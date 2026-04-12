@@ -1,0 +1,28 @@
+---
+description: normal coding
+alwaysApply: false
+---
+
+# Cursor Rule — Markdown Control
+
+-   Do NOT generate Markdown files by default.
+-   Create `.md` files **only when explicitly requested**.
+
+Do NOT use Markdown for:
+
+-   Code explanations
+-   Refactor summaries
+-   TODOs or notes
+-   Architecture thoughts
+
+Use instead:
+
+-   Inline comments
+-   JSDoc / TSDoc
+-   Chat explanations
+
+Allowed Markdown:
+
+-   README
+-   API / architecture docs
+-   Specs meant for long-term use
