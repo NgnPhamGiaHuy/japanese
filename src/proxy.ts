@@ -5,13 +5,13 @@ import type { NextRequest } from "next/server";
 const PUBLIC_PATHS = ["/login"];
 
 /**
- * Route-protection middleware.
+ * Route protection (Next.js 16 `proxy` convention; replaces deprecated `middleware`).
  * Reads the `auth-token` cookie (set by useFirebaseAuth via onIdTokenChanged).
  * - Unauthenticated request to a protected path → redirect to /login
  * - Authenticated request to /login → redirect to /
  * The cookie is NOT httpOnly so Firebase client SDK can refresh it seamlessly.
  */
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
     const { pathname } = request.nextUrl;
     const token = request.cookies.get("auth-token")?.value;
 

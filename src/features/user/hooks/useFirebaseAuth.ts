@@ -10,7 +10,7 @@ import { useAppStore } from "@/store/useAppStore";
 /**
  * Bootstraps Firebase auth persistence and subscribes to token changes.
  * - `onIdTokenChanged` fires on: initial load, sign-in, sign-out, and each
- *    automatic token refresh (~every 1 hour). This keeps the middleware cookie
+ *    automatic token refresh (~every 1 hour). This keeps the auth cookie
  *    in sync without manual refresh logic.
  * Must be called once — inside the root Providers component.
  */

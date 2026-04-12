@@ -8,7 +8,7 @@ import type { User } from "firebase/auth";
 /**
  * Opens the Google OAuth popup and persists the ID token in a cookie.
  * Firebase handles session persistence in localStorage/IndexedDB;
- * the cookie is used exclusively by Next.js middleware for route protection.
+ * the cookie is used exclusively by Next.js `proxy` for route protection.
  */
 export async function signInWithGoogle(): Promise<User> {
     const result = await signInWithPopup(auth, googleProvider);
@@ -18,7 +18,7 @@ export async function signInWithGoogle(): Promise<User> {
 }
 
 /**
- * Signs the current user out and removes the auth cookie so middleware
+ * Signs the current user out and removes the auth cookie so the proxy
  * redirects immediately on the next navigation.
  */
 export async function signOut(): Promise<void> {
