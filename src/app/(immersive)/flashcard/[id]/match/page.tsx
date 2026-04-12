@@ -19,7 +19,7 @@ interface MatchItem {
 
 export default function MatchModePage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = use(params);
-    const { lessons } = useLessons();
+    const { lessons, loading } = useLessons();
     const { addXP } = useUserProgress();
     const router = useRouter();
 
@@ -83,6 +83,13 @@ export default function MatchModePage({ params }: { params: Promise<{ id: string
         }
     };
 
+    if (loading) {
+        return (
+            <div className="fixed inset-0 flex items-center justify-center bg-[#F7F7F8]">
+                <div className="h-8 w-8 animate-spin rounded-full border-4 border-gray-200 border-t-[#ce82ff]" />
+            </div>
+        );
+    }
     if (!lesson) return notFound();
     if (items.length === 0) return null;
     const isComplete = matched.length === items.length && items.length > 0;

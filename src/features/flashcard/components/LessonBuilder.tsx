@@ -1,37 +1,34 @@
 "use client";
 
 import { useState } from "react";
-import { Plus, Trash2, X } from "lucide-react";
+import { Loader2, Plus, Trash2, X } from "lucide-react";
 
 import { Button } from "@/shared/components/ui";
 
 import type { FlashCard, Lesson } from "../types/flashcard.types";
 
 interface LessonBuilderProps {
-    lessons: Lesson[];
-    onSave: (lesson: Lesson) => void;
-    onDelete?: (id: string) => void;
+    onSave: (lesson: Lesson) => Promise<void>;
+    onDelete?: (id: string) => Promise<void>;
     onClose: () => void;
     editingLesson?: Lesson | null;
 }
 
-const makeCard = (): FlashCard => {
-    return {
-        id: `c_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
-        kanji: "",
-        furigana: "",
-        meaning: "",
-        example: "",
-        correctCount: 0,
-        wrongCount: 0,
-    };
-};
+const makeCard = (): FlashCard => ({
+    id: `c_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
+    kanji: "",
+    furigana: "",
+    meaning: "",
+    example: "",
+    correctCount: 0,
+    wrongCount: 0,
+});
 
 const LessonBuilder = ({ onSave, onDelete, onClose, editingLesson }: LessonBuilderProps) => {
     const [lesson, setLesson] = useState<Lesson>(
         () =>
             editingLesson ?? {
-                id: `l_${Date.now()}`,
+                id: "",
                 title: "",
                 description: "",
                 tags: [],
@@ -40,22 +37,25 @@ const LessonBuilder = ({ onSave, onDelete, onClose, editingLesson }: LessonBuild
             },
     );
     const [tagInput, setTagInput] = useState("");
+    const [saving, setSaving] = useState(false);
 
-    const handleSave = () => {
+    const handleSave = async () => {
         if (!lesson.title.trim()) {
             alert("Title is required");
             return;
         }
-        onSave(lesson);
+        setSaving(true);
+        try {
+            await onSave(lesson);
+        } finally {
+            setSaving(false);
+        }
     };
 
     const addTag = (e: React.KeyboardEvent) => {
         if (e.key === "Enter" && tagInput.trim()) {
             if (!lesson.tags.includes(tagInput.trim()))
-                setLesson({
-                    ...lesson,
-                    tags: [...lesson.tags, tagInput.trim()],
-                });
+                setLesson({ ...lesson, tags: [...lesson.tags, tagInput.trim()] });
             setTagInput("");
         }
     };
@@ -69,7 +69,13 @@ const LessonBuilder = ({ onSave, onDelete, onClose, editingLesson }: LessonBuild
     return (
         <div className="fixed inset-0 z-50 flex flex-col overflow-y-auto bg-[#F7F7F8]">
             <header className="sticky top-0 z-10 flex items-center justify-between border-b-2 border-gray-200 bg-white/90 px-4 py-4 backdrop-blur-md">
-                <Button variant="ghost" onClick={onClose} icon={X} className="px-3 py-2" />
+                <Button
+                    variant="ghost"
+                    onClick={onClose}
+                    icon={X}
+                    className="px-3 py-2"
+                    disabled={saving}
+                />
                 <h2 className="text-xl font-black text-[#3c3c3c]">
                     {editingLesson ? "Edit Deck" : "New Deck"}
                 </h2>
@@ -77,9 +83,10 @@ const LessonBuilder = ({ onSave, onDelete, onClose, editingLesson }: LessonBuild
                     variant="primary"
                     color="blue"
                     onClick={handleSave}
-                    className="px-6 py-2 text-sm"
+                    disabled={saving}
+                    className="min-w-[80px] px-6 py-2 text-sm"
                 >
-                    Save
+                    {saving ? <Loader2 size={16} className="animate-spin" /> : "Save"}
                 </Button>
             </header>
 
@@ -93,17 +100,14 @@ const LessonBuilder = ({ onSave, onDelete, onClose, editingLesson }: LessonBuild
                         value={lesson.title}
                         onChange={(e) => setLesson({ ...lesson, title: e.target.value })}
                         autoFocus={!editingLesson}
+                        disabled={saving}
                     />
                     <textarea
                         placeholder="Describe what this deck is about..."
                         className="h-20 w-full resize-none border-b-2 border-transparent bg-transparent font-bold text-[#afafaf] placeholder-gray-300 transition-colors outline-none focus:border-[#1cb0f6]"
                         value={lesson.description}
-                        onChange={(e) =>
-                            setLesson({
-                                ...lesson,
-                                description: e.target.value,
-                            })
-                        }
+                        onChange={(e) => setLesson({ ...lesson, description: e.target.value })}
+                        disabled={saving}
                     />
                     <div className="pt-2">
                         <div className="mb-3 flex flex-wrap gap-2">
@@ -121,6 +125,7 @@ const LessonBuilder = ({ onSave, onDelete, onClose, editingLesson }: LessonBuild
                                             })
                                         }
                                         className="hover:text-[#ea2b2b]"
+                                        disabled={saving}
                                     >
                                         <X size={14} strokeWidth={3} />
                                     </button>
@@ -134,6 +139,7 @@ const LessonBuilder = ({ onSave, onDelete, onClose, editingLesson }: LessonBuild
                             className="w-full max-w-xs rounded-xl border-2 border-gray-200 bg-white px-4 py-3 text-sm font-bold placeholder-gray-300 transition-colors outline-none focus:border-[#1cb0f6]"
                             onChange={(e) => setTagInput(e.target.value)}
                             onKeyDown={addTag}
+                            disabled={saving}
                         />
                     </div>
                 </div>
@@ -146,16 +152,15 @@ const LessonBuilder = ({ onSave, onDelete, onClose, editingLesson }: LessonBuild
                         </h3>
                         <button
                             onClick={() =>
-                                setLesson({
-                                    ...lesson,
-                                    cards: [...lesson.cards, makeCard()],
-                                })
+                                setLesson({ ...lesson, cards: [...lesson.cards, makeCard()] })
                             }
-                            className="flex items-center gap-1 text-sm font-black text-[#1cb0f6] hover:text-[#149fdf]"
+                            disabled={saving}
+                            className="flex items-center gap-1 text-sm font-black text-[#1cb0f6] hover:text-[#149fdf] disabled:opacity-50"
                         >
                             <Plus size={18} strokeWidth={3} /> Add Card
                         </button>
                     </div>
+
                     <div className="space-y-6">
                         {lesson.cards.map((card, idx) => (
                             <div
@@ -172,10 +177,12 @@ const LessonBuilder = ({ onSave, onDelete, onClose, editingLesson }: LessonBuild
                                             cards: lesson.cards.filter((c) => c.id !== card.id),
                                         })
                                     }
+                                    disabled={saving}
                                     className="absolute top-4 right-4 p-2 text-gray-300 opacity-0 transition-opacity group-hover:opacity-100 hover:text-[#ea2b2b]"
                                 >
                                     <Trash2 size={24} strokeWidth={2.5} />
                                 </button>
+
                                 <div className="mt-4 grid grid-cols-1 gap-6 md:grid-cols-2">
                                     {(["kanji", "furigana"] as const).map((field) => (
                                         <div key={field}>
@@ -191,6 +198,7 @@ const LessonBuilder = ({ onSave, onDelete, onClose, editingLesson }: LessonBuild
                                                 onChange={(e) =>
                                                     updateCard(card.id, field, e.target.value)
                                                 }
+                                                disabled={saving}
                                             />
                                         </div>
                                     ))}
@@ -205,6 +213,7 @@ const LessonBuilder = ({ onSave, onDelete, onClose, editingLesson }: LessonBuild
                                             onChange={(e) =>
                                                 updateCard(card.id, "meaning", e.target.value)
                                             }
+                                            disabled={saving}
                                         />
                                     </div>
                                     <div className="md:col-span-2">
@@ -218,19 +227,16 @@ const LessonBuilder = ({ onSave, onDelete, onClose, editingLesson }: LessonBuild
                                             onChange={(e) =>
                                                 updateCard(card.id, "example", e.target.value)
                                             }
+                                            disabled={saving}
                                         />
                                     </div>
                                 </div>
                             </div>
                         ))}
+
                         {lesson.cards.length === 0 && (
                             <div
-                                onClick={() =>
-                                    setLesson({
-                                        ...lesson,
-                                        cards: [makeCard()],
-                                    })
-                                }
+                                onClick={() => setLesson({ ...lesson, cards: [makeCard()] })}
                                 className="cursor-pointer rounded-[2rem] border-4 border-dashed border-gray-300 p-12 text-center text-lg font-bold text-[#afafaf] transition-colors hover:border-[#1cb0f6] hover:bg-white hover:text-[#1cb0f6]"
                             >
                                 <Plus
@@ -249,10 +255,16 @@ const LessonBuilder = ({ onSave, onDelete, onClose, editingLesson }: LessonBuild
                         <Button
                             variant="secondary"
                             color="red"
-                            onClick={() => {
+                            disabled={saving}
+                            onClick={async () => {
                                 if (confirm("Delete this deck?")) {
-                                    onDelete(editingLesson.id);
-                                    onClose();
+                                    setSaving(true);
+                                    try {
+                                        await onDelete(editingLesson.id);
+                                        onClose();
+                                    } finally {
+                                        setSaving(false);
+                                    }
                                 }
                             }}
                             className="w-full text-lg"

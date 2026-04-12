@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import { ArrowLeft, Eye, Keyboard, Shuffle, X } from "lucide-react";
 
-import { AnswerFeedback } from "@/features/game/components";
+import { AnswerFeedback, Leaderboard } from "@/features/game/components";
+import { saveGameResult } from "@/features/game/services/game.service";
 import { useKanaDataset } from "@/features/kana/hooks/useKanaDataset";
 import { useQuizEngine } from "@/features/kana/hooks/useQuizEngine";
 import { ScreenHeader, ScreenHeaderBackButton, ScreenHeaderRow } from "@/shared/components/layout";
@@ -14,9 +15,11 @@ import { useAppStore } from "@/store/useAppStore";
 
 type QuizMode = "choice" | "type" | "smart";
 
+const TARGET_SCORE = 20;
+
 export default function KanaQuizPage() {
     const { dataset, alphabet, themeColor } = useKanaDataset();
-    const { useHandwriting } = useAppStore();
+    const { useHandwriting, user } = useAppStore();
     const activeFont = useHandwriting ? HANDWRITING_FONT : PRINT_FONT;
 
     const [quizMode, setQuizMode] = useState<QuizMode>("choice");
@@ -25,31 +28,71 @@ export default function KanaQuizPage() {
 
     const engine = useQuizEngine(dataset);
 
+    // Prevent double-saving if somehow the effect fires twice
+    const savedRef = useRef(false);
+
+    const gameModeKey = `quiz_${quizMode}_${alphabet}`;
+
+    const saveQuizScore = useCallback(
+        async (finalScore: number) => {
+            if (!user || savedRef.current || finalScore <= 0) return;
+            savedRef.current = true;
+            try {
+                await saveGameResult({
+                    userId: user.uid,
+                    displayName: user.displayName ?? "Player",
+                    gameMode: gameModeKey,
+                    score: finalScore,
+                });
+            } catch (err) {
+                console.error("[Quiz] Score save error:", err);
+            }
+        },
+        [user, gameModeKey],
+    );
+
     const startQuiz = (mode: QuizMode) => {
         setQuizMode(mode);
+        savedRef.current = false;
         engine.resetEngine();
-        if (mode === "smart") engine.buildSmartDeck(20);
+        if (mode === "smart") engine.buildSmartDeck(TARGET_SCORE);
         engine.generateQuestion(mode === "type" ? "type" : "read");
         setPhase("playing");
     };
 
     const handleMCAnswer = (option: { romaji: string }) => {
         if (engine.status !== "idle" || !engine.question) return;
-        engine.processAnswer(option.romaji === engine.question.romaji, () => {
+        const isCorrect = option.romaji === engine.question.romaji;
+        const nextScore = engine.score + (isCorrect ? 1 : 0);
+
+        engine.processAnswer(isCorrect, () => {
             setTypedInput("");
-            engine.generateQuestion(quizMode === "type" ? "type" : "read");
+            if (nextScore >= TARGET_SCORE) {
+                setPhase("done");
+                saveQuizScore(nextScore);
+            } else {
+                engine.generateQuestion(quizMode === "type" ? "type" : "read");
+            }
         });
     };
 
     const handleTypeAnswer = () => {
         if (engine.status !== "idle" || !engine.question) return;
-        const correct = checkTypedAnswer(typedInput, engine.question.romaji);
-        engine.processAnswer(correct, () => {
+        const isCorrect = checkTypedAnswer(typedInput, engine.question.romaji);
+        const nextScore = engine.score + (isCorrect ? 1 : 0);
+
+        engine.processAnswer(isCorrect, () => {
             setTypedInput("");
-            engine.generateQuestion("type");
+            if (nextScore >= TARGET_SCORE) {
+                setPhase("done");
+                saveQuizScore(nextScore);
+            } else {
+                engine.generateQuestion("type");
+            }
         });
     };
 
+    // ---- SETUP ----
     if (phase === "setup") {
         return (
             <div className="fixed inset-0 z-50 flex flex-col overflow-y-auto bg-[#F7F7F8]">
@@ -124,6 +167,60 @@ export default function KanaQuizPage() {
         );
     }
 
+    // ---- DONE ----
+    if (phase === "done") {
+        const isPerfect = engine.score >= TARGET_SCORE;
+        return (
+            <div className="fixed inset-0 z-50 flex flex-col overflow-y-auto bg-[#F7F7F8]">
+                <div className="mx-auto flex w-full max-w-md flex-col items-center px-4 py-8">
+                    <div
+                        className={`mb-4 flex h-20 w-20 -rotate-6 items-center justify-center rounded-[1.75rem] border-b-8 text-4xl font-medium text-white shadow-sm ${themeColor.bg}`}
+                        style={{ borderColor: themeColor.border }}
+                    >
+                        {isPerfect ? "🏆" : "✓"}
+                    </div>
+                    <h2 className="mb-1 text-4xl font-black text-[#3c3c3c]">
+                        {isPerfect ? "Perfect!" : "Done!"}
+                    </h2>
+                    <p className="mb-1 text-xl font-bold text-[#afafaf]">
+                        Score:{" "}
+                        <span className={`mx-1 text-3xl font-black ${themeColor.text}`}>
+                            {engine.score}
+                        </span>
+                        <span className="text-base text-[#afafaf]">/ {TARGET_SCORE}</span>
+                    </p>
+                    <p className="mb-6 text-sm font-bold text-[#afafaf]">
+                        {isPerfect ? "You answered all questions correctly!" : "Keep practising!"}
+                    </p>
+
+                    <div className="mb-6 w-full space-y-3">
+                        <Button
+                            alphabet={alphabet}
+                            onClick={() => startQuiz(quizMode)}
+                            className="w-full py-5 text-xl"
+                        >
+                            Play Again
+                        </Button>
+                        <Button
+                            variant="outline"
+                            onClick={() => setPhase("setup")}
+                            className="w-full py-4 text-lg"
+                        >
+                            Change Mode
+                        </Button>
+                    </div>
+
+                    <Leaderboard
+                        gameMode={gameModeKey}
+                        currentUserId={user?.uid}
+                        accentColor={themeColor.primary}
+                    />
+                </div>
+            </div>
+        );
+    }
+
+    // ---- PLAYING ----
     const { question, options, status, score, streak } = engine;
 
     return (
@@ -138,7 +235,7 @@ export default function KanaQuizPage() {
                     <div
                         className={`h-full rounded-full transition-all duration-500 ease-out ${themeColor.bg}`}
                         style={{
-                            width: `${Math.min((score / 20) * 100, 100)}%`,
+                            width: `${Math.min((score / TARGET_SCORE) * 100, 100)}%`,
                         }}
                     />
                 </div>
@@ -149,7 +246,7 @@ export default function KanaQuizPage() {
                         </span>
                     )}
                     <span className={`text-[10px] font-black md:text-sm ${themeColor.text}`}>
-                        {score}/20
+                        {score}/{TARGET_SCORE}
                     </span>
                 </div>
             </ScreenHeaderRow>

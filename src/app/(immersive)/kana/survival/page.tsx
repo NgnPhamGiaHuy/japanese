@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useEffect, useRef } from "react";
 import { Clock, Flame, Sword, Trophy, X } from "lucide-react";
 
-import { AnswerFeedback, LivesDisplay } from "@/features/game/components";
+import { AnswerFeedback, Leaderboard, LivesDisplay } from "@/features/game/components";
 import { useKanaDataset } from "@/features/kana/hooks/useKanaDataset";
 import { useSurvivalGame } from "@/features/kana/hooks/useSurvivalGame";
 import { useBestScores } from "@/features/user/hooks/useBestScores";
@@ -16,7 +16,7 @@ import { useAppStore } from "@/store/useAppStore";
 
 export default function KanaSurvivalPage() {
     const { dataset, alphabet } = useKanaDataset();
-    const { useHandwriting } = useAppStore();
+    const { useHandwriting, user } = useAppStore();
     const activeFont = useHandwriting ? HANDWRITING_FONT : PRINT_FONT;
     const { bestScores, saveScore } = useBestScores();
 
@@ -27,6 +27,14 @@ export default function KanaSurvivalPage() {
     });
 
     const inputRef = useRef<HTMLDivElement>(null);
+
+    // Pre-fill leaderboard name from Google profile on first load
+    useEffect(() => {
+        if (user?.displayName && !game.localName) {
+            game.setLocalName(user.displayName.substring(0, 10));
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [user?.displayName]);
 
     useEffect(() => {
         if (game.phase === "playing" && game.challengeMode === "drop") inputRef.current?.focus();
@@ -139,41 +147,50 @@ export default function KanaSurvivalPage() {
     // ---- GAME OVER ----
     if (game.phase === "gameover") {
         return (
-            <div className="fixed inset-0 z-50 flex flex-col items-center justify-center overflow-y-auto bg-[#F7F7F8] p-6">
-                <div className="mb-6 flex h-24 w-24 -rotate-6 items-center justify-center rounded-[2rem] border-b-8 border-[#cc7800] bg-[#ff9600] text-white shadow-sm">
-                    <Trophy size={56} strokeWidth={3} />
-                </div>
-                <h2 className="mb-2 text-4xl font-black text-[#3c3c3c]">Game Over!</h2>
-                <p className="mb-2 text-xl font-bold text-[#afafaf]">
-                    Final Score:{" "}
-                    <span className="mx-1 text-3xl font-black text-[#ff9600]">
-                        {game.engine.score}
-                    </span>
-                </p>
-                <p className="mb-10 text-sm font-bold text-[#afafaf]">
-                    Best: {bestScores[game.activeModeKey] ?? 0}
-                </p>
-                <div className="w-full max-w-xs space-y-3">
-                    <Button
-                        variant="primary"
-                        color="orange"
-                        onClick={game.startGame}
-                        className="w-full py-5 text-xl"
-                    >
-                        Play Again
-                    </Button>
-                    <Button
-                        variant="outline"
-                        onClick={() => game.setPhase("setup")}
-                        className="w-full py-4 text-lg"
-                    >
-                        Change Mode
-                    </Button>
-                    <Link href="/kana">
-                        <Button variant="ghost" className="w-full py-4 text-lg">
-                            Back to Kana
+            <div className="fixed inset-0 z-50 flex flex-col overflow-y-auto bg-[#F7F7F8]">
+                <div className="mx-auto flex w-full max-w-md flex-col items-center px-4 py-8">
+                    <div className="mb-4 flex h-20 w-20 -rotate-6 items-center justify-center rounded-[1.75rem] border-b-8 border-[#cc7800] bg-[#ff9600] text-white shadow-sm">
+                        <Trophy size={48} strokeWidth={3} />
+                    </div>
+                    <h2 className="mb-1 text-4xl font-black text-[#3c3c3c]">Game Over!</h2>
+                    <p className="mb-1 text-xl font-bold text-[#afafaf]">
+                        Final Score:{" "}
+                        <span className="mx-1 text-3xl font-black text-[#ff9600]">
+                            {game.engine.score}
+                        </span>
+                    </p>
+                    <p className="mb-6 text-sm font-bold text-[#afafaf]">
+                        Best: {bestScores[game.activeModeKey] ?? 0}
+                    </p>
+
+                    <div className="mb-6 w-full space-y-3">
+                        <Button
+                            variant="primary"
+                            color="orange"
+                            onClick={game.startGame}
+                            className="w-full py-5 text-xl"
+                        >
+                            Play Again
                         </Button>
-                    </Link>
+                        <Button
+                            variant="outline"
+                            onClick={() => game.setPhase("setup")}
+                            className="w-full py-4 text-lg"
+                        >
+                            Change Mode
+                        </Button>
+                        <Link href="/kana">
+                            <Button variant="ghost" className="w-full py-4 text-lg">
+                                Back to Kana
+                            </Button>
+                        </Link>
+                    </div>
+
+                    <Leaderboard
+                        gameMode={game.activeModeKey}
+                        currentUserId={user?.uid}
+                        accentColor="#ff9600"
+                    />
                 </div>
             </div>
         );

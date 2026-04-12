@@ -1,76 +1,57 @@
 "use client";
 
 import { useCallback, useEffect } from "react";
-import { collection, doc, onSnapshot, setDoc } from "firebase/firestore";
+import { collection, onSnapshot } from "firebase/firestore";
 
+import { saveGameResult } from "@/features/game/services/game.service";
 import { APP_ID, db } from "@/lib/firebase";
-import { getDeviceId } from "@/shared/utils/device";
 import { useAppStore } from "@/store/useAppStore";
 import { useKanaStore } from "@/store/useKanaStore";
 
-/** Syncs best scores from Firestore → Zustand and exposes a save function */
+/** Syncs personal best scores from Firestore → Zustand and exposes a save function. */
 export function useBestScores() {
     const { user } = useAppStore();
     const { bestScores, setBestScores, updateBestScore } = useKanaStore();
 
-    // Real-time listener for best scores
+    // Real-time listener: keeps Zustand in sync with Firestore personal bests
     useEffect(() => {
         if (!user) return;
         const ref = collection(db, "artifacts", APP_ID, "users", user.uid, "stats");
-        const unsub = onSnapshot(ref, (snap) => {
+        return onSnapshot(ref, (snap) => {
             const scores: Record<string, number> = {};
             snap.forEach((d) => {
                 scores[d.id] = d.data().bestScore ?? 0;
             });
             setBestScores(scores);
         });
-        return unsub;
     }, [user, setBestScores]);
 
-    /** Writes a new score if it beats the current best, and updates the leaderboard */
+    /**
+     * Save a score for a game mode.
+     *
+     * - Uses Google display name when available, falls back to `playerName`.
+     * - Only writes to Firestore when the new score beats the current best.
+     * - Updates both personal best AND public leaderboard atomically via game.service.
+     */
     const saveScore = useCallback(
         async (score: number, playerName: string, modeKey: string) => {
             if (!user) return;
             const currentBest = bestScores[modeKey] ?? 0;
+            const displayName = (user.displayName || playerName || "Player").substring(0, 20);
 
             try {
+                await saveGameResult({
+                    userId: user.uid,
+                    displayName,
+                    gameMode: modeKey,
+                    score,
+                    currentBest,
+                });
                 if (score > currentBest) {
-                    await setDoc(
-                        doc(db, "artifacts", APP_ID, "users", user.uid, "stats", modeKey),
-                        {
-                            bestScore: score,
-                            lastUpdated: new Date().toISOString(),
-                        },
-                        { merge: true },
-                    );
                     updateBestScore(modeKey, score);
                 }
-
-                const scoreToSubmit = Math.max(score, currentBest);
-                if (scoreToSubmit > 0) {
-                    const deviceId = getDeviceId();
-                    await setDoc(
-                        doc(
-                            db,
-                            "artifacts",
-                            APP_ID,
-                            "public",
-                            "data",
-                            `leaderboard_${modeKey}`,
-                            deviceId,
-                        ),
-                        {
-                            userId: user.uid,
-                            deviceId,
-                            name: playerName.substring(0, 10).toUpperCase(),
-                            score: scoreToSubmit,
-                            timestamp: new Date().toISOString(),
-                        },
-                        { merge: true },
-                    );
-                }
             } catch (err) {
-                console.error("[Firestore] Score save error:", err);
+                console.error("[useBestScores] Save error:", err);
             }
         },
         [user, bestScores, updateBestScore],

@@ -1,14 +1,17 @@
 "use client";
 
 import { notFound, useRouter } from "next/navigation";
-import { use, useEffect, useMemo, useState } from "react";
+import { use, useEffect, useMemo, useRef, useState } from "react";
 import Confetti from "react-confetti";
 import { motion } from "framer-motion";
 import { Clock, X, Zap } from "lucide-react";
 
 import { useLessons } from "@/features/flashcard/hooks/useLessons";
+import { Leaderboard } from "@/features/game/components";
+import { saveGameResult } from "@/features/game/services/game.service";
 import { useUserProgress } from "@/features/user/hooks/useUserProgress";
 import { Button } from "@/shared/components/ui";
+import { useAppStore } from "@/store/useAppStore";
 
 import type { FlashCard } from "@/features/flashcard/types/flashcard.types";
 
@@ -39,11 +42,15 @@ function shuffleWithRng<T>(items: T[], rand: () => number): T[] {
     return arr;
 }
 
+const GAME_MODE = "flashcard_speed";
+
 export default function SpeedQuizPage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = use(params);
-    const { lessons } = useLessons();
+    const { lessons, loading } = useLessons();
     const { addXP } = useUserProgress();
+    const { user } = useAppStore();
     const router = useRouter();
+    const savedScoreRef = useRef(false);
 
     const lesson = lessons.find((l) => l.id === id);
 
@@ -84,9 +91,21 @@ export default function SpeedQuizPage({ params }: { params: Promise<{ id: string
 
     useEffect(() => {
         if (timeLeft !== 0 || gameOver) return;
-        const id = requestAnimationFrame(() => setGameOver(true));
-        return () => cancelAnimationFrame(id);
+        const raf = requestAnimationFrame(() => setGameOver(true));
+        return () => cancelAnimationFrame(raf);
     }, [timeLeft, gameOver]);
+
+    // Save score to leaderboard once when the game ends
+    useEffect(() => {
+        if (!gameOver || savedScoreRef.current || !user || score <= 0) return;
+        savedScoreRef.current = true;
+        saveGameResult({
+            userId: user.uid,
+            displayName: user.displayName ?? "Player",
+            gameMode: GAME_MODE,
+            score,
+        }).catch((err) => console.error("[SpeedQuiz] Score save error:", err));
+    }, [gameOver, user, score]);
 
     const handleAnswer = (selected: string) => {
         if (status !== "idle") return;
@@ -102,6 +121,13 @@ export default function SpeedQuizPage({ params }: { params: Promise<{ id: string
         }, 800);
     };
 
+    if (loading) {
+        return (
+            <div className="fixed inset-0 flex items-center justify-center bg-[#F7F7F8]">
+                <div className="h-8 w-8 animate-spin rounded-full border-4 border-gray-200 border-t-[#ff9600]" />
+            </div>
+        );
+    }
     if (!lesson) return notFound();
     if (lesson.cards.length < 4) {
         return (
@@ -120,7 +146,7 @@ export default function SpeedQuizPage({ params }: { params: Promise<{ id: string
         const { innerWidth: width, innerHeight: height } =
             typeof window !== "undefined" ? window : { innerWidth: 500, innerHeight: 500 };
         return (
-            <div className="fixed inset-0 z-50 flex flex-col items-center justify-center overflow-hidden bg-[#F7F7F8] p-6">
+            <div className="fixed inset-0 z-50 flex flex-col overflow-y-auto bg-[#F7F7F8]">
                 <Confetti
                     width={width}
                     height={height}
@@ -129,29 +155,41 @@ export default function SpeedQuizPage({ params }: { params: Promise<{ id: string
                     gravity={0.2}
                     colors={["#ff9600", "#1cb0f6", "#58cc02", "#ce82ff"]}
                 />
-                <motion.div
-                    initial={{ scale: 0, rotate: -20 }}
-                    animate={{ scale: 1, rotate: -6 }}
-                    transition={{ type: "spring", stiffness: 300, damping: 15 }}
-                    className="mb-6 flex h-24 w-24 items-center justify-center rounded-[2rem] border-b-8 border-[#cc7800] bg-[#ff9600] text-white shadow-sm"
-                >
-                    <Zap size={56} className="animate-bounce" strokeWidth={3} />
-                </motion.div>
-                <h2 className="mb-2 text-4xl font-black text-[#3c3c3c]">Time&apos;s Up!</h2>
-                <p className="mb-12 text-xl font-bold text-[#afafaf]">
-                    You scored <span className="mx-2 text-3xl text-[#ff9600]">{score}</span> points.
-                </p>
-                <Button
-                    variant="primary"
-                    color="orange"
-                    onClick={() => {
-                        addXP(score * 10);
-                        router.push(`/flashcard/${id}`);
-                    }}
-                    className="w-full max-w-xs py-5 text-xl"
-                >
-                    Collect {score * 10} XP
-                </Button>
+                <div className="mx-auto flex w-full max-w-md flex-col items-center px-6 py-8">
+                    <motion.div
+                        initial={{ scale: 0, rotate: -20 }}
+                        animate={{ scale: 1, rotate: -6 }}
+                        transition={{ type: "spring", stiffness: 300, damping: 15 }}
+                        className="mb-4 flex h-20 w-20 items-center justify-center rounded-[1.75rem] border-b-8 border-[#cc7800] bg-[#ff9600] text-white shadow-sm"
+                    >
+                        <Zap size={48} className="animate-bounce" strokeWidth={3} />
+                    </motion.div>
+                    <h2 className="mb-1 text-4xl font-black text-[#3c3c3c]">Time&apos;s Up!</h2>
+                    <p className="mb-1 text-xl font-bold text-[#afafaf]">
+                        You scored{" "}
+                        <span className="mx-1 text-3xl font-black text-[#ff9600]">{score}</span>{" "}
+                        points.
+                    </p>
+                    <p className="mb-6 text-sm font-bold text-[#afafaf]">+{score * 10} XP earned</p>
+
+                    <Button
+                        variant="primary"
+                        color="orange"
+                        onClick={() => {
+                            addXP(score * 10);
+                            router.push(`/flashcard/${id}`);
+                        }}
+                        className="mb-8 w-full py-5 text-xl"
+                    >
+                        Collect {score * 10} XP
+                    </Button>
+
+                    <Leaderboard
+                        gameMode={GAME_MODE}
+                        currentUserId={user?.uid}
+                        accentColor="#ff9600"
+                    />
+                </div>
             </div>
         );
     }

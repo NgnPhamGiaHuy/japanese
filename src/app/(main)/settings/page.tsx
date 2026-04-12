@@ -1,5 +1,8 @@
 "use client";
 
+import { useRouter } from "next/navigation";
+
+import { signOut } from "@/features/user/services/auth.service";
 import { ScreenHeader } from "@/shared/components/layout";
 import { SPACING } from "@/shared/constants";
 import { clearCharStats } from "@/shared/utils/stats";
@@ -9,6 +12,12 @@ import { useKanaStore } from "@/store/useKanaStore";
 export default function SettingsPage() {
     const { useHandwriting, globalAutoPlay, toggleHandwriting, toggleAutoPlay } = useAppStore();
     const { resetProgress } = useKanaStore();
+    const router = useRouter();
+
+    const handleSignOut = async () => {
+        await signOut();
+        router.replace("/login");
+    };
 
     return (
         <div className="min-h-[100dvh] bg-[#F7F7F8] pb-28">
@@ -77,6 +86,29 @@ export default function SettingsPage() {
                                 Kana data from KanjiVG · Powered by Firebase
                             </p>
                         </div>
+                    </div>
+
+                    {/* Account */}
+                    <div className="overflow-hidden rounded-[2rem] border-2 border-b-4 border-gray-200 bg-white shadow-sm">
+                        <div className="bg-gray-50 px-6 py-4">
+                            <h3 className="text-[10px] font-black tracking-widest text-[#afafaf] uppercase">
+                                Account
+                            </h3>
+                        </div>
+                        <button
+                            className="group flex w-full items-center justify-between px-6 py-4 text-left transition-colors hover:bg-[#ffdfe0]"
+                            onClick={handleSignOut}
+                        >
+                            <div>
+                                <div className="font-black text-[#ea2b2b]">Sign Out</div>
+                                <div className="text-sm font-bold text-[#afafaf]">
+                                    Log out of your Google account
+                                </div>
+                            </div>
+                            <span className="text-lg font-black text-[#ea2b2b] opacity-50 group-hover:opacity-100">
+                                ›
+                            </span>
+                        </button>
                     </div>
                 </div>
             </div>

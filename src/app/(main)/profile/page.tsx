@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { BookOpen, Flame, Trophy } from "lucide-react";
 
 import { useLessons } from "@/features/flashcard/hooks/useLessons";
@@ -7,12 +8,17 @@ import { useUserProgress } from "@/features/user/hooks/useUserProgress";
 import { ScreenHeader } from "@/shared/components/layout";
 import { StatCard } from "@/shared/components/ui";
 import { SPACING } from "@/shared/constants";
+import { useAppStore } from "@/store/useAppStore";
 import { useKanaStore } from "@/store/useKanaStore";
 
 export default function ProfilePage() {
     const { userData } = useUserProgress();
     const { lessons } = useLessons();
     const { learnedChars } = useKanaStore();
+    const user = useAppStore((s) => s.user);
+
+    const displayName = user?.displayName ?? "Learner";
+    const photoURL = user?.photoURL ?? null;
 
     const level = Math.floor(userData.xp / 500) + 1;
     const xpInLevel = userData.xp % 500;
@@ -24,10 +30,22 @@ export default function ProfilePage() {
             <div className={`mx-auto max-w-md ${SPACING.pagePadding} pt-6`}>
                 {/* Avatar */}
                 <div className="mb-8 flex flex-col items-center">
-                    <div className="mb-4 flex h-28 w-28 -rotate-3 transform items-center justify-center rounded-[3rem] border-b-8 border-[#1899d6] bg-gradient-to-br from-[#1cb0f6] to-[#ce82ff] text-6xl font-medium text-white shadow-sm">
-                        あ
+                    <div className="mb-4 -rotate-3 transform overflow-hidden rounded-[3rem] border-b-8 border-[#1899d6] shadow-sm">
+                        {photoURL ? (
+                            <Image
+                                src={photoURL}
+                                alt={displayName}
+                                width={112}
+                                height={112}
+                                className="h-28 w-28 object-cover"
+                            />
+                        ) : (
+                            <div className="flex h-28 w-28 items-center justify-center bg-gradient-to-br from-[#1cb0f6] to-[#ce82ff] text-6xl font-medium text-white">
+                                {displayName.charAt(0).toUpperCase()}
+                            </div>
+                        )}
                     </div>
-                    <h2 className="text-2xl font-black text-[#3c3c3c]">Learner</h2>
+                    <h2 className="text-2xl font-black text-[#3c3c3c]">{displayName}</h2>
                     <div className="mt-1 flex items-center gap-2">
                         <span className="text-lg font-black text-[#ff9600]">Lv.{level}</span>
                         <span className="text-base font-bold text-[#afafaf]">·</span>

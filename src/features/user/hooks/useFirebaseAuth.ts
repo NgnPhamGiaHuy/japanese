@@ -1,38 +1,43 @@
 "use client";
 
 import { useEffect } from "react";
-import {
-    browserLocalPersistence,
-    onAuthStateChanged,
-    setPersistence,
-    signInAnonymously,
-} from "firebase/auth";
+import { browserLocalPersistence, onIdTokenChanged, setPersistence } from "firebase/auth";
 
 import { auth } from "@/lib/firebase";
+import { clearAuthCookie, setAuthCookie } from "@/shared/utils/cookie";
 import { useAppStore } from "@/store/useAppStore";
 
 /**
- * Bootstraps Firebase anonymous auth and subscribes to auth state changes.
- * Must be called once — in the root layout's client provider.
+ * Bootstraps Firebase auth persistence and subscribes to token changes.
+ * - `onIdTokenChanged` fires on: initial load, sign-in, sign-out, and each
+ *    automatic token refresh (~every 1 hour). This keeps the middleware cookie
+ *    in sync without manual refresh logic.
+ * Must be called once — inside the root Providers component.
  */
 export function useFirebaseAuth() {
     const { setUser, setAuthReady } = useAppStore();
 
     useEffect(() => {
-        const init = async () => {
-            try {
-                await setPersistence(auth, browserLocalPersistence);
-                await signInAnonymously(auth);
-            } catch (err) {
-                console.error("[Firebase] Auth init error:", err);
-            } finally {
-                setAuthReady(true);
+        setPersistence(auth, browserLocalPersistence).catch((err) =>
+            console.error("[Firebase] Persistence error:", err),
+        );
+
+        const unsubscribe = onIdTokenChanged(auth, async (user) => {
+            if (user) {
+                try {
+                    const token = await user.getIdToken();
+                    setAuthCookie(token);
+                } catch {
+                    clearAuthCookie();
+                }
+                setUser(user);
+            } else {
+                clearAuthCookie();
+                setUser(null);
             }
-        };
+            setAuthReady(true);
+        });
 
-        init();
-        const unsubscribe = onAuthStateChanged(auth, (u) => setUser(u));
-
-        return () => unsubscribe?.();
+        return unsubscribe;
     }, [setUser, setAuthReady]);
 }
