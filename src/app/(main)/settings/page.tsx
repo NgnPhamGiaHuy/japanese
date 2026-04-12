@@ -21,7 +21,7 @@ export default function SettingsPage() {
 
     return (
         <div className="min-h-[100dvh] bg-[#F7F7F8] pb-28">
-            <ScreenHeader title="Settings" />
+            <ScreenHeader title="Settings" backHref="/profile" />
             <div className={`mx-auto max-w-md ${SPACING.pagePadding} pt-6`}>
                 <div className="space-y-4">
                     {/* Appearance */}

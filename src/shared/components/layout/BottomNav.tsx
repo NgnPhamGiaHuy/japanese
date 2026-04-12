@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { BookOpen, Gamepad2, Settings, Trophy } from "lucide-react";
+import { BookOpen, Gamepad2, Trophy } from "lucide-react";
 
 const NAV_ICON_SIZE = 26;
 const NAV_ICON_STROKE_ACTIVE = 2.5;
@@ -56,20 +56,17 @@ const ROUTES: NavRoute[] = [
         activeIcon: <Trophy size={NAV_ICON_SIZE} strokeWidth={NAV_ICON_STROKE_ACTIVE} />,
         activeColor: "text-[#ff9600]",
     },
-    {
-        href: "/settings",
-        label: "Settings",
-        icon: <Settings size={NAV_ICON_SIZE} strokeWidth={NAV_ICON_STROKE_IDLE} />,
-        activeIcon: <Settings size={NAV_ICON_SIZE} strokeWidth={NAV_ICON_STROKE_ACTIVE} />,
-        activeColor: "text-[#afafaf]",
-    },
 ];
 
 const BottomNav = () => {
     const pathname = usePathname();
 
-    const isActive = (href: string) =>
-        href === "/" ? pathname === "/" : pathname.startsWith(href);
+    const isActive = (href: string) => {
+        if (href === "/") return pathname === "/";
+        if (href === "/profile")
+            return pathname.startsWith("/profile") || pathname.startsWith("/settings");
+        return pathname.startsWith(href);
+    };
 
     return (
         <nav

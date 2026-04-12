@@ -1,11 +1,12 @@
 "use client";
 
 import Image from "next/image";
-import { BookOpen, Flame, Trophy } from "lucide-react";
+import Link from "next/link";
+import { BookOpen, Flame, Settings, Trophy } from "lucide-react";
 
 import { useLessons } from "@/features/flashcard/hooks/useLessons";
 import { useUserProgress } from "@/features/user/hooks/useUserProgress";
-import { ScreenHeader } from "@/shared/components/layout";
+import { SCREEN_HEADER_BACK_BUTTON_CLASS, ScreenHeader } from "@/shared/components/layout";
 import { StatCard } from "@/shared/components/ui";
 import { SPACING } from "@/shared/constants";
 import { useAppStore } from "@/store/useAppStore";
@@ -26,7 +27,18 @@ export default function ProfilePage() {
 
     return (
         <div className="min-h-[100dvh] bg-[#F7F7F8] pb-28">
-            <ScreenHeader title="Profile" />
+            <ScreenHeader
+                title="Profile"
+                right={
+                    <Link
+                        href="/settings"
+                        className={SCREEN_HEADER_BACK_BUTTON_CLASS}
+                        aria-label="Settings"
+                    >
+                        <Settings size={22} strokeWidth={2.5} />
+                    </Link>
+                }
+            />
             <div className={`mx-auto max-w-md ${SPACING.pagePadding} pt-6`}>
                 {/* Avatar */}
                 <div className="mb-8 flex flex-col items-center">
