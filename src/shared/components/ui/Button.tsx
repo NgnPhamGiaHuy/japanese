@@ -1,17 +1,11 @@
 "use client";
 
-import type { LucideIcon } from "lucide-react";
 import { motion } from "framer-motion";
 
+import type { LucideIcon } from "lucide-react";
+
 type AlphabetMode = "hiragana" | "katakana" | "both";
-type ThemeColor =
-    | "blue"
-    | "green"
-    | "purple"
-    | "orange"
-    | "red"
-    | "gray"
-    | "teal";
+type ThemeColor = "blue" | "green" | "purple" | "orange" | "red" | "gray" | "teal";
 type Variant = "primary" | "secondary" | "outline" | "ghost";
 
 const ALPHABET_MAP: Record<AlphabetMode, ThemeColor> = {
@@ -20,10 +14,7 @@ const ALPHABET_MAP: Record<AlphabetMode, ThemeColor> = {
     both: "purple",
 };
 
-const THEMES: Record<
-    ThemeColor,
-    { bg: string; border: string; hover: string; text: string }
-> = {
+const THEMES: Record<ThemeColor, { bg: string; border: string; hover: string; text: string }> = {
     blue: {
         bg: "bg-[#1cb0f6]",
         border: "border-[#1899d6]",
@@ -82,7 +73,7 @@ interface ButtonProps {
     id?: string;
 }
 
-export default function Button({
+const Button = ({
     children,
     onClick,
     variant = "primary",
@@ -93,7 +84,7 @@ export default function Button({
     disabled,
     type = "button",
     id,
-}: ButtonProps) {
+}: ButtonProps) => {
     const resolvedColor = alphabet ? ALPHABET_MAP[alphabet] : color;
     const t = THEMES[resolvedColor];
 
@@ -121,4 +112,6 @@ export default function Button({
             {children}
         </motion.button>
     );
-}
+};
+
+export default Button;

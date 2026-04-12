@@ -7,20 +7,20 @@ interface ProgressBarProps {
     className?: string;
 }
 
-export default function ProgressBar({
+const ProgressBar = ({
     value,
     color = "bg-[#1cb0f6]",
     height = "h-2.5",
     className = "",
-}: ProgressBarProps) {
+}: ProgressBarProps) => {
     return (
-        <div
-            className={`${height} bg-gray-200 rounded-full overflow-hidden ${className}`}
-        >
+        <div className={`${height} overflow-hidden rounded-full bg-gray-200 ${className}`}>
             <div
                 className={`h-full rounded-full transition-all duration-500 ease-out ${color}`}
                 style={{ width: `${Math.min(100, Math.max(0, value))}%` }}
             />
         </div>
     );
-}
+};
+
+export default ProgressBar;

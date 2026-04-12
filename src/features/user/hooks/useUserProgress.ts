@@ -1,8 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import type { UserData } from "../types/user.types";
+
 import { INITIAL_USER_DATA } from "../types/user.types";
+
+import type { UserData } from "../types/user.types";
 
 const STORAGE_KEY = "nihongo_user";
 

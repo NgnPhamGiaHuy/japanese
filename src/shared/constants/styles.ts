@@ -6,8 +6,7 @@ export const SPACING = {
     cardPadding: "p-5",
 } as const;
 
-export const CARD_BASE =
-    "bg-white rounded-[1.5rem] border-2 border-b-4 border-gray-200 shadow-sm";
+export const CARD_BASE = "bg-white rounded-[1.5rem] border-2 border-b-4 border-gray-200 shadow-sm";
 
 export const CARD_INTERACTIVE = `${CARD_BASE} hover:-translate-y-1 hover:shadow-md transition-all duration-200 active:translate-y-[2px] active:border-b-2`;
 

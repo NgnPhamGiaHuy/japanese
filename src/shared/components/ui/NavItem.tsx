@@ -18,19 +18,14 @@ const COLOR_MAP: Record<string, string> = {
     gray: "text-[#3c3c3c] bg-gray-100",
 };
 
-export default function NavItem({
-    icon,
-    active,
-    onClick,
-    color = "blue",
-}: NavItemProps) {
+const NavItem = ({ icon, active, onClick, color = "blue" }: NavItemProps) => {
     return (
         <button
             onClick={onClick}
-            className={`flex flex-col items-center p-2 rounded-xl transition-all duration-200 ${
+            className={`flex flex-col items-center rounded-xl p-2 transition-all duration-200 ${
                 active
                     ? `${COLOR_MAP[color]} scale-105 border-2 border-transparent`
-                    : "text-[#afafaf] hover:bg-gray-50 border-2 border-transparent hover:border-gray-100"
+                    : "border-2 border-transparent text-[#afafaf] hover:border-gray-100 hover:bg-gray-50"
             }`}
         >
             {React.cloneElement(icon, {
@@ -39,4 +34,6 @@ export default function NavItem({
             } as React.SVGProps<SVGSVGElement>)}
         </button>
     );
-}
+};
+
+export default NavItem;

@@ -1,29 +1,24 @@
 "use client";
 
+import { ScreenHeader } from "@/shared/components/layout";
+import { SPACING } from "@/shared/constants";
+import { clearCharStats } from "@/shared/utils/stats";
 import { useAppStore } from "@/store/useAppStore";
 import { useKanaStore } from "@/store/useKanaStore";
-import { clearCharStats } from "@/shared/utils/stats";
-import { BottomNav, ScreenHeader } from "@/shared/components/layout";
-import { SPACING } from "@/shared/constants";
 
 export default function SettingsPage() {
-    const {
-        useHandwriting,
-        globalAutoPlay,
-        toggleHandwriting,
-        toggleAutoPlay,
-    } = useAppStore();
+    const { useHandwriting, globalAutoPlay, toggleHandwriting, toggleAutoPlay } = useAppStore();
     const { resetProgress } = useKanaStore();
 
     return (
         <div className="min-h-[100dvh] bg-[#F7F7F8] pb-28">
             <ScreenHeader title="Settings" />
-            <div className={`max-w-md mx-auto ${SPACING.pagePadding} pt-6`}>
+            <div className={`mx-auto max-w-md ${SPACING.pagePadding} pt-6`}>
                 <div className="space-y-4">
                     {/* Appearance */}
-                    <div className="bg-white rounded-[2rem] border-2 border-b-4 border-gray-200 shadow-sm divide-y-2 divide-gray-100 overflow-hidden">
-                        <div className="px-6 py-4 bg-gray-50">
-                            <h3 className="text-[10px] font-black text-[#afafaf] uppercase tracking-widest">
+                    <div className="divide-y-2 divide-gray-100 overflow-hidden rounded-[2rem] border-2 border-b-4 border-gray-200 bg-white shadow-sm">
+                        <div className="bg-gray-50 px-6 py-4">
+                            <h3 className="text-[10px] font-black tracking-widest text-[#afafaf] uppercase">
                                 Appearance
                             </h3>
                         </div>
@@ -44,9 +39,9 @@ export default function SettingsPage() {
                     </div>
 
                     {/* Data */}
-                    <div className="bg-white rounded-[2rem] border-2 border-b-4 border-gray-200 shadow-sm divide-y-2 divide-gray-100 overflow-hidden">
-                        <div className="px-6 py-4 bg-gray-50">
-                            <h3 className="text-[10px] font-black text-[#afafaf] uppercase tracking-widest">
+                    <div className="divide-y-2 divide-gray-100 overflow-hidden rounded-[2rem] border-2 border-b-4 border-gray-200 bg-white shadow-sm">
+                        <div className="bg-gray-50 px-6 py-4">
+                            <h3 className="text-[10px] font-black tracking-widest text-[#afafaf] uppercase">
                                 Data
                             </h3>
                         </div>
@@ -54,42 +49,37 @@ export default function SettingsPage() {
                             label="Reset Kana Progress"
                             sub="Clear all learned characters"
                             onClick={() => {
-                                if (confirm("Reset kana progress?"))
-                                    resetProgress();
+                                if (confirm("Reset kana progress?")) resetProgress();
                             }}
                         />
                         <DangerRow
                             label="Reset Character Stats"
                             sub="Clear accuracy records for smart review"
                             onClick={() => {
-                                if (confirm("Clear all character stats?"))
-                                    clearCharStats();
+                                if (confirm("Clear all character stats?")) clearCharStats();
                             }}
                         />
                     </div>
 
                     {/* About */}
-                    <div className="bg-white rounded-[2rem] border-2 border-b-4 border-gray-200 shadow-sm overflow-hidden">
-                        <div className="px-6 py-4 bg-gray-50">
-                            <h3 className="text-[10px] font-black text-[#afafaf] uppercase tracking-widest">
+                    <div className="overflow-hidden rounded-[2rem] border-2 border-b-4 border-gray-200 bg-white shadow-sm">
+                        <div className="bg-gray-50 px-6 py-4">
+                            <h3 className="text-[10px] font-black tracking-widest text-[#afafaf] uppercase">
                                 About
                             </h3>
                         </div>
-                        <div className="px-6 py-4 space-y-1">
-                            <p className="font-black text-[#3c3c3c]">
-                                Kana &amp; Nihongo Master
-                            </p>
-                            <p className="text-sm text-[#afafaf] font-bold">
+                        <div className="space-y-1 px-6 py-4">
+                            <p className="font-black text-[#3c3c3c]">Kana &amp; Nihongo Master</p>
+                            <p className="text-sm font-bold text-[#afafaf]">
                                 Unified Japanese learning app · v2.0
                             </p>
-                            <p className="text-xs text-[#afafaf] font-bold mt-2">
+                            <p className="mt-2 text-xs font-bold text-[#afafaf]">
                                 Kana data from KanjiVG · Powered by Firebase
                             </p>
                         </div>
                     </div>
                 </div>
             </div>
-            <BottomNav />
         </div>
     );
 }
@@ -117,39 +107,31 @@ function ToggleRow({
         <div className="flex items-center justify-between px-6 py-4">
             <div>
                 <div className="font-black text-[#3c3c3c]">{label}</div>
-                <div className="text-sm text-[#afafaf] font-bold">{sub}</div>
+                <div className="text-sm font-bold text-[#afafaf]">{sub}</div>
             </div>
             <button
                 onClick={onToggle}
-                className={`relative w-14 h-8 rounded-full border-2 border-b-4 transition-all duration-200 ${value ? `${colors[color]}` : "bg-gray-200 border-gray-300"}`}
+                className={`relative h-8 w-14 rounded-full border-2 border-b-4 transition-all duration-200 ${value ? `${colors[color]}` : "border-gray-300 bg-gray-200"}`}
             >
                 <div
-                    className={`absolute top-1 w-5 h-5 rounded-full bg-white shadow-sm transition-all duration-300 ${value ? "left-7" : "left-1"}`}
+                    className={`absolute top-1 h-5 w-5 rounded-full bg-white shadow-sm transition-all duration-300 ${value ? "left-7" : "left-1"}`}
                 />
             </button>
         </div>
     );
 }
 
-function DangerRow({
-    label,
-    sub,
-    onClick,
-}: {
-    label: string;
-    sub: string;
-    onClick: () => void;
-}) {
+function DangerRow({ label, sub, onClick }: { label: string; sub: string; onClick: () => void }) {
     return (
         <button
-            className="flex items-center justify-between px-6 py-4 w-full text-left hover:bg-[#ffdfe0] transition-colors group"
+            className="group flex w-full items-center justify-between px-6 py-4 text-left transition-colors hover:bg-[#ffdfe0]"
             onClick={onClick}
         >
             <div>
                 <div className="font-black text-[#ea2b2b]">{label}</div>
-                <div className="text-sm text-[#afafaf] font-bold">{sub}</div>
+                <div className="text-sm font-bold text-[#afafaf]">{sub}</div>
             </div>
-            <span className="text-[#ea2b2b] opacity-50 group-hover:opacity-100 font-black text-lg">
+            <span className="text-lg font-black text-[#ea2b2b] opacity-50 group-hover:opacity-100">
                 ›
             </span>
         </button>

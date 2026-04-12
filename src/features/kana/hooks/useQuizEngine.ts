@@ -1,10 +1,12 @@
 "use client";
 
-import { useState, useRef, useCallback } from "react";
+import { useCallback, useRef, useState } from "react";
+
+import { VISUAL_GROUPS } from "@/features/kana/data/visualGroups";
 import { shuffleArray } from "@/shared/utils/array";
 import { playAudio } from "@/shared/utils/audio";
-import { recordCharStat, getCharStats } from "@/shared/utils/stats";
-import { VISUAL_GROUPS } from "@/features/kana/data/visualGroups";
+import { getCharStats, recordCharStat } from "@/shared/utils/stats";
+
 import type { KanaChar, QuestionType } from "../types/kana.types";
 
 export type AnswerStatus = "idle" | "correct" | "wrong";
@@ -21,8 +23,7 @@ export function useQuizEngine(dataset: KanaChar[]) {
 
     const buildDistractors = useCallback(
         (target: KanaChar): KanaChar[] => {
-            const visualMatch =
-                VISUAL_GROUPS.find((g) => g.includes(target.char)) ?? [];
+            const visualMatch = VISUAL_GROUPS.find((g) => g.includes(target.char)) ?? [];
             const phoneticMatch = dataset
                 .filter((i) => i.group === target.group)
                 .map((i) => i.char);
@@ -31,8 +32,7 @@ export function useQuizEngine(dataset: KanaChar[]) {
                 (i) =>
                     i.char !== target.char &&
                     i.romaji !== target.romaji &&
-                    (visualMatch.includes(i.char) ||
-                        phoneticMatch.includes(i.char))
+                    (visualMatch.includes(i.char) || phoneticMatch.includes(i.char)),
             );
 
             if (pool.length < 3) {
@@ -40,20 +40,19 @@ export function useQuizEngine(dataset: KanaChar[]) {
                     (i) =>
                         i.char !== target.char &&
                         i.romaji !== target.romaji &&
-                        !pool.some((p) => p.char === i.char)
+                        !pool.some((p) => p.char === i.char),
                 );
                 pool = [...pool, ...shuffleArray(remaining)];
             }
 
             return shuffleArray(pool).slice(0, 3);
         },
-        [dataset]
+        [dataset],
     );
 
     const generateQuestion = useCallback(
         (forceType?: QuestionType, isSmartMode = false) => {
-            if (deckRef.current.length === 0)
-                deckRef.current = shuffleArray([...dataset]);
+            if (deckRef.current.length === 0) deckRef.current = shuffleArray([...dataset]);
             const target = deckRef.current.pop()!;
 
             const distractors = buildDistractors(target);
@@ -65,12 +64,7 @@ export function useQuizEngine(dataset: KanaChar[]) {
             } else if (isSmartMode) {
                 selectedType = "type";
             } else {
-                const types: QuestionType[] = [
-                    "read",
-                    "reverse",
-                    "listen",
-                    "type",
-                ];
+                const types: QuestionType[] = ["read", "reverse", "listen", "type"];
                 selectedType = types[Math.floor(Math.random() * types.length)];
             }
 
@@ -79,10 +73,9 @@ export function useQuizEngine(dataset: KanaChar[]) {
             setOptions(allOptions);
             setStatus("idle");
 
-            if (selectedType === "listen")
-                setTimeout(() => playAudio(target.char), 300);
+            if (selectedType === "listen") setTimeout(() => playAudio(target.char), 300);
         },
-        [dataset, buildDistractors]
+        [dataset, buildDistractors],
     );
 
     /** Loads a Smart Review deck sorted by weakest characters */
@@ -92,21 +85,13 @@ export function useQuizEngine(dataset: KanaChar[]) {
             const sorted = [...dataset].sort((a, b) => {
                 const sA = stats[a.char];
                 const sB = stats[b.char];
-                const rA = sA?.attempts
-                    ? sA.correct / sA.attempts
-                    : sA
-                      ? 0.4
-                      : -0.1;
-                const rB = sB?.attempts
-                    ? sB.correct / sB.attempts
-                    : sB
-                      ? 0.4
-                      : -0.1;
+                const rA = sA?.attempts ? sA.correct / sA.attempts : sA ? 0.4 : -0.1;
+                const rB = sB?.attempts ? sB.correct / sB.attempts : sB ? 0.4 : -0.1;
                 return rA - rB;
             });
             deckRef.current = shuffleArray(sorted.slice(0, size));
         },
-        [dataset]
+        [dataset],
     );
 
     const processAnswer = useCallback(
@@ -124,7 +109,7 @@ export function useQuizEngine(dataset: KanaChar[]) {
 
             setTimeout(onAdvance, isCorrect ? 800 : 1500);
         },
-        [question]
+        [question],
     );
 
     const resetEngine = useCallback(() => {

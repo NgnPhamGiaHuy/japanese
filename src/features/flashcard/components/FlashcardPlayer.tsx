@@ -1,9 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import type { Lesson, FlashCard, StudyStats } from "../types/flashcard.types";
-import { Button } from "@/shared/components/ui";
 import { Check, X } from "lucide-react";
+
+import { Button } from "@/shared/components/ui";
+
+import type { FlashCard, Lesson, StudyStats } from "../types/flashcard.types";
 
 interface FlashcardPlayerProps {
     lesson: Lesson;
@@ -12,15 +14,8 @@ interface FlashcardPlayerProps {
     onCardResult: (lessonId: string, cardId: string, knew: boolean) => void;
 }
 
-export default function FlashcardPlayer({
-    lesson,
-    onClose,
-    onComplete,
-    onCardResult,
-}: FlashcardPlayerProps) {
-    const [queue] = useState<FlashCard[]>(() =>
-        [...lesson.cards].sort(() => Math.random() - 0.5)
-    );
+const FlashcardPlayer = ({ lesson, onClose, onComplete, onCardResult }: FlashcardPlayerProps) => {
+    const [queue] = useState<FlashCard[]>(() => [...lesson.cards].sort(() => Math.random() - 0.5));
     const [currentIndex, setCurrentIndex] = useState(0);
     const [isFlipped, setIsFlipped] = useState(false);
     const [stats, setStats] = useState<StudyStats>({
@@ -31,10 +26,10 @@ export default function FlashcardPlayer({
 
     if (queue.length === 0) {
         return (
-            <div className="p-6 font-bold text-center">
+            <div className="p-6 text-center font-bold">
                 No cards found.
                 <br />
-                <Button onClick={onClose} className="mt-4 mx-auto">
+                <Button onClick={onClose} className="mx-auto mt-4">
                     Go back
                 </Button>
             </div>
@@ -57,30 +52,24 @@ export default function FlashcardPlayer({
 
     if (showSummary) {
         return (
-            <div className="fixed inset-0 bg-[#F7F7F8] z-50 flex flex-col items-center justify-center p-6">
-                <div className="w-24 h-24 bg-[#58cc02] text-white rounded-[2rem] flex items-center justify-center mb-6 shadow-sm border-b-8 border-[#58a700] transform -rotate-6">
+            <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-[#F7F7F8] p-6">
+                <div className="mb-6 flex h-24 w-24 -rotate-6 transform items-center justify-center rounded-[2rem] border-b-8 border-[#58a700] bg-[#58cc02] text-white shadow-sm">
                     <Check size={56} strokeWidth={4} />
                 </div>
-                <h2 className="text-4xl font-black text-[#3c3c3c] mb-2">
-                    Great Job!
-                </h2>
-                <p className="text-[#afafaf] font-bold text-lg mb-8">
+                <h2 className="mb-2 text-4xl font-black text-[#3c3c3c]">Great Job!</h2>
+                <p className="mb-8 text-lg font-bold text-[#afafaf]">
                     You&apos;ve completed this deck.
                 </p>
-                <div className="flex gap-4 w-full max-w-sm mb-12">
-                    <div className="flex-1 bg-white p-6 rounded-[1.5rem] shadow-sm text-center border-2 border-b-8 border-gray-200">
-                        <div className="text-5xl font-black text-[#58cc02]">
-                            {stats.correct}
-                        </div>
-                        <div className="text-[10px] font-black text-[#afafaf] uppercase tracking-widest mt-2">
+                <div className="mb-12 flex w-full max-w-sm gap-4">
+                    <div className="flex-1 rounded-[1.5rem] border-2 border-b-8 border-gray-200 bg-white p-6 text-center shadow-sm">
+                        <div className="text-5xl font-black text-[#58cc02]">{stats.correct}</div>
+                        <div className="mt-2 text-[10px] font-black tracking-widest text-[#afafaf] uppercase">
                             Knew It
                         </div>
                     </div>
-                    <div className="flex-1 bg-white p-6 rounded-[1.5rem] shadow-sm text-center border-2 border-b-8 border-gray-200">
-                        <div className="text-5xl font-black text-[#ff9600]">
-                            {stats.incorrect}
-                        </div>
-                        <div className="text-[10px] font-black text-[#afafaf] uppercase tracking-widest mt-2">
+                    <div className="flex-1 rounded-[1.5rem] border-2 border-b-8 border-gray-200 bg-white p-6 text-center shadow-sm">
+                        <div className="text-5xl font-black text-[#ff9600]">{stats.incorrect}</div>
+                        <div className="mt-2 text-[10px] font-black tracking-widest text-[#afafaf] uppercase">
                             Review
                         </div>
                     </div>
@@ -89,7 +78,7 @@ export default function FlashcardPlayer({
                     variant="primary"
                     color="blue"
                     onClick={onComplete}
-                    className="w-full max-w-xs text-xl py-5"
+                    className="w-full max-w-xs py-5 text-xl"
                 >
                     Collect +50 XP
                 </Button>
@@ -98,68 +87,61 @@ export default function FlashcardPlayer({
     }
 
     return (
-        <div className="fixed inset-0 bg-[#F7F7F8] z-50 flex flex-col">
-            <header className="flex justify-between items-center p-4">
-                <Button
-                    variant="ghost"
-                    onClick={onClose}
-                    icon={X}
-                    className="px-3 py-2"
-                />
-                <div className="flex-1 mx-4">
-                    <div className="h-4 bg-gray-200 rounded-full overflow-hidden">
+        <div className="fixed inset-0 z-50 flex flex-col bg-[#F7F7F8]">
+            <header className="flex items-center justify-between p-4">
+                <Button variant="ghost" onClick={onClose} icon={X} className="px-3 py-2" />
+                <div className="mx-4 flex-1">
+                    <div className="h-4 overflow-hidden rounded-full bg-gray-200">
                         <div
                             className="h-full bg-[#1cb0f6] transition-all duration-300"
                             style={{ width: `${progress}%` }}
                         />
                     </div>
                 </div>
-                <span className="text-sm font-black text-[#afafaf] w-12 text-right">
+                <span className="w-12 text-right text-sm font-black text-[#afafaf]">
                     {currentIndex + 1}/{queue.length}
                 </span>
             </header>
 
-            <div className="flex-1 flex flex-col items-center justify-center p-6 w-full max-w-md mx-auto perspective-1000">
+            <div className="perspective-1000 mx-auto flex w-full max-w-md flex-1 flex-col items-center justify-center p-6">
                 <div
-                    className={`relative w-full aspect-[3/4] transition-all duration-500 preserve-3d cursor-pointer ${isFlipped ? "rotate-y-180" : ""}`}
+                    className={`preserve-3d relative aspect-[3/4] w-full cursor-pointer transition-all duration-500 ${isFlipped ? "rotate-y-180" : ""}`}
                     onClick={() => !isFlipped && setIsFlipped(true)}
                 >
-                    <div className="absolute inset-0 backface-hidden bg-white rounded-[3rem] shadow-sm border-2 border-b-8 border-gray-200 flex flex-col items-center justify-center p-8 text-center hover:-translate-y-2 hover:shadow-md transition-transform">
+                    <div className="absolute inset-0 flex flex-col items-center justify-center rounded-[3rem] border-2 border-b-8 border-gray-200 bg-white p-8 text-center shadow-sm transition-transform backface-hidden hover:-translate-y-2 hover:shadow-md">
                         {card.furigana && (
-                            <span className="text-2xl text-[#afafaf] font-bold mb-4 tracking-widest">
+                            <span className="mb-4 text-2xl font-bold tracking-widest text-[#afafaf]">
                                 {card.furigana}
                             </span>
                         )}
-                        <h1 className="text-[6rem] font-medium text-[#3c3c3c] leading-tight select-none">
+                        <h1 className="text-[6rem] leading-tight font-medium text-[#3c3c3c] select-none">
                             {card.kanji}
                         </h1>
-                        <p className="absolute bottom-8 text-sm text-gray-300 font-black uppercase tracking-widest animate-pulse">
+                        <p className="absolute bottom-8 animate-pulse text-sm font-black tracking-widest text-gray-300 uppercase">
                             Tap to reveal
                         </p>
                     </div>
-                    <div className="absolute inset-0 backface-hidden bg-white rounded-[3rem] shadow-sm border-2 border-b-8 border-gray-200 flex flex-col items-center justify-center p-8 text-center rotate-y-180">
-                        <h2 className="text-4xl font-black text-[#1cb0f6] mb-6 leading-tight">
+                    <div className="absolute inset-0 flex rotate-y-180 flex-col items-center justify-center rounded-[3rem] border-2 border-b-8 border-gray-200 bg-white p-8 text-center shadow-sm backface-hidden">
+                        <h2 className="mb-6 text-4xl leading-tight font-black text-[#1cb0f6]">
                             {card.meaning}
                         </h2>
                         {card.example && (
-                            <div className="mt-4 p-5 bg-gray-50 rounded-2xl w-full border-2 border-gray-100">
-                                <p className="text-[#3c3c3c] font-bold text-lg">
-                                    {card.example}
-                                </p>
+                            <div className="mt-4 w-full rounded-2xl border-2 border-gray-100 bg-gray-50 p-5">
+                                <p className="text-lg font-bold text-[#3c3c3c]">{card.example}</p>
                             </div>
                         )}
                     </div>
                 </div>
 
                 <div
-                    className={`w-full mt-10 flex gap-4 transition-opacity duration-300 ${isFlipped ? "opacity-100" : "opacity-0 pointer-events-none"}`}
+                    className={`mt-10 flex w-full gap-4 transition-opacity duration-300 ${isFlipped ? "opacity-100" : "pointer-events-none opacity-0"}`}
                     onClick={(e) => e.stopPropagation()}
                 >
                     <Button
                         variant="secondary"
                         color="orange"
                         onClick={() => handleAnswer(false)}
-                        className="flex-1 text-xl py-5"
+                        className="flex-1 py-5 text-xl"
                     >
                         Review Again
                     </Button>
@@ -167,7 +149,7 @@ export default function FlashcardPlayer({
                         variant="primary"
                         color="green"
                         onClick={() => handleAnswer(true)}
-                        className="flex-1 text-xl py-5"
+                        className="flex-1 py-5 text-xl"
                     >
                         Got It
                     </Button>
@@ -175,4 +157,6 @@ export default function FlashcardPlayer({
             </div>
         </div>
     );
-}
+};
+
+export default FlashcardPlayer;

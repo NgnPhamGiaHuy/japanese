@@ -1,7 +1,8 @@
 "use client";
 
-import { useRef, useState, useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 import { RotateCcw } from "lucide-react";
+
 import KanaStrokeAnimation from "./KanaStrokeAnimation";
 
 interface DrawingCanvasProps {
@@ -12,13 +13,13 @@ interface DrawingCanvasProps {
     strokeColor?: string;
 }
 
-export default function DrawingCanvas({
+const DrawingCanvas = ({
     char,
     activeFont,
     showGuide = true,
     stepKey = 1,
     strokeColor = "#58cc02",
-}: DrawingCanvasProps) {
+}: DrawingCanvasProps) => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const [isDrawing, setIsDrawing] = useState(false);
 
@@ -65,9 +66,9 @@ export default function DrawingCanvas({
     useEffect(clear, [char, stepKey]);
 
     return (
-        <div className="relative w-full max-w-[200px] md:max-w-[280px] aspect-square mx-auto bg-white border-2 border-gray-200 rounded-3xl overflow-hidden shadow-sm flex items-center justify-center shrink-0">
+        <div className="relative mx-auto flex aspect-square w-full max-w-[200px] shrink-0 items-center justify-center overflow-hidden rounded-3xl border-2 border-gray-200 bg-white shadow-sm md:max-w-[280px]">
             {showGuide && (
-                <div className="absolute inset-0 pointer-events-none opacity-25 flex items-center justify-center">
+                <div className="pointer-events-none absolute inset-0 flex items-center justify-center opacity-25">
                     <KanaStrokeAnimation
                         charStr={char}
                         activeFont={activeFont}
@@ -80,7 +81,7 @@ export default function DrawingCanvas({
                 ref={canvasRef}
                 width={512}
                 height={512}
-                className="w-full h-full touch-none cursor-crosshair relative z-10"
+                className="relative z-10 h-full w-full cursor-crosshair touch-none"
                 onMouseDown={startDrawing}
                 onMouseMove={draw}
                 onMouseUp={() => setIsDrawing(false)}
@@ -92,14 +93,12 @@ export default function DrawingCanvas({
             />
             <button
                 onClick={clear}
-                className="absolute bottom-2 right-2 md:bottom-3 md:right-3 z-20 p-2 bg-white rounded-lg md:rounded-xl shadow-md border border-gray-100 hover:bg-gray-50 text-gray-500 active:scale-95 transition-transform"
+                className="absolute right-2 bottom-2 z-20 rounded-lg border border-gray-100 bg-white p-2 text-gray-500 shadow-md transition-transform hover:bg-gray-50 active:scale-95 md:right-3 md:bottom-3 md:rounded-xl"
             >
-                <RotateCcw
-                    size={16}
-                    strokeWidth={2.5}
-                    className="md:w-5 md:h-5"
-                />
+                <RotateCcw size={16} strokeWidth={2.5} className="md:h-5 md:w-5" />
             </button>
         </div>
     );
-}
+};
+
+export default DrawingCanvas;

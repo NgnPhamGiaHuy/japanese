@@ -23,10 +23,7 @@ function charMap(dataset: KanaChar[]): Map<string, KanaChar> {
     return new Map(dataset.map((c) => [c.char, c]));
 }
 
-function rowFromGroup(
-    dataset: KanaChar[],
-    group: string
-): (KanaChar | null)[] {
+function rowFromGroup(dataset: KanaChar[], group: string): (KanaChar | null)[] {
     const cells: (KanaChar | null)[] = [null, null, null, null, null];
     for (const c of dataset) {
         if (c.group !== group) continue;
@@ -108,34 +105,22 @@ function yoonRows(chars: KanaChar[], labels: string[]): ChartBlock["rows"] {
         if (triplet.length === 0) break;
         rows.push({
             label: labels[rows.length] ?? `·`,
-            cells: [
-                triplet[0] ?? null,
-                triplet[1] ?? null,
-                triplet[2] ?? null,
-            ],
+            cells: [triplet[0] ?? null, triplet[1] ?? null, triplet[2] ?? null],
         });
     }
     return rows;
 }
 
-const YOON_LABELS_UNVOICED = [
-    "Ky",
-    "Sh",
-    "Ch",
-    "Ny",
-    "Hy",
-    "My",
-    "Ry",
-];
+const YOON_LABELS_UNVOICED = ["Ky", "Sh", "Ch", "Ny", "Hy", "My", "Ry"];
 
 const YOON_LABELS_VOICED = ["Gy", "J", "By", "Py"];
 
 /** Katakana-only extended tables (romaji a i u e o columns). */
 function extendedKatakanaRows(
-    byChar: Map<string, KanaChar>
+    byChar: Map<string, KanaChar>,
 ): { label: string; cells: (KanaChar | null)[] }[] {
     const g = (chars: (string | null)[]) =>
-        chars.map((ch) => (ch ? byChar.get(ch) ?? null : null));
+        chars.map((ch) => (ch ? (byChar.get(ch) ?? null) : null));
 
     const rows: { label: string; cells: (KanaChar | null)[] }[] = [
         {
@@ -180,10 +165,10 @@ function extendedKatakanaRows(
 }
 
 function extendedYoonKatakanaRows(
-    byChar: Map<string, KanaChar>
+    byChar: Map<string, KanaChar>,
 ): { label: string; cells: (KanaChar | null)[] }[] {
     const g = (chars: (string | null)[]) =>
-        chars.map((ch) => (ch ? byChar.get(ch) ?? null : null));
+        chars.map((ch) => (ch ? (byChar.get(ch) ?? null) : null));
 
     const rows = [
         { label: "V", cells: g([null, "ヴュ", null]) },

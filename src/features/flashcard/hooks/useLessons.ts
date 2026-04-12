@@ -1,8 +1,10 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
-import type { Lesson } from "../types/flashcard.types";
+import { useCallback, useEffect, useState } from "react";
+
 import { DEFAULT_LESSONS } from "../data/defaultLessons";
+
+import type { Lesson } from "../types/flashcard.types";
 
 const STORAGE_KEY = "nihongo_lessons";
 
@@ -34,41 +36,32 @@ export function useLessons() {
     }, []);
 
     const updateLesson = useCallback((updated: Lesson) => {
-        setLessons((prev) =>
-            prev.map((l) => (l.id === updated.id ? updated : l))
-        );
+        setLessons((prev) => prev.map((l) => (l.id === updated.id ? updated : l)));
     }, []);
 
     const deleteLesson = useCallback((id: string) => {
         setLessons((prev) => prev.filter((l) => l.id !== id));
     }, []);
 
-    const recordCardResult = useCallback(
-        (lessonId: string, cardId: string, knew: boolean) => {
-            setLessons((prev) =>
-                prev.map((l) => {
-                    if (l.id !== lessonId) return l;
-                    return {
-                        ...l,
-                        cards: l.cards.map((c) =>
-                            c.id !== cardId
-                                ? c
-                                : {
-                                      ...c,
-                                      correctCount: knew
-                                          ? c.correctCount + 1
-                                          : c.correctCount,
-                                      wrongCount: !knew
-                                          ? c.wrongCount + 1
-                                          : c.wrongCount,
-                                  }
-                        ),
-                    };
-                })
-            );
-        },
-        []
-    );
+    const recordCardResult = useCallback((lessonId: string, cardId: string, knew: boolean) => {
+        setLessons((prev) =>
+            prev.map((l) => {
+                if (l.id !== lessonId) return l;
+                return {
+                    ...l,
+                    cards: l.cards.map((c) =>
+                        c.id !== cardId
+                            ? c
+                            : {
+                                  ...c,
+                                  correctCount: knew ? c.correctCount + 1 : c.correctCount,
+                                  wrongCount: !knew ? c.wrongCount + 1 : c.wrongCount,
+                              },
+                    ),
+                };
+            }),
+        );
+    }, []);
 
     return {
         lessons,

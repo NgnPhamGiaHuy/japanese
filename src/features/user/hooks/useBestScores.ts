@@ -1,11 +1,12 @@
 "use client";
 
-import { useEffect, useCallback } from "react";
+import { useCallback, useEffect } from "react";
 import { collection, doc, onSnapshot, setDoc } from "firebase/firestore";
-import { db, APP_ID } from "@/lib/firebase";
+
+import { APP_ID, db } from "@/lib/firebase";
+import { getDeviceId } from "@/shared/utils/device";
 import { useAppStore } from "@/store/useAppStore";
 import { useKanaStore } from "@/store/useKanaStore";
-import { getDeviceId } from "@/shared/utils/device";
 
 /** Syncs best scores from Firestore → Zustand and exposes a save function */
 export function useBestScores() {
@@ -15,14 +16,7 @@ export function useBestScores() {
     // Real-time listener for best scores
     useEffect(() => {
         if (!user) return;
-        const ref = collection(
-            db,
-            "artifacts",
-            APP_ID,
-            "users",
-            user.uid,
-            "stats"
-        );
+        const ref = collection(db, "artifacts", APP_ID, "users", user.uid, "stats");
         const unsub = onSnapshot(ref, (snap) => {
             const scores: Record<string, number> = {};
             snap.forEach((d) => {
@@ -42,20 +36,12 @@ export function useBestScores() {
             try {
                 if (score > currentBest) {
                     await setDoc(
-                        doc(
-                            db,
-                            "artifacts",
-                            APP_ID,
-                            "users",
-                            user.uid,
-                            "stats",
-                            modeKey
-                        ),
+                        doc(db, "artifacts", APP_ID, "users", user.uid, "stats", modeKey),
                         {
                             bestScore: score,
                             lastUpdated: new Date().toISOString(),
                         },
-                        { merge: true }
+                        { merge: true },
                     );
                     updateBestScore(modeKey, score);
                 }
@@ -71,7 +57,7 @@ export function useBestScores() {
                             "public",
                             "data",
                             `leaderboard_${modeKey}`,
-                            deviceId
+                            deviceId,
                         ),
                         {
                             userId: user.uid,
@@ -80,14 +66,14 @@ export function useBestScores() {
                             score: scoreToSubmit,
                             timestamp: new Date().toISOString(),
                         },
-                        { merge: true }
+                        { merge: true },
                     );
                 }
             } catch (err) {
                 console.error("[Firestore] Score save error:", err);
             }
         },
-        [user, bestScores, updateBestScore]
+        [user, bestScores, updateBestScore],
     );
 
     return { bestScores, saveScore };

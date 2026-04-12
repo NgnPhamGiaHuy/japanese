@@ -1,0 +1,9 @@
+.next/
+node_modules/
+public/
+repomix-output.xml
+dist/
+build/
+out/
+.env*
+next-env.d.ts

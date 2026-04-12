@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
+
 import type { User } from "firebase/auth";
 
 interface AppState {
@@ -25,10 +26,8 @@ export const useAppStore = create<AppState>()(
             globalAutoPlay: true,
             setUser: (user) => set({ user }),
             setAuthReady: (isAuthReady) => set({ isAuthReady }),
-            toggleHandwriting: () =>
-                set((s) => ({ useHandwriting: !s.useHandwriting })),
-            toggleAutoPlay: () =>
-                set((s) => ({ globalAutoPlay: !s.globalAutoPlay })),
+            toggleHandwriting: () => set((s) => ({ useHandwriting: !s.useHandwriting })),
+            toggleAutoPlay: () => set((s) => ({ globalAutoPlay: !s.globalAutoPlay })),
         }),
         {
             name: "app-settings",
@@ -37,6 +36,6 @@ export const useAppStore = create<AppState>()(
                 useHandwriting: s.useHandwriting,
                 globalAutoPlay: s.globalAutoPlay,
             }),
-        }
-    )
+        },
+    ),
 );

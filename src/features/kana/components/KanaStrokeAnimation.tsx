@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 
 interface SvgData {
     paths: string[];
@@ -19,7 +19,7 @@ async function fetchKanaSvg(char: string): Promise<SvgData | null> {
     const hex = char.charCodeAt(0).toString(16).padStart(5, "0");
     try {
         const res = await fetch(
-            `https://raw.githubusercontent.com/KanjiVG/kanjivg/master/kanji/${hex}.svg`
+            `https://raw.githubusercontent.com/KanjiVG/kanjivg/master/kanji/${hex}.svg`,
         );
         if (!res.ok) {
             svgCache[char] = null;
@@ -29,7 +29,7 @@ async function fetchKanaSvg(char: string): Promise<SvgData | null> {
         const parser = new DOMParser();
         const doc = parser.parseFromString(text, "image/svg+xml");
         const paths = Array.from(doc.querySelectorAll("path")).map(
-            (p) => p.getAttribute("d") ?? ""
+            (p) => p.getAttribute("d") ?? "",
         );
         const texts = Array.from(doc.querySelectorAll("text")).map((t) => ({
             text: t.textContent ?? "",
@@ -50,12 +50,12 @@ interface KanaStrokeAnimationProps {
     strokeColor?: string;
 }
 
-export default function KanaStrokeAnimation({
+const KanaStrokeAnimation = ({
     charStr,
     activeFont,
     svgClassName = "w-12 h-12 md:w-24 md:h-24",
     strokeColor = "#1cb0f6",
-}: KanaStrokeAnimationProps) {
+}: KanaStrokeAnimationProps) => {
     const [svgData, setSvgData] = useState<SvgEntry[]>([]);
     const [loading, setLoading] = useState(true);
 
@@ -78,15 +78,10 @@ export default function KanaStrokeAnimation({
         };
     }, [charStr]);
 
-    if (loading)
-        return (
-            <div
-                className={`animate-pulse bg-gray-200 rounded-xl ${svgClassName}`}
-            />
-        );
+    if (loading) return <div className={`animate-pulse rounded-xl bg-gray-200 ${svgClassName}`} />;
 
     return (
-        <div className="flex items-center justify-center w-full h-full gap-1">
+        <div className="flex h-full w-full items-center justify-center gap-1">
             {svgData.map((item, idx) =>
                 item.data ? (
                     <svg
@@ -118,10 +113,7 @@ export default function KanaStrokeAnimation({
                         </g>
                         <g fill="#ff9600" fontSize="8" fontWeight="bold">
                             {item.data.texts.map((t, i) => (
-                                <text
-                                    key={`txt-${i}`}
-                                    transform={t.transform ?? undefined}
-                                >
+                                <text key={`txt-${i}`} transform={t.transform ?? undefined}>
                                     {t.text}
                                 </text>
                             ))}
@@ -130,13 +122,15 @@ export default function KanaStrokeAnimation({
                 ) : (
                     <span
                         key={idx}
-                        className="text-3xl md:text-5xl font-medium text-gray-300"
+                        className="text-3xl font-medium text-gray-300 md:text-5xl"
                         style={{ fontFamily: activeFont }}
                     >
                         {item.char}
                     </span>
-                )
+                ),
             )}
         </div>
     );
-}
+};
+
+export default KanaStrokeAnimation;

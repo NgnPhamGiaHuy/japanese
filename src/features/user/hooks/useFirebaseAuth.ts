@@ -7,6 +7,7 @@ import {
     setPersistence,
     signInAnonymously,
 } from "firebase/auth";
+
 import { auth } from "@/lib/firebase";
 import { useAppStore } from "@/store/useAppStore";
 

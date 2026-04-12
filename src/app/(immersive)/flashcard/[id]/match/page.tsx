@@ -1,10 +1,10 @@
 "use client";
 
-import { use, useEffect, useState } from "react";
 import { notFound, useRouter } from "next/navigation";
-import { Trophy, X } from "lucide-react";
-import { motion } from "framer-motion";
+import { use, useEffect, useState } from "react";
 import Confetti from "react-confetti";
+import { motion } from "framer-motion";
+import { Trophy, X } from "lucide-react";
 
 import { useLessons } from "@/features/flashcard/hooks/useLessons";
 import { useUserProgress } from "@/features/user/hooks/useUserProgress";
@@ -17,11 +17,7 @@ interface MatchItem {
     type: "kanji" | "meaning";
 }
 
-export default function MatchModePage({
-    params,
-}: {
-    params: Promise<{ id: string }>;
-}) {
+export default function MatchModePage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = use(params);
     const { lessons } = useLessons();
     const { addXP } = useUserProgress();
@@ -37,9 +33,7 @@ export default function MatchModePage({
 
     useEffect(() => {
         if (lesson?.cards) {
-            const pool = [...lesson.cards]
-                .sort(() => Math.random() - 0.5)
-                .slice(0, 6);
+            const pool = [...lesson.cards].sort(() => Math.random() - 0.5).slice(0, 6);
             const gameItems: MatchItem[] = [];
             pool.forEach((c) => {
                 gameItems.push({
@@ -95,11 +89,9 @@ export default function MatchModePage({
 
     if (isComplete) {
         const { innerWidth: width, innerHeight: height } =
-            typeof window !== "undefined"
-                ? window
-                : { innerWidth: 500, innerHeight: 500 };
+            typeof window !== "undefined" ? window : { innerWidth: 500, innerHeight: 500 };
         return (
-            <div className="fixed inset-0 bg-[#F7F7F8] z-50 flex flex-col items-center justify-center p-6 overflow-hidden">
+            <div className="fixed inset-0 z-50 flex flex-col items-center justify-center overflow-hidden bg-[#F7F7F8] p-6">
                 <Confetti
                     width={width}
                     height={height}
@@ -112,13 +104,11 @@ export default function MatchModePage({
                     initial={{ scale: 0, rotate: -20 }}
                     animate={{ scale: 1, rotate: -6 }}
                     transition={{ type: "spring", stiffness: 300, damping: 15 }}
-                    className="w-24 h-24 bg-[#ce82ff] text-white rounded-[2rem] flex items-center justify-center mb-6 shadow-sm border-b-8 border-[#b65ce8]"
+                    className="mb-6 flex h-24 w-24 items-center justify-center rounded-[2rem] border-b-8 border-[#b65ce8] bg-[#ce82ff] text-white shadow-sm"
                 >
                     <Trophy size={56} strokeWidth={3} />
                 </motion.div>
-                <h2 className="text-4xl font-black text-[#3c3c3c] mb-2">
-                    Perfect Match!
-                </h2>
+                <h2 className="mb-2 text-4xl font-black text-[#3c3c3c]">Perfect Match!</h2>
                 <Button
                     variant="primary"
                     color="purple"
@@ -126,7 +116,7 @@ export default function MatchModePage({
                         addXP(score * 15);
                         router.push(`/flashcard/${id}`);
                     }}
-                    className="mt-12 w-full max-w-xs text-xl py-5"
+                    className="mt-12 w-full max-w-xs py-5 text-xl"
                 >
                     Collect {score * 15} XP
                 </Button>
@@ -135,25 +125,23 @@ export default function MatchModePage({
     }
 
     return (
-        <div className="fixed inset-0 bg-[#F7F7F8] z-50 flex flex-col">
-            <header className="flex justify-between items-center p-4">
+        <div className="fixed inset-0 z-50 flex flex-col bg-[#F7F7F8]">
+            <header className="flex items-center justify-between p-4">
                 <Button
                     variant="ghost"
                     onClick={() => router.back()}
                     icon={X}
                     className="px-3 py-2"
                 />
-                <h2 className="font-black text-2xl text-[#ce82ff] uppercase tracking-widest">
+                <h2 className="text-2xl font-black tracking-widest text-[#ce82ff] uppercase">
                     Match
                 </h2>
                 <div className="w-12" />
             </header>
-            <div className="flex-1 p-4 md:p-6 w-full max-w-md mx-auto flex flex-col justify-center">
+            <div className="mx-auto flex w-full max-w-md flex-1 flex-col justify-center p-4 md:p-6">
                 <div className="grid grid-cols-2 gap-3 md:gap-4">
                     {items.map((item) => {
-                        const isSelected = selected.some(
-                            (s) => s.id === item.id
-                        );
+                        const isSelected = selected.some((s) => s.id === item.id);
                         const isMatched = matched.includes(item.id);
                         const isError = errorIds.includes(item.id);
                         let btnClass =
@@ -171,11 +159,8 @@ export default function MatchModePage({
                             <button
                                 key={item.id}
                                 onClick={() => handleSelect(item)}
-                                disabled={
-                                    isMatched ||
-                                    (selected.length === 2 && !isError)
-                                }
-                                className={`p-4 md:p-6 rounded-2xl border-2 border-b-4 text-xl md:text-2xl font-black transition-all duration-200 flex items-center justify-center min-h-[100px] select-none ${btnClass}`}
+                                disabled={isMatched || (selected.length === 2 && !isError)}
+                                className={`flex min-h-[100px] items-center justify-center rounded-2xl border-2 border-b-4 p-4 text-xl font-black transition-all duration-200 select-none md:p-6 md:text-2xl ${btnClass}`}
                             >
                                 {item.text}
                             </button>

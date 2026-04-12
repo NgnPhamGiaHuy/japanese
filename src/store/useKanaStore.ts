@@ -1,7 +1,9 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import type { AlphabetMode } from "@/features/kana/types/kana.types";
+
 import { clearCharStats } from "@/shared/utils/stats";
+
+import type { AlphabetMode } from "@/features/kana/types/kana.types";
 
 interface KanaState {
     alphabet: AlphabetMode;
@@ -41,6 +43,6 @@ export const useKanaStore = create<KanaState>()(
                     },
                 })),
         }),
-        { name: "kana-progress" }
-    )
+        { name: "kana-progress" },
+    ),
 );

@@ -1,9 +1,11 @@
 "use client";
 
 import { useMemo } from "react";
-import { useKanaStore } from "@/store/useKanaStore";
+
 import { HIRAGANA_DATA } from "@/features/kana/data/hiragana";
 import { KATAKANA_DATA } from "@/features/kana/data/katakana";
+import { useKanaStore } from "@/store/useKanaStore";
+
 import type { KanaChar } from "../types/kana.types";
 
 /** Returns the active dataset and helpers based on the current alphabet selection */

@@ -1,8 +1,7 @@
 "use client";
 
 if (typeof window !== "undefined" && "speechSynthesis" in window) {
-    window.speechSynthesis.onvoiceschanged = () =>
-        window.speechSynthesis.getVoices();
+    window.speechSynthesis.onvoiceschanged = () => window.speechSynthesis.getVoices();
 }
 
 /** Plays a Japanese text string using the Web Speech API */
@@ -18,22 +17,16 @@ export function playAudio(text: string): void {
 
     const voices = window.speechSynthesis.getVoices();
     const jpVoices = voices.filter(
-        (v) => v.lang === "ja-JP" || v.lang === "ja_JP" || v.lang.includes("ja")
+        (v) => v.lang === "ja-JP" || v.lang === "ja_JP" || v.lang.includes("ja"),
     );
 
     if (jpVoices.length > 0) {
         utterance.voice =
             jpVoices.find(
-                (v) =>
-                    v.name.includes("Google 日本語") ||
-                    v.name.includes("Google Japanese")
+                (v) => v.name.includes("Google 日本語") || v.name.includes("Google Japanese"),
             ) ??
-            jpVoices.find(
-                (v) => v.name.includes("Kyoko") || v.name.includes("Otoya")
-            ) ??
-            jpVoices.find(
-                (v) => v.name.includes("Ayumi") || v.name.includes("Haruka")
-            ) ??
+            jpVoices.find((v) => v.name.includes("Kyoko") || v.name.includes("Otoya")) ??
+            jpVoices.find((v) => v.name.includes("Ayumi") || v.name.includes("Haruka")) ??
             jpVoices[0];
     }
 

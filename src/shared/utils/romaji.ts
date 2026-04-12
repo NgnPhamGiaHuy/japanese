@@ -25,8 +25,7 @@ export function getValidRomaji(romajiStr: string): string[] {
     const expanded = [...base];
 
     base.forEach((ans) => {
-        if (ROMAJI_ALTERNATIVES[ans])
-            expanded.push(...ROMAJI_ALTERNATIVES[ans]);
+        if (ROMAJI_ALTERNATIVES[ans]) expanded.push(...ROMAJI_ALTERNATIVES[ans]);
     });
 
     return [...new Set(expanded)];

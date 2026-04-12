@@ -1,15 +1,13 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback } from "react";
-import { useQuizEngine } from "./useQuizEngine";
+import { useCallback, useEffect, useRef, useState } from "react";
+
 import { playAudio } from "@/shared/utils/audio";
 import { getValidRomaji } from "@/shared/utils/romaji";
-import type {
-    KanaChar,
-    ChallengeMode,
-    SurvivalPhase,
-    DropWord,
-} from "../types/kana.types";
+
+import { useQuizEngine } from "./useQuizEngine";
+
+import type { ChallengeMode, DropWord, KanaChar, SurvivalPhase } from "../types/kana.types";
 
 interface UseSurvivalGameProps {
     dataset: KanaChar[];
@@ -17,14 +15,9 @@ interface UseSurvivalGameProps {
     onSaveScore: (score: number, name: string, modeKey: string) => void;
 }
 
-export function useSurvivalGame({
-    dataset,
-    alphabet,
-    onSaveScore,
-}: UseSurvivalGameProps) {
+export function useSurvivalGame({ dataset, alphabet, onSaveScore }: UseSurvivalGameProps) {
     const [phase, setPhase] = useState<SurvivalPhase>("setup");
-    const [challengeMode, setChallengeMode] =
-        useState<ChallengeMode>("infinity");
+    const [challengeMode, setChallengeMode] = useState<ChallengeMode>("infinity");
     const [timeMinutes, setTimeMinutes] = useState(1);
     const [timeLeft, setTimeLeft] = useState(0);
     const [lives, setLives] = useState(3);
@@ -54,10 +47,7 @@ export function useSurvivalGame({
             isGameOverRef.current
         )
             return;
-        const timer = setInterval(
-            () => setTimeLeft((t) => Math.max(0, t - 1)),
-            1000
-        );
+        const timer = setInterval(() => setTimeLeft((t) => Math.max(0, t - 1)), 1000);
         return () => clearInterval(timer);
     }, [phase, challengeMode, timeLeft]);
 
@@ -72,15 +62,7 @@ export function useSurvivalGame({
             onSaveScore(engine.score, localName, activeModeKey);
             setPhase("gameover");
         }
-    }, [
-        timeLeft,
-        phase,
-        challengeMode,
-        activeModeKey,
-        engine.score,
-        localName,
-        onSaveScore,
-    ]);
+    }, [timeLeft, phase, challengeMode, activeModeKey, engine.score, localName, onSaveScore]);
 
     const startGame = useCallback(() => {
         engine.resetEngine();
@@ -117,15 +99,7 @@ export function useSurvivalGame({
                 if (!isGameOverRef.current) engine.generateQuestion();
             });
         },
-        [
-            challengeMode,
-            lives,
-            engine,
-            localName,
-            activeModeKey,
-            onSaveScore,
-            onCorrectAnswer,
-        ]
+        [challengeMode, lives, engine, localName, activeModeKey, onSaveScore, onCorrectAnswer],
     );
 
     // Drop game state
@@ -155,10 +129,7 @@ export function useSurvivalGame({
             const spawnInterval = Math.max(600, 4000 - elapsed * 25);
             const maxWords = Math.min(12, 2 + Math.floor(elapsed / 12));
 
-            if (
-                time - (state.lastSpawn || 0) > spawnInterval &&
-                state.words.length < maxWords
-            ) {
+            if (time - (state.lastSpawn || 0) > spawnInterval && state.words.length < maxWords) {
                 const allowedGroups = [
                     "vowels",
                     "k-row",
@@ -174,12 +145,9 @@ export function useSurvivalGame({
                 ];
                 if (elapsed > 30) allowedGroups.push("dakuten", "handakuten");
                 if (elapsed > 60) allowedGroups.push("yōon", "yōon-voiced");
-                if (elapsed > 90)
-                    allowedGroups.push("extended", "extended-yōon");
+                if (elapsed > 90) allowedGroups.push("extended", "extended-yōon");
 
-                const pool = dataset.filter((c) =>
-                    allowedGroups.includes(c.group)
-                );
+                const pool = dataset.filter((c) => allowedGroups.includes(c.group));
                 const charData = pool[Math.floor(Math.random() * pool.length)];
                 const lanes = [15, 30, 45, 60, 75, 85];
                 let lane = lanes[Math.floor(Math.random() * lanes.length)];
@@ -202,8 +170,7 @@ export function useSurvivalGame({
             for (let i = state.words.length - 1; i >= 0; i--) {
                 state.words[i].y += speed * delta;
                 if (state.words[i].y > 105) {
-                    if (state.activeId === state.words[i].id)
-                        state.activeId = null;
+                    if (state.activeId === state.words[i].id) state.activeId = null;
                     state.words.splice(i, 1);
                     lost++;
                 }
@@ -214,11 +181,7 @@ export function useSurvivalGame({
                     const n = l - lost;
                     if (n <= 0 && !isGameOverRef.current) {
                         isGameOverRef.current = true;
-                        onSaveScore(
-                            dropScore.current,
-                            localName,
-                            activeModeKey
-                        );
+                        onSaveScore(dropScore.current, localName, activeModeKey);
                         setPhase("gameover");
                     }
                     return n;
@@ -228,10 +191,9 @@ export function useSurvivalGame({
             }
 
             setDropTick((t) => t + 1);
-            if (!isGameOverRef.current)
-                rafRef.current = requestAnimationFrame(updateDropGame);
+            if (!isGameOverRef.current) rafRef.current = requestAnimationFrame(updateDropGame);
         },
-        [dataset, localName, activeModeKey, onSaveScore]
+        [dataset, localName, activeModeKey, onSaveScore],
     );
 
     useEffect(() => {
@@ -259,17 +221,13 @@ export function useSurvivalGame({
                 const target = state.words.find((w) => w.id === state.activeId);
                 if (target) {
                     const newTyped = target.typed + inputChar;
-                    const still = target.validOptions.filter((o) =>
-                        o.startsWith(newTyped)
-                    );
+                    const still = target.validOptions.filter((o) => o.startsWith(newTyped));
                     if (still.length > 0) {
                         target.typed = newTyped;
                         target.validOptions = still;
                         hit = true;
                         if (still.some((o) => o === newTyped)) {
-                            state.words = state.words.filter(
-                                (w) => w.id !== target.id
-                            );
+                            state.words = state.words.filter((w) => w.id !== target.id);
                             state.activeId = null;
                             dropScore.current += 1;
                             engine.setStatus("correct");
@@ -279,23 +237,19 @@ export function useSurvivalGame({
                 }
             } else {
                 const possible = state.words.filter(
-                    (w) =>
-                        w.y > 0 &&
-                        w.validOptions.some((o) => o.startsWith(inputChar))
+                    (w) => w.y > 0 && w.validOptions.some((o) => o.startsWith(inputChar)),
                 );
                 if (possible.length > 0) {
                     possible.sort((a, b) => b.y - a.y);
                     const target = possible[0];
                     target.typed = inputChar;
                     target.validOptions = target.validOptions.filter((o) =>
-                        o.startsWith(inputChar)
+                        o.startsWith(inputChar),
                     );
                     state.activeId = target.id;
                     hit = true;
                     if (target.validOptions.some((o) => o === inputChar)) {
-                        state.words = state.words.filter(
-                            (w) => w.id !== target.id
-                        );
+                        state.words = state.words.filter((w) => w.id !== target.id);
                         state.activeId = null;
                         dropScore.current += 1;
                         playAudio(target.char);
@@ -310,7 +264,7 @@ export function useSurvivalGame({
             }
             setDropTick((t) => t + 1);
         },
-        [engine]
+        [engine],
     );
 
     return {

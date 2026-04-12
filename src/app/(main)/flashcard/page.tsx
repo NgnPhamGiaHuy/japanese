@@ -2,12 +2,14 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { Plus, Trash2, Gamepad2, Play, Zap } from "lucide-react";
-import { useLessons } from "@/features/flashcard/hooks/useLessons";
+import { Gamepad2, Play, Plus, Trash2, Zap } from "lucide-react";
+
 import { LessonBuilder } from "@/features/flashcard/components";
+import { useLessons } from "@/features/flashcard/hooks/useLessons";
+import { ScreenHeader } from "@/shared/components/layout";
 import { Button } from "@/shared/components/ui";
-import { BottomNav, ScreenHeader } from "@/shared/components/layout";
-import { SPACING, CARD_BASE } from "@/shared/constants";
+import { CARD_BASE, SPACING } from "@/shared/constants";
+
 import type { Lesson } from "@/features/flashcard/types/flashcard.types";
 
 export default function FlashcardIndexPage() {
@@ -37,23 +39,21 @@ export default function FlashcardIndexPage() {
                         variant="primary"
                         color="purple"
                         onClick={() => setShowBuilder(true)}
-                        className="!p-2 -mr-2 shadow-none"
+                        className="-mr-2 !p-2 shadow-none"
                     >
                         <Plus size={20} strokeWidth={3} />
                     </Button>
                 }
             />
 
-            <div className={`${SPACING.pagePadding} max-w-2xl mx-auto pt-6`}>
+            <div className={`${SPACING.pagePadding} mx-auto max-w-2xl pt-6`}>
                 {lessons.length === 0 ? (
-                    <div className="text-center py-20">
-                        <div className="w-24 h-24 bg-[#ce82ff] text-white rounded-[2rem] flex items-center justify-center mb-6 shadow-sm border-b-8 border-[#b65ce8] mx-auto -rotate-6">
+                    <div className="py-20 text-center">
+                        <div className="mx-auto mb-6 flex h-24 w-24 -rotate-6 items-center justify-center rounded-[2rem] border-b-8 border-[#b65ce8] bg-[#ce82ff] text-white shadow-sm">
                             <Play size={48} strokeWidth={3} />
                         </div>
-                        <h2 className="text-2xl font-black text-[#3c3c3c] mb-2">
-                            No decks yet
-                        </h2>
-                        <p className="text-[#afafaf] font-bold mb-8">
+                        <h2 className="mb-2 text-2xl font-black text-[#3c3c3c]">No decks yet</h2>
+                        <p className="mb-8 font-bold text-[#afafaf]">
                             Create your first vocabulary deck!
                         </p>
                         <Button
@@ -61,7 +61,7 @@ export default function FlashcardIndexPage() {
                             color="purple"
                             onClick={() => setShowBuilder(true)}
                             icon={Plus}
-                            className="mx-auto text-xl py-5 px-8"
+                            className="mx-auto px-8 py-5 text-xl"
                         >
                             Create Deck
                         </Button>
@@ -73,60 +73,48 @@ export default function FlashcardIndexPage() {
                                 key={lesson.id}
                                 lesson={lesson}
                                 onDelete={() => {
-                                    if (confirm("Delete this deck?"))
-                                        deleteLesson(lesson.id);
+                                    if (confirm("Delete this deck?")) deleteLesson(lesson.id);
                                 }}
                             />
                         ))}
                     </div>
                 )}
             </div>
-            <BottomNav />
         </div>
     );
 }
 
-function DeckCard({
-    lesson,
-    onDelete,
-}: {
-    lesson: Lesson;
-    onDelete: () => void;
-}) {
+function DeckCard({ lesson, onDelete }: { lesson: Lesson; onDelete: () => void }) {
     return (
         <div
-            className={`${CARD_BASE} hover:-translate-y-0.5 hover:shadow-md transition-all ${SPACING.cardPadding}`}
+            className={`${CARD_BASE} transition-all hover:-translate-y-0.5 hover:shadow-md ${SPACING.cardPadding}`}
         >
-            <div className="flex justify-between items-start mb-4">
+            <div className="mb-4 flex items-start justify-between">
                 <div className="flex-1 pr-4">
-                    <h3 className="font-black text-xl text-[#3c3c3c]">
-                        {lesson.title}
-                    </h3>
+                    <h3 className="text-xl font-black text-[#3c3c3c]">{lesson.title}</h3>
                     {lesson.description && (
-                        <p className="text-sm text-[#afafaf] font-bold mt-1 line-clamp-2">
+                        <p className="mt-1 line-clamp-2 text-sm font-bold text-[#afafaf]">
                             {lesson.description}
                         </p>
                     )}
-                    <div className="flex flex-wrap gap-2 mt-2">
+                    <div className="mt-2 flex flex-wrap gap-2">
                         {lesson.tags.map((tag) => (
                             <span
                                 key={tag}
-                                className="text-[10px] font-black text-[#ce82ff] bg-[#faeaff] px-2 py-1 rounded-lg uppercase tracking-wider"
+                                className="rounded-lg bg-[#faeaff] px-2 py-1 text-[10px] font-black tracking-wider text-[#ce82ff] uppercase"
                             >
                                 {tag}
                             </span>
                         ))}
                     </div>
                 </div>
-                <div className="flex flex-col items-center shrink-0">
-                    <div className="w-14 h-14 bg-[#faeaff] rounded-2xl flex items-center justify-center mb-1">
+                <div className="flex shrink-0 flex-col items-center">
+                    <div className="mb-1 flex h-14 w-14 items-center justify-center rounded-2xl bg-[#faeaff]">
                         <span className="text-2xl font-black text-[#ce82ff]">
                             {lesson.cards.length}
                         </span>
                     </div>
-                    <span className="text-[9px] font-black text-[#afafaf] uppercase">
-                        cards
-                    </span>
+                    <span className="text-[9px] font-black text-[#afafaf] uppercase">cards</span>
                 </div>
             </div>
             <div className="flex gap-2">
@@ -162,7 +150,7 @@ function DeckCard({
                 </Link>
                 <button
                     onClick={onDelete}
-                    className="p-3 text-gray-300 hover:text-[#ea2b2b] transition-colors rounded-xl hover:bg-[#ffdfe0]"
+                    className="rounded-xl p-3 text-gray-300 transition-colors hover:bg-[#ffdfe0] hover:text-[#ea2b2b]"
                 >
                     <Trash2 size={20} strokeWidth={2.5} />
                 </button>
