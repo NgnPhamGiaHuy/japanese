@@ -2,12 +2,26 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 
-import { playAudio } from "@/shared/utils/audio";
+import { comboMultiplier } from "@/features/game/logic/combo";
 import { getValidRomaji } from "@/shared/utils/romaji";
 
 import { useQuizEngine } from "./useQuizEngine";
 
 import type { ChallengeMode, DropWord, KanaChar, SurvivalPhase } from "../types/kana.types";
+
+/** Time Attack: seconds removed on each wrong answer. */
+export const TIME_ATTACK_WRONG_PENALTY_SEC = 10;
+
+/**
+ * Max seconds granted per correct — must stay **below** {@link TIME_ATTACK_WRONG_PENALTY_SEC}
+ * so mistakes drain the clock and runs always end.
+ */
+export const TIME_ATTACK_MAX_STREAK_BONUS_SEC = 2;
+
+/** Bonus after a correct answer (uses streak *after* this hit). Capped under wrong penalty. */
+function timeAttackStreakBonusSec(streakAfterCorrect: number): number {
+    return Math.min(TIME_ATTACK_MAX_STREAK_BONUS_SEC, 1 + streakAfterCorrect);
+}
 
 interface UseSurvivalGameProps {
     dataset: KanaChar[];
@@ -25,11 +39,27 @@ export function useSurvivalGame({ dataset, alphabet, onSaveScore }: UseSurvivalG
     const [errorFlash, setErrorFlash] = useState(false);
     const [lastPoints, setLastPoints] = useState(0);
     const [pointsAnimKey, setPointsAnimKey] = useState(0);
+    const [timeAttackPeak, setTimeAttackPeak] = useState(0);
 
     const isGameOverRef = useRef(false);
-    const scoreRef = useRef(0);
+    const challengeModeRef = useRef(challengeMode);
+    useEffect(() => {
+        challengeModeRef.current = challengeMode;
+    }, [challengeMode]);
 
-    const engine = useQuizEngine(dataset);
+    const onCorrectCombo = useCallback((info: { points: number; streak: number }) => {
+        setLastPoints(info.points);
+        setPointsAnimKey(Date.now());
+        if (challengeModeRef.current !== "time") return;
+        const bonus = timeAttackStreakBonusSec(info.streak);
+        setTimeLeft((t) => {
+            const next = t + bonus;
+            setTimeAttackPeak((p) => Math.max(p, next));
+            return next;
+        });
+    }, []);
+
+    const engine = useQuizEngine(dataset, { comboScoring: true, onCorrectCombo });
 
     const activeModeKey =
         challengeMode === "infinity"
@@ -70,22 +100,25 @@ export function useSurvivalGame({ dataset, alphabet, onSaveScore }: UseSurvivalG
         setErrorFlash(false);
         setLastPoints(0);
         isGameOverRef.current = false;
-        scoreRef.current = 0;
-        setTimeLeft(challengeMode === "time" ? timeMinutes * 60 : 0);
+        dropScore.current = 0;
+        dropStreak.current = 0;
+        if (challengeMode === "time") {
+            const initial = timeMinutes * 60;
+            setTimeLeft(initial);
+            setTimeAttackPeak(initial);
+        } else {
+            setTimeLeft(0);
+        }
         engine.generateQuestion();
         setPhase("playing");
     }, [challengeMode, timeMinutes, engine]);
 
-    const onCorrectAnswer = useCallback(() => {
-        const multiplier = Math.floor(engine.streak / 5) + 1;
-        setLastPoints(multiplier);
-        setPointsAnimKey(Date.now());
-    }, [engine.streak]);
-
     const handleAnswer = useCallback(
         (isCorrect: boolean) => {
-            if (isCorrect) onCorrectAnswer();
-            else if (challengeMode === "infinity") {
+            if (!isCorrect && challengeMode === "time") {
+                setTimeLeft((t) => Math.max(0, t - TIME_ATTACK_WRONG_PENALTY_SEC));
+            }
+            if (!isCorrect && challengeMode === "infinity") {
                 const newLives = lives - 1;
                 setLives(newLives);
                 if (newLives <= 0 && !isGameOverRef.current) {
@@ -99,7 +132,7 @@ export function useSurvivalGame({ dataset, alphabet, onSaveScore }: UseSurvivalG
                 if (!isGameOverRef.current) engine.generateQuestion();
             });
         },
-        [challengeMode, lives, engine, localName, activeModeKey, onSaveScore, onCorrectAnswer],
+        [challengeMode, lives, engine, localName, activeModeKey, onSaveScore],
     );
 
     // Drop game state
@@ -113,6 +146,7 @@ export function useSurvivalGame({ dataset, alphabet, onSaveScore }: UseSurvivalG
     const [dropTick, setDropTick] = useState(0);
     const rafRef = useRef<number>(0);
     const dropScore = useRef(0);
+    const dropStreak = useRef(0);
 
     const updateDropGame = useCallback(
         (time: number) => {
@@ -177,6 +211,7 @@ export function useSurvivalGame({ dataset, alphabet, onSaveScore }: UseSurvivalG
             }
 
             if (lost > 0) {
+                dropStreak.current = 0;
                 setLives((l) => {
                     const n = l - lost;
                     if (n <= 0 && !isGameOverRef.current) {
@@ -206,6 +241,7 @@ export function useSurvivalGame({ dataset, alphabet, onSaveScore }: UseSurvivalG
                 lastSpawn: 0,
             };
             dropScore.current = 0;
+            dropStreak.current = 0;
             rafRef.current = requestAnimationFrame(updateDropGame);
         }
         return () => cancelAnimationFrame(rafRef.current);
@@ -229,9 +265,12 @@ export function useSurvivalGame({ dataset, alphabet, onSaveScore }: UseSurvivalG
                         if (still.some((o) => o === newTyped)) {
                             state.words = state.words.filter((w) => w.id !== target.id);
                             state.activeId = null;
-                            dropScore.current += 1;
+                            dropStreak.current += 1;
+                            const pts = comboMultiplier(dropStreak.current);
+                            dropScore.current += pts;
+                            setLastPoints(pts);
+                            setPointsAnimKey(Date.now());
                             engine.setStatus("correct");
-                            playAudio(target.char);
                         }
                     }
                 }
@@ -251,13 +290,17 @@ export function useSurvivalGame({ dataset, alphabet, onSaveScore }: UseSurvivalG
                     if (target.validOptions.some((o) => o === inputChar)) {
                         state.words = state.words.filter((w) => w.id !== target.id);
                         state.activeId = null;
-                        dropScore.current += 1;
-                        playAudio(target.char);
+                        dropStreak.current += 1;
+                        const pts = comboMultiplier(dropStreak.current);
+                        dropScore.current += pts;
+                        setLastPoints(pts);
+                        setPointsAnimKey(Date.now());
                     }
                 }
             }
 
             if (!hit) {
+                dropStreak.current = 0;
                 engine.setStatus("wrong");
                 setErrorFlash(true);
                 setTimeout(() => setErrorFlash(false), 200);
@@ -275,6 +318,7 @@ export function useSurvivalGame({ dataset, alphabet, onSaveScore }: UseSurvivalG
         timeMinutes,
         setTimeMinutes,
         timeLeft,
+        timeAttackPeak,
         lives,
         localName,
         setLocalName,
@@ -284,6 +328,8 @@ export function useSurvivalGame({ dataset, alphabet, onSaveScore }: UseSurvivalG
         activeModeKey,
         engine,
         dropState,
+        dropScore,
+        dropStreak,
         dropTick,
         startGame,
         handleAnswer,

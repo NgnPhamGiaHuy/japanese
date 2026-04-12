@@ -1,18 +1,40 @@
 "use client";
 
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
+import { comboMultiplier } from "@/features/game/logic/combo";
 import { VISUAL_GROUPS } from "@/features/kana/data/visualGroups";
 import { shuffleArray } from "@/shared/utils/array";
 import { playAudio } from "@/shared/utils/audio";
 import { getCharStats, recordCharStat } from "@/shared/utils/stats";
 
+import { allowAudio } from "../utils/speechPolicy";
+
 import type { KanaChar, QuestionType } from "../types/kana.types";
 
 export type AnswerStatus = "idle" | "correct" | "wrong";
 
-/** Unified quiz engine — used by both QuizScreen and SurvivalScreen (non-drop modes) */
-export function useQuizEngine(dataset: KanaChar[]) {
+export interface QuizEngineOptions {
+    /** When true, each correct answer adds `comboMultiplier(streak)` points instead of 1. */
+    comboScoring?: boolean;
+    /** Fires after a correct answer with points actually added and new streak count. */
+    onCorrectCombo?: (info: { points: number; streak: number }) => void;
+}
+
+/**
+ * Unified quiz engine — used by Quiz and Survival (non-drop modes).
+ *
+ * Wrong-answer reinforcement: a missed character is re-inserted near the back
+ * of the deck so the learner encounters it again before the session ends, without
+ * seeing it immediately.
+ */
+export function useQuizEngine(dataset: KanaChar[], opts?: QuizEngineOptions) {
+    const comboScoring = opts?.comboScoring ?? false;
+    const onCorrectComboRef = useRef(opts?.onCorrectCombo);
+    useEffect(() => {
+        onCorrectComboRef.current = opts?.onCorrectCombo;
+    }, [opts?.onCorrectCombo]);
+
     const [question, setQuestion] = useState<KanaChar | null>(null);
     const [questionType, setQuestionType] = useState<QuestionType>("read");
     const [options, setOptions] = useState<KanaChar[]>([]);
@@ -20,6 +42,8 @@ export function useQuizEngine(dataset: KanaChar[]) {
     const [score, setScore] = useState(0);
     const [streak, setStreak] = useState(0);
     const deckRef = useRef<KanaChar[]>([]);
+    /** Mirrors `streak` for synchronous combo math inside `processAnswer`. */
+    const streakRef = useRef(0);
 
     const buildDistractors = useCallback(
         (target: KanaChar): KanaChar[] => {
@@ -72,8 +96,6 @@ export function useQuizEngine(dataset: KanaChar[]) {
             setQuestionType(selectedType);
             setOptions(allOptions);
             setStatus("idle");
-
-            if (selectedType === "listen") setTimeout(() => playAudio(target.char), 300);
         },
         [dataset, buildDistractors],
     );
@@ -100,19 +122,33 @@ export function useQuizEngine(dataset: KanaChar[]) {
             if (question) recordCharStat(question.char, isCorrect);
 
             if (isCorrect) {
-                setScore((s) => s + 1);
-                setStreak((s) => s + 1);
-                if (question) playAudio(question.char);
+                const nextStreak = streakRef.current + 1;
+                streakRef.current = nextStreak;
+                setStreak(nextStreak);
+                const pts = comboScoring ? comboMultiplier(nextStreak) : 1;
+                setScore((s) => s + pts);
+                onCorrectComboRef.current?.({ points: pts, streak: nextStreak });
             } else {
+                streakRef.current = 0;
                 setStreak(0);
+                if (question) {
+                    const deck = deckRef.current;
+                    const insertAt = Math.max(0, deck.length - 4);
+                    deck.splice(insertAt, 0, question);
+                }
+            }
+
+            if (question && allowAudio(questionType, "feedback")) {
+                playAudio(question.char);
             }
 
             setTimeout(onAdvance, isCorrect ? 800 : 1500);
         },
-        [question],
+        [question, questionType, comboScoring],
     );
 
     const resetEngine = useCallback(() => {
+        streakRef.current = 0;
         setScore(0);
         setStreak(0);
         setStatus("idle");

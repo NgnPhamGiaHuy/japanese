@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { Children } from "react";
 import { ArrowLeft } from "lucide-react";
 
 import type { LucideIcon } from "lucide-react";
@@ -52,15 +53,44 @@ export const ScreenHeaderRow = ({
     children,
     className,
     variant = "light",
+    /**
+     * When true (expects exactly 3 children: left | center | right), left and right
+     * use equal `flex-1` rails and the middle slot is pinned to the true horizontal
+     * center of the bar — e.g. lives stay centered even when the right HUD is wider
+     * than the close button.
+     */
+    symmetricSidebars = false,
 }: {
     children: React.ReactNode;
     className?: string;
     variant?: "light" | "dark";
+    symmetricSidebars?: boolean;
 }) => {
     const bar =
         variant === "dark"
             ? "sticky top-0 z-20 border-b border-white/10 bg-[#0a0a1a]/90 backdrop-blur-md"
             : SCREEN_HEADER_BAR_CLASS;
+
+    const slots = Children.toArray(children);
+    if (symmetricSidebars && slots.length === 3) {
+        const [left, center, right] = slots;
+        return (
+            <header
+                className={`${bar} relative flex items-center gap-2 px-4 py-3 ${className ?? ""}`}
+            >
+                <div className="relative z-10 flex min-w-0 flex-1 basis-0 items-center justify-start">
+                    {left}
+                </div>
+                <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+                    <div className="pointer-events-auto">{center}</div>
+                </div>
+                <div className="relative z-10 flex min-w-0 flex-1 basis-0 items-center justify-end">
+                    {right}
+                </div>
+            </header>
+        );
+    }
+
     return (
         <header
             className={`${bar} flex items-center justify-between gap-2 px-4 py-3 ${className ?? ""}`}

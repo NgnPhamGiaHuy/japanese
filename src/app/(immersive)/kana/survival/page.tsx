@@ -4,9 +4,18 @@ import Link from "next/link";
 import { useEffect, useRef } from "react";
 import { Clock, Flame, Sword, Trophy, X } from "lucide-react";
 
-import { AnswerFeedback, Leaderboard, LivesDisplay } from "@/features/game/components";
+import {
+    AnswerFeedback,
+    GameStreakScoreStack,
+    Leaderboard,
+    LivesDisplay,
+} from "@/features/game/components";
 import { useKanaDataset } from "@/features/kana/hooks/useKanaDataset";
-import { useSurvivalGame } from "@/features/kana/hooks/useSurvivalGame";
+import {
+    TIME_ATTACK_MAX_STREAK_BONUS_SEC,
+    TIME_ATTACK_WRONG_PENALTY_SEC,
+    useSurvivalGame,
+} from "@/features/kana/hooks/useSurvivalGame";
 import { useBestScores } from "@/features/user/hooks/useBestScores";
 import { ScreenHeader, ScreenHeaderBackButton, ScreenHeaderRow } from "@/shared/components/layout";
 import { Button } from "@/shared/components/ui";
@@ -84,7 +93,7 @@ export default function KanaSurvivalPage() {
                                                 {mode === "infinity"
                                                     ? "Survive as long as possible"
                                                     : mode === "time"
-                                                      ? "Score as much as possible in time"
+                                                      ? "Streaks add time — wrong answers cost seconds"
                                                       : "Type falling characters"}
                                             </div>
                                         </div>
@@ -114,6 +123,17 @@ export default function KanaSurvivalPage() {
                                         </button>
                                     ))}
                                 </div>
+                                <p className="mt-4 text-center text-xs leading-relaxed font-bold text-[#afafaf]">
+                                    Streaks add up to{" "}
+                                    <span className="text-[#3c3c3c]">
+                                        +{TIME_ATTACK_MAX_STREAK_BONUS_SEC}s
+                                    </span>{" "}
+                                    per correct — always less than a wrong answer (
+                                    <span className="text-[#3c3c3c]">
+                                        −{TIME_ATTACK_WRONG_PENALTY_SEC}s
+                                    </span>
+                                    ), so the clock eventually runs out.
+                                </p>
                             </div>
                         )}
 
@@ -146,6 +166,8 @@ export default function KanaSurvivalPage() {
 
     // ---- GAME OVER ----
     if (game.phase === "gameover") {
+        const finalScore =
+            game.challengeMode === "drop" ? game.dropScore.current : game.engine.score;
         return (
             <div className="fixed inset-0 z-50 flex flex-col overflow-y-auto bg-[#F7F7F8]">
                 <div className="mx-auto flex w-full max-w-md flex-col items-center px-4 py-8">
@@ -156,7 +178,7 @@ export default function KanaSurvivalPage() {
                     <p className="mb-1 text-xl font-bold text-[#afafaf]">
                         Final Score:{" "}
                         <span className="mx-1 text-3xl font-black text-[#ff9600]">
-                            {game.engine.score}
+                            {finalScore}
                         </span>
                     </p>
                     <p className="mb-6 text-sm font-bold text-[#afafaf]">
@@ -198,30 +220,54 @@ export default function KanaSurvivalPage() {
 
     // ---- PLAYING — INFINITY / TIME ----
     if (game.challengeMode !== "drop") {
-        const { question, options, status } = game.engine;
+        const { question, questionType, options, status } = game.engine;
         return (
             <div className="fixed inset-0 z-50 flex flex-col bg-[#F7F7F8]">
-                <ScreenHeaderRow className="shrink-0">
+                <ScreenHeaderRow className="shrink-0" symmetricSidebars>
                     <ScreenHeaderBackButton
                         onClick={() => game.setPhase("setup")}
                         icon={X}
                         aria-label="Back to survival menu"
                     />
-                    <div className="flex min-w-0 flex-1 justify-center px-2">
-                        <LivesDisplay lives={game.challengeMode === "infinity" ? game.lives : 3} />
-                    </div>
-                    <div className="flex min-w-[5rem] shrink-0 items-center justify-end gap-3">
-                        {game.challengeMode === "time" && (
-                            <span
-                                className={`text-2xl font-black ${game.timeLeft <= 5 ? "animate-pulse text-[#ea2b2b]" : "text-[#ff9600]"}`}
+                    {game.challengeMode === "time" ? (
+                        <div className="flex w-full max-w-[min(100%,16rem)] flex-col items-center gap-1.5 md:max-w-xs">
+                            <div
+                                className="h-2.5 w-full overflow-hidden rounded-full bg-gray-200/90"
+                                role="progressbar"
+                                aria-valuenow={game.timeLeft}
+                                aria-valuemin={0}
+                                aria-valuemax={Math.max(game.timeAttackPeak, 1)}
+                                aria-label="Time remaining"
                             >
-                                {formatTime(game.timeLeft)}
-                            </span>
-                        )}
-                        <span className="text-2xl font-black text-[#ff9600]">
-                            {game.engine.score}
-                        </span>
-                    </div>
+                                <div
+                                    className={`h-full rounded-full transition-[width] duration-1000 ease-linear ${game.timeLeft <= 10 ? "bg-[#ea2b2b]" : "bg-[#ff9600]"}`}
+                                    style={{
+                                        width: `${Math.min(100, (game.timeLeft / Math.max(game.timeAttackPeak, 1)) * 100)}%`,
+                                    }}
+                                />
+                            </div>
+                            <p className="text-[10px] font-bold tracking-wide text-[#afafaf] uppercase md:text-xs">
+                                Streak adds time
+                            </p>
+                        </div>
+                    ) : (
+                        <LivesDisplay lives={game.lives} />
+                    )}
+                    <GameStreakScoreStack
+                        startSlot={
+                            game.challengeMode === "time" ? (
+                                <span
+                                    className={`block w-full text-right text-lg font-semibold tracking-tight tabular-nums md:text-xl ${game.timeLeft <= 5 ? "animate-pulse text-[#ea2b2b]" : "text-[#ff9600]"}`}
+                                >
+                                    {formatTime(game.timeLeft)}
+                                </span>
+                            ) : undefined
+                        }
+                        streak={game.engine.streak}
+                        score={game.engine.score}
+                        lastPoints={game.lastPoints}
+                        pointsAnimKey={game.pointsAnimKey}
+                    />
                 </ScreenHeaderRow>
 
                 <div className="hide-scrollbar mx-auto flex min-h-0 w-full max-w-md flex-1 flex-col items-center justify-center overflow-y-auto p-4">
@@ -266,6 +312,7 @@ export default function KanaSurvivalPage() {
                             <AnswerFeedback
                                 status={status}
                                 question={question}
+                                questionType={questionType}
                                 primaryBg="bg-[#ff9600]"
                                 activeFont={activeFont}
                             />
@@ -288,19 +335,21 @@ export default function KanaSurvivalPage() {
             tabIndex={0}
             ref={inputRef}
         >
-            <ScreenHeaderRow variant="dark" className="z-10 shrink-0">
+            <ScreenHeaderRow variant="dark" className="z-10 shrink-0" symmetricSidebars>
                 <ScreenHeaderBackButton
                     onClick={() => game.setPhase("setup")}
                     icon={X}
                     aria-label="Back to survival menu"
                     className="text-white/80 hover:bg-white/10 hover:text-white"
                 />
-                <div className="flex min-w-0 flex-1 justify-center">
-                    <LivesDisplay lives={game.lives} />
-                </div>
-                <div className="flex min-w-[3rem] shrink-0 items-center justify-end">
-                    <span className="text-2xl font-black text-[#ff9600]">{game.engine.score}</span>
-                </div>
+                <LivesDisplay lives={game.lives} />
+                <GameStreakScoreStack
+                    streak={game.dropStreak.current}
+                    score={game.dropScore.current}
+                    lastPoints={game.lastPoints}
+                    pointsAnimKey={game.pointsAnimKey}
+                    scoreClassName="text-4xl font-black tabular-nums leading-none tracking-tight text-[#ffb347] md:text-5xl"
+                />
             </ScreenHeaderRow>
             <div className="relative flex-1">
                 {state.words.map((word) => {

@@ -3,7 +3,12 @@
 import { useCallback, useRef, useState } from "react";
 import { ArrowLeft, Eye, Keyboard, Shuffle, X } from "lucide-react";
 
-import { AnswerFeedback, Leaderboard } from "@/features/game/components";
+import {
+    AnswerFeedback,
+    gameQuizStreakColumnClassName,
+    Leaderboard,
+    StreakComboBadge,
+} from "@/features/game/components";
 import { saveGameResult } from "@/features/game/services/game.service";
 import { useKanaDataset } from "@/features/kana/hooks/useKanaDataset";
 import { useQuizEngine } from "@/features/kana/hooks/useQuizEngine";
@@ -221,7 +226,7 @@ export default function KanaQuizPage() {
     }
 
     // ---- PLAYING ----
-    const { question, options, status, score, streak } = engine;
+    const { question, questionType, options, status, score, streak } = engine;
 
     return (
         <div className="fixed inset-0 z-50 flex flex-col bg-[#F7F7F8]">
@@ -239,13 +244,11 @@ export default function KanaQuizPage() {
                         }}
                     />
                 </div>
-                <div className="flex min-w-[4.5rem] shrink-0 items-center justify-end gap-2 md:gap-3">
-                    {streak >= 3 && (
-                        <span className="animate-bounce text-[10px] font-black text-[#ff9600] md:text-sm">
-                            🔥{streak}
-                        </span>
-                    )}
-                    <span className={`text-[10px] font-black md:text-sm ${themeColor.text}`}>
+                <div className={gameQuizStreakColumnClassName}>
+                    <StreakComboBadge streak={streak} variant="compact" showMultiplier={false} />
+                    <span
+                        className={`text-[10px] font-black tabular-nums md:text-sm ${themeColor.text}`}
+                    >
                         {score}/{TARGET_SCORE}
                     </span>
                 </div>
@@ -315,6 +318,7 @@ export default function KanaQuizPage() {
                     <AnswerFeedback
                         status={status}
                         question={question}
+                        questionType={questionType}
                         primaryBg={themeColor.bg}
                         activeFont={activeFont}
                     />
