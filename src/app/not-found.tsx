@@ -1,4 +1,5 @@
 import Link from "next/link";
+
 import { ArrowLeft, Ghost } from "lucide-react";
 
 export default function NotFoundPage() {

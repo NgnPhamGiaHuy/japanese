@@ -2,16 +2,15 @@
 
 import { useRouter } from "next/navigation";
 
+import { useUserProgress } from "@/features/user/hooks/useUserProgress";
 import { signOut } from "@/features/user/services/auth.service";
 import { ScreenHeader } from "@/shared/components/layout";
 import { SPACING } from "@/shared/constants";
-import { clearCharStats } from "@/shared/utils/stats";
 import { useAppStore } from "@/store/useAppStore";
-import { useKanaStore } from "@/store/useKanaStore";
 
 export default function SettingsPage() {
     const { useHandwriting, globalAutoPlay, toggleHandwriting, toggleAutoPlay } = useAppStore();
-    const { resetProgress } = useKanaStore();
+    const { resetProgress } = useUserProgress();
     const router = useRouter();
 
     const handleSignOut = async () => {
@@ -55,17 +54,16 @@ export default function SettingsPage() {
                             </h3>
                         </div>
                         <DangerRow
-                            label="Reset Kana Progress"
-                            sub="Clear all learned characters"
+                            label="Reset Progress Data"
+                            sub="Clear learned characters and accuracy stats"
                             onClick={() => {
-                                if (confirm("Reset kana progress?")) resetProgress();
-                            }}
-                        />
-                        <DangerRow
-                            label="Reset Character Stats"
-                            sub="Clear accuracy records for smart review"
-                            onClick={() => {
-                                if (confirm("Clear all character stats?")) clearCharStats();
+                                if (
+                                    confirm(
+                                        "Reset all Japanese learning progress and character stats?",
+                                    )
+                                ) {
+                                    resetProgress();
+                                }
                             }}
                         />
                     </div>

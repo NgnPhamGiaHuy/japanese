@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+
 import { BookOpen, Flame, Gamepad2, Trophy } from "lucide-react";
 
 import { useLessons } from "@/features/flashcard/hooks/useLessons";

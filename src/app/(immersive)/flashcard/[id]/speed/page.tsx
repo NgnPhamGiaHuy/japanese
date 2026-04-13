@@ -3,6 +3,7 @@
 import { notFound, useRouter } from "next/navigation";
 import { use, useEffect, useMemo, useRef, useState } from "react";
 import Confetti from "react-confetti";
+
 import { motion } from "framer-motion";
 import { Clock, X, Zap } from "lucide-react";
 

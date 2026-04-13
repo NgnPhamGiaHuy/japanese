@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
+
 import {
     BarChart2,
     Brain,
@@ -17,6 +18,8 @@ import {
 
 import { AlphabetSwitcher } from "@/features/kana/components";
 import { useKanaDataset } from "@/features/kana/hooks/useKanaDataset";
+import { useBestScores } from "@/features/user/hooks/useBestScores";
+import { useUserProgress } from "@/features/user/hooks/useUserProgress";
 import { HANDWRITING_FONT, PRINT_FONT } from "@/shared/constants/fonts";
 import { useAppStore } from "@/store/useAppStore";
 import { useKanaStore } from "@/store/useKanaStore";
@@ -233,12 +236,14 @@ function QuizActionCard({ primary }: { primary: boolean }) {
 
 export default function KanaHubPage() {
     const { dataset, alphabet, setAlphabet } = useKanaDataset();
-    const { learnedChars, bestScores, resetProgress } = useKanaStore();
+    const { userData, resetProgress } = useUserProgress();
+    const { bestScores } = useBestScores();
     const { useHandwriting, globalAutoPlay, toggleHandwriting, toggleAutoPlay } = useAppStore();
 
     const [showSettings, setShowSettings] = useState(false);
     const [showConfirmReset, setShowConfirmReset] = useState(false);
 
+    const learnedChars = userData.learnedChars || [];
     const learnedCount = learnedChars.filter((c) => dataset.some((d) => d.char === c)).length;
     const totalChars = dataset.length;
     const progressPct = Math.min(Math.round((learnedCount / totalChars) * 100), 100);

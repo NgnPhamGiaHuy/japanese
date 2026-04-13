@@ -1,21 +1,25 @@
 "use client";
 
-import { useCallback, useEffect } from "react";
+import { useCallback, useEffect, useState } from "react";
+
 import { collection, onSnapshot } from "firebase/firestore";
 
 import { saveGameResult } from "@/features/game/services/game.service";
 import { APP_ID, db } from "@/lib/firebase";
 import { useAppStore } from "@/store/useAppStore";
-import { useKanaStore } from "@/store/useKanaStore";
 
-/** Syncs personal best scores from Firestore → Zustand and exposes a save function. */
+/** Syncs personal best scores from Firestore */
 export function useBestScores() {
     const { user } = useAppStore();
-    const { bestScores, setBestScores, updateBestScore } = useKanaStore();
+    const [bestScores, setBestScores] = useState<Record<string, number>>({});
 
-    // Real-time listener: keeps Zustand in sync with Firestore personal bests
+    // Real-time listener: keeps state in sync with Firestore personal bests
     useEffect(() => {
-        if (!user) return;
+        if (!user) {
+            setBestScores({});
+            return;
+        }
+
         const ref = collection(db, "artifacts", APP_ID, "users", user.uid, "stats");
         return onSnapshot(ref, (snap) => {
             const scores: Record<string, number> = {};
@@ -24,14 +28,11 @@ export function useBestScores() {
             });
             setBestScores(scores);
         });
-    }, [user, setBestScores]);
+    }, [user]);
 
     /**
      * Save a score for a game mode.
-     *
-     * - Uses Google display name when available, falls back to `playerName`.
-     * - Only writes to Firestore when the new score beats the current best.
-     * - Updates both personal best AND public leaderboard atomically via game.service.
+     * Legacy mode for non-session-based games (like non-time/drop modes if any exist)
      */
     const saveScore = useCallback(
         async (score: number, playerName: string, modeKey: string) => {
@@ -47,14 +48,11 @@ export function useBestScores() {
                     score,
                     currentBest,
                 });
-                if (score > currentBest) {
-                    updateBestScore(modeKey, score);
-                }
             } catch (err) {
                 console.error("[useBestScores] Save error:", err);
             }
         },
-        [user, bestScores, updateBestScore],
+        [user, bestScores],
     );
 
     return { bestScores, saveScore };

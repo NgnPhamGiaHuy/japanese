@@ -1,20 +1,21 @@
 "use client";
 
 import { useEffect, useState } from "react";
+
 import { ChevronRight, Shuffle, Volume2 } from "lucide-react";
 
 import { KanaStrokeAnimation } from "@/features/kana/components";
 import { useKanaDataset } from "@/features/kana/hooks/useKanaDataset";
+import { useUserProgress } from "@/features/user/hooks/useUserProgress";
 import { ScreenHeader } from "@/shared/components/layout";
 import { Button } from "@/shared/components/ui";
 import { HANDWRITING_FONT, PRINT_FONT } from "@/shared/constants/fonts";
 import { playAudio } from "@/shared/utils/audio";
 import { useAppStore } from "@/store/useAppStore";
-import { useKanaStore } from "@/store/useKanaStore";
 
 export default function KanaLearnPage() {
     const { dataset, alphabet, themeColor } = useKanaDataset();
-    const { markLearned } = useKanaStore();
+    const { markLearned } = useUserProgress();
     const { useHandwriting, globalAutoPlay } = useAppStore();
 
     const [currentIndex, setCurrentIndex] = useState(0);

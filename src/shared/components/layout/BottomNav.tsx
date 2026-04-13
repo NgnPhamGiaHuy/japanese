@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+
 import { BookOpen, Gamepad2, Trophy } from "lucide-react";
 
 const NAV_ICON_SIZE = 26;

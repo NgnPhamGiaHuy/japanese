@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+
 import { motion, useAnimation } from "framer-motion";
 
 import { comboMultiplier } from "@/features/game/logic";
@@ -35,11 +36,11 @@ interface StreakComboBadgeProps {
 /**
  * Streak pill is always mounted (fixed slot). Opacity / motion for states — no mount/unmount.
  */
-export function StreakComboBadge({
+const StreakComboBadge = ({
     streak,
     variant = "default",
     showMultiplier = true,
-}: StreakComboBadgeProps) {
+}: StreakComboBadgeProps) => {
     const controls = useAnimation();
     const prevStreak = useRef(streak);
 
@@ -103,7 +104,7 @@ export function StreakComboBadge({
             </motion.div>
         </div>
     );
-}
+};
 
 interface GameStreakScoreStackProps {
     streak: number;
@@ -122,7 +123,7 @@ const DEFAULT_SCORE_CLASS =
 /**
  * Top bar right group: [ Timer | Streak | Score ]. Fixed slots; bonus line always reserves height.
  */
-export function GameStreakScoreStack({
+const GameStreakScoreStack = ({
     streak,
     score,
     variant = "default",
@@ -131,7 +132,7 @@ export function GameStreakScoreStack({
     pointsAnimKey,
     scoreClassName = DEFAULT_SCORE_CLASS,
     startSlot,
-}: GameStreakScoreStackProps) {
+}: GameStreakScoreStackProps) => {
     const showBonus = lastPoints != null && lastPoints > 1;
 
     return (
@@ -171,4 +172,7 @@ export function GameStreakScoreStack({
             </div>
         </div>
     );
-}
+};
+
+export { StreakComboBadge, GameStreakScoreStack };
+export default GameStreakScoreStack;

@@ -2,9 +2,9 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 
+import useGameSession from "@/features/game/hooks/useGameSession";
 import { comboMultiplier } from "@/features/game/logic/combo";
 import { getValidRomaji } from "@/shared/utils/romaji";
-
 import { useQuizEngine } from "./useQuizEngine";
 
 import type { ChallengeMode, DropWord, KanaChar, SurvivalPhase } from "../types/kana.types";
@@ -19,17 +19,26 @@ export const TIME_ATTACK_WRONG_PENALTY_SEC = 10;
 export const TIME_ATTACK_MAX_STREAK_BONUS_SEC = 2;
 
 /** Bonus after a correct answer (uses streak *after* this hit). Capped under wrong penalty. */
-function timeAttackStreakBonusSec(streakAfterCorrect: number): number {
-    return Math.min(TIME_ATTACK_MAX_STREAK_BONUS_SEC, 1 + streakAfterCorrect);
-}
+const timeAttackStreakBonusSec = (streakAfterCorrect: number): number =>
+    Math.min(TIME_ATTACK_MAX_STREAK_BONUS_SEC, 1 + streakAfterCorrect);
 
 interface UseSurvivalGameProps {
     dataset: KanaChar[];
     alphabet: string;
+    userId: string | null;
+    userName: string;
+    currentBest?: number;
     onSaveScore: (score: number, name: string, modeKey: string) => void;
 }
 
-export function useSurvivalGame({ dataset, alphabet, onSaveScore }: UseSurvivalGameProps) {
+export const useSurvivalGame = ({
+    dataset,
+    alphabet,
+    userId,
+    userName,
+    currentBest = 0,
+    onSaveScore,
+}: UseSurvivalGameProps) => {
     const [phase, setPhase] = useState<SurvivalPhase>("setup");
     const [challengeMode, setChallengeMode] = useState<ChallengeMode>("infinity");
     const [timeMinutes, setTimeMinutes] = useState(1);
@@ -47,6 +56,21 @@ export function useSurvivalGame({ dataset, alphabet, onSaveScore }: UseSurvivalG
         challengeModeRef.current = challengeMode;
     }, [challengeMode]);
 
+    const activeModeKey =
+        challengeMode === "infinity"
+            ? `infinity_${alphabet}`
+            : challengeMode === "time"
+              ? `time_${timeMinutes}_${alphabet}`
+              : `drop_${alphabet}`;
+
+    // ── Firebase session ─────────────────────────────────────────────────────
+    const { startSession, syncScore, endSession } = useGameSession({
+        userId,
+        userName: userName || localName || "Player",
+        gameMode: activeModeKey,
+        currentBest,
+    });
+
     const onCorrectCombo = useCallback((info: { points: number; streak: number }) => {
         setLastPoints(info.points);
         setPointsAnimKey(Date.now());
@@ -61,14 +85,7 @@ export function useSurvivalGame({ dataset, alphabet, onSaveScore }: UseSurvivalG
 
     const engine = useQuizEngine(dataset, { comboScoring: true, onCorrectCombo });
 
-    const activeModeKey =
-        challengeMode === "infinity"
-            ? `infinity_${alphabet}`
-            : challengeMode === "time"
-              ? `time_${timeMinutes}_${alphabet}`
-              : `drop_${alphabet}`;
-
-    // Time-attack countdown
+    // ── Time-attack countdown ─────────────────────────────────────────────────
     useEffect(() => {
         if (
             phase !== "playing" ||
@@ -81,6 +98,7 @@ export function useSurvivalGame({ dataset, alphabet, onSaveScore }: UseSurvivalG
         return () => clearInterval(timer);
     }, [phase, challengeMode, timeLeft]);
 
+    // ── Time-attack expiry → game over ────────────────────────────────────────
     useEffect(() => {
         if (
             phase === "playing" &&
@@ -89,11 +107,31 @@ export function useSurvivalGame({ dataset, alphabet, onSaveScore }: UseSurvivalG
             !isGameOverRef.current
         ) {
             isGameOverRef.current = true;
-            onSaveScore(engine.score, localName, activeModeKey);
+            const finalScore = engine.score;
+            onSaveScore(finalScore, userName || localName, activeModeKey);
+            endSession(finalScore);
             setPhase("gameover");
         }
-    }, [timeLeft, phase, challengeMode, activeModeKey, engine.score, localName, onSaveScore]);
+    }, [
+        timeLeft,
+        phase,
+        challengeMode,
+        activeModeKey,
+        engine.score,
+        userName,
+        localName,
+        onSaveScore,
+        endSession,
+    ]);
 
+    // ── Live score sync → Firestore (debounced via useGameSession) ────────────
+    useEffect(() => {
+        if (phase === "playing") {
+            syncScore(engine.score);
+        }
+    }, [engine.score, phase, syncScore]);
+
+    // ── Game start ───────────────────────────────────────────────────────────
     const startGame = useCallback(() => {
         engine.resetEngine();
         setLives(3);
@@ -111,8 +149,11 @@ export function useSurvivalGame({ dataset, alphabet, onSaveScore }: UseSurvivalG
         }
         engine.generateQuestion();
         setPhase("playing");
-    }, [challengeMode, timeMinutes, engine]);
+        // Create Firebase session asynchronously
+        startSession();
+    }, [challengeMode, timeMinutes, engine, startSession]);
 
+    // ── Answer handling ───────────────────────────────────────────────────────
     const handleAnswer = useCallback(
         (isCorrect: boolean) => {
             if (!isCorrect && challengeMode === "time") {
@@ -123,7 +164,9 @@ export function useSurvivalGame({ dataset, alphabet, onSaveScore }: UseSurvivalG
                 setLives(newLives);
                 if (newLives <= 0 && !isGameOverRef.current) {
                     isGameOverRef.current = true;
-                    onSaveScore(engine.score, localName, activeModeKey);
+                    const finalScore = engine.score;
+                    onSaveScore(finalScore, userName || localName, activeModeKey);
+                    endSession(finalScore);
                     setPhase("gameover");
                     return;
                 }
@@ -132,10 +175,10 @@ export function useSurvivalGame({ dataset, alphabet, onSaveScore }: UseSurvivalG
                 if (!isGameOverRef.current) engine.generateQuestion();
             });
         },
-        [challengeMode, lives, engine, localName, activeModeKey, onSaveScore],
+        [challengeMode, lives, engine, userName, localName, activeModeKey, onSaveScore, endSession],
     );
 
-    // Drop game state
+    // ── Drop game state ───────────────────────────────────────────────────────
     const dropState = useRef({
         words: [] as DropWord[],
         activeId: null as string | null,
@@ -216,7 +259,9 @@ export function useSurvivalGame({ dataset, alphabet, onSaveScore }: UseSurvivalG
                     const n = l - lost;
                     if (n <= 0 && !isGameOverRef.current) {
                         isGameOverRef.current = true;
-                        onSaveScore(dropScore.current, localName, activeModeKey);
+                        const finalScore = dropScore.current;
+                        onSaveScore(finalScore, userName || localName, activeModeKey);
+                        endSession(finalScore);
                         setPhase("gameover");
                     }
                     return n;
@@ -228,7 +273,7 @@ export function useSurvivalGame({ dataset, alphabet, onSaveScore }: UseSurvivalG
             setDropTick((t) => t + 1);
             if (!isGameOverRef.current) rafRef.current = requestAnimationFrame(updateDropGame);
         },
-        [dataset, localName, activeModeKey, onSaveScore],
+        [dataset, userName, localName, activeModeKey, onSaveScore, endSession],
     );
 
     useEffect(() => {
@@ -309,6 +354,12 @@ export function useSurvivalGame({ dataset, alphabet, onSaveScore }: UseSurvivalG
         },
         [engine],
     );
+    useEffect(() => {
+        if (phase === "playing" && challengeMode === "drop") {
+            syncScore(dropScore.current);
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [dropTick, phase, challengeMode, syncScore]);
 
     return {
         phase,
@@ -335,4 +386,4 @@ export function useSurvivalGame({ dataset, alphabet, onSaveScore }: UseSurvivalG
         handleAnswer,
         handleDropTyping,
     };
-}
+};

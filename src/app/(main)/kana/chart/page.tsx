@@ -1,6 +1,7 @@
 "use client";
 
 import { Fragment, useMemo, useState } from "react";
+
 import { motion } from "framer-motion";
 import { Eye, EyeOff } from "lucide-react";
 
@@ -8,6 +9,7 @@ import { buildChartBlocks, CHART_SECTION_TITLES } from "@/features/kana/data/cha
 import { HIRAGANA_DATA } from "@/features/kana/data/hiragana";
 import { KATAKANA_DATA } from "@/features/kana/data/katakana";
 import { useKanaDataset } from "@/features/kana/hooks/useKanaDataset";
+import { useUserProgress } from "@/features/user/hooks/useUserProgress";
 import { ScreenHeader } from "@/shared/components/layout";
 import { PRINT_FONT } from "@/shared/constants/fonts";
 import { playAudio } from "@/shared/utils/audio";
@@ -120,10 +122,11 @@ function ChartBlockGrid({
 
 export default function KanaChartPage() {
     const [showRomaji, setShowRomaji] = useState(true);
-    const { learnedChars, alphabet } = useKanaStore();
+    const { alphabet } = useKanaStore();
+    const { userData } = useUserProgress();
     const { themeColor } = useKanaDataset();
 
-    const isLearned = (char: string) => learnedChars.includes(char);
+    const isLearned = (char: string) => userData.learnedChars?.includes(char) ?? false;
     const isBoth = alphabet === "both";
 
     const hiraBlocks = useMemo(() => buildChartBlocks(HIRAGANA_DATA, false), []);

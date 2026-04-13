@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useRef } from "react";
+
 import { Clock, Flame, Sword, Trophy, X } from "lucide-react";
 
 import {
@@ -9,6 +10,7 @@ import {
     GameStreakScoreStack,
     Leaderboard,
     LivesDisplay,
+    MiniLeaderboard,
 } from "@/features/game/components";
 import { useKanaDataset } from "@/features/kana/hooks/useKanaDataset";
 import {
@@ -23,7 +25,7 @@ import { HANDWRITING_FONT, PRINT_FONT } from "@/shared/constants/fonts";
 import { formatTime } from "@/shared/utils/time";
 import { useAppStore } from "@/store/useAppStore";
 
-export default function KanaSurvivalPage() {
+const KanaSurvivalPage = () => {
     const { dataset, alphabet } = useKanaDataset();
     const { useHandwriting, user } = useAppStore();
     const activeFont = useHandwriting ? HANDWRITING_FONT : PRINT_FONT;
@@ -32,6 +34,9 @@ export default function KanaSurvivalPage() {
     const game = useSurvivalGame({
         dataset,
         alphabet,
+        userId: user?.uid ?? null,
+        userName: user?.displayName ?? "",
+        currentBest: 0, // bestScores checked per-mode inside endSession
         onSaveScore: saveScore,
     });
 
@@ -158,6 +163,14 @@ export default function KanaSurvivalPage() {
                         >
                             Start →
                         </Button>
+
+                        <div className="mt-8">
+                            <Leaderboard
+                                gameMode={game.activeModeKey}
+                                currentUserId={user?.uid}
+                                accentColor="#ff9600"
+                            />
+                        </div>
                     </div>
                 </div>
             </div>
@@ -223,6 +236,12 @@ export default function KanaSurvivalPage() {
         const { question, questionType, options, status } = game.engine;
         return (
             <div className="fixed inset-0 z-50 flex flex-col bg-[#F7F7F8]">
+                <MiniLeaderboard
+                    gameMode={game.activeModeKey}
+                    currentUserId={user?.uid}
+                    currentUserName={game.localName}
+                    currentScore={game.engine.score}
+                />
                 <ScreenHeaderRow className="shrink-0" symmetricSidebars>
                     <ScreenHeaderBackButton
                         onClick={() => game.setPhase("setup")}
@@ -335,6 +354,12 @@ export default function KanaSurvivalPage() {
             tabIndex={0}
             ref={inputRef}
         >
+            <MiniLeaderboard
+                gameMode={game.activeModeKey}
+                currentUserId={user?.uid}
+                currentUserName={game.localName}
+                currentScore={game.dropScore.current}
+            />
             <ScreenHeaderRow variant="dark" className="z-10 shrink-0" symmetricSidebars>
                 <ScreenHeaderBackButton
                     onClick={() => game.setPhase("setup")}
@@ -387,4 +412,6 @@ export default function KanaSurvivalPage() {
             </div>
         </div>
     );
-}
+};
+
+export default KanaSurvivalPage;

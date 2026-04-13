@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+
 import { browserLocalPersistence, onIdTokenChanged, setPersistence } from "firebase/auth";
 
 import { auth } from "@/lib/firebase";

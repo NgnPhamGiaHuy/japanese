@@ -1,8 +1,15 @@
+export interface CharStat {
+    correct: number;
+    attempts: number;
+}
+
 export interface UserData {
     xp: number;
     streak: number;
     lastPlayed: string | null;
     lessonsCompleted: number;
+    learnedChars: string[];
+    charStats: Record<string, CharStat>;
 }
 
 export const INITIAL_USER_DATA: UserData = {
@@ -10,4 +17,6 @@ export const INITIAL_USER_DATA: UserData = {
     streak: 0,
     lastPlayed: null,
     lessonsCompleted: 0,
+    learnedChars: [],
+    charStats: {},
 };

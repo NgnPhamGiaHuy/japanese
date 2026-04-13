@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
+
 import { BookOpen, Flame, Settings, Trophy } from "lucide-react";
 
 import { useLessons } from "@/features/flashcard/hooks/useLessons";
@@ -15,7 +16,6 @@ import { useKanaStore } from "@/store/useKanaStore";
 export default function ProfilePage() {
     const { userData } = useUserProgress();
     const { lessons } = useLessons();
-    const { learnedChars } = useKanaStore();
     const user = useAppStore((s) => s.user);
 
     const displayName = user?.displayName ?? "Learner";
@@ -99,7 +99,7 @@ export default function ProfilePage() {
                     <StatCard
                         icon={<BookOpen className="h-7 w-7 text-[#1cb0f6]" />}
                         title="Kana Known"
-                        value={learnedChars.length}
+                        value={userData.learnedChars?.length || 0}
                     />
                 </div>
 

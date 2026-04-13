@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+
 import { RotateCcw } from "lucide-react";
 
 import KanaStrokeAnimation from "./KanaStrokeAnimation";

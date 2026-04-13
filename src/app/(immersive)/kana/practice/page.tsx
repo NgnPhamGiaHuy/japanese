@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+
 import { Brain, ChevronRight, Eye, PenTool, Shuffle, Volume2 } from "lucide-react";
 
 import { DrawingCanvas, KanaStrokeAnimation } from "@/features/kana/components";

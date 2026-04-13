@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+
 import { Check, X } from "lucide-react";
 
 import { Button } from "@/shared/components/ui";

@@ -4,10 +4,9 @@ import { useCallback, useEffect, useRef, useState } from "react";
 
 import { comboMultiplier } from "@/features/game/logic/combo";
 import { VISUAL_GROUPS } from "@/features/kana/data/visualGroups";
+import { useUserProgress } from "@/features/user/hooks/useUserProgress";
 import { shuffleArray } from "@/shared/utils/array";
 import { playAudio } from "@/shared/utils/audio";
-import { getCharStats, recordCharStat } from "@/shared/utils/stats";
-
 import { allowAudio } from "../utils/speechPolicy";
 
 import type { KanaChar, QuestionType } from "../types/kana.types";
@@ -34,6 +33,8 @@ export function useQuizEngine(dataset: KanaChar[], opts?: QuizEngineOptions) {
     useEffect(() => {
         onCorrectComboRef.current = opts?.onCorrectCombo;
     }, [opts?.onCorrectCombo]);
+
+    const { userData, recordCharStat } = useUserProgress();
 
     const [question, setQuestion] = useState<KanaChar | null>(null);
     const [questionType, setQuestionType] = useState<QuestionType>("read");
@@ -103,7 +104,7 @@ export function useQuizEngine(dataset: KanaChar[], opts?: QuizEngineOptions) {
     /** Loads a Smart Review deck sorted by weakest characters */
     const buildSmartDeck = useCallback(
         (size: number) => {
-            const stats = getCharStats();
+            const stats = userData.charStats || {};
             const sorted = [...dataset].sort((a, b) => {
                 const sA = stats[a.char];
                 const sB = stats[b.char];
@@ -113,7 +114,7 @@ export function useQuizEngine(dataset: KanaChar[], opts?: QuizEngineOptions) {
             });
             deckRef.current = shuffleArray(sorted.slice(0, size));
         },
-        [dataset],
+        [dataset, userData.charStats],
     );
 
     const processAnswer = useCallback(
