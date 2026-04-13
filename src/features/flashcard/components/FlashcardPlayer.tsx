@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import { Check, Lightbulb, Volume2, X } from "lucide-react";
 
@@ -35,8 +35,8 @@ const FlashcardPlayer = ({ lesson, cards, mode, onClose, onComplete }: Flashcard
 
     // Hint visibility for the current card
     const [hintVisible, setHintVisible] = useState(false);
-    // Which MC choice was selected (null = not yet answered)
     const [mcSelected, setMcSelected] = useState<string | null>(null);
+    const prevFlippedRef = useRef(false);
 
     useEffect(() => {
         if (initialized) return;
@@ -56,7 +56,6 @@ const FlashcardPlayer = ({ lesson, cards, mode, onClose, onComplete }: Flashcard
     useEffect(() => {
         setHintVisible(false);
         setMcSelected(null);
-        setIsFlipped(false);
     }, [currentIndex]);
 
     const card = queue[currentIndex];
@@ -71,11 +70,12 @@ const FlashcardPlayer = ({ lesson, cards, mode, onClose, onComplete }: Flashcard
 
     const isMCMode = mcChoices !== null && mcChoices.length === 4;
 
-    // Auto-play audio when card is flipped
     useEffect(() => {
-        if (isFlipped && globalAutoPlay && card?.kanji) {
+        const justFlipped = isFlipped && !prevFlippedRef.current;
+        if (justFlipped && globalAutoPlay && card?.kanji) {
             playAudio(card.kanji);
         }
+        prevFlippedRef.current = isFlipped;
     }, [isFlipped, globalAutoPlay, card]);
 
     if (!initialized) return null;
@@ -104,6 +104,7 @@ const FlashcardPlayer = ({ lesson, cards, mode, onClose, onComplete }: Flashcard
             correct: prev.correct + (knew ? 1 : 0),
             incorrect: prev.incorrect + (!knew ? 1 : 0),
         }));
+        setIsFlipped(false);
         if (mode !== "test") {
             await processReview(card, knew);
         }

@@ -93,7 +93,7 @@ export function ShareModal({ lesson, onShare, onClose }: ShareModalProps) {
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm">
             <div className="w-full max-w-lg rounded-[2rem] border-2 border-b-8 border-gray-200 bg-white shadow-xl">
                 {/* Header */}
-                <div className="flex items-center justify-between border-b-2 border-gray-100 bg-gray-50/50 p-6">
+                <div className="flex items-center justify-between border-b-2 border-gray-100 p-6">
                     <h2 className="text-2xl font-black text-[#3c3c3c]">Share Deck</h2>
                     <Button
                         variant="ghost"
