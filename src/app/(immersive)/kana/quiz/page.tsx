@@ -1,17 +1,14 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useState } from "react";
 
 import { ArrowLeft, Eye, Keyboard, Shuffle, X } from "lucide-react";
 
 import {
     AnswerFeedback,
     gameQuizStreakColumnClassName,
-    Leaderboard,
-    MiniLeaderboard,
     StreakComboBadge,
 } from "@/features/game/components";
-import { useGameSession } from "@/features/game/hooks";
 import { useKanaDataset } from "@/features/kana/hooks/useKanaDataset";
 import { useQuizEngine } from "@/features/kana/hooks/useQuizEngine";
 import { ScreenHeader, ScreenHeaderBackButton, ScreenHeaderRow } from "@/shared/components/layout";
@@ -26,52 +23,21 @@ const TARGET_SCORE = 20;
 
 const KanaQuizPage = () => {
     const { dataset, alphabet, themeColor } = useKanaDataset();
-    const { useHandwriting, user } = useAppStore();
+    const { useHandwriting } = useAppStore();
     const activeFont = useHandwriting ? HANDWRITING_FONT : PRINT_FONT;
 
     const [quizMode, setQuizMode] = useState<QuizMode>("choice");
     const [typedInput, setTypedInput] = useState("");
     const [phase, setPhase] = useState<"setup" | "playing" | "done">("setup");
-    const [lbMode, setLbMode] = useState<QuizMode>("choice");
 
     const engine = useQuizEngine(dataset);
 
-    // Prevent double-saving if somehow the effect fires twice
-    const savedRef = useRef(false);
-
-    const gameModeKey = `quiz_${quizMode}_${alphabet}`;
-
-    const { startSession, syncScore, endSession } = useGameSession({
-        userId: user?.uid ?? null,
-        userName: user?.displayName ?? "Player",
-        gameMode: gameModeKey,
-        currentBest: 0,
-    });
-
-    const saveQuizScore = useCallback(
-        (finalScore: number) => {
-            if (!user || savedRef.current || finalScore <= 0) return;
-            savedRef.current = true;
-            endSession(finalScore);
-        },
-        [user, endSession],
-    );
-
-    // Sync live score to Firebase while playing
-    useEffect(() => {
-        if (phase === "playing") {
-            syncScore(engine.score);
-        }
-    }, [engine.score, phase, syncScore]);
-
     const startQuiz = (mode: QuizMode) => {
         setQuizMode(mode);
-        savedRef.current = false;
         engine.resetEngine();
         if (mode === "smart") engine.buildSmartDeck(TARGET_SCORE);
         engine.generateQuestion(mode === "type" ? "type" : "read");
         setPhase("playing");
-        startSession();
     };
 
     const handleMCAnswer = (option: { romaji: string }) => {
@@ -83,7 +49,6 @@ const KanaQuizPage = () => {
             setTypedInput("");
             if (nextScore >= TARGET_SCORE) {
                 setPhase("done");
-                saveQuizScore(nextScore);
             } else {
                 engine.generateQuestion(quizMode === "type" ? "type" : "read");
             }
@@ -99,7 +64,6 @@ const KanaQuizPage = () => {
             setTypedInput("");
             if (nextScore >= TARGET_SCORE) {
                 setPhase("done");
-                saveQuizScore(nextScore);
             } else {
                 engine.generateQuestion("type");
             }
@@ -176,32 +140,6 @@ const KanaQuizPage = () => {
                             </button>
                         </div>
 
-                        <div className="mt-8">
-                            <div className="mb-4 flex rounded-xl bg-gray-200/70 p-1">
-                                {(["choice", "type", "smart"] as const).map((m) => (
-                                    <button
-                                        key={m}
-                                        onClick={() => setLbMode(m)}
-                                        className={`flex-1 rounded-lg py-1.5 text-xs font-bold transition-colors ${
-                                            lbMode === m
-                                                ? "bg-white text-[#3c3c3c] shadow-sm"
-                                                : "text-gray-500 hover:text-gray-700"
-                                        }`}
-                                    >
-                                        {m === "choice"
-                                            ? "Multiple Choice"
-                                            : m === "type"
-                                              ? "Type"
-                                              : "Smart"}
-                                    </button>
-                                ))}
-                            </div>
-                            <Leaderboard
-                                gameMode={`quiz_${lbMode}_${alphabet}`}
-                                currentUserId={user?.uid}
-                                accentColor={themeColor.primary}
-                            />
-                        </div>
                     </div>
                 </div>
             </div>
@@ -250,12 +188,6 @@ const KanaQuizPage = () => {
                             Change Mode
                         </Button>
                     </div>
-
-                    <Leaderboard
-                        gameMode={gameModeKey}
-                        currentUserId={user?.uid}
-                        accentColor={themeColor.primary}
-                    />
                 </div>
             </div>
         );
@@ -266,12 +198,6 @@ const KanaQuizPage = () => {
 
     return (
         <div className="fixed inset-0 z-50 flex flex-col bg-[#F7F7F8]">
-            <MiniLeaderboard
-                gameMode={gameModeKey}
-                currentUserId={user?.uid}
-                currentUserName={user?.displayName || "Player"}
-                currentScore={score}
-            />
             <ScreenHeaderRow className="shrink-0">
                 <ScreenHeaderBackButton
                     onClick={() => setPhase("setup")}
