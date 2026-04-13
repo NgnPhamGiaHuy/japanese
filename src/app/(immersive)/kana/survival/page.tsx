@@ -349,7 +349,7 @@ const KanaSurvivalPage = () => {
 
     return (
         <div
-            className={`fixed inset-0 z-50 flex flex-col overflow-hidden bg-[#0a0a1a] outline-none ${game.errorFlash ? "ring-2 ring-red-500/50 ring-inset" : ""}`}
+            className={`fixed inset-0 z-50 flex flex-col overflow-hidden bg-[#F7F7F8] outline-none ${game.errorFlash ? "ring-2 ring-red-500/50 ring-inset" : ""}`}
             onKeyDown={(e) => game.handleDropTyping(e.key.toLowerCase())}
             tabIndex={0}
             ref={inputRef}
@@ -360,12 +360,12 @@ const KanaSurvivalPage = () => {
                 currentUserName={game.localName}
                 currentScore={game.dropScore.current}
             />
-            <ScreenHeaderRow variant="dark" className="z-10 shrink-0" symmetricSidebars>
+            <ScreenHeaderRow className="z-10 shrink-0" symmetricSidebars>
                 <ScreenHeaderBackButton
                     onClick={() => game.setPhase("setup")}
                     icon={X}
                     aria-label="Back to survival menu"
-                    className="text-white/80 hover:bg-white/10 hover:text-white"
+                    className="text-[#afafaf] hover:bg-gray-100 hover:text-[#3c3c3c]"
                 />
                 <LivesDisplay lives={game.lives} />
                 <GameStreakScoreStack
@@ -386,7 +386,7 @@ const KanaSurvivalPage = () => {
                             style={{ left: `${word.x}%`, top: `${word.y}%` }}
                         >
                             <div
-                                className={`text-4xl font-medium drop-shadow-lg ${isActive ? "text-[#ff9600]" : "text-white"}`}
+                                className={`text-4xl font-medium drop-shadow-sm ${isActive ? "text-[#ff9600]" : "text-[#3c3c3c]"}`}
                                 style={{ fontFamily: activeFont }}
                             >
                                 {word.char}
@@ -400,7 +400,7 @@ const KanaSurvivalPage = () => {
                     );
                 })}
             </div>
-            <div className="z-10 p-4 text-center text-sm font-bold text-white/30">
+            <div className="z-10 p-4 text-center text-sm font-bold text-[#afafaf]">
                 {activeWord ? (
                     <>
                         Typing:{" "}
