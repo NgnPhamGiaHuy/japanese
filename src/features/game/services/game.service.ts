@@ -14,6 +14,8 @@ import {
 
 import { APP_ID, db } from "@/lib/firebase";
 
+import type { Unsubscribe } from "firebase/firestore";
+
 // ─── Collection helpers ───────────────────────────────────────────────────────
 
 /** /artifacts/{APP_ID}/public/data/game_sessions */
@@ -52,15 +54,48 @@ export interface GameResultInput {
     displayName: string;
     gameMode: string;
     score: number;
-    /** The caller's current known best — skip write if score doesn't beat it */
     currentBest?: number;
+}
+
+// ─── Internal helpers ─────────────────────────────────────────────────────────
+
+/**
+ * Writes the final score to the public leaderboard and the user's personal
+ * best if (and only if) `score` beats `currentBest`.
+ *
+ * Private — consumed by `finishGameSession` and `submitScore`.
+ */
+async function persistBestScore(
+    userId: string,
+    displayName: string,
+    gameMode: string,
+    score: number,
+    currentBest: number,
+): Promise<void> {
+    if (score <= 0 || score <= currentBest) return;
+
+    const now = new Date().toISOString();
+
+    await setDoc(lbDoc(gameMode, userId), {
+        userId,
+        displayName: displayName.substring(0, 20),
+        score,
+        gameMode,
+        timestamp: now,
+    });
+
+    await setDoc(
+        personalBestDoc(userId, gameMode),
+        { bestScore: score, lastUpdated: now },
+        { merge: true },
+    );
 }
 
 // ─── Game Sessions ────────────────────────────────────────────────────────────
 
 /**
  * Creates a new game session in Firestore and returns its auto-generated ID.
- * Called once when the user clicks "Start".
+ * Call once when the user clicks "Start".
  */
 export const createGameSession = async (
     userId: string,
@@ -89,14 +124,14 @@ export const updateGameScore = async (sessionId: string, score: number): Promise
             updatedAt: serverTimestamp(),
         });
     } catch (err) {
-        // Session doc may not exist yet on very first write race — swallow silently
+        // Session doc may not exist yet on a very fast first write — swallow silently
         console.warn("[GameService] updateGameScore skipped:", err);
     }
 };
 
 /**
- * Marks a session as finished and flushes the final score to both
- * the public leaderboard and personal best atomically.
+ * Marks a session as finished and flushes the final score to both the public
+ * leaderboard and the user's personal best (only if `finalScore` is a new high).
  */
 export const finishGameSession = async (
     sessionId: string,
@@ -106,7 +141,6 @@ export const finishGameSession = async (
     gameMode: string,
     currentBest: number = 0,
 ): Promise<void> => {
-    // Mark session finished
     try {
         await updateDoc(doc(sessionsCol(), sessionId), {
             score: finalScore,
@@ -117,38 +151,37 @@ export const finishGameSession = async (
         console.warn("[GameService] finishGameSession session update skipped:", err);
     }
 
-    // Only promote to leaderboard / personal best if it's a new high score
-    if (finalScore <= 0 || finalScore <= currentBest) return;
+    await persistBestScore(userId, displayName, gameMode, finalScore, currentBest);
+};
 
-    const now = new Date().toISOString();
-
-    await setDoc(lbDoc(gameMode, userId), {
-        userId,
-        displayName: displayName.substring(0, 20),
-        score: finalScore,
-        gameMode,
-        timestamp: now,
-    });
-
-    await setDoc(
-        personalBestDoc(userId, gameMode),
-        { bestScore: finalScore, lastUpdated: now },
-        { merge: true },
-    );
+/**
+ * Standalone score submission — use when there is no managed session
+ * (e.g. a short one-shot game that skips the full session lifecycle).
+ *
+ * Promotes the score to the leaderboard and personal best if it is a new high.
+ */
+export const submitScore = async ({
+    userId,
+    displayName,
+    gameMode,
+    score,
+    currentBest = 0,
+}: GameResultInput): Promise<void> => {
+    await persistBestScore(userId, displayName, gameMode, score, currentBest);
 };
 
 // ─── Leaderboard ──────────────────────────────────────────────────────────────
 
 /**
- * Real-time subscription to the top-N leaderboard (personal-best table).
- * Uses onSnapshot — never getDocs.
+ * Real-time subscription to the top-N leaderboard for a game mode.
+ * Uses `onSnapshot` — never `getDocs`.
  */
 export const subscribeLeaderboard = (
     gameMode: string,
     topN: number,
     onUpdate: (entries: LeaderboardEntry[]) => void,
     onError?: (err: Error) => void,
-): (() => void) => {
+): Unsubscribe => {
     const ref = collection(db, "artifacts", APP_ID, "public", "data", `leaderboard_${gameMode}`);
     const q = query(ref, orderBy("score", "desc"), limit(topN));
 
@@ -169,13 +202,30 @@ export const subscribeLeaderboard = (
 };
 
 /**
+ * Real-time subscription to a user's personal best scores across all game modes.
+ */
+export const subscribePersonalBests = (
+    userId: string,
+    onUpdate: (scores: Record<string, number>) => void,
+): Unsubscribe => {
+    const ref = collection(db, "artifacts", APP_ID, "users", userId, "stats");
+    return onSnapshot(ref, (snap) => {
+        const scores: Record<string, number> = {};
+        snap.forEach((d) => {
+            scores[d.id] = (d.data().bestScore as number) ?? 0;
+        });
+        onUpdate(scores);
+    });
+};
+
+/**
  * Real-time subscription to active game sessions for a given mode.
- * Useful for showing "live" players during gameplay (future feature).
+ * Useful for showing "live" players during gameplay.
  */
 export const subscribeActiveSessions = (
     gameMode: string,
     onUpdate: (sessions: GameSession[]) => void,
-): (() => void) => {
+): Unsubscribe => {
     const q = query(
         sessionsCol(),
         where("gameMode", "==", gameMode),
@@ -193,36 +243,3 @@ export const subscribeActiveSessions = (
         onUpdate(sessions);
     });
 };
-
-// ─── Legacy compat ────────────────────────────────────────────────────────────
-
-/**
- * @deprecated Use finishGameSession() for new code.
- * Kept so that existing callsites don't break during migration.
- */
-export const saveGameResult = async ({
-    userId,
-    displayName,
-    gameMode,
-    score,
-    currentBest = 0,
-}: GameResultInput): Promise<void> => {
-    if (score <= 0 || score <= currentBest) return;
-    const now = new Date().toISOString();
-
-    await setDoc(
-        personalBestDoc(userId, gameMode),
-        { bestScore: score, lastUpdated: now },
-        { merge: true },
-    );
-
-    await setDoc(lbDoc(gameMode, userId), {
-        userId,
-        displayName: displayName.substring(0, 20),
-        score,
-        gameMode,
-        timestamp: now,
-    });
-};
-
-export const subscribeTopScores = subscribeLeaderboard;

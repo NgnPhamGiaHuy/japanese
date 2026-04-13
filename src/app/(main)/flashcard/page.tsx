@@ -3,9 +3,9 @@
 import Link from "next/link";
 import { useState } from "react";
 
-import { Edit2, Gamepad2, Play, Plus, RefreshCw, Trash2, Zap } from "lucide-react";
+import { Edit2, Gamepad2, Play, Plus, RefreshCw, Share2, Trash2, Zap } from "lucide-react";
 
-import { LessonBuilder } from "@/features/flashcard/components";
+import { LessonBuilder, ShareModal } from "@/features/flashcard/components";
 import { useLessons } from "@/features/flashcard/hooks/useLessons";
 import { ScreenHeader } from "@/shared/components/layout";
 import { Button } from "@/shared/components/ui";
@@ -14,9 +14,10 @@ import { CARD_BASE, SPACING } from "@/shared/constants";
 import type { Lesson } from "@/features/flashcard/types/flashcard.types";
 
 export default function FlashcardIndexPage() {
-    const { lessons, loading, error, createLesson, updateLesson, deleteLesson } = useLessons();
+    const { lessons, loading, error, saveFullLesson, deleteLesson, shareLesson } = useLessons();
 
     const [editingLesson, setEditingLesson] = useState<Lesson | null>(null);
+    const [sharingLesson, setSharingLesson] = useState<Lesson | null>(null);
     const [showBuilder, setShowBuilder] = useState(false);
 
     const closeBuilder = () => {
@@ -28,12 +29,8 @@ export default function FlashcardIndexPage() {
         return (
             <LessonBuilder
                 editingLesson={editingLesson}
-                onSave={async (l) => {
-                    if (editingLesson) {
-                        await updateLesson(l);
-                    } else {
-                        await createLesson(l);
-                    }
+                onSave={async (lesson, cards, isNew) => {
+                    await saveFullLesson(lesson, cards, isNew);
                     closeBuilder();
                 }}
                 onDelete={async (id) => {
@@ -139,11 +136,29 @@ export default function FlashcardIndexPage() {
                                 onDelete={async () => {
                                     if (confirm("Delete this deck?")) await deleteLesson(lesson.id);
                                 }}
+                                onShare={() => setSharingLesson(lesson)}
                             />
                         ))}
                     </div>
                 )}
             </div>
+
+            {sharingLesson &&
+                (() => {
+                    // Always use the live lesson from the real-time list so the
+                    // modal never shows stale share settings.
+                    const liveLesson =
+                        lessons.find((l) => l.id === sharingLesson.id) ?? sharingLesson;
+                    return (
+                        <ShareModal
+                            lesson={liveLesson}
+                            onShare={async (isPublic, publicRole) => {
+                                await shareLesson(liveLesson.id, isPublic, publicRole);
+                            }}
+                            onClose={() => setSharingLesson(null)}
+                        />
+                    );
+                })()}
         </div>
     );
 }
@@ -152,10 +167,12 @@ function DeckCard({
     lesson,
     onEdit,
     onDelete,
+    onShare,
 }: {
     lesson: Lesson;
     onEdit: () => void;
     onDelete: () => void;
+    onShare: () => void;
 }) {
     return (
         <div
@@ -185,7 +202,7 @@ function DeckCard({
                 <div className="flex shrink-0 flex-col items-center">
                     <div className="mb-1 flex h-14 w-14 items-center justify-center rounded-2xl bg-[#faeaff]">
                         <span className="text-2xl font-black text-[#ce82ff]">
-                            {lesson.cards.length}
+                            {lesson.cardCount}
                         </span>
                     </div>
                     <span className="text-[9px] font-black text-[#afafaf] uppercase">cards</span>
@@ -223,6 +240,13 @@ function DeckCard({
                         Match
                     </Button>
                 </Link>
+                <button
+                    onClick={onShare}
+                    className="rounded-xl p-3 text-gray-300 transition-colors hover:bg-[#ebf8e6] hover:text-[#58cc02]"
+                    title="Share deck"
+                >
+                    <Share2 size={20} strokeWidth={2.5} />
+                </button>
                 <button
                     onClick={onEdit}
                     className="rounded-xl p-3 text-gray-300 transition-colors hover:bg-[#e5f5ff] hover:text-[#1cb0f6]"

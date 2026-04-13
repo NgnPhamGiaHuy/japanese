@@ -7,9 +7,11 @@ import Confetti from "react-confetti";
 import { motion } from "framer-motion";
 import { Trophy, X } from "lucide-react";
 
+import { useCards } from "@/features/flashcard/hooks/useCards";
 import { useLessons } from "@/features/flashcard/hooks/useLessons";
 import { useUserProgress } from "@/features/user/hooks/useUserProgress";
 import { Button } from "@/shared/components/ui";
+import { shuffleArray } from "@/shared/utils/array";
 
 interface MatchItem {
     id: string;
@@ -20,7 +22,8 @@ interface MatchItem {
 
 export default function MatchModePage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = use(params);
-    const { lessons, loading } = useLessons();
+    const { lessons, loading: lessonsLoading } = useLessons();
+    const { cards, loading: cardsLoading } = useCards(id);
     const { addXP } = useUserProgress();
     const router = useRouter();
 
@@ -33,8 +36,8 @@ export default function MatchModePage({ params }: { params: Promise<{ id: string
     const [errorIds, setErrorIds] = useState<string[]>([]);
 
     useEffect(() => {
-        if (lesson?.cards) {
-            const pool = [...lesson.cards].sort(() => Math.random() - 0.5).slice(0, 6);
+        if (!cardsLoading && cards.length > 0) {
+            const pool = shuffleArray(cards).slice(0, 6);
             const gameItems: MatchItem[] = [];
             pool.forEach((c) => {
                 gameItems.push({
@@ -51,9 +54,9 @@ export default function MatchModePage({ params }: { params: Promise<{ id: string
                 });
             });
             // eslint-disable-next-line react-hooks/set-state-in-effect
-            setItems(gameItems.sort(() => Math.random() - 0.5));
+            setItems(shuffleArray(gameItems));
         }
-    }, [lesson]);
+    }, [cards, cardsLoading]);
 
     const handleSelect = (item: MatchItem) => {
         if (matched.includes(item.id) || errorIds.length > 0) return;
@@ -84,7 +87,7 @@ export default function MatchModePage({ params }: { params: Promise<{ id: string
         }
     };
 
-    if (loading) {
+    if (lessonsLoading || cardsLoading) {
         return (
             <div className="fixed inset-0 flex items-center justify-center bg-[#F7F7F8]">
                 <div className="h-8 w-8 animate-spin rounded-full border-4 border-gray-200 border-t-[#ce82ff]" />

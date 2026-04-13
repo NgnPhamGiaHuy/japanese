@@ -7,9 +7,10 @@ import Confetti from "react-confetti";
 import { motion } from "framer-motion";
 import { Clock, X, Zap } from "lucide-react";
 
+import { useCards } from "@/features/flashcard/hooks/useCards";
 import { useLessons } from "@/features/flashcard/hooks/useLessons";
 import { Leaderboard } from "@/features/game/components";
-import { saveGameResult } from "@/features/game/services/game.service";
+import { submitScore } from "@/features/game/services/game.service";
 import { useUserProgress } from "@/features/user/hooks/useUserProgress";
 import { Button } from "@/shared/components/ui";
 import { useAppStore } from "@/store/useAppStore";
@@ -47,7 +48,8 @@ const GAME_MODE = "flashcard_speed";
 
 export default function SpeedQuizPage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = use(params);
-    const { lessons, loading } = useLessons();
+    const { lessons, loading: lessonsLoading } = useLessons();
+    const { cards: allCards, loading: cardsLoading } = useCards(id);
     const { addXP } = useUserProgress();
     const { user } = useAppStore();
     const router = useRouter();
@@ -56,10 +58,10 @@ export default function SpeedQuizPage({ params }: { params: Promise<{ id: string
     const lesson = lessons.find((l) => l.id === id);
 
     const cards = useMemo((): FlashCard[] => {
-        if (!lesson) return [];
+        if (!lesson || cardsLoading || allCards.length === 0) return [];
         const rng = mulberry32(hashString(`${lesson.id}:deck`));
-        return shuffleWithRng([...lesson.cards], rng);
-    }, [lesson]);
+        return shuffleWithRng([...allCards], rng);
+    }, [lesson, allCards, cardsLoading]);
 
     const [currentIndex, setCurrentIndex] = useState(0);
     const [timeLeft, setTimeLeft] = useState(30);
@@ -71,8 +73,8 @@ export default function SpeedQuizPage({ params }: { params: Promise<{ id: string
     const currentCard = cards[currentIndex];
 
     const options = useMemo(() => {
-        if (!currentCard || !lesson) return [];
-        const pool = lesson.cards.map((c) => c.meaning).filter((m) => m !== currentCard.meaning);
+        if (!currentCard || !lesson || allCards.length === 0) return [];
+        const pool = allCards.map((c) => c.meaning).filter((m) => m !== currentCard.meaning);
         const pickRng = mulberry32(
             hashString(`${lesson.id}:${currentCard.id}:${currentIndex}:pick`),
         );
@@ -100,7 +102,7 @@ export default function SpeedQuizPage({ params }: { params: Promise<{ id: string
     useEffect(() => {
         if (!gameOver || savedScoreRef.current || !user || score <= 0) return;
         savedScoreRef.current = true;
-        saveGameResult({
+        submitScore({
             userId: user.uid,
             displayName: user.displayName ?? "Player",
             gameMode: GAME_MODE,
@@ -122,7 +124,7 @@ export default function SpeedQuizPage({ params }: { params: Promise<{ id: string
         }, 800);
     };
 
-    if (loading) {
+    if (lessonsLoading || cardsLoading) {
         return (
             <div className="fixed inset-0 flex items-center justify-center bg-[#F7F7F8]">
                 <div className="h-8 w-8 animate-spin rounded-full border-4 border-gray-200 border-t-[#ff9600]" />
@@ -130,7 +132,7 @@ export default function SpeedQuizPage({ params }: { params: Promise<{ id: string
         );
     }
     if (!lesson) return notFound();
-    if (lesson.cards.length < 4) {
+    if (allCards.length < 4) {
         return (
             <div className="p-6 pt-24 text-center font-bold">
                 Need at least 4 cards to play Speed Quiz.

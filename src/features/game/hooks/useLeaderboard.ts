@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 
-import { subscribeTopScores } from "@/features/game/services/game.service";
+import { subscribeLeaderboard } from "@/features/game/services/game.service";
 
 import type { LeaderboardEntry } from "@/features/game/services/game.service";
 
@@ -35,7 +35,7 @@ export function useLeaderboard(
         setLoading(true);
         setError(null);
 
-        const unsub = subscribeTopScores(
+        const unsub = subscribeLeaderboard(
             gameMode,
             topN,
             (data) => {

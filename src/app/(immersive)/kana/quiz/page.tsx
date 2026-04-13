@@ -12,7 +12,6 @@ import {
     StreakComboBadge,
 } from "@/features/game/components";
 import { useGameSession } from "@/features/game/hooks";
-import { saveGameResult } from "@/features/game/services/game.service";
 import { useKanaDataset } from "@/features/kana/hooks/useKanaDataset";
 import { useQuizEngine } from "@/features/kana/hooks/useQuizEngine";
 import { ScreenHeader, ScreenHeaderBackButton, ScreenHeaderRow } from "@/shared/components/layout";
@@ -49,24 +48,13 @@ const KanaQuizPage = () => {
         currentBest: 0,
     });
 
-    // Legacy: also write to leaderboard_ subcollection via saveGameResult on finish
     const saveQuizScore = useCallback(
-        async (finalScore: number) => {
+        (finalScore: number) => {
             if (!user || savedRef.current || finalScore <= 0) return;
             savedRef.current = true;
-            try {
-                await saveGameResult({
-                    userId: user.uid,
-                    displayName: user.displayName ?? "Player",
-                    gameMode: gameModeKey,
-                    score: finalScore,
-                });
-                endSession(finalScore);
-            } catch (err) {
-                console.error("[Quiz] Score save error:", err);
-            }
+            endSession(finalScore);
         },
-        [user, gameModeKey, endSession],
+        [user, endSession],
     );
 
     // Sync live score to Firebase while playing

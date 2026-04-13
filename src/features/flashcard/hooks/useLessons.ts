@@ -5,7 +5,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useAppStore } from "@/store/useAppStore";
 import * as LessonService from "../services/lesson.service";
 
-import type { Lesson } from "../types/flashcard.types";
+import type { FlashCard, Lesson } from "../types/flashcard.types";
 
 interface LessonsState {
     lessons: Lesson[];
@@ -29,8 +29,8 @@ export function useLessons() {
         error: null,
     });
 
-    // Stable ref so callbacks always see the current lessons without being
-    // re-created on every render (avoids unnecessary re-subscriptions).
+    // Stable ref so callbacks always see the latest lessons without causing
+    // re-subscriptions on every render.
     const lessonsRef = useRef<Lesson[]>([]);
     lessonsRef.current = state.lessons;
 
@@ -60,15 +60,6 @@ export function useLessons() {
 
     // ── Write helpers ────────────────────────────────────────────────────
 
-    const createLesson = useCallback(
-        async (lesson: Omit<Lesson, "id">): Promise<void> => {
-            if (!user) return;
-            await LessonService.createLesson(user.uid, lesson);
-            // onSnapshot will push the new lesson into state automatically.
-        },
-        [user],
-    );
-
     const updateLesson = useCallback(
         async (lesson: Lesson): Promise<void> => {
             if (!user) return;
@@ -77,34 +68,54 @@ export function useLessons() {
         [user],
     );
 
+    /**
+     * Deletes a lesson and all its cards (including Storage images).
+     * Uses `deleteLessonWithCards` — never leaves orphaned cards.
+     */
     const deleteLesson = useCallback(
         async (id: string): Promise<void> => {
             if (!user) return;
-            await LessonService.deleteLesson(user.uid, id);
+            await LessonService.deleteLessonWithCards(user.uid, id);
         },
         [user],
     );
 
     /**
-     * Records a correct / incorrect result for one card in a lesson.
-     * The current cards array is read from the stable ref to avoid
-     * stale-closure issues inside game callbacks.
+     * Saves a lesson + its full card set.  For existing lessons, a diff
+     * determines which cards to create / update / delete — no destructive
+     * full-replace.
      */
-    const recordCardResult = useCallback(
-        async (lessonId: string, cardId: string, knew: boolean): Promise<void> => {
+    const saveFullLesson = useCallback(
+        async (lesson: Lesson, cards: FlashCard[], isNew: boolean): Promise<void> => {
             if (!user) return;
-            const lesson = lessonsRef.current.find((l) => l.id === lessonId);
-            if (!lesson) return;
-            await LessonService.recordCardResult(user.uid, lessonId, lesson.cards, cardId, knew);
+            await LessonService.saveLessonWithCards(user.uid, lesson, cards, isNew);
+        },
+        [user],
+    );
+
+    /**
+     * Toggles public sharing for a lesson.  Generates a stable shareId,
+     * writes `isPublic` and `publicRole` to Firestore.
+     *
+     * Delegates entirely to the service — no Firebase calls here.
+     */
+    const shareLesson = useCallback(
+        async (
+            lessonId: string,
+            isPublic: boolean,
+            publicRole: Lesson["publicRole"],
+        ): Promise<void> => {
+            if (!user) return;
+            await LessonService.shareLessonSettings(user.uid, lessonId, isPublic, publicRole);
         },
         [user],
     );
 
     return {
         ...state,
-        createLesson,
         updateLesson,
         deleteLesson,
-        recordCardResult,
+        saveFullLesson,
+        shareLesson,
     };
 }

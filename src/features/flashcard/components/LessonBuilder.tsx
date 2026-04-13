@@ -1,31 +1,43 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
-import { Loader2, Plus, Trash2, X } from "lucide-react";
+import { Image as ImageIcon, Loader2, Plus, Trash2, X } from "lucide-react";
 
 import { Button } from "@/shared/components/ui";
+import { useAppStore } from "@/store/useAppStore";
+import { useCards } from "../hooks/useCards";
+import { deleteCardImage, uploadCardImage } from "../services/image.service";
 
 import type { FlashCard, Lesson } from "../types/flashcard.types";
 
+type EditorCard = FlashCard & { imageFile?: File; previewUrl?: string };
+
 interface LessonBuilderProps {
-    onSave: (lesson: Lesson) => Promise<void>;
+    onSave: (lesson: Lesson, cards: FlashCard[], isNew: boolean) => Promise<void>;
     onDelete?: (id: string) => Promise<void>;
     onClose: () => void;
     editingLesson?: Lesson | null;
 }
 
-const makeCard = (): FlashCard => ({
+const makeCard = (): EditorCard => ({
     id: `c_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
+    lessonId: "",
     kanji: "",
     furigana: "",
     meaning: "",
     example: "",
-    correctCount: 0,
-    wrongCount: 0,
+    easeFactor: 2.5,
+    interval: 0,
+    repetitions: 0,
+    nextReviewAt: 0,
 });
 
-const LessonBuilder = ({ onSave, onDelete, onClose, editingLesson }: LessonBuilderProps) => {
+export const LessonBuilder = ({ onSave, onDelete, onClose, editingLesson }: LessonBuilderProps) => {
+    const isNew = !editingLesson;
+    const { user } = useAppStore();
+    const { cards: existingCards, loading: cardsLoading } = useCards(editingLesson?.id);
+
     const [lesson, setLesson] = useState<Lesson>(
         () =>
             editingLesson ?? {
@@ -34,20 +46,64 @@ const LessonBuilder = ({ onSave, onDelete, onClose, editingLesson }: LessonBuild
                 description: "",
                 tags: [],
                 createdAt: Date.now(),
-                cards: [],
+                cardCount: 0,
             },
     );
+    const [cards, setCards] = useState<EditorCard[]>([]);
     const [tagInput, setTagInput] = useState("");
     const [saving, setSaving] = useState(false);
+    // Tracks Storage paths of images that were cleared mid-session so we can
+    // delete them from Storage after a successful save.
+    const clearedImagePathsRef = useRef<string[]>([]);
+
+    // Sync fetched cards when they arrive
+    useEffect(() => {
+        if (!isNew && !cardsLoading) {
+            setCards(existingCards);
+        }
+    }, [isNew, cardsLoading, existingCards]);
 
     const handleSave = async () => {
         if (!lesson.title.trim()) {
             alert("Title is required");
             return;
         }
+
+        const validCards = cards.filter(
+            (c) => (c.kanji.trim() || c.furigana.trim()) && c.meaning.trim(),
+        );
+
         setSaving(true);
         try {
-            await onSave(lesson);
+            // Process Image Uploads
+            const processedCards: FlashCard[] = [];
+            for (const c of validCards) {
+                const { imageFile, previewUrl, ...baseCard } = c;
+                if (imageFile && user) {
+                    // Upload new image
+                    const res = await uploadCardImage(imageFile, user.uid, baseCard.id);
+                    // Optionally delete old image if replaced
+                    if (baseCard.imagePath) {
+                        deleteCardImage(baseCard.imagePath).catch(() => {});
+                    }
+                    processedCards.push({
+                        ...baseCard,
+                        imageUrl: res.imageUrl,
+                        imagePath: res.imagePath,
+                    });
+                } else {
+                    processedCards.push(baseCard);
+                }
+            }
+
+            await onSave(lesson, processedCards, isNew);
+
+            // After a successful save, clean up Storage for any images that
+            // were cleared in this editor session.
+            for (const path of clearedImagePathsRef.current) {
+                deleteCardImage(path).catch(() => {});
+            }
+            clearedImagePathsRef.current = [];
         } finally {
             setSaving(false);
         }
@@ -61,11 +117,22 @@ const LessonBuilder = ({ onSave, onDelete, onClose, editingLesson }: LessonBuild
         }
     };
 
-    const updateCard = (id: string, field: keyof FlashCard, value: string) =>
-        setLesson({
-            ...lesson,
-            cards: lesson.cards.map((c) => (c.id === id ? { ...c, [field]: value } : c)),
-        });
+    const updateCard = (id: string, field: keyof EditorCard, value: any) =>
+        setCards((prev) => prev.map((c) => (c.id === id ? { ...c, [field]: value } : c)));
+
+    const handleImageChange = (file: File | null, id: string) => {
+        if (!file) return;
+        const previewUrl = URL.createObjectURL(file);
+        setCards((prev) =>
+            prev.map((c) => (c.id === id ? { ...c, imageFile: file, previewUrl } : c)),
+        );
+    };
+
+    const removeCard = (id: string) => {
+        if (confirm("Remove this card?")) {
+            setCards((prev) => prev.filter((c) => c.id !== id));
+        }
+    };
 
     return (
         <div className="fixed inset-0 z-50 flex flex-col overflow-y-auto bg-[#F7F7F8]">
@@ -84,7 +151,7 @@ const LessonBuilder = ({ onSave, onDelete, onClose, editingLesson }: LessonBuild
                     variant="primary"
                     color="blue"
                     onClick={handleSave}
-                    disabled={saving}
+                    disabled={saving || cardsLoading}
                     className="min-w-[80px] px-6 py-2 text-sm"
                 >
                     {saving ? <Loader2 size={16} className="animate-spin" /> : "Save"}
@@ -149,13 +216,16 @@ const LessonBuilder = ({ onSave, onDelete, onClose, editingLesson }: LessonBuild
                 <div>
                     <div className="mb-4 flex items-end justify-between px-2">
                         <h3 className="text-2xl font-black text-[#3c3c3c]">
-                            Cards ({lesson.cards.length})
+                            Cards{" "}
+                            {cardsLoading ? (
+                                <Loader2 size={16} className="ml-2 inline animate-spin" />
+                            ) : (
+                                `(${cards.length})`
+                            )}
                         </h3>
                         <button
-                            onClick={() =>
-                                setLesson({ ...lesson, cards: [...lesson.cards, makeCard()] })
-                            }
-                            disabled={saving}
+                            onClick={() => setCards([...cards, makeCard()])}
+                            disabled={saving || cardsLoading}
                             className="flex items-center gap-1 text-sm font-black text-[#1cb0f6] hover:text-[#149fdf] disabled:opacity-50"
                         >
                             <Plus size={18} strokeWidth={3} /> Add Card
@@ -163,21 +233,16 @@ const LessonBuilder = ({ onSave, onDelete, onClose, editingLesson }: LessonBuild
                     </div>
 
                     <div className="space-y-6">
-                        {lesson.cards.map((card, idx) => (
+                        {cards.map((card, idx) => (
                             <div
                                 key={card.id}
-                                className="group relative rounded-[2rem] border-2 border-b-8 border-gray-200 bg-white p-6 shadow-sm transition-colors focus-within:border-[#1cb0f6]"
+                                className="group (focus-within:border-[#1cb0f6]) relative rounded-[2rem] border-2 border-b-8 border-gray-200 bg-white p-6 shadow-sm transition-colors"
                             >
                                 <div className="absolute -top-3 -left-3 flex h-10 w-10 -rotate-3 transform items-center justify-center rounded-xl border-b-4 border-black bg-[#3c3c3c] text-lg font-black text-white shadow-sm">
                                     {idx + 1}
                                 </div>
                                 <button
-                                    onClick={() =>
-                                        setLesson({
-                                            ...lesson,
-                                            cards: lesson.cards.filter((c) => c.id !== card.id),
-                                        })
-                                    }
+                                    onClick={() => removeCard(card.id)}
                                     disabled={saving}
                                     className="absolute top-4 right-4 p-2 text-gray-300 opacity-0 transition-opacity group-hover:opacity-100 hover:text-[#ea2b2b]"
                                 >
@@ -231,13 +296,84 @@ const LessonBuilder = ({ onSave, onDelete, onClose, editingLesson }: LessonBuild
                                             disabled={saving}
                                         />
                                     </div>
+                                    <div className="md:col-span-2">
+                                        <label className="mb-1 block text-[10px] font-black tracking-widest text-[#afafaf] uppercase">
+                                            Card Image (Optional)
+                                        </label>
+                                        <div className="mt-2 flex items-center gap-4">
+                                            {card.previewUrl || card.imageUrl ? (
+                                                <div className="relative h-20 w-20 overflow-hidden rounded-xl border-2 border-gray-200">
+                                                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                                                    <img
+                                                        src={card.previewUrl || card.imageUrl}
+                                                        alt="Card preview"
+                                                        className="h-full w-full object-cover"
+                                                    />
+                                                    <button
+                                                        onClick={() => {
+                                                            // Track the cleared path so we can delete from Storage on save
+                                                            if (card.imagePath) {
+                                                                clearedImagePathsRef.current.push(
+                                                                    card.imagePath,
+                                                                );
+                                                            }
+                                                            setCards((prev) =>
+                                                                prev.map((c) =>
+                                                                    c.id === card.id
+                                                                        ? {
+                                                                              ...c,
+                                                                              imageFile: undefined,
+                                                                              previewUrl: undefined,
+                                                                              imageUrl: undefined,
+                                                                              imagePath: undefined,
+                                                                          }
+                                                                        : c,
+                                                                ),
+                                                            );
+                                                        }}
+                                                        disabled={saving}
+                                                        className="absolute inset-0 flex items-center justify-center bg-black/50 text-white opacity-0 transition-opacity hover:opacity-100"
+                                                    >
+                                                        <Trash2 size={24} />
+                                                    </button>
+                                                </div>
+                                            ) : (
+                                                <div className="flex h-20 w-20 items-center justify-center rounded-xl border-2 border-dashed border-gray-300 bg-gray-50 text-gray-400">
+                                                    <ImageIcon size={24} />
+                                                </div>
+                                            )}
+                                            <div className="flex-1">
+                                                <input
+                                                    type="file"
+                                                    accept="image/*"
+                                                    id={`img-upload-${card.id}`}
+                                                    className="hidden"
+                                                    disabled={saving}
+                                                    onChange={(e) =>
+                                                        handleImageChange(
+                                                            e.target.files?.[0] || null,
+                                                            card.id,
+                                                        )
+                                                    }
+                                                />
+                                                <label
+                                                    htmlFor={`img-upload-${card.id}`}
+                                                    className="inline-block cursor-pointer rounded-xl border-2 border-gray-200 bg-white px-4 py-2 text-sm font-bold text-[#3c3c3c] shadow-sm hover:bg-gray-50"
+                                                >
+                                                    {card.previewUrl || card.imageUrl
+                                                        ? "Change Image"
+                                                        : "Upload Image"}
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         ))}
 
-                        {lesson.cards.length === 0 && (
+                        {!cardsLoading && cards.length === 0 && (
                             <div
-                                onClick={() => setLesson({ ...lesson, cards: [makeCard()] })}
+                                onClick={() => setCards([makeCard()])}
                                 className="cursor-pointer rounded-[2rem] border-4 border-dashed border-gray-300 p-12 text-center text-lg font-bold text-[#afafaf] transition-colors hover:border-[#1cb0f6] hover:bg-white hover:text-[#1cb0f6]"
                             >
                                 <Plus

@@ -2,17 +2,23 @@
 
 import Link from "next/link";
 
-import { BookOpen, Flame, Gamepad2, Trophy } from "lucide-react";
+import { AlertTriangle, BookOpen, Clock, Flame, Gamepad2, Trophy } from "lucide-react";
 
+import { useCards } from "@/features/flashcard/hooks/useCards";
 import { useLessons } from "@/features/flashcard/hooks/useLessons";
+import { useSRS } from "@/features/flashcard/hooks/useSRS";
 import { useUserProgress } from "@/features/user/hooks/useUserProgress";
-import { StatCard } from "@/shared/components/ui";
+import { Button, StatCard } from "@/shared/components/ui";
 import { CARD_INTERACTIVE, SECTION_HEADING, SPACING } from "@/shared/constants";
 
 export default function HomePage() {
     const { userData } = useUserProgress();
     const { lessons } = useLessons();
+    const { cards } = useCards();
+    const { dueCards, newCards } = useSRS(cards);
+
     const recentLessons = [...lessons].sort((a, b) => b.createdAt - a.createdAt).slice(0, 2);
+    const weakCards = cards.filter((c) => c.easeFactor < 2.0);
 
     return (
         <div className="min-h-[100dvh] bg-[#F7F7F8]">
@@ -49,6 +55,38 @@ export default function HomePage() {
                     />
                 </div>
 
+                {/* Deck Learning System Overview */}
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                    <div className="flex flex-col justify-between rounded-[2rem] border-2 border-b-8 border-[#1899d6] bg-[#1cb0f6] p-6 text-white shadow-sm">
+                        <div>
+                            <Clock size={32} className="mb-2 opacity-80" />
+                            <div className="text-4xl font-black">{dueCards.length}</div>
+                            <h3 className="font-bold">Daily Reviews</h3>
+                        </div>
+                        <Button
+                            variant="ghost"
+                            className="mt-4 bg-white text-[#1cb0f6] hover:bg-gray-100"
+                            onClick={() => (window.location.href = "/flashcard")}
+                        >
+                            Review Now
+                        </Button>
+                    </div>
+                    <div className="flex flex-col justify-between rounded-[2rem] border-2 border-b-8 border-[#ea2b2b] bg-[#ff4b4b] p-6 text-white shadow-sm">
+                        <div>
+                            <AlertTriangle size={32} className="mb-2 opacity-80" />
+                            <div className="text-4xl font-black">{weakCards.length}</div>
+                            <h3 className="font-bold">Weak Cards</h3>
+                        </div>
+                        <Button
+                            variant="ghost"
+                            className="mt-4 bg-white text-[#ff4b4b] hover:bg-gray-100"
+                            onClick={() => (window.location.href = "/flashcard")}
+                        >
+                            Practice Weak
+                        </Button>
+                    </div>
+                </div>
+
                 {/* Kana Section */}
                 <div>
                     <h2 className={`${SECTION_HEADING} mb-4`}>Kana Practice</h2>
@@ -76,13 +114,6 @@ export default function HomePage() {
                         </Link>
                     </div>
                     <div className={`flex flex-col ${SPACING.cardGap}`}>
-                        {recentLessons.length === 0 && (
-                            <Link href="/flashcard/new">
-                                <div className="cursor-pointer rounded-[1.5rem] border-2 border-dashed border-gray-300 bg-white p-5 text-center font-bold text-[#afafaf] shadow-sm transition-colors hover:border-[#1cb0f6] hover:text-[#1cb0f6]">
-                                    + Create your first flashcard deck
-                                </div>
-                            </Link>
-                        )}
                         {recentLessons.map((lesson) => (
                             <Link key={lesson.id} href={`/flashcard/${lesson.id}`}>
                                 <div
@@ -93,7 +124,7 @@ export default function HomePage() {
                                             {lesson.title}
                                         </h3>
                                         <p className="text-sm font-bold text-[#afafaf]">
-                                            {lesson.cards.length} cards
+                                            {lesson.cardCount} cards
                                         </p>
                                     </div>
                                     <div className="rounded-2xl border-b-4 border-[#1899d6] bg-[#1cb0f6] p-4 text-white transition-colors group-hover:bg-[#149fdf]">
