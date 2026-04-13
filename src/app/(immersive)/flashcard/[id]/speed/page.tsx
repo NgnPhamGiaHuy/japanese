@@ -13,6 +13,8 @@ import { Leaderboard } from "@/features/game/components";
 import { submitScore } from "@/features/game/services/game.service";
 import { useUserProgress } from "@/features/user/hooks/useUserProgress";
 import { Button } from "@/shared/components/ui";
+import { playAudio } from "@/shared/utils/audio";
+import { allowAudio } from "@/shared/utils/speechPolicy";
 import { useAppStore } from "@/store/useAppStore";
 
 import type { FlashCard } from "@/features/flashcard/types/flashcard.types";
@@ -116,6 +118,11 @@ export default function SpeedQuizPage({ params }: { params: Promise<{ id: string
         const correct = selected === currentCard.meaning;
         setStatus(correct ? "correct" : "wrong");
         if (correct) setScore((s) => s + 1);
+
+        if (currentCard.kanji && allowAudio("speed", "feedback")) {
+            playAudio(currentCard.kanji);
+        }
+
         setTimeout(() => {
             setStatus("idle");
             setSelectedOpt(null);

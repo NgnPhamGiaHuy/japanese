@@ -28,6 +28,7 @@ export interface Lesson {
     isPublic?: boolean;
     shareId?: string;
     publicRole?: "viewer" | "commenter" | "editor";
+    themeColor?: string;
 }
 
 export interface StudyStats {

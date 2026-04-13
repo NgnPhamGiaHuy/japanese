@@ -7,7 +7,7 @@ import { VISUAL_GROUPS } from "@/features/kana/data/visualGroups";
 import { useUserProgress } from "@/features/user/hooks/useUserProgress";
 import { shuffleArray } from "@/shared/utils/array";
 import { playAudio } from "@/shared/utils/audio";
-import { allowAudio } from "../utils/speechPolicy";
+import { allowAudio } from "@/shared/utils/speechPolicy";
 
 import type { KanaChar, QuestionType } from "../types/kana.types";
 

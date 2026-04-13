@@ -139,7 +139,6 @@ const KanaQuizPage = () => {
                                 </div>
                             </button>
                         </div>
-
                     </div>
                 </div>
             </div>

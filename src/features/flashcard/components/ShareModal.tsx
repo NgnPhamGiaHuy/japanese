@@ -6,6 +6,7 @@ import { Check, ChevronDown, Copy, Eye, Globe2, Lock, X } from "lucide-react";
 
 import { buildShareId } from "@/features/flashcard/services/lesson.service";
 import { Button } from "@/shared/components/ui";
+import { hexToThemeColor } from "@/shared/utils/colors";
 import { useAppStore } from "@/store/useAppStore";
 
 import type { Lesson } from "../types/flashcard.types";
@@ -45,6 +46,9 @@ export function ShareModal({ lesson, onShare, onClose }: ShareModalProps) {
     const [openRoleMenu, setOpenRoleMenu] = useState(false);
     const [copied, setCopied] = useState(false);
     const [saving, setSaving] = useState(false);
+
+    const themeHex = lesson.themeColor || "#1cb0f6";
+    const themeColorStr = hexToThemeColor(themeHex);
 
     const handleCopy = async () => {
         if (!shareLink) return;
@@ -112,7 +116,7 @@ export function ShareModal({ lesson, onShare, onClose }: ShareModalProps) {
                                 <div className="flex items-start gap-4">
                                     <div className="mt-1 flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gray-100">
                                         {isPublic ? (
-                                            <Globe2 className="text-[#1cb0f6]" size={20} />
+                                            <Globe2 style={{ color: themeHex }} size={20} />
                                         ) : (
                                             <Lock className="text-gray-400" size={20} />
                                         )}
@@ -157,7 +161,7 @@ export function ShareModal({ lesson, onShare, onClose }: ShareModalProps) {
                                                         </div>
                                                         {!isPublic && (
                                                             <Check
-                                                                className="ml-auto text-[#1cb0f6]"
+                                                                style={{ color: themeHex }}
                                                                 size={20}
                                                             />
                                                         )}
@@ -170,7 +174,7 @@ export function ShareModal({ lesson, onShare, onClose }: ShareModalProps) {
                                                         }}
                                                     >
                                                         <Globe2
-                                                            className="text-[#1cb0f6]"
+                                                            style={{ color: themeHex }}
                                                             size={20}
                                                         />
                                                         <div>
@@ -183,7 +187,7 @@ export function ShareModal({ lesson, onShare, onClose }: ShareModalProps) {
                                                         </div>
                                                         {isPublic && (
                                                             <Check
-                                                                className="ml-auto text-[#1cb0f6]"
+                                                                style={{ color: themeHex }}
                                                                 size={20}
                                                             />
                                                         )}
@@ -239,7 +243,7 @@ export function ShareModal({ lesson, onShare, onClose }: ShareModalProps) {
                                                             {r}
                                                             {role === r && (
                                                                 <Check
-                                                                    className="text-[#1cb0f6]"
+                                                                    style={{ color: themeHex }}
                                                                     size={16}
                                                                 />
                                                             )}
@@ -255,8 +259,11 @@ export function ShareModal({ lesson, onShare, onClose }: ShareModalProps) {
                     ) : (
                         /* ── Viewer / unauthenticated view ─────────────────────────── */
                         <div className="mb-6 flex items-center gap-4 rounded-2xl border-2 border-gray-100 p-4">
-                            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#e5f5ff]">
-                                <Eye className="text-[#1cb0f6]" size={20} />
+                            <div
+                                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full"
+                                style={{ backgroundColor: `${themeHex}20` }}
+                            >
+                                <Eye style={{ color: themeHex }} size={20} />
                             </div>
                             <div>
                                 <p className="font-black text-[#3c3c3c]">View only</p>
@@ -286,7 +293,7 @@ export function ShareModal({ lesson, onShare, onClose }: ShareModalProps) {
 
                         <Button
                             variant="primary"
-                            color="blue"
+                            color={themeColorStr}
                             onClick={handleSave}
                             className="px-8 py-3 text-sm"
                             disabled={saving}

@@ -10,6 +10,7 @@ import { useLessons } from "@/features/flashcard/hooks/useLessons";
 import { ScreenHeader } from "@/shared/components/layout";
 import { Button } from "@/shared/components/ui";
 import { CARD_BASE, SPACING } from "@/shared/constants";
+import { hexToThemeColor } from "@/shared/utils/colors";
 
 import type { Lesson } from "@/features/flashcard/types/flashcard.types";
 
@@ -92,11 +93,17 @@ export default function FlashcardIndexPage() {
                                     </div>
                                     <div className="h-14 w-14 rounded-2xl bg-gray-100" />
                                 </div>
-                                <div className="flex gap-2">
-                                    <div className="h-10 flex-1 rounded-xl bg-gray-100" />
-                                    <div className="h-10 flex-1 rounded-xl bg-gray-100" />
-                                    <div className="h-10 flex-1 rounded-xl bg-gray-100" />
-                                    <div className="h-10 w-10 rounded-xl bg-gray-100" />
+                                <div className="flex flex-col gap-3 sm:flex-row sm:gap-2">
+                                    <div className="flex flex-1 gap-2">
+                                        <div className="h-10 flex-1 rounded-xl bg-gray-100" />
+                                        <div className="h-10 flex-1 rounded-xl bg-gray-100" />
+                                        <div className="h-10 flex-1 rounded-xl bg-gray-100" />
+                                    </div>
+                                    <div className="flex justify-around gap-2 border-t-2 border-gray-50 pt-3 sm:justify-end sm:border-t-0 sm:pt-0">
+                                        <div className="h-10 w-10 flex-1 rounded-xl bg-gray-100 sm:flex-none" />
+                                        <div className="h-10 w-10 flex-1 rounded-xl bg-gray-100 sm:flex-none" />
+                                        <div className="h-10 w-10 flex-1 rounded-xl bg-gray-100 sm:flex-none" />
+                                    </div>
                                 </div>
                             </div>
                         ))}
@@ -174,6 +181,8 @@ function DeckCard({
     onDelete: () => void;
     onShare: () => void;
 }) {
+    const themeColor = lesson.themeColor || "#1cb0f6";
+
     return (
         <div
             className={`${CARD_BASE} transition-all hover:-translate-y-0.5 hover:shadow-md ${SPACING.cardPadding}`}
@@ -191,7 +200,11 @@ function DeckCard({
                             {lesson.tags.map((tag) => (
                                 <span
                                     key={tag}
-                                    className="rounded-lg bg-[#faeaff] px-2 py-1 text-[10px] font-black tracking-wider text-[#ce82ff] uppercase"
+                                    style={{
+                                        color: themeColor,
+                                        backgroundColor: `${themeColor}20`,
+                                    }}
+                                    className="rounded-lg px-2 py-1 text-[10px] font-black tracking-wider uppercase"
                                 >
                                     {tag}
                                 </span>
@@ -200,8 +213,11 @@ function DeckCard({
                     )}
                 </div>
                 <div className="flex shrink-0 flex-col items-center">
-                    <div className="mb-1 flex h-14 w-14 items-center justify-center rounded-2xl bg-[#faeaff]">
-                        <span className="text-2xl font-black text-[#ce82ff]">
+                    <div
+                        className="mb-1 flex h-14 w-14 items-center justify-center rounded-2xl"
+                        style={{ backgroundColor: `${themeColor}20` }}
+                    >
+                        <span className="text-2xl font-black" style={{ color: themeColor }}>
                             {lesson.cardCount}
                         </span>
                     </div>
@@ -209,58 +225,75 @@ function DeckCard({
                 </div>
             </div>
 
-            <div className="flex gap-2">
-                <Link href={`/flashcard/${lesson.id}`} className="flex-1">
-                    <Button
-                        variant="primary"
-                        color="blue"
-                        icon={Play}
-                        className="w-full py-3 text-sm"
+            <div className="mt-2 flex flex-col gap-3 sm:mt-0 sm:flex-row sm:gap-2">
+                <div className="flex flex-1 gap-2">
+                    <Link href={`/flashcard/${lesson.id}`} className="flex-1">
+                        <Button
+                            variant="primary"
+                            color={hexToThemeColor(themeColor)}
+                            icon={Play}
+                            className="w-full flex-col gap-1 px-1 py-2 text-[10px] md:flex-row md:gap-2 md:px-2 md:py-3 md:text-sm"
+                        >
+                            <span className="truncate">Study</span>
+                        </Button>
+                    </Link>
+                    <Link href={`/flashcard/${lesson.id}/speed`} className="flex-1">
+                        <Button
+                            variant="secondary"
+                            color="orange"
+                            icon={Zap}
+                            className="w-full flex-col gap-1 px-1 py-2 text-[10px] md:flex-row md:gap-2 md:px-2 md:py-3 md:text-sm"
+                        >
+                            <span className="truncate">Speed</span>
+                        </Button>
+                    </Link>
+                    <Link href={`/flashcard/${lesson.id}/match`} className="flex-1">
+                        <Button
+                            variant="secondary"
+                            color="purple"
+                            icon={Gamepad2}
+                            className="w-full flex-col gap-1 px-1 py-2 text-[10px] md:flex-row md:gap-2 md:px-2 md:py-3 md:text-sm"
+                        >
+                            <span className="truncate">Match</span>
+                        </Button>
+                    </Link>
+                </div>
+
+                <div className="flex justify-around gap-2 border-t-2 border-gray-100 pt-3 sm:justify-end sm:border-t-0 sm:pt-0">
+                    <button
+                        onClick={onShare}
+                        className="flex flex-1 items-center justify-center rounded-xl p-3 text-gray-300 transition-colors hover:bg-[#ebf8e6] hover:text-[#58cc02] sm:flex-none"
+                        title="Share deck"
                     >
-                        Study
-                    </Button>
-                </Link>
-                <Link href={`/flashcard/${lesson.id}/speed`} className="flex-1">
-                    <Button
-                        variant="secondary"
-                        color="orange"
-                        icon={Zap}
-                        className="w-full py-3 text-sm"
+                        <Share2 size={20} strokeWidth={2.5} />
+                    </button>
+                    <button
+                        onClick={onEdit}
+                        className="flex flex-1 items-center justify-center rounded-xl p-3 text-gray-300 transition-colors sm:flex-none"
+                        style={{
+                            backgroundColor: "transparent",
+                            color: undefined,
+                        }}
+                        onMouseEnter={(e) => {
+                            e.currentTarget.style.backgroundColor = `${themeColor}20`;
+                            e.currentTarget.style.color = themeColor;
+                        }}
+                        onMouseLeave={(e) => {
+                            e.currentTarget.style.backgroundColor = "transparent";
+                            e.currentTarget.style.color = "";
+                        }}
+                        title="Edit deck"
                     >
-                        Speed
-                    </Button>
-                </Link>
-                <Link href={`/flashcard/${lesson.id}/match`} className="flex-1">
-                    <Button
-                        variant="secondary"
-                        color="purple"
-                        icon={Gamepad2}
-                        className="w-full py-3 text-sm"
+                        <Edit2 size={20} strokeWidth={2.5} />
+                    </button>
+                    <button
+                        onClick={onDelete}
+                        className="flex flex-1 items-center justify-center rounded-xl p-3 text-gray-300 transition-colors hover:bg-[#ffdfe0] hover:text-[#ea2b2b] sm:flex-none"
+                        title="Delete deck"
                     >
-                        Match
-                    </Button>
-                </Link>
-                <button
-                    onClick={onShare}
-                    className="rounded-xl p-3 text-gray-300 transition-colors hover:bg-[#ebf8e6] hover:text-[#58cc02]"
-                    title="Share deck"
-                >
-                    <Share2 size={20} strokeWidth={2.5} />
-                </button>
-                <button
-                    onClick={onEdit}
-                    className="rounded-xl p-3 text-gray-300 transition-colors hover:bg-[#e5f5ff] hover:text-[#1cb0f6]"
-                    title="Edit deck"
-                >
-                    <Edit2 size={20} strokeWidth={2.5} />
-                </button>
-                <button
-                    onClick={onDelete}
-                    className="rounded-xl p-3 text-gray-300 transition-colors hover:bg-[#ffdfe0] hover:text-[#ea2b2b]"
-                    title="Delete deck"
-                >
-                    <Trash2 size={20} strokeWidth={2.5} />
-                </button>
+                        <Trash2 size={20} strokeWidth={2.5} />
+                    </button>
+                </div>
             </div>
         </div>
     );

@@ -2,8 +2,8 @@
 
 import { Check, Volume2, X } from "lucide-react";
 
-import { allowAudio } from "@/features/kana/utils/speechPolicy";
 import { playAudio } from "@/shared/utils/audio";
+import { allowAudio } from "@/shared/utils/speechPolicy";
 
 import type { KanaChar, QuestionType } from "@/features/kana/types/kana.types";
 

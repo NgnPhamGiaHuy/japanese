@@ -7,6 +7,7 @@ import { Check, Volume2, X } from "lucide-react";
 import { Button } from "@/shared/components/ui";
 import { shuffleArray } from "@/shared/utils/array";
 import { playAudio } from "@/shared/utils/audio";
+import { hexToThemeColor } from "@/shared/utils/colors";
 import { useAppStore } from "@/store/useAppStore";
 import { useSRS } from "../hooks/useSRS";
 
@@ -23,6 +24,7 @@ interface FlashcardPlayerProps {
 const FlashcardPlayer = ({ lesson, cards, mode, onClose, onComplete }: FlashcardPlayerProps) => {
     const { processReview } = useSRS(cards);
     const { globalAutoPlay } = useAppStore();
+    const themeHex = lesson.themeColor || "#1cb0f6";
 
     const [queue, setQueue] = useState<FlashCard[]>([]);
     const [currentIndex, setCurrentIndex] = useState(0);
@@ -97,8 +99,11 @@ const FlashcardPlayer = ({ lesson, cards, mode, onClose, onComplete }: Flashcard
         const xpEarned = mode === "test" ? stats.correct * 5 : stats.correct * 2;
         return (
             <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-[#F7F7F8] p-6 text-center">
-                <div className="mb-6 flex h-24 w-24 -rotate-6 transform items-center justify-center rounded-[2rem] border-b-8 border-[#58a700] bg-[#58cc02] text-white shadow-sm">
-                    <Check size={56} strokeWidth={4} />
+                <div
+                    className="mb-6 flex h-24 w-24 -rotate-6 transform items-center justify-center rounded-[2rem] border-b-8 shadow-sm"
+                    style={{ backgroundColor: themeHex, borderColor: `${themeHex}AA` }}
+                >
+                    <Check size={56} className="text-white" strokeWidth={4} />
                 </div>
                 <h2 className="mb-2 text-4xl font-black text-[#3c3c3c]">Session Complete!</h2>
                 <p className="mb-8 text-lg font-bold text-[#afafaf]">
@@ -120,7 +125,7 @@ const FlashcardPlayer = ({ lesson, cards, mode, onClose, onComplete }: Flashcard
                 </div>
                 <Button
                     variant="primary"
-                    color="blue"
+                    color={hexToThemeColor(themeHex)}
                     onClick={() => onComplete(stats)}
                     className="w-full max-w-xs py-5 text-xl"
                 >
@@ -137,8 +142,11 @@ const FlashcardPlayer = ({ lesson, cards, mode, onClose, onComplete }: Flashcard
                 <div className="mx-4 flex-1">
                     <div className="h-4 overflow-hidden rounded-full bg-gray-200">
                         <div
-                            className="h-full bg-[#1cb0f6] transition-all duration-300"
-                            style={{ width: `${progress}%` }}
+                            className="h-full transition-all duration-300"
+                            style={{
+                                width: `${progress}%`,
+                                backgroundColor: themeHex,
+                            }}
                         />
                     </div>
                 </div>
@@ -147,20 +155,20 @@ const FlashcardPlayer = ({ lesson, cards, mode, onClose, onComplete }: Flashcard
                 </span>
             </header>
 
-            <div className="perspective-1000 mx-auto flex w-full max-w-md flex-1 flex-col items-center justify-center p-6">
+            <div className="perspective-1000 mx-auto flex w-full max-w-md flex-1 flex-col items-center justify-center p-4 sm:p-6">
                 <div
                     className={`preserve-3d relative flex aspect-[3/4] w-full cursor-pointer flex-col justify-center transition-all duration-500 ${isFlipped ? "rotate-y-180" : ""}`}
                     onClick={() => setIsFlipped(!isFlipped)}
                 >
                     {/* Front of Card */}
-                    <div className="absolute inset-0 flex flex-col items-center justify-center rounded-[3rem] border-2 border-b-8 border-gray-200 bg-white p-8 text-center shadow-sm transition-transform backface-hidden hover:-translate-y-2 hover:shadow-md">
+                    <div className="absolute inset-0 flex flex-col items-center justify-center rounded-[2.5rem] border-2 border-b-8 border-gray-200 bg-white p-6 text-center shadow-sm transition-transform backface-hidden hover:-translate-y-1 hover:shadow-md sm:rounded-[3rem] sm:p-8 sm:hover:-translate-y-2">
                         {mode !== "test" && card.furigana && (
-                            <span className="mb-4 text-2xl font-bold tracking-widest text-[#afafaf]">
+                            <span className="mb-2 shrink-0 text-xl font-bold tracking-widest text-[#afafaf] sm:mb-4 sm:text-2xl">
                                 {card.furigana}
                             </span>
                         )}
                         {card.imageUrl ? (
-                            <div className="mb-6 h-40 w-full overflow-hidden rounded-2xl">
+                            <div className="mb-4 h-32 w-full shrink-0 overflow-hidden rounded-2xl sm:mb-6 sm:h-40">
                                 {/* eslint-disable-next-line @next/next/no-img-element */}
                                 <img
                                     src={card.imageUrl}
@@ -169,55 +177,63 @@ const FlashcardPlayer = ({ lesson, cards, mode, onClose, onComplete }: Flashcard
                                 />
                             </div>
                         ) : null}
-                        <h1
-                            className={`${card.imageUrl ? "text-[3rem]" : "text-[5rem]"} leading-tight font-medium break-words text-[#3c3c3c] select-none`}
-                        >
-                            {card.kanji}
-                        </h1>
-                        <p className="absolute bottom-8 animate-pulse text-sm font-black tracking-widest text-gray-300 uppercase">
+
+                        <div className="flex w-full flex-1 flex-col items-center justify-center overflow-y-auto px-2 pt-2 pb-8 sm:pb-10">
+                            <h1
+                                className={`leading-tight font-black break-words text-[#3c3c3c] uppercase select-none ${card.imageUrl ? "text-3xl sm:text-4xl" : "text-4xl sm:text-5xl md:text-6xl"}`}
+                            >
+                                {card.kanji}
+                            </h1>
+                        </div>
+
+                        <p className="absolute bottom-6 shrink-0 animate-pulse text-xs font-black tracking-widest text-gray-300 uppercase sm:bottom-8 sm:text-sm">
                             Tap to reveal
                         </p>
                     </div>
 
                     {/* Back of Card / Answer Side */}
-                    <div className="absolute inset-0 flex rotate-y-180 flex-col items-center justify-center rounded-[3rem] border-2 border-b-8 border-gray-200 bg-white p-8 text-center shadow-sm backface-hidden">
+                    <div className="absolute inset-0 flex rotate-y-180 flex-col items-center justify-center rounded-[2.5rem] border-2 border-b-8 border-gray-200 bg-white p-6 text-center shadow-sm backface-hidden sm:rounded-[3rem] sm:p-8">
                         <button
                             onClick={(e) => {
                                 e.stopPropagation();
                                 playAudio(card.kanji);
                             }}
-                            className="absolute top-6 right-6 rounded-full bg-gray-100 p-3 text-gray-500 hover:bg-gray-200"
+                            className="absolute top-4 right-4 z-10 shrink-0 rounded-full bg-gray-100 p-2 text-gray-500 transition-colors hover:bg-gray-200 sm:top-6 sm:right-6 sm:p-3"
                         >
-                            <Volume2 size={24} />
+                            <Volume2 className="h-5 w-5 sm:h-6 sm:w-6" />
                         </button>
 
-                        {mode === "test" && card.furigana && (
-                            <span className="mb-2 text-xl font-bold text-gray-400">
-                                {card.furigana}
-                            </span>
-                        )}
+                        <div className="flex w-full flex-1 flex-col items-center justify-center overflow-y-auto px-2 pt-10 pb-4 sm:pt-4">
+                            {mode === "test" && card.furigana && (
+                                <span className="mb-2 text-lg font-bold text-gray-400 sm:text-xl">
+                                    {card.furigana}
+                                </span>
+                            )}
 
-                        <h2 className="mb-6 text-4xl leading-tight font-black text-[#1cb0f6]">
-                            {card.meaning}
-                        </h2>
+                            <h2 className="mb-4 text-2xl leading-tight font-black break-words text-[#1cb0f6] sm:mb-6 sm:text-3xl md:text-4xl">
+                                {card.meaning}
+                            </h2>
 
-                        {card.example && (
-                            <div className="mt-4 max-h-[150px] w-full overflow-y-auto rounded-2xl border-2 border-gray-100 bg-gray-50 p-5">
-                                <p className="text-lg font-bold text-[#3c3c3c]">{card.example}</p>
-                            </div>
-                        )}
+                            {card.example && (
+                                <div className="mt-2 w-full shrink-0 rounded-2xl border-2 border-gray-100 bg-gray-50 p-4 text-left sm:mt-4 sm:p-5">
+                                    <p className="text-sm font-bold break-words text-[#3c3c3c] sm:text-base md:text-lg">
+                                        {card.example}
+                                    </p>
+                                </div>
+                            )}
+                        </div>
                     </div>
                 </div>
 
                 <div
-                    className={`mt-10 flex w-full gap-4 transition-opacity duration-300 ${isFlipped ? "opacity-100" : "pointer-events-none opacity-0"}`}
+                    className={`mt-6 flex w-full gap-2 transition-opacity duration-300 sm:mt-10 sm:gap-4 ${isFlipped ? "opacity-100" : "pointer-events-none opacity-0"}`}
                     onClick={(e) => e.stopPropagation()}
                 >
                     <Button
                         variant="secondary"
                         color="orange"
                         onClick={() => handleAnswer(false)}
-                        className="flex-1 py-5 text-xl"
+                        className="flex-1 py-4 text-lg sm:py-5 sm:text-xl"
                     >
                         {mode === "test" ? "Incorrect" : "Review Again"}
                     </Button>
@@ -225,7 +241,7 @@ const FlashcardPlayer = ({ lesson, cards, mode, onClose, onComplete }: Flashcard
                         variant="primary"
                         color="green"
                         onClick={() => handleAnswer(true)}
-                        className="flex-1 py-5 text-xl"
+                        className="flex-1 py-4 text-lg sm:py-5 sm:text-xl"
                     >
                         {mode === "test" ? "Correct" : "Got It"}
                     </Button>

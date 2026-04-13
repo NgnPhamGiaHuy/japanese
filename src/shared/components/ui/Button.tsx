@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 import type { LucideIcon } from "lucide-react";
 
 type AlphabetMode = "hiragana" | "katakana" | "both";
-type ThemeColor = "blue" | "green" | "purple" | "orange" | "red" | "gray" | "teal";
+type ThemeColor = "blue" | "green" | "purple" | "orange" | "red" | "gray" | "teal" | "pink";
 type Variant = "primary" | "secondary" | "outline" | "ghost";
 
 const ALPHABET_MAP: Record<AlphabetMode, ThemeColor> = {
@@ -57,6 +57,12 @@ const THEMES: Record<ThemeColor, { bg: string; border: string; hover: string; te
         hover: "hover:bg-[#00b8ca]",
         text: "text-[#00d1e0]",
     },
+    pink: {
+        bg: "bg-[#ff66bb]",
+        border: "border-[#e056a4]",
+        hover: "hover:bg-[#ff88cc]",
+        text: "text-[#ff66bb]",
+    },
 };
 
 interface ButtonProps {
@@ -64,7 +70,6 @@ interface ButtonProps {
     onClick?: () => void;
     variant?: Variant;
     color?: ThemeColor;
-    /** When set, overrides `color` using the kana alphabet theme */
     alphabet?: AlphabetMode;
     className?: string;
     icon?: LucideIcon;

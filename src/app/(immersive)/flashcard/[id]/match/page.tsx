@@ -12,6 +12,8 @@ import { useLessons } from "@/features/flashcard/hooks/useLessons";
 import { useUserProgress } from "@/features/user/hooks/useUserProgress";
 import { Button } from "@/shared/components/ui";
 import { shuffleArray } from "@/shared/utils/array";
+import { playAudio } from "@/shared/utils/audio";
+import { allowAudio } from "@/shared/utils/speechPolicy";
 
 interface MatchItem {
     id: string;
@@ -72,12 +74,25 @@ export default function MatchModePage({ params }: { params: Promise<{ id: string
             }
             setSelected([first, item]);
             if (first.matchId === item.matchId && first.type !== item.type) {
+                if (allowAudio("match", "feedback")) {
+                    const jpText = first.type === "kanji" ? first.text : item.text;
+                    playAudio(jpText);
+                }
                 setTimeout(() => {
                     setMatched((p) => [...p, first.id, item.id]);
                     setSelected([]);
                     setScore((s) => s + 1);
                 }, 300);
             } else {
+                if (allowAudio("match", "feedback")) {
+                    const jpText =
+                        first.type === "kanji"
+                            ? first.text
+                            : item.type === "kanji"
+                              ? item.text
+                              : null;
+                    if (jpText) playAudio(jpText);
+                }
                 setErrorIds([first.id, item.id]);
                 setTimeout(() => {
                     setSelected([]);

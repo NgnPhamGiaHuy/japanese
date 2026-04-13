@@ -5,10 +5,14 @@ import { useEffect, useRef, useState } from "react";
 import { Image as ImageIcon, Loader2, Plus, Trash2, X } from "lucide-react";
 
 import { Button } from "@/shared/components/ui";
+import { hexToThemeColor } from "@/shared/utils/colors";
 import { useAppStore } from "@/store/useAppStore";
+import { ImportPreview } from "./ImportPreview";
 import { useCards } from "../hooks/useCards";
 import { deleteCardImage, uploadCardImage } from "../services/image.service";
+import { parseCSV, parseText } from "../utils/parser";
 
+import type { ImportRow } from "./ImportPreview";
 import type { FlashCard, Lesson } from "../types/flashcard.types";
 
 type EditorCard = FlashCard & { imageFile?: File; previewUrl?: string };
@@ -52,6 +56,9 @@ export const LessonBuilder = ({ onSave, onDelete, onClose, editingLesson }: Less
     const [cards, setCards] = useState<EditorCard[]>([]);
     const [tagInput, setTagInput] = useState("");
     const [saving, setSaving] = useState(false);
+    const [importMode, setImportMode] = useState<"manual" | "paste" | "file">("manual");
+    const [pasteText, setPasteText] = useState("");
+    const [previewRows, setPreviewRows] = useState<ImportRow[] | null>(null);
     // Tracks Storage paths of images that were cleared mid-session so we can
     // delete them from Storage after a successful save.
     const clearedImagePathsRef = useRef<string[]>([]);
@@ -134,8 +141,14 @@ export const LessonBuilder = ({ onSave, onDelete, onClose, editingLesson }: Less
         }
     };
 
+    const themeHex = lesson.themeColor || "#1cb0f6";
+    const themeColorStr = hexToThemeColor(themeHex);
+
     return (
-        <div className="fixed inset-0 z-50 flex flex-col overflow-y-auto bg-[#F7F7F8]">
+        <div
+            className="fixed inset-0 z-50 flex flex-col overflow-y-auto bg-[#F7F7F8]"
+            style={{ "--theme-color": themeHex } as React.CSSProperties}
+        >
             <header className="sticky top-0 z-10 flex items-center justify-between border-b-2 border-gray-200 bg-white/90 px-4 py-4 backdrop-blur-md">
                 <Button
                     variant="ghost"
@@ -149,7 +162,7 @@ export const LessonBuilder = ({ onSave, onDelete, onClose, editingLesson }: Less
                 </h2>
                 <Button
                     variant="primary"
-                    color="blue"
+                    color={themeColorStr}
                     onClick={handleSave}
                     disabled={saving || cardsLoading}
                     className="min-w-[80px] px-6 py-2 text-sm"
@@ -164,7 +177,7 @@ export const LessonBuilder = ({ onSave, onDelete, onClose, editingLesson }: Less
                     <input
                         type="text"
                         placeholder="Deck Title (e.g. JLPT N5 Verbs)"
-                        className="w-full border-b-2 border-transparent bg-transparent pb-2 text-3xl font-black text-[#3c3c3c] placeholder-gray-300 transition-colors outline-none focus:border-[#1cb0f6]"
+                        className="w-full border-b-2 border-transparent bg-transparent pb-2 text-3xl font-black text-[#3c3c3c] placeholder-gray-300 transition-colors outline-none focus:border-[var(--theme-color)]"
                         value={lesson.title}
                         onChange={(e) => setLesson({ ...lesson, title: e.target.value })}
                         autoFocus={!editingLesson}
@@ -172,7 +185,7 @@ export const LessonBuilder = ({ onSave, onDelete, onClose, editingLesson }: Less
                     />
                     <textarea
                         placeholder="Describe what this deck is about..."
-                        className="h-20 w-full resize-none border-b-2 border-transparent bg-transparent font-bold text-[#afafaf] placeholder-gray-300 transition-colors outline-none focus:border-[#1cb0f6]"
+                        className="h-20 w-full resize-none border-b-2 border-transparent bg-transparent font-bold text-[#afafaf] placeholder-gray-300 transition-colors outline-none focus:border-[var(--theme-color)]"
                         value={lesson.description}
                         onChange={(e) => setLesson({ ...lesson, description: e.target.value })}
                         disabled={saving}
@@ -204,188 +217,346 @@ export const LessonBuilder = ({ onSave, onDelete, onClose, editingLesson }: Less
                             type="text"
                             placeholder="Add tag and press Enter..."
                             value={tagInput}
-                            className="w-full max-w-xs rounded-xl border-2 border-gray-200 bg-white px-4 py-3 text-sm font-bold placeholder-gray-300 transition-colors outline-none focus:border-[#1cb0f6]"
+                            className="mb-4 w-full max-w-xs rounded-xl border-2 border-gray-200 bg-white px-4 py-3 text-sm font-bold placeholder-gray-300 transition-colors outline-none focus:border-[var(--theme-color)]"
                             onChange={(e) => setTagInput(e.target.value)}
                             onKeyDown={addTag}
                             disabled={saving}
                         />
+
+                        {/* Theme Picker */}
+                        <div className="border-t-2 border-gray-100 pt-4">
+                            <label className="mb-3 block text-xs font-black tracking-wider text-[#afafaf] uppercase">
+                                Theme Color
+                            </label>
+                            <div className="flex flex-wrap gap-3">
+                                {[
+                                    "#1cb0f6", // Blue (Default)
+                                    "#58cc02", // Green
+                                    "#ff9600", // Orange
+                                    "#ce82ff", // Purple
+                                    "#ea2b2b", // Red
+                                    "#ff66bb", // Pink
+                                ].map((color) => (
+                                    <button
+                                        key={color}
+                                        type="button"
+                                        onClick={() => setLesson({ ...lesson, themeColor: color })}
+                                        className={`h-12 w-12 rounded-full border-[3px] transition-all hover:scale-110 active:scale-95 ${
+                                            (lesson.themeColor || "#1cb0f6") === color
+                                                ? "border-black shadow-sm"
+                                                : "border-transparent opacity-80 hover:opacity-100"
+                                        }`}
+                                        style={{ backgroundColor: color }}
+                                    />
+                                ))}
+                            </div>
+                        </div>
                     </div>
                 </div>
 
-                {/* Cards */}
-                <div>
-                    <div className="mb-4 flex items-end justify-between px-2">
-                        <h3 className="text-2xl font-black text-[#3c3c3c]">
-                            Cards{" "}
-                            {cardsLoading ? (
-                                <Loader2 size={16} className="ml-2 inline animate-spin" />
-                            ) : (
-                                `(${cards.length})`
-                            )}
-                        </h3>
+                {/* Input Mode Tabs */}
+                <div className="mb-6 flex overflow-hidden rounded-2xl border-2 border-gray-200 bg-white shadow-sm">
+                    {(["manual", "paste", "file"] as const).map((mode) => (
                         <button
-                            onClick={() => setCards([...cards, makeCard()])}
-                            disabled={saving || cardsLoading}
-                            className="flex items-center gap-1 text-sm font-black text-[#1cb0f6] hover:text-[#149fdf] disabled:opacity-50"
+                            key={mode}
+                            onClick={() => {
+                                setImportMode(mode);
+                                setPreviewRows(null);
+                            }}
+                            className={`flex flex-1 items-center justify-center p-4 text-sm font-black uppercase transition-colors ${importMode === mode ? "text-white" : "text-[#afafaf] hover:bg-gray-50"}`}
+                            style={importMode === mode ? { backgroundColor: themeHex } : {}}
                         >
-                            <Plus size={18} strokeWidth={3} /> Add Card
+                            {mode}
                         </button>
+                    ))}
+                </div>
+
+                {previewRows ? (
+                    <ImportPreview
+                        initialRows={previewRows}
+                        themeColor={themeHex}
+                        onCancel={() => setPreviewRows(null)}
+                        onConfirm={(validRows) => {
+                            const newCards = validRows.map((r) => ({
+                                ...makeCard(),
+                                kanji: r.kanji,
+                                furigana: r.furigana,
+                                meaning: r.meaning,
+                                example: r.example,
+                            }));
+                            setCards((prev) => [...prev, ...newCards]);
+                            setPreviewRows(null);
+                            setImportMode("manual");
+                            setPasteText("");
+                        }}
+                    />
+                ) : importMode === "paste" ? (
+                    <div className="space-y-4">
+                        <textarea
+                            className="h-64 w-full resize-none rounded-2xl border-2 border-gray-200 bg-white p-4 font-bold text-[#3c3c3c] outline-none focus:border-[var(--theme-color)]"
+                            placeholder="Paste your text here...&#10;Format:&#10;word,meaning&#10;kanji,furigana,meaning"
+                            value={pasteText}
+                            onChange={(e) => setPasteText(e.target.value)}
+                            disabled={saving}
+                        />
+                        <Button
+                            variant="primary"
+                            color={themeColorStr}
+                            onClick={() => {
+                                const result = parseText(pasteText);
+                                const rows: ImportRow[] = [
+                                    ...result.valid.map((r, i) => ({
+                                        id: `valid_${Date.now()}_${i}`,
+                                        kanji: r.kanji || "",
+                                        furigana: r.furigana || "",
+                                        meaning: r.meaning || "",
+                                        example: r.example || "",
+                                        isInvalid: false,
+                                    })),
+                                    ...result.invalid.map((r, i) => ({
+                                        id: `invalid_${Date.now()}_${i}`,
+                                        kanji: r.row || "",
+                                        furigana: "",
+                                        meaning: "",
+                                        example: "",
+                                        isInvalid: true,
+                                        errorMsg: r.error,
+                                        originalText: r.row,
+                                    })),
+                                ];
+                                setPreviewRows(rows);
+                            }}
+                            disabled={!pasteText.trim()}
+                            className="w-full"
+                        >
+                            Preview
+                        </Button>
                     </div>
-
-                    <div className="space-y-6">
-                        {cards.map((card, idx) => (
-                            <div
-                                key={card.id}
-                                className="group (focus-within:border-[#1cb0f6]) relative rounded-[2rem] border-2 border-b-8 border-gray-200 bg-white p-6 shadow-sm transition-colors"
+                ) : importMode === "file" ? (
+                    <div className="flex flex-col items-center justify-center space-y-4 rounded-[2rem] border-4 border-dashed border-gray-300 bg-white p-12 text-center transition-colors hover:border-[var(--theme-color)]">
+                        <input
+                            type="file"
+                            accept=".csv,.txt"
+                            id="file-upload"
+                            className="hidden"
+                            onChange={async (e) => {
+                                const file = e.target.files?.[0];
+                                if (!file) return;
+                                const result = await parseCSV(file);
+                                const rows: ImportRow[] = [
+                                    ...result.valid.map((r, i) => ({
+                                        id: `valid_${Date.now()}_${i}`,
+                                        kanji: r.kanji || "",
+                                        furigana: r.furigana || "",
+                                        meaning: r.meaning || "",
+                                        example: r.example || "",
+                                        isInvalid: false,
+                                    })),
+                                    ...result.invalid.map((r, i) => ({
+                                        id: `invalid_${Date.now()}_${i}`,
+                                        kanji: r.row || "",
+                                        furigana: "",
+                                        meaning: "",
+                                        example: "",
+                                        isInvalid: true,
+                                        errorMsg: r.error,
+                                        originalText: r.row,
+                                    })),
+                                ];
+                                setPreviewRows(rows);
+                                e.target.value = "";
+                            }}
+                        />
+                        <label
+                            htmlFor="file-upload"
+                            className="cursor-pointer text-lg font-bold text-[#afafaf] transition-colors"
+                            style={{ color: themeHex }}
+                        >
+                            Click to select CSV or TXT file
+                        </label>
+                    </div>
+                ) : (
+                    <div>
+                        <div className="mb-4 flex items-end justify-between px-2">
+                            <h3 className="text-2xl font-black text-[#3c3c3c]">
+                                Cards{" "}
+                                {cardsLoading ? (
+                                    <Loader2 size={16} className="ml-2 inline animate-spin" />
+                                ) : (
+                                    `(${cards.length})`
+                                )}
+                            </h3>
+                            <button
+                                onClick={() => setCards([...cards, makeCard()])}
+                                disabled={saving || cardsLoading}
+                                className="flex items-center gap-1 text-sm font-black hover:opacity-80 disabled:opacity-50"
+                                style={{ color: themeHex }}
                             >
-                                <div className="absolute -top-3 -left-3 flex h-10 w-10 -rotate-3 transform items-center justify-center rounded-xl border-b-4 border-black bg-[#3c3c3c] text-lg font-black text-white shadow-sm">
-                                    {idx + 1}
-                                </div>
-                                <button
-                                    onClick={() => removeCard(card.id)}
-                                    disabled={saving}
-                                    className="absolute top-4 right-4 p-2 text-gray-300 opacity-0 transition-opacity group-hover:opacity-100 hover:text-[#ea2b2b]"
-                                >
-                                    <Trash2 size={24} strokeWidth={2.5} />
-                                </button>
+                                <Plus size={18} strokeWidth={3} /> Add Card
+                            </button>
+                        </div>
 
-                                <div className="mt-4 grid grid-cols-1 gap-6 md:grid-cols-2">
-                                    {(["kanji", "furigana"] as const).map((field) => (
-                                        <div key={field}>
+                        <div className="space-y-6">
+                            {cards.map((card, idx) => (
+                                <div
+                                    key={card.id}
+                                    className="group relative rounded-[2rem] border-2 border-b-8 border-gray-200 bg-white p-6 shadow-sm transition-colors focus-within:border-[var(--theme-color)]"
+                                >
+                                    <div className="absolute -top-3 -left-3 flex h-10 w-10 -rotate-3 transform items-center justify-center rounded-xl border-b-4 border-black bg-[#3c3c3c] text-lg font-black text-white shadow-sm">
+                                        {idx + 1}
+                                    </div>
+                                    <button
+                                        onClick={() => removeCard(card.id)}
+                                        disabled={saving}
+                                        className="absolute top-4 right-4 p-2 text-gray-300 opacity-0 transition-opacity group-hover:opacity-100 hover:text-[#ea2b2b]"
+                                    >
+                                        <Trash2 size={24} strokeWidth={2.5} />
+                                    </button>
+
+                                    <div className="mt-4 grid grid-cols-1 gap-6 md:grid-cols-2">
+                                        {(["kanji", "furigana"] as const).map((field) => (
+                                            <div key={field}>
+                                                <label className="mb-1 block text-[10px] font-black tracking-widest text-[#afafaf] uppercase">
+                                                    {field === "kanji"
+                                                        ? "Kanji / Word"
+                                                        : "Furigana"}
+                                                </label>
+                                                <input
+                                                    className={`w-full border-b-2 border-gray-100 bg-transparent pb-2 font-black text-[#3c3c3c] transition-colors outline-none focus:border-[var(--theme-color)] ${field === "kanji" ? "text-3xl" : "text-xl font-bold"}`}
+                                                    placeholder={
+                                                        field === "kanji" ? "食べる" : "たべる"
+                                                    }
+                                                    value={card[field]}
+                                                    onChange={(e) =>
+                                                        updateCard(card.id, field, e.target.value)
+                                                    }
+                                                    disabled={saving}
+                                                />
+                                            </div>
+                                        ))}
+                                        <div className="md:col-span-2">
                                             <label className="mb-1 block text-[10px] font-black tracking-widest text-[#afafaf] uppercase">
-                                                {field === "kanji" ? "Kanji / Word" : "Furigana"}
+                                                Meaning
                                             </label>
                                             <input
-                                                className={`w-full border-b-2 border-gray-100 bg-transparent pb-2 font-black text-[#3c3c3c] transition-colors outline-none focus:border-[#1cb0f6] ${field === "kanji" ? "text-3xl" : "text-xl font-bold"}`}
-                                                placeholder={
-                                                    field === "kanji" ? "食べる" : "たべる"
-                                                }
-                                                value={card[field]}
+                                                className="w-full border-b-2 border-gray-100 bg-transparent pb-2 text-xl font-bold text-[#3c3c3c] transition-colors outline-none focus:border-[var(--theme-color)]"
+                                                placeholder="To eat"
+                                                value={card.meaning}
                                                 onChange={(e) =>
-                                                    updateCard(card.id, field, e.target.value)
+                                                    updateCard(card.id, "meaning", e.target.value)
                                                 }
                                                 disabled={saving}
                                             />
                                         </div>
-                                    ))}
-                                    <div className="md:col-span-2">
-                                        <label className="mb-1 block text-[10px] font-black tracking-widest text-[#afafaf] uppercase">
-                                            Meaning
-                                        </label>
-                                        <input
-                                            className="w-full border-b-2 border-gray-100 bg-transparent pb-2 text-xl font-bold text-[#3c3c3c] transition-colors outline-none focus:border-[#1cb0f6]"
-                                            placeholder="To eat"
-                                            value={card.meaning}
-                                            onChange={(e) =>
-                                                updateCard(card.id, "meaning", e.target.value)
-                                            }
-                                            disabled={saving}
-                                        />
-                                    </div>
-                                    <div className="md:col-span-2">
-                                        <label className="mb-1 block text-[10px] font-black tracking-widest text-[#afafaf] uppercase">
-                                            Example Sentence (Optional)
-                                        </label>
-                                        <input
-                                            className="w-full border-b-2 border-gray-100 bg-transparent pb-2 text-base font-bold text-gray-400 transition-colors outline-none focus:border-[#1cb0f6]"
-                                            placeholder="りんごを食べる。"
-                                            value={card.example}
-                                            onChange={(e) =>
-                                                updateCard(card.id, "example", e.target.value)
-                                            }
-                                            disabled={saving}
-                                        />
-                                    </div>
-                                    <div className="md:col-span-2">
-                                        <label className="mb-1 block text-[10px] font-black tracking-widest text-[#afafaf] uppercase">
-                                            Card Image (Optional)
-                                        </label>
-                                        <div className="mt-2 flex items-center gap-4">
-                                            {card.previewUrl || card.imageUrl ? (
-                                                <div className="relative h-20 w-20 overflow-hidden rounded-xl border-2 border-gray-200">
-                                                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                                                    <img
-                                                        src={card.previewUrl || card.imageUrl}
-                                                        alt="Card preview"
-                                                        className="h-full w-full object-cover"
-                                                    />
-                                                    <button
-                                                        onClick={() => {
-                                                            // Track the cleared path so we can delete from Storage on save
-                                                            if (card.imagePath) {
-                                                                clearedImagePathsRef.current.push(
-                                                                    card.imagePath,
+                                        <div className="md:col-span-2">
+                                            <label className="mb-1 block text-[10px] font-black tracking-widest text-[#afafaf] uppercase">
+                                                Example Sentence (Optional)
+                                            </label>
+                                            <input
+                                                className="w-full border-b-2 border-gray-100 bg-transparent pb-2 text-base font-bold text-gray-400 transition-colors outline-none focus:border-[var(--theme-color)]"
+                                                placeholder="りんごを食べる。"
+                                                value={card.example}
+                                                onChange={(e) =>
+                                                    updateCard(card.id, "example", e.target.value)
+                                                }
+                                                disabled={saving}
+                                            />
+                                        </div>
+                                        <div className="md:col-span-2">
+                                            <label className="mb-1 block text-[10px] font-black tracking-widest text-[#afafaf] uppercase">
+                                                Card Image (Optional)
+                                            </label>
+                                            <div className="mt-2 flex items-center gap-4">
+                                                {card.previewUrl || card.imageUrl ? (
+                                                    <div className="relative h-20 w-20 overflow-hidden rounded-xl border-2 border-gray-200">
+                                                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                                                        <img
+                                                            src={card.previewUrl || card.imageUrl}
+                                                            alt="Card preview"
+                                                            className="h-full w-full object-cover"
+                                                        />
+                                                        <button
+                                                            onClick={() => {
+                                                                // Track the cleared path so we can delete from Storage on save
+                                                                if (card.imagePath) {
+                                                                    clearedImagePathsRef.current.push(
+                                                                        card.imagePath,
+                                                                    );
+                                                                }
+                                                                setCards((prev) =>
+                                                                    prev.map((c) =>
+                                                                        c.id === card.id
+                                                                            ? {
+                                                                                  ...c,
+                                                                                  imageFile:
+                                                                                      undefined,
+                                                                                  previewUrl:
+                                                                                      undefined,
+                                                                                  imageUrl:
+                                                                                      undefined,
+                                                                                  imagePath:
+                                                                                      undefined,
+                                                                              }
+                                                                            : c,
+                                                                    ),
                                                                 );
-                                                            }
-                                                            setCards((prev) =>
-                                                                prev.map((c) =>
-                                                                    c.id === card.id
-                                                                        ? {
-                                                                              ...c,
-                                                                              imageFile: undefined,
-                                                                              previewUrl: undefined,
-                                                                              imageUrl: undefined,
-                                                                              imagePath: undefined,
-                                                                          }
-                                                                        : c,
-                                                                ),
-                                                            );
-                                                        }}
+                                                            }}
+                                                            disabled={saving}
+                                                            className="absolute inset-0 flex items-center justify-center bg-black/50 text-white opacity-0 transition-opacity hover:opacity-100"
+                                                        >
+                                                            <Trash2 size={24} />
+                                                        </button>
+                                                    </div>
+                                                ) : (
+                                                    <div className="flex h-20 w-20 items-center justify-center rounded-xl border-2 border-dashed border-gray-300 bg-gray-50 text-gray-400">
+                                                        <ImageIcon size={24} />
+                                                    </div>
+                                                )}
+                                                <div className="flex-1">
+                                                    <input
+                                                        type="file"
+                                                        accept="image/*"
+                                                        id={`img-upload-${card.id}`}
+                                                        className="hidden"
                                                         disabled={saving}
-                                                        className="absolute inset-0 flex items-center justify-center bg-black/50 text-white opacity-0 transition-opacity hover:opacity-100"
+                                                        onChange={(e) =>
+                                                            handleImageChange(
+                                                                e.target.files?.[0] || null,
+                                                                card.id,
+                                                            )
+                                                        }
+                                                    />
+                                                    <label
+                                                        htmlFor={`img-upload-${card.id}`}
+                                                        className="inline-block cursor-pointer rounded-xl border-2 border-gray-200 bg-white px-4 py-2 text-sm font-bold text-[#3c3c3c] shadow-sm hover:bg-gray-50"
                                                     >
-                                                        <Trash2 size={24} />
-                                                    </button>
+                                                        {card.previewUrl || card.imageUrl
+                                                            ? "Change Image"
+                                                            : "Upload Image"}
+                                                    </label>
                                                 </div>
-                                            ) : (
-                                                <div className="flex h-20 w-20 items-center justify-center rounded-xl border-2 border-dashed border-gray-300 bg-gray-50 text-gray-400">
-                                                    <ImageIcon size={24} />
-                                                </div>
-                                            )}
-                                            <div className="flex-1">
-                                                <input
-                                                    type="file"
-                                                    accept="image/*"
-                                                    id={`img-upload-${card.id}`}
-                                                    className="hidden"
-                                                    disabled={saving}
-                                                    onChange={(e) =>
-                                                        handleImageChange(
-                                                            e.target.files?.[0] || null,
-                                                            card.id,
-                                                        )
-                                                    }
-                                                />
-                                                <label
-                                                    htmlFor={`img-upload-${card.id}`}
-                                                    className="inline-block cursor-pointer rounded-xl border-2 border-gray-200 bg-white px-4 py-2 text-sm font-bold text-[#3c3c3c] shadow-sm hover:bg-gray-50"
-                                                >
-                                                    {card.previewUrl || card.imageUrl
-                                                        ? "Change Image"
-                                                        : "Upload Image"}
-                                                </label>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
-                        ))}
+                            ))}
 
-                        {!cardsLoading && cards.length === 0 && (
-                            <div
-                                onClick={() => setCards([makeCard()])}
-                                className="cursor-pointer rounded-[2rem] border-4 border-dashed border-gray-300 p-12 text-center text-lg font-bold text-[#afafaf] transition-colors hover:border-[#1cb0f6] hover:bg-white hover:text-[#1cb0f6]"
-                            >
-                                <Plus
-                                    size={48}
-                                    className="mx-auto mb-4 opacity-50"
-                                    strokeWidth={2.5}
-                                />
-                                <p>Click to add your first card</p>
-                            </div>
-                        )}
+                            {!cardsLoading && cards.length === 0 && (
+                                <div
+                                    onClick={() => setCards([makeCard()])}
+                                    className="cursor-pointer rounded-[2rem] border-4 border-dashed border-gray-300 p-12 text-center text-lg font-bold text-[#afafaf] transition-colors hover:border-[var(--theme-color)] hover:bg-white hover:text-[var(--theme-color)]"
+                                >
+                                    <Plus
+                                        size={48}
+                                        className="mx-auto mb-4 opacity-50"
+                                        strokeWidth={2.5}
+                                    />
+                                    <p>Click to add your first card</p>
+                                </div>
+                            )}
+                        </div>
                     </div>
-                </div>
+                )}
 
                 {editingLesson && onDelete && (
                     <div className="pt-8 pb-12">
