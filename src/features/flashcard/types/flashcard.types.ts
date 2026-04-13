@@ -15,6 +15,12 @@ export interface FlashCard {
     interval: number;
     repetitions: number;
     nextReviewAt: number;
+
+    // AI-enriched fields (optional — fully backward-compatible)
+    distractors?: string[];
+    hint?: string;
+    usageNote?: string;
+    difficulty?: 1 | 2 | 3;
 }
 
 export interface Lesson {
@@ -24,7 +30,7 @@ export interface Lesson {
     description: string;
     tags: string[];
     createdAt: number;
-    cardCount: number; // Stored to avoid n+1 queries
+    cardCount: number;
     isPublic?: boolean;
     shareId?: string;
     publicRole?: "viewer" | "commenter" | "editor";

@@ -1,3 +1,4 @@
+import { getAI, GoogleAIBackend } from "firebase/ai";
 import { getApps, initializeApp } from "firebase/app";
 import { getAuth, GoogleAuthProvider } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
@@ -20,3 +21,9 @@ export const db = getFirestore(app);
 export const storage = getStorage(app);
 export const googleProvider = new GoogleAuthProvider();
 export const APP_ID = process.env.NEXT_PUBLIC_APP_ID ?? "kana-nihongo-master";
+
+/**
+ * Firebase AI Logic instance using the Google AI (Gemini Developer) backend.
+ * Authentication is handled transparently by Firebase — no API key is exposed.
+ */
+export const firebaseAI = getAI(app, { backend: new GoogleAIBackend() });

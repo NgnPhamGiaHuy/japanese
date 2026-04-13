@@ -2,8 +2,9 @@
 
 import { useEffect, useRef, useState } from "react";
 
-import { Image as ImageIcon, Loader2, Plus, Trash2, X } from "lucide-react";
+import { Image as ImageIcon, Loader2, Plus, Sparkles, Trash2, X } from "lucide-react";
 
+import { AIBulkPanel, useAICard } from "@/features/ai";
 import { Button } from "@/shared/components/ui";
 import { hexToThemeColor } from "@/shared/utils/colors";
 import { useAppStore } from "@/store/useAppStore";
@@ -56,11 +57,15 @@ export const LessonBuilder = ({ onSave, onDelete, onClose, editingLesson }: Less
     const [cards, setCards] = useState<EditorCard[]>([]);
     const [tagInput, setTagInput] = useState("");
     const [saving, setSaving] = useState(false);
-    const [importMode, setImportMode] = useState<"manual" | "paste" | "file">("manual");
+    const [importMode, setImportMode] = useState<"ai" | "manual" | "paste" | "file">("ai");
     const [pasteText, setPasteText] = useState("");
     const [previewRows, setPreviewRows] = useState<ImportRow[] | null>(null);
-    // Tracks Storage paths of images that were cleared mid-session so we can
-    // delete them from Storage after a successful save.
+
+    const [aiLoadingCardIds, setAILoadingCardIds] = useState<Set<string>>(new Set());
+    const [aiCardErrors, setAICardErrors] = useState<Record<string, string>>({});
+
+    const aiCard = useAICard();
+
     const clearedImagePathsRef = useRef<string[]>([]);
 
     // Sync fetched cards when they arrive
@@ -69,6 +74,53 @@ export const LessonBuilder = ({ onSave, onDelete, onClose, editingLesson }: Less
             setCards(existingCards);
         }
     }, [isNew, cardsLoading, existingCards]);
+
+    const handleAIFillCard = async (cardId: string, word: string) => {
+        if (!word.trim()) return;
+        setAILoadingCardIds((prev) => new Set(prev).add(cardId));
+        setAICardErrors((prev) => {
+            const n = { ...prev };
+            delete n[cardId];
+            return n;
+        });
+
+        const result = await aiCard.generate(word.trim());
+
+        setAILoadingCardIds((prev) => {
+            const next = new Set(prev);
+            next.delete(cardId);
+            return next;
+        });
+
+        if (result) {
+            setCards((prev) =>
+                prev.map((c) =>
+                    c.id === cardId
+                        ? {
+                              ...c,
+                              kanji: result.kanji,
+                              furigana: result.furigana,
+                              meaning: result.meaning,
+                              example: result.example,
+                              // Rich AI fields — stored when present, left unchanged otherwise
+                              ...(result.distractors !== undefined && {
+                                  distractors: result.distractors,
+                              }),
+                              ...(result.hint !== undefined && { hint: result.hint }),
+                              ...(result.usageNote !== undefined && {
+                                  usageNote: result.usageNote,
+                              }),
+                              ...(result.difficulty !== undefined && {
+                                  difficulty: result.difficulty,
+                              }),
+                          }
+                        : c,
+                ),
+            );
+        } else if (aiCard.error) {
+            setAICardErrors((prev) => ({ ...prev, [cardId]: aiCard.error! }));
+        }
+    };
 
     const handleSave = async () => {
         if (!lesson.title.trim()) {
@@ -105,8 +157,6 @@ export const LessonBuilder = ({ onSave, onDelete, onClose, editingLesson }: Less
 
             await onSave(lesson, processedCards, isNew);
 
-            // After a successful save, clean up Storage for any images that
-            // were cleared in this editor session.
             for (const path of clearedImagePathsRef.current) {
                 deleteCardImage(path).catch(() => {});
             }
@@ -256,17 +306,25 @@ export const LessonBuilder = ({ onSave, onDelete, onClose, editingLesson }: Less
 
                 {/* Input Mode Tabs */}
                 <div className="mb-6 flex overflow-hidden rounded-2xl border-2 border-gray-200 bg-white shadow-sm">
-                    {(["manual", "paste", "file"] as const).map((mode) => (
+                    {(["ai", "manual", "paste", "file"] as const).map((mode) => (
                         <button
                             key={mode}
                             onClick={() => {
                                 setImportMode(mode);
                                 setPreviewRows(null);
                             }}
-                            className={`flex flex-1 items-center justify-center p-4 text-sm font-black uppercase transition-colors ${importMode === mode ? "text-white" : "text-[#afafaf] hover:bg-gray-50"}`}
+                            className={`flex flex-1 items-center justify-center gap-1.5 p-4 text-xs font-black tracking-wider uppercase transition-colors ${importMode === mode ? "text-white" : "text-[#afafaf] hover:bg-gray-50"}`}
                             style={importMode === mode ? { backgroundColor: themeHex } : {}}
                         >
-                            {mode}
+                            {mode === "ai" && (
+                                <Sparkles
+                                    size={14}
+                                    strokeWidth={2.5}
+                                    className={importMode === "ai" ? "text-white" : ""}
+                                    style={importMode !== "ai" ? { color: themeHex } : {}}
+                                />
+                            )}
+                            {mode === "ai" ? "AI" : mode}
                         </button>
                     ))}
                 </div>
@@ -290,6 +348,8 @@ export const LessonBuilder = ({ onSave, onDelete, onClose, editingLesson }: Less
                             setPasteText("");
                         }}
                     />
+                ) : importMode === "ai" ? (
+                    <AIBulkPanel themeColor={themeHex} onPreview={(rows) => setPreviewRows(rows)} />
                 ) : importMode === "paste" ? (
                     <div className="space-y-4">
                         <textarea
@@ -414,26 +474,80 @@ export const LessonBuilder = ({ onSave, onDelete, onClose, editingLesson }: Less
                                     </button>
 
                                     <div className="mt-4 grid grid-cols-1 gap-6 md:grid-cols-2">
-                                        {(["kanji", "furigana"] as const).map((field) => (
-                                            <div key={field}>
-                                                <label className="mb-1 block text-[10px] font-black tracking-widest text-[#afafaf] uppercase">
-                                                    {field === "kanji"
-                                                        ? "Kanji / Word"
-                                                        : "Furigana"}
-                                                </label>
-                                                <input
-                                                    className={`w-full border-b-2 border-gray-100 bg-transparent pb-2 font-black text-[#3c3c3c] transition-colors outline-none focus:border-[var(--theme-color)] ${field === "kanji" ? "text-3xl" : "text-xl font-bold"}`}
-                                                    placeholder={
-                                                        field === "kanji" ? "食べる" : "たべる"
-                                                    }
-                                                    value={card[field]}
-                                                    onChange={(e) =>
-                                                        updateCard(card.id, field, e.target.value)
-                                                    }
-                                                    disabled={saving}
-                                                />
-                                            </div>
-                                        ))}
+                                        {(["kanji", "furigana"] as const).map((field) => {
+                                            const isKanji = field === "kanji";
+                                            const isAILoading =
+                                                isKanji && aiLoadingCardIds.has(card.id);
+                                            const aiError = isKanji
+                                                ? aiCardErrors[card.id]
+                                                : undefined;
+                                            return (
+                                                <div key={field}>
+                                                    <div className="mb-1 flex items-center justify-between">
+                                                        <label className="text-[10px] font-black tracking-widest text-[#afafaf] uppercase">
+                                                            {isKanji ? "Kanji / Word" : "Furigana"}
+                                                        </label>
+                                                        {isKanji && (
+                                                            <button
+                                                                type="button"
+                                                                title={
+                                                                    card.kanji.trim()
+                                                                        ? "Auto-fill with AI"
+                                                                        : "Type a word first"
+                                                                }
+                                                                disabled={
+                                                                    saving ||
+                                                                    isAILoading ||
+                                                                    !card.kanji.trim()
+                                                                }
+                                                                onClick={() =>
+                                                                    handleAIFillCard(
+                                                                        card.id,
+                                                                        card.kanji,
+                                                                    )
+                                                                }
+                                                                className="flex items-center gap-1 rounded-lg border border-transparent px-2 py-0.5 text-[9px] font-black uppercase transition-all hover:enabled:border-gray-200 hover:enabled:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-30"
+                                                                style={
+                                                                    isAILoading
+                                                                        ? { color: themeHex }
+                                                                        : { color: themeHex }
+                                                                }
+                                                            >
+                                                                {isAILoading ? (
+                                                                    <Loader2
+                                                                        size={10}
+                                                                        className="animate-spin"
+                                                                    />
+                                                                ) : (
+                                                                    <Sparkles size={10} />
+                                                                )}
+                                                                {isAILoading
+                                                                    ? "Filling…"
+                                                                    : "AI Fill"}
+                                                            </button>
+                                                        )}
+                                                    </div>
+                                                    <input
+                                                        className={`w-full border-b-2 border-gray-100 bg-transparent pb-2 font-black text-[#3c3c3c] transition-colors outline-none focus:border-[var(--theme-color)] ${isKanji ? "text-3xl" : "text-xl font-bold"} ${isAILoading ? "opacity-60" : ""}`}
+                                                        placeholder={isKanji ? "食べる" : "たべる"}
+                                                        value={card[field]}
+                                                        onChange={(e) =>
+                                                            updateCard(
+                                                                card.id,
+                                                                field,
+                                                                e.target.value,
+                                                            )
+                                                        }
+                                                        disabled={saving || isAILoading}
+                                                    />
+                                                    {aiError && isKanji && (
+                                                        <p className="mt-1 text-[10px] font-bold text-[#ea2b2b]">
+                                                            {aiError}
+                                                        </p>
+                                                    )}
+                                                </div>
+                                            );
+                                        })}
                                         <div className="md:col-span-2">
                                             <label className="mb-1 block text-[10px] font-black tracking-widest text-[#afafaf] uppercase">
                                                 Meaning
@@ -453,7 +567,7 @@ export const LessonBuilder = ({ onSave, onDelete, onClose, editingLesson }: Less
                                                 Example Sentence (Optional)
                                             </label>
                                             <input
-                                                className="w-full border-b-2 border-gray-100 bg-transparent pb-2 text-base font-bold text-gray-400 transition-colors outline-none focus:border-[var(--theme-color)]"
+                                                className="w-full border-b-2 border-gray-100 bg-transparent pb-2 text-base font-bold text-[#3c3c3c] transition-colors outline-none focus:border-[var(--theme-color)]"
                                                 placeholder="りんごを食べる。"
                                                 value={card.example}
                                                 onChange={(e) =>
@@ -469,11 +583,18 @@ export const LessonBuilder = ({ onSave, onDelete, onClose, editingLesson }: Less
                                             <div className="mt-2 flex items-center gap-4">
                                                 {card.previewUrl || card.imageUrl ? (
                                                     <div className="relative h-20 w-20 overflow-hidden rounded-xl border-2 border-gray-200">
-                                                        {/* eslint-disable-next-line @next/next/no-img-element */}
                                                         <img
+                                                            key={card.previewUrl || card.imageUrl}
                                                             src={card.previewUrl || card.imageUrl}
                                                             alt="Card preview"
                                                             className="h-full w-full object-cover"
+                                                            crossOrigin="anonymous"
+                                                            referrerPolicy="no-referrer"
+                                                            onError={(e) => {
+                                                                // Fallback if the URL fails
+                                                                e.currentTarget.style.display =
+                                                                    "none";
+                                                            }}
                                                         />
                                                         <button
                                                             onClick={() => {

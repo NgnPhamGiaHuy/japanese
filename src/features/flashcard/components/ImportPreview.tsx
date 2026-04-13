@@ -137,7 +137,7 @@ export const ImportPreview = ({
                                 </td>
                                 <td className="p-2">
                                     <input
-                                        className="w-full rounded-lg border-2 border-transparent bg-transparent p-2 text-sm text-gray-500 outline-none focus:border-[var(--theme-color)] focus:bg-white focus:text-[#3c3c3c]"
+                                        className="w-full rounded-lg border-2 border-transparent bg-transparent p-2 text-sm text-[#3c3c3c] outline-none focus:border-[var(--theme-color)] focus:bg-white"
                                         style={
                                             { "--theme-color": themeColor } as React.CSSProperties
                                         }
