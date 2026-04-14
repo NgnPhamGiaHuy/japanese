@@ -9,11 +9,26 @@ function getLevelNote(level: JLPTLevel): string {
         : `JLPT ${level} vocabulary`;
 }
 
-const buildDeckPrompt = (topic: string, count: number, level: JLPTLevel): string => {
+const buildDeckPrompt = (
+    topic: string,
+    count: number,
+    level: JLPTLevel,
+    existingWords: string[] = [],
+): string => {
+    const exclusionBlock =
+        existingWords.length > 0
+            ? `
+
+Already in current deck (DO NOT generate these exact words again):
+${existingWords.slice(0, 200).map((word) => `- ${word}`).join("\n")}
+`
+            : "";
+
     return `${AI_SYSTEM_PROMPT}
 
 Task: Generate exactly ${count} unique Japanese flashcards for topic "${topic}".
 Target level: ${getLevelNote(level)}.
+${exclusionBlock}
 
 Output JSON schema:
 ${DECK_JSON_SCHEMA}

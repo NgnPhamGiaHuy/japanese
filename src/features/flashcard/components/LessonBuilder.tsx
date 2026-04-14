@@ -57,7 +57,9 @@ export const LessonBuilder = ({ onSave, onDelete, onClose, editingLesson }: Less
     const [cards, setCards] = useState<EditorCard[]>([]);
     const [tagInput, setTagInput] = useState("");
     const [saving, setSaving] = useState(false);
-    const [importMode, setImportMode] = useState<"ai" | "manual" | "paste" | "file">("ai");
+    const [importMode, setImportMode] = useState<"ai" | "manual" | "paste" | "file">(
+        editingLesson ? "manual" : "ai",
+    );
     const [pasteText, setPasteText] = useState("");
     const [previewRows, setPreviewRows] = useState<ImportRow[] | null>(null);
 
@@ -137,7 +139,7 @@ export const LessonBuilder = ({ onSave, onDelete, onClose, editingLesson }: Less
             // Process Image Uploads
             const processedCards: FlashCard[] = [];
             for (const c of validCards) {
-                const { imageFile, previewUrl, ...baseCard } = c;
+                const { imageFile, ...baseCard } = c;
                 if (imageFile && user) {
                     // Upload new image
                     const res = await uploadCardImage(imageFile, user.uid, baseCard.id);
@@ -174,7 +176,7 @@ export const LessonBuilder = ({ onSave, onDelete, onClose, editingLesson }: Less
         }
     };
 
-    const updateCard = (id: string, field: keyof EditorCard, value: any) =>
+    const updateCard = (id: string, field: keyof EditorCard, value: EditorCard[keyof EditorCard]) =>
         setCards((prev) => prev.map((c) => (c.id === id ? { ...c, [field]: value } : c)));
 
     const handleImageChange = (file: File | null, id: string) => {
@@ -193,6 +195,14 @@ export const LessonBuilder = ({ onSave, onDelete, onClose, editingLesson }: Less
 
     const themeHex = lesson.themeColor || "#1cb0f6";
     const themeColorStr = hexToThemeColor(themeHex);
+    const existingWordsForAI = Array.from(
+        new Set(
+            cards
+                .flatMap((card) => [card.kanji, card.furigana])
+                .map((value) => value.trim())
+                .filter((value) => value.length > 0),
+        ),
+    );
 
     return (
         <div
@@ -349,7 +359,11 @@ export const LessonBuilder = ({ onSave, onDelete, onClose, editingLesson }: Less
                         }}
                     />
                 ) : importMode === "ai" ? (
-                    <AIBulkPanel themeColor={themeHex} onPreview={(rows) => setPreviewRows(rows)} />
+                    <AIBulkPanel
+                        themeColor={themeHex}
+                        existingWords={existingWordsForAI}
+                        onPreview={(rows) => setPreviewRows(rows)}
+                    />
                 ) : importMode === "paste" ? (
                     <div className="space-y-4">
                         <textarea

@@ -14,6 +14,7 @@ import type { AIGenerateMode, JLPTLevel } from "../types";
 interface AIBulkPanelProps {
     themeColor: string;
     onPreview: (rows: ImportRow[]) => void;
+    existingWords?: string[];
 }
 
 const LEVEL_OPTIONS: { value: JLPTLevel; label: string; sub: string }[] = [
@@ -75,7 +76,7 @@ const ModeChip = ({ active, icon, label, sub, onClick, color }: ModeChipProps) =
     </button>
 );
 
-const AIBulkPanel = ({ themeColor, onPreview }: AIBulkPanelProps) => {
+const AIBulkPanel = ({ themeColor, onPreview, existingWords = [] }: AIBulkPanelProps) => {
     const { status, error, generate } = useAIDeck();
 
     const [mode, setMode] = useState<AIGenerateMode>("quick");
@@ -90,7 +91,7 @@ const AIBulkPanel = ({ themeColor, onPreview }: AIBulkPanelProps) => {
     const effectiveLevel = mode === "quick" ? QUICK_DEFAULT_LEVEL : level;
 
     const handleGenerate = async () => {
-        const cards = await generate(topic, effectiveCount, effectiveLevel);
+        const cards = await generate(topic, effectiveCount, effectiveLevel, existingWords);
         if (!cards) return;
 
         const rows: ImportRow[] = cards.map((c, i) => ({

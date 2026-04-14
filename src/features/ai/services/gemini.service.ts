@@ -21,6 +21,33 @@ export class AIServiceError extends Error {
 const cardCache = new Map<string, GeneratedCard>();
 const deckCache = new Map<string, GeneratedCard[]>();
 
+function normalizeToken(value: string): string {
+    return value.trim().toLocaleLowerCase();
+}
+
+function cardDedupKeys(card: GeneratedCard): string[] {
+    const keys = [card.kanji, card.furigana]
+        .map((value) => normalizeToken(value))
+        .filter((value) => value.length > 0);
+    return Array.from(new Set(keys));
+}
+
+function dedupeDeckCards(cards: GeneratedCard[], existingWords: string[]): GeneratedCard[] {
+    const blocked = new Set(existingWords.map((word) => normalizeToken(word)).filter(Boolean));
+    const seen = new Set<string>();
+    const filtered: GeneratedCard[] = [];
+
+    for (const card of cards) {
+        const keys = cardDedupKeys(card);
+        const collides = keys.some((key) => blocked.has(key) || seen.has(key));
+        if (collides) continue;
+        keys.forEach((key) => seen.add(key));
+        filtered.push(card);
+    }
+
+    return filtered;
+}
+
 function getModel(modelName: string) {
     return getGenerativeModel(firebaseAI, {
         model: modelName,
@@ -124,6 +151,7 @@ export const generateDeck = async (
     topic: string,
     count: number,
     level: JLPTLevel,
+    existingWords: string[] = [],
 ): Promise<GeneratedCard[]> => {
     const trimmed = topic.trim();
     if (!trimmed) throw new AIServiceError("Topic cannot be empty", "api_error");
@@ -132,18 +160,22 @@ export const generateDeck = async (
         Math.max(count, AI_CONFIG.limits.minDeckCards),
         AI_CONFIG.limits.maxDeckCards,
     );
-    const cacheKey = `${trimmed.toLowerCase()}::${safeCnt}::${level}`;
+    const normalizedExclusions = Array.from(
+        new Set(existingWords.map((word) => normalizeToken(word)).filter(Boolean)),
+    ).sort();
+    const cacheKey = `${trimmed.toLowerCase()}::${safeCnt}::${level}::${normalizedExclusions.join("|")}`;
     const cached = deckCache.get(cacheKey);
     if (cached) return cached;
 
     try {
         const model = getModel(AI_CONFIG.models.deck);
         const result = await model.generateContent(
-            getDeckGenerationPrompt(trimmed, safeCnt, level),
+            getDeckGenerationPrompt(trimmed, safeCnt, level, normalizedExclusions),
         );
         const cards = parseCardArray(JSON.parse(result.response.text()));
-        deckCache.set(cacheKey, cards);
-        return cards;
+        const deduped = dedupeDeckCards(cards, normalizedExclusions);
+        deckCache.set(cacheKey, deduped);
+        return deduped;
     } catch (err) {
         classifyError(err);
     }

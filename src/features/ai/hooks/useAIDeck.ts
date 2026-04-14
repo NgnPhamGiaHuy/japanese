@@ -9,7 +9,12 @@ import type { AIStatus, GeneratedCard, JLPTLevel } from "../types";
 interface UseAIDeckResult {
     status: AIStatus;
     error: string | null;
-    generate: (topic: string, count: number, level: JLPTLevel) => Promise<GeneratedCard[] | null>;
+    generate: (
+        topic: string,
+        count: number,
+        level: JLPTLevel,
+        existingWords?: string[],
+    ) => Promise<GeneratedCard[] | null>;
     reset: () => void;
 }
 
@@ -19,14 +24,19 @@ const useAIDeck = (): UseAIDeckResult => {
     const [succeeded, setSucceeded] = useState(false);
 
     const generate = useCallback(
-        async (topic: string, count: number, level: JLPTLevel): Promise<GeneratedCard[] | null> => {
+        async (
+            topic: string,
+            count: number,
+            level: JLPTLevel,
+            existingWords: string[] = [],
+        ): Promise<GeneratedCard[] | null> => {
             setError(null);
             setSucceeded(false);
 
             return new Promise<GeneratedCard[] | null>((resolve) => {
                 startTransition(async () => {
                     try {
-                        const cards = await generateDeck(topic, count, level);
+                        const cards = await generateDeck(topic, count, level, existingWords);
                         setSucceeded(true);
                         resolve(cards);
                     } catch (err) {
