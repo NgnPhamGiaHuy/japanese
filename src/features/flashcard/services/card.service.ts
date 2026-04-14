@@ -15,7 +15,7 @@ import {
 import { APP_ID, db } from "@/lib/firebase";
 
 import type { Unsubscribe } from "firebase/firestore";
-import type { FlashCard } from "../types/flashcard.types";
+import type { FlashCard } from "../types";
 
 // ─── Firestore path helpers ────────────────────────────────────────────────
 

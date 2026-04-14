@@ -2,11 +2,10 @@
 
 import { useMemo } from "react";
 
-import { HIRAGANA_DATA } from "@/features/kana/data/hiragana";
-import { KATAKANA_DATA } from "@/features/kana/data/katakana";
+import { HIRAGANA_DATA, KATAKANA_DATA } from "@/features/kana/data";
 import { useKanaStore } from "@/store";
 
-import type { KanaChar } from "../types/kana.types";
+import type { KanaChar } from "../types";
 
 /** Returns the active dataset and helpers based on the current alphabet selection */
 export function useKanaDataset() {

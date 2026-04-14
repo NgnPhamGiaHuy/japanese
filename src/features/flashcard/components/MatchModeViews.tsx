@@ -6,12 +6,12 @@ import { AnimatePresence, motion } from "framer-motion";
 import { CheckCircle2, Clock, Gamepad2, Trophy, X } from "lucide-react";
 
 import { Leaderboard, MiniLeaderboard } from "@/features/game/components";
-import { DIFFICULTY_CONFIG } from "@/features/game/modes/flashcardMatch";
+import { DIFFICULTY_CONFIG } from "@/features/game/modes";
 import { Button } from "@/shared/components/ui";
 
-import type { TierInfo } from "@/features/game/logic/tier";
-import type { MatchDifficulty } from "@/features/game/modes/flashcardMatch";
-import type { MatchModeCard } from "../hooks/useMatchModeSession";
+import type { TierInfo } from "@/features/game/logic";
+import type { MatchDifficulty } from "@/features/game/modes";
+import type { MatchModeCard } from "../hooks";
 
 interface MatchIntroViewProps {
     bestScore: number;

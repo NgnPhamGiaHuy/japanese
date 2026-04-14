@@ -2,18 +2,18 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
-import useGameSession from "@/features/game/hooks/useGameSession";
+import { useGameSession } from "@/features/game/hooks";
 import {
     calcSpeedPoints,
     getDifficultyForQuestion,
     SPEED_DIFFICULTY_CONFIG,
     timerColor,
     TOTAL_QUESTIONS,
-} from "@/features/game/modes/flashcardSpeed";
-import { recordGameResult } from "@/features/game/services/game.service";
+} from "@/features/game/modes";
+import { recordGameResult } from "@/features/game/services";
 import { allowAudio, playAudio, shuffleArray } from "@/shared/utils";
 
-import type { FlashCard } from "../types/flashcard.types";
+import type { FlashCard } from "../types";
 
 const TIMER_TICK_MS = 80;
 type SpeedPhase = "intro" | "playing" | "results";

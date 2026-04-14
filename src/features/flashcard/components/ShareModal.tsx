@@ -4,12 +4,12 @@ import { useEffect, useMemo, useState } from "react";
 
 import { Check, ChevronDown, Copy, Eye, Globe2, Lock, X } from "lucide-react";
 
-import { buildShareId } from "@/features/flashcard/services/lesson.service";
+import { buildShareId } from "@/features/flashcard/services";
 import { Button } from "@/shared/components/ui";
 import { hexToThemeColor } from "@/shared/utils";
 import { useAppStore } from "@/store";
 
-import type { Lesson } from "../types/flashcard.types";
+import type { Lesson } from "../types";
 
 interface ShareModalProps {
     lesson: Lesson;
@@ -17,7 +17,7 @@ interface ShareModalProps {
     onClose: () => void;
 }
 
-export function ShareModal({ lesson, onShare, onClose }: ShareModalProps) {
+const ShareModal = ({ lesson, onShare, onClose }: ShareModalProps) => {
     const { user } = useAppStore();
 
     // ── Role derivation ──────────────────────────────────────────────────
@@ -305,4 +305,6 @@ export function ShareModal({ lesson, onShare, onClose }: ShareModalProps) {
             </div>
         </div>
     );
-}
+};
+
+export default ShareModal;

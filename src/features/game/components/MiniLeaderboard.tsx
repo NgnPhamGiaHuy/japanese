@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Trophy } from "lucide-react";
 
-import { useLeaderboard } from "@/features/game/hooks/useLeaderboard";
+import { useLeaderboard } from "@/features/game/hooks";
 
 interface MiniLeaderboardProps {
     gameMode: string | null;

@@ -2,11 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 
-import {
-    createGameSession,
-    finishGameSession,
-    updateGameScore,
-} from "@/features/game/services/game.service";
+import { createGameSession, finishGameSession, updateGameScore } from "@/features/game/services";
 
 export interface UseGameSessionOptions {
     userId: string | null;
@@ -23,7 +19,12 @@ export interface UseGameSessionOptions {
  * Score state remains local for instant UI responsiveness;
  * Firestore is written to asynchronously via debounce.
  */
-const useGameSession = ({ userId, userName, gameMode, currentBest = 0 }: UseGameSessionOptions) => {
+export function useGameSession({
+    userId,
+    userName,
+    gameMode,
+    currentBest = 0,
+}: UseGameSessionOptions) {
     const sessionIdRef = useRef<string | null>(null);
     const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
     const lastSyncedScore = useRef(0);
@@ -105,6 +106,4 @@ const useGameSession = ({ userId, userName, gameMode, currentBest = 0 }: UseGame
     );
 
     return { startSession, syncScore, endSession, isSessionActive };
-};
-
-export default useGameSession;
+}

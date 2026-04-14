@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { Brain, ChevronRight, Eye, PenTool, Shuffle, Volume2 } from "lucide-react";
 
 import { DrawingCanvas, KanaStrokeAnimation } from "@/features/kana/components";
-import { useKanaDataset } from "@/features/kana/hooks/useKanaDataset";
+import { useKanaDataset } from "@/features/kana/hooks";
 import { ScreenHeader } from "@/shared/components/layout";
 import { Button } from "@/shared/components/ui";
 import { HANDWRITING_FONT, PRINT_FONT } from "@/shared/constants";

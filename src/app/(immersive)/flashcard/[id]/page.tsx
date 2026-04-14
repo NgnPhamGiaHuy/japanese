@@ -5,20 +5,15 @@ import { use, useMemo, useState } from "react";
 
 import { AlertCircle, BookOpen, RefreshCw, RotateCcw } from "lucide-react";
 
-import {
-    FlashcardLearn,
-    FlashcardMistakeReview,
-    FlashcardPractice,
-} from "@/features/flashcard/components";
-import { useCards } from "@/features/flashcard/hooks/useCards";
-import { useLessons } from "@/features/flashcard/hooks/useLessons";
+import { FlashcardLearn, FlashcardMistakeReview, FlashcardPractice } from "@/features/flashcard";
+import { useCards, useLessons } from "@/features/flashcard/hooks";
 import {
     buildSession,
     getDeckStatus,
     processAnswer,
     recommendedAction,
-} from "@/features/flashcard/logic/learningEngine";
-import { useUserProgress } from "@/features/user/hooks/useUserProgress";
+} from "@/features/flashcard/logic";
+import { useUserProgress } from "@/features/user/hooks";
 import { useAppStore } from "@/store";
 
 import type { StudyMode } from "@/features/flashcard/types/flashcard.types";

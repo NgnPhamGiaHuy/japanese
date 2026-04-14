@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-import { signInWithGoogle } from "@/features/user/services/auth.service";
+import { signInWithGoogle } from "@/features/user/services";
 
 export default function LoginPage() {
     const router = useRouter();

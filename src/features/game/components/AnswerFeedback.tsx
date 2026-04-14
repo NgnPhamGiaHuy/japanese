@@ -4,12 +4,7 @@ import { Check, Volume2, X } from "lucide-react";
 
 import { allowAudio, playAudio } from "@/shared/utils";
 
-import type {
-    KanaChar,
-    KanaChar,
-    QuestionType,
-    QuestionType,
-} from "@/features/kana/types/kana.types";
+import type { KanaChar, QuestionType } from "@/features/kana/types";
 
 interface AnswerFeedbackProps {
     status: "idle" | "correct" | "wrong";

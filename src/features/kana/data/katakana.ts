@@ -1,4 +1,4 @@
-import type { KanaChar } from "../types/kana.types";
+import type { KanaChar } from "../types";
 
 export const KATAKANA_DATA: KanaChar[] = [
     { char: "ア", romaji: "a", group: "vowels" },

@@ -2,12 +2,11 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 
-import useGameSession from "@/features/game/hooks/useGameSession";
-import { comboMultiplier } from "@/features/game/logic/combo";
+import { comboMultiplier, useGameSession } from "@/features/game";
 import { getValidRomaji } from "@/shared/utils";
 import { useQuizEngine } from "./useQuizEngine";
 
-import type { ChallengeMode, DropWord, KanaChar, SurvivalPhase } from "../types/kana.types";
+import type { ChallengeMode, DropWord, KanaChar, SurvivalPhase } from "../types";
 
 /** Time Attack: seconds removed on each wrong answer. */
 export const TIME_ATTACK_WRONG_PENALTY_SEC = 10;

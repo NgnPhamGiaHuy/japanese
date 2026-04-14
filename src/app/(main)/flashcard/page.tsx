@@ -5,20 +5,20 @@ import { useEffect, useState } from "react";
 
 import { BookOpen, Edit2, Gamepad2, Plus, RefreshCw, Share2, Trash2, Zap } from "lucide-react";
 
-import { LessonBuilder, ShareModal } from "@/features/flashcard/components";
-import { useLessons } from "@/features/flashcard/hooks/useLessons";
-import { scoreToTier, TIER_INFO } from "@/features/game/logic/tier";
-import { matchGameMode } from "@/features/game/modes/flashcardMatch";
-import { speedGameMode } from "@/features/game/modes/flashcardSpeed";
-import { subscribeGameStats } from "@/features/game/services/game.service";
+import { Lesson, LessonBuilder, ShareModal, useLessons } from "@/features/flashcard";
+import {
+    GameStatEntry,
+    matchGameMode,
+    scoreToTier,
+    speedGameMode,
+    subscribeGameStats,
+    TIER_INFO,
+} from "@/features/game";
 import { ScreenHeader } from "@/shared/components/layout";
 import { Button } from "@/shared/components/ui";
 import { CARD_BASE, SPACING } from "@/shared/constants";
 import { hexToThemeColor } from "@/shared/utils";
 import { useAppStore } from "@/store";
-
-import type { Lesson } from "@/features/flashcard/types/flashcard.types";
-import type { GameStatEntry } from "@/features/game/services/game.service";
 
 export default function FlashcardIndexPage() {
     const { lessons, loading, error, saveFullLesson, deleteLesson, shareLesson } = useLessons();

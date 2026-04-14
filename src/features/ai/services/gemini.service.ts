@@ -1,11 +1,7 @@
 import { getGenerativeModel } from "firebase/ai";
 
 import { firebaseAI } from "@/lib/firebase";
-import {
-    getCardGenerationPrompt,
-    getDeckGenerationPrompt,
-    getDistractorsPrompt,
-} from "./prompt-builder";
+import { getCardGenerationPrompt, getDeckGenerationPrompt } from "./prompt-builder";
 import { AI_CONFIG } from "../config";
 
 import type { GeneratedCard, JLPTLevel } from "../types";
@@ -24,7 +20,6 @@ export class AIServiceError extends Error {
 
 const cardCache = new Map<string, GeneratedCard>();
 const deckCache = new Map<string, GeneratedCard[]>();
-const distractorsCache = new Map<string, string[]>();
 
 function getModel(modelName: string) {
     return getGenerativeModel(firebaseAI, {
@@ -94,21 +89,6 @@ function parseCardArray(raw: unknown): GeneratedCard[] {
     });
 }
 
-function parseDistractors(raw: unknown): string[] {
-    if (!Array.isArray(raw)) {
-        throw new AIServiceError("Distractors response is not an array", "invalid_response");
-    }
-    const validated = raw
-        .filter((d): d is string => typeof d === "string" && d.trim().length > 0)
-        .map((d) => d.trim())
-        .slice(0, 3);
-
-    if (validated.length < 3) {
-        throw new AIServiceError("AI returned fewer than 3 distractors", "invalid_response");
-    }
-    return validated;
-}
-
 function classifyError(err: unknown): never {
     if (err instanceof AIServiceError) throw err;
     const msg = err instanceof Error ? err.message : String(err);
@@ -167,29 +147,4 @@ export const generateDeck = async (
     } catch (err) {
         classifyError(err);
     }
-};
-
-export const generateDistractors = async (
-    word: string,
-    correctMeaning: string,
-): Promise<string[]> => {
-    const key = `${word.toLowerCase()}::${correctMeaning.toLowerCase()}`;
-    const cached = distractorsCache.get(key);
-    if (cached) return cached;
-
-    try {
-        const model = getModel(AI_CONFIG.models.card);
-        const result = await model.generateContent(getDistractorsPrompt(word, correctMeaning));
-        const distractors = parseDistractors(JSON.parse(result.response.text()));
-        distractorsCache.set(key, distractors);
-        return distractors;
-    } catch (err) {
-        classifyError(err);
-    }
-};
-
-export const clearAICache = (): void => {
-    cardCache.clear();
-    deckCache.clear();
-    distractorsCache.clear();
 };

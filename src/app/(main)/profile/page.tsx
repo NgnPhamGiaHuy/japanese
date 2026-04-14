@@ -5,8 +5,8 @@ import Link from "next/link";
 
 import { BookOpen, Flame, Settings, Trophy } from "lucide-react";
 
-import { useLessons } from "@/features/flashcard/hooks/useLessons";
-import { useUserProgress } from "@/features/user/hooks/useUserProgress";
+import { useLessons } from "@/features/flashcard/hooks";
+import { useUserProgress } from "@/features/user/hooks";
 import { SCREEN_HEADER_BACK_BUTTON_CLASS, ScreenHeader } from "@/shared/components/layout";
 import { StatCard } from "@/shared/components/ui";
 import { SPACING } from "@/shared/constants";

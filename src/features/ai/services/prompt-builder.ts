@@ -1,4 +1,4 @@
-import { buildCardPrompt, buildDeckPrompt, buildDistractorsPrompt } from "../prompts";
+import { buildCardPrompt, buildDeckPrompt } from "../prompts";
 
 import type { JLPTLevel } from "../types";
 
@@ -6,6 +6,3 @@ export const getCardGenerationPrompt = (word: string): string => buildCardPrompt
 
 export const getDeckGenerationPrompt = (topic: string, count: number, level: JLPTLevel): string =>
     buildDeckPrompt(topic, count, level);
-
-export const getDistractorsPrompt = (word: string, correctMeaning: string): string =>
-    buildDistractorsPrompt(word, correctMeaning);

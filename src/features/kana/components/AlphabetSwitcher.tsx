@@ -1,6 +1,6 @@
 "use client";
 
-import type { AlphabetMode } from "../types/kana.types";
+import type { AlphabetMode } from "../types";
 
 interface AlphabetSwitcherProps {
     value: AlphabetMode;

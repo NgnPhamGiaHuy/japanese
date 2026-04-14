@@ -11,9 +11,9 @@
  */
 
 import { shuffleArray } from "@/shared/utils";
-import { updateCardProgress } from "../services/card.service";
+import { updateCardProgress } from "../services";
 
-import type { FlashCard, StudyMode } from "../types/flashcard.types";
+import type { FlashCard, StudyMode } from "../types";
 
 // ─── Session model ──────────────────────────────────────────────────────────
 

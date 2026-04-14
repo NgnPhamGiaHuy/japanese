@@ -4,9 +4,9 @@ import { useEffect, useState } from "react";
 
 import { ChevronRight, Shuffle, Volume2 } from "lucide-react";
 
-import { KanaStrokeAnimation } from "@/features/kana/components";
-import { useKanaDataset } from "@/features/kana/hooks/useKanaDataset";
-import { useUserProgress } from "@/features/user/hooks/useUserProgress";
+import { KanaStrokeAnimation } from "@/features/kana";
+import { useKanaDataset } from "@/features/kana/hooks";
+import { useUserProgress } from "@/features/user/hooks";
 import { ScreenHeader } from "@/shared/components/layout";
 import { Button } from "@/shared/components/ui";
 import { HANDWRITING_FONT, PRINT_FONT } from "@/shared/constants";

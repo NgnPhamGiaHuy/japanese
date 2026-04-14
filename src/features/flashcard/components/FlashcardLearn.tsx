@@ -8,7 +8,7 @@ import { Button } from "@/shared/components/ui";
 import { hexToThemeColor, playAudio } from "@/shared/utils";
 import { useAppStore } from "@/store";
 
-import type { FlashCard, Lesson, StudyStats } from "../types/flashcard.types";
+import type { FlashCard, Lesson, StudyStats } from "../types";
 
 /**
  * FlashcardLearn — "zero pressure" introduction mode.

@@ -1,4 +1,4 @@
-import { FlashCard } from "../types/flashcard.types";
+import { FlashCard } from "../types";
 
 export interface ParseResult {
     valid: Partial<FlashCard>[];

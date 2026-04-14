@@ -8,13 +8,15 @@ import {
     MatchPlayingView,
     MatchResultsView,
 } from "@/features/flashcard/components";
-import { useCards } from "@/features/flashcard/hooks/useCards";
-import { useFlashcardGameBestScore } from "@/features/flashcard/hooks/useFlashcardGameBestScore";
-import { useLessons } from "@/features/flashcard/hooks/useLessons";
-import { useMatchModeSession } from "@/features/flashcard/hooks/useMatchModeSession";
-import { scoreToTier, TIER_INFO } from "@/features/game/logic/tier";
-import { matchGameMode } from "@/features/game/modes/flashcardMatch";
-import { useUserProgress } from "@/features/user/hooks/useUserProgress";
+import {
+    useCards,
+    useFlashcardGameBestScore,
+    useLessons,
+    useMatchModeSession,
+} from "@/features/flashcard/hooks";
+import { scoreToTier, TIER_INFO } from "@/features/game/logic";
+import { matchGameMode } from "@/features/game/modes";
+import { useUserProgress } from "@/features/user/hooks";
 import { useAppStore } from "@/store";
 
 // ─── Page ─────────────────────────────────────────────────────────────────────

@@ -2,8 +2,8 @@
 
 import { Trophy } from "lucide-react";
 
-import { useLeaderboard } from "@/features/game/hooks/useLeaderboard";
-import { scoreToTier, TIER_INFO } from "@/features/game/logic/tier";
+import { useLeaderboard } from "@/features/game/hooks";
+import { scoreToTier, TIER_INFO } from "@/features/game/logic";
 
 interface LeaderboardProps {
     gameMode: string | null;

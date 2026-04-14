@@ -3,10 +3,10 @@
 import { useEffect, useState } from "react";
 
 import { useAppStore } from "@/store";
-import { subscribeUserProgress, updateUserProgress } from "../services/user.service";
-import { INITIAL_USER_DATA } from "../types/user.types";
+import { subscribeUserProgress, updateUserProgress } from "../services";
+import { INITIAL_USER_DATA } from "../types";
 
-import type { UserData } from "../types/user.types";
+import type { UserData } from "../types";
 
 /** Manages XP, daily streak, and lesson completion counts strictly synced with Firebase */
 export function useUserProgress() {

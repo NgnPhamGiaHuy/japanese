@@ -2,12 +2,12 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 
-import { comboMultiplier } from "@/features/game/logic/combo";
-import { VISUAL_GROUPS } from "@/features/kana/data/visualGroups";
-import { useUserProgress } from "@/features/user/hooks/useUserProgress";
+import { comboMultiplier } from "@/features/game";
+import { useUserProgress } from "@/features/user";
 import { allowAudio, playAudio, shuffleArray } from "@/shared/utils";
+import { VISUAL_GROUPS } from "../data";
 
-import type { KanaChar, KanaChar, QuestionType, QuestionType } from "../types/kana.types";
+import type { KanaChar, QuestionType } from "../types";
 
 export type AnswerStatus = "idle" | "correct" | "wrong";
 

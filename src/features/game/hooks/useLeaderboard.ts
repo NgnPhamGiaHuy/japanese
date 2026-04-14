@@ -2,9 +2,9 @@
 
 import { useEffect, useMemo, useState } from "react";
 
-import { subscribeLeaderboard } from "@/features/game/services/game.service";
+import { subscribeLeaderboard } from "@/features/game/services";
 
-import type { LeaderboardEntry } from "@/features/game/services/game.service";
+import type { LeaderboardEntry } from "@/features/game/services";
 
 export interface ComputedLeaderboardEntry extends LeaderboardEntry {
     rank: number;

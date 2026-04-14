@@ -3,9 +3,9 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import { useAppStore } from "@/store";
-import * as LessonService from "../services/lesson.service";
+import * as LessonService from "../services";
 
-import type { FlashCard, Lesson } from "../types/flashcard.types";
+import type { FlashCard, Lesson } from "../types";
 
 interface LessonsState {
     lessons: Lesson[];

@@ -15,7 +15,7 @@ import { cardDoc, cardsCol } from "./card.service";
 import { deleteCardImage } from "./image.service";
 
 import type { Unsubscribe } from "firebase/firestore";
-import type { FlashCard, Lesson } from "../types/flashcard.types";
+import type { FlashCard, Lesson } from "../types";
 
 // ─── Firestore path helpers ────────────────────────────────────────────────
 

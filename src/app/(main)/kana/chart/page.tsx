@@ -5,11 +5,14 @@ import { Fragment, useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import { Eye, EyeOff } from "lucide-react";
 
-import { buildChartBlocks, CHART_SECTION_TITLES } from "@/features/kana/data/chartLayouts";
-import { HIRAGANA_DATA } from "@/features/kana/data/hiragana";
-import { KATAKANA_DATA } from "@/features/kana/data/katakana";
-import { useKanaDataset } from "@/features/kana/hooks/useKanaDataset";
-import { useUserProgress } from "@/features/user/hooks/useUserProgress";
+import {
+    buildChartBlocks,
+    CHART_SECTION_TITLES,
+    HIRAGANA_DATA,
+    KATAKANA_DATA,
+} from "@/features/kana/data";
+import { useKanaDataset } from "@/features/kana/hooks";
+import { useUserProgress } from "@/features/user/hooks";
 import { ScreenHeader } from "@/shared/components/layout";
 import { PRINT_FONT } from "@/shared/constants";
 import { playAudio } from "@/shared/utils";

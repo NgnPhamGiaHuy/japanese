@@ -1,9 +1,9 @@
-import { doc, getDoc, onSnapshot, setDoc, updateDoc } from "firebase/firestore";
+import { doc, getDoc, onSnapshot, setDoc } from "firebase/firestore";
 
 import { APP_ID, db } from "@/lib/firebase";
-import { INITIAL_USER_DATA } from "../types/user.types";
+import { INITIAL_USER_DATA } from "../types";
 
-import type { UserData } from "../types/user.types";
+import type { UserData } from "../types";
 
 const userDoc = (userId: string) => doc(db, "artifacts", APP_ID, "users", userId);
 

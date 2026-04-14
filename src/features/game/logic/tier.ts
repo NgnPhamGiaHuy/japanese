@@ -28,7 +28,6 @@ export interface TierInfo {
     bg: string;
     border: string;
     emoji: string;
-    /** Score needed to reach the next tier; null if already Diamond */
     nextThreshold: number | null;
 }
 

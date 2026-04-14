@@ -12,13 +12,13 @@ import {
     LivesDisplay,
     MiniLeaderboard,
 } from "@/features/game/components";
-import { useKanaDataset } from "@/features/kana/hooks/useKanaDataset";
 import {
     TIME_ATTACK_MAX_STREAK_BONUS_SEC,
     TIME_ATTACK_WRONG_PENALTY_SEC,
+    useKanaDataset,
     useSurvivalGame,
-} from "@/features/kana/hooks/useSurvivalGame";
-import { useBestScores } from "@/features/user/hooks/useBestScores";
+} from "@/features/kana/hooks";
+import { useBestScores } from "@/features/user/hooks";
 import { ScreenHeader, ScreenHeaderBackButton, ScreenHeaderRow } from "@/shared/components/layout";
 import { Button } from "@/shared/components/ui";
 import { HANDWRITING_FONT, PRINT_FONT } from "@/shared/constants";
@@ -36,7 +36,7 @@ const KanaSurvivalPage = () => {
         alphabet,
         userId: user?.uid ?? null,
         userName: user?.displayName ?? "",
-        currentBest: 0, // bestScores checked per-mode inside endSession
+        currentBest: 0,
         onSaveScore: saveScore,
     });
 

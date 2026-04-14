@@ -2,8 +2,8 @@
 
 import { useRouter } from "next/navigation";
 
-import { useUserProgress } from "@/features/user/hooks/useUserProgress";
-import { signOut } from "@/features/user/services/auth.service";
+import { useUserProgress } from "@/features/user/hooks";
+import { signOut } from "@/features/user/services";
 import { ScreenHeader } from "@/shared/components/layout";
 import { SPACING } from "@/shared/constants";
 import { useAppStore } from "@/store";

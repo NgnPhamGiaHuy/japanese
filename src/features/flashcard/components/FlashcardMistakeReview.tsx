@@ -8,7 +8,7 @@ import { useAICard } from "@/features/ai";
 import { Button } from "@/shared/components/ui";
 import { hexToThemeColor, playAudio, shuffleArray } from "@/shared/utils";
 
-import type { FlashCard, Lesson, StudyStats } from "../types/flashcard.types";
+import type { FlashCard, Lesson, StudyStats } from "../types";
 
 /**
  * FlashcardMistakeReview — targeted re-exposure with AI-generated explanations.

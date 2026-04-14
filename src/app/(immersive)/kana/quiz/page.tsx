@@ -9,8 +9,7 @@ import {
     gameQuizStreakColumnClassName,
     StreakComboBadge,
 } from "@/features/game/components";
-import { useKanaDataset } from "@/features/kana/hooks/useKanaDataset";
-import { useQuizEngine } from "@/features/kana/hooks/useQuizEngine";
+import { useKanaDataset, useQuizEngine } from "@/features/kana/hooks";
 import { ScreenHeader, ScreenHeaderBackButton, ScreenHeaderRow } from "@/shared/components/layout";
 import { Button } from "@/shared/components/ui";
 import { HANDWRITING_FONT, PRINT_FONT } from "@/shared/constants";

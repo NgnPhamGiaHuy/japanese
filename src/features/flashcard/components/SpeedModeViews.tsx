@@ -6,11 +6,11 @@ import { AnimatePresence, motion } from "framer-motion";
 import { X, Zap } from "lucide-react";
 
 import { Leaderboard, MiniLeaderboard } from "@/features/game/components";
-import { SPEED_DIFFICULTY_CONFIG, TOTAL_QUESTIONS } from "@/features/game/modes/flashcardSpeed";
+import { SPEED_DIFFICULTY_CONFIG, TOTAL_QUESTIONS } from "@/features/game/modes";
 import { Button } from "@/shared/components/ui";
 
-import type { TierInfo } from "@/features/game/logic/tier";
-import type { FlashCard } from "../types/flashcard.types";
+import type { TierInfo } from "@/features/game/logic";
+import type { FlashCard } from "../types";
 
 interface SpeedIntroViewProps {
     bestScore: number;

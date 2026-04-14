@@ -10,11 +10,11 @@ import { hexToThemeColor } from "@/shared/utils";
 import { useAppStore } from "@/store";
 import { ImportPreview } from "./ImportPreview";
 import { useCards } from "../hooks/useCards";
-import { deleteCardImage, uploadCardImage } from "../services/image.service";
+import { deleteCardImage, uploadCardImage } from "../services";
 import { parseCSV, parseText } from "../utils/parser";
 
 import type { ImportRow } from "./ImportPreview";
-import type { FlashCard, Lesson } from "../types/flashcard.types";
+import type { FlashCard, Lesson } from "../types";
 
 type EditorCard = FlashCard & { imageFile?: File; previewUrl?: string };
 

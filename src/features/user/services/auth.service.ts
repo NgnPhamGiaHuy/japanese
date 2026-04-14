@@ -25,8 +25,3 @@ export async function signOut(): Promise<void> {
     clearAuthCookie();
     await firebaseSignOut(auth);
 }
-
-/** Returns the currently signed-in Firebase user, or null. */
-export function getCurrentUser(): User | null {
-    return auth.currentUser;
-}

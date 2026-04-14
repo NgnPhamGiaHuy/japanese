@@ -5,8 +5,8 @@ import { use, useEffect, useState } from "react";
 
 import { CopyPlus, Loader2 } from "lucide-react";
 
-import { useLessons } from "@/features/flashcard/hooks/useLessons";
-import { getSharedLesson } from "@/features/flashcard/services/lesson.service";
+import { useLessons } from "@/features/flashcard/hooks";
+import { getSharedLesson } from "@/features/flashcard/services";
 import { Button } from "@/shared/components/ui";
 import { useAppStore } from "@/store";
 

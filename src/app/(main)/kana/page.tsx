@@ -17,9 +17,8 @@ import {
 } from "lucide-react";
 
 import { AlphabetSwitcher } from "@/features/kana/components";
-import { useKanaDataset } from "@/features/kana/hooks/useKanaDataset";
-import { useBestScores } from "@/features/user/hooks/useBestScores";
-import { useUserProgress } from "@/features/user/hooks/useUserProgress";
+import { useKanaDataset } from "@/features/kana/hooks";
+import { useBestScores, useUserProgress } from "@/features/user/hooks";
 import { HANDWRITING_FONT, PRINT_FONT } from "@/shared/constants";
 import { useAppStore } from "@/store";
 

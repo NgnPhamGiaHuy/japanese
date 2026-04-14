@@ -5,7 +5,7 @@ import { useCallback, useEffect, useState } from "react";
 import { useAppStore } from "@/store";
 import * as CardService from "../services/card.service";
 
-import type { FlashCard } from "../types/flashcard.types";
+import type { FlashCard } from "../types";
 
 interface CardsState {
     cards: FlashCard[];

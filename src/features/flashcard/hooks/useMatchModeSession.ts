@@ -2,19 +2,19 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
-import useGameSession from "@/features/game/hooks/useGameSession";
+import { useGameSession } from "@/features/game/hooks";
 import {
     calcMatchPoints,
     calcTimeBonus,
     comboLabel,
     DIFFICULTY_CONFIG,
     WRONG_PENALTY,
-} from "@/features/game/modes/flashcardMatch";
-import { recordGameResult } from "@/features/game/services/game.service";
+} from "@/features/game/modes";
+import { recordGameResult } from "@/features/game/services";
 import { allowAudio, playAudio, shuffleArray } from "@/shared/utils";
 
-import type { MatchDifficulty } from "@/features/game/modes/flashcardMatch";
-import type { FlashCard } from "../types/flashcard.types";
+import type { MatchDifficulty } from "@/features/game/modes";
+import type { FlashCard } from "../types";
 
 type MatchPhase = "intro" | "playing" | "results";
 

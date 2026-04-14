@@ -10,13 +10,15 @@ import {
     SpeedPlayingView,
     SpeedResultsView,
 } from "@/features/flashcard/components";
-import { useCards } from "@/features/flashcard/hooks/useCards";
-import { useFlashcardGameBestScore } from "@/features/flashcard/hooks/useFlashcardGameBestScore";
-import { useLessons } from "@/features/flashcard/hooks/useLessons";
-import { useSpeedModeSession } from "@/features/flashcard/hooks/useSpeedModeSession";
-import { scoreToTier, TIER_INFO } from "@/features/game/logic/tier";
-import { speedGameMode } from "@/features/game/modes/flashcardSpeed";
-import { useUserProgress } from "@/features/user/hooks/useUserProgress";
+import {
+    useCards,
+    useFlashcardGameBestScore,
+    useLessons,
+    useSpeedModeSession,
+} from "@/features/flashcard/hooks";
+import { scoreToTier, TIER_INFO } from "@/features/game/logic";
+import { speedGameMode } from "@/features/game/modes";
+import { useUserProgress } from "@/features/user/hooks";
 import { Button } from "@/shared/components/ui";
 import { useAppStore } from "@/store";
 

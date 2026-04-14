@@ -4,10 +4,8 @@ import Link from "next/link";
 
 import { AlertTriangle, BookOpen, Clock, Flame, Gamepad2, Trophy } from "lucide-react";
 
-import { useCards } from "@/features/flashcard/hooks/useCards";
-import { useLessons } from "@/features/flashcard/hooks/useLessons";
-import { getDueCards } from "@/features/flashcard/logic/learningEngine";
-import { useUserProgress } from "@/features/user/hooks/useUserProgress";
+import { getDueCards, useCards, useLessons } from "@/features/flashcard";
+import { useUserProgress } from "@/features/user";
 import { Button, StatCard } from "@/shared/components/ui";
 import { CARD_INTERACTIVE, SECTION_HEADING, SPACING } from "@/shared/constants";
 

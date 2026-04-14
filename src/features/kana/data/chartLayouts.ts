@@ -1,4 +1,4 @@
-import type { KanaChar } from "../types/kana.types";
+import type { KanaChar } from "../types";
 
 const VOWEL_HEADERS = ["a", "i", "u", "e", "o"] as const;
 const YOON_HEADERS = ["ya", "yu", "yo"] as const;
