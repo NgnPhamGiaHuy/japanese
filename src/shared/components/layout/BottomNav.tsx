@@ -59,7 +59,7 @@ const ROUTES: NavRoute[] = [
     },
 ];
 
-const BottomNav = () => {
+export const BottomNav = () => {
     const pathname = usePathname();
 
     const isActive = (href: string) => {

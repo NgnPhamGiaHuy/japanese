@@ -5,8 +5,8 @@ import { useEffect } from "react";
 import { browserLocalPersistence, onIdTokenChanged, setPersistence } from "firebase/auth";
 
 import { auth } from "@/lib/firebase";
-import { clearAuthCookie, setAuthCookie } from "@/shared/utils/cookie";
-import { useAppStore } from "@/store/useAppStore";
+import { clearAuthCookie, setAuthCookie } from "@/shared/utils";
+import { useAppStore } from "@/store";
 
 /**
  * Bootstraps Firebase auth persistence and subscribes to token changes.

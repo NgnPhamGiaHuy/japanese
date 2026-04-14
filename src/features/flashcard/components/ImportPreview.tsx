@@ -3,7 +3,7 @@ import { useState } from "react";
 import { AlertCircle, CheckCircle2, Trash2 } from "lucide-react";
 
 import { Button } from "@/shared/components/ui";
-import { hexToThemeColor } from "@/shared/utils/colors";
+import { hexToThemeColor } from "@/shared/utils";
 
 export interface ImportRow {
     id: string;

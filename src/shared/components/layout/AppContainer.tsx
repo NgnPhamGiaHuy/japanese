@@ -11,7 +11,7 @@ const MAX_WIDTHS = {
     xl: "max-w-5xl",
 };
 
-const AppContainer = ({ children, className = "", maxWidth = "lg" }: AppContainerProps) => {
+export const AppContainer = ({ children, className = "", maxWidth = "lg" }: AppContainerProps) => {
     return <div className={`${MAX_WIDTHS[maxWidth]} mx-auto px-4 ${className}`}>{children}</div>;
 };
 

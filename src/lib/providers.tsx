@@ -1,7 +1,7 @@
 "use client";
 
 import { useFirebaseAuth } from "@/features/user/hooks/useFirebaseAuth";
-import { useAppStore } from "@/store/useAppStore";
+import { useAppStore } from "@/store";
 
 function AuthGate({ children }: { children: React.ReactNode }) {
     const isAuthReady = useAppStore((s) => s.isAuthReady);

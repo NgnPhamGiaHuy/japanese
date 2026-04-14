@@ -3,6 +3,7 @@
 import { Trophy } from "lucide-react";
 
 import { useLeaderboard } from "@/features/game/hooks/useLeaderboard";
+import { scoreToTier, TIER_INFO } from "@/features/game/logic/tier";
 
 interface LeaderboardProps {
     gameMode: string | null;
@@ -100,12 +101,26 @@ const Leaderboard = ({ gameMode, currentUserId, accentColor = "#ff9600" }: Leade
                                     </span>
                                 </div>
 
-                                <span
-                                    className={`shrink-0 text-base ${isMe ? "font-black" : "font-bold text-[#3c3c3c]"}`}
-                                    style={isMe ? { color: accentColor } : undefined}
-                                >
-                                    {entry.score}
-                                </span>
+                                <div className="flex shrink-0 items-center gap-2">
+                                    {(() => {
+                                        const t = scoreToTier(entry.score);
+                                        const ti = TIER_INFO[t];
+                                        return (
+                                            <span
+                                                className="rounded-lg px-1.5 py-0.5 text-[10px] font-black"
+                                                style={{ color: ti.color, backgroundColor: ti.bg }}
+                                            >
+                                                {ti.emoji}
+                                            </span>
+                                        );
+                                    })()}
+                                    <span
+                                        className={`text-base ${isMe ? "font-black" : "font-bold text-[#3c3c3c]"}`}
+                                        style={isMe ? { color: accentColor } : undefined}
+                                    >
+                                        {entry.score}
+                                    </span>
+                                </div>
                             </div>
                         );
                     })}

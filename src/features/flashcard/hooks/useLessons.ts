@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 
-import { useAppStore } from "@/store/useAppStore";
+import { useAppStore } from "@/store";
 import * as LessonService from "../services/lesson.service";
 
 import type { FlashCard, Lesson } from "../types/flashcard.types";

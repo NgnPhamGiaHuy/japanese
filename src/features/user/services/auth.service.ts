@@ -1,7 +1,7 @@
 import { signOut as firebaseSignOut, signInWithPopup } from "firebase/auth";
 
 import { auth, googleProvider } from "@/lib/firebase";
-import { clearAuthCookie, setAuthCookie } from "@/shared/utils/cookie";
+import { clearAuthCookie, setAuthCookie } from "@/shared/utils";
 
 import type { User } from "firebase/auth";
 

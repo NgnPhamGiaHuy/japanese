@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 
-import { useAppStore } from "@/store/useAppStore";
+import { useAppStore } from "@/store";
 import * as CardService from "../services/card.service";
 
 import type { FlashCard } from "../types/flashcard.types";
@@ -71,10 +71,28 @@ export function useCards(lessonId?: string) {
         [user],
     );
 
+    const resetCard = useCallback(
+        async (cardId: string): Promise<void> => {
+            if (!user) return;
+            await CardService.resetCardProgress(user.uid, cardId);
+        },
+        [user],
+    );
+
+    const resetLesson = useCallback(
+        async (lessonId: string): Promise<void> => {
+            if (!user) return;
+            await CardService.resetLessonProgress(user.uid, lessonId);
+        },
+        [user],
+    );
+
     return {
         ...state,
         createCard,
         updateCard,
         deleteCard,
+        resetCard,
+        resetLesson,
     };
 }

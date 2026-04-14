@@ -7,9 +7,11 @@ interface AppState {
     // Auth
     user: User | null;
     isAuthReady: boolean;
+
     // Settings
     useHandwriting: boolean;
     globalAutoPlay: boolean;
+
     // Actions
     setUser: (user: User | null) => void;
     setAuthReady: (ready: boolean) => void;

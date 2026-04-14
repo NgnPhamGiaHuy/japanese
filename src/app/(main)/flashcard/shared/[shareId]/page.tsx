@@ -3,12 +3,12 @@
 import { useRouter } from "next/navigation";
 import { use, useEffect, useState } from "react";
 
-import { CopyPlus, Loader2, Play } from "lucide-react";
+import { CopyPlus, Loader2 } from "lucide-react";
 
 import { useLessons } from "@/features/flashcard/hooks/useLessons";
 import { getSharedLesson } from "@/features/flashcard/services/lesson.service";
 import { Button } from "@/shared/components/ui";
-import { useAppStore } from "@/store/useAppStore";
+import { useAppStore } from "@/store";
 
 import type { FlashCard, Lesson } from "@/features/flashcard/types/flashcard.types";
 

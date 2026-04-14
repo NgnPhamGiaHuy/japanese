@@ -21,9 +21,9 @@ import {
 import { useBestScores } from "@/features/user/hooks/useBestScores";
 import { ScreenHeader, ScreenHeaderBackButton, ScreenHeaderRow } from "@/shared/components/layout";
 import { Button } from "@/shared/components/ui";
-import { HANDWRITING_FONT, PRINT_FONT } from "@/shared/constants/fonts";
-import { formatTime } from "@/shared/utils/time";
-import { useAppStore } from "@/store/useAppStore";
+import { HANDWRITING_FONT, PRINT_FONT } from "@/shared/constants";
+import { formatTime } from "@/shared/utils";
+import { useAppStore } from "@/store";
 
 const KanaSurvivalPage = () => {
     const { dataset, alphabet } = useKanaDataset();

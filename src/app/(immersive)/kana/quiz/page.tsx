@@ -13,9 +13,9 @@ import { useKanaDataset } from "@/features/kana/hooks/useKanaDataset";
 import { useQuizEngine } from "@/features/kana/hooks/useQuizEngine";
 import { ScreenHeader, ScreenHeaderBackButton, ScreenHeaderRow } from "@/shared/components/layout";
 import { Button } from "@/shared/components/ui";
-import { HANDWRITING_FONT, PRINT_FONT } from "@/shared/constants/fonts";
-import { checkTypedAnswer } from "@/shared/utils/romaji";
-import { useAppStore } from "@/store/useAppStore";
+import { HANDWRITING_FONT, PRINT_FONT } from "@/shared/constants";
+import { checkTypedAnswer } from "@/shared/utils";
+import { useAppStore } from "@/store";
 
 type QuizMode = "choice" | "type" | "smart";
 

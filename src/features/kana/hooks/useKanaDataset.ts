@@ -4,7 +4,7 @@ import { useMemo } from "react";
 
 import { HIRAGANA_DATA } from "@/features/kana/data/hiragana";
 import { KATAKANA_DATA } from "@/features/kana/data/katakana";
-import { useKanaStore } from "@/store/useKanaStore";
+import { useKanaStore } from "@/store";
 
 import type { KanaChar } from "../types/kana.types";
 

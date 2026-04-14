@@ -6,8 +6,8 @@ import { Check, ChevronDown, Copy, Eye, Globe2, Lock, X } from "lucide-react";
 
 import { buildShareId } from "@/features/flashcard/services/lesson.service";
 import { Button } from "@/shared/components/ui";
-import { hexToThemeColor } from "@/shared/utils/colors";
-import { useAppStore } from "@/store/useAppStore";
+import { hexToThemeColor } from "@/shared/utils";
+import { useAppStore } from "@/store";
 
 import type { Lesson } from "../types/flashcard.types";
 

@@ -6,8 +6,8 @@ import { Image as ImageIcon, Loader2, Plus, Sparkles, Trash2, X } from "lucide-r
 
 import { AIBulkPanel, useAICard } from "@/features/ai";
 import { Button } from "@/shared/components/ui";
-import { hexToThemeColor } from "@/shared/utils/colors";
-import { useAppStore } from "@/store/useAppStore";
+import { hexToThemeColor } from "@/shared/utils";
+import { useAppStore } from "@/store";
 import { ImportPreview } from "./ImportPreview";
 import { useCards } from "../hooks/useCards";
 import { deleteCardImage, uploadCardImage } from "../services/image.service";

@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 
 import { submitScore, subscribePersonalBests } from "@/features/game/services/game.service";
-import { useAppStore } from "@/store/useAppStore";
+import { useAppStore } from "@/store";
 
 /** Syncs personal best scores from Firestore and exposes a score-submit helper. */
 export function useBestScores() {

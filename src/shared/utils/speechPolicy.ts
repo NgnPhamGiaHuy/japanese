@@ -18,10 +18,3 @@ export function allowAudio(
     if (stage === "feedback") return true;
     return false;
 }
-
-/** Convenience alias — kept for any call sites that only care about the prompt. */
-export function shouldSpeakQuestionPrompt(
-    type: ImmersiveQuestionType | string | undefined,
-): boolean {
-    return allowAudio(type, "prompt");
-}

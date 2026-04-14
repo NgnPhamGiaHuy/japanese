@@ -20,9 +20,8 @@ import { AlphabetSwitcher } from "@/features/kana/components";
 import { useKanaDataset } from "@/features/kana/hooks/useKanaDataset";
 import { useBestScores } from "@/features/user/hooks/useBestScores";
 import { useUserProgress } from "@/features/user/hooks/useUserProgress";
-import { HANDWRITING_FONT, PRINT_FONT } from "@/shared/constants/fonts";
-import { useAppStore } from "@/store/useAppStore";
-import { useKanaStore } from "@/store/useKanaStore";
+import { HANDWRITING_FONT, PRINT_FONT } from "@/shared/constants";
+import { useAppStore } from "@/store";
 
 function KanaSettingsMenu({
     primaryBg,

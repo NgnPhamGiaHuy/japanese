@@ -10,8 +10,7 @@ import { useUserProgress } from "@/features/user/hooks/useUserProgress";
 import { SCREEN_HEADER_BACK_BUTTON_CLASS, ScreenHeader } from "@/shared/components/layout";
 import { StatCard } from "@/shared/components/ui";
 import { SPACING } from "@/shared/constants";
-import { useAppStore } from "@/store/useAppStore";
-import { useKanaStore } from "@/store/useKanaStore";
+import { useAppStore } from "@/store";
 
 export default function ProfilePage() {
     const { userData } = useUserProgress();

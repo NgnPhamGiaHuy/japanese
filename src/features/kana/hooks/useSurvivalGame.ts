@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 
 import useGameSession from "@/features/game/hooks/useGameSession";
 import { comboMultiplier } from "@/features/game/logic/combo";
-import { getValidRomaji } from "@/shared/utils/romaji";
+import { getValidRomaji } from "@/shared/utils";
 import { useQuizEngine } from "./useQuizEngine";
 
 import type { ChallengeMode, DropWord, KanaChar, SurvivalPhase } from "../types/kana.types";

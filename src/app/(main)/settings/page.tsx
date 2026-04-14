@@ -6,7 +6,7 @@ import { useUserProgress } from "@/features/user/hooks/useUserProgress";
 import { signOut } from "@/features/user/services/auth.service";
 import { ScreenHeader } from "@/shared/components/layout";
 import { SPACING } from "@/shared/constants";
-import { useAppStore } from "@/store/useAppStore";
+import { useAppStore } from "@/store";
 
 export default function SettingsPage() {
     const { useHandwriting, globalAutoPlay, toggleHandwriting, toggleAutoPlay } = useAppStore();

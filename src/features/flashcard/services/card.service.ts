@@ -3,11 +3,13 @@ import {
     collection,
     deleteDoc,
     doc,
+    getDocs,
     onSnapshot,
     query,
     setDoc,
     updateDoc,
     where,
+    writeBatch,
 } from "firebase/firestore";
 
 import { APP_ID, db } from "@/lib/firebase";
@@ -69,7 +71,12 @@ export async function deleteCard(userId: string, cardId: string): Promise<void> 
     await deleteDoc(cardDoc(userId, cardId));
 }
 
-// SRS Processing
+// ─── SRS Processing ───────────────────────────────────────────────────────
+
+const SRS_EASE_MIN = 1.3;
+const SRS_EASE_MAX = 2.5;
+const SRS_EASE_DEFAULT = 2.5;
+
 export async function updateCardProgress(
     userId: string,
     cardId: string,
@@ -84,11 +91,11 @@ export async function updateCardProgress(
         else interval = Math.round(interval * easeFactor);
 
         repetitions += 1;
-        easeFactor = easeFactor + 0.1; // simplified increase
+        easeFactor = Math.min(SRS_EASE_MAX, easeFactor + 0.1);
     } else {
         repetitions = 0;
         interval = 1;
-        easeFactor = Math.max(1.3, easeFactor - 0.2); // minimum ease 1.3
+        easeFactor = Math.max(SRS_EASE_MIN, easeFactor - 0.2);
     }
 
     const nextReviewAt = Date.now() + interval * 24 * 60 * 60 * 1000;
@@ -99,4 +106,40 @@ export async function updateCardProgress(
         easeFactor,
         nextReviewAt,
     });
+}
+
+// ─── Reset Progress ───────────────────────────────────────────────────────
+
+const FRESH_SRS_STATE = {
+    repetitions: 0,
+    interval: 0,
+    easeFactor: SRS_EASE_DEFAULT,
+    nextReviewAt: 0,
+};
+
+/** Resets a single card's SRS progress to factory state. */
+export async function resetCardProgress(userId: string, cardId: string): Promise<void> {
+    await updateDoc(cardDoc(userId, cardId), {
+        ...FRESH_SRS_STATE,
+        nextReviewAt: Date.now(),
+    });
+}
+
+/**
+ * Atomically resets ALL cards in a lesson via a Firestore WriteBatch.
+ * Either all cards are reset or none — no partial state.
+ */
+export async function resetLessonProgress(userId: string, lessonId: string): Promise<void> {
+    const snap = await getDocs(query(cardsCol(userId), where("lessonId", "==", lessonId)));
+
+    if (snap.empty) return;
+
+    const batch = writeBatch(db);
+    const resetPayload = { ...FRESH_SRS_STATE, nextReviewAt: Date.now() };
+
+    for (const docSnap of snap.docs) {
+        batch.update(docSnap.ref, resetPayload);
+    }
+
+    await batch.commit();
 }

@@ -40,6 +40,7 @@ export interface Lesson {
 export interface StudyStats {
     correct: number;
     incorrect: number;
+    mistakeCardIds: string[];
 }
 
-export type StudyMode = "learn" | "review" | "test";
+export type StudyMode = "learn" | "practice" | "mistake-review";

@@ -11,9 +11,9 @@ import { KATAKANA_DATA } from "@/features/kana/data/katakana";
 import { useKanaDataset } from "@/features/kana/hooks/useKanaDataset";
 import { useUserProgress } from "@/features/user/hooks/useUserProgress";
 import { ScreenHeader } from "@/shared/components/layout";
-import { PRINT_FONT } from "@/shared/constants/fonts";
-import { playAudio } from "@/shared/utils/audio";
-import { useKanaStore } from "@/store/useKanaStore";
+import { PRINT_FONT } from "@/shared/constants";
+import { playAudio } from "@/shared/utils";
+import { useKanaStore } from "@/store";
 
 import type { ChartBlock } from "@/features/kana/data/chartLayouts";
 import type { KanaChar } from "@/features/kana/types/kana.types";

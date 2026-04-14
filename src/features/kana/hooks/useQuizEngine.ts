@@ -5,11 +5,9 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { comboMultiplier } from "@/features/game/logic/combo";
 import { VISUAL_GROUPS } from "@/features/kana/data/visualGroups";
 import { useUserProgress } from "@/features/user/hooks/useUserProgress";
-import { shuffleArray } from "@/shared/utils/array";
-import { playAudio } from "@/shared/utils/audio";
-import { allowAudio } from "@/shared/utils/speechPolicy";
+import { allowAudio, playAudio, shuffleArray } from "@/shared/utils";
 
-import type { KanaChar, QuestionType } from "../types/kana.types";
+import type { KanaChar, KanaChar, QuestionType, QuestionType } from "../types/kana.types";
 
 export type AnswerStatus = "idle" | "correct" | "wrong";
 

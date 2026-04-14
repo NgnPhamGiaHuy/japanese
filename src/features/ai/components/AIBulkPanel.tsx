@@ -5,7 +5,7 @@ import { useState } from "react";
 import { AlertCircle, Loader2, Settings2, Sparkles, Zap } from "lucide-react";
 
 import { Button } from "@/shared/components/ui";
-import { hexToThemeColor } from "@/shared/utils/colors";
+import { hexToThemeColor } from "@/shared/utils";
 import { useAIDeck } from "../hooks";
 
 import type { ImportRow } from "@/features/flashcard/components/ImportPreview";

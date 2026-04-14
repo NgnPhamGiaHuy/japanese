@@ -54,12 +54,6 @@ export const ScreenHeaderRow = ({
     children,
     className,
     variant = "light",
-    /**
-     * When true (expects exactly 3 children: left | center | right), left and right
-     * use equal `flex-1` rails and the middle slot is pinned to the true horizontal
-     * center of the bar — e.g. lives stay centered even when the right HUD is wider
-     * than the close button.
-     */
     symmetricSidebars = false,
 }: {
     children: React.ReactNode;
@@ -106,11 +100,10 @@ interface ScreenHeaderProps {
     backHref?: string;
     onBack?: () => void;
     right?: React.ReactNode;
-    /** Override default narrow right column (e.g. for toolbars). */
     rightWrapperClassName?: string;
 }
 
-const ScreenHeader = ({
+export const ScreenHeader = ({
     title,
     backHref,
     onBack,

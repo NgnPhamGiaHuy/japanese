@@ -3,5 +3,3 @@ export const PRINT_FONT =
 
 export const HANDWRITING_FONT =
     '"Klee One", "Yuji Syuku", "Yu Mincho", "Hiragino Mincho Pro", "MS PMincho", serif';
-
-export const UI_FONT = '"Nunito", "Segoe UI", system-ui, sans-serif';

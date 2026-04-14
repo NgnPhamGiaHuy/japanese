@@ -8,9 +8,9 @@ import { DrawingCanvas, KanaStrokeAnimation } from "@/features/kana/components";
 import { useKanaDataset } from "@/features/kana/hooks/useKanaDataset";
 import { ScreenHeader } from "@/shared/components/layout";
 import { Button } from "@/shared/components/ui";
-import { HANDWRITING_FONT, PRINT_FONT } from "@/shared/constants/fonts";
-import { playAudio } from "@/shared/utils/audio";
-import { useAppStore } from "@/store/useAppStore";
+import { HANDWRITING_FONT, PRINT_FONT } from "@/shared/constants";
+import { playAudio } from "@/shared/utils";
+import { useAppStore } from "@/store";
 
 export default function KanaPracticePage() {
     const { dataset, alphabet, themeColor } = useKanaDataset();

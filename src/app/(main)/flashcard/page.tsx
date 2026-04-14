@@ -1,21 +1,35 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
-import { Edit2, Gamepad2, Play, Plus, RefreshCw, Share2, Trash2, Zap } from "lucide-react";
+import { BookOpen, Edit2, Gamepad2, Plus, RefreshCw, Share2, Trash2, Zap } from "lucide-react";
 
 import { LessonBuilder, ShareModal } from "@/features/flashcard/components";
 import { useLessons } from "@/features/flashcard/hooks/useLessons";
+import { scoreToTier, TIER_INFO } from "@/features/game/logic/tier";
+import { matchGameMode } from "@/features/game/modes/flashcardMatch";
+import { speedGameMode } from "@/features/game/modes/flashcardSpeed";
+import { subscribeGameStats } from "@/features/game/services/game.service";
 import { ScreenHeader } from "@/shared/components/layout";
 import { Button } from "@/shared/components/ui";
 import { CARD_BASE, SPACING } from "@/shared/constants";
-import { hexToThemeColor } from "@/shared/utils/colors";
+import { hexToThemeColor } from "@/shared/utils";
+import { useAppStore } from "@/store";
 
 import type { Lesson } from "@/features/flashcard/types/flashcard.types";
+import type { GameStatEntry } from "@/features/game/services/game.service";
 
 export default function FlashcardIndexPage() {
     const { lessons, loading, error, saveFullLesson, deleteLesson, shareLesson } = useLessons();
+    const { user } = useAppStore();
+
+    // Real-time game stats for all modes (used to show tier badges on deck cards)
+    const [gameStats, setGameStats] = useState<Record<string, GameStatEntry>>({});
+    useEffect(() => {
+        if (!user) return;
+        return subscribeGameStats(user.uid, setGameStats);
+    }, [user]);
 
     const [editingLesson, setEditingLesson] = useState<Lesson | null>(null);
     const [sharingLesson, setSharingLesson] = useState<Lesson | null>(null);
@@ -114,7 +128,7 @@ export default function FlashcardIndexPage() {
                 {!loading && !error && lessons.length === 0 && (
                     <div className="py-20 text-center">
                         <div className="mx-auto mb-6 flex h-24 w-24 -rotate-6 items-center justify-center rounded-[2rem] border-b-8 border-[#b65ce8] bg-[#ce82ff] text-white shadow-sm">
-                            <Play size={48} strokeWidth={3} />
+                            <BookOpen size={48} strokeWidth={3} />
                         </div>
                         <h2 className="mb-2 text-2xl font-black text-[#3c3c3c]">No decks yet</h2>
                         <p className="mb-8 font-bold text-[#afafaf]">
@@ -139,6 +153,8 @@ export default function FlashcardIndexPage() {
                             <DeckCard
                                 key={lesson.id}
                                 lesson={lesson}
+                                matchStats={gameStats[matchGameMode(lesson.id)]}
+                                speedStats={gameStats[speedGameMode(lesson.id)]}
                                 onEdit={() => setEditingLesson(lesson)}
                                 onDelete={async () => {
                                     if (confirm("Delete this deck?")) await deleteLesson(lesson.id);
@@ -170,13 +186,34 @@ export default function FlashcardIndexPage() {
     );
 }
 
+function TierBadge({ score, className = "" }: { score: number; className?: string }) {
+    const tier = scoreToTier(score);
+    const info = TIER_INFO[tier];
+    return (
+        <span
+            className={`inline-flex items-center rounded-full px-1.5 py-0.5 text-[9px] font-black shadow-sm ${className}`}
+            style={{
+                backgroundColor: info.bg,
+                color: info.color,
+                border: `1px solid ${info.border}`,
+            }}
+        >
+            {info.emoji}
+        </span>
+    );
+}
+
 function DeckCard({
     lesson,
+    matchStats,
+    speedStats,
     onEdit,
     onDelete,
     onShare,
 }: {
     lesson: Lesson;
+    matchStats?: GameStatEntry;
+    speedStats?: GameStatEntry;
     onEdit: () => void;
     onDelete: () => void;
     onShare: () => void;
@@ -231,32 +268,52 @@ function DeckCard({
                         <Button
                             variant="primary"
                             color={hexToThemeColor(themeColor)}
-                            icon={Play}
+                            icon={BookOpen}
                             className="w-full flex-col gap-1 px-1 py-2 text-[10px] md:flex-row md:gap-2 md:px-2 md:py-3 md:text-sm"
                         >
                             <span className="truncate">Study</span>
                         </Button>
                     </Link>
-                    <Link href={`/flashcard/${lesson.id}/speed`} className="flex-1">
-                        <Button
-                            variant="secondary"
-                            color="orange"
-                            icon={Zap}
-                            className="w-full flex-col gap-1 px-1 py-2 text-[10px] md:flex-row md:gap-2 md:px-2 md:py-3 md:text-sm"
-                        >
-                            <span className="truncate">Speed</span>
-                        </Button>
-                    </Link>
-                    <Link href={`/flashcard/${lesson.id}/match`} className="flex-1">
-                        <Button
-                            variant="secondary"
-                            color="purple"
-                            icon={Gamepad2}
-                            className="w-full flex-col gap-1 px-1 py-2 text-[10px] md:flex-row md:gap-2 md:px-2 md:py-3 md:text-sm"
-                        >
-                            <span className="truncate">Match</span>
-                        </Button>
-                    </Link>
+
+                    {/* Speed button with tier badge */}
+                    <div className="relative flex-1">
+                        {speedStats && (
+                            <TierBadge
+                                score={speedStats.bestScore}
+                                className="absolute -top-2 left-1/2 z-10 -translate-x-1/2"
+                            />
+                        )}
+                        <Link href={`/flashcard/${lesson.id}/speed`} className="block">
+                            <Button
+                                variant="secondary"
+                                color="orange"
+                                icon={Zap}
+                                className="w-full flex-col gap-1 px-1 py-2 text-[10px] md:flex-row md:gap-2 md:px-2 md:py-3 md:text-sm"
+                            >
+                                <span className="truncate">Speed</span>
+                            </Button>
+                        </Link>
+                    </div>
+
+                    {/* Match button with tier badge */}
+                    <div className="relative flex-1">
+                        {matchStats && (
+                            <TierBadge
+                                score={matchStats.bestScore}
+                                className="absolute -top-2 left-1/2 z-10 -translate-x-1/2"
+                            />
+                        )}
+                        <Link href={`/flashcard/${lesson.id}/match`} className="block">
+                            <Button
+                                variant="secondary"
+                                color="purple"
+                                icon={Gamepad2}
+                                className="w-full flex-col gap-1 px-1 py-2 text-[10px] md:flex-row md:gap-2 md:px-2 md:py-3 md:text-sm"
+                            >
+                                <span className="truncate">Match</span>
+                            </Button>
+                        </Link>
+                    </div>
                 </div>
 
                 <div className="flex justify-around gap-2 border-t-2 border-gray-100 pt-3 sm:justify-end sm:border-t-0 sm:pt-0">

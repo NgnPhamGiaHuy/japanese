@@ -6,7 +6,7 @@ import { AlertTriangle, BookOpen, Clock, Flame, Gamepad2, Trophy } from "lucide-
 
 import { useCards } from "@/features/flashcard/hooks/useCards";
 import { useLessons } from "@/features/flashcard/hooks/useLessons";
-import { useSRS } from "@/features/flashcard/hooks/useSRS";
+import { getDueCards } from "@/features/flashcard/logic/learningEngine";
 import { useUserProgress } from "@/features/user/hooks/useUserProgress";
 import { Button, StatCard } from "@/shared/components/ui";
 import { CARD_INTERACTIVE, SECTION_HEADING, SPACING } from "@/shared/constants";
@@ -15,9 +15,8 @@ export default function HomePage() {
     const { userData } = useUserProgress();
     const { lessons } = useLessons();
     const { cards } = useCards();
-    const { dueCards, newCards } = useSRS(cards);
-
     const recentLessons = [...lessons].sort((a, b) => b.createdAt - a.createdAt).slice(0, 2);
+    const dueCards = getDueCards(cards);
     const weakCards = cards.filter((c) => c.easeFactor < 2.0);
 
     return (
