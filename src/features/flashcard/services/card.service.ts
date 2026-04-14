@@ -62,8 +62,13 @@ export function subscribeCards(
         (snap) => {
             const cards = snap.docs
                 .map((d) => migrateCard({ ...d.data(), id: d.id } as FlashCard))
-                // Sort by Firestore document ID — auto-IDs are lexicographically time-ordered
-                .sort((a, b) => a.id.localeCompare(b.id));
+                // Sort by explicit sortOrder first, then by document ID as tiebreaker
+                .sort((a, b) => {
+                    const aOrder = a.sortOrder ?? Infinity;
+                    const bOrder = b.sortOrder ?? Infinity;
+                    if (aOrder !== bOrder) return aOrder - bOrder;
+                    return a.id.localeCompare(b.id);
+                });
             onUpdate(cards);
         },
         onError,
@@ -71,18 +76,23 @@ export function subscribeCards(
 }
 
 /**
- * Migration helper: normalizes legacy Firestore documents to the current schema.
- * Legacy cards stored `kanji` and `furigana` directly.
- * Current schema uses `kanaPrimary` and `altForm`.
+ * Validates that a card from Firestore has the required kanaPrimary field.
+ * Migrates legacy `kanji`/`furigana` fields to `kanaPrimary`/`altForm` for
+ * existing Firestore documents that predate the kana-first schema.
+ * Throws if kanaPrimary cannot be resolved — fail fast.
  */
 function migrateCard(raw: FlashCard): FlashCard {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const legacy = raw as any;
     const card = { ...raw };
 
-    // Ensure kanaPrimary from legacy furigana or kanji fields
+    // One-time migration: derive kanaPrimary from legacy fields
     if (!card.kanaPrimary) {
-        card.kanaPrimary = legacy.furigana || legacy.kanji || "";
+        const derived = legacy.furigana || legacy.kanji;
+        if (!derived) {
+            throw new Error(`[card.service] Card ${card.id} has no kanaPrimary and no legacy fields to migrate from`);
+        }
+        card.kanaPrimary = derived;
     }
 
     // Migrate legacy kanji → altForm when it differs from kanaPrimary

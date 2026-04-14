@@ -1,14 +1,29 @@
+/**
+ * Concrete example JSON array shown to the AI as the expected output shape.
+ * Uses real values (not descriptions) so the AI understands the format precisely.
+ */
 const DECK_JSON_SCHEMA = `[
   {
-    "kanaPrimary": "string — REQUIRED: natural spoken/kana form (e.g. 'たべる', 'おはよう')",
-    "kanji": "string — OPTIONAL: romaji for N5/N4 (e.g. 'taberu'), kanji for N3+ (e.g. '食べる'); omit if not useful",
-    "furigana": "string — OPTIONAL: hiragana reading; only when kanji field contains kanji characters",
-    "meaning": "string",
-    "example": "kana sentence - English translation (e.g. りんごをたべる - I eat an apple)",
-    "distractors": ["wrong meaning 1", "wrong meaning 2", "wrong meaning 3"],
-    "hint": "memorable mnemonic in ≤12 words",
-    "usageNote": "brief usage context or empty string",
+    "kanaPrimary": "たべる",
+    "altForm": "taberu",
+    "furigana": "",
+    "meaning": "to eat",
+    "example": "まいにちごはんをたべる - I eat rice every day",
+    "distractors": ["to drink", "to cook", "to buy"],
+    "hint": "ta-BEru sounds like TABle — you eat at a table",
+    "usageNote": "godan verb, used with を particle",
     "difficulty": 1
+  },
+  {
+    "kanaPrimary": "たべもの",
+    "altForm": "食べ物",
+    "furigana": "たべもの",
+    "meaning": "food",
+    "example": "このたべものはおいしい - This food is delicious",
+    "distractors": ["drink", "restaurant", "recipe"],
+    "hint": "tabemono = tabe (eat) + mono (thing) = eat-thing = food",
+    "usageNote": "",
+    "difficulty": 3
   }
 ]`;
 

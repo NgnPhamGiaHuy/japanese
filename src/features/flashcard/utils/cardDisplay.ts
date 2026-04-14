@@ -14,16 +14,19 @@ import type { FlashCard } from "../types";
 
 export type LearningStage = "kana" | "mixed" | "kanji";
 
+/** Returns the spoken/kana form — throws if missing (fail fast). */
+export function getPrimary(card: FlashCard): string {
+    if (!card.kanaPrimary) {
+        throw new Error(`[cardDisplay] Card ${card.id} is missing required kanaPrimary field`);
+    }
+    return card.kanaPrimary;
+}
+
 /** Returns altForm only when it exists and differs from kanaPrimary. */
 export function getAltForm(card: FlashCard): string | null {
     const alt = card.altForm || null;
     if (!alt) return null;
     return alt !== card.kanaPrimary ? alt : null;
-}
-
-/** Returns the spoken/kana form — always the primary display. */
-export function getPrimary(card: FlashCard): string {
-    return card.kanaPrimary || "";
 }
 
 /**

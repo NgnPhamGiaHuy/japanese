@@ -160,8 +160,6 @@ export const LessonBuilder = ({
                               ...c,
                               kanaPrimary:
                                   result.kanaPrimary ||
-                                  result.furigana ||
-                                  result.kanji ||
                                   c.kanaPrimary,
                               altForm: result.kanji || "",
                               furigana: result.furigana || "",
@@ -421,7 +419,7 @@ export const LessonBuilder = ({
                             const newCards = validRows.map((r) => ({
                                 ...makeCard(),
                                 kanaPrimary: r.furigana || r.kanji || "",
-                                altForm: r.kanji || "",
+                                altForm: r.kanji !== r.furigana ? r.kanji : "",
                                 furigana: r.furigana,
                                 meaning: r.meaning,
                                 example: r.example,

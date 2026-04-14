@@ -96,7 +96,7 @@ const AIBulkPanel = ({ themeColor, onPreview, existingWords = [] }: AIBulkPanelP
 
         const rows: ImportRow[] = cards.map((c, i) => ({
             id: `ai_${Date.now()}_${i}`,
-            kanji: c.kanji ?? c.kanaPrimary,
+            kanji: c.kanji ?? "",
             furigana: c.furigana ?? "",
             meaning: c.meaning,
             example: c.example,

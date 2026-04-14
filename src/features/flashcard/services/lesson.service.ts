@@ -224,8 +224,9 @@ export async function saveLessonWithCards(
         }
     }
 
-    // ── Upsert all incoming cards ──────────────────────────────────────────
-    for (const card of cards) {
+    // ── Upsert all incoming cards with explicit sort order ────────────────
+    for (let i = 0; i < cards.length; i++) {
+        const card = cards[i];
         const isTemp = !card.id || card.id.startsWith("c_");
         const ref = isTemp ? doc(cardsCol(userId)) : cardDoc(userId, card.id);
 
@@ -233,15 +234,13 @@ export async function saveLessonWithCards(
         const cardData = omitUndefined({
             ...rawData,
             lessonId: targetLessonId,
+            sortOrder: i,
             easeFactor: rawData.easeFactor ?? 2.5,
             interval: rawData.interval ?? 0,
             repetitions: rawData.repetitions ?? 0,
             nextReviewAt: rawData.nextReviewAt ?? Date.now(),
         });
 
-        // Full document replace for both new and existing cards.
-        // For existing cards this correctly removes any fields (e.g. imagePath)
-        // that the caller no longer includes, without needing merge semantics.
         batch.set(ref, cardData);
     }
 

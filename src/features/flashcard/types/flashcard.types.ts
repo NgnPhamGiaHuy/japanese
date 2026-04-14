@@ -53,7 +53,10 @@ export interface FlashCard {
     /** Unix timestamp (ms) of the earliest time the card can be reviewed again */
     nextReviewAt: number;
 
-    // AI-enriched fields (optional — fully backward-compatible)
+    /** Explicit sort order within the lesson — determines display sequence */
+    sortOrder?: number;
+
+    // AI-enriched fields
     /** Semantic distractors used for multiple-choice generation in Speed mode */
     distractors?: string[];
     /** Mnemonic or contextual nudge for the user */
