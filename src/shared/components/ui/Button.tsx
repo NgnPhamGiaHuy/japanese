@@ -76,6 +76,7 @@ interface ButtonProps {
     disabled?: boolean;
     type?: "button" | "submit";
     id?: string;
+    style?: React.CSSProperties;
 }
 
 const Button = ({
@@ -89,6 +90,7 @@ const Button = ({
     disabled,
     type = "button",
     id,
+    style,
 }: ButtonProps) => {
     const resolvedColor = alphabet ? ALPHABET_MAP[alphabet] : color;
     const t = THEMES[resolvedColor];
@@ -112,6 +114,7 @@ const Button = ({
             onClick={onClick}
             disabled={disabled}
             className={`${base} ${variants[variant]} ${className}`}
+            style={style}
         >
             {Icon && <Icon size={20} strokeWidth={2.5} />}
             {children}

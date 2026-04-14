@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import { useAppStore } from "@/store";
 import * as LessonService from "../services";
@@ -25,22 +25,22 @@ export function useLessons() {
 
     const [state, setState] = useState<LessonsState>({
         lessons: [],
-        loading: true,
+        loading: !!user,
         error: null,
     });
 
-    // Stable ref so callbacks always see the latest lessons without causing
-    // re-subscriptions on every render.
-    const lessonsRef = useRef<Lesson[]>([]);
-    lessonsRef.current = state.lessons;
+    const [prevUserId, setPrevUserId] = useState(user?.uid);
+    if (user?.uid !== prevUserId) {
+        setPrevUserId(user?.uid);
+        setState({
+            lessons: [],
+            loading: !!user,
+            error: null,
+        });
+    }
 
     useEffect(() => {
-        if (!user) {
-            setState({ lessons: [], loading: false, error: null });
-            return;
-        }
-
-        setState((prev) => ({ ...prev, loading: true, error: null }));
+        if (!user) return;
 
         const unsubscribe = LessonService.subscribeLessons(
             user.uid,
@@ -56,7 +56,7 @@ export function useLessons() {
         );
 
         return unsubscribe;
-    }, [user]);
+    }, [user?.uid]);
 
     // ── Write helpers ────────────────────────────────────────────────────
 
@@ -88,7 +88,8 @@ export function useLessons() {
     const saveFullLesson = useCallback(
         async (lesson: Lesson, cards: FlashCard[], isNew: boolean): Promise<void> => {
             if (!user) return;
-            await LessonService.saveLessonWithCards(user.uid, lesson, cards, isNew);
+            const targetUserId = lesson.userId || user.uid;
+            await LessonService.saveLessonWithCards(targetUserId, lesson, cards, isNew);
         },
         [user],
     );
@@ -102,11 +103,28 @@ export function useLessons() {
     const shareLesson = useCallback(
         async (
             lessonId: string,
-            isPublic: boolean,
+            allowLinkAccess: boolean,
             publicRole: Lesson["publicRole"],
         ): Promise<void> => {
             if (!user) return;
-            await LessonService.shareLessonSettings(user.uid, lessonId, isPublic, publicRole);
+            await LessonService.shareLessonSettings(
+                user.uid,
+                lessonId,
+                allowLinkAccess,
+                publicRole,
+            );
+        },
+        [user],
+    );
+
+    const updateLessonRoles = useCallback(
+        async (
+            lessonId: string,
+            roles: Record<string, "owner" | "editor" | "commenter" | "viewer">,
+            collaborators: string[],
+        ): Promise<void> => {
+            if (!user) return;
+            await LessonService.updateLessonRoles(user.uid, lessonId, roles, collaborators);
         },
         [user],
     );
@@ -117,5 +135,6 @@ export function useLessons() {
         deleteLesson,
         saveFullLesson,
         shareLesson,
+        updateLessonRoles,
     };
 }

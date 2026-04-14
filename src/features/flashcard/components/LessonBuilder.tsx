@@ -23,6 +23,7 @@ interface LessonBuilderProps {
     onDelete?: (id: string) => Promise<void>;
     onClose: () => void;
     editingLesson?: Lesson | null;
+    initialCards?: FlashCard[];
 }
 
 const makeCard = (): EditorCard => ({
@@ -38,10 +39,21 @@ const makeCard = (): EditorCard => ({
     nextReviewAt: 0,
 });
 
-export const LessonBuilder = ({ onSave, onDelete, onClose, editingLesson }: LessonBuilderProps) => {
+export const LessonBuilder = ({
+    onSave,
+    onDelete,
+    onClose,
+    editingLesson,
+    initialCards,
+}: LessonBuilderProps) => {
     const isNew = !editingLesson;
     const { user } = useAppStore();
-    const { cards: existingCards, loading: cardsLoading } = useCards(editingLesson?.id);
+
+    // Only fetch if initialCards are not provided
+    const { cards: existingCards, loading: cardsLoading } = useCards(
+        initialCards ? undefined : editingLesson?.id,
+        initialCards ? undefined : editingLesson?.userId,
+    );
 
     const [lesson, setLesson] = useState<Lesson>(
         () =>
@@ -54,7 +66,7 @@ export const LessonBuilder = ({ onSave, onDelete, onClose, editingLesson }: Less
                 cardCount: 0,
             },
     );
-    const [cards, setCards] = useState<EditorCard[]>([]);
+    const [cards, setCards] = useState<EditorCard[]>(initialCards || []);
     const [tagInput, setTagInput] = useState("");
     const [saving, setSaving] = useState(false);
     const [importMode, setImportMode] = useState<"ai" | "manual" | "paste" | "file">(
@@ -72,10 +84,10 @@ export const LessonBuilder = ({ onSave, onDelete, onClose, editingLesson }: Less
 
     // Sync fetched cards when they arrive
     useEffect(() => {
-        if (!isNew && !cardsLoading) {
+        if (!isNew && !initialCards && !cardsLoading) {
             setCards(existingCards);
         }
-    }, [isNew, cardsLoading, existingCards]);
+    }, [isNew, cardsLoading, existingCards, initialCards]);
 
     const handleAIFillCard = async (cardId: string, word: string) => {
         if (!word.trim()) return;

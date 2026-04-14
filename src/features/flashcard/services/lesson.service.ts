@@ -1,7 +1,6 @@
 import {
     collection,
     doc,
-    getDoc,
     getDocs,
     onSnapshot,
     query,
@@ -60,40 +59,6 @@ export function subscribeLessons(
 
 // ─── Read operations ───────────────────────────────────────────────────────
 
-/**
- * Fetches a shared lesson by its shareId token.
- *
- * The token is a URL-safe Base64 encoding of `userId:lessonId`, so no
- * cross-user or collectionGroup query is needed — we know exactly where to
- * look.  The `isPublic` flag is checked before returning anything.
- */
-export async function getSharedLesson(
-    shareId: string,
-): Promise<{ lesson: Lesson; cards: FlashCard[] } | null> {
-    try {
-        let base64 = decodeURIComponent(shareId).replace(/-/g, "+").replace(/_/g, "/");
-        while (base64.length % 4) base64 += "=";
-
-        const decoded = atob(base64);
-        const [userId, lessonId] = decoded.split(":");
-        if (!userId || !lessonId) return null;
-
-        const snap = await getDoc(lessonDoc(userId, lessonId));
-        if (!snap.exists()) return null;
-
-        const lesson = { ...snap.data(), id: snap.id } as Lesson;
-        if (!lesson.isPublic) return null;
-
-        const cardsSnap = await getDocs(query(cardsCol(userId), where("lessonId", "==", lessonId)));
-        const cards = cardsSnap.docs.map((d) => ({ ...d.data(), id: d.id }) as FlashCard);
-
-        return { lesson, cards };
-    } catch (err) {
-        console.error("[getSharedLesson] Failed:", err);
-        return null;
-    }
-}
-
 // ─── Write operations ──────────────────────────────────────────────────────
 
 export async function updateLesson(userId: string, lesson: Lesson): Promise<void> {
@@ -102,18 +67,37 @@ export async function updateLesson(userId: string, lesson: Lesson): Promise<void
 }
 
 /**
- * Updates share settings for a lesson: generates a stable shareId, sets
- * `isPublic` and `publicRole`.  Calling this with `isPublic: false` revokes
- * public access without destroying the shareId so the link can be re-enabled.
+ * Updates link-based share settings for a lesson.
  */
 export async function shareLessonSettings(
     userId: string,
     lessonId: string,
-    isPublic: boolean,
+    allowLinkAccess: boolean,
     publicRole: Lesson["publicRole"],
 ): Promise<void> {
     const shareId = buildShareId(userId, lessonId);
-    await setDoc(lessonDoc(userId, lessonId), { shareId, isPublic, publicRole }, { merge: true });
+    await setDoc(
+        lessonDoc(userId, lessonId),
+        {
+            shareId,
+            allowLinkAccess,
+            publicRole,
+            isPublic: allowLinkAccess,
+        },
+        { merge: true },
+    );
+}
+
+/**
+ * Updates the explicitly invited collaborators and their roles.
+ */
+export async function updateLessonRoles(
+    userId: string,
+    lessonId: string,
+    roles: Record<string, "owner" | "editor" | "commenter" | "viewer">,
+    collaborators: string[],
+): Promise<void> {
+    await setDoc(lessonDoc(userId, lessonId), { roles, collaborators }, { merge: true });
 }
 
 /**
@@ -177,6 +161,9 @@ export async function saveLessonWithCards(
             id: targetLessonId,
             userId,
             cardCount: cards.length,
+            roles: { [userId]: "owner" },
+            collaborators: [userId],
+            allowLinkAccess: false,
         });
     } else {
         const { id: _id, ...lessonData } = lesson;

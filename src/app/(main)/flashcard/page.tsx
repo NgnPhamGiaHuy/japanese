@@ -21,7 +21,15 @@ import { hexToThemeColor } from "@/shared/utils";
 import { useAppStore } from "@/store";
 
 export default function FlashcardIndexPage() {
-    const { lessons, loading, error, saveFullLesson, deleteLesson, shareLesson } = useLessons();
+    const {
+        lessons,
+        loading,
+        error,
+        saveFullLesson,
+        deleteLesson,
+        shareLesson,
+        updateLessonRoles,
+    } = useLessons();
     const { user } = useAppStore();
 
     // Real-time game stats for all modes (used to show tier badges on deck cards)
@@ -168,15 +176,16 @@ export default function FlashcardIndexPage() {
 
             {sharingLesson &&
                 (() => {
-                    // Always use the live lesson from the real-time list so the
-                    // modal never shows stale share settings.
                     const liveLesson =
                         lessons.find((l) => l.id === sharingLesson.id) ?? sharingLesson;
                     return (
                         <ShareModal
                             lesson={liveLesson}
-                            onShare={async (isPublic, publicRole) => {
-                                await shareLesson(liveLesson.id, isPublic, publicRole);
+                            onShareLink={async (allowLinkAccess, publicRole) => {
+                                await shareLesson(liveLesson.id, allowLinkAccess, publicRole);
+                            }}
+                            onUpdateRoles={async (roles, collabs) => {
+                                await updateLessonRoles(liveLesson.id, roles, collabs);
                             }}
                             onClose={() => setSharingLesson(null)}
                         />

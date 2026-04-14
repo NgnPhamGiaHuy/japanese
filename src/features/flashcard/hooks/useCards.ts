@@ -13,7 +13,7 @@ interface CardsState {
     error: string | null;
 }
 
-export function useCards(lessonId?: string) {
+export function useCards(lessonId?: string, ownerId?: string) {
     const user = useAppStore((s) => s.user);
 
     const [state, setState] = useState<CardsState>({
@@ -28,10 +28,12 @@ export function useCards(lessonId?: string) {
             return;
         }
 
+        const targetUserId = ownerId || user.uid;
+
         setState((prev) => ({ ...prev, loading: true, error: null }));
 
         const unsubscribe = CardService.subscribeCards(
-            user.uid,
+            targetUserId,
             (cards) => setState({ cards, loading: false, error: null }),
             (err) => {
                 console.error("[useCards] Firestore error:", err);
@@ -45,7 +47,7 @@ export function useCards(lessonId?: string) {
         );
 
         return unsubscribe;
-    }, [user, lessonId]);
+    }, [user, lessonId, ownerId]);
 
     const createCard = useCallback(
         async (card: Omit<FlashCard, "id">): Promise<string | undefined> => {

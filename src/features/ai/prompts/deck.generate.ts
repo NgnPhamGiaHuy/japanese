@@ -20,7 +20,10 @@ const buildDeckPrompt = (
             ? `
 
 Already in current deck (DO NOT generate these exact words again):
-${existingWords.slice(0, 200).map((word) => `- ${word}`).join("\n")}
+${existingWords
+    .slice(0, 200)
+    .map((word) => `- ${word}`)
+    .join("\n")}
 `
             : "";
 

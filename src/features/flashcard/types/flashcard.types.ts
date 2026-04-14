@@ -31,10 +31,17 @@ export interface Lesson {
     tags: string[];
     createdAt: number;
     cardCount: number;
+    roles?: Record<string, "owner" | "editor" | "commenter" | "viewer">;
+    collaborators?: string[];
+    allowLinkAccess?: boolean;
+    publicRole?: "viewer" | "commenter" | "editor";
+
     isPublic?: boolean;
     shareId?: string;
-    publicRole?: "viewer" | "commenter" | "editor";
+
     themeColor?: string;
+    sourceLessonId?: string;
+    sourceUserId?: string;
 }
 
 export interface StudyStats {
