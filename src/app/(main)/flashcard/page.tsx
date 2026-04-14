@@ -1,11 +1,18 @@
+/**
+ * @file FlashcardIndexPage
+ * The main dashboard for the Flashcard feature.
+ * Shows personal decks, high scores, and quick-action buttons.
+ */
+
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 import { BookOpen, Edit2, Gamepad2, Plus, RefreshCw, Share2, Trash2, Zap } from "lucide-react";
 
-import { Lesson, LessonBuilder, ShareModal, useLessons } from "@/features/flashcard";
+import { Lesson, ShareModal, useLessons } from "@/features/flashcard";
 import {
     GameStatEntry,
     matchGameMode,
@@ -20,50 +27,29 @@ import { CARD_BASE, SPACING } from "@/shared/constants";
 import { hexToThemeColor } from "@/shared/utils";
 import { useAppStore } from "@/store";
 
+/**
+ * Flashcard Dashboard View
+ *
+ * @remarks
+ * Orchestrates:
+ * 1. Fetching personal lessons (decks) via `useLessons`.
+ * 2. Real-time subscription to game stats (high scores) for the deck badges.
+ * 3. Share flow management via `ShareModal`.
+ */
 export default function FlashcardIndexPage() {
-    const {
-        lessons,
-        loading,
-        error,
-        saveFullLesson,
-        deleteLesson,
-        shareLesson,
-        updateLessonRoles,
-    } = useLessons();
+    const { lessons, loading, error, deleteLesson, shareLesson, updateLessonRoles } = useLessons();
     const { user } = useAppStore();
+    const router = useRouter();
 
-    // Real-time game stats for all modes (used to show tier badges on deck cards)
+    /** Track high scores for each personal deck to display badges/tiers */
     const [gameStats, setGameStats] = useState<Record<string, GameStatEntry>>({});
+
     useEffect(() => {
         if (!user) return;
         return subscribeGameStats(user.uid, setGameStats);
     }, [user]);
 
-    const [editingLesson, setEditingLesson] = useState<Lesson | null>(null);
     const [sharingLesson, setSharingLesson] = useState<Lesson | null>(null);
-    const [showBuilder, setShowBuilder] = useState(false);
-
-    const closeBuilder = () => {
-        setShowBuilder(false);
-        setEditingLesson(null);
-    };
-
-    if (showBuilder || editingLesson) {
-        return (
-            <LessonBuilder
-                editingLesson={editingLesson}
-                onSave={async (lesson, cards, isNew) => {
-                    await saveFullLesson(lesson, cards, isNew);
-                    closeBuilder();
-                }}
-                onDelete={async (id) => {
-                    await deleteLesson(id);
-                    closeBuilder();
-                }}
-                onClose={closeBuilder}
-            />
-        );
-    }
 
     return (
         <div className="min-h-[100dvh] bg-[#F7F7F8] pb-28">
@@ -74,7 +60,7 @@ export default function FlashcardIndexPage() {
                     <Button
                         variant="primary"
                         color="purple"
-                        onClick={() => setShowBuilder(true)}
+                        onClick={() => router.push("/flashcard/create")}
                         className="-mr-2 !p-2 shadow-none"
                     >
                         <Plus size={20} strokeWidth={3} />
@@ -145,7 +131,7 @@ export default function FlashcardIndexPage() {
                         <Button
                             variant="primary"
                             color="purple"
-                            onClick={() => setShowBuilder(true)}
+                            onClick={() => router.push("/flashcard/create")}
                             icon={Plus}
                             className="mx-auto px-8 py-5 text-xl"
                         >
@@ -163,7 +149,6 @@ export default function FlashcardIndexPage() {
                                 lesson={lesson}
                                 matchStats={gameStats[matchGameMode(lesson.id)]}
                                 speedStats={gameStats[speedGameMode(lesson.id)]}
-                                onEdit={() => setEditingLesson(lesson)}
                                 onDelete={async () => {
                                     if (confirm("Delete this deck?")) await deleteLesson(lesson.id);
                                 }}
@@ -195,6 +180,10 @@ export default function FlashcardIndexPage() {
     );
 }
 
+/**
+ * Small visual tier indicator based on score.
+ * Shows emoji + specific theme colors (Gold, Platinum, etc).
+ */
 function TierBadge({ score, className = "" }: { score: number; className?: string }) {
     const tier = scoreToTier(score);
     const info = TIER_INFO[tier];
@@ -212,18 +201,23 @@ function TierBadge({ score, className = "" }: { score: number; className?: strin
     );
 }
 
+/**
+ * Individual Deck Entry on Dashboard
+ *
+ * @remarks
+ * Displays deck metadata (title, tags, count) and high score badges.
+ * Provides entry points to Study, Speed Quiz, and Match game.
+ */
 function DeckCard({
     lesson,
     matchStats,
     speedStats,
-    onEdit,
     onDelete,
     onShare,
 }: {
     lesson: Lesson;
     matchStats?: GameStatEntry;
     speedStats?: GameStatEntry;
-    onEdit: () => void;
     onDelete: () => void;
     onShare: () => void;
 }) {
@@ -280,7 +274,7 @@ function DeckCard({
                             icon={BookOpen}
                             className="w-full flex-col gap-1 px-1 py-2 text-[10px] md:flex-row md:gap-2 md:px-2 md:py-3 md:text-sm"
                         >
-                            <span className="truncate">Study</span>
+                            <span className="truncate">View</span>
                         </Button>
                     </Link>
 
@@ -333,25 +327,23 @@ function DeckCard({
                     >
                         <Share2 size={20} strokeWidth={2.5} />
                     </button>
-                    <button
-                        onClick={onEdit}
+                    <Link
+                        href={`/flashcard/${lesson.id}/edit`}
                         className="flex flex-1 items-center justify-center rounded-xl p-3 text-gray-300 transition-colors sm:flex-none"
-                        style={{
-                            backgroundColor: "transparent",
-                            color: undefined,
-                        }}
+                        style={{ color: undefined }}
                         onMouseEnter={(e) => {
-                            e.currentTarget.style.backgroundColor = `${themeColor}20`;
-                            e.currentTarget.style.color = themeColor;
+                            (e.currentTarget as HTMLElement).style.backgroundColor =
+                                `${themeColor}20`;
+                            (e.currentTarget as HTMLElement).style.color = themeColor;
                         }}
                         onMouseLeave={(e) => {
-                            e.currentTarget.style.backgroundColor = "transparent";
-                            e.currentTarget.style.color = "";
+                            (e.currentTarget as HTMLElement).style.backgroundColor = "transparent";
+                            (e.currentTarget as HTMLElement).style.color = "";
                         }}
                         title="Edit deck"
                     >
                         <Edit2 size={20} strokeWidth={2.5} />
-                    </button>
+                    </Link>
                     <button
                         onClick={onDelete}
                         className="flex flex-1 items-center justify-center rounded-xl p-3 text-gray-300 transition-colors hover:bg-[#ffdfe0] hover:text-[#ea2b2b] sm:flex-none"

@@ -1,3 +1,9 @@
+/**
+ * @file FlashcardPractice
+ * Core SRS-integrated study mode implementing mixed-modality pedagogy.
+ * Dynamically switches between recognition (MC) and recall (Flip) based on card data.
+ */
+
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -13,21 +19,33 @@ import type { FlashCard, Lesson, StudyStats } from "../types";
 /**
  * FlashcardPractice — SRS-integrated mixed-modality session.
  *
- * Design rationale (Quizlet "Learn" inspired):
- *  - Cards with AI distractors → Multiple Choice (recognition)
- *  - Cards without distractors → Flip (recall)
- *  - Both modes update SRS after each answer
- *  - Hint is available but subtly hidden to encourage recall first
+ * @remarks
+ * **Design Rationale (Quizlet "Learn" inspired):**
+ * - **Recognition Stage (MC)**: If a card has AI-generated distractors, it starts as Multiple Choice to build initial familiarity.
+ * - **Recall Stage (Flip)**: For deep memory retrieval, cards without distractors (or advanced ones) use the traditional flip mechanic.
+ * - **SRS Feedback**: Both modes feed performance data back to the SRS algorithm.
+ * - **Saliency**: Hints are present but "hidden" by default to encourage active recall effort before providing a crutch.
  */
 
 interface FlashcardPracticeProps {
+    /** The deck metadata */
     lesson: Lesson;
+    /** The batch of cards due for review */
     cards: FlashCard[];
+    /** Triggered on manual exit */
     onClose: () => void;
+    /** Persistence handler for SRS state updates */
     onAnswer: (card: FlashCard, knew: boolean) => Promise<void>;
+    /** Final transition to reward/summary screen */
     onComplete: (stats: StudyStats) => void;
 }
 
+/**
+ * FlashcardPractice Component
+ *
+ * @example
+ * <FlashcardPractice lesson={lesson} cards={dueCards} onAnswer={handleSrs} />
+ */
 export const FlashcardPractice = ({
     lesson,
     cards,
@@ -40,19 +58,25 @@ export const FlashcardPractice = ({
 
     const [currentIndex, setCurrentIndex] = useState(0);
     const [isFlipped, setIsFlipped] = useState(false);
+
+    /** Tracking session performance for XP calculation and summary */
     const [stats, setStats] = useState<StudyStats>({
         correct: 0,
         incorrect: 0,
         mistakeCardIds: [],
     });
+
     const [showSummary, setShowSummary] = useState(false);
     const [hintVisible, setHintVisible] = useState(false);
+
+    /** Local state for the multiple-choice selection animation */
     const [mcSelected, setMcSelected] = useState<string | null>(null);
     const prevFlippedRef = useRef(false);
 
-    // (Per-card UI resets are handled in `advance` to avoid cascading renders)
-
-    // Auto-play on flip
+    /**
+     * Pronunciation Reinforcement
+     * Plays audio upon "reveal" (flipping the card) to bond visual memory with sound.
+     */
     useEffect(() => {
         const justFlipped = isFlipped && !prevFlippedRef.current;
         if (justFlipped && globalAutoPlay) {
@@ -64,14 +88,22 @@ export const FlashcardPractice = ({
 
     const card = cards[currentIndex];
 
-    // Build MC choices if distractors are available
+    /**
+     * Multiple Choice Choice Generation
+     *
+     * @remarks
+     * Derived from card distractors.
+     * We limit to 3 distractors + 1 correct answer to maintain high density but low cognitive overload.
+     */
     const mcChoices = useMemo<string[] | null>(() => {
         const d = card?.distractors;
         if (!d || d.length < 3) return null;
         return shuffleArray([card.meaning, ...d.slice(0, 3)]);
+        // Re-shuffle only when current index changes to prevent choices jumping on state updates
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [currentIndex]);
 
+    /** Flag determining if the current card should be presented as a Quiz or a Flip-card */
     const isMCMode = mcChoices !== null && mcChoices.length === 4;
 
     if (cards.length === 0) {
@@ -91,11 +123,15 @@ export const FlashcardPractice = ({
         );
     }
 
-    // Prevents runtime crashes if UI transitions faster than state updates
+    // Safety guard for transition logic
     if (!card) return null;
 
     const progress = (currentIndex / cards.length) * 100;
 
+    /**
+     * Advancement Orchestrator
+     * Resets local UI states (flipped, hints, mc) and moves to next card or summary.
+     */
     const advance = async (knew: boolean) => {
         const nextMistakes = knew ? stats.mistakeCardIds : [...stats.mistakeCardIds, card.id];
         const nextStats: StudyStats = {
@@ -119,10 +155,11 @@ export const FlashcardPractice = ({
         if (mcSelected !== null) return;
         setMcSelected(choice);
         const correct = choice === card.meaning;
+        /** Short delay to allow user to see the success/error colors before advancing */
         setTimeout(() => void advance(correct), 750);
     };
 
-    // ── Summary ─────────────────────────────────────────────────────────────
+    // ── Summary (XP and Accuracy Report) ───────────────────────────────────
     if (showSummary) {
         const xpEarned = stats.correct * 3;
         const accuracy =
@@ -167,7 +204,7 @@ export const FlashcardPractice = ({
         );
     }
 
-    // ── Main player ──────────────────────────────────────────────────────────
+    // ── Session UI ───────────────────────────────────────────────────────────
     return (
         <div className="fixed inset-0 z-50 flex flex-col bg-[#F7F7F8]">
             <header className="flex items-center justify-between p-4">
@@ -186,7 +223,7 @@ export const FlashcardPractice = ({
             </header>
 
             <div className="mx-auto flex w-full max-w-md flex-1 flex-col items-center justify-center p-4 sm:p-6">
-                {/* ── Multiple-choice ── */}
+                {/* ── Multiple-choice (Recognition Mode) ── */}
                 {isMCMode ? (
                     <div className="flex w-full flex-col gap-5">
                         <div className="relative flex w-full flex-col items-center justify-center rounded-[2.5rem] border-2 border-b-8 border-gray-200 bg-white px-6 py-8 text-center shadow-sm sm:rounded-[3rem]">
@@ -273,13 +310,13 @@ export const FlashcardPractice = ({
                         </div>
                     </div>
                 ) : (
-                    /* ── Flip mode ── */
+                    /* ── Flip mode (Recall Mode) ── */
                     <>
                         <div
                             className={`perspective-1000 preserve-3d relative flex aspect-3/4 w-full cursor-pointer flex-col justify-center transition-all duration-500 ${isFlipped ? "rotate-y-180" : ""}`}
                             onClick={() => setIsFlipped((f) => !f)}
                         >
-                            {/* Front */}
+                            {/* Front Side */}
                             <div className="absolute inset-0 flex flex-col items-center justify-center rounded-[2.5rem] border-2 border-b-8 border-gray-200 bg-white p-6 text-center shadow-sm backface-hidden hover:-translate-y-1 hover:shadow-md">
                                 {card.furigana && (
                                     <span className="mb-2 shrink-0 text-xl font-bold tracking-widest text-[#afafaf]">
@@ -335,7 +372,7 @@ export const FlashcardPractice = ({
                                 )}
                             </div>
 
-                            {/* Back */}
+                            {/* Back Side */}
                             <div className="absolute inset-0 flex rotate-y-180 flex-col items-center justify-center rounded-[2.5rem] border-2 border-b-8 border-gray-200 bg-white p-6 text-center shadow-sm backface-hidden sm:rounded-[3rem] sm:p-8">
                                 <button
                                     onClick={(e) => {
@@ -374,7 +411,7 @@ export const FlashcardPractice = ({
                             </div>
                         </div>
 
-                        {/* Answer buttons — fade in after flip */}
+                        {/* Interaction: SRS Performance Scale (binary for now) */}
                         <div
                             className={`mt-6 flex w-full gap-2 transition-opacity duration-300 sm:mt-10 sm:gap-4 ${isFlipped ? "opacity-100" : "pointer-events-none opacity-0"}`}
                             onClick={(e) => e.stopPropagation()}

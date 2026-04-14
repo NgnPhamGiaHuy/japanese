@@ -7,12 +7,28 @@ import * as CardService from "../services/card.service";
 
 import type { FlashCard } from "../types";
 
+/**
+ * State representing the card collection and its loading/error status.
+ */
 interface CardsState {
+    /** The synchronized list of flashcards */
     cards: FlashCard[];
+    /** Whether the initial fetch or a dynamic update is pending */
     loading: boolean;
+    /** Error message caught from the Firestore listener or underlying service */
     error: string | null;
 }
 
+/**
+ * Real-time hook for managing flashcards within a specific context.
+ *
+ * Supports both internal study (current user's cards) and external preview
+ * (shared cards from another user via ownerId).
+ *
+ * @param lessonId - Optional filter to only fetch cards for a specific lesson/deck.
+ * @param ownerId - Optional UID to fetch another user's cards (for shared previews).
+ * @returns State and CRUD operations for the targeted card set.
+ */
 export function useCards(lessonId?: string, ownerId?: string) {
     const user = useAppStore((s) => s.user);
 

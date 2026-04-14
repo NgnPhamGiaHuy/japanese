@@ -6,9 +6,8 @@ import { useGameSession } from "@/features/game/hooks";
 import {
     calcSpeedPoints,
     getDifficultyForQuestion,
-    SPEED_DIFFICULTY_CONFIG,
+    SPEED_GAME_CONFIG,
     timerColor,
-    TOTAL_QUESTIONS,
 } from "@/features/game/modes";
 import { recordGameResult } from "@/features/game/services";
 import { allowAudio, playAudio, shuffleArray } from "@/shared/utils";
@@ -29,6 +28,18 @@ interface UseSpeedModeSessionParams {
     addXP: (amount: number) => Promise<void>;
 }
 
+/**
+ * Controller hook for the Speed Mode (Blitz) gameplay session.
+ *
+ * @remarks
+ * Orchestrates a high-pressure, multiple-choice flashcard session.
+ *
+ * **Key Logic**:
+ * - **Difficulty Escalation**: Gradually shortens timers and removes furigana as the question index increases.
+ * - **Timer Management**: Frame-accurate timers with transition logic for the progress bar.
+ * - **Combo Engine**: Multipliers that stack based on correct answer streaks.
+ * - **Session Reliability**: Ensures scores are synced mid-session and persisted atomically on completion/timeout.
+ */
 export function useSpeedModeSession({
     allCards,
     lessonExists,
@@ -62,12 +73,12 @@ export function useSpeedModeSession({
 
     const cardQueue = useMemo(() => {
         if (!lessonExists || allCards.length === 0) return [];
-        return shuffleArray([...allCards]).slice(0, TOTAL_QUESTIONS + 5);
+        return shuffleArray([...allCards]).slice(0, SPEED_GAME_CONFIG.TOTAL_QUESTIONS + 5);
     }, [allCards, lessonExists]);
 
     const currentCard = cardQueue[questionIndex];
     const difficultyLevel = getDifficultyForQuestion(questionIndex);
-    const difficultyConfig = SPEED_DIFFICULTY_CONFIG[difficultyLevel];
+    const difficultyConfig = SPEED_GAME_CONFIG.LEVELS[difficultyLevel];
 
     const options = useMemo(() => {
         if (!currentCard || allCards.length < 4) return [];
@@ -88,12 +99,13 @@ export function useSpeedModeSession({
         setAnswerStatus("wrong");
         setStreak(0);
         setTimerFraction(0);
+        if (currentCard && allowAudio("speed", "feedback")) playAudio(currentCard.kanji);
         setTimeout(() => {
             setAnswerStatus("idle");
             setSelectedOption(null);
             setQuestionIndex((prev) => prev + 1);
         }, 600);
-    }, [stopTimer]);
+    }, [currentCard, stopTimer]);
 
     const startQuestionTimer = useCallback(
         (limitSecs: number) => {
@@ -127,12 +139,15 @@ export function useSpeedModeSession({
 
     useEffect(() => {
         if (phase !== "playing") return;
-        if (questionIndex >= TOTAL_QUESTIONS || questionIndex >= cardQueue.length) {
+        if (
+            questionIndex >= SPEED_GAME_CONFIG.TOTAL_QUESTIONS ||
+            questionIndex >= cardQueue.length
+        ) {
             stopTimer();
             return;
         }
         const limitSecs =
-            SPEED_DIFFICULTY_CONFIG[getDifficultyForQuestion(questionIndex)].timeLimit;
+            SPEED_GAME_CONFIG.LEVELS[getDifficultyForQuestion(questionIndex)].timeLimit;
         const raf = requestAnimationFrame(() => startQuestionTimer(limitSecs));
         return () => {
             cancelAnimationFrame(raf);
@@ -142,7 +157,8 @@ export function useSpeedModeSession({
 
     useEffect(() => {
         if (phase !== "playing") return;
-        const done = questionIndex >= TOTAL_QUESTIONS || questionIndex >= cardQueue.length;
+        const done =
+            questionIndex >= SPEED_GAME_CONFIG.TOTAL_QUESTIONS || questionIndex >= cardQueue.length;
         if (!done) return;
 
         stopTimer();
@@ -195,6 +211,7 @@ export function useSpeedModeSession({
             } else {
                 setAnswerStatus("wrong");
                 setStreak(0);
+                if (allowAudio("speed", "feedback")) playAudio(currentCard.kanji);
             }
 
             setTimeout(() => {
@@ -212,13 +229,15 @@ export function useSpeedModeSession({
     const closeSession = useCallback(() => stopTimer(), [stopTimer]);
 
     const ui = useMemo(() => {
-        const multiplier = Math.floor(streak / 5) + 1;
+        const { SCORING, UI } = SPEED_GAME_CONFIG;
+        const multiplier = Math.floor(streak / SCORING.COMBO_STEP) + 1;
         const secondsLeft = Math.ceil(timerFraction * difficultyConfig.timeLimit);
+
         return {
             questionNumber: questionIndex + 1,
             multiplier,
             secondsLeft,
-            isUrgent: timerFraction < 0.35,
+            isUrgent: timerFraction < UI.URGENT_THRESHOLD,
             timerBarColor: timerColor(timerFraction),
             timerTransitionMs: TIMER_TICK_MS,
         };

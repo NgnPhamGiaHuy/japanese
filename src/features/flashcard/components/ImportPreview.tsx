@@ -1,3 +1,9 @@
+/**
+ * @file ImportPreview
+ * Staging UI for validating and correcting batch-imported flashcard data.
+ * Used for CSV, Paste, and AI bulk generation flows.
+ */
+
 import { useState } from "react";
 
 import { AlertCircle, CheckCircle2, Trash2 } from "lucide-react";
@@ -5,24 +11,47 @@ import { AlertCircle, CheckCircle2, Trash2 } from "lucide-react";
 import { Button } from "@/shared/components/ui";
 import { hexToThemeColor } from "@/shared/utils";
 
+/**
+ * Represents a single row of imported data in the staging area.
+ * Contains original source text and validation error messages.
+ */
 export interface ImportRow {
+    /** Unique temporary ID for list management */
     id: string;
     kanji: string;
     furigana: string;
     meaning: string;
     example: string;
+    /** Flag indicating if the row meets the minimum requirements for a valid card */
     isInvalid: boolean;
+    /** Detailed error description for display in tooltips */
     errorMsg?: string;
+    /** The original unparsed string (useful for debugging raw import failures) */
     originalText?: string;
 }
 
 interface ImportPreviewProps {
+    /** The raw set of rows returned by a parser (CSV/Text) or AI generator */
     initialRows: ImportRow[];
+    /** Triggered when the user commits only the valid subset of rows back to the builder */
     onConfirm: (validRows: ImportRow[]) => void;
+    /** Reverts back to the main builder view */
     onCancel: () => void;
+    /** Optional visual branding (hex) */
     themeColor?: string;
 }
 
+/**
+ * ImportPreview Component
+ *
+ * @remarks
+ * Acts as a quality gate (guard) before data enters the main `LessonBuilder` list.
+ * Users can edit fields inline to fix validation errors (missing meaning/kanji).
+ * Only "Clean" rows are passed through to `onConfirm`.
+ *
+ * @example
+ * <ImportPreview initialRows={parsedData} onConfirm={handleAdd} onCancel={closePreview} />
+ */
 export const ImportPreview = ({
     initialRows,
     onConfirm,
@@ -33,11 +62,19 @@ export const ImportPreview = ({
 
     const [rows, setRows] = useState<ImportRow[]>(initialRows);
 
+    /**
+     * Inline row updates with real-time validation re-evaluation.
+     *
+     * @param id - Row ID to update
+     * @param field - ImportRow property
+     * @param value - New string value
+     */
     const updateRow = (id: string, field: keyof ImportRow, value: string) => {
         setRows((prev) =>
             prev.map((row) => {
                 if (row.id === id) {
                     const newRow = { ...row, [field]: value };
+                    /** Minimum Requirement: (Kanji OR Furigana) AND Meaning */
                     const hasKanji = newRow.kanji.trim() || newRow.furigana.trim();
                     const hasMeaning = newRow.meaning.trim();
                     newRow.isInvalid = !(hasKanji && hasMeaning);
@@ -58,6 +95,7 @@ export const ImportPreview = ({
 
     return (
         <div className="space-y-4">
+            {/* Header Summary & Actions */}
             <div className="flex items-center justify-between rounded-xl border-2 border-gray-200 bg-white p-4 shadow-sm">
                 <div>
                     <h3 className="text-lg font-black text-[#3c3c3c]">Preview Cards</h3>
@@ -80,6 +118,7 @@ export const ImportPreview = ({
                 </div>
             </div>
 
+            {/* Validation Table */}
             <div className="overflow-x-auto rounded-2xl border-2 border-gray-200 bg-white shadow-sm">
                 <table className="w-full text-left font-bold text-[#3c3c3c]">
                     <thead className="border-b-2 border-gray-200 bg-gray-50 text-xs tracking-widest text-[#afafaf] uppercase">

@@ -7,18 +7,29 @@ import * as LessonService from "../services";
 
 import type { FlashCard, Lesson } from "../types";
 
+/**
+ * Internal state for the lessons collection.
+ */
 interface LessonsState {
+    /** Array of lesson/deck metadata */
     lessons: Lesson[];
+    /** True during initial hydration from Firestore */
     loading: boolean;
+    /** Connectivity or permission error messages */
     error: string | null;
 }
 
 /**
- * Real-time hook for the current user's flashcard lessons.
+ * Real-time hook for the current user's flashcard lessons/decks.
  *
- * Opens an `onSnapshot` listener on mount (and whenever `user` changes).
- * All write operations delegate to the service layer — no Firebase SDK
- * calls are made directly in this hook or in UI components.
+ * @remarks
+ * Orchestration details:
+ * 1. **RT Sync**: Opens an `onSnapshot` listener on mount.
+ * 2. **Auto-Cleanup**: Automatically unsubscribes when the UID changes or component unmounts.
+ * 3. **Service-Only**: All write operations are delegated to `LessonService` to ensure
+ *    architectural purity and single-source-of-truth logic for complex operations (like atomic saves).
+ *
+ * @returns Metadata-level state and management actions for current user's lessons.
  */
 export function useLessons() {
     const user = useAppStore((s) => s.user);

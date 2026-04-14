@@ -1,3 +1,9 @@
+/**
+ * @file ShareModal
+ * Management interface for deck sharing and collaborative permissions.
+ * Implements a "Google Docs" style access control model.
+ */
+
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
@@ -12,6 +18,13 @@ import { useAppStore } from "@/store";
 import type { SelectOption } from "@/shared/components/ui";
 import type { Lesson } from "../types";
 
+/**
+ * Permission levels for deck collaboration.
+ * - owner: Full control, can delete deck, can manage roles.
+ * - editor: Can modify cards and meta, cannot manage roles or delete deck.
+ * - commenter: Can read and add comments to cards.
+ * - viewer: Read-only access to cards.
+ */
 export type Role = "owner" | "editor" | "commenter" | "viewer";
 
 const sharingOptions: SelectOption<Role>[] = [
@@ -21,28 +34,51 @@ const sharingOptions: SelectOption<Role>[] = [
 ];
 
 interface ShareModalProps {
+    /** The deck being shared */
     lesson: Lesson;
+    /** Callback for toggling public link access and default public role */
     onShareLink: (allowLinkAccess: boolean, publicRole: Lesson["publicRole"]) => Promise<void>;
+    /** Callback for specific user role management */
     onUpdateRoles: (newRoles: Record<string, Role>, newCollaborators: string[]) => Promise<void>;
+    /** Close logic */
     onClose: () => void;
 }
 
+/**
+ * ShareModal Component
+ *
+ * @remarks
+ * Orchestrates:
+ * 1. **Public Access**: Toggling "Anyone with the link" and assigning a default role.
+ * 2. **Invite System**: Adding specific users by ID with explicit roles.
+ * 3. **Role Management**: Updating or removing existing collaborator access.
+ * 4. **Adaptive UI**: Rendered differently for owners (Manage) vs collaborators (View).
+ *
+ * @example
+ * <ShareModal lesson={lesson} onShareLink={handleShare} onUpdateRoles={handleUpdate} />
+ */
 const ShareModal = ({ lesson, onShareLink, onUpdateRoles, onClose }: ShareModalProps) => {
     const { user } = useAppStore();
 
-    // ── Role derivation ──────────────────────────────────────────────────
+    // ── Role derivation (Logic Orchestration) ──────────────────────────────────
+    /**
+     * Finds the user's effective role.
+     * Priority: Explicit Firestore Role > Public Role (if link access enabled) > Viewer.
+     */
     let currentRole = user ? lesson.roles?.[user.uid] : null;
     if (!currentRole && (lesson.allowLinkAccess || lesson.isPublic)) {
         currentRole = lesson.publicRole || "viewer";
     }
 
     const isOwner = currentRole === "owner" || (user && lesson.userId === user.uid);
-    // If not owner, but editor, they can maybe add others? Usually only owner can change roles, but prompt says:
-    // If OWNER: can change roles, can remove users
-    // If EDITOR: can edit content, cannot change roles
+
+    /** Permission guard: Only owners can invite or change roles of others */
     const canManageRoles = isOwner;
 
-    // Derive share link deterministically
+    /**
+     * Deterministic Share Link
+     * Generated from userId + lessonId via buildShareId utility.
+     */
     const shareLink = useMemo(() => {
         if (typeof window === "undefined" || !lesson.userId) return "";
         const id = buildShareId(lesson.userId, lesson.id);
@@ -61,7 +97,7 @@ const ShareModal = ({ lesson, onShareLink, onUpdateRoles, onClose }: ShareModalP
     const [inviteId, setInviteId] = useState("");
     const [inviteRole, setInviteRole] = useState<Role>("viewer");
 
-    // Sync when the lesson prop changes (real-time update)
+    // Sync when the lesson prop changes (for real-time consistency)
     useEffect(() => {
         setAllowLinkAccess(!!lesson.allowLinkAccess || !!lesson.isPublic);
         setPublicRole(lesson.publicRole ?? "viewer");
@@ -83,6 +119,7 @@ const ShareModal = ({ lesson, onShareLink, onUpdateRoles, onClose }: ShareModalP
         setTimeout(() => setCopied(false), 2000);
     };
 
+    /** Handles the "Anyone with link" toggle */
     const handleSaveLinkAccess = async (access: boolean) => {
         setAllowLinkAccess(access);
         setSaving(true);
@@ -96,6 +133,7 @@ const ShareModal = ({ lesson, onShareLink, onUpdateRoles, onClose }: ShareModalP
         }
     };
 
+    /** Handles the default role for public visitors */
     const handleSavePublicRole = async (role: Lesson["publicRole"]) => {
         setPublicRole(role);
         setSaving(true);
@@ -110,6 +148,10 @@ const ShareModal = ({ lesson, onShareLink, onUpdateRoles, onClose }: ShareModalP
 
     // ── Role Management ───────────────────────────────────────────────
 
+    /**
+     * Orchestrator for persisting role changes.
+     * Computes the new collaborators list (keys of roles object) and calls parent handler.
+     */
     const commitRolesUpdate = async (newRoles: Record<string, Role>) => {
         setRoles(newRoles);
         const newCollaborators = Object.keys(newRoles);
@@ -379,7 +421,7 @@ const ShareModal = ({ lesson, onShareLink, onUpdateRoles, onClose }: ShareModalP
                                     </p>
                                     <p className="text-sm font-bold text-[#afafaf]">
                                         {currentRole === "editor"
-                                            ? "You can edit this deck&apos;s content, but only the owner can modify sharing settings."
+                                            ? "You can edit this deck's content, but only the owner can modify sharing settings."
                                             : currentRole === "commenter"
                                               ? "You can comment on items in this deck."
                                               : "You can study this deck but cannot edit it."}

@@ -1,3 +1,9 @@
+/**
+ * @file LessonBuilder
+ * Orchestrator for creating and editing flashcard decks (lessons).
+ * Supports manual entry, AI-assisted generation, CSV imports, and text pasting.
+ */
+
 "use client";
 
 import { useEffect, useRef, useState } from "react";
@@ -16,16 +22,30 @@ import { parseCSV, parseText } from "../utils/parser";
 import type { ImportRow } from "./ImportPreview";
 import type { FlashCard, Lesson } from "../types";
 
+/** Extended FlashCard type for managing temporary local file state during editing */
 type EditorCard = FlashCard & { imageFile?: File; previewUrl?: string };
 
 interface LessonBuilderProps {
+    /** Callback triggered when the user commits the full deck (new or edited) */
     onSave: (lesson: Lesson, cards: FlashCard[], isNew: boolean) => Promise<void>;
+
+    /** Optional callback for deleting the entire deck (only for owners in edit mode) */
     onDelete?: (id: string) => Promise<void>;
+
+    /** Triggered when closing the builder (cancel or finish) */
     onClose: () => void;
+
+    /** Existing lesson data if in edit mode */
     editingLesson?: Lesson | null;
+
+    /** Pre-loaded card data (usually for shared decks or deep-linked edits) */
     initialCards?: FlashCard[];
 }
 
+/**
+ * Factory for creating a skeleton card with unique ID.
+ * Generates an ID prefix 'c_' to distinguish from Firestore IDs.
+ */
 const makeCard = (): EditorCard => ({
     id: `c_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
     lessonId: "",
@@ -39,6 +59,19 @@ const makeCard = (): EditorCard => ({
     nextReviewAt: 0,
 });
 
+/**
+ * LessonBuilder Component
+ *
+ * @remarks
+ * A high-complexity component that manages:
+ * 1. **Multi-Source Ingestion**: Switchable modes for AI Bulk generation, manual entry, CSV uploads, or raw text pasting.
+ * 2. **AI Assistance**: Individual card "AI Fill" feature powered by `useAICard`.
+ * 3. **Image Lifecycle**: Local preview generation using `URL.createObjectURL` and late-binding storage uploads.
+ * 4. **Validation**: Ensures every card has at least a word and a meaning before saving.
+ *
+ * @example
+ * <LessonBuilder editingLesson={myDeck} onSave={handleSave} onClose={closeModal} />
+ */
 export const LessonBuilder = ({
     onSave,
     onDelete,
@@ -49,7 +82,7 @@ export const LessonBuilder = ({
     const isNew = !editingLesson;
     const { user } = useAppStore();
 
-    // Only fetch if initialCards are not provided
+    // Data fetching: Only fetch if initialCards are not provided (Owner edit flow)
     const { cards: existingCards, loading: cardsLoading } = useCards(
         initialCards ? undefined : editingLesson?.id,
         initialCards ? undefined : editingLesson?.userId,
@@ -69,10 +102,14 @@ export const LessonBuilder = ({
     const [cards, setCards] = useState<EditorCard[]>(initialCards || []);
     const [tagInput, setTagInput] = useState("");
     const [saving, setSaving] = useState(false);
+
+    /** Determines the current ingestion UI (AI vs Manual vs Import) */
     const [importMode, setImportMode] = useState<"ai" | "manual" | "paste" | "file">(
         editingLesson ? "manual" : "ai",
     );
     const [pasteText, setPasteText] = useState("");
+
+    /** Buffer for raw import data awaiting user confirmation/matching in ImportPreview */
     const [previewRows, setPreviewRows] = useState<ImportRow[] | null>(null);
 
     const [aiLoadingCardIds, setAILoadingCardIds] = useState<Set<string>>(new Set());
@@ -80,15 +117,23 @@ export const LessonBuilder = ({
 
     const aiCard = useAICard();
 
+    /** Track images marked for removal during the edit session to delete from Storage on successful save */
     const clearedImagePathsRef = useRef<string[]>([]);
 
-    // Sync fetched cards when they arrive
+    // Sync fetched cards when they arrive (standard edit flow)
     useEffect(() => {
         if (!isNew && !initialCards && !cardsLoading) {
             setCards(existingCards);
         }
     }, [isNew, cardsLoading, existingCards, initialCards]);
 
+    /**
+     * Contextual AI Fill
+     * Uses the current word (kanji/word field) to fetch furigana, meaning, and sentences.
+     *
+     * @param cardId - The target card's local/remote ID
+     * @param word - The Japanese word to look up
+     */
     const handleAIFillCard = async (cardId: string, word: string) => {
         if (!word.trim()) return;
         setAILoadingCardIds((prev) => new Set(prev).add(cardId));
@@ -136,6 +181,13 @@ export const LessonBuilder = ({
         }
     };
 
+    /**
+     * Submission Logic
+     * 1. Filters out empty cards.
+     * 2. Uploads pending image files to Storage.
+     * 3. Cleans up redundant Storage paths.
+     * 4. Persists the lesson object and card array via `onSave`.
+     */
     const handleSave = async () => {
         if (!lesson.title.trim()) {
             alert("Title is required");
@@ -171,6 +223,7 @@ export const LessonBuilder = ({
 
             await onSave(lesson, processedCards, isNew);
 
+            // Post-success cleanup: Delete images that were explicitly removed during editing
             for (const path of clearedImagePathsRef.current) {
                 deleteCardImage(path).catch(() => {});
             }
@@ -188,9 +241,11 @@ export const LessonBuilder = ({
         }
     };
 
+    /** Curried helper for updating individual card properties within the list state */
     const updateCard = (id: string, field: keyof EditorCard, value: EditorCard[keyof EditorCard]) =>
         setCards((prev) => prev.map((c) => (c.id === id ? { ...c, [field]: value } : c)));
 
+    /** Manages local blob preview for freshly selected image files */
     const handleImageChange = (file: File | null, id: string) => {
         if (!file) return;
         const previewUrl = URL.createObjectURL(file);
@@ -207,6 +262,8 @@ export const LessonBuilder = ({
 
     const themeHex = lesson.themeColor || "#1cb0f6";
     const themeColorStr = hexToThemeColor(themeHex);
+
+    /** Deduplicated list of Japanese words for AI bulk generation context */
     const existingWordsForAI = Array.from(
         new Set(
             cards
@@ -244,7 +301,7 @@ export const LessonBuilder = ({
             </header>
 
             <div className="mx-auto w-full max-w-2xl flex-1 space-y-8 p-6">
-                {/* Meta */}
+                {/* Meta Panel (Title, Description, Tags, Theme) */}
                 <div className="space-y-4 rounded-[2rem] border-2 border-b-8 border-gray-200 bg-white p-6 shadow-sm">
                     <input
                         type="text"
@@ -326,7 +383,7 @@ export const LessonBuilder = ({
                     </div>
                 </div>
 
-                {/* Input Mode Tabs */}
+                {/* Input Mode Tabs (Import Logic Swappers) */}
                 <div className="mb-6 flex overflow-hidden rounded-2xl border-2 border-gray-200 bg-white shadow-sm">
                     {(["ai", "manual", "paste", "file"] as const).map((mode) => (
                         <button
@@ -351,6 +408,7 @@ export const LessonBuilder = ({
                     ))}
                 </div>
 
+                {/* Switchable Import Panels */}
                 {previewRows ? (
                     <ImportPreview
                         initialRows={previewRows}
@@ -462,6 +520,7 @@ export const LessonBuilder = ({
                         </label>
                     </div>
                 ) : (
+                    /* Manual Card Editor */
                     <div>
                         <div className="mb-4 flex items-end justify-between px-2">
                             <h3 className="text-2xl font-black text-[#3c3c3c]">

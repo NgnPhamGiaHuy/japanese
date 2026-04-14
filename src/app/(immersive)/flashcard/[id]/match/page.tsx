@@ -1,3 +1,8 @@
+/**
+ * @file MatchModePage
+ * Immersive game mode for personal flashcard decks where users match Japanese terms with meanings.
+ */
+
 "use client";
 
 import { notFound, useRouter } from "next/navigation";
@@ -19,8 +24,14 @@ import { matchGameMode } from "@/features/game/modes";
 import { useUserProgress } from "@/features/user/hooks";
 import { useAppStore } from "@/store";
 
-// ─── Page ─────────────────────────────────────────────────────────────────────
-
+/**
+ * Match Mode Page Component
+ *
+ * @remarks
+ * Orhcestrates the match game session. It uses `useMatchModeSession` to manage
+ * game state transitions (intro, playing, results), scoring, and streaks.
+ * This specific version is for private/personal decks.
+ */
 export default function MatchModePage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = use(params);
     const { lessons, loading: lessonsLoading } = useLessons();
@@ -32,6 +43,11 @@ export default function MatchModePage({ params }: { params: Promise<{ id: string
     const lesson = lessons.find((l) => l.id === id);
     const gameMode = matchGameMode(id);
     const bestScore = useFlashcardGameBestScore(user?.uid, gameMode);
+
+    /**
+     * Managed game session state.
+     * Handles complex logic: pair generation, selection validation, combo popups, and timer.
+     */
     const {
         phase,
         difficulty,
@@ -79,6 +95,7 @@ export default function MatchModePage({ params }: { params: Promise<{ id: string
     const tier = scoreToTier(bestScore);
     const tierInfo = TIER_INFO[tier];
 
+    // Phase 1: Game Introduction (Best score, Difficulty selection)
     if (phase === "intro") {
         return (
             <MatchIntroView
@@ -94,6 +111,7 @@ export default function MatchModePage({ params }: { params: Promise<{ id: string
         );
     }
 
+    // Phase 3: Results (Final score, Streak analysis, Tier display)
     if (phase === "results") {
         const finalTierInfo = TIER_INFO[scoreToTier(score)];
 
@@ -114,6 +132,7 @@ export default function MatchModePage({ params }: { params: Promise<{ id: string
         );
     }
 
+    // Phase 2: Active Gameplay (Pair matching)
     return (
         <MatchPlayingView
             gameMode={gameMode}

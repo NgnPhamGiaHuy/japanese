@@ -1,3 +1,9 @@
+/**
+ * @file SharedStudyPage
+ * A lightweight "Preview" version of the study mode for shared decks.
+ * Does not interact with SRS (Spaced Repetition System) metrics.
+ */
+
 "use client";
 
 import { useRouter } from "next/navigation";
@@ -12,6 +18,16 @@ import { useAppStore } from "@/store";
 import type { SharedLessonResult } from "@/features/flashcard/services";
 import type { FlashCard } from "@/features/flashcard/types";
 
+/**
+ * Shared Deck Study (Preview Mode)
+ *
+ * @remarks
+ * Unlike the standard Study mode, this page:
+ * 1. **No SRS**: Does not record ease factors or next review dates.
+ * 2. **Linear flow**: Simply lets a guest or collaborator browse the cards.
+ * 3. **Engagement tracking**: Calls `saveSharedStudyProgress` at the end to
+ *    notify the owner and track the user's view in their library.
+ */
 export default function SharedStudyPage({ params }: { params: Promise<{ shareId: string }> }) {
     const { shareId } = use(params);
     const router = useRouter();
@@ -58,12 +74,16 @@ export default function SharedStudyPage({ params }: { params: Promise<{ shareId:
     const themeHex = lesson.themeColor || "#1cb0f6";
     const card: FlashCard | undefined = cards[currentIndex];
 
+    /** Progresses through the deck or triggers completion logic */
     const handleNext = () => {
         if (currentIndex < cards.length - 1) {
             setCurrentIndex((i) => i + 1);
             setRevealed(false);
         } else {
-            // Save lightweight progress (no SRS data touched)
+            /**
+             * Save lightweight progress (no SRS data touched).
+             * Purely for "Activity" tracking.
+             */
             if (user) {
                 void saveSharedStudyProgress(
                     user.uid,

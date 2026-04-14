@@ -1,3 +1,9 @@
+/**
+ * @file FlashcardLearn
+ * The "zero pressure" introduction mode for new flashcards.
+ * Focuses on initial exposure and vocabulary building.
+ */
+
 "use client";
 
 import { useEffect, useRef, useState } from "react";
@@ -13,21 +19,33 @@ import type { FlashCard, Lesson, StudyStats } from "../types";
 /**
  * FlashcardLearn — "zero pressure" introduction mode.
  *
- * Philosophy (Anki/Duolingo inspired):
- *  - Show the full card immediately — no mystery, no flip.
- *  - Let the user pace themselves ("Got it" / "Study more").
- *  - Auto-play pronunciation when reaching the answer side.
- *  - Furigana always visible (scaffolding for beginners).
+ * @remarks
+ * **Philosophy (Anki/Duolingo inspired):**
+ * - **Full Disclosure**: Shows the full card immediately (no mystery / mystery-meat navigation).
+ * - **Pronunciation First**: Auto-plays audio upon exposure to reinforce the link between sound and script.
+ * - **Self-Assessment**: Users decide if they "Got It" or need more repetition.
+ * - **Scaffolding**: Furigana is always visible to help with reading.
  */
 
 interface FlashcardLearnProps {
+    /** The deck metadata */
     lesson: Lesson;
+    /** The subset of cards to be introduced */
     cards: FlashCard[];
+    /** Triggered when the user manually exits the session */
     onClose: () => void;
+    /** Callback for each card's self-assessment */
     onAnswer: (card: FlashCard, knew: boolean) => Promise<void>;
+    /** Final callback when the entire batch is completed */
     onComplete: (stats: StudyStats) => void;
 }
 
+/**
+ * FlashcardLearn Component
+ *
+ * @example
+ * <FlashcardLearn lesson={myDeck} cards={newCards} onComplete={handleFinish} />
+ */
 export const FlashcardLearn = ({
     lesson,
     cards,
@@ -40,16 +58,24 @@ export const FlashcardLearn = ({
 
     const [currentIndex, setCurrentIndex] = useState(0);
     const [revealed, setRevealed] = useState(false);
+
+    /** Accumulator for session results, tracked for the final reward screen */
     const [stats, setStats] = useState<StudyStats>({
         correct: 0,
         incorrect: 0,
         mistakeCardIds: [],
     });
+
     const [showSummary, setShowSummary] = useState(false);
     const [hintVisible, setHintVisible] = useState(false);
+
+    /** Ref-based tracking to prevent redundant audio triggers on re-renders */
     const prevRevealedRef = useRef(false);
 
-    // Auto-play audio on reveal
+    /**
+     * Pronunciation Reinforcement
+     * Plays audio automatically when a card is revealed if globalAutoPlay is enabled.
+     */
     useEffect(() => {
         const justRevealed = revealed && !prevRevealedRef.current;
         if (justRevealed && globalAutoPlay) {
@@ -58,8 +84,6 @@ export const FlashcardLearn = ({
         }
         prevRevealedRef.current = revealed;
     }, [revealed, globalAutoPlay, cards, currentIndex]);
-
-    // (Per-card resets are handled in `advance` to avoid cascading renders)
 
     if (cards.length === 0) {
         return (
@@ -80,11 +104,15 @@ export const FlashcardLearn = ({
 
     const card = cards[currentIndex];
 
-    // Prevents runtime crashes if UI transitions faster than state updates
+    // Safety guard for state transitions during unmount/cleanup
     if (!card) return null;
 
     const progress = (currentIndex / cards.length) * 100;
 
+    /**
+     * Session Advancement
+     * Records the answer in Firestore through `onAnswer` and moves to the next card/summary.
+     */
     const advance = async (knew: boolean) => {
         const nextMistakes = knew ? stats.mistakeCardIds : [...stats.mistakeCardIds, card.id];
         const nextStats: StudyStats = {
@@ -103,7 +131,7 @@ export const FlashcardLearn = ({
         }
     };
 
-    // ── Summary ─────────────────────────────────────────────────────────────
+    // ── Summary (Reward State) ────────────────────────────────────────────────
     if (showSummary) {
         const xpEarned = stats.correct * 2;
         return (
@@ -144,10 +172,10 @@ export const FlashcardLearn = ({
         );
     }
 
-    // ── Main card ────────────────────────────────────────────────────────────
+    // ── Main Card View ───────────────────────────────────────────────────────
     return (
         <div className="fixed inset-0 z-50 flex flex-col bg-[#F7F7F8]">
-            {/* Header */}
+            {/* Header with Navigation and Progress */}
             <header className="flex items-center justify-between p-4">
                 <Button variant="ghost" onClick={onClose} icon={X} className="px-3 py-2" />
                 <div className="mx-4 flex-1">
@@ -164,9 +192,9 @@ export const FlashcardLearn = ({
             </header>
 
             <div className="mx-auto flex w-full max-w-md flex-1 flex-col items-center justify-center gap-6 p-4 sm:p-6">
-                {/* Card face — always fully revealed in Learn mode */}
+                {/* Front Face - Note: Learn mode shows everything by default */}
                 <div className="relative flex w-full flex-col items-center justify-center rounded-[2.5rem] border-2 border-b-8 border-gray-200 bg-white p-8 text-center shadow-sm sm:rounded-[3rem]">
-                    {/* Hint trigger */}
+                    {/* Interactive Scaffolding: Hints and Audio */}
                     {card.hint && (
                         <button
                             type="button"
@@ -179,22 +207,19 @@ export const FlashcardLearn = ({
                         </button>
                     )}
 
-                    {/* Audio replay */}
                     <button
                         onClick={() => playAudio(card.kanji)}
-                        className="absolute top-4 right-4 rounded-full bg-gray-100 p-2 text-gray-400 transition-colors hover:bg-gray-200"
+                        className="hover:bg-200 absolute top-4 right-4 rounded-full bg-gray-100 p-2 text-gray-400 transition-colors"
                     >
                         <Volume2 className="h-5 w-5" />
                     </button>
 
-                    {/* Furigana */}
                     {card.furigana && (
                         <span className="mb-2 text-xl font-bold tracking-widest text-[#afafaf]">
                             {card.furigana}
                         </span>
                     )}
 
-                    {/* Kanji */}
                     {card.imageUrl && (
                         <div className="mb-4 h-32 w-full overflow-hidden rounded-2xl">
                             <img
@@ -212,15 +237,13 @@ export const FlashcardLearn = ({
                         </h1>
                     </div>
 
-                    {/* Divider */}
                     <div className="my-4 h-px w-full bg-gray-100" />
 
-                    {/* Meaning revealed immediately */}
+                    {/* Meta Data: Meaning, Examples, Usage */}
                     <p className="text-2xl font-black sm:text-3xl" style={{ color: themeHex }}>
                         {card.meaning}
                     </p>
 
-                    {/* Example sentence */}
                     {card.example && (
                         <div className="mt-4 w-full rounded-2xl border-2 border-gray-100 bg-gray-50 p-4 text-left">
                             <p className="text-sm font-bold text-[#3c3c3c] sm:text-base">
@@ -229,7 +252,6 @@ export const FlashcardLearn = ({
                         </div>
                     )}
 
-                    {/* Usage note */}
                     {card.usageNote && (
                         <div className="mt-3 flex items-center gap-1.5 rounded-xl border border-gray-200 bg-gray-50 px-3 py-1.5">
                             <span className="text-[10px] font-black tracking-wide text-[#afafaf] uppercase">
@@ -241,7 +263,6 @@ export const FlashcardLearn = ({
                         </div>
                     )}
 
-                    {/* Hint reveal */}
                     {hintVisible && card.hint && (
                         <div
                             className="mt-4 w-full rounded-2xl px-4 py-2.5 text-sm font-bold text-white"
@@ -252,7 +273,7 @@ export const FlashcardLearn = ({
                     )}
                 </div>
 
-                {/* Self-assessment buttons */}
+                {/* Self-Assessment Interaction */}
                 <div className="flex w-full gap-3">
                     <Button
                         variant="secondary"

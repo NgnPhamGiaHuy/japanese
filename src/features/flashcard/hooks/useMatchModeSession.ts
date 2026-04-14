@@ -34,6 +34,22 @@ interface UseMatchModeSessionParams {
     addXP: (amount: number) => Promise<void>;
 }
 
+/**
+ * Logic orchestration hook for the Match Mode game.
+ *
+ * @remarks
+ * Features:
+ * 1. **Phase Management**: Orchestrates the transition from config (intro) to active gameplay (playing) and final summary (results).
+ * 2. **Game Mechanics**: Handles 2-column selection, error shake triggers, match validation, and streak-based scoring.
+ * 3. **Session Interfacing**: Leverages `useGameSession` for real-time leaderboard participation and XP distribution.
+ * 4. **Adaptive Difficulty**: Enforces time limits and pair counts based on the `DIFFICULTY_CONFIG`.
+ *
+ * @param cards - Pool of flashcards available for the game.
+ * @param gameMode - Unique identifier for the leaderboard/tracking.
+ * @param bestScore - User's current personal best for the target deck/mode.
+ * @param addXP - Callback to persist experience gains.
+ * @returns Comprehensive state and handlers for the Match Mode UI.
+ */
 export function useMatchModeSession({
     cards,
     gameMode,
@@ -174,6 +190,11 @@ export function useMatchModeSession({
             setScore((prev) => Math.max(0, prev - WRONG_PENALTY));
             setErrorLeft(leftId);
             setErrorRight(rightId);
+
+            if (allowAudio("match", "feedback")) {
+                const card = leftItems.find((item) => item.cardId === leftId);
+                if (card) playAudio(card.kanji);
+            }
             setTimeout(() => {
                 setErrorLeft(null);
                 setErrorRight(null);

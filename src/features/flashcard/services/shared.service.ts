@@ -1,3 +1,8 @@
+/**
+ * @file shared.service
+ * Logic layer for public deck sharing and external session resolution.
+ */
+
 import { doc, getDoc, getDocs, query, setDoc, where } from "firebase/firestore";
 
 import { APP_ID, db } from "@/lib/firebase";
@@ -14,7 +19,13 @@ export interface ShareIdPayload {
 
 /**
  * Decodes a URL-safe Base64 shareId back to { ownerId, lessonId }.
- * Returns null if the token is malformed.
+ *
+ * @remarks
+ * Uses a deterministic token format `ownerId:lessonId`.
+ * Encoded with a URL-safe Base64 implementation to prevent issues in routing.
+ *
+ * @param shareId - The token from the URL.
+ * @returns Resolved payload or null if the token is invalid/tampered.
  */
 export function decodeShareId(shareId: string): ShareIdPayload | null {
     try {
@@ -47,12 +58,17 @@ export interface SharedLessonResult {
 }
 
 /**
- * Fetches a shared lesson and its cards using the shareId.
+ * Resolves a shared lesson and its full card set using a guest share token.
  *
- * Security:
- *  - Checks if user is explicitly in roles map
- *  - Fallback to allowLinkAccess / isPublic
- *  - NEVER touches the owner's SRS data or writes anything.
+ * @remarks
+ * **Security Orchestration**:
+ * 1. **Explicit Role**: If the `currentUserId` is in the deck's `roles` map, access is granted.
+ * 2. **Link Access**: If `allowLinkAccess` (Public Link) is toggled, access is granted to anyone.
+ * 3. **Namespace Isolation**: This fetcher never touches study progress; it only resolves content.
+ *
+ * @param shareId - Guest token from the URL.
+ * @param currentUserId - Visiting user's UID (optional).
+ * @returns Resolved lesson data, cards, and metadata for the session.
  */
 export async function getSharedLesson(
     shareId: string,

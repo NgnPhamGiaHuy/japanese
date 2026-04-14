@@ -1,13 +1,14 @@
 /**
- * learningEngine.ts
- *
+ * @file learningEngine.ts
  * Single source of truth for card selection, sequencing, and SRS state
  * transitions across all study modes.
  *
- * Design principles:
- *  – Pure functions where possible; side-effects live in card.service.
- *  – Each mode returns a lean LearningSession that the player components consume.
- *  – Mistakes are accumulated in-memory per session.
+ * @remarks
+ * Design Principles:
+ * 1. **Purity**: Functions are pure where possible; persistence side-effects are isolated.
+ * 2. **Sequence Orchestration**: Deterministic ordering for learning (insertion-based)
+ *    vs adaptive mix for practice (shuffled).
+ * 3. **Mistake Recovery**: Per-session memory management for immediate feedback loops.
  */
 
 import { shuffleArray } from "@/shared/utils";
@@ -15,35 +16,63 @@ import { updateCardProgress } from "../services";
 
 import type { FlashCard, StudyMode } from "../types";
 
-// ─── Session model ──────────────────────────────────────────────────────────
-
+/**
+ * Model representing a study session's configuration and initial state.
+ * Consumed by player components to initialize their internal queue.
+ */
 export interface LearningSession {
-    /** Ordered queue ready for the player to walk through */
+    /** Ordered queue of cards ready for the player to iterate through */
     queue: FlashCard[];
-    /** Human-readable title for the HUD */
+    /** Human-readable label for HUD and progress tracking (e.g., 'Practice') */
     modeLabel: string;
-    /** Whether SRS progress should be written on each answer */
+    /** Whether progress on these cards should persist to the SRS database on answer */
     updateSRS: boolean;
 }
 
-// ─── Card selectors ─────────────────────────────────────────────────────────
-
-/** Cards the user has never studied (zero repetitions). */
+/**
+ * Filters for cards the user has never studied (zero repetitions found).
+ *
+ * @param cards - Full deck collection.
+ * @returns Array of pristine cards.
+ */
 export const getNewCards = (cards: FlashCard[]): FlashCard[] =>
     cards.filter((c) => c.repetitions === 0);
 
-/** Cards whose next review is due right now. */
+/**
+ * Filters for cards whose calculated review epoch has passed.
+ *
+ * @param cards - Full deck collection.
+ * @returns Array of cards that require immediate active recall.
+ */
 export const getDueCards = (cards: FlashCard[]): FlashCard[] =>
     cards.filter((c) => c.nextReviewAt <= Date.now() && c.repetitions > 0);
 
-/** Cards that the user has flagged as mistakes in the current session. */
+/**
+ * Resolves a subset of cards based on a session's current mistake tracking.
+ *
+ * @param cards - Full deck collection.
+ * @param mistakeIds - Array of specific card IDs flagged during current session.
+ * @returns Filtered cards for a specialized "Mistake Review" loop.
+ */
 export const getMistakeCards = (cards: FlashCard[], mistakeIds: string[]): FlashCard[] => {
     const set = new Set(mistakeIds);
     return cards.filter((c) => set.has(c.id));
 };
 
-// ─── Session builder ─────────────────────────────────────────────────────────
-
+/**
+ * Core factory for generating a study segment based on mode and state.
+ *
+ * @remarks
+ * **Mode Strategies**:
+ * - `learn`: Presents new cards in their creation order (predictability aids initial links).
+ * - `practice`: Shuffles a mix of overdue cards and a capped subset of new ones.
+ * - `mistake-review`: Focuses precisely on cards the user struggled with in the prior loop.
+ *
+ * @param cards - Raw card list from the database.
+ * @param mode - Target study intent.
+ * @param mistakeIds - Contextual mistakes from parental state.
+ * @returns A structured session ready for UI mounting.
+ */
 export function buildSession(
     cards: FlashCard[],
     mode: StudyMode,
@@ -51,7 +80,6 @@ export function buildSession(
 ): LearningSession {
     switch (mode) {
         case "learn": {
-            // Introduce new cards in insertion order (no shuffle — want predictability).
             const queue = getNewCards(cards);
             return {
                 queue,
@@ -61,10 +89,9 @@ export function buildSession(
         }
 
         case "practice": {
-            // Mix new + due cards, shuffle for variety.
             const newCards = getNewCards(cards);
             const dueCards = getDueCards(cards);
-            // Cap new cards at 10 so a practice session doesn't balloon.
+            // Capping new cards prevents sessions from becoming overwhelming
             const capped = [...dueCards, ...newCards.slice(0, 10)];
             return {
                 queue: shuffleArray(capped),
@@ -78,44 +105,62 @@ export function buildSession(
             return {
                 queue: shuffleArray(queue),
                 modeLabel: "Mistake Review",
-                updateSRS: true, // reviewing mistakes counts toward SRS
+                updateSRS: true,
             };
         }
     }
 }
 
-// ─── SRS processing ──────────────────────────────────────────────────────────
-
 /**
- * Process a user's answer and persist progress.
- * Returns the calculated next interval (days) so callers can show feedback.
+ * Logical entry point for updating card metadata after an answer.
+ *
+ * @remarks
+ * While this delegates to the service layer for the actual write,
+ * it acts as the semantic handler for the player orchestration.
+ *
+ * @param userId - Context user UID.
+ * @param card - The specific card being answered.
+ * @param knew - Whether the user successfully recalled the card.
  */
 export async function processAnswer(userId: string, card: FlashCard, knew: boolean): Promise<void> {
     await updateCardProgress(userId, card.id, card, knew);
 }
 
-// ─── Utility: next-action advisor ───────────────────────────────────────────
-
+/**
+ * Statistical summary of a deck's current learning status.
+ */
 export interface DeckStatus {
+    /** Cards not yet introduced */
     newCount: number;
+    /** Cards that require review according to the SM2 algorithm */
     dueCount: number;
+    /** Total size of the deck */
     totalCount: number;
 }
 
 /**
- * Tells the entry screen which action to suggest as primary CTA:
- *  - "continue"  → cards are due (pick up where you left off)
- *  - "learn"     → there are unlearned cards but nothing due
- *  - "idle"      → everything is reviewed and not yet due again
+ * Recommended primary action for a deck based on its current status.
+ * - `continue`: Prioritizes clearing review debt.
+ * - `learn`: Encourages introducing new vocabulary.
+ * - `idle`: Occurs when all current goals are met for the day.
  */
 export type DeckAction = "continue" | "learn" | "idle";
 
+/**
+ * Evaluates deck metrics to suggest the most valuable next step for the user.
+ *
+ * @param status - Pre-calculated deck status.
+ * @returns A primary call-to-action identifier.
+ */
 export function recommendedAction(status: DeckStatus): DeckAction {
     if (status.dueCount > 0) return "continue";
     if (status.newCount > 0) return "learn";
     return "idle";
 }
 
+/**
+ * Generates a full status report for a deck.
+ */
 export function getDeckStatus(cards: FlashCard[]): DeckStatus {
     return {
         newCount: getNewCards(cards).length,

@@ -1,3 +1,8 @@
+/**
+ * @file SharedSpeedPage
+ * High-speed multiple-choice quiz mode for SHARED flashcard decks.
+ */
+
 "use client";
 
 import { useRouter } from "next/navigation";
@@ -21,17 +26,30 @@ import { useUserProgress } from "@/features/user/hooks";
 import { Button } from "@/shared/components/ui";
 import { useAppStore } from "@/store";
 
+/**
+ * Shared Speed Mode Page
+ *
+ * @remarks
+ * Manages a speed quiz session for a publicly shared deck.
+ * Requires at least 4 cards. Scoring is tracked against a deck-specific 'shareId' mode
+ * to allow global ranking among users who access the same link.
+ */
 export default function SharedSpeedPage({ params }: { params: Promise<{ shareId: string }> }) {
     const { shareId } = use(params);
     const router = useRouter();
     const { user } = useAppStore();
     const { addXP } = useUserProgress();
 
+    // Fetches lesson data using the share token
     const { result, status } = useSharedLesson(shareId);
 
     const gameMode = sharedSpeedGameMode(shareId);
     const bestScore = useFlashcardGameBestScore(user?.uid, gameMode);
 
+    /**
+     * Managed game session state.
+     * Handles timer-based multiple choice logic on transient shared cards.
+     */
     const {
         phase,
         questionIndex,
@@ -81,6 +99,10 @@ export default function SharedSpeedPage({ params }: { params: Promise<{ shareId:
 
     const { cards } = result;
 
+    /**
+     * Shared deck validation:
+     * Ensure the shared deck has enough content for the speed mode generation.
+     */
     if (cards.length < 4) {
         return (
             <div className="fixed inset-0 flex flex-col items-center justify-center bg-[#F7F7F8] p-6 text-center">
@@ -99,6 +121,7 @@ export default function SharedSpeedPage({ params }: { params: Promise<{ shareId:
     const tier = scoreToTier(bestScore);
     const tierInfo = TIER_INFO[tier];
 
+    // Phase 1: Intro
     if (phase === "intro") {
         return (
             <SpeedIntroView
@@ -110,6 +133,7 @@ export default function SharedSpeedPage({ params }: { params: Promise<{ shareId:
         );
     }
 
+    // Phase 3: Results
     if (phase === "results") {
         const finalTierInfo = TIER_INFO[scoreToTier(score)];
         return (
@@ -129,6 +153,7 @@ export default function SharedSpeedPage({ params }: { params: Promise<{ shareId:
 
     if (!currentCard) return null;
 
+    // Phase 2: Play
     return (
         <SpeedPlayingView
             gameMode={gameMode}

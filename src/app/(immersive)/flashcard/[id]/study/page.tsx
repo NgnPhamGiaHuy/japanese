@@ -1,3 +1,9 @@
+/**
+ * @file FlashcardStudyPage
+ * Central entry point for studying a specific flashcard deck.
+ * Handles mode selection (Learn, Practice, Mistake Review) based on SRS status.
+ */
+
 "use client";
 
 import { notFound, useRouter, useSearchParams } from "next/navigation";
@@ -18,6 +24,13 @@ import { useAppStore } from "@/store";
 
 import type { StudyMode } from "@/features/flashcard/types/flashcard.types";
 
+/**
+ * Main Study Page Component
+ *
+ * @remarks
+ * This component acts as an orchestrator for different study modes. It evaluates the
+ * Spaced Repetition System (SRS) status of the deck to recommend "New" or "Due" cards.
+ */
 export default function FlashcardStudyPage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = use(params);
     const { lessons, loading: lessonsLoading } = useLessons();
@@ -27,18 +40,31 @@ export default function FlashcardStudyPage({ params }: { params: Promise<{ id: s
     const router = useRouter();
     const searchParams = useSearchParams();
 
+    /**
+     * Current study mode. If null, the user is presented with the mode selection menu.
+     */
     const initialMode = searchParams.get("mode") as StudyMode | null;
     const [mode, setMode] = useState<StudyMode | null>(initialMode);
+
+    /**
+     * Temporary storage for cards failed during the current session
+     */
     const [mistakeIds, setMistakeIds] = useState<string[]>([]);
+
     const [showResetConfirm, setShowResetConfirm] = useState(false);
     const [resetting, setResetting] = useState(false);
 
+    /**
+     * Builds the study session queue based on the selected mode and card states.
+     * Uses memoization to prevent unnecessary reshuffling of the queue.
+     */
     const session = useMemo(() => {
         if (!mode) return null;
         return buildSession(cards, mode, mistakeIds);
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [mode]);
 
+    // Loading State: Centered spinner
     if (lessonsLoading || cardsLoading) {
         return (
             <div className="fixed inset-0 flex items-center justify-center bg-[#F7F7F8]">
@@ -56,8 +82,17 @@ export default function FlashcardStudyPage({ params }: { params: Promise<{ id: s
 
     // ── Shared callbacks ─────────────────────────────────────────────────────
 
-    const handleClose = () => router.push("/flashcard");
+    /**
+     * Returns to the deck details page
+     */
+    const handleClose = () => router.push(`/flashcard/${id}`);
 
+    /**
+     * Processes an individual card answer and updates SRS data in the backend.
+     *
+     * @param card - The flashcard being reviewed
+     * @param knew - Whether the user got the answer correct
+     */
     const handleAnswer = async (
         card: import("@/features/flashcard/types/flashcard.types").FlashCard,
         knew: boolean,
@@ -66,6 +101,12 @@ export default function FlashcardStudyPage({ params }: { params: Promise<{ id: s
         await processAnswer(user.uid, card, knew);
     };
 
+    /**
+     * Handles session completion, XP calculation, and transition back or to mistakes.
+     *
+     * @param stats - Accumulated results from the study session
+     * @param overrideXp - Optional fixed XP award (used for specialized modes)
+     */
     const handleComplete = async (
         stats: import("@/features/flashcard/types/flashcard.types").StudyStats,
         overrideXp?: number,
@@ -74,6 +115,7 @@ export default function FlashcardStudyPage({ params }: { params: Promise<{ id: s
         addXP(xp);
         completedLesson();
 
+        // If there were mistakes, offer a "Review Mistakes" session immediately
         if (stats.mistakeCardIds.length > 0) {
             setMistakeIds(stats.mistakeCardIds);
             setMode(null);
@@ -82,6 +124,10 @@ export default function FlashcardStudyPage({ params }: { params: Promise<{ id: s
         }
     };
 
+    /**
+     * Resets all SRS progress for this deck.
+     * DANGEROUS: Clears all history for the current user.
+     */
     const handleReset = async () => {
         if (!user) return;
         setResetting(true);
@@ -96,6 +142,7 @@ export default function FlashcardStudyPage({ params }: { params: Promise<{ id: s
     };
 
     // ── Mode selection ───────────────────────────────────────────────────────
+    // Rendered when no active session is running
     if (!mode || !session) {
         const learnCount = status.newCount;
         const practiceCount = status.dueCount;
@@ -148,6 +195,7 @@ export default function FlashcardStudyPage({ params }: { params: Promise<{ id: s
 
                     {/* Mode buttons */}
                     <div className="flex w-full max-w-sm flex-col gap-3">
+                        {/* Primary Recommendation: Continue Practice (Due) */}
                         {action === "continue" && (
                             <ModeButton
                                 label="Continue Learning"
@@ -158,6 +206,7 @@ export default function FlashcardStudyPage({ params }: { params: Promise<{ id: s
                                 onClick={() => setMode("practice")}
                             />
                         )}
+                        {/* Primary Recommendation: Start Learning (New) */}
                         {action === "learn" && (
                             <ModeButton
                                 label="Start Learning"
@@ -168,6 +217,7 @@ export default function FlashcardStudyPage({ params }: { params: Promise<{ id: s
                                 onClick={() => setMode("learn")}
                             />
                         )}
+                        {/* Empty State Recommendation */}
                         {action === "idle" && (
                             <div className="rounded-2xl border-2 border-[#e2f6e2] bg-[#f0faf0] p-4 text-center">
                                 <p className="text-sm font-bold text-[#58cc02]">
@@ -178,6 +228,7 @@ export default function FlashcardStudyPage({ params }: { params: Promise<{ id: s
 
                         <div className="my-1 h-px w-full bg-gray-200" />
 
+                        {/* Secondary Options */}
                         {action !== "learn" && (
                             <ModeButton
                                 label="Learn New"
@@ -228,7 +279,7 @@ export default function FlashcardStudyPage({ params }: { params: Promise<{ id: s
                             onClick={handleClose}
                             className="py-3 text-sm font-black text-[#afafaf] transition-colors hover:text-[#3c3c3c]"
                         >
-                            Back to My Decks
+                            Back to Deck
                         </button>
                     </div>
                 </div>
@@ -272,6 +323,7 @@ export default function FlashcardStudyPage({ params }: { params: Promise<{ id: s
     }
 
     // ── Render active mode ───────────────────────────────────────────────────
+
     if (mode === "learn") {
         return (
             <FlashcardLearn
@@ -314,15 +366,24 @@ export default function FlashcardStudyPage({ params }: { params: Promise<{ id: s
 // ─── Reusable mode button ─────────────────────────────────────────────────────
 
 interface ModeButtonProps {
+    /** Main display text */
     label: string;
+    /** Descriptive subtext (e.g., "5 cards due") */
     sub: string;
+    /** Icon from lucide-react or custom SVG */
     icon: React.ReactNode;
+    /** Brand color for the icon background/primary button state */
     color: string;
+    /** If true, uses the color as background. If false, uses a clean white style. */
     primary?: boolean;
+    /** Prevents interaction and reduces opacity */
     disabled?: boolean;
     onClick: () => void;
 }
 
+/**
+ * Custom button for mode selection with a premium "Duolingo-style" aesthetic.
+ */
 function ModeButton({
     label,
     sub,

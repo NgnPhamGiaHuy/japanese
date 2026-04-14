@@ -1,3 +1,13 @@
+/**
+ * Service orchestrator for Lesson (Deck) metadata and atomic deep-saves.
+ *
+ * @remarks
+ * High-value logic zone:
+ * 1. **RT Subscription**: Syncs deck metadata.
+ * 2. **Deep-Deletes**: Batch commitment to clear entire card collections plus Storage blobs.
+ * 3. **Diff-based Saving**: Complex atomic upsert that normalizes IDs and garbage-collects unused assets.
+ */
+
 import {
     collection,
     doc,
@@ -40,6 +50,10 @@ export function buildShareId(userId: string, lessonId: string): string {
 
 // ─── Subscribe ────────────────────────────────────────────────────────────
 
+/**
+ * Establishes a real-time listener for a user's lesson collection.
+ * Sorts results by creation timestamp in descending order.
+ */
 export function subscribeLessons(
     userId: string,
     onUpdate: (lessons: Lesson[]) => void,

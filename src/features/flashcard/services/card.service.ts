@@ -27,8 +27,27 @@ export function cardDoc(userId: string, cardId: string) {
     return doc(db, "artifacts", APP_ID, "users", userId, "cards", cardId);
 }
 
+/**
+ * Service for managing individual flashcard documents.
+ * Includes SRS (Spaced Repetition System) logic and progress management.
+ *
+ * @remarks
+ * Orchestration responsibility:
+ * 1. **RT Sync**: Management of deck-scoped subscriptions.
+ * 2. **SRS Engine**: Pure logic for interval and ease-factor calculation.
+ * 3. **Lifecycle**: CRUD and atomic resets for entire decks.
+ */
+
 // ─── Subscribe ────────────────────────────────────────────────────────────
 
+/**
+ * Real-time subscription to cards for a specific user.
+ *
+ * @param userId - Owner of the cards.
+ * @param onUpdate - Callback for snapshot changes.
+ * @param onError - Error handler for permission or network issues.
+ * @param lessonId - Optional filter to scope cards to a specific deck.
+ */
 export function subscribeCards(
     userId: string,
     onUpdate: (cards: FlashCard[]) => void,
@@ -50,6 +69,11 @@ export function subscribeCards(
 
 // ─── Write operations ─────────────────────────────────────────────────────
 
+/**
+ * Creates a new card with initialized SRS metadata.
+ *
+ * @returns The newly generated Firestore document ID.
+ */
 export async function createCard(userId: string, card: Omit<FlashCard, "id">): Promise<string> {
     const initCard = {
         ...card,
@@ -77,6 +101,21 @@ const SRS_EASE_MIN = 1.3;
 const SRS_EASE_MAX = 2.5;
 const SRS_EASE_DEFAULT = 2.5;
 
+/**
+ * Core SRS Algorithm (SM2-inspired)
+ *
+ * @remarks
+ * Logic orchestration:
+ * 1. **Success (Knew)**: Increments repetitions and scales interval by the current `easeFactor`.
+ *    Interval steps: 0 -> 1 -> 6 -> round(old_interval * ease).
+ * 2. **Failure (Forgot)**: Resets repetitions and interval, but preserves a slightly
+ *    lower `easeFactor` to account for difficulty.
+ *
+ * @param userId - UID of the card owner.
+ * @param cardId - Target card ID.
+ * @param currentCard - Prior state for differential calculation.
+ * @param knew - The user's self-reported recall status.
+ */
 export async function updateCardProgress(
     userId: string,
     cardId: string,
@@ -128,6 +167,9 @@ export async function resetCardProgress(userId: string, cardId: string): Promise
 /**
  * Atomically resets ALL cards in a lesson via a Firestore WriteBatch.
  * Either all cards are reset or none — no partial state.
+ *
+ * @param userId - Owner UID.
+ * @param lessonId - Deck to reset.
  */
 export async function resetLessonProgress(userId: string, lessonId: string): Promise<void> {
     const snap = await getDocs(query(cardsCol(userId), where("lessonId", "==", lessonId)));

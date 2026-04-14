@@ -1,75 +1,115 @@
 /**
- * Speed Mode — Rapid-fire recall mini-game.
- *
- * Gameplay: 20 questions, each with its own countdown timer.
- * The timer shrinks as difficulty escalates every 5 questions.
- * Furigana is hidden after Q5. Wrong or timed-out answers reset the combo.
- *
- * Scoring formula per correct answer:
- *   (BASE_POINTS + speed_bonus) × combo_multiplier
- *
- *   speed_bonus   = proportional to time remaining on the question timer
- *   combo_mult    = 1× at streak 0–4, 2× at 5–9, 3× at 10–14, …
+ * @file flashcardSpeed
+ * Speed Mode — Rapid-fire recall mini-game configuration and logic.
  */
 
 export const SPEED_GAME_MODE = "flashcard_speed";
 
+/**
+ * Centralized configuration for Speed Mode.
+ * Edit these values to adjust game balance, difficulty, and scoring.
+ */
+export const SPEED_GAME_CONFIG = {
+    /** Total number of questions per session */
+    TOTAL_QUESTIONS: 20,
+
+    /** Global scoring constants */
+    SCORING: {
+        BASE_POINTS: 100,
+        MAX_SPEED_BONUS: 50,
+        /** Streak size needed to increase the combo multiplier */
+        COMBO_STEP: 5,
+    },
+
+    /** Level definitions and escalation thresholds */
+    LEVELS: {
+        1: {
+            threshold: 0,
+            timeLimit: 10,
+            label: "Level 1",
+            showFurigana: true,
+            color: "#58cc02",
+        },
+        2: {
+            threshold: 5,
+            timeLimit: 8,
+            label: "Level 2",
+            showFurigana: false,
+            color: "#ff9600",
+        },
+        3: {
+            threshold: 10,
+            timeLimit: 5,
+            label: "Level 3",
+            showFurigana: false,
+            color: "#ea2b2b",
+        },
+    } as Record<number, SpeedDifficultyConfig>,
+
+    /** Visual/UI settings */
+    UI: {
+        /** Threshold fraction for 'urgent' timer state (e.g., 0.3 = 30% time left) */
+        URGENT_THRESHOLD: 0.35,
+        /** Timer bar color transitions */
+        TIMER_COLORS: {
+            SAFE: "#58cc02", // Green
+            WARNING: "#ff9600", // Orange
+            DANGER: "#ea2b2b", // Red
+        },
+    },
+};
 /** Per-deck game mode key stored in Firestore and used for the leaderboard. */
 export function speedGameMode(deckId: string): string {
     return `${SPEED_GAME_MODE}_${deckId}`;
 }
 
-export const TOTAL_QUESTIONS = 20;
-
 export type SpeedDifficulty = 1 | 2 | 3;
 
 export interface SpeedDifficultyConfig {
-    timeLimit: number; // seconds per question
+    /** The question index (0-based) where this level begins */
+    threshold: number;
+    /** Seconds allowed per question at this level */
+    timeLimit: number;
+    /** Human-readable name for the level */
     label: string;
+    /** Whether to help the user with furigana hints */
     showFurigana: boolean;
+    /** Theme color for this difficulty level */
     color: string;
 }
 
-export const SPEED_DIFFICULTY_CONFIG: Record<SpeedDifficulty, SpeedDifficultyConfig> = {
-    1: { timeLimit: 5, label: "Level 1", showFurigana: true, color: "#58cc02" },
-    2: { timeLimit: 4, label: "Level 2", showFurigana: false, color: "#ff9600" },
-    3: { timeLimit: 3, label: "Level 3", showFurigana: false, color: "#ea2b2b" },
-};
-
-/** Maps question index (0-based) to a difficulty level. */
+/**
+ * Maps question index (0-based) to a difficulty level.
+ * Uses thresholds defined in the config.
+ */
 export function getDifficultyForQuestion(questionIndex: number): SpeedDifficulty {
-    if (questionIndex < 5) return 1;
-    if (questionIndex < 10) return 2;
+    const levels = SPEED_GAME_CONFIG.LEVELS;
+    if (questionIndex < levels[2].threshold) return 1;
+    if (questionIndex < levels[3].threshold) return 2;
     return 3;
 }
-
-// ─── Scoring constants ────────────────────────────────────────────────────────
-
-export const BASE_POINTS_PER_CORRECT = 100;
-/** Maximum speed bonus (awarded for near-instant answers). */
-export const MAX_SPEED_BONUS = 50;
-/** Streak size needed to step the combo multiplier up by 1. */
-export const COMBO_STEP = 5;
 
 // ─── Score helpers ────────────────────────────────────────────────────────────
 
 /**
- * Score for a single correct answer.
+ * Calculates the score for a single correct answer.
  *
  * @param timeRemaining  Seconds left on the question timer.
  * @param timeLimit      Total seconds allowed for this question.
  * @param streak         Consecutive correct streak INCLUDING this answer.
  */
 export function calcSpeedPoints(timeRemaining: number, timeLimit: number, streak: number): number {
+    const { BASE_POINTS, MAX_SPEED_BONUS, COMBO_STEP } = SPEED_GAME_CONFIG.SCORING;
     const speedRatio = Math.max(0, timeRemaining / timeLimit);
     const speedBonus = Math.round(speedRatio * MAX_SPEED_BONUS);
     const multiplier = Math.floor(streak / COMBO_STEP) + 1;
-    return (BASE_POINTS_PER_CORRECT + speedBonus) * multiplier;
+    return (BASE_POINTS + speedBonus) * multiplier;
 }
 
 /** Timer bar color based on fraction of time remaining (1 = full, 0 = expired). */
 export function timerColor(fraction: number): string {
-    if (fraction > 0.6) return "#58cc02"; // green
-    if (fraction > 0.3) return "#ff9600"; // orange
-    return "#ea2b2b"; // red
+    const { TIMER_COLORS } = SPEED_GAME_CONFIG.UI;
+    if (fraction > 0.6) return TIMER_COLORS.SAFE;
+    if (fraction > 0.3) return TIMER_COLORS.WARNING;
+    return TIMER_COLORS.DANGER;
 }

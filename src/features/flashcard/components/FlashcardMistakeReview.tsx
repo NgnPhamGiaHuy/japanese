@@ -1,3 +1,9 @@
+/**
+ * @file FlashcardMistakeReview
+ * High-intensity recovery mode for cards failed in the current session.
+ * Leverages AI to provide "Memory Tips" (mnemonics) to repair broken neural links.
+ */
+
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
@@ -13,22 +19,33 @@ import type { FlashCard, Lesson, StudyStats } from "../types";
 /**
  * FlashcardMistakeReview — targeted re-exposure with AI-generated explanations.
  *
- * Design rationale:
- *  - Shows only cards the learner got wrong in a recent session.
- *  - On the back face, an AI explanation is loaded automatically to help
- *    them understand WHY they were wrong (memory encoding).
- *  - Updates SRS so that Firestore reflects genuinely weak cards.
+ * @remarks
+ * **Design Rationale:**
+ * - **Isolation**: Focuses exclusively on cards failed in the preceding Practice/Learn session.
+ * - **Deep Encoding**: Automatically generates AI "Memory Tips" (mnemonics) when the card is revealed to provide a new mental hook.
+ * - **Validation**: Uses MC mode (when distractors exist) as a low-stakes check before moving to full recall.
  */
 
 interface FlashcardMistakeReviewProps {
+    /** The deck metadata */
     lesson: Lesson;
+    /** The subset of missed cards */
     cards: FlashCard[];
+    /** Manual exit handler */
     onClose: () => void;
+    /** Persistent state updater */
     onAnswer: (card: FlashCard, knew: boolean) => Promise<void>;
+    /** Session completion callback */
     onComplete: (stats: StudyStats) => void;
 }
 
-/** Lazy-loaded AI explanation for a single card. */
+/**
+ * Custom hook for lazy-loading AI mnemonics.
+ * Triggers generation only when the card is first revealed to optimize token usage.
+ *
+ * @param card - The target card
+ * @param revealed - Reveal flag (trigger)
+ */
 const useAIExplanation = (card: FlashCard | undefined, revealed: boolean) => {
     const { generate, status, error } = useAICard();
     const aiLoading = status === "loading";
@@ -36,6 +53,7 @@ const useAIExplanation = (card: FlashCard | undefined, revealed: boolean) => {
 
     useEffect(() => {
         if (!revealed || !card || explanation) return;
+        /** Use existing hint if available, otherwise fetch from AI */
         if (card.hint) {
             setExplanation(card.hint);
         } else {
@@ -49,6 +67,12 @@ const useAIExplanation = (card: FlashCard | undefined, revealed: boolean) => {
     return { explanation, loading: aiLoading, error };
 };
 
+/**
+ * FlashcardMistakeReview Component
+ *
+ * @example
+ * <FlashcardMistakeReview lesson={deck} cards={fails} onComplete={handleRedeem} />
+ */
 export const FlashcardMistakeReview = ({
     lesson,
     cards,
@@ -60,14 +84,16 @@ export const FlashcardMistakeReview = ({
 
     const [currentIndex, setCurrentIndex] = useState(0);
     const [isFlipped, setIsFlipped] = useState(false);
+
+    /** Local session stats for reward calculation */
     const [stats, setStats] = useState<StudyStats>({
         correct: 0,
         incorrect: 0,
         mistakeCardIds: [],
     });
+
     const [showSummary, setShowSummary] = useState(false);
 
-    // Multiple-choice choices for mistake cards using their distractors
     const card = cards[currentIndex];
 
     const mcChoices = useMemo<string[] | null>(() => {
@@ -79,10 +105,8 @@ export const FlashcardMistakeReview = ({
 
     const [mcSelected, setMcSelected] = useState<string | null>(null);
 
-    // Load AI explanation when the card is revealed
-    const { explanation, loading: aiLoading } = useAIExplanation(card, isFlipped);
-
-    // (Per-card UI resets are handled in `advance` to avoid cascading renders)
+    /** Load AI explanation (mnemonic) as soon as the card is flipped or answered */
+    const { explanation, loading: aiLoading } = useAIExplanation(card, isFlipped || !!mcSelected);
 
     if (cards.length === 0) {
         return (
@@ -99,11 +123,15 @@ export const FlashcardMistakeReview = ({
         );
     }
 
-    // Prevents runtime crashes if UI transitions faster than state updates
+    // Guard for fast transition between states
     if (!card) return null;
 
     const progress = (currentIndex / cards.length) * 100;
 
+    /**
+     * Session Flow Control
+     * Triggers SRS update and either advances or completes the session.
+     */
     const advance = async (knew: boolean) => {
         const nextMistakes = knew ? stats.mistakeCardIds : [...stats.mistakeCardIds, card.id];
         const nextStats: StudyStats = {
@@ -126,13 +154,13 @@ export const FlashcardMistakeReview = ({
         if (mcSelected !== null) return;
         setMcSelected(choice);
         const correct = choice === card.meaning;
-        // Reveal flip to show explanation even in MC mode
+        /** Short delay for visual feedback before auto-advancing */
         setTimeout(() => {
             void advance(correct);
         }, 900);
     };
 
-    // ── Summary ─────────────────────────────────────────────────────────────
+    // ── Summary (Redemption Summary) ──────────────────────────────────────────
     if (showSummary) {
         const xpEarned = stats.correct * 3;
         return (
@@ -173,9 +201,10 @@ export const FlashcardMistakeReview = ({
         );
     }
 
-    // ── Main player ──────────────────────────────────────────────────────────
+    // ── Player UI ────────────────────────────────────────────────────────────
     return (
         <div className="fixed inset-0 z-50 flex flex-col bg-[#F7F7F8]">
+            {/* Header: Error-themed progress bar */}
             <header className="flex items-center justify-between p-4">
                 <Button variant="ghost" onClick={onClose} icon={X} className="px-3 py-2" />
                 <div className="mx-4 flex-1">
@@ -191,7 +220,7 @@ export const FlashcardMistakeReview = ({
                 </span>
             </header>
 
-            {/* "Reviewing mistakes" badge */}
+            {/* Visual Guard: Mistake Mode Badge */}
             <div className="mx-auto flex items-center gap-2 rounded-xl border border-[#ffdfe0] bg-[#ffdfe0] px-4 py-1.5 text-xs font-black text-[#ea2b2b] uppercase">
                 <AlertCircle size={12} />
                 Reviewing your mistakes
@@ -199,7 +228,7 @@ export const FlashcardMistakeReview = ({
 
             <div className="mx-auto flex w-full max-w-md flex-1 flex-col items-center justify-center p-4 sm:p-6">
                 {mcChoices && mcChoices.length === 4 ? (
-                    /* MC mode with visible distractors */
+                    /* Recognition Mode: Select the meaning you missed previously */
                     <div className="flex w-full flex-col gap-5">
                         <div className="flex w-full flex-col items-center justify-center rounded-[2.5rem] border-2 border-b-8 border-[#ea2b2b]/20 bg-white px-6 py-8 text-center shadow-sm">
                             {card.furigana && (
@@ -263,13 +292,13 @@ export const FlashcardMistakeReview = ({
                         </div>
                     </div>
                 ) : (
-                    /* Flip mode with AI explanation on back */
+                    /* Recall Mode: Flip and study AI-generated Memory Tips */
                     <>
                         <div
                             className={`perspective-1000 preserve-3d relative flex aspect-3/4 w-full cursor-pointer flex-col justify-center transition-all duration-500 ${isFlipped ? "rotate-y-180" : ""}`}
                             onClick={() => setIsFlipped((f) => !f)}
                         >
-                            {/* Front */}
+                            {/* Front (Recall Trigger) */}
                             <div className="absolute inset-0 flex flex-col items-center justify-center rounded-[2.5rem] border-2 border-b-8 border-[#ea2b2b]/20 bg-white p-6 text-center shadow-sm backface-hidden hover:-translate-y-1 hover:shadow-md">
                                 {card.furigana && (
                                     <span className="mb-2 shrink-0 text-xl font-bold tracking-widest text-[#afafaf]">
@@ -286,7 +315,7 @@ export const FlashcardMistakeReview = ({
                                 </p>
                             </div>
 
-                            {/* Back — with AI explanation */}
+                            {/* Back (Memory Encoding with AI Aid) */}
                             <div className="absolute inset-0 flex rotate-y-180 flex-col items-center justify-center rounded-[2.5rem] border-2 border-b-8 border-[#ea2b2b]/20 bg-white p-6 text-center shadow-sm backface-hidden sm:p-8">
                                 <button
                                     onClick={(e) => {
@@ -312,7 +341,7 @@ export const FlashcardMistakeReview = ({
                                         </div>
                                     )}
 
-                                    {/* AI explanation / hint */}
+                                    {/* Mnemonic Generation Area */}
                                     <div className="mt-4 w-full rounded-2xl border-2 border-[#ffe5c7] bg-[#fff8f0] p-4 text-left">
                                         <div className="mb-2 flex items-center gap-2 text-[10px] font-black tracking-widest text-[#ff9600] uppercase">
                                             <Lightbulb size={12} />
@@ -337,6 +366,7 @@ export const FlashcardMistakeReview = ({
                             </div>
                         </div>
 
+                        {/* Confirmation Interaction */}
                         <div
                             className={`mt-6 flex w-full gap-2 transition-opacity duration-300 ${isFlipped ? "opacity-100" : "pointer-events-none opacity-0"}`}
                             onClick={(e) => e.stopPropagation()}

@@ -1,3 +1,9 @@
+/**
+ * @file SpeedQuizPage
+ * High-speed multiple-choice quiz mode for personal flashcard decks.
+ * Challenges users to recall meanings under a strict time limit.
+ */
+
 "use client";
 
 import { notFound, useRouter } from "next/navigation";
@@ -22,8 +28,13 @@ import { useUserProgress } from "@/features/user/hooks";
 import { Button } from "@/shared/components/ui";
 import { useAppStore } from "@/store";
 
-// ─── Page ─────────────────────────────────────────────────────────────────────
-
+/**
+ * Speed Quiz Page Component
+ *
+ * @remarks
+ * Manages a speed-based quiz session. Requires at least 4 cards to generate meaningful
+ * multiple-choice options. Handles real-time timer synchronization and streak-based scoring.
+ */
 export default function SpeedQuizPage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = use(params);
     const { lessons, loading: lessonsLoading } = useLessons();
@@ -35,6 +46,11 @@ export default function SpeedQuizPage({ params }: { params: Promise<{ id: string
     const lesson = lessons.find((l) => l.id === id);
     const gameMode = speedGameMode(id);
     const bestScore = useFlashcardGameBestScore(user?.uid, gameMode);
+
+    /**
+     * Managed game session state.
+     * Orchestrates card randomization, option generation, and timer logic.
+     */
     const {
         phase,
         questionIndex,
@@ -73,6 +89,10 @@ export default function SpeedQuizPage({ params }: { params: Promise<{ id: string
     }
     if (!lesson) return notFound();
 
+    /**
+     * Constraint Check: Multiple choice requires at least 4 unique cards
+     * to provide 1 correct answer and 3 distinct distractors.
+     */
     if (allCards.length < 4) {
         return (
             <div className="fixed inset-0 flex flex-col items-center justify-center bg-[#F7F7F8] p-6 text-center">
@@ -91,6 +111,7 @@ export default function SpeedQuizPage({ params }: { params: Promise<{ id: string
     const tier = scoreToTier(bestScore);
     const tierInfo = TIER_INFO[tier];
 
+    // Phase 1: Game Introduction (Best score, Instructions)
     if (phase === "intro") {
         return (
             <SpeedIntroView
@@ -102,6 +123,7 @@ export default function SpeedQuizPage({ params }: { params: Promise<{ id: string
         );
     }
 
+    // Phase 3: Results (Final score, Metrics, Collection)
     if (phase === "results") {
         const finalTierInfo = TIER_INFO[scoreToTier(score)];
 
@@ -122,6 +144,7 @@ export default function SpeedQuizPage({ params }: { params: Promise<{ id: string
 
     if (!currentCard) return null;
 
+    // Phase 2: Active Gameplay (Speed Quiz)
     return (
         <SpeedPlayingView
             gameMode={gameMode}
