@@ -3,7 +3,9 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-import { BookOpen, Gamepad2, Trophy } from "lucide-react";
+import { Bell, BookOpen, Gamepad2, Trophy } from "lucide-react";
+
+import { useNotifications } from "@/features/notifications";
 
 const NAV_ICON_SIZE = 26;
 const NAV_ICON_STROKE_ACTIVE = 2.5;
@@ -15,52 +17,65 @@ interface NavRoute {
     icon: React.ReactNode;
     activeIcon: React.ReactNode;
     activeColor: string;
+    badge?: number;
 }
 
-const ROUTES: NavRoute[] = [
-    {
-        href: "/",
-        label: "Home",
-        icon: <BookOpen size={NAV_ICON_SIZE} strokeWidth={NAV_ICON_STROKE_IDLE} />,
-        activeIcon: <BookOpen size={NAV_ICON_SIZE} strokeWidth={NAV_ICON_STROKE_ACTIVE} />,
-        activeColor: "text-[#1cb0f6]",
-    },
-    {
-        href: "/kana",
-        label: "Kana",
-        icon: (
-            <span className="block leading-none" style={{ fontSize: NAV_ICON_SIZE, lineHeight: 1 }}>
-                あ
-            </span>
-        ),
-        activeIcon: (
-            <span
-                className="block leading-none font-black"
-                style={{ fontSize: NAV_ICON_SIZE, lineHeight: 1 }}
-            >
-                あ
-            </span>
-        ),
-        activeColor: "text-[#58cc02]",
-    },
-    {
-        href: "/flashcard",
-        label: "Decks",
-        icon: <Gamepad2 size={NAV_ICON_SIZE} strokeWidth={NAV_ICON_STROKE_IDLE} />,
-        activeIcon: <Gamepad2 size={NAV_ICON_SIZE} strokeWidth={NAV_ICON_STROKE_ACTIVE} />,
-        activeColor: "text-[#ce82ff]",
-    },
-    {
-        href: "/profile",
-        label: "Profile",
-        icon: <Trophy size={NAV_ICON_SIZE} strokeWidth={NAV_ICON_STROKE_IDLE} />,
-        activeIcon: <Trophy size={NAV_ICON_SIZE} strokeWidth={NAV_ICON_STROKE_ACTIVE} />,
-        activeColor: "text-[#ff9600]",
-    },
-];
+function buildRoutes(unreadCount: number): NavRoute[] {
+    return [
+        {
+            href: "/",
+            label: "Home",
+            icon: <BookOpen size={NAV_ICON_SIZE} strokeWidth={NAV_ICON_STROKE_IDLE} />,
+            activeIcon: <BookOpen size={NAV_ICON_SIZE} strokeWidth={NAV_ICON_STROKE_ACTIVE} />,
+            activeColor: "text-[#1cb0f6]",
+        },
+        {
+            href: "/kana",
+            label: "Kana",
+            icon: (
+                <span className="block leading-none" style={{ fontSize: NAV_ICON_SIZE, lineHeight: 1 }}>
+                    あ
+                </span>
+            ),
+            activeIcon: (
+                <span
+                    className="block leading-none font-black"
+                    style={{ fontSize: NAV_ICON_SIZE, lineHeight: 1 }}
+                >
+                    あ
+                </span>
+            ),
+            activeColor: "text-[#58cc02]",
+        },
+        {
+            href: "/flashcard",
+            label: "Decks",
+            icon: <Gamepad2 size={NAV_ICON_SIZE} strokeWidth={NAV_ICON_STROKE_IDLE} />,
+            activeIcon: <Gamepad2 size={NAV_ICON_SIZE} strokeWidth={NAV_ICON_STROKE_ACTIVE} />,
+            activeColor: "text-[#ce82ff]",
+        },
+        {
+            href: "/notifications",
+            label: "Alerts",
+            icon: <Bell size={NAV_ICON_SIZE} strokeWidth={NAV_ICON_STROKE_IDLE} />,
+            activeIcon: <Bell size={NAV_ICON_SIZE} strokeWidth={NAV_ICON_STROKE_ACTIVE} />,
+            activeColor: "text-[#1cb0f6]",
+            badge: unreadCount,
+        },
+        {
+            href: "/profile",
+            label: "Profile",
+            icon: <Trophy size={NAV_ICON_SIZE} strokeWidth={NAV_ICON_STROKE_IDLE} />,
+            activeIcon: <Trophy size={NAV_ICON_SIZE} strokeWidth={NAV_ICON_STROKE_ACTIVE} />,
+            activeColor: "text-[#ff9600]",
+        },
+    ];
+}
 
 export const BottomNav = () => {
     const pathname = usePathname();
+    const { unreadCount } = useNotifications();
+    const ROUTES = buildRoutes(unreadCount);
 
     const isActive = (href: string) => {
         if (href === "/") return pathname === "/";
@@ -80,15 +95,21 @@ export const BottomNav = () => {
                     <Link
                         key={route.href}
                         href={route.href}
-                        className={`flex min-w-[52px] flex-col items-center justify-center gap-1 rounded-xl py-1 transition-colors duration-150 ${
+                        className={`relative flex min-w-[52px] flex-col items-center justify-center gap-1 rounded-xl py-1 transition-colors duration-150 ${
                             active ? route.activeColor : "text-[#afafaf] hover:text-[#3c3c3c]"
                         }`}
                         aria-current={active ? "page" : undefined}
                     >
-                        {active ? route.activeIcon : route.icon}
-                        <span
-                            className={`text-[9px] font-black tracking-wider uppercase ${active ? "" : ""}`}
-                        >
+                        <div className="relative">
+                            {active ? route.activeIcon : route.icon}
+                            {/* Unread badge */}
+                            {route.badge != null && route.badge > 0 && (
+                                <span className="absolute -top-1.5 -right-1.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-[#ea2b2b] px-1 text-[9px] font-black text-white">
+                                    {route.badge > 99 ? "99+" : route.badge}
+                                </span>
+                            )}
+                        </div>
+                        <span className="text-[9px] font-black tracking-wider uppercase">
                             {route.label}
                         </span>
                     </Link>

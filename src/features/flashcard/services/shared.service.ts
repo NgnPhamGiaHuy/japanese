@@ -7,7 +7,9 @@ import { doc, getDoc, getDocs, query, setDoc, where } from "firebase/firestore";
 
 import { APP_ID, db } from "@/lib/firebase";
 import { cardsCol } from "./card.service";
+import { syncInviteToCollaborator } from "./access.service";
 
+import type { User } from "firebase/auth";
 import type { FlashCard, Lesson } from "../types";
 
 // ─── Decode helper ─────────────────────────────────────────────────────────────
@@ -60,19 +62,13 @@ export interface SharedLessonResult {
 /**
  * Resolves a shared lesson and its full card set using a guest share token.
  *
- * @remarks
- * **Security Orchestration**:
- * 1. **Explicit Role**: If the `currentUserId` is in the deck's `roles` map, access is granted.
- * 2. **Link Access**: If `allowLinkAccess` (Public Link) is toggled, access is granted to anyone.
- * 3. **Namespace Isolation**: This fetcher never touches study progress; it only resolves content.
- *
- * @param shareId - Guest token from the URL.
- * @param currentUserId - Visiting user's UID (optional).
- * @returns Resolved lesson data, cards, and metadata for the session.
+ * On access, if the authenticated user has a pending email invite, it is
+ * automatically converted to a permanent collaborator entry.
  */
 export async function getSharedLesson(
     shareId: string,
     currentUserId?: string,
+    currentUser?: User | null,
 ): Promise<SharedLessonResult | null> {
     const payload = decodeShareId(shareId);
     if (!payload) return null;
@@ -83,17 +79,38 @@ export async function getSharedLesson(
     const lessonSnap = await getDoc(lessonRef);
     if (!lessonSnap.exists()) return null;
 
-    const lesson = { ...lessonSnap.data(), id: lessonSnap.id } as Lesson;
+    let lesson = { ...lessonSnap.data(), id: lessonSnap.id } as Lesson;
 
-    // RBAC Resolution
-    let roleAccess = false;
-    if (currentUserId && lesson.roles && lesson.roles[currentUserId]) {
-        roleAccess = true;
+    // ── Auto-convert pending email invite → collaborator ──────────────────
+    // Must happen BEFORE the access gate so restricted decks grant access
+    // to invited users on their first visit.
+    if (currentUser?.email) {
+        const normalizedEmail = currentUser.email.trim().toLowerCase();
+        if (lesson.invitedEmails?.[normalizedEmail]) {
+            await syncInviteToCollaborator(currentUser, lesson, ownerId, lessonId);
+            // Re-fetch so the updated roles are used in the access check below
+            const refreshed = await getDoc(lessonRef);
+            if (refreshed.exists()) {
+                lesson = { ...refreshed.data(), id: refreshed.id } as Lesson;
+            }
+        }
     }
+
+    // ── RBAC Resolution ───────────────────────────────────────────────────
+    // Priority: owner → explicit role (includes just-converted invite) → pending email invite → public link
+    const isOwner = currentUserId === ownerId || lesson.roles?.[currentUserId ?? ""] === "owner";
+    const hasExplicitRole = !!(currentUserId && lesson.roles?.[currentUserId]);
+
+    // Safety net: if the user has a pending invite that wasn't converted
+    // (e.g. email mismatch casing edge case), still grant access
+    const hasPendingInvite = !!(
+        currentUser?.email &&
+        lesson.invitedEmails?.[currentUser.email.trim().toLowerCase()]
+    );
 
     const linkAccess = lesson.allowLinkAccess || lesson.isPublic;
 
-    if (!roleAccess && !linkAccess) {
+    if (!isOwner && !hasExplicitRole && !hasPendingInvite && !linkAccess) {
         return null; // Deny access
     }
 

@@ -77,6 +77,25 @@ export interface Lesson {
     /** Permission level granted to guest/link viewers */
     publicRole?: "viewer" | "commenter" | "editor";
 
+    /**
+     * Pending email invites — converted to collaborators on first login.
+     * Key: normalized email (lowercase), Value: invite metadata.
+     */
+    invitedEmails?: Record<string, {
+        role: "viewer" | "commenter" | "editor";
+        invitedAt: number;
+    }>;
+
+    /**
+     * Display metadata for collaborators — populated when an invite is accepted.
+     * Key: User UID, Value: snapshot of name/email at time of acceptance.
+     * Used purely for UI display; never used for permission checks.
+     */
+    collaboratorMeta?: Record<string, {
+        displayName?: string | null;
+        email?: string | null;
+    }>;
+
     /** Legacy or computed public status flag */
     isPublic?: boolean;
     /** URL-safe token representing the {ownerId}:{lessonId} pair */

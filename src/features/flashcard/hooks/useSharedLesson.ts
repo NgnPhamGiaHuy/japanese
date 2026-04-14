@@ -25,7 +25,7 @@ export function useSharedLesson(shareId: string) {
     useEffect(() => {
         if (!shareId) return;
 
-        getSharedLesson(shareId, user?.uid)
+        getSharedLesson(shareId, user?.uid, user)
             .then((res) => {
                 if (!res) setStatus("not_found");
                 else {

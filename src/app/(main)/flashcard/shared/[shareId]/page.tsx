@@ -44,7 +44,7 @@ export default function SharedLessonPage({ params }: { params: Promise<{ shareId
 
     /** Resolves shared lesson data including the original owner's ID and lesson ID */
     const loadSharedLesson = () => {
-        getSharedLesson(shareId, user?.uid)
+        getSharedLesson(shareId, user?.uid, user)
             .then((res) => {
                 if (!res) setStatus("not_found");
                 else setStatus("ready");

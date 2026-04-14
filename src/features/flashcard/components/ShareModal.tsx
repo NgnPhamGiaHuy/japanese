@@ -1,16 +1,16 @@
 /**
  * @file ShareModal
  * Management interface for deck sharing and collaborative permissions.
- * Implements a "Google Docs" style access control model.
+ * Implements a "Google Docs" style access control model with email-based invites.
  */
 
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
 
-import { Check, ChevronDown, Copy, Globe2, Lock, ShieldAlert, X } from "lucide-react";
+import { Check, ChevronDown, Copy, Globe2, Lock, Mail, ShieldAlert, X } from "lucide-react";
 
-import { buildShareId } from "@/features/flashcard/services";
+import { buildShareId, inviteByEmail, revokeEmailInvite } from "@/features/flashcard/services";
 import { Button, CustomSelect } from "@/shared/components/ui";
 import { hexToThemeColor } from "@/shared/utils";
 import { useAppStore } from "@/store";
@@ -94,8 +94,9 @@ const ShareModal = ({ lesson, onShareLink, onUpdateRoles, onClose }: ShareModalP
     );
 
     const [roles, setRoles] = useState<Record<string, Role>>(lesson.roles || {});
-    const [inviteId, setInviteId] = useState("");
+    const [inviteEmail, setInviteEmail] = useState("");
     const [inviteRole, setInviteRole] = useState<Role>("viewer");
+    const [inviteError, setInviteError] = useState<string | null>(null);
 
     // Sync when the lesson prop changes (for real-time consistency)
     useEffect(() => {
@@ -167,13 +168,52 @@ const ShareModal = ({ lesson, onShareLink, onUpdateRoles, onClose }: ShareModalP
     };
 
     const handleInvite = async () => {
-        if (!inviteId.trim()) return;
-        const targetId = inviteId.trim();
-        if (roles[targetId] === "owner") return;
+        if (!inviteEmail.trim()) return;
+        const email = inviteEmail.trim().toLowerCase();
 
-        const newRoles = { ...roles, [targetId]: inviteRole };
-        await commitRolesUpdate(newRoles);
-        setInviteId("");
+        // Basic email validation
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+            setInviteError("Please enter a valid email address.");
+            return;
+        }
+
+        // Don't invite the owner
+        if (email === user?.email?.toLowerCase()) {
+            setInviteError("You can't invite yourself.");
+            return;
+        }
+
+        setInviteError(null);
+        setSaving(true);
+        try {
+            if (!lesson.userId) return;
+            await inviteByEmail(
+                lesson.userId,
+                lesson.id,
+                email,
+                inviteRole as "viewer" | "commenter" | "editor",
+                user?.displayName,
+                lesson.title,
+            );
+            setInviteEmail("");
+        } catch (err) {
+            console.error("[ShareModal] handleInvite failed:", err);
+            setInviteError("Failed to send invite. Please try again.");
+        } finally {
+            setSaving(false);
+        }
+    };
+
+    const handleRevokeEmailInvite = async (email: string) => {
+        if (!lesson.userId) return;
+        setSaving(true);
+        try {
+            await revokeEmailInvite(lesson.userId, lesson.id, email);
+        } catch (err) {
+            console.error("[ShareModal] handleRevokeEmailInvite failed:", err);
+        } finally {
+            setSaving(false);
+        }
     };
 
     const handleUpdateUserRole = async (targetId: string, newRole: Role) => {
@@ -209,34 +249,45 @@ const ShareModal = ({ lesson, onShareLink, onUpdateRoles, onClose }: ShareModalP
                     {canManageRoles ? (
                         <>
                             {/* Invite Input */}
-                            <div className="mb-6 flex items-center gap-2">
-                                <div className="relative flex-1">
-                                    <input
-                                        type="text"
-                                        placeholder="Add people and groups (User ID)"
-                                        className="h-12 w-full rounded-xl border-2 border-gray-200 px-4 font-bold text-[#3c3c3c] transition-colors outline-none focus:border-[#1cb0f6]"
-                                        value={inviteId}
-                                        onChange={(e) => setInviteId(e.target.value)}
+                            <div className="mb-6">
+                                <div className="flex items-center gap-2">
+                                    <div className="relative flex-1">
+                                        <input
+                                            type="email"
+                                            placeholder="Invite by email address"
+                                            className="h-12 w-full rounded-xl border-2 border-gray-200 px-4 font-bold text-[#3c3c3c] transition-colors outline-none focus:border-[#1cb0f6]"
+                                            value={inviteEmail}
+                                            onChange={(e) => {
+                                                setInviteEmail(e.target.value);
+                                                setInviteError(null);
+                                            }}
+                                            onKeyDown={(e) => {
+                                                if (e.key === "Enter") void handleInvite();
+                                            }}
+                                            disabled={saving}
+                                        />
+                                    </div>
+                                    <CustomSelect
+                                        value={inviteRole}
+                                        options={sharingOptions}
+                                        onChange={(r) => setInviteRole(r)}
                                         disabled={saving}
+                                        themeHex={themeHex}
+                                        align="right"
                                     />
+                                    <Button
+                                        onClick={handleInvite}
+                                        disabled={!inviteEmail.trim() || saving}
+                                        variant="primary"
+                                        color="blue"
+                                        className="h-12 px-6"
+                                    >
+                                        Invite
+                                    </Button>
                                 </div>
-                                <CustomSelect
-                                    value={inviteRole}
-                                    options={sharingOptions}
-                                    onChange={(r) => setInviteRole(r)}
-                                    disabled={saving}
-                                    themeHex={themeHex}
-                                    align="right"
-                                />
-                                <Button
-                                    onClick={handleInvite}
-                                    disabled={!inviteId.trim() || saving}
-                                    variant="primary"
-                                    color="blue"
-                                    className="h-12 px-6"
-                                >
-                                    Invite
-                                </Button>
+                                {inviteError && (
+                                    <p className="mt-1.5 text-xs font-bold text-red-500">{inviteError}</p>
+                                )}
                             </div>
 
                             {/* Collaborators List */}
@@ -245,26 +296,37 @@ const ShareModal = ({ lesson, onShareLink, onUpdateRoles, onClose }: ShareModalP
                                     People with access
                                 </h3>
                                 <div className="flex flex-col gap-2">
-                                    {Object.entries(roles).map(([uid, r]) => (
+                                    {Object.entries(roles).map(([uid, r]) => {
+                                        const meta = lesson.collaboratorMeta?.[uid];
+                                        const isCurrentUser = uid === user?.uid;
+                                        const displayName = isCurrentUser
+                                            ? "You"
+                                            : meta?.displayName || meta?.email?.split("@")[0] || `User ${uid.substring(0, 6)}`;
+                                        const displayEmail = isCurrentUser
+                                            ? user?.email || ""
+                                            : meta?.email || "";
+                                        const initial = isCurrentUser
+                                            ? (user?.displayName?.[0] ?? user?.email?.[0] ?? "Y").toUpperCase()
+                                            : (meta?.displayName?.[0] ?? meta?.email?.[0] ?? uid[0]).toUpperCase();
+
+                                        return (
                                         <div
                                             key={uid}
                                             className="flex items-center justify-between rounded-xl px-2 py-2 transition-colors hover:bg-gray-50"
                                         >
                                             <div className="flex items-center gap-3">
                                                 <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gray-200 font-bold text-gray-500">
-                                                    {uid.slice(0, 2).toUpperCase()}
+                                                    {initial}
                                                 </div>
                                                 <div>
                                                     <div className="font-black text-[#3c3c3c]">
-                                                        {uid === user?.uid
-                                                            ? "You"
-                                                            : `User: ${uid.substring(0, 8)}...`}
+                                                        {displayName}
                                                     </div>
-                                                    <div className="text-xs font-bold text-gray-400">
-                                                        {uid === user?.uid
-                                                            ? user?.email || "Owner"
-                                                            : uid}
-                                                    </div>
+                                                    {displayEmail && (
+                                                        <div className="text-xs font-bold text-gray-400">
+                                                            {displayEmail}
+                                                        </div>
+                                                    )}
                                                 </div>
                                             </div>
 
@@ -285,8 +347,45 @@ const ShareModal = ({ lesson, onShareLink, onUpdateRoles, onClose }: ShareModalP
                                                 variant="compact"
                                             />
                                         </div>
-                                    ))}
+                                        );
+                                    })}
                                 </div>
+
+                                {/* Pending email invites */}
+                                {lesson.invitedEmails && Object.keys(lesson.invitedEmails).length > 0 && (
+                                    <div className="mt-4">
+                                        <h4 className="mb-2 text-xs font-black tracking-wider text-gray-400 uppercase">
+                                            Pending invites
+                                        </h4>
+                                        <div className="flex flex-col gap-2">
+                                            {Object.entries(lesson.invitedEmails).map(([email, invite]) => (
+                                                <div
+                                                    key={email}
+                                                    className="flex items-center justify-between rounded-xl px-2 py-2 transition-colors hover:bg-gray-50"
+                                                >
+                                                    <div className="flex items-center gap-3">
+                                                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-amber-100 text-amber-600">
+                                                            <Mail size={18} />
+                                                        </div>
+                                                        <div>
+                                                            <div className="font-black text-[#3c3c3c]">{email}</div>
+                                                            <div className="text-xs font-bold text-amber-500">
+                                                                Invite pending · {invite.role}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <button
+                                                        onClick={() => void handleRevokeEmailInvite(email)}
+                                                        disabled={saving}
+                                                        className="text-xs font-bold text-gray-400 hover:text-red-500 transition-colors"
+                                                    >
+                                                        Revoke
+                                                    </button>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
                             </div>
 
                             <h3 className="mb-4 border-t-2 border-gray-100 pt-6 text-base font-black text-[#3c3c3c]">

@@ -23,6 +23,7 @@ import {
 } from "firebase/firestore";
 
 import { APP_ID, db } from "@/lib/firebase";
+import { notifyComment, notifyReply } from "@/features/notifications";
 
 import type { CollectionReference, DocumentReference, Unsubscribe } from "firebase/firestore";
 import type { Comment } from "../types/flashcard.types";
@@ -159,6 +160,11 @@ export async function addComment(
     userId: string,
     authorName?: string | null,
     authorEmail?: string | null,
+    notifyCtx?: {
+        deckTitle?: string | null;
+        cardKanji?: string | null;
+        shareLink: string;
+    },
 ): Promise<string> {
     try {
         const validation = validateCommentContent(content);
@@ -179,6 +185,20 @@ export async function addComment(
             resolved: false,
             replies: [],
         });
+
+        // Notify deck owner (fire-and-forget, skip if commenter is the owner)
+        if (notifyCtx && userId !== ownerId) {
+            notifyComment({
+                toUserId: ownerId,
+                senderId: userId,
+                senderName: authorName,
+                deckId: lessonId,
+                deckTitle: notifyCtx.deckTitle,
+                shareLink: notifyCtx.shareLink,
+                cardKanji: notifyCtx.cardKanji,
+            }).catch(() => {});
+        }
+
         return commentRef.id;
     } catch (error: unknown) {
         if (error instanceof CommentError) throw error;
@@ -215,6 +235,10 @@ export async function replyToComment(
     userId: string,
     authorName?: string | null,
     authorEmail?: string | null,
+    notifyCtx?: {
+        deckTitle?: string | null;
+        shareLink: string;
+    },
 ): Promise<void> {
     try {
         const validation = validateCommentContent(content);
@@ -228,7 +252,8 @@ export async function replyToComment(
         const snap = await getDoc(ref);
         if (!snap.exists())
             throw new CommentError(CommentErrorCode.COMMENT_NOT_FOUND, "Comment not found");
-        const replies = snap.data().replies || [];
+        const parentComment = snap.data();
+        const replies = parentComment.replies || [];
         await updateDoc(ref, {
             replies: [
                 ...replies,
@@ -242,6 +267,18 @@ export async function replyToComment(
                 },
             ],
         });
+
+        // Notify the parent comment author (fire-and-forget)
+        if (notifyCtx && parentComment.userId && parentComment.userId !== userId) {
+            notifyReply({
+                toUserId: parentComment.userId,
+                senderId: userId,
+                senderName: authorName,
+                deckId: lessonId,
+                deckTitle: notifyCtx.deckTitle,
+                shareLink: notifyCtx.shareLink,
+            }).catch(() => {});
+        }
     } catch (error: unknown) {
         if (error instanceof CommentError) throw error;
         const e = error as { code?: string };

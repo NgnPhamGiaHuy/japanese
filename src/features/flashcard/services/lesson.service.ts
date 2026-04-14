@@ -15,6 +15,7 @@ import {
     onSnapshot,
     query,
     setDoc,
+    updateDoc,
     where,
     writeBatch,
 } from "firebase/firestore";
@@ -104,6 +105,7 @@ export async function shareLessonSettings(
 
 /**
  * Updates the explicitly invited collaborators and their roles.
+ * Uses updateDoc (not setDoc+merge) so removed keys are actually deleted from Firestore.
  */
 export async function updateLessonRoles(
     userId: string,
@@ -111,7 +113,7 @@ export async function updateLessonRoles(
     roles: Record<string, "owner" | "editor" | "commenter" | "viewer">,
     collaborators: string[],
 ): Promise<void> {
-    await setDoc(lessonDoc(userId, lessonId), { roles, collaborators }, { merge: true });
+    await updateDoc(lessonDoc(userId, lessonId), { roles, collaborators });
 }
 
 /**

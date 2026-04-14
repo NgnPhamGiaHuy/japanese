@@ -5,16 +5,10 @@ import { useEffect } from "react";
 import { browserLocalPersistence, onIdTokenChanged, setPersistence } from "firebase/auth";
 
 import { auth } from "@/lib/firebase";
+import { deliverPendingNotifications } from "@/features/notifications";
 import { clearAuthCookie, setAuthCookie } from "@/shared/utils";
 import { useAppStore } from "@/store";
 
-/**
- * Bootstraps Firebase auth persistence and subscribes to token changes.
- * - `onIdTokenChanged` fires on: initial load, sign-in, sign-out, and each
- *    automatic token refresh (~every 1 hour). This keeps the auth cookie
- *    in sync without manual refresh logic.
- * Must be called once — inside the root Providers component.
- */
 export function useFirebaseAuth() {
     const { setUser, setAuthReady } = useAppStore();
 
@@ -22,6 +16,8 @@ export function useFirebaseAuth() {
         setPersistence(auth, browserLocalPersistence).catch((err) =>
             console.error("[Firebase] Persistence error:", err),
         );
+
+        let lastUid: string | null = null;
 
         const unsubscribe = onIdTokenChanged(auth, async (user) => {
             if (user) {
@@ -32,9 +28,16 @@ export function useFirebaseAuth() {
                     clearAuthCookie();
                 }
                 setUser(user);
+
+                // Deliver any pending notifications (email invites) on first login
+                if (user.email && user.uid !== lastUid) {
+                    lastUid = user.uid;
+                    deliverPendingNotifications(user.uid, user.email).catch(() => {});
+                }
             } else {
                 clearAuthCookie();
                 setUser(null);
+                lastUid = null;
             }
             setAuthReady(true);
         });
