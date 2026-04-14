@@ -50,16 +50,17 @@ export function parseText(text: string): ParseResult {
         const parts = line.split(separator).map((p) => p.trim());
 
         if (parts.length >= 3) {
+            const kana = parts[1] || parts[0];
             valid.push({
-                kanji: parts[0],
+                kanaPrimary: kana,
+                altForm: parts[0] !== kana ? parts[0] : undefined,
                 furigana: parts[1],
                 meaning: parts[2],
                 example: parts[3] || "",
             });
         } else if (parts.length === 2) {
             valid.push({
-                kanji: parts[0],
-                furigana: "",
+                kanaPrimary: parts[0],
                 meaning: parts[1],
                 example: "",
             });

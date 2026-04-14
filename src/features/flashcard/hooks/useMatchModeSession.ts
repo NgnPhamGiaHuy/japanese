@@ -12,6 +12,7 @@ import {
 } from "@/features/game/modes";
 import { recordGameResult } from "@/features/game/services";
 import { allowAudio, playAudio, shuffleArray } from "@/shared/utils";
+import { getPrimary } from "../utils/cardDisplay";
 
 import type { MatchDifficulty } from "@/features/game/modes";
 import type { FlashCard } from "../types";
@@ -20,7 +21,7 @@ type MatchPhase = "intro" | "playing" | "results";
 
 interface MatchCard {
     cardId: string;
-    kanji: string;
+    display: string;
     meaning: string;
 }
 export type MatchModeCard = MatchCard;
@@ -121,7 +122,7 @@ export function useMatchModeSession({
         const pool = shuffleArray(cards).slice(0, config.pairs);
         const matchCards: MatchCard[] = pool.map((card) => ({
             cardId: card.id,
-            kanji: card.kanji,
+            display: getPrimary(card),
             meaning: card.meaning,
         }));
 
@@ -174,7 +175,7 @@ export function useMatchModeSession({
 
                 if (allowAudio("match", "feedback")) {
                     const card = leftItems.find((item) => item.cardId === leftId);
-                    if (card) playAudio(card.kanji);
+                    if (card) playAudio(card.display);
                 }
 
                 setTimeout(() => {
@@ -193,7 +194,7 @@ export function useMatchModeSession({
 
             if (allowAudio("match", "feedback")) {
                 const card = leftItems.find((item) => item.cardId === leftId);
-                if (card) playAudio(card.kanji);
+                if (card) playAudio(card.display);
             }
             setTimeout(() => {
                 setErrorLeft(null);

@@ -26,8 +26,8 @@ function normalizeToken(value: string): string {
 }
 
 function cardDedupKeys(card: GeneratedCard): string[] {
-    const keys = [card.kanji, card.furigana]
-        .map((value) => normalizeToken(value))
+    const keys = [card.kanaPrimary, card.kanji, card.furigana]
+        .map((value) => normalizeToken(value ?? ""))
         .filter((value) => value.length > 0);
     return Array.from(new Set(keys));
 }
@@ -66,14 +66,17 @@ function parseCard(raw: unknown): GeneratedCard {
     }
     const obj = raw as Record<string, unknown>;
 
-    const kanji = String(obj.kanji ?? "").trim();
-    const furigana = String(obj.furigana ?? "").trim();
+    // kanaPrimary is required; fall back to furigana then kanji for legacy AI responses
+    const kanaPrimary = String(obj.kanaPrimary ?? obj.furigana ?? obj.kanji ?? "").trim();
+    // AI returns `kanji` field — map it to `altForm` (romaji for N4/N5, kanji for N3+)
+    const altForm = String(obj.kanji ?? "").trim() || undefined;
+    const furigana = String(obj.furigana ?? "").trim() || undefined;
     const meaning = String(obj.meaning ?? "").trim();
     const example = String(obj.example ?? "").trim();
 
-    if (!kanji || !meaning) {
+    if (!kanaPrimary || !meaning) {
         throw new AIServiceError(
-            "AI response is missing required fields (kanji, meaning)",
+            "AI response is missing required fields (kanaPrimary/kanji, meaning)",
             "invalid_response",
         );
     }
@@ -100,7 +103,17 @@ function parseCard(raw: unknown): GeneratedCard {
         ? (rawDiff as 1 | 2 | 3)
         : undefined;
 
-    return { kanji, furigana, meaning, example, distractors, hint, usageNote, difficulty };
+    return {
+        kanaPrimary,
+        kanji: altForm, // GeneratedCard.kanji maps to FlashCard.altForm
+        furigana,
+        meaning,
+        example,
+        distractors,
+        hint,
+        usageNote,
+        difficulty,
+    };
 }
 
 function parseCardArray(raw: unknown): GeneratedCard[] {

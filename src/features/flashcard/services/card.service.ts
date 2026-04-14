@@ -60,11 +60,37 @@ export function subscribeCards(
     return onSnapshot(
         q,
         (snap) => {
-            const cards = snap.docs.map((d) => ({ ...d.data(), id: d.id }) as FlashCard);
+            const cards = snap.docs
+                .map((d) => migrateCard({ ...d.data(), id: d.id } as FlashCard))
+                // Sort by Firestore document ID — auto-IDs are lexicographically time-ordered
+                .sort((a, b) => a.id.localeCompare(b.id));
             onUpdate(cards);
         },
         onError,
     );
+}
+
+/**
+ * Migration helper: normalizes legacy Firestore documents to the current schema.
+ * Legacy cards stored `kanji` and `furigana` directly.
+ * Current schema uses `kanaPrimary` and `altForm`.
+ */
+function migrateCard(raw: FlashCard): FlashCard {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const legacy = raw as any;
+    const card = { ...raw };
+
+    // Ensure kanaPrimary from legacy furigana or kanji fields
+    if (!card.kanaPrimary) {
+        card.kanaPrimary = legacy.furigana || legacy.kanji || "";
+    }
+
+    // Migrate legacy kanji → altForm when it differs from kanaPrimary
+    if (!card.altForm && legacy.kanji && legacy.kanji !== card.kanaPrimary) {
+        card.altForm = legacy.kanji;
+    }
+
+    return card;
 }
 
 // ─── Write operations ─────────────────────────────────────────────────────

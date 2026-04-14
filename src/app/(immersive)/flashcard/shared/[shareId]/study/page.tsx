@@ -12,6 +12,7 @@ import { use, useEffect, useState } from "react";
 import { BookOpen } from "lucide-react";
 
 import { getSharedLesson, saveSharedStudyProgress } from "@/features/flashcard/services";
+import { getPrimary } from "@/features/flashcard/utils/cardDisplay";
 import { Button } from "@/shared/components/ui";
 import { useAppStore } from "@/store";
 
@@ -187,12 +188,14 @@ export default function SharedStudyPage({ params }: { params: Promise<{ shareId:
                         <div className="mb-1 text-[10px] font-black tracking-widest text-[#afafaf] uppercase">
                             Japanese
                         </div>
+                        {/* Kana-first: show spoken form as primary */}
                         <div className="text-5xl font-medium break-words text-[#3c3c3c]">
-                            {card.kanji}
+                            {getPrimary(card)}
                         </div>
-                        {card.furigana && (
+                        {/* Show altForm (romaji/kanji) as subtitle when it differs from kana */}
+                        {card.altForm && card.altForm !== getPrimary(card) && (
                             <div className="mt-2 text-sm font-bold text-[#afafaf]">
-                                {card.furigana}
+                                {card.altForm}
                             </div>
                         )}
                     </div>

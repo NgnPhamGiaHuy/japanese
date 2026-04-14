@@ -10,9 +10,8 @@
 
 import { deleteField, setDoc } from "firebase/firestore";
 
-import { lessonDoc } from "./lesson.service";
-import { buildShareId } from "./lesson.service";
 import { notifyInvite, notifyRoleChange } from "@/features/notifications";
+import { buildShareId, lessonDoc } from "./lesson.service";
 
 import type { User } from "firebase/auth";
 import type { Lesson } from "../types";
@@ -36,7 +35,7 @@ export type DeckAccessRole = "owner" | "editor" | "commenter" | "viewer" | "none
 export function resolveUserAccess(user: User | null, lesson: Lesson): DeckAccessRole {
     if (!user) {
         return lesson.allowLinkAccess || lesson.isPublic
-            ? (lesson.publicRole as DeckAccessRole) ?? "viewer"
+            ? ((lesson.publicRole as DeckAccessRole) ?? "viewer")
             : "none";
     }
 
@@ -109,9 +108,7 @@ export async function syncInviteToCollaborator(
         [user.uid]: roleToGrant,
     };
 
-    const updatedCollaborators = Array.from(
-        new Set([...(lesson.collaborators ?? []), user.uid]),
-    );
+    const updatedCollaborators = Array.from(new Set([...(lesson.collaborators ?? []), user.uid]));
 
     const updatedInvitedEmails = { ...(lesson.invitedEmails ?? {}) };
     delete updatedInvitedEmails[normalizedEmail];

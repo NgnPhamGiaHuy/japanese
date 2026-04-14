@@ -286,7 +286,9 @@ const ShareModal = ({ lesson, onShareLink, onUpdateRoles, onClose }: ShareModalP
                                     </Button>
                                 </div>
                                 {inviteError && (
-                                    <p className="mt-1.5 text-xs font-bold text-red-500">{inviteError}</p>
+                                    <p className="mt-1.5 text-xs font-bold text-red-500">
+                                        {inviteError}
+                                    </p>
                                 )}
                             </div>
 
@@ -301,91 +303,111 @@ const ShareModal = ({ lesson, onShareLink, onUpdateRoles, onClose }: ShareModalP
                                         const isCurrentUser = uid === user?.uid;
                                         const displayName = isCurrentUser
                                             ? "You"
-                                            : meta?.displayName || meta?.email?.split("@")[0] || `User ${uid.substring(0, 6)}`;
+                                            : meta?.displayName ||
+                                              meta?.email?.split("@")[0] ||
+                                              `User ${uid.substring(0, 6)}`;
                                         const displayEmail = isCurrentUser
                                             ? user?.email || ""
                                             : meta?.email || "";
                                         const initial = isCurrentUser
-                                            ? (user?.displayName?.[0] ?? user?.email?.[0] ?? "Y").toUpperCase()
-                                            : (meta?.displayName?.[0] ?? meta?.email?.[0] ?? uid[0]).toUpperCase();
+                                            ? (
+                                                  user?.displayName?.[0] ??
+                                                  user?.email?.[0] ??
+                                                  "Y"
+                                              ).toUpperCase()
+                                            : (
+                                                  meta?.displayName?.[0] ??
+                                                  meta?.email?.[0] ??
+                                                  uid[0]
+                                              ).toUpperCase();
 
                                         return (
-                                        <div
-                                            key={uid}
-                                            className="flex items-center justify-between rounded-xl px-2 py-2 transition-colors hover:bg-gray-50"
-                                        >
-                                            <div className="flex items-center gap-3">
-                                                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gray-200 font-bold text-gray-500">
-                                                    {initial}
-                                                </div>
-                                                <div>
-                                                    <div className="font-black text-[#3c3c3c]">
-                                                        {displayName}
+                                            <div
+                                                key={uid}
+                                                className="flex items-center justify-between rounded-xl px-2 py-2 transition-colors hover:bg-gray-50"
+                                            >
+                                                <div className="flex items-center gap-3">
+                                                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gray-200 font-bold text-gray-500">
+                                                        {initial}
                                                     </div>
-                                                    {displayEmail && (
-                                                        <div className="text-xs font-bold text-gray-400">
-                                                            {displayEmail}
+                                                    <div>
+                                                        <div className="font-black text-[#3c3c3c]">
+                                                            {displayName}
                                                         </div>
-                                                    )}
+                                                        {displayEmail && (
+                                                            <div className="text-xs font-bold text-gray-400">
+                                                                {displayEmail}
+                                                            </div>
+                                                        )}
+                                                    </div>
                                                 </div>
-                                            </div>
 
-                                            <CustomSelect
-                                                value={r}
-                                                options={sharingOptions}
-                                                onChange={(newRole) =>
-                                                    handleUpdateUserRole(uid, newRole)
-                                                }
-                                                onRemove={
-                                                    r !== "owner" && uid !== user?.uid
-                                                        ? () => handleRemoveUser(uid)
-                                                        : undefined
-                                                }
-                                                removeLabel="Remove access"
-                                                disabled={saving || r === "owner"}
-                                                themeHex={themeHex}
-                                                variant="compact"
-                                            />
-                                        </div>
+                                                <CustomSelect
+                                                    value={r}
+                                                    options={sharingOptions}
+                                                    onChange={(newRole) =>
+                                                        handleUpdateUserRole(uid, newRole)
+                                                    }
+                                                    onRemove={
+                                                        r !== "owner" && uid !== user?.uid
+                                                            ? () => handleRemoveUser(uid)
+                                                            : undefined
+                                                    }
+                                                    removeLabel="Remove access"
+                                                    disabled={saving || r === "owner"}
+                                                    themeHex={themeHex}
+                                                    variant="compact"
+                                                />
+                                            </div>
                                         );
                                     })}
                                 </div>
 
                                 {/* Pending email invites */}
-                                {lesson.invitedEmails && Object.keys(lesson.invitedEmails).length > 0 && (
-                                    <div className="mt-4">
-                                        <h4 className="mb-2 text-xs font-black tracking-wider text-gray-400 uppercase">
-                                            Pending invites
-                                        </h4>
-                                        <div className="flex flex-col gap-2">
-                                            {Object.entries(lesson.invitedEmails).map(([email, invite]) => (
-                                                <div
-                                                    key={email}
-                                                    className="flex items-center justify-between rounded-xl px-2 py-2 transition-colors hover:bg-gray-50"
-                                                >
-                                                    <div className="flex items-center gap-3">
-                                                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-amber-100 text-amber-600">
-                                                            <Mail size={18} />
-                                                        </div>
-                                                        <div>
-                                                            <div className="font-black text-[#3c3c3c]">{email}</div>
-                                                            <div className="text-xs font-bold text-amber-500">
-                                                                Invite pending · {invite.role}
+                                {lesson.invitedEmails &&
+                                    Object.keys(lesson.invitedEmails).length > 0 && (
+                                        <div className="mt-4">
+                                            <h4 className="mb-2 text-xs font-black tracking-wider text-gray-400 uppercase">
+                                                Pending invites
+                                            </h4>
+                                            <div className="flex flex-col gap-2">
+                                                {Object.entries(lesson.invitedEmails).map(
+                                                    ([email, invite]) => (
+                                                        <div
+                                                            key={email}
+                                                            className="flex items-center justify-between rounded-xl px-2 py-2 transition-colors hover:bg-gray-50"
+                                                        >
+                                                            <div className="flex items-center gap-3">
+                                                                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-amber-100 text-amber-600">
+                                                                    <Mail size={18} />
+                                                                </div>
+                                                                <div>
+                                                                    <div className="font-black text-[#3c3c3c]">
+                                                                        {email}
+                                                                    </div>
+                                                                    <div className="text-xs font-bold text-amber-500">
+                                                                        Invite pending ·{" "}
+                                                                        {invite.role}
+                                                                    </div>
+                                                                </div>
                                                             </div>
+                                                            <button
+                                                                onClick={() =>
+                                                                    void handleRevokeEmailInvite(
+                                                                        email,
+                                                                    )
+                                                                }
+                                                                disabled={saving}
+                                                                className="text-xs font-bold text-gray-400 transition-colors hover:text-red-500"
+                                                            >
+                                                                Revoke
+                                                            </button>
                                                         </div>
-                                                    </div>
-                                                    <button
-                                                        onClick={() => void handleRevokeEmailInvite(email)}
-                                                        disabled={saving}
-                                                        className="text-xs font-bold text-gray-400 hover:text-red-500 transition-colors"
-                                                    >
-                                                        Revoke
-                                                    </button>
-                                                </div>
-                                            ))}
+                                                    ),
+                                                )}
+                                            </div>
                                         </div>
-                                    </div>
-                                )}
+                                    )}
                             </div>
 
                             <h3 className="mb-4 border-t-2 border-gray-100 pt-6 text-base font-black text-[#3c3c3c]">

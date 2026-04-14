@@ -33,7 +33,10 @@ function buildRoutes(unreadCount: number): NavRoute[] {
             href: "/kana",
             label: "Kana",
             icon: (
-                <span className="block leading-none" style={{ fontSize: NAV_ICON_SIZE, lineHeight: 1 }}>
+                <span
+                    className="block leading-none"
+                    style={{ fontSize: NAV_ICON_SIZE, lineHeight: 1 }}
+                >
                     あ
                 </span>
             ),

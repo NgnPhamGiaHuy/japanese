@@ -74,11 +74,13 @@ export const ImportPreview = ({
             prev.map((row) => {
                 if (row.id === id) {
                     const newRow = { ...row, [field]: value };
-                    /** Minimum Requirement: (Kanji OR Furigana) AND Meaning */
-                    const hasKanji = newRow.kanji.trim() || newRow.furigana.trim();
+                    /** Minimum Requirement: kanaPrimary OR (Kanji/Furigana) AND Meaning */
+                    const hasKana = newRow.furigana.trim() || newRow.kanji.trim();
                     const hasMeaning = newRow.meaning.trim();
-                    newRow.isInvalid = !(hasKanji && hasMeaning);
-                    newRow.errorMsg = newRow.isInvalid ? "Requires Kanji/Furigana and Meaning" : "";
+                    newRow.isInvalid = !(hasKana && hasMeaning);
+                    newRow.errorMsg = newRow.isInvalid
+                        ? "Requires a Japanese word and Meaning"
+                        : "";
                     return newRow;
                 }
                 return row;
@@ -123,8 +125,8 @@ export const ImportPreview = ({
                 <table className="w-full text-left font-bold text-[#3c3c3c]">
                     <thead className="border-b-2 border-gray-200 bg-gray-50 text-xs tracking-widest text-[#afafaf] uppercase">
                         <tr>
-                            <th className="p-4">Kanji</th>
-                            <th className="p-4">Furigana</th>
+                            <th className="p-4">Kana / Reading</th>
+                            <th className="p-4">Kanji (Optional)</th>
                             <th className="p-4">Meaning</th>
                             <th className="p-4">Example</th>
                             <th className="p-4 text-center">Status</th>

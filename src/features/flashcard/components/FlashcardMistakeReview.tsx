@@ -13,6 +13,13 @@ import { AlertCircle, Brain, Check, Lightbulb, Loader2, Volume2, X } from "lucid
 import { useAICard } from "@/features/ai";
 import { Button } from "@/shared/components/ui";
 import { hexToThemeColor, playAudio, shuffleArray } from "@/shared/utils";
+import {
+    getAudioText,
+    getDisplayFront,
+    getDisplayFurigana,
+    getKanaSubtitle,
+    getLearningStage,
+} from "../utils/cardDisplay";
 
 import type { FlashCard, Lesson, StudyStats } from "../types";
 
@@ -53,16 +60,15 @@ const useAIExplanation = (card: FlashCard | undefined, revealed: boolean) => {
 
     useEffect(() => {
         if (!revealed || !card || explanation) return;
-        /** Use existing hint if available, otherwise fetch from AI */
         if (card.hint) {
             setExplanation(card.hint);
         } else {
-            generate(card.kanji).then((result) => {
+            generate(getAudioText(card)).then((result) => {
                 if (result?.hint) setExplanation(result.hint);
             });
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [revealed, card?.kanji]);
+    }, [revealed, card?.id]);
 
     return { explanation, loading: aiLoading, error };
 };
@@ -126,6 +132,10 @@ export const FlashcardMistakeReview = ({
     // Guard for fast transition between states
     if (!card) return null;
 
+    const stage = getLearningStage(card);
+    const displayFront = getDisplayFront(card, stage);
+    const displayFurigana = getDisplayFurigana(card, stage);
+    const kanaSubtitle = getKanaSubtitle(card, stage);
     const progress = (currentIndex / cards.length) * 100;
 
     /**
@@ -231,15 +241,20 @@ export const FlashcardMistakeReview = ({
                     /* Recognition Mode: Select the meaning you missed previously */
                     <div className="flex w-full flex-col gap-5">
                         <div className="flex w-full flex-col items-center justify-center rounded-[2.5rem] border-2 border-b-8 border-[#ea2b2b]/20 bg-white px-6 py-8 text-center shadow-sm">
-                            {card.furigana && (
+                            {displayFurigana && (
                                 <span className="mb-2 text-lg font-bold tracking-widest text-[#afafaf]">
-                                    {card.furigana}
+                                    {displayFurigana}
                                 </span>
                             )}
                             <div className="flex w-full flex-1 flex-col items-center justify-center px-2 py-2">
-                                <h1 className="w-full text-center text-3xl leading-tight font-black break-words text-[#3c3c3c] uppercase select-none sm:text-4xl md:text-5xl">
-                                    {card.kanji}
+                                <h1 className="w-full text-center text-3xl leading-tight font-black break-words text-[#3c3c3c] select-none sm:text-4xl md:text-5xl">
+                                    {displayFront}
                                 </h1>
+                                {kanaSubtitle && (
+                                    <p className="mt-2 text-lg font-bold text-[#afafaf]">
+                                        {kanaSubtitle}
+                                    </p>
+                                )}
                             </div>
                             <p className="mt-3 text-[10px] font-black tracking-widest text-gray-300 uppercase">
                                 Choose the correct meaning
@@ -300,15 +315,20 @@ export const FlashcardMistakeReview = ({
                         >
                             {/* Front (Recall Trigger) */}
                             <div className="absolute inset-0 flex flex-col items-center justify-center rounded-[2.5rem] border-2 border-b-8 border-[#ea2b2b]/20 bg-white p-6 text-center shadow-sm backface-hidden hover:-translate-y-1 hover:shadow-md">
-                                {card.furigana && (
+                                {displayFurigana && (
                                     <span className="mb-2 shrink-0 text-xl font-bold tracking-widest text-[#afafaf]">
-                                        {card.furigana}
+                                        {displayFurigana}
                                     </span>
                                 )}
                                 <div className="flex w-full flex-1 flex-col items-center justify-center px-2 py-4">
-                                    <h1 className="w-full text-center text-3xl leading-tight font-black break-words text-[#3c3c3c] uppercase select-none sm:text-4xl md:text-5xl">
-                                        {card.kanji}
+                                    <h1 className="w-full text-center text-3xl leading-tight font-black break-words text-[#3c3c3c] select-none sm:text-4xl md:text-5xl">
+                                        {displayFront}
                                     </h1>
+                                    {kanaSubtitle && (
+                                        <p className="mt-2 text-lg font-bold text-[#afafaf]">
+                                            {kanaSubtitle}
+                                        </p>
+                                    )}
                                 </div>
                                 <p className="absolute bottom-6 animate-pulse text-xs font-black tracking-widest text-gray-300 uppercase">
                                     Tap to reveal
@@ -320,7 +340,7 @@ export const FlashcardMistakeReview = ({
                                 <button
                                     onClick={(e) => {
                                         e.stopPropagation();
-                                        playAudio(card.kanji);
+                                        playAudio(getAudioText(card));
                                     }}
                                     className="absolute top-4 right-4 rounded-full bg-gray-100 p-2 text-gray-500 hover:bg-gray-200"
                                 >

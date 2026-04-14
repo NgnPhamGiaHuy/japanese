@@ -49,7 +49,8 @@ interface LessonBuilderProps {
 const makeCard = (): EditorCard => ({
     id: `c_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
     lessonId: "",
-    kanji: "",
+    kanaPrimary: "",
+    altForm: "",
     furigana: "",
     meaning: "",
     example: "",
@@ -157,11 +158,15 @@ export const LessonBuilder = ({
                     c.id === cardId
                         ? {
                               ...c,
-                              kanji: result.kanji,
-                              furigana: result.furigana,
+                              kanaPrimary:
+                                  result.kanaPrimary ||
+                                  result.furigana ||
+                                  result.kanji ||
+                                  c.kanaPrimary,
+                              altForm: result.kanji || "",
+                              furigana: result.furigana || "",
                               meaning: result.meaning,
                               example: result.example,
-                              // Rich AI fields — stored when present, left unchanged otherwise
                               ...(result.distractors !== undefined && {
                                   distractors: result.distractors,
                               }),
@@ -195,7 +200,7 @@ export const LessonBuilder = ({
         }
 
         const validCards = cards.filter(
-            (c) => (c.kanji.trim() || c.furigana.trim()) && c.meaning.trim(),
+            (c) => (c.kanaPrimary?.trim() || c.altForm?.trim()) && c.meaning.trim(),
         );
 
         setSaving(true);
@@ -255,9 +260,7 @@ export const LessonBuilder = ({
     };
 
     const removeCard = (id: string) => {
-        if (confirm("Remove this card?")) {
-            setCards((prev) => prev.filter((c) => c.id !== id));
-        }
+        setCards((prev) => prev.filter((c) => c.id !== id));
     };
 
     const themeHex = lesson.themeColor || "#1cb0f6";
@@ -267,8 +270,8 @@ export const LessonBuilder = ({
     const existingWordsForAI = Array.from(
         new Set(
             cards
-                .flatMap((card) => [card.kanji, card.furigana])
-                .map((value) => value.trim())
+                .flatMap((card) => [card.kanaPrimary, card.altForm, card.furigana])
+                .map((value) => (value || "").trim())
                 .filter((value) => value.length > 0),
         ),
     );
@@ -417,7 +420,8 @@ export const LessonBuilder = ({
                         onConfirm={(validRows) => {
                             const newCards = validRows.map((r) => ({
                                 ...makeCard(),
-                                kanji: r.kanji,
+                                kanaPrimary: r.furigana || r.kanji || "",
+                                altForm: r.kanji || "",
                                 furigana: r.furigana,
                                 meaning: r.meaning,
                                 example: r.example,
@@ -451,7 +455,7 @@ export const LessonBuilder = ({
                                 const rows: ImportRow[] = [
                                     ...result.valid.map((r, i) => ({
                                         id: `valid_${Date.now()}_${i}`,
-                                        kanji: r.kanji || "",
+                                        kanji: r.altForm || r.kanaPrimary || "",
                                         furigana: r.furigana || "",
                                         meaning: r.meaning || "",
                                         example: r.example || "",
@@ -490,7 +494,7 @@ export const LessonBuilder = ({
                                 const rows: ImportRow[] = [
                                     ...result.valid.map((r, i) => ({
                                         id: `valid_${Date.now()}_${i}`,
-                                        kanji: r.kanji || "",
+                                        kanji: r.altForm || r.kanaPrimary || "",
                                         furigana: r.furigana || "",
                                         meaning: r.meaning || "",
                                         example: r.example || "",
@@ -553,50 +557,53 @@ export const LessonBuilder = ({
                                     <button
                                         onClick={() => removeCard(card.id)}
                                         disabled={saving}
-                                        className="absolute top-4 right-4 p-2 text-gray-300 opacity-0 transition-opacity group-hover:opacity-100 hover:text-[#ea2b2b]"
+                                        className="absolute -top-3 -right-3 z-10 flex h-10 w-10 rotate-3 transform items-center justify-center rounded-xl border-b-4 border-[#ea2b2b] bg-[#ea2b2b] text-white opacity-100 shadow-sm transition-all hover:scale-110 active:scale-95 md:opacity-0 md:group-hover:opacity-100"
+                                        title="Remove Card"
                                     >
-                                        <Trash2 size={24} strokeWidth={2.5} />
+                                        <Trash2 size={20} strokeWidth={3} />
                                     </button>
 
                                     <div className="mt-4 grid grid-cols-1 gap-6 md:grid-cols-2">
-                                        {(["kanji", "furigana"] as const).map((field) => {
-                                            const isKanji = field === "kanji";
+                                        {(["kanaPrimary", "altForm"] as const).map((field) => {
+                                            const isKana = field === "kanaPrimary";
                                             const isAILoading =
-                                                isKanji && aiLoadingCardIds.has(card.id);
-                                            const aiError = isKanji
+                                                isKana && aiLoadingCardIds.has(card.id);
+                                            const aiError = isKana
                                                 ? aiCardErrors[card.id]
                                                 : undefined;
+                                            const fieldValue =
+                                                field === "kanaPrimary"
+                                                    ? card.kanaPrimary || ""
+                                                    : card.altForm || "";
                                             return (
                                                 <div key={field}>
                                                     <div className="mb-1 flex items-center justify-between">
                                                         <label className="text-[10px] font-black tracking-widest text-[#afafaf] uppercase">
-                                                            {isKanji ? "Kanji / Word" : "Furigana"}
+                                                            {isKana
+                                                                ? "Kana / Reading ✱"
+                                                                : "Alt Form (kanji / romaji)"}
                                                         </label>
-                                                        {isKanji && (
+                                                        {isKana && (
                                                             <button
                                                                 type="button"
                                                                 title={
-                                                                    card.kanji.trim()
+                                                                    card.kanaPrimary?.trim()
                                                                         ? "Auto-fill with AI"
                                                                         : "Type a word first"
                                                                 }
                                                                 disabled={
                                                                     saving ||
                                                                     isAILoading ||
-                                                                    !card.kanji.trim()
+                                                                    !card.kanaPrimary?.trim()
                                                                 }
                                                                 onClick={() =>
                                                                     handleAIFillCard(
                                                                         card.id,
-                                                                        card.kanji,
+                                                                        card.kanaPrimary || "",
                                                                     )
                                                                 }
                                                                 className="flex items-center gap-1 rounded-lg border border-transparent px-2 py-0.5 text-[9px] font-black uppercase transition-all hover:enabled:border-gray-200 hover:enabled:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-30"
-                                                                style={
-                                                                    isAILoading
-                                                                        ? { color: themeHex }
-                                                                        : { color: themeHex }
-                                                                }
+                                                                style={{ color: themeHex }}
                                                             >
                                                                 {isAILoading ? (
                                                                     <Loader2
@@ -613,9 +620,13 @@ export const LessonBuilder = ({
                                                         )}
                                                     </div>
                                                     <input
-                                                        className={`w-full border-b-2 border-gray-100 bg-transparent pb-2 font-black text-[#3c3c3c] transition-colors outline-none focus:border-[var(--theme-color)] ${isKanji ? "text-3xl" : "text-xl font-bold"} ${isAILoading ? "opacity-60" : ""}`}
-                                                        placeholder={isKanji ? "食べる" : "たべる"}
-                                                        value={card[field]}
+                                                        className={`w-full border-b-2 border-gray-100 bg-transparent pb-2 font-black text-[#3c3c3c] transition-colors outline-none focus:border-[var(--theme-color)] ${isKana ? "text-3xl" : "text-xl font-bold"} ${isAILoading ? "opacity-60" : ""}`}
+                                                        placeholder={
+                                                            isKana
+                                                                ? "たべる"
+                                                                : "食べる or taberu (optional)"
+                                                        }
+                                                        value={fieldValue}
                                                         onChange={(e) =>
                                                             updateCard(
                                                                 card.id,
@@ -625,7 +636,7 @@ export const LessonBuilder = ({
                                                         }
                                                         disabled={saving || isAILoading}
                                                     />
-                                                    {aiError && isKanji && (
+                                                    {aiError && isKana && (
                                                         <p className="mt-1 text-[10px] font-bold text-[#ea2b2b]">
                                                             {aiError}
                                                         </p>

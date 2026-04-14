@@ -181,7 +181,8 @@ const MatchPlayingView = ({
                                     className={className}
                                     style={style}
                                 >
-                                    <span className="text-xl leading-tight">{item.kanji}</span>
+                                    {/* display holds getPrimary() — kana-first spoken form */}
+                                    <span className="text-xl leading-tight">{item.display}</span>
                                 </button>
                             );
                         })}

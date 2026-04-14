@@ -1,6 +1,9 @@
 export interface GeneratedCard {
-    kanji: string;
-    furigana: string;
+    /** Kana/spoken form — always the primary learning anchor */
+    kanaPrimary: string;
+    /** Kanji written form — optional */
+    kanji?: string;
+    furigana?: string;
     meaning: string;
     example: string;
     distractors?: string[];

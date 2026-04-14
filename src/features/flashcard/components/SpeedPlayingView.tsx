@@ -10,6 +10,7 @@ import { X } from "lucide-react";
 
 import { MiniLeaderboard } from "@/features/game/components";
 import { SPEED_GAME_CONFIG } from "@/features/game/modes";
+import { getAltForm, getPrimary } from "../utils/cardDisplay";
 
 import type { FlashCard } from "../types";
 
@@ -123,14 +124,16 @@ const SpeedPlayingView = ({
                     transition={{ duration: 0.18 }}
                     className={`mb-8 w-full text-center ${answerStatus === "wrong" ? "animate-shake" : ""}`}
                 >
-                    {difficultyConfig.showFurigana && currentCard.furigana ? (
-                        <p className="mb-2 text-xl font-bold tracking-widest text-[#afafaf]">
-                            {currentCard.furigana}
+                    {/* Level 1 only: altForm (romaji/kanji) shown ABOVE kana as context */}
+                    {difficultyConfig.showFurigana && getAltForm(currentCard) ? (
+                        <p className="mb-2 text-lg font-bold tracking-widest text-[#afafaf]">
+                            {getAltForm(currentCard)}
                         </p>
                     ) : null}
 
                     <h1 className="text-[5rem] leading-none font-black text-[#3c3c3c] drop-shadow-sm sm:text-[6rem]">
-                        {currentCard.kanji}
+                        {/* All levels: show kana (spoken form) as the main question */}
+                        {getPrimary(currentCard)}
                     </h1>
 
                     <AnimatePresence>
@@ -142,7 +145,7 @@ const SpeedPlayingView = ({
                                 exit={{ opacity: 0 }}
                                 className="mt-2 text-xs font-black text-[#ff9600]"
                             >
-                                ⚠ Furigana removed from here
+                                ⚠ Alt form hidden from here
                             </motion.p>
                         ) : null}
                         {questionIndex === SPEED_GAME_CONFIG.LEVELS[3].threshold &&

@@ -4,10 +4,13 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-import { Bell, BellOff, Check, CheckCheck, MessageSquare, UserPlus, Shield } from "lucide-react";
+import { Bell, BellOff, Check, CheckCheck, MessageSquare, Shield, UserPlus } from "lucide-react";
 
-import { useNotifications } from "@/features/notifications";
-import { markNotificationRead, markAllNotificationsRead } from "@/features/notifications";
+import {
+    markAllNotificationsRead,
+    markNotificationRead,
+    useNotifications,
+} from "@/features/notifications";
 import { ScreenHeader } from "@/shared/components/layout";
 import { useAppStore } from "@/store";
 
@@ -80,14 +83,16 @@ function NotificationRow({
 
             <div className="min-w-0 flex-1">
                 <div className="flex items-start justify-between gap-2">
-                    <p className={`text-sm leading-snug ${!notification.read ? "font-black text-[#3c3c3c]" : "font-bold text-[#3c3c3c]"}`}>
+                    <p
+                        className={`text-sm leading-snug ${!notification.read ? "font-black text-[#3c3c3c]" : "font-bold text-[#3c3c3c]"}`}
+                    >
                         {notification.title}
                     </p>
                     <span className="shrink-0 text-[11px] text-gray-400">
                         {relativeTime(notification.createdAt)}
                     </span>
                 </div>
-                <p className="mt-0.5 text-[13px] text-gray-500 leading-snug">
+                <p className="mt-0.5 text-[13px] leading-snug text-gray-500">
                     {notification.message}
                 </p>
             </div>
@@ -107,9 +112,7 @@ export default function NotificationsPage() {
     const [filter, setFilter] = useState<"all" | "unread">("all");
     const [markingAll, setMarkingAll] = useState(false);
 
-    const displayed = filter === "unread"
-        ? notifications.filter((n) => !n.read)
-        : notifications;
+    const displayed = filter === "unread" ? notifications.filter((n) => !n.read) : notifications;
 
     const handleRead = async (id: string) => {
         if (!user) return;
@@ -153,7 +156,7 @@ export default function NotificationsPage() {
                         <button
                             key={f}
                             onClick={() => setFilter(f)}
-                            className={`rounded-xl px-4 py-2 text-sm font-black transition-colors capitalize ${
+                            className={`rounded-xl px-4 py-2 text-sm font-black capitalize transition-colors ${
                                 filter === f
                                     ? "bg-[#1cb0f6] text-white"
                                     : "bg-white text-gray-500 hover:bg-gray-100"

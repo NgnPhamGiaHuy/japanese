@@ -229,11 +229,7 @@ export function subscribeNotifications(
     onUpdate: (notifications: AppNotification[]) => void,
     onError?: (err: Error) => void,
 ): Unsubscribe {
-    const q = query(
-        notificationsCol(userId),
-        orderBy("createdAt", "desc"),
-        limit(50),
-    );
+    const q = query(notificationsCol(userId), orderBy("createdAt", "desc"), limit(50));
     return onSnapshot(
         q,
         (snap) => {
@@ -253,9 +249,7 @@ export async function markNotificationRead(userId: string, notificationId: strin
 }
 
 export async function markAllNotificationsRead(userId: string): Promise<void> {
-    const snap = await getDocs(
-        query(notificationsCol(userId), where("read", "==", false)),
-    );
+    const snap = await getDocs(query(notificationsCol(userId), where("read", "==", false)));
     if (snap.empty) return;
     const batch = writeBatch(db);
     snap.docs.forEach((d) => batch.update(d.ref, { read: true }));

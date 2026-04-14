@@ -22,8 +22,8 @@ import {
     updateDoc,
 } from "firebase/firestore";
 
-import { APP_ID, db } from "@/lib/firebase";
 import { notifyComment, notifyReply } from "@/features/notifications";
+import { APP_ID, db } from "@/lib/firebase";
 
 import type { CollectionReference, DocumentReference, Unsubscribe } from "firebase/firestore";
 import type { Comment } from "../types/flashcard.types";

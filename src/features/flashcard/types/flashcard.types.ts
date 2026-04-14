@@ -1,19 +1,37 @@
 /**
  * Core Flashcard domain model.
  *
- * @remarks
- * Contains basic content, media references, and the Spaced Repetition System (SRS)
- * metadata used by the SuperMemo-2 (SM2) logic in services.
+ * Learning Stage Architecture:
+ * - kana:  Beginner — show kana only, build pronunciation + familiarity
+ * - mixed: Intermediate — show kana + altForm together
+ * - kanji: Advanced — show altForm only, full recall expected
  */
 export interface FlashCard {
     /** Unique identifier for the card document */
     id: string;
     /** Reference to the parent lesson/deck */
     lessonId: string;
-    /** The primary word or phrase being studied (Question) */
-    kanji: string;
-    /** Reading or phonetic representation */
-    furigana: string;
+
+    /**
+     * Primary spoken/kana form — ALWAYS required.
+     * This is the canonical learning anchor (e.g. "たべる", "おはよう").
+     * For kana-only words this equals kanji. For kanji words this is the reading.
+     */
+    kanaPrimary: string;
+
+    /**
+     * Alternative written form — OPTIONAL.
+     * N4/N5 words: romaji (e.g. "taberu").
+     * N3 and above: kanji (e.g. "食べる").
+     * Shown as a subtitle ABOVE the kana in level 1, hidden in level 2+.
+     */
+    altForm?: string;
+
+    /**
+     * Furigana reading — only meaningful when altForm contains kanji characters.
+     */
+    furigana?: string;
+
     /** The definition or translation (Answer) */
     meaning: string;
     /** Contextual usage of the card in a sentence */
@@ -81,20 +99,26 @@ export interface Lesson {
      * Pending email invites — converted to collaborators on first login.
      * Key: normalized email (lowercase), Value: invite metadata.
      */
-    invitedEmails?: Record<string, {
-        role: "viewer" | "commenter" | "editor";
-        invitedAt: number;
-    }>;
+    invitedEmails?: Record<
+        string,
+        {
+            role: "viewer" | "commenter" | "editor";
+            invitedAt: number;
+        }
+    >;
 
     /**
      * Display metadata for collaborators — populated when an invite is accepted.
      * Key: User UID, Value: snapshot of name/email at time of acceptance.
      * Used purely for UI display; never used for permission checks.
      */
-    collaboratorMeta?: Record<string, {
-        displayName?: string | null;
-        email?: string | null;
-    }>;
+    collaboratorMeta?: Record<
+        string,
+        {
+            displayName?: string | null;
+            email?: string | null;
+        }
+    >;
 
     /** Legacy or computed public status flag */
     isPublic?: boolean;

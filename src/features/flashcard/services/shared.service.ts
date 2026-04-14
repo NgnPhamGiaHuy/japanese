@@ -6,8 +6,8 @@
 import { doc, getDoc, getDocs, query, setDoc, where } from "firebase/firestore";
 
 import { APP_ID, db } from "@/lib/firebase";
-import { cardsCol } from "./card.service";
 import { syncInviteToCollaborator } from "./access.service";
+import { cardsCol } from "./card.service";
 
 import type { User } from "firebase/auth";
 import type { FlashCard, Lesson } from "../types";
@@ -104,8 +104,7 @@ export async function getSharedLesson(
     // Safety net: if the user has a pending invite that wasn't converted
     // (e.g. email mismatch casing edge case), still grant access
     const hasPendingInvite = !!(
-        currentUser?.email &&
-        lesson.invitedEmails?.[currentUser.email.trim().toLowerCase()]
+        currentUser?.email && lesson.invitedEmails?.[currentUser.email.trim().toLowerCase()]
     );
 
     const linkAccess = lesson.allowLinkAccess || lesson.isPublic;

@@ -11,6 +11,7 @@ import {
 } from "@/features/game/modes";
 import { recordGameResult } from "@/features/game/services";
 import { allowAudio, playAudio, shuffleArray } from "@/shared/utils";
+import { getAudioText } from "../utils/cardDisplay";
 
 import type { FlashCard } from "../types";
 
@@ -99,7 +100,7 @@ export function useSpeedModeSession({
         setAnswerStatus("wrong");
         setStreak(0);
         setTimerFraction(0);
-        if (currentCard && allowAudio("speed", "feedback")) playAudio(currentCard.kanji);
+        if (currentCard && allowAudio("speed", "feedback")) playAudio(getAudioText(currentCard));
         setTimeout(() => {
             setAnswerStatus("idle");
             setSelectedOption(null);
@@ -207,11 +208,11 @@ export function useSpeedModeSession({
                 setScore(nextScore);
                 syncScore(nextScore);
 
-                if (allowAudio("speed", "feedback")) playAudio(currentCard.kanji);
+                if (allowAudio("speed", "feedback")) playAudio(getAudioText(currentCard));
             } else {
                 setAnswerStatus("wrong");
                 setStreak(0);
-                if (allowAudio("speed", "feedback")) playAudio(currentCard.kanji);
+                if (allowAudio("speed", "feedback")) playAudio(getAudioText(currentCard));
             }
 
             setTimeout(() => {
