@@ -10,6 +10,7 @@ import Link from "next/link";
 import { useState } from "react";
 
 import {
+    ArrowLeft,
     BookOpen,
     Copy,
     CopyPlus,
@@ -143,7 +144,16 @@ export default function FlashcardDetailLayout({
                     className="pointer-events-none absolute inset-0 opacity-10"
                     style={{ backgroundColor: themeHex }}
                 />
-                <div className="relative z-10 mx-auto flex max-w-7xl flex-col justify-between gap-6 px-6 pt-8 pb-6 md:flex-row md:items-end">
+                <div className="relative z-20 px-4 pt-4 text-left">
+                    <Link
+                        href={isOwner ? "/flashcard?tab=personal" : "/flashcard?tab=shared"}
+                        className="inline-flex items-center justify-center rounded-xl p-2 text-[#3c3c3c] transition-all hover:bg-black/5 hover:shadow-sm"
+                        title="Back to Decks"
+                    >
+                        <ArrowLeft size={24} strokeWidth={3} />
+                    </Link>
+                </div>
+                <div className="relative z-10 mx-auto flex max-w-7xl flex-col justify-between gap-6 px-6 pt-4 pb-6 md:flex-row md:items-end">
                     <div>
                         <div className="mb-4 flex flex-wrap items-center gap-2">
                             {!isOwner && (

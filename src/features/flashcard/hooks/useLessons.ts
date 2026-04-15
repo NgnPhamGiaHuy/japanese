@@ -11,8 +11,10 @@ import type { FlashCard, Lesson } from "../types";
  * Internal state for the lessons collection.
  */
 interface LessonsState {
-    /** Array of lesson/deck metadata */
+    /** Array of user's own lesson/deck metadata */
     lessons: Lesson[];
+    /** Array of lessons shared with the user */
+    sharedLessons: Lesson[];
     /** True during initial hydration from Firestore */
     loading: boolean;
     /** Connectivity or permission error messages */
@@ -24,10 +26,9 @@ interface LessonsState {
  *
  * @remarks
  * Orchestration details:
- * 1. **RT Sync**: Opens an `onSnapshot` listener on mount.
+ * 1. **RT Sync**: Opens `onSnapshot` listeners for both personal and shared decks.
  * 2. **Auto-Cleanup**: Automatically unsubscribes when the UID changes or component unmounts.
- * 3. **Service-Only**: All write operations are delegated to `LessonService` to ensure
- *    architectural purity and single-source-of-truth logic for complex operations (like atomic saves).
+ * 3. **Service-Only**: All write operations are delegated to `LessonService`.
  *
  * @returns Metadata-level state and management actions for current user's lessons.
  */
@@ -36,6 +37,7 @@ export function useLessons() {
 
     const [state, setState] = useState<LessonsState>({
         lessons: [],
+        sharedLessons: [],
         loading: !!user,
         error: null,
     });
@@ -45,6 +47,7 @@ export function useLessons() {
         setPrevUserId(user?.uid);
         setState({
             lessons: [],
+            sharedLessons: [],
             loading: !!user,
             error: null,
         });
@@ -53,20 +56,34 @@ export function useLessons() {
     useEffect(() => {
         if (!user) return;
 
-        const unsubscribe = LessonService.subscribeLessons(
+        // Subscribe to personal lessons
+        const unsubPersonal = LessonService.subscribeLessons(
             user.uid,
-            (lessons) => setState({ lessons, loading: false, error: null }),
+            (lessons) => setState((prev) => ({ ...prev, lessons, loading: false, error: null })),
             (err) => {
-                console.error("[useLessons] Firestore error:", err);
+                console.error("[useLessons] Personal lessons error:", err);
                 setState((prev) => ({
                     ...prev,
                     loading: false,
-                    error: "Could not load your lessons. Please check your connection and try again.",
+                    error: "Could not load your lessons.",
                 }));
             },
         );
 
-        return unsubscribe;
+        // Subscribe to shared lessons
+        const unsubShared = LessonService.subscribeSharedLessons(
+            user.uid,
+            (sharedLessons) =>
+                setState((prev) => ({ ...prev, sharedLessons, loading: false, error: null })),
+            (err) => {
+                console.error("[useLessons] Shared lessons error:", err);
+            },
+        );
+
+        return () => {
+            unsubPersonal();
+            unsubShared();
+        };
     }, [user?.uid]);
 
     // ── Write helpers ────────────────────────────────────────────────────

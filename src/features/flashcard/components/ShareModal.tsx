@@ -1,9 +1,3 @@
-/**
- * @file ShareModal
- * Management interface for deck sharing and collaborative permissions.
- * Implements a "Google Docs" style access control model with email-based invites.
- */
-
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
@@ -12,6 +6,7 @@ import { Check, ChevronDown, Copy, Globe2, Lock, Mail, ShieldAlert, X } from "lu
 
 import { buildShareId, inviteByEmail, revokeEmailInvite } from "@/features/flashcard/services";
 import { Button, CustomSelect } from "@/shared/components/ui";
+import { useAlert } from "@/shared/providers";
 import { hexToThemeColor } from "@/shared/utils";
 import { useAppStore } from "@/store";
 
@@ -19,12 +14,19 @@ import type { SelectOption } from "@/shared/components/ui";
 import type { Lesson } from "../types";
 
 /**
- * Permission levels for deck collaboration.
- * - owner: Full control, can delete deck, can manage roles.
- * - editor: Can modify cards and meta, cannot manage roles or delete deck.
- * - commenter: Can read and add comments to cards.
- * - viewer: Read-only access to cards.
+ * Collaborative Access Controller (Share Modal)
+ *
+ * @remarks
+ * Orchestrates a "Google Docs" style permissions model. Manages:
+ * 1. Public Access: Toggling "Anyone with the link" and default roles.
+ * 2. Targeted Invites: Email-based invitations with explicit RBAC.
+ * 3. Role Life-cycle: Updating and revoking existing collaborator access.
+ *
+ * @example
+ * <ShareModal lesson={lesson} onShareLink={handleShare} onUpdateRoles={handleUpdate} onClose={close} />
  */
+
+/** Access levels defining what actions a user can perform on a shared deck. */
 export type Role = "owner" | "editor" | "commenter" | "viewer";
 
 const sharingOptions: SelectOption<Role>[] = [
@@ -43,22 +45,9 @@ interface ShareModalProps {
     /** Close logic */
     onClose: () => void;
 }
-
-/**
- * ShareModal Component
- *
- * @remarks
- * Orchestrates:
- * 1. **Public Access**: Toggling "Anyone with the link" and assigning a default role.
- * 2. **Invite System**: Adding specific users by ID with explicit roles.
- * 3. **Role Management**: Updating or removing existing collaborator access.
- * 4. **Adaptive UI**: Rendered differently for owners (Manage) vs collaborators (View).
- *
- * @example
- * <ShareModal lesson={lesson} onShareLink={handleShare} onUpdateRoles={handleUpdate} />
- */
 const ShareModal = ({ lesson, onShareLink, onUpdateRoles, onClose }: ShareModalProps) => {
     const { user } = useAppStore();
+    const { showAlert } = useAlert();
 
     // ── Role derivation (Logic Orchestration) ──────────────────────────────────
     /**
@@ -117,6 +106,7 @@ const ShareModal = ({ lesson, onShareLink, onUpdateRoles, onClose }: ShareModalP
         if (!shareLink) return;
         await navigator.clipboard.writeText(shareLink);
         setCopied(true);
+        showAlert("success", "Link copied to clipboard");
         setTimeout(() => setCopied(false), 2000);
     };
 
@@ -126,9 +116,11 @@ const ShareModal = ({ lesson, onShareLink, onUpdateRoles, onClose }: ShareModalP
         setSaving(true);
         try {
             await onShareLink(access, publicRole);
+            showAlert("success", access ? "Public link access enabled" : "Privacy restricted");
         } catch (err) {
             console.error("[ShareModal] handleSaveLinkAccess failed:", err);
             setAllowLinkAccess(!access);
+            showAlert("error", "Failed to update privacy settings");
         } finally {
             setSaving(false);
         }
@@ -140,8 +132,10 @@ const ShareModal = ({ lesson, onShareLink, onUpdateRoles, onClose }: ShareModalP
         setSaving(true);
         try {
             await onShareLink(allowLinkAccess, role);
+            showAlert("success", `Default role set to ${role}`);
         } catch (err) {
             console.error("[ShareModal] handleSavePublicRole failed:", err);
+            showAlert("error", "Failed to update public role");
         } finally {
             setSaving(false);
         }
@@ -159,9 +153,11 @@ const ShareModal = ({ lesson, onShareLink, onUpdateRoles, onClose }: ShareModalP
         setSaving(true);
         try {
             await onUpdateRoles(newRoles, newCollaborators);
+            showAlert("success", "Collaborator permissions updated");
         } catch (err) {
             console.error("[ShareModal] commitRolesUpdate failed:", err);
             setRoles(lesson.roles || {});
+            showAlert("error", "Failed to update permissions");
         } finally {
             setSaving(false);
         }
@@ -196,9 +192,11 @@ const ShareModal = ({ lesson, onShareLink, onUpdateRoles, onClose }: ShareModalP
                 lesson.title,
             );
             setInviteEmail("");
+            showAlert("success", `Invitation sent to ${email}`);
         } catch (err) {
             console.error("[ShareModal] handleInvite failed:", err);
             setInviteError("Failed to send invite. Please try again.");
+            showAlert("error", "Invitation failed");
         } finally {
             setSaving(false);
         }
@@ -209,8 +207,10 @@ const ShareModal = ({ lesson, onShareLink, onUpdateRoles, onClose }: ShareModalP
         setSaving(true);
         try {
             await revokeEmailInvite(lesson.userId, lesson.id, email);
+            showAlert("success", "Invitation revoked");
         } catch (err) {
             console.error("[ShareModal] handleRevokeEmailInvite failed:", err);
+            showAlert("error", "Failed to revoke invitation");
         } finally {
             setSaving(false);
         }

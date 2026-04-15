@@ -1,6 +1,7 @@
 "use client";
 
-import { useFirebaseAuth } from "@/features/user/hooks/useFirebaseAuth";
+import { useFirebaseAuth } from "@/features/user/hooks";
+import { AlertProvider } from "@/shared/providers";
 import { useAppStore } from "@/store";
 
 function AuthGate({ children }: { children: React.ReactNode }) {
@@ -27,5 +28,9 @@ function AuthGate({ children }: { children: React.ReactNode }) {
 /** Client-side shell that initialises Firebase auth and wraps the app */
 export function Providers({ children }: { children: React.ReactNode }) {
     useFirebaseAuth();
-    return <AuthGate>{children}</AuthGate>;
+    return (
+        <AlertProvider>
+            <AuthGate>{children}</AuthGate>
+        </AlertProvider>
+    );
 }

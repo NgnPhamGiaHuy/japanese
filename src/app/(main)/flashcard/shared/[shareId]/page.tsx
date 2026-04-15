@@ -13,6 +13,7 @@ import { ShareModal } from "@/features/flashcard/components";
 import { useLessons } from "@/features/flashcard/hooks";
 import { getSharedLesson, SharedLessonResult } from "@/features/flashcard/services";
 import { Button } from "@/shared/components/ui";
+import { useAlert } from "@/shared/providers";
 import { useAppStore } from "@/store";
 import FlashcardDetailLayout from "../../_components/FlashcardDetailLayout";
 
@@ -34,6 +35,7 @@ export default function SharedLessonPage({ params }: { params: Promise<{ shareId
     const { shareId } = use(params);
     const router = useRouter();
     const { user } = useAppStore();
+    const { showAlert } = useAlert();
     const { saveFullLesson, shareLesson, updateLessonRoles } = useLessons();
 
     const [result, setResult] = useState<SharedLessonResult | null>(null);
@@ -149,7 +151,7 @@ export default function SharedLessonPage({ params }: { params: Promise<{ shareId
             router.push("/flashcard");
         } catch (err) {
             console.error("[SharedLessonPage] Duplicate failed:", err);
-            alert("Failed to duplicate deck. Please try again.");
+            showAlert("error", "Failed to duplicate deck. Please try again.");
         } finally {
             setSaving(false);
         }
@@ -158,6 +160,7 @@ export default function SharedLessonPage({ params }: { params: Promise<{ shareId
     const handleCopyLink = async () => {
         await navigator.clipboard.writeText(window.location.href);
         setLinkCopied(true);
+        showAlert("success", "Link copied to clipboard");
         setTimeout(() => setLinkCopied(false), 2000);
     };
 

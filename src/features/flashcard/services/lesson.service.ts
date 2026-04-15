@@ -10,6 +10,7 @@
 
 import {
     collection,
+    collectionGroup,
     doc,
     getDocs,
     onSnapshot,
@@ -65,6 +66,33 @@ export function subscribeLessons(
         (snap) => {
             const lessons = snap.docs
                 .map((d) => ({ ...d.data(), id: d.id }) as Lesson)
+                .sort((a, b) => b.createdAt - a.createdAt);
+            onUpdate(lessons);
+        },
+        onError,
+    );
+}
+
+/**
+ * Subscribes to lessons where the user is a collaborator but NOT the owner.
+ * Uses a collection group query on 'lessons' — requires a Firestore index.
+ */
+export function subscribeSharedLessons(
+    userId: string,
+    onUpdate: (lessons: Lesson[]) => void,
+    onError: (err: Error) => void,
+): Unsubscribe {
+    const q = query(
+        collectionGroup(db, "lessons"),
+        where("collaborators", "array-contains", userId),
+    );
+
+    return onSnapshot(
+        q,
+        (snap) => {
+            const lessons = snap.docs
+                .map((d) => ({ ...d.data(), id: d.id }) as Lesson)
+                .filter((l) => l.roles?.[userId] !== "owner")
                 .sort((a, b) => b.createdAt - a.createdAt);
             onUpdate(lessons);
         },

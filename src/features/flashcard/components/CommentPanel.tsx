@@ -1,15 +1,10 @@
-/**
- * @file CommentPanel
- * The primary social interface for flashcard decks.
- * Orchestrates real-time Firebase subscriptions, CRUD operations, and threaded UI state.
- */
-
 "use client";
 
 import { useEffect, useRef, useState } from "react";
 
-import { MessageSquare, RefreshCw, SlidersHorizontal } from "lucide-react";
+import { MessageSquare, SlidersHorizontal } from "lucide-react";
 
+import { useAlert } from "@/shared/providers";
 import CommentInput from "./CommentInput";
 import CommentThread from "./CommentThread";
 import {
@@ -26,8 +21,19 @@ import {
 import type { Comment } from "../types";
 
 /**
- * Maps specialized CommentErrors to user-friendly UI strings.
+ * Flashcard Commenting Hub
+ *
+ * @remarks
+ * Orchestrates real-time social interactions for specific cards. Manages:
+ * 1. Firebase subscription lifecycle (Connect/Disconnect/Retry).
+ * 2. Nested CRUD operations (Reply/Edit/Resolve).
+ * 3. Intelligent scroll management for new message arrivals.
+ *
+ * @example
+ * <CommentPanel lessonId="123" cardId="456" currentUserId="abc" ... />
  */
+
+/** Error lookup table used for normalizing Firestore/Logic errors into user-friendly strings. */
 function mapError(err: unknown, fallback: string): string {
     if (err instanceof CommentError) {
         switch (err.code) {
@@ -46,15 +52,25 @@ function mapError(err: unknown, fallback: string): string {
     return fallback;
 }
 
+/** Configuration for the comment lifecycle and access control. */
 export interface CommentPanelProps {
+    /** Creator of the deck, used for security path derivation. */
     ownerId: string;
+    /** Parent deck identifier. */
     lessonId: string;
+    /** Specific card being discussed. */
     cardId: string;
+    /** Identity of the active session user. */
     currentUserId: string;
+    /** Display name used for new local-first comment rendering. */
     currentUserName?: string | null;
+    /** Email for gravatar or internal lookup. */
     currentUserEmail?: string | null;
+    /** Permission scope affecting UI visibility of Edit/Delete/Resolve. */
     currentUserRole: "viewer" | "commenter" | "editor" | "owner";
+    /** True if the active user is the deck author, granting super-admin delete rights. */
     isOwner: boolean;
+    /** Branding color used for theme-consistent icons and loading states. */
     themeColor: string;
 }
 
@@ -69,9 +85,9 @@ const CommentPanel = ({
     isOwner,
     themeColor,
 }: CommentPanelProps) => {
+    const { showAlert } = useAlert();
     const [comments, setComments] = useState<Comment[]>([]);
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
     const [isNetworkError, setIsNetworkError] = useState(false);
     const [retryKey, setRetryKey] = useState(0);
     const [showResolved, setShowResolved] = useState(false);
@@ -99,14 +115,13 @@ const CommentPanel = ({
                 if (!active) return;
                 setComments(updated);
                 setLoading(false);
-                setError(null);
                 setIsNetworkError(false);
             },
             (err) => {
                 if (!active) return;
                 console.error("[CommentPanel]", err);
-                setError("Lost connection. Retrying…");
                 setIsNetworkError(true);
+                showAlert("error", "Lost connection to comments. Trying to reconnect...");
             },
         );
         return () => {
@@ -139,17 +154,19 @@ const CommentPanel = ({
      * Async Action Wrapper
      * Uniformly handles error catching, network status tracking, and UI error state reporting.
      */
-    const wrap = async (fn: () => Promise<void>, fallback: string) => {
+    const wrap = async (fn: () => Promise<void>, fallback: string, successMsg?: string) => {
         try {
-            setError(null);
             setIsNetworkError(false);
             await fn();
+            if (successMsg) {
+                showAlert("success", successMsg);
+            }
         } catch (err) {
             const msg = mapError(err, fallback);
             setIsNetworkError(
                 err instanceof CommentError && err.code === CommentErrorCode.NETWORK_ERROR,
             );
-            setError(msg);
+            showAlert("error", msg);
             throw err;
         }
     };
@@ -189,6 +206,7 @@ const CommentPanel = ({
         wrap(
             () => resolveComment(ownerId, lessonId, cardId, commentId, currentUserId),
             "Failed to resolve comment.",
+            "Comment resolved",
         );
 
     const handleEdit = (commentId: string, content: string) =>
@@ -201,6 +219,7 @@ const CommentPanel = ({
         wrap(
             () => deleteComment(ownerId, lessonId, cardId, commentId, currentUserId, isOwner),
             "Failed to delete comment.",
+            "Comment deleted",
         );
 
     // ── Render ────────────────────────────────────────────────────────────────
@@ -244,28 +263,6 @@ const CommentPanel = ({
                     </button>
                 )}
             </div>
-
-            {/* ── Error banner ───────────────────────────────────────────── */}
-            {error && (
-                <div className="mx-3 mt-2 shrink-0 rounded-lg border border-red-200 bg-red-50 px-3 py-2">
-                    <div className="flex items-center justify-between gap-2">
-                        <p className="text-[12px] font-bold text-red-600">{error}</p>
-                        {isNetworkError && (
-                            <button
-                                onClick={() => {
-                                    setError(null);
-                                    setIsNetworkError(false);
-                                    setRetryKey((k) => k + 1);
-                                }}
-                                className="flex shrink-0 items-center gap-1 text-[11px] font-bold text-red-500 hover:text-red-700"
-                            >
-                                <RefreshCw size={11} />
-                                Retry
-                            </button>
-                        )}
-                    </div>
-                </div>
-            )}
 
             {/* ── Scrollable comment list ─────────────────────────────────── */}
             <div ref={listRef} className="flex-1 overflow-y-auto px-2 py-2">

@@ -13,7 +13,8 @@ import { getDoc } from "firebase/firestore";
 
 import { LessonBuilder, useLessons } from "@/features/flashcard";
 import { useCards } from "@/features/flashcard/hooks";
-import { lessonDoc } from "@/features/flashcard/services/lesson.service";
+import { lessonDoc } from "@/features/flashcard/services";
+import { useAlert } from "@/shared/providers";
 import { useAppStore } from "@/store";
 
 import type { FlashCard, Lesson } from "@/features/flashcard/types";
@@ -30,6 +31,7 @@ import type { FlashCard, Lesson } from "@/features/flashcard/types";
  */
 export default function FlashcardEditPage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = use(params);
+    const { showAlert } = useAlert();
     const router = useRouter();
     const searchParams = useSearchParams();
     const { user } = useAppStore();
@@ -51,11 +53,19 @@ export default function FlashcardEditPage({ params }: { params: Promise<{ id: st
     const [loadingShared, setLoadingShared] = useState(isSharedEdit);
 
     /**
+     * 🔙 Pure history-based navigation
+     */
+    const handleBack = () => {
+        router.back();
+    };
+
+    /**
      * Cross-User Data Fetching
      * Fetches the original lesson and cards from the owner's Firestore paths.
      */
     useEffect(() => {
         if (!isSharedEdit || !ownerId) return;
+
         Promise.all([
             getDoc(lessonDoc(ownerId, id)),
             import("@/features/flashcard/services/card.service").then(({ cardsCol }) =>
@@ -78,8 +88,6 @@ export default function FlashcardEditPage({ params }: { params: Promise<{ id: st
     const cards = isSharedEdit ? sharedCards : ownCards;
     const loading = isSharedEdit ? loadingShared : !lesson;
 
-    const backPath = returnTo ?? (isSharedEdit ? `/flashcard/${id}` : `/flashcard/${id}`);
-
     if (loading) {
         return (
             <div className="fixed inset-0 flex items-center justify-center bg-[#F7F7F8]">
@@ -101,19 +109,30 @@ export default function FlashcardEditPage({ params }: { params: Promise<{ id: st
             editingLesson={{ ...lesson, userId: ownerId ?? lesson.userId }}
             initialCards={cards}
             onSave={async (updatedLesson, updatedCards, isNew) => {
-                await saveFullLesson(updatedLesson, updatedCards, isNew);
-                router.push(backPath);
-            }}
-            onDelete={async () => {
-                /** Constraint: Editors cannot delete shared decks */
-                if (!isSharedEdit) {
-                    await deleteLesson(id);
-                    router.push("/flashcard");
-                } else {
-                    alert("Only the owner can delete this deck.");
+                try {
+                    await saveFullLesson(updatedLesson, updatedCards, isNew);
+                    showAlert("success", isNew ? "Deck created!" : "Changes saved");
+                    handleBack();
+                } catch (err) {
+                    console.error("[EditPage] Save failed:", err);
+                    showAlert("error", "Failed to save changes");
                 }
             }}
-            onClose={() => router.push(backPath)}
+            onDelete={async () => {
+                if (!isSharedEdit) {
+                    try {
+                        await deleteLesson(id);
+                        showAlert("success", "Deck deleted");
+                        handleBack();
+                    } catch (err) {
+                        console.error("[EditPage] Delete failed:", err);
+                        showAlert("error", "Failed to delete deck");
+                    }
+                } else {
+                    showAlert("error", "Only the owner can delete this deck.");
+                }
+            }}
+            onClose={handleBack}
         />
     );
 }

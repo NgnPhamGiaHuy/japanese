@@ -1,18 +1,12 @@
-/**
- * @file FlashcardIndexPage
- * The main dashboard for the Flashcard feature.
- * Shows personal decks, high scores, and quick-action buttons.
- */
-
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 
 import { BookOpen, Edit2, Gamepad2, Plus, RefreshCw, Share2, Trash2, Zap } from "lucide-react";
 
-import { Lesson, ShareModal, useLessons } from "@/features/flashcard";
+import { buildShareId, Lesson, ShareModal, useLessons } from "@/features/flashcard";
 import {
     GameStatEntry,
     matchGameMode,
@@ -24,22 +18,36 @@ import {
 import { ScreenHeader } from "@/shared/components/layout";
 import { Button } from "@/shared/components/ui";
 import { CARD_BASE, SPACING } from "@/shared/constants";
+import { useAlert } from "@/shared/providers";
 import { hexToThemeColor } from "@/shared/utils";
 import { useAppStore } from "@/store";
 
 /**
- * Flashcard Dashboard View
+ * Flashcard Dashboard
  *
  * @remarks
- * Orchestrates:
- * 1. Fetching personal lessons (decks) via `useLessons`.
- * 2. Real-time subscription to game stats (high scores) for the deck badges.
- * 3. Share flow management via `ShareModal`.
+ * Central hub for the user's personal and shared study materials. Orchestrates:
+ * 1. Synchronized Deck Lifecycle: Fetching and managing personal vs. shared views.
+ * 2. Gamification Sync: Real-time subscription to high-scores and tier badges.
+ * 3. Collaboration Flow: Management of share-link generation and modal states.
+ *
+ * @example
+ * <FlashcardIndexPage />
  */
 export default function FlashcardIndexPage() {
-    const { lessons, loading, error, deleteLesson, shareLesson, updateLessonRoles } = useLessons();
+    const { lessons, sharedLessons, loading, error, deleteLesson, shareLesson, updateLessonRoles } =
+        useLessons();
     const { user } = useAppStore();
+    const { showAlert } = useAlert();
     const router = useRouter();
+    const searchParams = useSearchParams();
+    const tabParam = searchParams.get("tab") as "personal" | "shared" | null;
+
+    const activeTab = tabParam || "personal";
+
+    const handleTabChange = (tab: "personal" | "shared") => {
+        router.replace(`/flashcard?tab=${tab}`, { scroll: false });
+    };
 
     /** Track high scores for each personal deck to display badges/tiers */
     const [gameStats, setGameStats] = useState<Record<string, GameStatEntry>>({});
@@ -51,10 +59,12 @@ export default function FlashcardIndexPage() {
 
     const [sharingLesson, setSharingLesson] = useState<Lesson | null>(null);
 
+    const displayLessons = activeTab === "personal" ? lessons : sharedLessons;
+
     return (
         <div className="min-h-[100dvh] bg-[#F7F7F8] pb-28">
             <ScreenHeader
-                title="My Decks"
+                title="Flashcards"
                 backHref="/"
                 right={
                     <Button
@@ -69,6 +79,35 @@ export default function FlashcardIndexPage() {
             />
 
             <div className={`${SPACING.pagePadding} mx-auto max-w-2xl pt-6`}>
+                {/* ── Tab Switcher ── */}
+                <div className="mb-6 flex gap-2 rounded-2xl bg-gray-100 p-1">
+                    <button
+                        onClick={() => handleTabChange("personal")}
+                        className={`flex-1 rounded-xl py-2 text-sm font-black transition-all ${
+                            activeTab === "personal"
+                                ? "bg-white text-[#3c3c3c] shadow-sm"
+                                : "text-[#afafaf] hover:text-[#3c3c3c]"
+                        }`}
+                    >
+                        My Decks
+                    </button>
+                    <button
+                        onClick={() => handleTabChange("shared")}
+                        className={`flex-1 rounded-xl py-2 text-sm font-black transition-all ${
+                            activeTab === "shared"
+                                ? "bg-white text-[#3c3c3c] shadow-sm"
+                                : "text-[#afafaf] hover:text-[#3c3c3c]"
+                        }`}
+                    >
+                        Shared with me
+                        {sharedLessons.length > 0 && (
+                            <span className="ml-2 inline-flex h-5 w-5 items-center justify-center rounded-full bg-[#ce82ff] text-[10px] text-white">
+                                {sharedLessons.length}
+                            </span>
+                        )}
+                    </button>
+                </div>
+
                 {/* ── Error state ── */}
                 {error && (
                     <div className="mb-6 flex items-center justify-between rounded-2xl border-2 border-[#ea2b2b]/30 bg-[#ffdfe0] px-5 py-4">
@@ -119,38 +158,53 @@ export default function FlashcardIndexPage() {
                 )}
 
                 {/* ── Empty state ── */}
-                {!loading && !error && lessons.length === 0 && (
+                {!loading && !error && displayLessons.length === 0 && (
                     <div className="py-20 text-center">
                         <div className="mx-auto mb-6 flex h-24 w-24 -rotate-6 items-center justify-center rounded-[2rem] border-b-8 border-[#b65ce8] bg-[#ce82ff] text-white shadow-sm">
                             <BookOpen size={48} strokeWidth={3} />
                         </div>
-                        <h2 className="mb-2 text-2xl font-black text-[#3c3c3c]">No decks yet</h2>
+                        <h2 className="mb-2 text-2xl font-black text-[#3c3c3c]">
+                            {activeTab === "personal" ? "No decks yet" : "No shared decks"}
+                        </h2>
                         <p className="mb-8 font-bold text-[#afafaf]">
-                            Create your first vocabulary deck to get started!
+                            {activeTab === "personal"
+                                ? "Create your first vocabulary deck to get started!"
+                                : "Shared decks from other students will appear here."}
                         </p>
-                        <Button
-                            variant="primary"
-                            color="purple"
-                            onClick={() => router.push("/flashcard/create")}
-                            icon={Plus}
-                            className="mx-auto px-8 py-5 text-xl"
-                        >
-                            Create Deck
-                        </Button>
+                        {activeTab === "personal" && (
+                            <Button
+                                variant="primary"
+                                color="purple"
+                                onClick={() => router.push("/flashcard/create")}
+                                icon={Plus}
+                                className="mx-auto px-8 py-5 text-xl"
+                            >
+                                Create Deck
+                            </Button>
+                        )}
                     </div>
                 )}
 
                 {/* ── Lesson list ── */}
-                {!loading && !error && lessons.length > 0 && (
+                {!loading && !error && displayLessons.length > 0 && (
                     <div className="space-y-4">
-                        {lessons.map((lesson) => (
+                        {displayLessons.map((lesson) => (
                             <DeckCard
                                 key={lesson.id}
                                 lesson={lesson}
+                                isShared={activeTab === "shared"}
                                 matchStats={gameStats[matchGameMode(lesson.id)]}
                                 speedStats={gameStats[speedGameMode(lesson.id)]}
                                 onDelete={async () => {
-                                    if (confirm("Delete this deck?")) await deleteLesson(lesson.id);
+                                    if (confirm("Delete this deck?")) {
+                                        try {
+                                            await deleteLesson(lesson.id);
+                                            showAlert("success", "Deck deleted");
+                                        } catch (err) {
+                                            console.error("[FlashcardIndex] Delete failed:", err);
+                                            showAlert("error", "Failed to delete deck");
+                                        }
+                                    }
                                 }}
                                 onShare={() => setSharingLesson(lesson)}
                             />
@@ -210,18 +264,42 @@ function TierBadge({ score, className = "" }: { score: number; className?: strin
  */
 function DeckCard({
     lesson,
+    isShared,
     matchStats,
     speedStats,
     onDelete,
     onShare,
 }: {
     lesson: Lesson;
+    isShared?: boolean;
     matchStats?: GameStatEntry;
     speedStats?: GameStatEntry;
     onDelete: () => void;
     onShare: () => void;
 }) {
+    const { user } = useAppStore();
     const themeColor = lesson.themeColor || "#1cb0f6";
+
+    // Determine permissions
+    const role = user ? lesson.roles?.[user.uid] : "viewer";
+    const canEdit = role === "owner" || role === "editor";
+    const canShare = role === "owner";
+    const canDelete = role === "owner";
+
+    // Path resolution
+    const resolvedShareId =
+        lesson.shareId || (lesson.userId ? buildShareId(lesson.userId, lesson.id) : "");
+
+    const viewPath = isShared ? `/flashcard/shared/${resolvedShareId}` : `/flashcard/${lesson.id}`;
+    const speedPath = isShared
+        ? `/flashcard/shared/${resolvedShareId}/speed`
+        : `/flashcard/${lesson.id}/speed`;
+    const matchPath = isShared
+        ? `/flashcard/shared/${resolvedShareId}/match`
+        : `/flashcard/${lesson.id}/match`;
+    const editPath = isShared
+        ? `/flashcard/${lesson.id}/edit?ownerId=${lesson.userId}`
+        : `/flashcard/${lesson.id}/edit`;
 
     return (
         <div
@@ -229,7 +307,14 @@ function DeckCard({
         >
             <div className="mb-4 flex items-start justify-between">
                 <div className="flex-1 pr-4">
-                    <h3 className="text-xl font-black text-[#3c3c3c]">{lesson.title}</h3>
+                    <div className="flex items-center gap-2">
+                        <h3 className="text-xl font-black text-[#3c3c3c]">{lesson.title}</h3>
+                        {isShared && (
+                            <span className="inline-flex items-center rounded-lg bg-gray-100 px-2 py-1 text-[9px] font-black tracking-tight text-[#afafaf] uppercase">
+                                Shared
+                            </span>
+                        )}
+                    </div>
                     {lesson.description && (
                         <p className="mt-1 line-clamp-2 text-sm font-bold text-[#afafaf]">
                             {lesson.description}
@@ -267,7 +352,7 @@ function DeckCard({
 
             <div className="mt-2 flex flex-col gap-3 sm:mt-0 sm:flex-row sm:gap-2">
                 <div className="flex flex-1 gap-2">
-                    <Link href={`/flashcard/${lesson.id}`} className="flex-1">
+                    <Link href={viewPath} className="flex-1">
                         <Button
                             variant="primary"
                             color={hexToThemeColor(themeColor)}
@@ -286,7 +371,7 @@ function DeckCard({
                                 className="absolute -top-2 left-1/2 z-10 -translate-x-1/2"
                             />
                         )}
-                        <Link href={`/flashcard/${lesson.id}/speed`} className="block">
+                        <Link href={speedPath} className="block">
                             <Button
                                 variant="secondary"
                                 color="orange"
@@ -306,7 +391,7 @@ function DeckCard({
                                 className="absolute -top-2 left-1/2 z-10 -translate-x-1/2"
                             />
                         )}
-                        <Link href={`/flashcard/${lesson.id}/match`} className="block">
+                        <Link href={matchPath} className="block">
                             <Button
                                 variant="secondary"
                                 color="purple"
@@ -320,37 +405,44 @@ function DeckCard({
                 </div>
 
                 <div className="flex justify-around gap-2 border-t-2 border-gray-100 pt-3 sm:justify-end sm:border-t-0 sm:pt-0">
-                    <button
-                        onClick={onShare}
-                        className="flex flex-1 items-center justify-center rounded-xl p-3 text-gray-300 transition-colors hover:bg-[#ebf8e6] hover:text-[#58cc02] sm:flex-none"
-                        title="Share deck"
-                    >
-                        <Share2 size={20} strokeWidth={2.5} />
-                    </button>
-                    <Link
-                        href={`/flashcard/${lesson.id}/edit`}
-                        className="flex flex-1 items-center justify-center rounded-xl p-3 text-gray-300 transition-colors sm:flex-none"
-                        style={{ color: undefined }}
-                        onMouseEnter={(e) => {
-                            (e.currentTarget as HTMLElement).style.backgroundColor =
-                                `${themeColor}20`;
-                            (e.currentTarget as HTMLElement).style.color = themeColor;
-                        }}
-                        onMouseLeave={(e) => {
-                            (e.currentTarget as HTMLElement).style.backgroundColor = "transparent";
-                            (e.currentTarget as HTMLElement).style.color = "";
-                        }}
-                        title="Edit deck"
-                    >
-                        <Edit2 size={20} strokeWidth={2.5} />
-                    </Link>
-                    <button
-                        onClick={onDelete}
-                        className="flex flex-1 items-center justify-center rounded-xl p-3 text-gray-300 transition-colors hover:bg-[#ffdfe0] hover:text-[#ea2b2b] sm:flex-none"
-                        title="Delete deck"
-                    >
-                        <Trash2 size={20} strokeWidth={2.5} />
-                    </button>
+                    {canShare && (
+                        <button
+                            onClick={onShare}
+                            className="flex flex-1 items-center justify-center rounded-xl p-3 text-gray-300 transition-colors hover:bg-[#ebf8e6] hover:text-[#58cc02] sm:flex-none"
+                            title="Share deck"
+                        >
+                            <Share2 size={20} strokeWidth={2.5} />
+                        </button>
+                    )}
+                    {canEdit && (
+                        <Link
+                            href={editPath}
+                            className="flex flex-1 items-center justify-center rounded-xl p-3 text-gray-300 transition-colors sm:flex-none"
+                            style={{ color: undefined }}
+                            onMouseEnter={(e) => {
+                                (e.currentTarget as HTMLElement).style.backgroundColor =
+                                    `${themeColor}20`;
+                                (e.currentTarget as HTMLElement).style.color = themeColor;
+                            }}
+                            onMouseLeave={(e) => {
+                                (e.currentTarget as HTMLElement).style.backgroundColor =
+                                    "transparent";
+                                (e.currentTarget as HTMLElement).style.color = "";
+                            }}
+                            title="Edit deck"
+                        >
+                            <Edit2 size={20} strokeWidth={2.5} />
+                        </Link>
+                    )}
+                    {canDelete && (
+                        <button
+                            onClick={onDelete}
+                            className="flex flex-1 items-center justify-center rounded-xl p-3 text-gray-300 transition-colors hover:bg-[#ffdfe0] hover:text-[#ea2b2b] sm:flex-none"
+                            title="Delete deck"
+                        >
+                            <Trash2 size={20} strokeWidth={2.5} />
+                        </button>
+                    )}
                 </div>
             </div>
         </div>

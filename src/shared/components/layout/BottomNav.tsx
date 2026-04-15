@@ -3,9 +3,11 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-import { Bell, BookOpen, Gamepad2, Trophy } from "lucide-react";
+import { Bell, BookOpen, Gamepad2 } from "lucide-react";
 
 import { useNotifications } from "@/features/notifications";
+import { UserAvatar } from "@/shared/components/ui";
+import { useAppStore } from "@/store";
 
 const NAV_ICON_SIZE = 26;
 const NAV_ICON_STROKE_ACTIVE = 2.5;
@@ -20,7 +22,7 @@ interface NavRoute {
     badge?: number;
 }
 
-function buildRoutes(unreadCount: number): NavRoute[] {
+function buildRoutes(unreadCount: number, userPhoto?: string | null): NavRoute[] {
     return [
         {
             href: "/",
@@ -68,8 +70,8 @@ function buildRoutes(unreadCount: number): NavRoute[] {
         {
             href: "/profile",
             label: "Profile",
-            icon: <Trophy size={NAV_ICON_SIZE} strokeWidth={NAV_ICON_STROKE_IDLE} />,
-            activeIcon: <Trophy size={NAV_ICON_SIZE} strokeWidth={NAV_ICON_STROKE_ACTIVE} />,
+            icon: <UserAvatar src={userPhoto} active={false} activeColor="text-[#ff9600]" />,
+            activeIcon: <UserAvatar src={userPhoto} active={true} activeColor="text-[#ff9600]" />,
             activeColor: "text-[#ff9600]",
         },
     ];
@@ -77,8 +79,9 @@ function buildRoutes(unreadCount: number): NavRoute[] {
 
 export const BottomNav = () => {
     const pathname = usePathname();
+    const { user } = useAppStore();
     const { unreadCount } = useNotifications();
-    const ROUTES = buildRoutes(unreadCount);
+    const ROUTES = buildRoutes(unreadCount, user?.photoURL);
 
     const isActive = (href: string) => {
         if (href === "/") return pathname === "/";

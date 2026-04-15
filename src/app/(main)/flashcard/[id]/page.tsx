@@ -13,6 +13,7 @@ import { ShareModal } from "@/features/flashcard/components";
 import { useCards, useLessons } from "@/features/flashcard/hooks";
 import { buildShareId } from "@/features/flashcard/services";
 import { Button } from "@/shared/components/ui";
+import { useAlert } from "@/shared/providers";
 import { useAppStore } from "@/store";
 import FlashcardDetailLayout from "../_components/FlashcardDetailLayout";
 
@@ -28,6 +29,7 @@ import type { DeckContext } from "../_components/FlashcardDetailLayout";
  */
 export default function FlashcardDetailPage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = use(params);
+    const { showAlert } = useAlert();
     const router = useRouter();
     const { user } = useAppStore();
     const { lessons, loading: lessonsLoading, shareLesson, updateLessonRoles } = useLessons();
@@ -86,6 +88,7 @@ export default function FlashcardDetailPage({ params }: { params: Promise<{ id: 
             `${window.location.origin}/flashcard/shared/${shareId}`,
         );
         setLinkCopied(true);
+        showAlert("success", "Link copied to clipboard");
         setTimeout(() => setLinkCopied(false), 2000);
     };
 

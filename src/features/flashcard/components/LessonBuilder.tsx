@@ -12,6 +12,7 @@ import { Image as ImageIcon, Loader2, Plus, Sparkles, Trash2, X } from "lucide-r
 
 import { AIBulkPanel, useAICard } from "@/features/ai";
 import { Button } from "@/shared/components/ui";
+import { useAlert } from "@/shared/providers";
 import { hexToThemeColor } from "@/shared/utils";
 import { useAppStore } from "@/store";
 import { ImportPreview } from "./ImportPreview";
@@ -81,6 +82,7 @@ export const LessonBuilder = ({
 }: LessonBuilderProps) => {
     const isNew = !editingLesson;
     const { user } = useAppStore();
+    const { showAlert } = useAlert();
 
     // Data fetching: Only fetch if initialCards are not provided (Owner edit flow)
     const { cards: existingCards, loading: cardsLoading } = useCards(
@@ -189,11 +191,20 @@ export const LessonBuilder = ({
      */
     const handleSave = async () => {
         if (!lesson.title.trim()) {
-            alert("Title is required");
+            showAlert("warning", "Title is required");
             return;
         }
 
-        const validCards = cards.filter((c) => c.primary?.trim() && c.meaning.trim());
+        const invalidCards = cards.filter((c) => !c.primary?.trim() || !c.meaning.trim());
+        if (invalidCards.length > 0) {
+            showAlert(
+                "warning",
+                "All cards must have a Primary word and a Meaning. Please check cards with missing information.",
+            );
+            return;
+        }
+
+        const validCards = cards;
 
         setSaving(true);
         try {
@@ -300,7 +311,7 @@ export const LessonBuilder = ({
                 <div className="space-y-4 rounded-[2rem] border-2 border-b-8 border-gray-200 bg-white p-6 shadow-sm">
                     <input
                         type="text"
-                        placeholder="Deck Title (e.g. JLPT N5 Verbs)"
+                        placeholder="Deck Title ✱ (e.g. JLPT N5 Verbs)"
                         className="w-full border-b-2 border-transparent bg-transparent pb-2 text-3xl font-black text-[#3c3c3c] placeholder-gray-300 transition-colors outline-none focus:border-[var(--theme-color)]"
                         value={lesson.title}
                         onChange={(e) => setLesson({ ...lesson, title: e.target.value })}
@@ -631,7 +642,7 @@ export const LessonBuilder = ({
                                         ))}
                                         <div className="md:col-span-2">
                                             <label className="mb-1 block text-[10px] font-black tracking-widest text-[#afafaf] uppercase">
-                                                Meaning
+                                                Meaning ✱
                                             </label>
                                             <input
                                                 className="w-full border-b-2 border-gray-100 bg-transparent pb-2 text-xl font-bold text-[#3c3c3c] transition-colors outline-none focus:border-[var(--theme-color)]"
@@ -742,6 +753,19 @@ export const LessonBuilder = ({
                                     </div>
                                 </div>
                             ))}
+
+                            {cards.length > 0 && (
+                                <div className="pt-4 pb-8">
+                                    <button
+                                        onClick={() => setCards([...cards, makeCard()])}
+                                        disabled={saving || cardsLoading}
+                                        className="flex w-full items-center justify-center gap-2 rounded-[1.5rem] border-2 border-b-4 border-gray-200 bg-white py-4 text-sm font-black transition-all hover:bg-gray-50 active:translate-y-0.5 active:border-b-2"
+                                        style={{ color: themeHex }}
+                                    >
+                                        <Plus size={20} strokeWidth={3} /> Add Another Card
+                                    </button>
+                                </div>
+                            )}
 
                             {!cardsLoading && cards.length === 0 && (
                                 <div
