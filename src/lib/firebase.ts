@@ -1,7 +1,11 @@
 import { getAI, GoogleAIBackend } from "firebase/ai";
 import { getApps, initializeApp } from "firebase/app";
 import { getAuth, GoogleAuthProvider } from "firebase/auth";
-import { getFirestore } from "firebase/firestore";
+import {
+    initializeFirestore,
+    persistentLocalCache,
+    persistentSingleTabManager,
+} from "firebase/firestore";
 import { getStorage } from "firebase/storage";
 
 const firebaseConfig = {
@@ -16,8 +20,28 @@ const firebaseConfig = {
 /** Singleton Firebase app — safe to import from any module */
 const app = getApps().length ? getApps()[0] : initializeApp(firebaseConfig);
 
+/**
+ * Firestore with persistent local cache (IndexedDB).
+ *
+ * Why this matters for real-time notifications:
+ * - The default Firestore instance uses an in-memory cache. When the tab
+ *   loses focus or the network briefly drops, the WebSocket reconnects and
+ *   re-fetches everything from the server — causing a visible delay.
+ * - persistentLocalCache keeps a local IndexedDB copy. onSnapshot listeners
+ *   fire immediately from cache, then again when the server confirms the
+ *   latest state. Recipients see new notifications the instant the tab
+ *   regains focus, with no round-trip delay.
+ * - persistentSingleTabManager is correct for a standard web app (one tab
+ *   owns the IndexedDB lock). Use persistentMultipleTabManager if you need
+ *   multi-tab sync.
+ */
+export const db = initializeFirestore(app, {
+    localCache: persistentLocalCache({
+        tabManager: persistentSingleTabManager({ forceOwnership: false }),
+    }),
+});
+
 export const auth = getAuth(app);
-export const db = getFirestore(app);
 export const storage = getStorage(app);
 export const googleProvider = new GoogleAuthProvider();
 export const APP_ID = process.env.NEXT_PUBLIC_APP_ID ?? "kana-nihongo-master";

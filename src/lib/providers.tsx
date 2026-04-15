@@ -1,5 +1,6 @@
 "use client";
 
+import { NotificationsProvider } from "@/features/notifications";
 import { useFirebaseAuth } from "@/features/user/hooks";
 import { AlertProvider } from "@/shared/providers";
 import { useAppStore } from "@/store";
@@ -30,7 +31,9 @@ export function Providers({ children }: { children: React.ReactNode }) {
     useFirebaseAuth();
     return (
         <AlertProvider>
-            <AuthGate>{children}</AuthGate>
+            <NotificationsProvider>
+                <AuthGate>{children}</AuthGate>
+            </NotificationsProvider>
         </AlertProvider>
     );
 }

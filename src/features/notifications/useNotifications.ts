@@ -1,39 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
-
-import { useAppStore } from "@/store";
-import { subscribeNotifications } from "./notification.service";
-
-import type { AppNotification } from "./types";
-
-export function useNotifications() {
-    const { user } = useAppStore();
-    const [notifications, setNotifications] = useState<AppNotification[]>([]);
-    const [loading, setLoading] = useState(true);
-
-    useEffect(() => {
-        if (!user) {
-            const t = setTimeout(() => {
-                setNotifications([]);
-                setLoading(false);
-            }, 0);
-            return () => clearTimeout(t);
-        }
-
-        const unsub = subscribeNotifications(
-            user.uid,
-            (updated) => {
-                setNotifications(updated);
-                setLoading(false);
-            },
-            () => setLoading(false),
-        );
-
-        return () => unsub();
-    }, [user?.uid]);
-
-    const unreadCount = notifications.filter((n) => !n.read).length;
-
-    return { notifications, loading, unreadCount };
-}
+/**
+ * Re-exports useNotifications from the context so all existing call sites
+ * (BottomNav, NotificationsPage, etc.) continue to work without any changes.
+ *
+ * The actual subscription now lives in NotificationsContext — one listener
+ * for the entire session, shared by every consumer.
+ */
+export { useNotifications } from "./NotificationsContext";
+export type { UseNotificationsResult } from "./NotificationsContext";
