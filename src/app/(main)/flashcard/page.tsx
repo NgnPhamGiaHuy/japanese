@@ -1,9 +1,7 @@
 /**
  * @file FlashcardIndexPage
- * Flashcard dashboard with three sections:
- * 1. Your Decks — owned by the current user
- * 2. Shared With Me — decks others have explicitly invited the user to
- * 3. Discover — globally public decks ordered by popularity
+ * The main dashboard for the Flashcard feature.
+ * Shows personal decks, high scores, and quick-action buttons.
  */
 
 "use client";
@@ -12,26 +10,9 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
-import {
-    BookOpen,
-    Copy,
-    Edit2,
-    Gamepad2,
-    Plus,
-    RefreshCw,
-    Share2,
-    Trash2,
-    Zap,
-} from "lucide-react";
+import { BookOpen, Edit2, Gamepad2, Plus, RefreshCw, Share2, Trash2, Zap } from "lucide-react";
 
-import {
-    Lesson,
-    OwnerBadge,
-    ShareModal,
-    useLessons,
-    usePublicLessons,
-    useSharedWithMe,
-} from "@/features/flashcard";
+import { Lesson, ShareModal, useLessons } from "@/features/flashcard";
 import {
     GameStatEntry,
     matchGameMode,
@@ -46,68 +27,29 @@ import { CARD_BASE, SPACING } from "@/shared/constants";
 import { hexToThemeColor } from "@/shared/utils";
 import { useAppStore } from "@/store";
 
+/**
+ * Flashcard Dashboard View
+ *
+ * @remarks
+ * Orchestrates:
+ * 1. Fetching personal lessons (decks) via `useLessons`.
+ * 2. Real-time subscription to game stats (high scores) for the deck badges.
+ * 3. Share flow management via `ShareModal`.
+ */
 export default function FlashcardIndexPage() {
-    const {
-        lessons,
-        loading,
-        error,
-        deleteLesson,
-        updateLessonRoles,
-        updateVisibility,
-        saveFullLesson,
-    } = useLessons();
-    const {
-        lessons: sharedLessons,
-        loading: sharedLoading,
-        error: sharedError,
-    } = useSharedWithMe();
-    const {
-        lessons: publicLessons,
-        loading: publicLoading,
-        error: publicError,
-    } = usePublicLessons(20);
+    const { lessons, loading, error, deleteLesson, shareLesson, updateLessonRoles } = useLessons();
     const { user } = useAppStore();
     const router = useRouter();
 
+    /** Track high scores for each personal deck to display badges/tiers */
     const [gameStats, setGameStats] = useState<Record<string, GameStatEntry>>({});
-    const [sharingLesson, setSharingLesson] = useState<Lesson | null>(null);
-    const [cloningId, setCloningId] = useState<string | null>(null);
 
     useEffect(() => {
         if (!user) return;
         return subscribeGameStats(user.uid, setGameStats);
     }, [user]);
 
-    const handleClone = async (lesson: Lesson) => {
-        if (!user) return;
-        setCloningId(lesson.id);
-        try {
-            const { getSharedLesson, buildShareId, incrementCloneCount } =
-                await import("@/features/flashcard");
-            const shareId = buildShareId(lesson.userId!, lesson.id);
-            const result = await getSharedLesson(shareId, user.uid, user);
-            if (!result) return;
-            await saveFullLesson(
-                {
-                    ...result.lesson,
-                    id: "",
-                    userId: user.uid,
-                    sourceLessonId: lesson.id,
-                    sourceUserId: lesson.userId,
-                    roles: { [user.uid]: "owner" },
-                    collaborators: [user.uid],
-                    visibility: "private",
-                    isIndexed: false,
-                    cloneCount: 0,
-                },
-                result.cards,
-                true,
-            );
-            await incrementCloneCount(lesson.userId!, lesson.id);
-        } finally {
-            setCloningId(null);
-        }
-    };
+    const [sharingLesson, setSharingLesson] = useState<Lesson | null>(null);
 
     return (
         <div className="min-h-[100dvh] bg-[#F7F7F8] pb-28">
@@ -126,15 +68,66 @@ export default function FlashcardIndexPage() {
                 }
             />
 
-            <div className={`${SPACING.pagePadding} mx-auto max-w-2xl space-y-10 pt-6`}>
-                {/* ── Your Decks ── */}
-                <DeckSection
-                    title="Your Decks"
-                    loading={loading}
-                    error={error}
-                    empty={!loading && !error && lessons.length === 0}
-                    emptyMessage="Create your first vocabulary deck to get started!"
-                    emptyAction={
+            <div className={`${SPACING.pagePadding} mx-auto max-w-2xl pt-6`}>
+                {/* ── Error state ── */}
+                {error && (
+                    <div className="mb-6 flex items-center justify-between rounded-2xl border-2 border-[#ea2b2b]/30 bg-[#ffdfe0] px-5 py-4">
+                        <p className="text-sm font-bold text-[#ea2b2b]">{error}</p>
+                        <button
+                            onClick={() => window.location.reload()}
+                            className="ml-4 flex items-center gap-1 text-xs font-black text-[#ea2b2b] hover:underline"
+                        >
+                            <RefreshCw size={14} strokeWidth={3} /> Retry
+                        </button>
+                    </div>
+                )}
+
+                {/* ── Loading skeleton ── */}
+                {loading && (
+                    <div className="space-y-4">
+                        {[1, 2, 3].map((i) => (
+                            <div
+                                key={i}
+                                className="animate-pulse rounded-[2rem] border-2 border-b-4 border-gray-200 bg-white p-6 shadow-sm"
+                            >
+                                <div className="mb-4 flex items-start justify-between">
+                                    <div className="flex-1 space-y-2 pr-4">
+                                        <div className="h-5 w-48 rounded-lg bg-gray-200" />
+                                        <div className="h-3 w-64 rounded-lg bg-gray-100" />
+                                        <div className="flex gap-2 pt-1">
+                                            <div className="h-5 w-12 rounded-lg bg-gray-100" />
+                                            <div className="h-5 w-16 rounded-lg bg-gray-100" />
+                                        </div>
+                                    </div>
+                                    <div className="h-14 w-14 rounded-2xl bg-gray-100" />
+                                </div>
+                                <div className="flex flex-col gap-3 sm:flex-row sm:gap-2">
+                                    <div className="flex flex-1 gap-2">
+                                        <div className="h-10 flex-1 rounded-xl bg-gray-100" />
+                                        <div className="h-10 flex-1 rounded-xl bg-gray-100" />
+                                        <div className="h-10 flex-1 rounded-xl bg-gray-100" />
+                                    </div>
+                                    <div className="flex justify-around gap-2 border-t-2 border-gray-50 pt-3 sm:justify-end sm:border-t-0 sm:pt-0">
+                                        <div className="h-10 w-10 flex-1 rounded-xl bg-gray-100 sm:flex-none" />
+                                        <div className="h-10 w-10 flex-1 rounded-xl bg-gray-100 sm:flex-none" />
+                                        <div className="h-10 w-10 flex-1 rounded-xl bg-gray-100 sm:flex-none" />
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                )}
+
+                {/* ── Empty state ── */}
+                {!loading && !error && lessons.length === 0 && (
+                    <div className="py-20 text-center">
+                        <div className="mx-auto mb-6 flex h-24 w-24 -rotate-6 items-center justify-center rounded-[2rem] border-b-8 border-[#b65ce8] bg-[#ce82ff] text-white shadow-sm">
+                            <BookOpen size={48} strokeWidth={3} />
+                        </div>
+                        <h2 className="mb-2 text-2xl font-black text-[#3c3c3c]">No decks yet</h2>
+                        <p className="mb-8 font-bold text-[#afafaf]">
+                            Create your first vocabulary deck to get started!
+                        </p>
                         <Button
                             variant="primary"
                             color="purple"
@@ -144,83 +137,26 @@ export default function FlashcardIndexPage() {
                         >
                             Create Deck
                         </Button>
-                    }
-                >
-                    {lessons.map((lesson) => (
-                        <DeckCard
-                            key={lesson.id}
-                            lesson={lesson}
-                            matchStats={gameStats[matchGameMode(lesson.id)]}
-                            speedStats={gameStats[speedGameMode(lesson.id)]}
-                            onDelete={async () => {
-                                if (confirm("Delete this deck?")) await deleteLesson(lesson.id);
-                            }}
-                            onShare={() => setSharingLesson(lesson)}
-                            badge={
-                                lesson.visibility === "public"
-                                    ? { label: "Public", color: "#58cc02" }
-                                    : lesson.visibility === "unlisted"
-                                      ? { label: "Unlisted", color: "#ff9600" }
-                                      : undefined
-                            }
-                        />
-                    ))}
-                </DeckSection>
+                    </div>
+                )}
 
-                {/* ── Shared With Me ── */}
-                <DeckSection
-                    title="Shared With Me"
-                    loading={sharedLoading}
-                    error={sharedError}
-                    empty={!sharedLoading && !sharedError && sharedLessons.length === 0}
-                    emptyMessage="No one has shared a deck with you yet."
-                >
-                    {sharedLessons.map((lesson) => {
-                        const role =
-                            lesson.roles?.[user?.uid ?? ""] ?? lesson.publicRole ?? "viewer";
-                        const shareHref = `/flashcard/shared/${buildShareIdClient(lesson)}`;
-                        return (
+                {/* ── Lesson list ── */}
+                {!loading && !error && lessons.length > 0 && (
+                    <div className="space-y-4">
+                        {lessons.map((lesson) => (
                             <DeckCard
-                                key={`${lesson.userId}-${lesson.id}`}
+                                key={lesson.id}
                                 lesson={lesson}
-                                viewHref={shareHref}
-                                showOwner
-                                badge={{
-                                    label: role.charAt(0).toUpperCase() + role.slice(1),
-                                    color: "#1cb0f6",
+                                matchStats={gameStats[matchGameMode(lesson.id)]}
+                                speedStats={gameStats[speedGameMode(lesson.id)]}
+                                onDelete={async () => {
+                                    if (confirm("Delete this deck?")) await deleteLesson(lesson.id);
                                 }}
-                                onClone={
-                                    cloningId === lesson.id ? undefined : () => handleClone(lesson)
-                                }
-                                cloningId={cloningId}
+                                onShare={() => setSharingLesson(lesson)}
                             />
-                        );
-                    })}
-                </DeckSection>
-
-                {/* ── Discover ── */}
-                <DeckSection
-                    title="Discover Decks"
-                    loading={publicLoading}
-                    error={publicError}
-                    empty={!publicLoading && !publicError && publicLessons.length === 0}
-                    emptyMessage="No public decks available yet."
-                >
-                    {publicLessons.map((lesson) => (
-                        <DeckCard
-                            key={`public-${lesson.userId}-${lesson.id}`}
-                            lesson={lesson}
-                            viewHref={`/flashcard/shared/${buildShareIdClient(lesson)}`}
-                            showOwner
-                            badge={{ label: "Public", color: "#58cc02" }}
-                            onClone={
-                                cloningId === lesson.id ? undefined : () => handleClone(lesson)
-                            }
-                            cloningId={cloningId}
-                            readOnly
-                        />
-                    ))}
-                </DeckSection>
+                        ))}
+                    </div>
+                )}
             </div>
 
             {sharingLesson &&
@@ -230,8 +166,8 @@ export default function FlashcardIndexPage() {
                     return (
                         <ShareModal
                             lesson={liveLesson}
-                            onShareLink={async (visibility, publicRole) => {
-                                await updateVisibility(liveLesson.id, visibility, publicRole);
+                            onShareLink={async (allowLinkAccess, publicRole) => {
+                                await shareLesson(liveLesson.id, allowLinkAccess, publicRole);
                             }}
                             onUpdateRoles={async (roles, collabs) => {
                                 await updateLessonRoles(liveLesson.id, roles, collabs);
@@ -244,78 +180,10 @@ export default function FlashcardIndexPage() {
     );
 }
 
-// ─── DeckSection ──────────────────────────────────────────────────────────────
-
-function DeckSection({
-    title,
-    loading,
-    error,
-    empty,
-    emptyMessage,
-    emptyAction,
-    children,
-}: {
-    title: string;
-    loading: boolean;
-    error: string | null;
-    empty: boolean;
-    emptyMessage: string;
-    emptyAction?: React.ReactNode;
-    children: React.ReactNode;
-}) {
-    return (
-        <section>
-            <h2 className="mb-4 text-lg font-black text-[#3c3c3c]">{title}</h2>
-
-            {error && (
-                <div className="mb-4 flex items-center justify-between rounded-2xl border-2 border-[#ea2b2b]/30 bg-[#ffdfe0] px-5 py-4">
-                    <p className="text-sm font-bold text-[#ea2b2b]">{error}</p>
-                    <button
-                        onClick={() => window.location.reload()}
-                        className="ml-4 flex items-center gap-1 text-xs font-black text-[#ea2b2b] hover:underline"
-                    >
-                        <RefreshCw size={14} strokeWidth={3} /> Retry
-                    </button>
-                </div>
-            )}
-
-            {loading && (
-                <div className="space-y-4">
-                    {[1, 2].map((i) => (
-                        <div
-                            key={i}
-                            className="animate-pulse rounded-[2rem] border-2 border-b-4 border-gray-200 bg-white p-6 shadow-sm"
-                        >
-                            <div className="mb-4 flex items-start justify-between">
-                                <div className="flex-1 space-y-2 pr-4">
-                                    <div className="h-5 w-48 rounded-lg bg-gray-200" />
-                                    <div className="h-3 w-64 rounded-lg bg-gray-100" />
-                                </div>
-                                <div className="h-14 w-14 rounded-2xl bg-gray-100" />
-                            </div>
-                            <div className="flex gap-2">
-                                <div className="h-10 flex-1 rounded-xl bg-gray-100" />
-                                <div className="h-10 flex-1 rounded-xl bg-gray-100" />
-                            </div>
-                        </div>
-                    ))}
-                </div>
-            )}
-
-            {empty && !loading && (
-                <div className="py-10 text-center">
-                    <p className="mb-4 font-bold text-[#afafaf]">{emptyMessage}</p>
-                    {emptyAction}
-                </div>
-            )}
-
-            {!loading && !error && !empty && <div className="space-y-4">{children}</div>}
-        </section>
-    );
-}
-
-// ─── TierBadge ────────────────────────────────────────────────────────────────
-
+/**
+ * Small visual tier indicator based on score.
+ * Shows emoji + specific theme colors (Gold, Platinum, etc).
+ */
 function TierBadge({ score, className = "" }: { score: number; className?: string }) {
     const tier = scoreToTier(score);
     const info = TIER_INFO[tier];
@@ -333,35 +201,27 @@ function TierBadge({ score, className = "" }: { score: number; className?: strin
     );
 }
 
-// ─── DeckCard ─────────────────────────────────────────────────────────────────
-
+/**
+ * Individual Deck Entry on Dashboard
+ *
+ * @remarks
+ * Displays deck metadata (title, tags, count) and high score badges.
+ * Provides entry points to Study, Speed Quiz, and Match game.
+ */
 function DeckCard({
     lesson,
     matchStats,
     speedStats,
     onDelete,
     onShare,
-    onClone,
-    cloningId,
-    badge,
-    readOnly = false,
-    viewHref,
-    showOwner = false,
 }: {
     lesson: Lesson;
     matchStats?: GameStatEntry;
     speedStats?: GameStatEntry;
-    onDelete?: () => void;
-    onShare?: () => void;
-    onClone?: () => void;
-    cloningId?: string | null;
-    badge?: { label: string; color: string };
-    readOnly?: boolean;
-    viewHref?: string;
-    showOwner?: boolean;
+    onDelete: () => void;
+    onShare: () => void;
 }) {
     const themeColor = lesson.themeColor || "#1cb0f6";
-    const isCloning = cloningId === lesson.id;
 
     return (
         <div
@@ -369,23 +229,13 @@ function DeckCard({
         >
             <div className="mb-4 flex items-start justify-between">
                 <div className="flex-1 pr-4">
-                    <div className="flex items-center gap-2">
-                        <h3 className="text-xl font-black text-[#3c3c3c]">{lesson.title}</h3>
-                        {badge && (
-                            <span
-                                className="rounded-lg px-2 py-0.5 text-[10px] font-black tracking-wider uppercase"
-                                style={{ color: badge.color, backgroundColor: `${badge.color}20` }}
-                            >
-                                {badge.label}
-                            </span>
-                        )}
-                    </div>
+                    <h3 className="text-xl font-black text-[#3c3c3c]">{lesson.title}</h3>
                     {lesson.description && (
                         <p className="mt-1 line-clamp-2 text-sm font-bold text-[#afafaf]">
                             {lesson.description}
                         </p>
                     )}
-                    {lesson.tags?.length > 0 && (
+                    {lesson.tags.length > 0 && (
                         <div className="mt-2 flex flex-wrap gap-2">
                             {lesson.tags.map((tag) => (
                                 <span
@@ -399,14 +249,6 @@ function DeckCard({
                                     {tag}
                                 </span>
                             ))}
-                        </div>
-                    )}
-                    {showOwner && (
-                        <div className="mt-2">
-                            <OwnerBadge
-                                displayName={lesson.owner?.displayName}
-                                photoURL={lesson.owner?.photoURL}
-                            />
                         </div>
                     )}
                 </div>
@@ -425,7 +267,7 @@ function DeckCard({
 
             <div className="mt-2 flex flex-col gap-3 sm:mt-0 sm:flex-row sm:gap-2">
                 <div className="flex flex-1 gap-2">
-                    <Link href={viewHref ?? `/flashcard/${lesson.id}`} className="flex-1">
+                    <Link href={`/flashcard/${lesson.id}`} className="flex-1">
                         <Button
                             variant="primary"
                             color={hexToThemeColor(themeColor)}
@@ -436,108 +278,81 @@ function DeckCard({
                         </Button>
                     </Link>
 
-                    {!readOnly && (
-                        <>
-                            <div className="relative flex-1">
-                                {speedStats && (
-                                    <TierBadge
-                                        score={speedStats.bestScore}
-                                        className="absolute -top-2 left-1/2 z-10 -translate-x-1/2"
-                                    />
-                                )}
-                                <Link href={`/flashcard/${lesson.id}/speed`} className="block">
-                                    <Button
-                                        variant="secondary"
-                                        color="orange"
-                                        icon={Zap}
-                                        className="w-full flex-col gap-1 px-1 py-2 text-[10px] md:flex-row md:gap-2 md:px-2 md:py-3 md:text-sm"
-                                    >
-                                        <span className="truncate">Speed</span>
-                                    </Button>
-                                </Link>
-                            </div>
+                    {/* Speed button with tier badge */}
+                    <div className="relative flex-1">
+                        {speedStats && (
+                            <TierBadge
+                                score={speedStats.bestScore}
+                                className="absolute -top-2 left-1/2 z-10 -translate-x-1/2"
+                            />
+                        )}
+                        <Link href={`/flashcard/${lesson.id}/speed`} className="block">
+                            <Button
+                                variant="secondary"
+                                color="orange"
+                                icon={Zap}
+                                className="w-full flex-col gap-1 px-1 py-2 text-[10px] md:flex-row md:gap-2 md:px-2 md:py-3 md:text-sm"
+                            >
+                                <span className="truncate">Speed</span>
+                            </Button>
+                        </Link>
+                    </div>
 
-                            <div className="relative flex-1">
-                                {matchStats && (
-                                    <TierBadge
-                                        score={matchStats.bestScore}
-                                        className="absolute -top-2 left-1/2 z-10 -translate-x-1/2"
-                                    />
-                                )}
-                                <Link href={`/flashcard/${lesson.id}/match`} className="block">
-                                    <Button
-                                        variant="secondary"
-                                        color="purple"
-                                        icon={Gamepad2}
-                                        className="w-full flex-col gap-1 px-1 py-2 text-[10px] md:flex-row md:gap-2 md:px-2 md:py-3 md:text-sm"
-                                    >
-                                        <span className="truncate">Match</span>
-                                    </Button>
-                                </Link>
-                            </div>
-                        </>
-                    )}
+                    {/* Match button with tier badge */}
+                    <div className="relative flex-1">
+                        {matchStats && (
+                            <TierBadge
+                                score={matchStats.bestScore}
+                                className="absolute -top-2 left-1/2 z-10 -translate-x-1/2"
+                            />
+                        )}
+                        <Link href={`/flashcard/${lesson.id}/match`} className="block">
+                            <Button
+                                variant="secondary"
+                                color="purple"
+                                icon={Gamepad2}
+                                className="w-full flex-col gap-1 px-1 py-2 text-[10px] md:flex-row md:gap-2 md:px-2 md:py-3 md:text-sm"
+                            >
+                                <span className="truncate">Match</span>
+                            </Button>
+                        </Link>
+                    </div>
                 </div>
 
                 <div className="flex justify-around gap-2 border-t-2 border-gray-100 pt-3 sm:justify-end sm:border-t-0 sm:pt-0">
-                    {onClone && (
-                        <button
-                            onClick={onClone}
-                            disabled={isCloning}
-                            className="flex flex-1 items-center justify-center rounded-xl p-3 text-gray-300 transition-colors hover:bg-[#ebf8e6] hover:text-[#58cc02] disabled:opacity-50 sm:flex-none"
-                            title="Duplicate deck"
-                        >
-                            <Copy size={20} strokeWidth={2.5} />
-                        </button>
-                    )}
-                    {onShare && (
-                        <button
-                            onClick={onShare}
-                            className="flex flex-1 items-center justify-center rounded-xl p-3 text-gray-300 transition-colors hover:bg-[#ebf8e6] hover:text-[#58cc02] sm:flex-none"
-                            title="Share deck"
-                        >
-                            <Share2 size={20} strokeWidth={2.5} />
-                        </button>
-                    )}
-                    {!readOnly && onDelete && (
-                        <>
-                            <Link
-                                href={`/flashcard/${lesson.id}/edit`}
-                                className="flex flex-1 items-center justify-center rounded-xl p-3 text-gray-300 transition-colors sm:flex-none"
-                                onMouseEnter={(e) => {
-                                    (e.currentTarget as HTMLElement).style.backgroundColor =
-                                        `${themeColor}20`;
-                                    (e.currentTarget as HTMLElement).style.color = themeColor;
-                                }}
-                                onMouseLeave={(e) => {
-                                    (e.currentTarget as HTMLElement).style.backgroundColor =
-                                        "transparent";
-                                    (e.currentTarget as HTMLElement).style.color = "";
-                                }}
-                                title="Edit deck"
-                            >
-                                <Edit2 size={20} strokeWidth={2.5} />
-                            </Link>
-                            <button
-                                onClick={onDelete}
-                                className="flex flex-1 items-center justify-center rounded-xl p-3 text-gray-300 transition-colors hover:bg-[#ffdfe0] hover:text-[#ea2b2b] sm:flex-none"
-                                title="Delete deck"
-                            >
-                                <Trash2 size={20} strokeWidth={2.5} />
-                            </button>
-                        </>
-                    )}
+                    <button
+                        onClick={onShare}
+                        className="flex flex-1 items-center justify-center rounded-xl p-3 text-gray-300 transition-colors hover:bg-[#ebf8e6] hover:text-[#58cc02] sm:flex-none"
+                        title="Share deck"
+                    >
+                        <Share2 size={20} strokeWidth={2.5} />
+                    </button>
+                    <Link
+                        href={`/flashcard/${lesson.id}/edit`}
+                        className="flex flex-1 items-center justify-center rounded-xl p-3 text-gray-300 transition-colors sm:flex-none"
+                        style={{ color: undefined }}
+                        onMouseEnter={(e) => {
+                            (e.currentTarget as HTMLElement).style.backgroundColor =
+                                `${themeColor}20`;
+                            (e.currentTarget as HTMLElement).style.color = themeColor;
+                        }}
+                        onMouseLeave={(e) => {
+                            (e.currentTarget as HTMLElement).style.backgroundColor = "transparent";
+                            (e.currentTarget as HTMLElement).style.color = "";
+                        }}
+                        title="Edit deck"
+                    >
+                        <Edit2 size={20} strokeWidth={2.5} />
+                    </Link>
+                    <button
+                        onClick={onDelete}
+                        className="flex flex-1 items-center justify-center rounded-xl p-3 text-gray-300 transition-colors hover:bg-[#ffdfe0] hover:text-[#ea2b2b] sm:flex-none"
+                        title="Delete deck"
+                    >
+                        <Trash2 size={20} strokeWidth={2.5} />
+                    </button>
                 </div>
             </div>
         </div>
     );
-}
-
-// ─── Helpers ──────────────────────────────────────────────────────────────────
-
-/** Client-side shareId builder (mirrors buildShareId from service) */
-function buildShareIdClient(lesson: Lesson): string {
-    if (!lesson.userId) return lesson.id;
-    const raw = btoa(`${lesson.userId}:${lesson.id}`);
-    return raw.replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
 }

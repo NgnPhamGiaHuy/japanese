@@ -61,11 +61,6 @@ export interface Lesson {
     id: string;
     /** UID of the primary deck owner */
     userId?: string;
-    /** Denormalized creator snapshot written at deck creation time. Never overwritten on updates. */
-    owner?: {
-        displayName: string | null;
-        photoURL: string | null;
-    };
     /** Human-readable title of the lesson */
     title: string;
     /** Short summary of deck contents */
@@ -118,21 +113,6 @@ export interface Lesson {
     isPublic?: boolean;
     /** URL-safe token representing the {ownerId}:{lessonId} pair */
     shareId?: string;
-    /**
-     * Three-tier visibility control for the deck.
-     * - `"private"`: Only the owner and explicit collaborators can access.
-     * - `"unlisted"`: Accessible via direct link (shareId) but not listed publicly.
-     * - `"public"`: Visible to anyone; eligible for Discover listing when `isIndexed` is true.
-     */
-    visibility?: "private" | "unlisted" | "public";
-    /**
-     * Controls whether this deck appears in Discover query results.
-     * Independent of `visibility` — a deck can be `"public"` but excluded from indexing,
-     * or `"unlisted"` and still indexed for specific use cases.
-     */
-    isIndexed?: boolean;
-    /** Number of times this deck has been cloned by other users */
-    cloneCount?: number;
 
     /** Brand color used for the deck's card components and UI highlights */
     themeColor?: string;
@@ -215,4 +195,32 @@ export interface Reply {
     createdAt: number;
     /** Update timestamp if edited */
     updatedAt?: number;
+}
+
+/**
+ * Contextual author metadata used for UI resolution (badges, permissions).
+ */
+export interface CommentAuthorInfo {
+    /** Foreign key to Auth system */
+    userId: string;
+    /** Resolved display name */
+    displayName?: string;
+    /** Fallback contact string */
+    email?: string;
+    /** Current calculated role for the current deck scope */
+    role: "owner" | "editor" | "commenter" | "viewer";
+    /** Avatar URL reference */
+    photoURL?: string;
+}
+
+/**
+ * Aggregate social metrics for a specific card.
+ */
+export interface CardCommentMeta {
+    /** Reference card */
+    cardId: string;
+    /** Total engagement count (Parents + Replies) */
+    totalComments: number;
+    /** Count of active threads requiring attention */
+    unresolvedCount: number;
 }

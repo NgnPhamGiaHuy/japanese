@@ -30,7 +30,7 @@ export default function FlashcardDetailPage({ params }: { params: Promise<{ id: 
     const { id } = use(params);
     const router = useRouter();
     const { user } = useAppStore();
-    const { lessons, loading: lessonsLoading, updateVisibility, updateLessonRoles } = useLessons();
+    const { lessons, loading: lessonsLoading, shareLesson, updateLessonRoles } = useLessons();
     const { cards, loading: cardsLoading } = useCards(id);
 
     const [sharingLesson, setSharingLesson] = useState(false);
@@ -80,7 +80,7 @@ export default function FlashcardDetailPage({ params }: { params: Promise<{ id: 
      * Uses the browser clipboard API.
      */
     const handleCopyLink = async () => {
-        if (!lesson.shareId && lesson.visibility === "private") return;
+        if (!lesson.shareId && !lesson.allowLinkAccess) return;
         const shareId = lesson.shareId || buildShareId(user.uid, id);
         await navigator.clipboard.writeText(
             `${window.location.origin}/flashcard/shared/${shareId}`,
@@ -97,9 +97,7 @@ export default function FlashcardDetailPage({ params }: { params: Promise<{ id: 
                 currentUserName={user.displayName}
                 currentUserEmail={user.email}
                 linkCopied={linkCopied}
-                onCopyLink={
-                    lesson.shareId || lesson.visibility !== "private" ? handleCopyLink : undefined
-                }
+                onCopyLink={lesson.shareId || lesson.allowLinkAccess ? handleCopyLink : undefined}
                 onManageAccess={() => setSharingLesson(true)}
                 onEdit={() => router.push(`/flashcard/${id}/edit`)}
             />
@@ -107,8 +105,8 @@ export default function FlashcardDetailPage({ params }: { params: Promise<{ id: 
             {sharingLesson && (
                 <ShareModal
                     lesson={lesson}
-                    onShareLink={async (visibility, publicRole) => {
-                        await updateVisibility(id, visibility, publicRole);
+                    onShareLink={async (allowLinkAccess, publicRole) => {
+                        await shareLesson(id, allowLinkAccess, publicRole);
                     }}
                     onUpdateRoles={async (roles, collabs) => {
                         await updateLessonRoles(id, roles, collabs);

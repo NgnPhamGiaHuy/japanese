@@ -1,64 +1,68 @@
 "use client";
 
-import { useCallback, useEffect, useReducer } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import { useAppStore } from "@/store";
 import * as LessonService from "../services";
 
 import type { FlashCard, Lesson } from "../types";
 
+/**
+ * Internal state for the lessons collection.
+ */
 interface LessonsState {
+    /** Array of lesson/deck metadata */
     lessons: Lesson[];
+    /** True during initial hydration from Firestore */
     loading: boolean;
+    /** Connectivity or permission error messages */
     error: string | null;
-}
-
-type Action =
-    | { type: "RESET"; hasUser: boolean }
-    | { type: "SET"; lessons: Lesson[] }
-    | { type: "ERROR"; error: string };
-
-function reducer(state: LessonsState, action: Action): LessonsState {
-    switch (action.type) {
-        case "RESET":
-            return { lessons: [], loading: action.hasUser, error: null };
-        case "SET":
-            return { lessons: action.lessons, loading: false, error: null };
-        case "ERROR":
-            return { ...state, loading: false, error: action.error };
-        default:
-            return state;
-    }
 }
 
 /**
  * Real-time hook for the current user's flashcard lessons/decks.
+ *
+ * @remarks
+ * Orchestration details:
+ * 1. **RT Sync**: Opens an `onSnapshot` listener on mount.
+ * 2. **Auto-Cleanup**: Automatically unsubscribes when the UID changes or component unmounts.
+ * 3. **Service-Only**: All write operations are delegated to `LessonService` to ensure
+ *    architectural purity and single-source-of-truth logic for complex operations (like atomic saves).
+ *
+ * @returns Metadata-level state and management actions for current user's lessons.
  */
 export function useLessons() {
     const user = useAppStore((s) => s.user);
 
-    const [state, dispatch] = useReducer(reducer, {
+    const [state, setState] = useState<LessonsState>({
         lessons: [],
         loading: !!user,
         error: null,
     });
 
-    useEffect(() => {
-        // Dispatch is not setState — dispatching from an effect is safe and
-        // does not trigger the react-hooks/set-state-in-effect lint rule.
-        dispatch({ type: "RESET", hasUser: !!user });
+    const [prevUserId, setPrevUserId] = useState(user?.uid);
+    if (user?.uid !== prevUserId) {
+        setPrevUserId(user?.uid);
+        setState({
+            lessons: [],
+            loading: !!user,
+            error: null,
+        });
+    }
 
+    useEffect(() => {
         if (!user) return;
 
         const unsubscribe = LessonService.subscribeLessons(
             user.uid,
-            (lessons) => dispatch({ type: "SET", lessons }),
+            (lessons) => setState({ lessons, loading: false, error: null }),
             (err) => {
                 console.error("[useLessons] Firestore error:", err);
-                dispatch({
-                    type: "ERROR",
+                setState((prev) => ({
+                    ...prev,
+                    loading: false,
                     error: "Could not load your lessons. Please check your connection and try again.",
-                });
+                }));
             },
         );
 
@@ -75,6 +79,10 @@ export function useLessons() {
         [user],
     );
 
+    /**
+     * Deletes a lesson and all its cards (including Storage images).
+     * Uses `deleteLessonWithCards` — never leaves orphaned cards.
+     */
     const deleteLesson = useCallback(
         async (id: string): Promise<void> => {
             if (!user) return;
@@ -83,32 +91,39 @@ export function useLessons() {
         [user],
     );
 
+    /**
+     * Saves a lesson + its full card set.  For existing lessons, a diff
+     * determines which cards to create / update / delete — no destructive
+     * full-replace.
+     */
     const saveFullLesson = useCallback(
         async (lesson: Lesson, cards: FlashCard[], isNew: boolean): Promise<void> => {
             if (!user) return;
             const targetUserId = lesson.userId || user.uid;
-            const lessonWithOwner: Lesson = isNew
-                ? {
-                      ...lesson,
-                      owner: lesson.owner ?? {
-                          displayName: user.displayName ?? null,
-                          photoURL: user.photoURL ?? null,
-                      },
-                  }
-                : lesson;
-            await LessonService.saveLessonWithCards(targetUserId, lessonWithOwner, cards, isNew);
+            await LessonService.saveLessonWithCards(targetUserId, lesson, cards, isNew);
         },
         [user],
     );
 
-    const updateVisibility = useCallback(
+    /**
+     * Toggles public sharing for a lesson.  Generates a stable shareId,
+     * writes `isPublic` and `publicRole` to Firestore.
+     *
+     * Delegates entirely to the service — no Firebase calls here.
+     */
+    const shareLesson = useCallback(
         async (
             lessonId: string,
-            visibility: Lesson["visibility"],
+            allowLinkAccess: boolean,
             publicRole: Lesson["publicRole"],
         ): Promise<void> => {
             if (!user) return;
-            await LessonService.updateLessonVisibility(user.uid, lessonId, visibility, publicRole);
+            await LessonService.shareLessonSettings(
+                user.uid,
+                lessonId,
+                allowLinkAccess,
+                publicRole,
+            );
         },
         [user],
     );
@@ -130,7 +145,7 @@ export function useLessons() {
         updateLesson,
         deleteLesson,
         saveFullLesson,
-        updateVisibility,
+        shareLesson,
         updateLessonRoles,
     };
 }

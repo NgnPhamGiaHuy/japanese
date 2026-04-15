@@ -10,14 +10,9 @@
 
 import {
     collection,
-    collectionGroup,
     doc,
-    getDoc,
     getDocs,
-    increment,
-    limit,
     onSnapshot,
-    orderBy,
     query,
     setDoc,
     updateDoc,
@@ -69,17 +64,8 @@ export function subscribeLessons(
         lessonsCol(userId),
         (snap) => {
             const lessons = snap.docs
-                .map((d) => normalizeOwner({ ...d.data(), id: d.id } as Lesson))
+                .map((d) => ({ ...d.data(), id: d.id }) as Lesson)
                 .sort((a, b) => b.createdAt - a.createdAt);
-
-            // Backfill owner for legacy docs — the write triggers a new snapshot automatically
-            snap.docs.forEach((d) => {
-                const data = d.data();
-                if (!data.owner && data.userId) {
-                    backfillLessonOwner(data.userId, d.id).catch(() => {});
-                }
-            });
-
             onUpdate(lessons);
         },
         onError,
@@ -88,116 +74,33 @@ export function subscribeLessons(
 
 // ─── Read operations ───────────────────────────────────────────────────────
 
-export function deriveVisibilityFields(visibility: Lesson["visibility"]): {
-    isIndexed: boolean;
-    allowLinkAccess: boolean;
-    isPublic: boolean;
-} {
-    switch (visibility) {
-        case "public":
-            return { isIndexed: true, allowLinkAccess: true, isPublic: true };
-        case "unlisted":
-            return { isIndexed: false, allowLinkAccess: true, isPublic: false };
-        case "private":
-        default:
-            return { isIndexed: false, allowLinkAccess: false, isPublic: false };
-    }
-}
-
-export async function updateLessonVisibility(
-    userId: string,
-    lessonId: string,
-    visibility: Lesson["visibility"],
-    publicRole: Lesson["publicRole"],
-): Promise<void> {
-    const shareId = buildShareId(userId, lessonId);
-    const derived = deriveVisibilityFields(visibility);
-    await setDoc(
-        lessonDoc(userId, lessonId),
-        { shareId, visibility, publicRole, ...derived },
-        { merge: true },
-    );
-}
-
-/**
- * Real-time listener for decks explicitly shared with the current user.
- * Queries the `lessons` collectionGroup for docs where `collaborators` contains
- * the user's UID but the user is NOT the owner.
- *
- * Requires a Firestore composite index on: collaborators (array-contains) + createdAt (desc)
- */
-export function subscribeSharedWithMe(
-    userId: string,
-    onUpdate: (lessons: Lesson[]) => void,
-    onError: (err: Error) => void,
-): Unsubscribe {
-    const q = query(
-        collectionGroup(db, "lessons"),
-        where("collaborators", "array-contains", userId),
-    );
-    return onSnapshot(
-        q,
-        (snap) => {
-            const lessons = snap.docs
-                .map((d) => normalizeOwner({ ...d.data(), id: d.id } as Lesson))
-                // Exclude decks the user owns
-                .filter((l) => l.userId !== userId)
-                .sort((a, b) => b.createdAt - a.createdAt);
-
-            // Backfill owner for legacy shared docs
-            snap.docs.forEach((d) => {
-                const data = d.data();
-                if (!data.owner && data.userId && data.userId !== userId) {
-                    backfillLessonOwner(data.userId, d.id).catch(() => {});
-                }
-            });
-
-            onUpdate(lessons);
-        },
-        onError,
-    );
-}
-
-/**
- * One-time fetch of globally public decks, ordered by cloneCount descending.
- * Used for the Discover section — no real-time listener needed.
- *
- * Requires a Firestore composite index on: isPublic (==) + cloneCount (desc)
- */
-export async function fetchPublicLessons(pageLimit = 20): Promise<Lesson[]> {
-    const q = query(
-        collectionGroup(db, "lessons"),
-        where("visibility", "==", "public"),
-        where("isIndexed", "==", true),
-        orderBy("cloneCount", "desc"),
-        limit(pageLimit),
-    );
-    const snap = await getDocs(q);
-    const lessons = snap.docs.map((d) => normalizeOwner({ ...d.data(), id: d.id } as Lesson));
-
-    // Backfill owner for legacy public docs (fire-and-forget)
-    snap.docs.forEach((d) => {
-        const data = d.data();
-        if (!data.owner && data.userId) {
-            backfillLessonOwner(data.userId, d.id).catch(() => {});
-        }
-    });
-
-    return lessons;
-}
-
-/**
- * Increments the cloneCount on a lesson when a user duplicates it.
- */
-export async function incrementCloneCount(ownerId: string, lessonId: string): Promise<void> {
-    await updateDoc(lessonDoc(ownerId, lessonId), { cloneCount: increment(1) });
-}
-
 // ─── Write operations ──────────────────────────────────────────────────────
 
 export async function updateLesson(userId: string, lesson: Lesson): Promise<void> {
     const { id, ...data } = lesson;
     await setDoc(lessonDoc(userId, id), data, { merge: true });
+}
+
+/**
+ * Updates link-based share settings for a lesson.
+ */
+export async function shareLessonSettings(
+    userId: string,
+    lessonId: string,
+    allowLinkAccess: boolean,
+    publicRole: Lesson["publicRole"],
+): Promise<void> {
+    const shareId = buildShareId(userId, lessonId);
+    await setDoc(
+        lessonDoc(userId, lessonId),
+        {
+            shareId,
+            allowLinkAccess,
+            publicRole,
+            isPublic: allowLinkAccess,
+        },
+        { merge: true },
+    );
 }
 
 /**
@@ -277,8 +180,6 @@ export async function saveLessonWithCards(
             roles: { [userId]: "owner" },
             collaborators: [userId],
             allowLinkAccess: false,
-            visibility: "private",
-            isIndexed: false,
         });
     } else {
         const { id: _id, ...lessonData } = lesson;
@@ -351,46 +252,6 @@ export async function saveLessonWithCards(
 /** Removes undefined values so Firestore doesn't receive them. */
 function omitUndefined<T extends Record<string, unknown>>(obj: T): T {
     return Object.fromEntries(Object.entries(obj).filter(([, v]) => v !== undefined)) as T;
-}
-
-/** Ensures every lesson has an owner field, defaulting to null values for legacy docs. */
-export function normalizeOwner(lesson: Lesson): Lesson {
-    return {
-        ...lesson,
-        owner: lesson.owner ?? { displayName: null, photoURL: null },
-    };
-}
-
-/**
- * Fetches a user's public profile snapshot.
- * Written at login time to artifacts/{APP_ID}/userProfiles/{uid}.
- */
-export async function getUserProfile(
-    uid: string,
-): Promise<{ displayName: string | null; photoURL: string | null } | null> {
-    const ref = doc(db, "artifacts", APP_ID, "userProfiles", uid);
-    const snap = await getDoc(ref);
-    if (!snap.exists()) return null;
-    const data = snap.data();
-    return {
-        displayName: data.displayName ?? null,
-        photoURL: data.photoURL ?? null,
-    };
-}
-
-/**
- * Backfills the `owner` field on a lesson document using the public profile.
- * Called when a lesson is fetched without an owner snapshot (legacy docs).
- * Fire-and-forget — never blocks the UI.
- */
-export async function backfillLessonOwner(
-    ownerId: string,
-    lessonId: string,
-): Promise<{ displayName: string | null; photoURL: string | null } | null> {
-    const profile = await getUserProfile(ownerId);
-    if (!profile) return null;
-    await setDoc(lessonDoc(ownerId, lessonId), { owner: profile }, { merge: true });
-    return profile;
 }
 
 /** Throws if any two cards share the same real (non-temp) ID. */

@@ -173,10 +173,6 @@ export default function FlashcardDetailLayout({
                             </p>
                         )}
 
-                        <p className="mt-2 text-sm font-bold text-[#afafaf]">
-                            by {lesson.owner?.displayName ?? "Unknown"}
-                        </p>
-
                         {lesson.tags?.length > 0 && (
                             <div className="mt-4 flex flex-wrap gap-2">
                                 {lesson.tags.map((tag) => (

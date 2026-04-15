@@ -14,4 +14,3 @@ export { default as MatchResultsView } from "./MatchResultsView";
 export { default as SpeedIntroView } from "./SpeedIntroView";
 export { default as SpeedPlayingView } from "./SpeedPlayingView";
 export { default as SpeedResultsView } from "./SpeedResultsView";
-export * from "./OwnerBadge";

@@ -8,7 +8,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 
-import { Check, ChevronDown, Copy, Globe2, Link, Lock, Mail, ShieldAlert, X } from "lucide-react";
+import { Check, ChevronDown, Copy, Globe2, Lock, Mail, ShieldAlert, X } from "lucide-react";
 
 import { buildShareId, inviteByEmail, revokeEmailInvite } from "@/features/flashcard/services";
 import { Button, CustomSelect } from "@/shared/components/ui";
@@ -36,11 +36,8 @@ const sharingOptions: SelectOption<Role>[] = [
 interface ShareModalProps {
     /** The deck being shared */
     lesson: Lesson;
-    /** Callback for updating visibility and default public role */
-    onShareLink: (
-        visibility: Lesson["visibility"],
-        publicRole: Lesson["publicRole"],
-    ) => Promise<void>;
+    /** Callback for toggling public link access and default public role */
+    onShareLink: (allowLinkAccess: boolean, publicRole: Lesson["publicRole"]) => Promise<void>;
     /** Callback for specific user role management */
     onUpdateRoles: (newRoles: Record<string, Role>, newCollaborators: string[]) => Promise<void>;
     /** Close logic */
@@ -52,7 +49,7 @@ interface ShareModalProps {
  *
  * @remarks
  * Orchestrates:
- * 1. **Public Access**: Toggling visibility (private/unlisted/public) and assigning a default role.
+ * 1. **Public Access**: Toggling "Anyone with the link" and assigning a default role.
  * 2. **Invite System**: Adding specific users by ID with explicit roles.
  * 3. **Role Management**: Updating or removing existing collaborator access.
  * 4. **Adaptive UI**: Rendered differently for owners (Manage) vs collaborators (View).
@@ -89,9 +86,8 @@ const ShareModal = ({ lesson, onShareLink, onUpdateRoles, onClose }: ShareModalP
     }, [lesson.userId, lesson.id]);
 
     // ── Local edit state ──────────────────────────────────────────────────
-    const [visibility, setVisibility] = useState<Lesson["visibility"]>(
-        lesson.visibility ??
-            (lesson.allowLinkAccess ? "unlisted" : lesson.isPublic ? "public" : "private"),
+    const [allowLinkAccess, setAllowLinkAccess] = useState<boolean>(
+        !!lesson.allowLinkAccess || !!lesson.isPublic,
     );
     const [publicRole, setPublicRole] = useState<Lesson["publicRole"]>(
         lesson.publicRole ?? "viewer",
@@ -104,19 +100,15 @@ const ShareModal = ({ lesson, onShareLink, onUpdateRoles, onClose }: ShareModalP
 
     // Sync when the lesson prop changes (for real-time consistency)
     useEffect(() => {
-        setVisibility(
-            lesson.visibility ??
-                (lesson.allowLinkAccess ? "unlisted" : lesson.isPublic ? "public" : "private"),
-        );
+        setAllowLinkAccess(!!lesson.allowLinkAccess || !!lesson.isPublic);
         setPublicRole(lesson.publicRole ?? "viewer");
         setRoles(lesson.roles || {});
     }, [lesson]);
 
     // ── UI state ──────────────────────────────────────────────────────
-    const [openVisibilityMenu, setOpenVisibilityMenu] = useState(false);
+    const [openPrivacyMenu, setOpenPrivacyMenu] = useState(false);
     const [copied, setCopied] = useState(false);
     const [saving, setSaving] = useState(false);
-    const [saveError, setSaveError] = useState<string | null>(null);
 
     const themeHex = lesson.themeColor || "#1cb0f6";
     const themeColorStr = hexToThemeColor(themeHex);
@@ -128,17 +120,15 @@ const ShareModal = ({ lesson, onShareLink, onUpdateRoles, onClose }: ShareModalP
         setTimeout(() => setCopied(false), 2000);
     };
 
-    /** Handles visibility change with optimistic rollback */
-    const handleVisibilityChange = async (next: Lesson["visibility"]) => {
-        const prev = visibility;
-        setVisibility(next);
-        setSaveError(null);
+    /** Handles the "Anyone with link" toggle */
+    const handleSaveLinkAccess = async (access: boolean) => {
+        setAllowLinkAccess(access);
         setSaving(true);
         try {
-            await onShareLink(next, publicRole);
-        } catch {
-            setVisibility(prev);
-            setSaveError("Failed to save. Please try again.");
+            await onShareLink(access, publicRole);
+        } catch (err) {
+            console.error("[ShareModal] handleSaveLinkAccess failed:", err);
+            setAllowLinkAccess(!access);
         } finally {
             setSaving(false);
         }
@@ -149,7 +139,7 @@ const ShareModal = ({ lesson, onShareLink, onUpdateRoles, onClose }: ShareModalP
         setPublicRole(role);
         setSaving(true);
         try {
-            await onShareLink(visibility, role);
+            await onShareLink(allowLinkAccess, role);
         } catch (err) {
             console.error("[ShareModal] handleSavePublicRole failed:", err);
         } finally {
@@ -238,45 +228,6 @@ const ShareModal = ({ lesson, onShareLink, onUpdateRoles, onClose }: ShareModalP
         delete newRoles[targetId];
         await commitRolesUpdate(newRoles);
     };
-
-    // ── Visibility helpers ────────────────────────────────────────────
-    const visibilityOptions: {
-        value: Lesson["visibility"];
-        label: string;
-        icon: React.ReactNode;
-        description: string;
-    }[] = [
-        {
-            value: "private",
-            label: "Private",
-            icon: <Lock className="text-gray-400" size={20} />,
-            description: "Only you and invited people can access this deck.",
-        },
-        {
-            value: "unlisted",
-            label: "Unlisted",
-            icon: <Link style={{ color: themeHex }} size={20} />,
-            description: "Anyone with the link can view. Not listed in Discover.",
-        },
-        {
-            value: "public",
-            label: "Public",
-            icon: <Globe2 style={{ color: themeHex }} size={20} />,
-            description: "Anyone can find and view this deck in Discover.",
-        },
-    ];
-
-    const currentVisibilityOption =
-        visibilityOptions.find((o) => o.value === visibility) ?? visibilityOptions[0];
-
-    const generalAccessIcon =
-        visibility === "private" ? (
-            <Lock className="text-gray-400" size={20} />
-        ) : visibility === "unlisted" ? (
-            <Link style={{ color: themeHex }} size={20} />
-        ) : (
-            <Globe2 style={{ color: themeHex }} size={20} />
-        );
 
     return (
         <div className="fixed inset-0 z-[100] flex items-center justify-center overflow-y-auto bg-black/40 p-4 backdrop-blur-sm">
@@ -466,76 +417,99 @@ const ShareModal = ({ lesson, onShareLink, onUpdateRoles, onClose }: ShareModalP
                             <div className="mb-6 flex flex-col gap-4 rounded-2xl border-2 border-gray-100 p-4">
                                 <div className="flex items-start gap-4">
                                     <div className="mt-1 flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gray-100">
-                                        {generalAccessIcon}
+                                        {allowLinkAccess ? (
+                                            <Globe2 style={{ color: themeHex }} size={20} />
+                                        ) : (
+                                            <Lock className="text-gray-400" size={20} />
+                                        )}
                                     </div>
 
                                     <div className="relative flex-1">
-                                        {/* Visibility picker */}
+                                        {/* Privacy picker */}
                                         <button
                                             className="flex w-fit items-center gap-2 rounded-lg py-1 pr-2 text-lg font-black text-[#3c3c3c] transition-colors hover:bg-gray-100"
-                                            onClick={() => setOpenVisibilityMenu((v) => !v)}
+                                            onClick={() => setOpenPrivacyMenu((v) => !v)}
                                             disabled={saving}
                                         >
-                                            {currentVisibilityOption.label}
+                                            {allowLinkAccess
+                                                ? "Anyone with the link"
+                                                : "Restricted"}
                                             <ChevronDown
                                                 size={20}
-                                                className={`text-gray-400 transition-transform ${openVisibilityMenu ? "rotate-180" : ""}`}
+                                                className={`text-gray-400 transition-transform ${openPrivacyMenu ? "rotate-180" : ""}`}
                                             />
                                         </button>
 
-                                        {openVisibilityMenu && (
+                                        {openPrivacyMenu && (
                                             <>
                                                 <div
                                                     className="fixed inset-0 z-40"
-                                                    onClick={() => setOpenVisibilityMenu(false)}
+                                                    onClick={() => setOpenPrivacyMenu(false)}
                                                 />
-                                                <div className="animate-in fade-in zoom-in-95 absolute top-10 left-0 z-50 w-72 overflow-hidden rounded-2xl border-2 border-gray-100 bg-white shadow-lg">
-                                                    {visibilityOptions.map((opt, idx) => (
-                                                        <button
-                                                            key={opt.value}
-                                                            className={`flex w-full items-center gap-3 p-4 text-left hover:bg-gray-50 ${idx < visibilityOptions.length - 1 ? "border-b-2 border-gray-50" : ""}`}
-                                                            onClick={() => {
-                                                                void handleVisibilityChange(
-                                                                    opt.value,
-                                                                );
-                                                                setOpenVisibilityMenu(false);
-                                                            }}
-                                                        >
-                                                            {opt.icon}
-                                                            <div className="flex-1">
-                                                                <div className="font-black text-[#3c3c3c]">
-                                                                    {opt.label}
-                                                                </div>
-                                                                <div className="text-xs font-bold text-gray-400">
-                                                                    {opt.description}
-                                                                </div>
+                                                <div className="animate-in fade-in zoom-in-95 absolute top-10 left-0 z-50 w-64 overflow-hidden rounded-2xl border-2 border-gray-100 bg-white shadow-lg">
+                                                    <button
+                                                        className="flex w-full items-center gap-3 border-b-2 border-gray-50 p-4 text-left hover:bg-gray-50"
+                                                        onClick={() => {
+                                                            void handleSaveLinkAccess(false);
+                                                            setOpenPrivacyMenu(false);
+                                                        }}
+                                                    >
+                                                        <Lock className="text-gray-400" size={20} />
+                                                        <div>
+                                                            <div className="font-black text-[#3c3c3c]">
+                                                                Restricted
                                                             </div>
-                                                            {visibility === opt.value && (
-                                                                <Check
-                                                                    style={{ color: themeHex }}
-                                                                    size={20}
-                                                                />
-                                                            )}
-                                                        </button>
-                                                    ))}
+                                                            <div className="text-xs font-bold text-gray-400">
+                                                                Only people with access can open
+                                                            </div>
+                                                        </div>
+                                                        {!allowLinkAccess && (
+                                                            <Check
+                                                                style={{ color: themeHex }}
+                                                                size={20}
+                                                            />
+                                                        )}
+                                                    </button>
+                                                    <button
+                                                        className="flex w-full items-center gap-3 p-4 text-left hover:bg-gray-50"
+                                                        onClick={() => {
+                                                            void handleSaveLinkAccess(true);
+                                                            setOpenPrivacyMenu(false);
+                                                        }}
+                                                    >
+                                                        <Globe2
+                                                            style={{ color: themeHex }}
+                                                            size={20}
+                                                        />
+                                                        <div>
+                                                            <div className="font-black text-[#3c3c3c]">
+                                                                Anyone with the link
+                                                            </div>
+                                                            <div className="text-xs font-bold text-gray-400">
+                                                                Anyone on the internet can view
+                                                            </div>
+                                                        </div>
+                                                        {allowLinkAccess && (
+                                                            <Check
+                                                                style={{ color: themeHex }}
+                                                                size={20}
+                                                            />
+                                                        )}
+                                                    </button>
                                                 </div>
                                             </>
                                         )}
 
                                         <p className="mt-1 text-sm font-bold text-[#afafaf]">
-                                            {currentVisibilityOption.description}
+                                            {allowLinkAccess
+                                                ? "Anyone on the internet with the link can view."
+                                                : "Only added people can open with the link."}
                                         </p>
-
-                                        {saveError && (
-                                            <p className="mt-1 text-xs font-bold text-red-500">
-                                                {saveError}
-                                            </p>
-                                        )}
                                     </div>
                                 </div>
 
-                                {/* Role picker (only when unlisted) */}
-                                {visibility === "unlisted" && (
+                                {/* Role picker (only when public) */}
+                                {allowLinkAccess && (
                                     <div className="relative ml-14 flex items-center justify-between border-t-2 border-gray-100 pt-3">
                                         <span className="text-sm font-bold text-gray-400">
                                             Role
@@ -605,28 +579,26 @@ const ShareModal = ({ lesson, onShareLink, onUpdateRoles, onClose }: ShareModalP
 
                     {/* Footer actions */}
                     <div className="flex shrink-0 items-center justify-between pt-2">
-                        {visibility !== "private" && (
-                            <Button
-                                variant="secondary"
-                                color={copied ? "green" : "gray"}
-                                icon={copied ? Check : Copy}
-                                onClick={handleCopy}
-                                className={`h-12 rounded-2xl border-2 px-6 text-sm font-bold transition-colors ${
-                                    copied
-                                        ? "border-[#58cc02] bg-[#f2fbf0] text-[#58cc02]"
-                                        : "border-gray-200 text-[#3c3c3c] hover:bg-gray-50"
-                                }`}
-                                disabled={saving}
-                            >
-                                {copied ? "Link copied" : "Copy link"}
-                            </Button>
-                        )}
+                        <Button
+                            variant="secondary"
+                            color={copied ? "green" : "gray"}
+                            icon={copied ? Check : Copy}
+                            onClick={handleCopy}
+                            className={`h-12 rounded-2xl border-2 px-6 text-sm font-bold transition-colors ${
+                                copied
+                                    ? "border-[#58cc02] bg-[#f2fbf0] text-[#58cc02]"
+                                    : "border-gray-200 text-[#3c3c3c] hover:bg-gray-50"
+                            }`}
+                            disabled={saving}
+                        >
+                            {copied ? "Link copied" : "Copy link"}
+                        </Button>
 
                         <Button
                             variant="primary"
                             color={themeColorStr}
                             onClick={onClose}
-                            className="ml-auto h-12 px-10 text-sm"
+                            className="h-12 px-10 text-sm"
                             disabled={saving}
                         >
                             Done
