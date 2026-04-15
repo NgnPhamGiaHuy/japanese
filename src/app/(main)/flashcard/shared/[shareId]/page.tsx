@@ -34,7 +34,7 @@ export default function SharedLessonPage({ params }: { params: Promise<{ shareId
     const { shareId } = use(params);
     const router = useRouter();
     const { user } = useAppStore();
-    const { saveFullLesson, shareLesson, updateLessonRoles } = useLessons();
+    const { saveFullLesson, updateVisibility, updateLessonRoles } = useLessons();
 
     const [result, setResult] = useState<SharedLessonResult | null>(null);
     const [status, setStatus] = useState<"loading" | "not_found" | "ready">("loading");
@@ -100,7 +100,12 @@ export default function SharedLessonPage({ params }: { params: Promise<{ shareId
         role = "owner";
     } else if (user && lesson.roles?.[user.uid]) {
         role = lesson.roles[user.uid] as DeckRole;
-    } else if (lesson.allowLinkAccess || lesson.isPublic) {
+    } else if (
+        lesson.visibility === "unlisted" ||
+        lesson.visibility === "public" ||
+        lesson.allowLinkAccess ||
+        lesson.isPublic
+    ) {
         role = (lesson.publicRole as DeckRole) || "viewer";
     }
 
@@ -128,8 +133,8 @@ export default function SharedLessonPage({ params }: { params: Promise<{ shareId
                 id: "",
                 userId: user.uid,
                 shareId: undefined,
-                allowLinkAccess: false,
-                isPublic: false,
+                visibility: "private" as const,
+                isIndexed: false,
                 roles: { [user.uid]: "owner" as const },
                 collaborators: [user.uid],
                 createdAt: Date.now(),
@@ -188,8 +193,8 @@ export default function SharedLessonPage({ params }: { params: Promise<{ shareId
             {sharingLesson && isOwner && (
                 <ShareModal
                     lesson={lesson}
-                    onShareLink={async (isPub, pRole) => {
-                        await shareLesson(lesson.id, isPub, pRole);
+                    onShareLink={async (visibility, pRole) => {
+                        await updateVisibility(lesson.id, visibility, pRole);
                         loadSharedLesson();
                     }}
                     onUpdateRoles={async (roles, collabs) => {

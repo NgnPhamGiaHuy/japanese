@@ -51,11 +51,19 @@ export default function FlashcardEditPage({ params }: { params: Promise<{ id: st
     const [loadingShared, setLoadingShared] = useState(isSharedEdit);
 
     /**
+     * 🔙 Pure history-based navigation
+     */
+    const handleBack = () => {
+        router.back();
+    };
+
+    /**
      * Cross-User Data Fetching
      * Fetches the original lesson and cards from the owner's Firestore paths.
      */
     useEffect(() => {
         if (!isSharedEdit || !ownerId) return;
+
         Promise.all([
             getDoc(lessonDoc(ownerId, id)),
             import("@/features/flashcard/services/card.service").then(({ cardsCol }) =>
@@ -77,8 +85,6 @@ export default function FlashcardEditPage({ params }: { params: Promise<{ id: st
     const lesson = isSharedEdit ? sharedLesson : lessons.find((l) => l.id === id);
     const cards = isSharedEdit ? sharedCards : ownCards;
     const loading = isSharedEdit ? loadingShared : !lesson;
-
-    const backPath = returnTo ?? (isSharedEdit ? `/flashcard/${id}` : `/flashcard/${id}`);
 
     if (loading) {
         return (
@@ -102,7 +108,7 @@ export default function FlashcardEditPage({ params }: { params: Promise<{ id: st
             initialCards={cards}
             onSave={async (updatedLesson, updatedCards, isNew) => {
                 await saveFullLesson(updatedLesson, updatedCards, isNew);
-                router.push(backPath);
+                handleBack();
             }}
             onDelete={async () => {
                 /** Constraint: Editors cannot delete shared decks */
@@ -113,7 +119,7 @@ export default function FlashcardEditPage({ params }: { params: Promise<{ id: st
                     alert("Only the owner can delete this deck.");
                 }
             }}
-            onClose={() => router.push(backPath)}
+            onClose={handleBack}
         />
     );
 }

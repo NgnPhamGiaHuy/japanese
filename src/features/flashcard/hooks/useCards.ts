@@ -1,22 +1,34 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useReducer } from "react";
 
 import { useAppStore } from "@/store";
 import * as CardService from "../services/card.service";
 
 import type { FlashCard } from "../types";
 
-/**
- * State representing the card collection and its loading/error status.
- */
 interface CardsState {
-    /** The synchronized list of flashcards */
     cards: FlashCard[];
-    /** Whether the initial fetch or a dynamic update is pending */
     loading: boolean;
-    /** Error message caught from the Firestore listener or underlying service */
     error: string | null;
+}
+
+type Action =
+    | { type: "RESET" }
+    | { type: "SET"; cards: FlashCard[] }
+    | { type: "ERROR"; error: string };
+
+function reducer(state: CardsState, action: Action): CardsState {
+    switch (action.type) {
+        case "RESET":
+            return { cards: [], loading: true, error: null };
+        case "SET":
+            return { cards: action.cards, loading: false, error: null };
+        case "ERROR":
+            return { ...state, loading: false, error: action.error };
+        default:
+            return state;
+    }
 }
 
 /**
@@ -32,32 +44,28 @@ interface CardsState {
 export function useCards(lessonId?: string, ownerId?: string) {
     const user = useAppStore((s) => s.user);
 
-    const [state, setState] = useState<CardsState>({
+    const [state, dispatch] = useReducer(reducer, {
         cards: [],
         loading: true,
         error: null,
     });
 
     useEffect(() => {
-        if (!user) {
-            setState({ cards: [], loading: false, error: null });
-            return;
-        }
+        dispatch({ type: "RESET" });
+
+        if (!user) return;
 
         const targetUserId = ownerId || user.uid;
 
-        setState((prev) => ({ ...prev, loading: true, error: null }));
-
         const unsubscribe = CardService.subscribeCards(
             targetUserId,
-            (cards) => setState({ cards, loading: false, error: null }),
+            (cards) => dispatch({ type: "SET", cards }),
             (err) => {
                 console.error("[useCards] Firestore error:", err);
-                setState((prev) => ({
-                    ...prev,
-                    loading: false,
+                dispatch({
+                    type: "ERROR",
                     error: "Could not load cards. Please check your connection and try again.",
-                }));
+                });
             },
             lessonId,
         );
