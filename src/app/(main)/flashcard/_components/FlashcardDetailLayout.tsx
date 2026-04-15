@@ -24,7 +24,7 @@ import {
 
 import { CommentPanel } from "@/features/flashcard/components";
 import { useCommentCount } from "@/features/flashcard/hooks";
-import { getAltForm, getPrimary } from "@/features/flashcard/utils/cardDisplay";
+import { resolveDisplay } from "@/features/flashcard/utils/displayEngine";
 import { Button } from "@/shared/components/ui";
 
 import type { FlashCard, Lesson } from "@/features/flashcard/types";
@@ -442,9 +442,14 @@ export default function FlashcardDetailLayout({
                                 >
                                     <div className="flex-1">
                                         <div className="mb-1 flex items-start justify-between gap-2">
-                                            {/* Kana-first: kanaPrimary is the large primary display */}
+                                            {/* Concept-first display text */}
                                             <span className="text-3xl font-medium text-[#3c3c3c]">
-                                                {getPrimary(card)}
+                                                {
+                                                    resolveDisplay(card, {
+                                                        mode: "learn",
+                                                        difficulty: 1,
+                                                    }).question
+                                                }
                                             </span>
                                             <CardCommentBadge
                                                 ownerId={ownerId}
@@ -452,10 +457,9 @@ export default function FlashcardDetailLayout({
                                                 cardId={card.id}
                                             />
                                         </div>
-                                        {/* Show altForm (kanji/romaji) as subtitle when it differs from kana */}
-                                        {getAltForm(card) && (
+                                        {card.alternatives.length > 0 && (
                                             <div className="text-sm font-bold text-gray-400">
-                                                {getAltForm(card)}
+                                                {card.alternatives[0]}
                                             </div>
                                         )}
                                         <div

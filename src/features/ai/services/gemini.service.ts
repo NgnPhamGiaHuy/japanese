@@ -26,7 +26,7 @@ function normalizeToken(value: string): string {
 }
 
 function cardDedupKeys(card: GeneratedCard): string[] {
-    const keys = [card.kanaPrimary, card.kanji, card.furigana]
+    const keys = [card.primary, ...(card.alternatives || [])]
         .map((value) => normalizeToken(value ?? ""))
         .filter((value) => value.length > 0);
     return Array.from(new Set(keys));
@@ -76,7 +76,8 @@ async function callGeminiDirect(modelName: string, prompt: string): Promise<stri
 
     if (!res.ok) {
         const errText = await res.text().catch(() => res.statusText);
-        if (res.status === 429) throw new AIServiceError("AI quota exceeded — please try again later", "quota_error");
+        if (res.status === 429)
+            throw new AIServiceError("AI quota exceeded — please try again later", "quota_error");
         throw new AIServiceError(`Gemini API error ${res.status}: ${errText}`, "api_error");
     }
 
@@ -129,35 +130,23 @@ function parseCard(raw: unknown): GeneratedCard {
     }
     const obj = raw as Record<string, unknown>;
 
-    // kanaPrimary is strictly required — no fallback
-    const kanaPrimary = String(obj.kanaPrimary ?? "").trim();
-    // AI returns `altForm` field (new schema) or `kanji` field (legacy) — both map to FlashCard.altForm
-    const altForm = String(obj.altForm ?? obj.kanji ?? "").trim() || undefined;
-    const furigana = String(obj.furigana ?? "").trim() || undefined;
+    const primary = String(obj.primary ?? "").trim();
+    const alternatives = Array.isArray(obj.alternatives)
+        ? obj.alternatives
+              .filter(
+                  (value): value is string => typeof value === "string" && value.trim().length > 0,
+              )
+              .map((value) => value.trim())
+        : [];
     const meaning = String(obj.meaning ?? "").trim();
     const example = String(obj.example ?? "").trim();
 
-    if (!kanaPrimary) {
-        throw new AIServiceError(
-            "AI response missing required field: kanaPrimary",
-            "invalid_response",
-        );
-    }
-
-    // Guard: if AI put romaji in kanaPrimary, reject — kanaPrimary must be kana script
-    const hasKanaScript = /[\u3040-\u309f\u30a0-\u30ff]/.test(kanaPrimary);
-    if (!hasKanaScript) {
-        throw new AIServiceError(
-            `AI returned non-kana value in kanaPrimary: "${kanaPrimary}". kanaPrimary must be hiragana or katakana.`,
-            "invalid_response",
-        );
+    if (!primary) {
+        throw new AIServiceError("AI response missing required field: primary", "invalid_response");
     }
 
     if (!meaning) {
-        throw new AIServiceError(
-            "AI response missing required field: meaning",
-            "invalid_response",
-        );
+        throw new AIServiceError("AI response missing required field: meaning", "invalid_response");
     }
 
     const distractors = Array.isArray(obj.distractors)
@@ -183,9 +172,8 @@ function parseCard(raw: unknown): GeneratedCard {
         : undefined;
 
     return {
-        kanaPrimary,
-        kanji: altForm, // GeneratedCard.kanji maps to FlashCard.altForm
-        furigana,
+        primary,
+        alternatives,
         meaning,
         example,
         distractors,

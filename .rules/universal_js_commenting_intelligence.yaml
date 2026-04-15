@@ -1,0 +1,291 @@
+skill:
+    name: universal_js_commenting_intelligence
+    version: 1.0.0
+    description: >
+        Framework-agnostic intelligent commenting engine for JavaScript and TypeScript
+        codebases. Applies structured documentation using JSDoc/TSDoc principles based
+        on code complexity, intent, and execution context while avoiding redundancy
+        and hallucination.
+
+    supported_environments:
+        languages:
+            - javascript
+            - typescript
+        runtimes:
+            - browser
+            - nodejs
+            - edge
+        frameworks:
+            - react
+            - nextjs
+            - vue
+            - nuxt
+            - svelte
+            - express
+            - nestjs
+            - fastify
+            - vanilla
+
+    capabilities:
+        - structural_analysis
+        - intent_extraction
+        - adaptive_commenting
+        - anti_noise_filtering
+        - ai_context_enrichment
+        - cross_framework_detection
+
+    inputs:
+        - files: array
+          description: Files or directories to analyze
+        - config:
+              comment_density: low | medium | high
+              strict_mode: boolean
+              include_examples: boolean
+
+    outputs:
+        - updated_files
+        - summary: documented_areas
+              skipped_areas
+              flagged_issues
+              framework_detected
+
+    pipeline:
+        - step: detect_environment
+          description: Identify framework, runtime, and patterns
+        - step: scan
+          description: Parse and map code structure
+        - step: classify
+          description: Tag elements by role and complexity
+        - step: score
+          description: Assign documentation priority score
+        - step: decide
+          description: Apply commenting thresholds
+        - step: generate
+          description: Generate structured comments
+        - step: validate
+          description: Remove noise and ensure consistency
+
+    rules:
+        environment_detection:
+            signals:
+                react:
+                    - jsx
+                    - useState
+                    - useEffect
+                vue:
+                    - defineComponent
+                    - setup()
+                node:
+                    - require
+                    - module.exports
+                api:
+                    - req
+                    - res
+                    - request
+                    - response
+
+        structural_awareness:
+            detect:
+                - functions
+                - async_functions
+                - classes
+                - modules
+                - components
+                - hooks_or_composables
+                - middleware
+                - api_handlers
+                - services
+                - adapters
+                - utilities
+                - data_transformations
+                - event_handlers
+
+        intent_extraction:
+            requirements:
+                - infer_what
+                - infer_why
+                - detect_side_effects
+                - detect_data_flow
+            fallback:
+                - skip_if_low_confidence
+
+        commenting_strategy:
+            type_level:
+                applies_to:
+                    - typescript_types
+                    - interfaces
+                rule: >
+                    Always document meaningful structures and domain models.
+
+            function_level:
+                conditions:
+                    - async
+                    - business_logic
+                    - transformation
+                    - side_effect
+                    - external_call
+
+            component_level:
+                applies_to:
+                    - react_components
+                    - vue_components
+                    - svelte_components
+                conditions:
+                    - reusable
+                    - complex_state
+                    - lifecycle_logic
+
+            api_level:
+                applies_to:
+                    - express_handlers
+                    - fetch_handlers
+                    - server_routes
+                rule: >
+                    Document method, purpose, inputs, and outputs.
+
+            inline_comments:
+                conditions:
+                    - edge_case
+                    - non_obvious_logic
+                    - concurrency_handling
+                    - performance_optimization
+                rule: explain_why_not_what
+
+        keyword_attention:
+            high_priority:
+                - async
+                - await
+                - fetch
+                - axios
+                - transform
+                - map
+                - reduce
+                - normalize
+                - handler
+                - middleware
+                - service
+                - adapter
+                - cache
+                - memo
+                - debounce
+                - throttle
+                - state
+                - reducer
+                - context
+                - store
+                - error
+                - retry
+                - fallback
+                - parser
+                - extractor
+                - crawler
+                - api
+                - request
+                - response
+                - stream
+                - queue
+
+        anti_noise_filter:
+            reject:
+                - obvious_comments
+                - redundant_comments
+                - empty_blocks
+                - restating_code
+            enforce:
+                - minimum_information_density
+
+        safety_rules:
+            - do_not_modify_logic
+            - do_not_refactor_structure
+            - do_not_rename_identifiers
+            - do_not_assume_external_context
+            - do_not_invent_behavior
+
+        directive_handling:
+            typescript:
+                transform:
+                    from: "@ts-ignore"
+                    to: "@ts-expect-error"
+                    require_reason: true
+            eslint:
+                require_reason: true
+
+        ai_context_enrichment:
+            apply_to:
+                - data_pipelines
+                - crawler_logic
+                - state_management
+                - api_integration
+            goal:
+                - improve_future_ai_reasoning
+                - improve_system_understanding
+
+    templates:
+        function: |
+            /**
+             * {what}
+             *
+             * @remarks {why}
+             * @param {params}
+             * @returns {returns}
+             */
+
+        class: |
+            /**
+             * {class_purpose}
+             *
+             * @remarks {design_role}
+             */
+
+        component: |
+            /**
+             * {component_purpose}
+             *
+             * @remarks {state_logic_or_behavior}
+             * @example
+             * {usage_example}
+             */
+
+        api: |
+            /**
+             * {method} {route}
+             *
+             * {purpose}
+             *
+             * @param {input}
+             * @returns {output}
+             */
+
+        type: |
+            /** {description} */
+
+        inline: |
+            // {why_this_logic_exists}
+
+    scoring:
+        weights:
+            complexity: 0.4
+            keyword_match: 0.3
+            side_effects: 0.2
+            reuse_factor: 0.1
+
+        threshold:
+            low: 0.3
+            medium: 0.5
+            high: 0.7
+
+    quality:
+        constraints:
+            - avoid_over_commenting
+            - avoid_generic_language
+            - avoid_hallucination
+            - ensure_consistency
+            - prioritize_signal_over_noise
+
+    extensibility:
+        composable_with:
+            - refactor_engine
+            - lint_engine
+            - test_generator
+            - doc_generator
+            - ai_pair_programmer

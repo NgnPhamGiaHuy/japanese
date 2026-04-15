@@ -65,7 +65,9 @@ const MatchIntroView = ({
             </motion.div>
 
             <h1 className="mb-1 text-3xl font-black text-[#3c3c3c]">Match Mode</h1>
-            <p className="mb-2 text-sm font-bold text-[#afafaf]">Match each Kanji to its meaning</p>
+            <p className="mb-2 text-sm font-bold text-[#afafaf]">
+                Match dynamic prompt-answer pairs across representations
+            </p>
 
             {bestScore > 0 && (
                 <div

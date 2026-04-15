@@ -18,8 +18,8 @@ import { hexToThemeColor } from "@/shared/utils";
 export interface ImportRow {
     /** Unique temporary ID for list management */
     id: string;
-    kanji: string;
-    furigana: string;
+    primary: string;
+    alternative: string;
     meaning: string;
     example: string;
     /** Flag indicating if the row meets the minimum requirements for a valid card */
@@ -46,7 +46,7 @@ interface ImportPreviewProps {
  *
  * @remarks
  * Acts as a quality gate (guard) before data enters the main `LessonBuilder` list.
- * Users can edit fields inline to fix validation errors (missing meaning/kanji).
+ * Users can edit fields inline to fix validation errors (missing primary/meaning).
  * Only "Clean" rows are passed through to `onConfirm`.
  *
  * @example
@@ -74,13 +74,10 @@ export const ImportPreview = ({
             prev.map((row) => {
                 if (row.id === id) {
                     const newRow = { ...row, [field]: value };
-                    /** Minimum Requirement: kanaPrimary OR (Kanji/Furigana) AND Meaning */
-                    const hasKana = newRow.furigana.trim() || newRow.kanji.trim();
+                    const hasPrimary = newRow.primary.trim();
                     const hasMeaning = newRow.meaning.trim();
-                    newRow.isInvalid = !(hasKana && hasMeaning);
-                    newRow.errorMsg = newRow.isInvalid
-                        ? "Requires a Japanese word and Meaning"
-                        : "";
+                    newRow.isInvalid = !(hasPrimary && hasMeaning);
+                    newRow.errorMsg = newRow.isInvalid ? "Requires primary and meaning" : "";
                     return newRow;
                 }
                 return row;
@@ -125,8 +122,8 @@ export const ImportPreview = ({
                 <table className="w-full text-left font-bold text-[#3c3c3c]">
                     <thead className="border-b-2 border-gray-200 bg-gray-50 text-xs tracking-widest text-[#afafaf] uppercase">
                         <tr>
-                            <th className="p-4">Kana / Reading</th>
-                            <th className="p-4">Kanji (Optional)</th>
+                            <th className="p-4">Primary</th>
+                            <th className="p-4">Alternative</th>
                             <th className="p-4">Meaning</th>
                             <th className="p-4">Example</th>
                             <th className="p-4 text-center">Status</th>
@@ -145,9 +142,11 @@ export const ImportPreview = ({
                                         style={
                                             { "--theme-color": themeColor } as React.CSSProperties
                                         }
-                                        value={row.kanji}
-                                        onChange={(e) => updateRow(row.id, "kanji", e.target.value)}
-                                        placeholder="Kanji/Word"
+                                        value={row.primary}
+                                        onChange={(e) =>
+                                            updateRow(row.id, "primary", e.target.value)
+                                        }
+                                        placeholder="Primary form"
                                     />
                                 </td>
                                 <td className="p-2">
@@ -156,11 +155,11 @@ export const ImportPreview = ({
                                         style={
                                             { "--theme-color": themeColor } as React.CSSProperties
                                         }
-                                        value={row.furigana}
+                                        value={row.alternative}
                                         onChange={(e) =>
-                                            updateRow(row.id, "furigana", e.target.value)
+                                            updateRow(row.id, "alternative", e.target.value)
                                         }
-                                        placeholder="Furigana"
+                                        placeholder="Alternative (optional)"
                                     />
                                 </td>
                                 <td className="p-2">

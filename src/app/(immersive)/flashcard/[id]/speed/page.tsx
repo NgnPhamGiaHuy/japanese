@@ -62,6 +62,7 @@ export default function SpeedQuizPage({ params }: { params: Promise<{ id: string
         selectedOption,
         timerFraction,
         currentCard,
+        currentQuestion,
         options,
         difficultyConfig,
         ui,
@@ -156,6 +157,7 @@ export default function SpeedQuizPage({ params }: { params: Promise<{ id: string
             answerStatus={answerStatus}
             selectedOption={selectedOption}
             currentCard={currentCard}
+            currentQuestion={currentQuestion}
             options={options}
             difficultyConfig={difficultyConfig}
             ui={ui}

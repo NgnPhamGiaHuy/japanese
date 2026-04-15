@@ -5,11 +5,16 @@ import type { JLPTLevel } from "../types";
 
 function getLevelNote(level: JLPTLevel): string {
     switch (level) {
-        case "N5": return "JLPT N5 — everyday beginner vocabulary (difficulty: 1)";
-        case "N4": return "JLPT N4 — elementary vocabulary (difficulty: 2)";
-        case "N3": return "JLPT N3 — intermediate vocabulary (difficulty: 3)";
-        case "N2": return "JLPT N2 — upper-intermediate vocabulary (difficulty: 3)";
-        default:   return "a balanced mix of N5–N3 vocabulary (vary difficulty 1–3)";
+        case "N5":
+            return "JLPT N5 — everyday beginner vocabulary (difficulty: 1)";
+        case "N4":
+            return "JLPT N4 — elementary vocabulary (difficulty: 2)";
+        case "N3":
+            return "JLPT N3 — intermediate vocabulary (difficulty: 3)";
+        case "N2":
+            return "JLPT N2 — upper-intermediate vocabulary (difficulty: 3)";
+        default:
+            return "a balanced mix of N5–N3 vocabulary (vary difficulty 1–3)";
     }
 }
 
@@ -21,7 +26,10 @@ const buildDeckPrompt = (
 ): string => {
     const exclusionBlock =
         existingWords.length > 0
-            ? `\nDo NOT include these words (already in the deck):\n${existingWords.slice(0, 200).map((w) => `- ${w}`).join("\n")}\n`
+            ? `\nDo NOT include these words (already in the deck):\n${existingWords
+                  .slice(0, 200)
+                  .map((w) => `- ${w}`)
+                  .join("\n")}\n`
             : "";
 
     return `${AI_SYSTEM_PROMPT}
@@ -34,22 +42,13 @@ ${DECK_JSON_SCHEMA}
 
 Field rules (apply to every card):
 
-kanaPrimary (REQUIRED):
-  - BEGINNER RULE (N5/N4): MUST be Hiragana only. Do not use Katakana unless the word is a loanword.
-  - SCRIPT: Hiragana or Katakana ONLY. 
-  - ABSOLUTE BAN: NEVER use Kanji (e.g., "一") in this field. NEVER use Romaji.
-  - This field is for pure Japanese script. For "one", use "いち", not "一".
-  - If input is Kanji, you MUST convert it to Hiragana for this field for beginners.
+primary (REQUIRED):
+  - The most natural/common display form for the level and topic.
+  - Can be kana, kanji, or mixed naturally.
 
-altForm (OPTIONAL):
-  - difficulty 1–2 (N5/N4): ROMAJI reading. Example: "taberu", "ohayou"
-  - difficulty 3 (N3+): KANJI form if one exists. Example: "食べる"
-  - Empty string if the word is kana-only with no useful kanji.
-  - NEVER put romaji in kanaPrimary.
-
-furigana (OPTIONAL):
-  - Include ONLY when altForm contains kanji characters.
-  - Hiragana reading of the kanji. Empty string otherwise.
+alternatives (OPTIONAL ARRAY):
+  - Include useful alternate forms only.
+  - Keep entries concise and commonly used.
 
 meaning:
   - Concise English, 2–8 words, no trailing period.

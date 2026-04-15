@@ -1,10 +1,5 @@
 /**
  * Core Flashcard domain model.
- *
- * Learning Stage Architecture:
- * - kana:  Beginner — show kana only, build pronunciation + familiarity
- * - mixed: Intermediate — show kana + altForm together
- * - kanji: Advanced — show altForm only, full recall expected
  */
 export interface FlashCard {
     /** Unique identifier for the card document */
@@ -12,25 +7,10 @@ export interface FlashCard {
     /** Reference to the parent lesson/deck */
     lessonId: string;
 
-    /**
-     * Primary spoken/kana form — ALWAYS required.
-     * This is the canonical learning anchor (e.g. "たべる", "おはよう").
-     * For kana-only words this equals kanji. For kanji words this is the reading.
-     */
-    kanaPrimary: string;
-
-    /**
-     * Alternative written form — OPTIONAL.
-     * N4/N5 words: romaji (e.g. "taberu").
-     * N3 and above: kanji (e.g. "食べる").
-     * Shown as a subtitle ABOVE the kana in level 1, hidden in level 2+.
-     */
-    altForm?: string;
-
-    /**
-     * Furigana reading — only meaningful when altForm contains kanji characters.
-     */
-    furigana?: string;
+    /** Canonical concept display used as the default representation. */
+    primary: string;
+    /** Alternative surface forms (kana, kanji, romaji, or mixed). */
+    alternatives: string[];
 
     /** The definition or translation (Answer) */
     meaning: string;
@@ -52,6 +32,12 @@ export interface FlashCard {
     repetitions: number;
     /** Unix timestamp (ms) of the earliest time the card can be reviewed again */
     nextReviewAt: number;
+    /** Multi-skill progress scores for Japanese learning dimensions. */
+    progress?: {
+        kanaReading?: number;
+        kanjiRecognition?: number;
+        meaningRecall?: number;
+    };
 
     /** Explicit sort order within the lesson — determines display sequence */
     sortOrder?: number;

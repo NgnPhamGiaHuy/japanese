@@ -22,19 +22,19 @@ interface MatchPlayingViewProps {
     progress: number;
     /** Content for the combo/bonus toast notification */
     comboPopup: { id: number; text: string; bonus: number } | null;
-    /** Shuffled list of Kanji (left column) */
+    /** Shuffled list of prompts (left column) */
     leftItems: MatchModeCard[];
-    /** Shuffled list of Meanings (right column) */
+    /** Shuffled list of answers (right column) */
     rightItems: MatchModeCard[];
     /** Set of card IDs that have been successfully paired */
     matchedIds: Set<string>;
-    /** ID of the currently selected Kanji */
+    /** ID of the currently selected prompt */
     selectedLeft: string | null;
-    /** ID of the currently selected Meaning */
+    /** ID of the currently selected answer */
     selectedRight: string | null;
-    /** ID of the Kanji that triggered an error animation */
+    /** ID of the prompt that triggered an error animation */
     errorLeft: string | null;
-    /** ID of the Meaning that triggered an error animation */
+    /** ID of the answer that triggered an error animation */
     errorRight: string | null;
     /** Prevents input while animations/validations are running */
     processing: boolean;
@@ -70,6 +70,12 @@ const MatchPlayingView = ({
     const isUrgent = timeLeft <= 10 && timeLeft > 0;
     const minutes = Math.floor(timeLeft / 60);
     const seconds = timeLeft % 60;
+    const getTileTextClass = (value: string) => {
+        const len = value.trim().length;
+        if (len <= 6) return "text-xl";
+        if (len <= 12) return "text-lg";
+        return "text-base";
+    };
 
     return (
         <div className="fixed inset-0 z-50 flex flex-col bg-[#F7F7F8]">
@@ -135,7 +141,7 @@ const MatchPlayingView = ({
                 <div className="grid grid-cols-2 gap-3">
                     <div className="flex flex-col gap-2.5">
                         <div className="mb-0.5 text-center text-[10px] font-black tracking-widest text-[#afafaf] uppercase">
-                            Japanese
+                            Prompt
                         </div>
                         {leftItems.map((item) => {
                             const isMatched = matchedIds.has(item.cardId);
@@ -181,8 +187,9 @@ const MatchPlayingView = ({
                                     className={className}
                                     style={style}
                                 >
-                                    {/* display holds getPrimary() — kana-first spoken form */}
-                                    <span className="text-xl leading-tight">{item.display}</span>
+                                    <span className={`${getTileTextClass(item.left)} leading-tight wrap-break-word`}>
+                                        {item.left}
+                                    </span>
                                 </button>
                             );
                         })}
@@ -190,7 +197,7 @@ const MatchPlayingView = ({
 
                     <div className="flex flex-col gap-2.5">
                         <div className="mb-0.5 text-center text-[10px] font-black tracking-widest text-[#afafaf] uppercase">
-                            Meaning
+                            Answer
                         </div>
                         {rightItems.map((item) => {
                             const isMatched = matchedIds.has(item.cardId);
@@ -198,7 +205,7 @@ const MatchPlayingView = ({
                             const isError = errorRight === item.cardId;
 
                             let className =
-                                "flex min-h-[72px] cursor-pointer items-center justify-center rounded-2xl border-2 border-b-4 p-3 text-center text-sm font-bold transition-all duration-150 select-none";
+                                "flex min-h-[72px] cursor-pointer items-center justify-center rounded-2xl border-2 border-b-4 p-3 text-center font-black transition-all duration-150 select-none";
                             let style: Record<string, string | number> = {};
 
                             if (isMatched) {
@@ -236,7 +243,9 @@ const MatchPlayingView = ({
                                     className={className}
                                     style={style}
                                 >
-                                    {item.meaning}
+                                    <span className={`${getTileTextClass(item.right)} leading-tight wrap-break-word`}>
+                                        {item.right}
+                                    </span>
                                 </button>
                             );
                         })}

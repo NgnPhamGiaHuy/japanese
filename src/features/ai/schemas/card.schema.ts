@@ -3,9 +3,8 @@
  * Uses real values (not descriptions) so the AI understands the format precisely.
  */
 const CARD_JSON_SCHEMA = `{
-  "kanaPrimary": "たべる",
-  "altForm": "taberu",
-  "furigana": "",
+  "primary": "食べる",
+  "alternatives": ["たべる", "taberu"],
   "meaning": "to eat",
   "example": "まいにちごはんをたべる - I eat rice every day",
   "distractors": ["to drink", "to cook", "to buy"],

@@ -49,9 +49,8 @@ interface LessonBuilderProps {
 const makeCard = (): EditorCard => ({
     id: `c_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
     lessonId: "",
-    kanaPrimary: "",
-    altForm: "",
-    furigana: "",
+    primary: "",
+    alternatives: [],
     meaning: "",
     example: "",
     easeFactor: 2.5,
@@ -130,7 +129,7 @@ export const LessonBuilder = ({
 
     /**
      * Contextual AI Fill
-     * Uses the current word (kanji/word field) to fetch furigana, meaning, and sentences.
+     * Uses the current word to fetch alternatives, meaning, and examples.
      *
      * @param cardId - The target card's local/remote ID
      * @param word - The Japanese word to look up
@@ -158,11 +157,8 @@ export const LessonBuilder = ({
                     c.id === cardId
                         ? {
                               ...c,
-                              kanaPrimary:
-                                  result.kanaPrimary ||
-                                  c.kanaPrimary,
-                              altForm: result.kanji || "",
-                              furigana: result.furigana || "",
+                              primary: result.primary || c.primary,
+                              alternatives: result.alternatives || c.alternatives || [],
                               meaning: result.meaning,
                               example: result.example,
                               ...(result.distractors !== undefined && {
@@ -197,9 +193,7 @@ export const LessonBuilder = ({
             return;
         }
 
-        const validCards = cards.filter(
-            (c) => (c.kanaPrimary?.trim() || c.altForm?.trim()) && c.meaning.trim(),
-        );
+        const validCards = cards.filter((c) => c.primary?.trim() && c.meaning.trim());
 
         setSaving(true);
         try {
@@ -268,7 +262,7 @@ export const LessonBuilder = ({
     const existingWordsForAI = Array.from(
         new Set(
             cards
-                .flatMap((card) => [card.kanaPrimary, card.altForm, card.furigana])
+                .flatMap((card) => [card.primary, ...(card.alternatives || [])])
                 .map((value) => (value || "").trim())
                 .filter((value) => value.length > 0),
         ),
@@ -418,9 +412,8 @@ export const LessonBuilder = ({
                         onConfirm={(validRows) => {
                             const newCards = validRows.map((r) => ({
                                 ...makeCard(),
-                                kanaPrimary: r.furigana || r.kanji || "",
-                                altForm: r.kanji !== r.furigana ? r.kanji : "",
-                                furigana: r.furigana,
+                                primary: r.primary || r.alternative || "",
+                                alternatives: r.alternative ? [r.alternative] : [],
                                 meaning: r.meaning,
                                 example: r.example,
                             }));
@@ -440,7 +433,7 @@ export const LessonBuilder = ({
                     <div className="space-y-4">
                         <textarea
                             className="h-64 w-full resize-none rounded-2xl border-2 border-gray-200 bg-white p-4 font-bold text-[#3c3c3c] outline-none focus:border-[var(--theme-color)]"
-                            placeholder="Paste your text here...&#10;Format:&#10;word,meaning&#10;kanji,furigana,meaning"
+                            placeholder="Paste your text here...&#10;Format:&#10;primary,meaning&#10;primary,secondary,meaning"
                             value={pasteText}
                             onChange={(e) => setPasteText(e.target.value)}
                             disabled={saving}
@@ -453,16 +446,16 @@ export const LessonBuilder = ({
                                 const rows: ImportRow[] = [
                                     ...result.valid.map((r, i) => ({
                                         id: `valid_${Date.now()}_${i}`,
-                                        kanji: r.altForm || r.kanaPrimary || "",
-                                        furigana: r.furigana || "",
+                                        primary: r.primary || "",
+                                        alternative: r.alternatives?.[0] || "",
                                         meaning: r.meaning || "",
                                         example: r.example || "",
                                         isInvalid: false,
                                     })),
                                     ...result.invalid.map((r, i) => ({
                                         id: `invalid_${Date.now()}_${i}`,
-                                        kanji: r.row || "",
-                                        furigana: "",
+                                        primary: r.row || "",
+                                        alternative: "",
                                         meaning: "",
                                         example: "",
                                         isInvalid: true,
@@ -492,16 +485,16 @@ export const LessonBuilder = ({
                                 const rows: ImportRow[] = [
                                     ...result.valid.map((r, i) => ({
                                         id: `valid_${Date.now()}_${i}`,
-                                        kanji: r.altForm || r.kanaPrimary || "",
-                                        furigana: r.furigana || "",
+                                        primary: r.primary || "",
+                                        alternative: r.alternatives?.[0] || "",
                                         meaning: r.meaning || "",
                                         example: r.example || "",
                                         isInvalid: false,
                                     })),
                                     ...result.invalid.map((r, i) => ({
                                         id: `invalid_${Date.now()}_${i}`,
-                                        kanji: r.row || "",
-                                        furigana: "",
+                                        primary: r.row || "",
+                                        alternative: "",
                                         meaning: "",
                                         example: "",
                                         isInvalid: true,
@@ -562,86 +555,80 @@ export const LessonBuilder = ({
                                     </button>
 
                                     <div className="mt-4 grid grid-cols-1 gap-6 md:grid-cols-2">
-                                        {(["kanaPrimary", "altForm"] as const).map((field) => {
-                                            const isKana = field === "kanaPrimary";
-                                            const isAILoading =
-                                                isKana && aiLoadingCardIds.has(card.id);
-                                            const aiError = isKana
-                                                ? aiCardErrors[card.id]
-                                                : undefined;
-                                            const fieldValue =
-                                                field === "kanaPrimary"
-                                                    ? card.kanaPrimary || ""
-                                                    : card.altForm || "";
-                                            return (
-                                                <div key={field}>
-                                                    <div className="mb-1 flex items-center justify-between">
-                                                        <label className="text-[10px] font-black tracking-widest text-[#afafaf] uppercase">
-                                                            {isKana
-                                                                ? "Kana / Reading ✱"
-                                                                : "Alt Form (kanji / romaji)"}
-                                                        </label>
-                                                        {isKana && (
-                                                            <button
-                                                                type="button"
-                                                                title={
-                                                                    card.kanaPrimary?.trim()
-                                                                        ? "Auto-fill with AI"
-                                                                        : "Type a word first"
-                                                                }
-                                                                disabled={
-                                                                    saving ||
-                                                                    isAILoading ||
-                                                                    !card.kanaPrimary?.trim()
-                                                                }
-                                                                onClick={() =>
-                                                                    handleAIFillCard(
-                                                                        card.id,
-                                                                        card.kanaPrimary || "",
-                                                                    )
-                                                                }
-                                                                className="flex items-center gap-1 rounded-lg border border-transparent px-2 py-0.5 text-[9px] font-black uppercase transition-all hover:enabled:border-gray-200 hover:enabled:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-30"
-                                                                style={{ color: themeHex }}
-                                                            >
-                                                                {isAILoading ? (
-                                                                    <Loader2
-                                                                        size={10}
-                                                                        className="animate-spin"
-                                                                    />
-                                                                ) : (
-                                                                    <Sparkles size={10} />
-                                                                )}
-                                                                {isAILoading
-                                                                    ? "Filling…"
-                                                                    : "AI Fill"}
-                                                            </button>
-                                                        )}
-                                                    </div>
-                                                    <input
-                                                        className={`w-full border-b-2 border-gray-100 bg-transparent pb-2 font-black text-[#3c3c3c] transition-colors outline-none focus:border-[var(--theme-color)] ${isKana ? "text-3xl" : "text-xl font-bold"} ${isAILoading ? "opacity-60" : ""}`}
-                                                        placeholder={
-                                                            isKana
-                                                                ? "たべる"
-                                                                : "食べる or taberu (optional)"
-                                                        }
-                                                        value={fieldValue}
-                                                        onChange={(e) =>
-                                                            updateCard(
-                                                                card.id,
-                                                                field,
-                                                                e.target.value,
-                                                            )
-                                                        }
-                                                        disabled={saving || isAILoading}
-                                                    />
-                                                    {aiError && isKana && (
-                                                        <p className="mt-1 text-[10px] font-bold text-[#ea2b2b]">
-                                                            {aiError}
-                                                        </p>
+                                        <div className="md:col-span-2">
+                                            <div className="mb-1 flex items-center justify-between">
+                                                <label className="text-[10px] font-black tracking-widest text-[#afafaf] uppercase">
+                                                    Primary ✱
+                                                </label>
+                                                <button
+                                                    type="button"
+                                                    title={
+                                                        card.primary?.trim()
+                                                            ? "Auto-fill with AI"
+                                                            : "Type a word first"
+                                                    }
+                                                    disabled={
+                                                        saving ||
+                                                        aiLoadingCardIds.has(card.id) ||
+                                                        !card.primary?.trim()
+                                                    }
+                                                    onClick={() =>
+                                                        handleAIFillCard(
+                                                            card.id,
+                                                            card.primary || "",
+                                                        )
+                                                    }
+                                                    className="flex items-center gap-1 rounded-lg border border-transparent px-2 py-0.5 text-[9px] font-black uppercase transition-all hover:enabled:border-gray-200 hover:enabled:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-30"
+                                                    style={{ color: themeHex }}
+                                                >
+                                                    {aiLoadingCardIds.has(card.id) ? (
+                                                        <Loader2
+                                                            size={10}
+                                                            className="animate-spin"
+                                                        />
+                                                    ) : (
+                                                        <Sparkles size={10} />
                                                     )}
-                                                </div>
-                                            );
-                                        })}
+                                                    {aiLoadingCardIds.has(card.id)
+                                                        ? "Filling…"
+                                                        : "AI Fill"}
+                                                </button>
+                                            </div>
+                                            <input
+                                                className={`w-full border-b-2 border-gray-100 bg-transparent pb-2 text-3xl font-black text-[#3c3c3c] transition-colors outline-none focus:border-[var(--theme-color)] ${aiLoadingCardIds.has(card.id) ? "opacity-60" : ""}`}
+                                                placeholder="食べる / たべる"
+                                                value={card.primary || ""}
+                                                onChange={(e) =>
+                                                    updateCard(card.id, "primary", e.target.value)
+                                                }
+                                                disabled={saving || aiLoadingCardIds.has(card.id)}
+                                            />
+                                            {aiCardErrors[card.id] && (
+                                                <p className="mt-1 text-[10px] font-bold text-[#ea2b2b]">
+                                                    {aiCardErrors[card.id]}
+                                                </p>
+                                            )}
+                                        </div>
+                                        {(["alternative"] as const).map((repKey) => (
+                                            <div key={repKey}>
+                                                <label className="mb-1 block text-[10px] font-black tracking-widest text-[#afafaf] uppercase">
+                                                    Alternative
+                                                </label>
+                                                <input
+                                                    className="w-full border-b-2 border-gray-100 bg-transparent pb-2 text-xl font-bold text-[#3c3c3c] transition-colors outline-none focus:border-[var(--theme-color)]"
+                                                    placeholder="Alternate form (optional)"
+                                                    value={card.alternatives?.[0] || ""}
+                                                    onChange={(e) =>
+                                                        updateCard(
+                                                            card.id,
+                                                            "alternatives",
+                                                            e.target.value ? [e.target.value] : [],
+                                                        )
+                                                    }
+                                                    disabled={saving}
+                                                />
+                                            </div>
+                                        ))}
                                         <div className="md:col-span-2">
                                             <label className="mb-1 block text-[10px] font-black tracking-widest text-[#afafaf] uppercase">
                                                 Meaning

@@ -12,7 +12,7 @@ import {
 } from "@/features/game/modes";
 import { recordGameResult } from "@/features/game/services";
 import { allowAudio, playAudio, shuffleArray } from "@/shared/utils";
-import { getPrimary } from "../utils/cardDisplay";
+import { buildQuestion, chooseQuestionType, getAudioText } from "../utils/displayEngine";
 
 import type { MatchDifficulty } from "@/features/game/modes";
 import type { FlashCard } from "../types";
@@ -21,8 +21,8 @@ type MatchPhase = "intro" | "playing" | "results";
 
 interface MatchCard {
     cardId: string;
-    display: string;
-    meaning: string;
+    left: string;
+    right: string;
 }
 export type MatchModeCard = MatchCard;
 
@@ -122,8 +122,14 @@ export function useMatchModeSession({
         const pool = shuffleArray(cards).slice(0, config.pairs);
         const matchCards: MatchCard[] = pool.map((card) => ({
             cardId: card.id,
-            display: getPrimary(card),
-            meaning: card.meaning,
+            ...(() => {
+                const type = chooseQuestionType(card, {
+                    difficulty,
+                    preferPrimary: true,
+                });
+                const pair = buildQuestion(card, type);
+                return { left: pair.prompt, right: pair.answer };
+            })(),
         }));
 
         setLeftItems(shuffleArray(matchCards));
@@ -144,7 +150,7 @@ export function useMatchModeSession({
         finalScoreRef.current = 0;
         setPhase("playing");
         void startSession();
-    }, [cards, config.pairs, config.timeLimit, startSession]);
+    }, [cards, config.pairs, config.timeLimit, difficulty, startSession]);
 
     const resolveMatch = useCallback(
         (leftId: string, rightId: string) => {
@@ -175,7 +181,10 @@ export function useMatchModeSession({
 
                 if (allowAudio("match", "feedback")) {
                     const card = leftItems.find((item) => item.cardId === leftId);
-                    if (card) playAudio(card.display);
+                    if (card) {
+                        const source = cards.find((c) => c.id === card.cardId);
+                        if (source) playAudio(getAudioText(source));
+                    }
                 }
 
                 setTimeout(() => {
@@ -194,7 +203,10 @@ export function useMatchModeSession({
 
             if (allowAudio("match", "feedback")) {
                 const card = leftItems.find((item) => item.cardId === leftId);
-                if (card) playAudio(card.display);
+                if (card) {
+                    const source = cards.find((c) => c.id === card.cardId);
+                    if (source) playAudio(getAudioText(source));
+                }
             }
             setTimeout(() => {
                 setErrorLeft(null);
@@ -204,7 +216,7 @@ export function useMatchModeSession({
                 setProcessing(false);
             }, 700);
         },
-        [leftItems, processing, streak, syncScore],
+        [cards, leftItems, processing, streak, syncScore],
     );
 
     const selectLeft = useCallback(

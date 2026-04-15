@@ -1,10 +1,8 @@
 export interface GeneratedCard {
-    /** Kana/spoken form — always the primary learning anchor (hiragana/katakana only) */
-    kanaPrimary: string;
-    /** Alt form: romaji for N5/N4, kanji for N3+ — maps to FlashCard.altForm */
-    kanji?: string;
-    /** Furigana reading — only when kanji field contains kanji characters */
-    furigana?: string;
+    /** Most natural default display form for this vocabulary concept. */
+    primary: string;
+    /** Alternate forms without fixed representation semantics. */
+    alternatives?: string[];
     meaning: string;
     example: string;
     distractors?: string[];

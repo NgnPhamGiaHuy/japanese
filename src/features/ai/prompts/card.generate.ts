@@ -11,23 +11,13 @@ ${CARD_JSON_SCHEMA}
 
 Field rules:
 
-kanaPrimary (REQUIRED):
-  - BEGINNER RULE (N5/N4): MUST be Hiragana only. Do not use Katakana unless the word is a loanword.
-  - SCRIPT: Hiragana or Katakana ONLY. 
-  - ABSOLUTE BAN: NEVER use Kanji (e.g., "一") in this field. NEVER use Romaji.
-  - This field is for pure Japanese script. For "one", use "いち", not "一".
-  - If input is Kanji, you MUST convert it to Hiragana for this field for beginners.
+primary (REQUIRED):
+  - The most natural/common display form for the target learner level.
+  - Can be kana, kanji, or mixed depending on common usage.
 
-altForm (OPTIONAL):
-  - For difficulty 1–2 (N5/N4): write the ROMAJI reading. Example: "taberu", "ohayou"
-  - For difficulty 3 (N3+): write the KANJI form if one exists. Example: "食べる"
-  - Omit (empty string) if the word is kana-only with no useful kanji form.
-  - NEVER put romaji in kanaPrimary. Romaji goes here only.
-
-furigana (OPTIONAL):
-  - Include ONLY when altForm contains kanji characters.
-  - Write the hiragana reading of the kanji. Example: "たべもの" for "食べ物"
-  - Leave empty string if altForm is romaji or empty.
+alternatives (OPTIONAL ARRAY):
+  - Include useful alternate forms as plain strings.
+  - Keep only common, learner-relevant alternatives.
 
 meaning:
   - Concise English, 2–8 words, no trailing period.

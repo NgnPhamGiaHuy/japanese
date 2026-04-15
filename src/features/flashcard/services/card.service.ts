@@ -61,7 +61,7 @@ export function subscribeCards(
         q,
         (snap) => {
             const cards = snap.docs
-                .map((d) => migrateCard({ ...d.data(), id: d.id } as FlashCard))
+                .map((d) => assertCardSchema(userId, { ...d.data(), id: d.id } as FlashCard))
                 // Sort by explicit sortOrder first, then by document ID as tiebreaker
                 .sort((a, b) => {
                     const aOrder = a.sortOrder ?? Infinity;
@@ -75,31 +75,18 @@ export function subscribeCards(
     );
 }
 
-/**
- * Validates that a card from Firestore has the required kanaPrimary field.
- * Migrates legacy `kanji`/`furigana` fields to `kanaPrimary`/`altForm` for
- * existing Firestore documents that predate the kana-first schema.
- * Throws if kanaPrimary cannot be resolved — fail fast.
- */
-function migrateCard(raw: FlashCard): FlashCard {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const legacy = raw as any;
-    const card = { ...raw };
-
-    // One-time migration: derive kanaPrimary from legacy fields
-    if (!card.kanaPrimary) {
-        const derived = legacy.furigana || legacy.kanji;
-        if (!derived) {
-            throw new Error(`[card.service] Card ${card.id} has no kanaPrimary and no legacy fields to migrate from`);
-        }
-        card.kanaPrimary = derived;
+function assertCardSchema(userId: string, card: FlashCard): FlashCard {
+    if (!card.primary || !card.primary.trim()) {
+        throw new Error(`[card.service] Invalid card ${card.id}: primary is required`);
     }
-
-    // Migrate legacy kanji → altForm when it differs from kanaPrimary
-    if (!card.altForm && legacy.kanji && legacy.kanji !== card.kanaPrimary) {
-        card.altForm = legacy.kanji;
+    if (card.alternatives === undefined) {
+        // Legacy docs may not have alternatives yet; normalize and heal once.
+        card.alternatives = [];
+        void updateDoc(cardDoc(userId, card.id), { alternatives: [] }).catch(() => {});
     }
-
+    if (!Array.isArray(card.alternatives)) {
+        throw new Error(`[card.service] Invalid card ${card.id}: alternatives must be an array`);
+    }
     return card;
 }
 

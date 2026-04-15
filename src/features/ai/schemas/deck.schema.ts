@@ -4,9 +4,8 @@
  */
 const DECK_JSON_SCHEMA = `[
   {
-    "kanaPrimary": "たべる",
-    "altForm": "taberu",
-    "furigana": "",
+    "primary": "食べる",
+    "alternatives": ["たべる", "taberu"],
     "meaning": "to eat",
     "example": "まいにちごはんをたべる - I eat rice every day",
     "distractors": ["to drink", "to cook", "to buy"],
@@ -15,9 +14,8 @@ const DECK_JSON_SCHEMA = `[
     "difficulty": 1
   },
   {
-    "kanaPrimary": "たべもの",
-    "altForm": "食べ物",
-    "furigana": "たべもの",
+    "primary": "食べ物",
+    "alternatives": ["たべもの", "tabemono"],
     "meaning": "food",
     "example": "このたべものはおいしい - This food is delicious",
     "distractors": ["drink", "restaurant", "recipe"],

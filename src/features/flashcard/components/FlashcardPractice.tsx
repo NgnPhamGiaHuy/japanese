@@ -13,14 +13,7 @@ import { Check, Lightbulb, RefreshCw, Volume2, X } from "lucide-react";
 import { Button } from "@/shared/components/ui";
 import { hexToThemeColor, playAudio, shuffleArray } from "@/shared/utils";
 import { useAppStore } from "@/store";
-import {
-    getAudioText,
-    getDisplayFront,
-    getDisplayFurigana,
-    getKanaSubtitle,
-    getLearningStage,
-    getStageBadge,
-} from "../utils/cardDisplay";
+import { getAudioText, resolveDisplay } from "../utils/displayEngine";
 
 import type { FlashCard, Lesson, StudyStats } from "../types";
 
@@ -134,11 +127,11 @@ export const FlashcardPractice = ({
     // Safety guard for transition logic
     if (!card) return null;
 
-    const stage = getLearningStage(card);
-    const stageBadge = getStageBadge(stage);
-    const displayFront = getDisplayFront(card, stage);
-    const displayFurigana = getDisplayFurigana(card, stage);
-    const kanaSubtitle = getKanaSubtitle(card, stage);
+    const display = resolveDisplay(card, { mode: "practice", difficulty: card.difficulty ?? 1 });
+    const displayFront = display.question;
+    const displayHint = display.hint || null;
+    const altSubtitle = card.alternatives.find((value) => value !== displayFront) || null;
+    const headerHint = displayHint && displayHint !== altSubtitle ? displayHint : null;
     const progress = (currentIndex / cards.length) * 100;
 
     /**
@@ -253,18 +246,18 @@ export const FlashcardPractice = ({
                                     />
                                 </button>
                             )}
-                            {displayFurigana && (
+                            {headerHint && (
                                 <span className="mb-2 text-lg font-bold tracking-widest text-[#afafaf]">
-                                    {displayFurigana}
+                                    {headerHint}
                                 </span>
                             )}
                             <div className="flex w-full flex-1 flex-col items-center justify-center px-2 py-2">
                                 <h1 className="w-full text-center text-3xl leading-tight font-black break-words text-[#3c3c3c] select-none sm:text-4xl md:text-5xl">
                                     {displayFront}
                                 </h1>
-                                {kanaSubtitle && (
+                                {altSubtitle && (
                                     <p className="mt-2 text-lg font-bold text-[#afafaf]">
-                                        {kanaSubtitle}
+                                        {altSubtitle}
                                     </p>
                                 )}
                             </div>
@@ -279,12 +272,6 @@ export const FlashcardPractice = ({
                             <p className="mt-3 text-[10px] font-black tracking-widest text-gray-300 uppercase">
                                 Choose the correct meaning
                             </p>
-                            <span
-                                className="mt-1 rounded-full px-2 py-px text-[9px] font-black tracking-widest text-white uppercase"
-                                style={{ backgroundColor: stageBadge.color }}
-                            >
-                                {stageBadge.label}
-                            </span>
                         </div>
 
                         <div className="grid grid-cols-2 gap-3">
@@ -342,9 +329,9 @@ export const FlashcardPractice = ({
                         >
                             {/* Front Side */}
                             <div className="absolute inset-0 flex flex-col items-center justify-center rounded-[2.5rem] border-2 border-b-8 border-gray-200 bg-white p-6 text-center shadow-sm backface-hidden hover:-translate-y-1 hover:shadow-md">
-                                {displayFurigana && (
+                                {headerHint && (
                                     <span className="mb-2 shrink-0 text-xl font-bold tracking-widest text-[#afafaf]">
-                                        {displayFurigana}
+                                        {headerHint}
                                     </span>
                                 )}
                                 {card.imageUrl && (
@@ -364,9 +351,9 @@ export const FlashcardPractice = ({
                                     >
                                         {displayFront}
                                     </h1>
-                                    {kanaSubtitle && (
+                                    {altSubtitle && (
                                         <p className="mt-2 text-lg font-bold text-[#afafaf]">
-                                            {kanaSubtitle}
+                                            {altSubtitle}
                                         </p>
                                     )}
                                 </div>
@@ -399,13 +386,6 @@ export const FlashcardPractice = ({
                                         Tap to reveal
                                     </p>
                                 )}
-
-                                <span
-                                    className="absolute top-4 right-4 rounded-full px-2 py-px text-[9px] font-black tracking-widest text-white uppercase"
-                                    style={{ backgroundColor: stageBadge.color }}
-                                >
-                                    {stageBadge.label}
-                                </span>
                             </div>
 
                             {/* Back Side */}

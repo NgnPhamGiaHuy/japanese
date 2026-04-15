@@ -11,7 +11,7 @@ import {
 } from "@/features/game/modes";
 import { recordGameResult } from "@/features/game/services";
 import { allowAudio, playAudio, shuffleArray } from "@/shared/utils";
-import { getAudioText } from "../utils/cardDisplay";
+import { buildQuestion, chooseQuestionType, getAudioText } from "../utils/displayEngine";
 
 import type { FlashCard } from "../types";
 
@@ -36,7 +36,7 @@ interface UseSpeedModeSessionParams {
  * Orchestrates a high-pressure, multiple-choice flashcard session.
  *
  * **Key Logic**:
- * - **Difficulty Escalation**: Gradually shortens timers and removes furigana as the question index increases.
+ * - **Difficulty Escalation**: Gradually shortens timers and reduces display hints.
  * - **Timer Management**: Frame-accurate timers with transition logic for the progress bar.
  * - **Combo Engine**: Multipliers that stack based on correct answer streaks.
  * - **Session Reliability**: Ensures scores are synced mid-session and persisted atomically on completion/timeout.
@@ -81,13 +81,28 @@ export function useSpeedModeSession({
     const difficultyLevel = getDifficultyForQuestion(questionIndex);
     const difficultyConfig = SPEED_GAME_CONFIG.LEVELS[difficultyLevel];
 
+    const currentQuestion = useMemo(() => {
+        if (!currentCard) return null;
+        const type = chooseQuestionType(currentCard, {
+            difficulty: difficultyLevel,
+            preferPrimary: true,
+        });
+        return { ...buildQuestion(currentCard, type), type };
+    }, [currentCard, difficultyLevel, questionIndex]);
+
     const options = useMemo(() => {
         if (!currentCard || allCards.length < 4) return [];
+        if (!currentQuestion) return [];
+
         const distractors = allCards
             .filter((card) => card.id !== currentCard.id)
-            .map((card) => card.meaning);
-        return shuffleArray([currentCard.meaning, ...shuffleArray(distractors).slice(0, 3)]);
-    }, [allCards, currentCard]);
+            .map((card) => {
+                if (currentQuestion.type === "primary_to_meaning") return card.meaning;
+                return card.primary;
+            })
+            .filter((value) => value && value !== currentQuestion.answer);
+        return shuffleArray([currentQuestion.answer, ...shuffleArray(distractors).slice(0, 3)]);
+    }, [allCards, currentCard, currentQuestion]);
 
     const stopTimer = useCallback(() => {
         if (!timerIntervalRef.current) return;
@@ -196,7 +211,7 @@ export function useSpeedModeSession({
             const remaining = Math.max(0, questionLimitRef.current - elapsed);
             setSelectedOption(selected);
 
-            if (selected === currentCard.meaning) {
+            if (currentQuestion && selected === currentQuestion.answer) {
                 const newStreak = streak + 1;
                 const points = calcSpeedPoints(remaining, questionLimitRef.current, newStreak);
                 const nextScore = score + points;
@@ -221,7 +236,7 @@ export function useSpeedModeSession({
                 setQuestionIndex((prev) => prev + 1);
             }, 700);
         },
-        [answerStatus, currentCard, score, stopTimer, streak, syncScore],
+        [answerStatus, currentCard, currentQuestion, score, stopTimer, streak, syncScore],
     );
 
     useEffect(() => () => stopTimer(), [stopTimer]);
@@ -256,6 +271,7 @@ export function useSpeedModeSession({
         selectedOption,
         timerFraction,
         currentCard,
+        currentQuestion,
         cardQueue,
         options,
         difficultyConfig,

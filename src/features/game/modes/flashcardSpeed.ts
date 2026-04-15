@@ -27,21 +27,21 @@ export const SPEED_GAME_CONFIG = {
             threshold: 0,
             timeLimit: 10,
             label: "Level 1",
-            showFurigana: true,
+            showHint: true,
             color: "#58cc02",
         },
         2: {
             threshold: 5,
             timeLimit: 8,
             label: "Level 2",
-            showFurigana: false,
+            showHint: false,
             color: "#ff9600",
         },
         3: {
             threshold: 10,
             timeLimit: 5,
             label: "Level 3",
-            showFurigana: false,
+            showHint: false,
             color: "#ea2b2b",
         },
     } as Record<number, SpeedDifficultyConfig>,
@@ -72,8 +72,8 @@ export interface SpeedDifficultyConfig {
     timeLimit: number;
     /** Human-readable name for the level */
     label: string;
-    /** Whether to help the user with furigana hints */
-    showFurigana: boolean;
+    /** Whether to show a lightweight representation hint */
+    showHint: boolean;
     /** Theme color for this difficulty level */
     color: string;
 }

@@ -13,14 +13,7 @@ import { BookOpen, Lightbulb, Volume2, X } from "lucide-react";
 import { Button } from "@/shared/components/ui";
 import { hexToThemeColor, playAudio } from "@/shared/utils";
 import { useAppStore } from "@/store";
-import {
-    getAudioText,
-    getDisplayFront,
-    getDisplayFurigana,
-    getKanaSubtitle,
-    getLearningStage,
-    getStageBadge,
-} from "../utils/cardDisplay";
+import { getAudioText, resolveDisplay } from "../utils/displayEngine";
 
 import type { FlashCard, Lesson, StudyStats } from "../types";
 
@@ -82,11 +75,11 @@ export const FlashcardLearn = ({
     const card = cards[currentIndex];
     if (!card) return null;
 
-    const stage = getLearningStage(card);
-    const stageBadge = getStageBadge(stage);
-    const displayFront = getDisplayFront(card, stage);
-    const displayFurigana = getDisplayFurigana(card, stage);
-    const kanaSubtitle = getKanaSubtitle(card, stage);
+    const display = resolveDisplay(card, { mode: "learn", difficulty: card.difficulty ?? 1 });
+    const displayFront = display.question;
+    const displayHint = display.hint || null;
+    const altSubtitle = card.alternatives.find((value) => value !== displayFront) || null;
+    const headerHint = displayHint && displayHint !== altSubtitle ? displayHint : null;
     const progress = (currentIndex / cards.length) * 100;
 
     const advance = async (knew: boolean) => {
@@ -164,16 +157,6 @@ export const FlashcardLearn = ({
                 </span>
             </header>
 
-            {/* Stage badge */}
-            <div className="flex justify-center pb-1">
-                <span
-                    className="rounded-full px-3 py-0.5 text-[10px] font-black tracking-widest text-white uppercase"
-                    style={{ backgroundColor: stageBadge.color }}
-                >
-                    {stageBadge.label} Stage
-                </span>
-            </div>
-
             <div className="mx-auto flex w-full max-w-md flex-1 flex-col items-center justify-center gap-6 p-4 sm:p-6">
                 <div className="relative flex w-full flex-col items-center justify-center rounded-[2.5rem] border-2 border-b-8 border-gray-200 bg-white p-8 text-center shadow-sm">
                     {card.hint && (
@@ -196,9 +179,9 @@ export const FlashcardLearn = ({
                     </button>
 
                     {/* Furigana — only in mixed stage */}
-                    {displayFurigana && (
+                    {headerHint && (
                         <span className="mb-1 text-lg font-bold tracking-widest text-[#afafaf]">
-                            {displayFurigana}
+                            {headerHint}
                         </span>
                     )}
 
@@ -219,9 +202,8 @@ export const FlashcardLearn = ({
                         <h1 className="w-full text-center text-4xl leading-tight font-black break-words text-[#3c3c3c] select-none sm:text-5xl">
                             {displayFront}
                         </h1>
-                        {/* Kana subtitle in mixed stage */}
-                        {kanaSubtitle && (
-                            <p className="mt-2 text-lg font-bold text-[#afafaf]">{kanaSubtitle}</p>
+                        {altSubtitle && (
+                            <p className="mt-2 text-lg font-bold text-[#afafaf]">{altSubtitle}</p>
                         )}
                     </div>
 

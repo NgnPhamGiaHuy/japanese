@@ -84,9 +84,9 @@ const SpeedIntroView = ({ bestScore, tierInfo, onBack, onStart }: SpeedIntroView
                             </div>
                             <div className="flex items-center gap-3 text-xs font-bold text-[#afafaf]">
                                 <span>{config.timeLimit}s per Q</span>
-                                {!config.showFurigana ? (
+                                {!config.showHint ? (
                                     <span className="rounded-lg bg-[#ffdfe0] px-1.5 py-0.5 text-[#ea2b2b]">
-                                        No furigana
+                                        Reduced hints
                                     </span>
                                 ) : null}
                             </div>

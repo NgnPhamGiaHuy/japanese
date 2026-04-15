@@ -10,7 +10,6 @@ import { X } from "lucide-react";
 
 import { MiniLeaderboard } from "@/features/game/components";
 import { SPEED_GAME_CONFIG } from "@/features/game/modes";
-import { getAltForm, getPrimary } from "../utils/cardDisplay";
 
 import type { FlashCard } from "../types";
 
@@ -25,10 +24,15 @@ interface SpeedPlayingViewProps {
     selectedOption: string | null;
     currentCard: FlashCard;
     options: string[];
+    currentQuestion: {
+        prompt: string;
+        answer: string;
+        type: "primary_to_meaning" | "alternative_to_primary" | "meaning_to_primary";
+    } | null;
     difficultyConfig: {
         label: string;
         color: string;
-        showFurigana: boolean;
+        showHint: boolean;
     };
     ui: {
         questionNumber: number;
@@ -56,6 +60,7 @@ const SpeedPlayingView = ({
     selectedOption,
     currentCard,
     options,
+    currentQuestion,
     difficultyConfig,
     ui,
     onBack,
@@ -124,16 +129,14 @@ const SpeedPlayingView = ({
                     transition={{ duration: 0.18 }}
                     className={`mb-8 w-full text-center ${answerStatus === "wrong" ? "animate-shake" : ""}`}
                 >
-                    {/* Level 1 only: altForm (romaji/kanji) shown ABOVE kana as context */}
-                    {difficultyConfig.showFurigana && getAltForm(currentCard) ? (
+                    {difficultyConfig.showHint && currentCard.alternatives[0] ? (
                         <p className="mb-2 text-lg font-bold tracking-widest text-[#afafaf]">
-                            {getAltForm(currentCard)}
+                            {currentCard.alternatives[0]}
                         </p>
                     ) : null}
 
                     <h1 className="text-[5rem] leading-none font-black text-[#3c3c3c] drop-shadow-sm sm:text-[6rem]">
-                        {/* All levels: show kana (spoken form) as the main question */}
-                        {getPrimary(currentCard)}
+                        {currentQuestion?.prompt ?? currentCard.primary}
                     </h1>
 
                     <AnimatePresence>
@@ -145,7 +148,7 @@ const SpeedPlayingView = ({
                                 exit={{ opacity: 0 }}
                                 className="mt-2 text-xs font-black text-[#ff9600]"
                             >
-                                ⚠ Alt form hidden from here
+                                ⚠ Hints reduced from here
                             </motion.p>
                         ) : null}
                         {questionIndex === SPEED_GAME_CONFIG.LEVELS[3].threshold &&
@@ -165,7 +168,7 @@ const SpeedPlayingView = ({
 
                 <div className="grid w-full gap-3">
                     {options.map((option, index) => {
-                        const isCorrect = option === currentCard.meaning;
+                        const isCorrect = option === (currentQuestion?.answer ?? "");
                         let className =
                             "min-h-[72px] rounded-2xl border-2 border-b-4 px-5 py-4 text-left text-base font-bold shadow-sm transition-all duration-150 select-none";
 

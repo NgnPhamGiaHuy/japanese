@@ -61,6 +61,7 @@ export default function SharedSpeedPage({ params }: { params: Promise<{ shareId:
         selectedOption,
         timerFraction,
         currentCard,
+        currentQuestion,
         options,
         difficultyConfig,
         ui,
@@ -165,6 +166,7 @@ export default function SharedSpeedPage({ params }: { params: Promise<{ shareId:
             answerStatus={answerStatus}
             selectedOption={selectedOption}
             currentCard={currentCard}
+            currentQuestion={currentQuestion}
             options={options}
             difficultyConfig={difficultyConfig}
             ui={ui}
