@@ -31,9 +31,9 @@ export function Providers({ children }: { children: React.ReactNode }) {
     useFirebaseAuth();
     return (
         <AlertProvider>
-            <NotificationsProvider>
-                <AuthGate>{children}</AuthGate>
-            </NotificationsProvider>
+            <AuthGate>
+                <NotificationsProvider>{children}</NotificationsProvider>
+            </AuthGate>
         </AlertProvider>
     );
 }
