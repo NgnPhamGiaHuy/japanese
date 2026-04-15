@@ -57,24 +57,22 @@ export default function SharedMatchPage({ params }: { params: Promise<{ shareId:
         difficulty,
         setDifficulty,
         config,
-        leftItems,
-        rightItems,
-        selectedLeft,
-        selectedRight,
-        matchedIds,
-        errorLeft,
-        errorRight,
-        processing,
+        prepLoading,
         score,
         streak,
         maxStreak,
         wrongAttempts,
         timeLeft,
+        timeUnlimited,
+        livesLeft,
+        livesTotal,
+        showLives,
+        pairCount,
+        matchedPairs,
         comboPopup,
         progress,
         startGame,
-        selectLeft,
-        selectRight,
+        onCellTap,
         resetToIntro,
         closeSession,
     } = useMatchModeSession({
@@ -117,6 +115,7 @@ export default function SharedMatchPage({ params }: { params: Promise<{ shareId:
                 difficulty={difficulty}
                 cardCount={result.cards.length}
                 requiredPairs={config.pairs}
+                prepLoading={prepLoading}
                 onBack={() => router.back()}
                 onStart={startGame}
                 onDifficultyChange={setDifficulty}
@@ -131,8 +130,8 @@ export default function SharedMatchPage({ params }: { params: Promise<{ shareId:
             <MatchResultsView
                 score={score}
                 bestScore={bestScore}
-                matchedCount={matchedIds.size}
-                totalCount={leftItems.length}
+                matchedCount={matchedPairs}
+                totalCount={pairCount}
                 wrongAttempts={wrongAttempts}
                 maxStreak={maxStreak}
                 tierInfo={finalTierInfo}
@@ -153,22 +152,17 @@ export default function SharedMatchPage({ params }: { params: Promise<{ shareId:
             score={score}
             streak={streak}
             timeLeft={timeLeft}
+            timeUnlimited={timeUnlimited}
             progress={progress}
             comboPopup={comboPopup}
-            leftItems={leftItems}
-            rightItems={rightItems}
-            matchedIds={matchedIds}
-            selectedLeft={selectedLeft}
-            selectedRight={selectedRight}
-            errorLeft={errorLeft}
-            errorRight={errorRight}
-            processing={processing}
+            showLives={showLives}
+            livesLeft={livesLeft}
+            livesTotal={livesTotal}
             onBack={() => {
                 closeSession();
                 router.back();
             }}
-            onSelectLeft={selectLeft}
-            onSelectRight={selectRight}
+            onCellTap={onCellTap}
         />
     );
 }

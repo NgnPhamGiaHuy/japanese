@@ -3,7 +3,9 @@ import { getGenerativeModel } from "firebase/ai";
 import { firebaseAI } from "@/lib/firebase";
 import { getCardGenerationPrompt, getDeckGenerationPrompt } from "./prompt-builder";
 import { AI_CONFIG } from "../config";
+import { getMatchDistractorsPrompt } from "../prompts/match.distractors";
 
+import type { FlashCard } from "@/features/flashcard/types";
 import type { GeneratedCard, JLPTLevel } from "../types";
 
 export type { GeneratedCard, JLPTLevel } from "../types";
@@ -239,6 +241,71 @@ export const generateCardData = async (word: string): Promise<GeneratedCard> => 
     } catch (err) {
         classifyError(err);
     }
+};
+
+const normLabel = (s: string) => s.trim().toLowerCase();
+
+function blocklistFromCards(cards: FlashCard[]): Set<string> {
+    const b = new Set<string>();
+    for (const c of cards) {
+        b.add(normLabel(c.primary));
+        b.add(normLabel(c.meaning));
+        for (const a of c.alternatives || []) {
+            if (a?.trim()) b.add(normLabel(a));
+        }
+    }
+    return b;
+}
+
+/**
+ * Decoy tiles: visually/semantically similar to pool content; deduped against targets.
+ */
+export const generateMatchDistractors = async (
+    cards: FlashCard[],
+    count: number,
+): Promise<string[]> => {
+    const safeCount = Math.min(Math.max(count, 1), 8);
+    const blocklist = blocklistFromCards(cards);
+    const hints = cards
+        .slice(0, 12)
+        .map((c) => [c.primary, ...(c.alternatives || []), c.meaning].filter(Boolean).join(" / "))
+        .join("\n");
+
+    const prompt = getMatchDistractorsPrompt(hints, safeCount);
+
+    let rawList: string[] = [];
+    try {
+        const text = await generateContent(AI_CONFIG.models.card, prompt);
+        const raw = JSON.parse(extractJSON(text)) as { distractors?: unknown };
+        const list = Array.isArray(raw.distractors) ? raw.distractors : [];
+        rawList = list
+            .filter((d): d is string => typeof d === "string" && d.trim().length > 0)
+            .map((d) => d.trim());
+    } catch {
+        rawList = [];
+    }
+
+    const fallbacks = ["シート", "ツール", "ぬいぐるみ", "めがね", "かう", "うる", "あさ", "ばん"];
+
+    const out: string[] = [];
+    let fb = 0;
+    const taken = new Set(blocklist);
+
+    for (let i = 0; i < safeCount; i++) {
+        let candidate = rawList[i] ?? fallbacks[fb % fallbacks.length];
+        fb++;
+        let guard = 0;
+        while (guard < 40 && taken.has(normLabel(candidate))) {
+            candidate = `${fallbacks[fb % fallbacks.length]}${guard}`;
+            fb++;
+            guard++;
+        }
+        if (taken.has(normLabel(candidate))) candidate = `·${i + 1}`;
+        taken.add(normLabel(candidate));
+        out.push(candidate);
+    }
+
+    return out.slice(0, safeCount);
 };
 
 export const generateDeck = async (

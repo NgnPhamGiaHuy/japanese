@@ -12,6 +12,7 @@ import { MiniLeaderboard } from "@/features/game/components";
 import { SPEED_GAME_CONFIG } from "@/features/game/modes";
 
 import type { FlashCard } from "../types";
+import type { QuestionType } from "../utils";
 
 interface SpeedPlayingViewProps {
     gameMode: string;
@@ -27,7 +28,7 @@ interface SpeedPlayingViewProps {
     currentQuestion: {
         prompt: string;
         answer: string;
-        type: "primary_to_meaning" | "alternative_to_primary" | "meaning_to_primary";
+        type: QuestionType;
     } | null;
     difficultyConfig: {
         label: string;

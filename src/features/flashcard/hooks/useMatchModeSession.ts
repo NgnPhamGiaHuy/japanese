@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
+import { generateMatchDistractors } from "@/features/ai/services/gemini.service";
 import { useGameSession } from "@/features/game/hooks";
 import {
     calcMatchPoints,
@@ -12,19 +13,66 @@ import {
 } from "@/features/game/modes";
 import { recordGameResult } from "@/features/game/services";
 import { allowAudio, playAudio, shuffleArray } from "@/shared/utils";
-import { buildQuestion, chooseQuestionType, getAudioText } from "../utils/displayEngine";
+import { useMatchGameStore } from "../stores/useMatchGameStore";
+import {
+    buildQuestionFallback,
+    chooseMatchQuestionTypeForCard,
+    getAudioText,
+    pickFixedRoundQuestionType,
+} from "../utils";
 
 import type { MatchDifficulty } from "@/features/game/modes";
+import type { MatchItem } from "../stores/useMatchGameStore";
 import type { FlashCard } from "../types";
+import type { QuestionType } from "../utils";
 
 type MatchPhase = "intro" | "playing" | "results";
 
-interface MatchCard {
-    cardId: string;
-    left: string;
-    right: string;
+export type { MatchItem };
+
+function buildGridItems(
+    pool: FlashCard[],
+    difficulty: MatchDifficulty,
+    fixedRoundType: QuestionType,
+    distractorLabels: string[],
+): MatchItem[] {
+    const nl = (s: string) => s.trim().toLowerCase();
+    const gameCfg = DIFFICULTY_CONFIG[difficulty].game;
+    const items: MatchItem[] = [];
+    const occupied = new Set<string>();
+
+    for (const card of pool) {
+        const qType = chooseMatchQuestionTypeForCard(
+            card,
+            gameCfg.pairType,
+            fixedRoundType,
+            difficulty,
+            true,
+        );
+        const pair = buildQuestionFallback(card, qType);
+        const pairId = card.id;
+        const a = `${pairId}-a`;
+        const b = `${pairId}-b`;
+        items.push({ id: a, pairId, value: pair.prompt, isDistractor: false });
+        items.push({ id: b, pairId, value: pair.answer, isDistractor: false });
+        occupied.add(nl(pair.prompt));
+        occupied.add(nl(pair.answer));
+    }
+
+    for (let i = 0; i < distractorLabels.length; i++) {
+        let text = distractorLabels[i]?.trim() ?? "";
+        let guard = 0;
+        while (guard < 40 && (!text || occupied.has(nl(text)))) {
+            text = `·${i + 1}${guard ? `(${guard})` : ""}`;
+            guard++;
+        }
+        occupied.add(nl(text));
+        const id = `dist-${i}-${Math.random().toString(36).slice(2, 9)}`;
+        items.push({ id, value: text, isDistractor: true });
+    }
+
+    return shuffleArray(items);
 }
-export type MatchModeCard = MatchCard;
 
 interface UseMatchModeSessionParams {
     cards: FlashCard[];
@@ -35,22 +83,6 @@ interface UseMatchModeSessionParams {
     addXP: (amount: number) => Promise<void>;
 }
 
-/**
- * Logic orchestration hook for the Match Mode game.
- *
- * @remarks
- * Features:
- * 1. **Phase Management**: Orchestrates the transition from config (intro) to active gameplay (playing) and final summary (results).
- * 2. **Game Mechanics**: Handles 2-column selection, error shake triggers, match validation, and streak-based scoring.
- * 3. **Session Interfacing**: Leverages `useGameSession` for real-time leaderboard participation and XP distribution.
- * 4. **Adaptive Difficulty**: Enforces time limits and pair counts based on the `DIFFICULTY_CONFIG`.
- *
- * @param cards - Pool of flashcards available for the game.
- * @param gameMode - Unique identifier for the leaderboard/tracking.
- * @param bestScore - User's current personal best for the target deck/mode.
- * @param addXP - Callback to persist experience gains.
- * @returns Comprehensive state and handlers for the Match Mode UI.
- */
 export function useMatchModeSession({
     cards,
     gameMode,
@@ -61,21 +93,14 @@ export function useMatchModeSession({
 }: UseMatchModeSessionParams) {
     const [phase, setPhase] = useState<MatchPhase>("intro");
     const [difficulty, setDifficulty] = useState<MatchDifficulty>(2);
-
-    const [leftItems, setLeftItems] = useState<MatchCard[]>([]);
-    const [rightItems, setRightItems] = useState<MatchCard[]>([]);
-    const [selectedLeft, setSelectedLeft] = useState<string | null>(null);
-    const [selectedRight, setSelectedRight] = useState<string | null>(null);
-    const [matchedIds, setMatchedIds] = useState<Set<string>>(new Set());
-    const [errorLeft, setErrorLeft] = useState<string | null>(null);
-    const [errorRight, setErrorRight] = useState<string | null>(null);
-    const [processing, setProcessing] = useState(false);
-
+    const [prepLoading, setPrepLoading] = useState(false);
     const [score, setScore] = useState(0);
     const [streak, setStreak] = useState(0);
     const [maxStreak, setMaxStreak] = useState(0);
     const [wrongAttempts, setWrongAttempts] = useState(0);
-    const [timeLeft, setTimeLeft] = useState(0);
+    const [timeLeft, setTimeLeft] = useState(-1);
+    const [livesLeft, setLivesLeft] = useState(0);
+    const [pairCount, setPairCount] = useState(0);
 
     const [comboPopup, setComboPopup] = useState<{
         id: number;
@@ -88,8 +113,11 @@ export function useMatchModeSession({
     const savedRef = useRef(false);
     const scoreRef = useRef(0);
     const finalScoreRef = useRef(0);
+    /** Wrong attempt costs a life when config.lives > 0 */
+    const livesModeRef = useRef(false);
 
     const config = DIFFICULTY_CONFIG[difficulty];
+    const gameCfg = config.game;
 
     const { startSession, syncScore, endSession } = useGameSession({
         userId: userId ?? null,
@@ -102,12 +130,14 @@ export function useMatchModeSession({
         scoreRef.current = score;
     }, [score]);
 
+    const timeUnlimited = !gameCfg.timePressure;
+
     useEffect(() => {
-        if (phase !== "playing") return;
+        if (phase !== "playing" || timeUnlimited) return;
         timerRef.current = setInterval(() => {
             setTimeLeft((t) => {
                 if (t <= 1) {
-                    clearInterval(timerRef.current!);
+                    if (timerRef.current) clearInterval(timerRef.current);
                     return 0;
                 }
                 return t - 1;
@@ -116,147 +146,173 @@ export function useMatchModeSession({
         return () => {
             if (timerRef.current) clearInterval(timerRef.current);
         };
-    }, [phase]);
+    }, [phase, timeUnlimited]);
 
-    const startGame = useCallback(() => {
-        const pool = shuffleArray(cards).slice(0, config.pairs);
-        const matchCards: MatchCard[] = pool.map((card) => ({
-            cardId: card.id,
-            ...(() => {
-                const type = chooseQuestionType(card, {
-                    difficulty,
-                    preferPrimary: true,
+    const resolveTwo = useCallback(
+        (idA: string, idB: string) => {
+            const { grid, matchedPairIds } = useMatchGameStore.getState();
+            const a = grid.find((c) => c.id === idA);
+            const b = grid.find((c) => c.id === idB);
+            if (!a || !b) {
+                useMatchGameStore.getState().setProcessing(false);
+                return;
+            }
+
+            const sameReal =
+                !a.isDistractor && !b.isDistractor && a.pairId != null && a.pairId === b.pairId;
+
+            if (sameReal) {
+                setStreak((prev) => {
+                    const newStreak = prev + 1;
+                    const points = calcMatchPoints(newStreak);
+                    setScore((s) => {
+                        const next = s + points;
+                        syncScore(next);
+                        return next;
+                    });
+                    setMaxStreak((m) => Math.max(m, newStreak));
+
+                    const label = comboLabel(newStreak);
+                    if (label) {
+                        const popupId = ++comboIdRef.current;
+                        setComboPopup({ id: popupId, text: label, bonus: points - 100 });
+                        setTimeout(() => {
+                            setComboPopup((current) => (current?.id === popupId ? null : current));
+                        }, 1400);
+                    }
+
+                    return newStreak;
                 });
-                const pair = buildQuestion(card, type);
-                return { left: pair.prompt, right: pair.answer };
-            })(),
-        }));
 
-        setLeftItems(shuffleArray(matchCards));
-        setRightItems(shuffleArray(matchCards));
-        setSelectedLeft(null);
-        setSelectedRight(null);
-        setMatchedIds(new Set());
-        setErrorLeft(null);
-        setErrorRight(null);
-        setProcessing(false);
-        setScore(0);
-        setStreak(0);
-        setMaxStreak(0);
-        setWrongAttempts(0);
-        setTimeLeft(config.timeLimit);
-        setComboPopup(null);
-        savedRef.current = false;
-        finalScoreRef.current = 0;
-        setPhase("playing");
-        void startSession();
-    }, [cards, config.pairs, config.timeLimit, difficulty, startSession]);
-
-    const resolveMatch = useCallback(
-        (leftId: string, rightId: string) => {
-            if (processing) return;
-            setProcessing(true);
-
-            if (leftId === rightId) {
-                const newStreak = streak + 1;
-                const points = calcMatchPoints(newStreak);
-
-                setStreak(newStreak);
-                setMaxStreak((prev) => Math.max(prev, newStreak));
-                setScore((prev) => {
-                    const next = prev + points;
-                    syncScore(next);
-                    return next;
-                });
-                setMatchedIds((prev) => new Set([...prev, leftId]));
-
-                const label = comboLabel(newStreak);
-                if (label) {
-                    const popupId = ++comboIdRef.current;
-                    setComboPopup({ id: popupId, text: label, bonus: points - 100 });
-                    setTimeout(() => {
-                        setComboPopup((current) => (current?.id === popupId ? null : current));
-                    }, 1400);
-                }
+                useMatchGameStore.getState().addMatchedPairId(a.pairId!);
 
                 if (allowAudio("match", "feedback")) {
-                    const card = leftItems.find((item) => item.cardId === leftId);
-                    if (card) {
-                        const source = cards.find((c) => c.id === card.cardId);
-                        if (source) playAudio(getAudioText(source));
-                    }
+                    const source = cards.find((c) => c.id === a.pairId);
+                    if (source) playAudio(getAudioText(source));
                 }
 
                 setTimeout(() => {
-                    setSelectedLeft(null);
-                    setSelectedRight(null);
-                    setProcessing(false);
-                }, 200);
+                    useMatchGameStore.getState().setProcessing(false);
+                }, 180);
                 return;
             }
 
             setStreak(0);
             setWrongAttempts((prev) => prev + 1);
-            setScore((prev) => Math.max(0, prev - WRONG_PENALTY));
-            setErrorLeft(leftId);
-            setErrorRight(rightId);
+            setScore((prev) => {
+                const next = Math.max(0, prev - WRONG_PENALTY);
+                syncScore(next);
+                return next;
+            });
 
-            if (allowAudio("match", "feedback")) {
-                const card = leftItems.find((item) => item.cardId === leftId);
-                if (card) {
-                    const source = cards.find((c) => c.id === card.cardId);
-                    if (source) playAudio(getAudioText(source));
+            const loseLife = livesModeRef.current;
+            if (loseLife) {
+                setLivesLeft((l) => Math.max(0, l - 1));
+            }
+
+            useMatchGameStore.getState().setShake([idA, idB]);
+
+            setTimeout(() => {
+                useMatchGameStore.getState().clearShake();
+                useMatchGameStore.getState().setSelected([]);
+                useMatchGameStore.getState().setProcessing(false);
+            }, 720);
+        },
+        [cards, syncScore],
+    );
+
+    const onCellTap = useCallback(
+        (id: string) => {
+            const current = useMatchGameStore.getState();
+            if (current.processing) return;
+
+            const c = current.grid.find((x) => x.id === id);
+            if (!c) return;
+            if (!c.isDistractor && c.pairId != null && current.matchedPairIds.includes(c.pairId)) {
+                return;
+            }
+
+            if (current.selectedIds.length === 0) {
+                current.setSelected([id]);
+                return;
+            }
+
+            if (current.selectedIds.length === 1) {
+                const first = current.selectedIds[0];
+                if (first === id) {
+                    current.setSelected([]);
+                    return;
+                }
+                current.setSelected([first, id]);
+                current.setProcessing(true);
+                setTimeout(() => resolveTwo(first, id), 120);
+            }
+        },
+        [resolveTwo],
+    );
+
+    const startGame = useCallback(async () => {
+        const safePairs = Math.min(config.pairs, cards.length);
+        if (safePairs < 1) return;
+
+        setPrepLoading(true);
+        savedRef.current = false;
+        finalScoreRef.current = 0;
+
+        try {
+            const pool = shuffleArray(cards).slice(0, safePairs);
+            setPairCount(pool.length);
+            livesModeRef.current = config.lives > 0;
+            setLivesLeft(livesModeRef.current ? config.lives : 0);
+
+            let distractorLabels: string[] = [];
+            if (config.distractorTiles > 0) {
+                try {
+                    distractorLabels = await generateMatchDistractors(pool, config.distractorTiles);
+                } catch (e) {
+                    console.warn("[MatchMode] Distractor generation failed, using fallback.", e);
                 }
             }
-            setTimeout(() => {
-                setErrorLeft(null);
-                setErrorRight(null);
-                setSelectedLeft(null);
-                setSelectedRight(null);
-                setProcessing(false);
-            }, 700);
-        },
-        [cards, leftItems, processing, streak, syncScore],
-    );
 
-    const selectLeft = useCallback(
-        (leftId: string) => {
-            if (selectedRight) {
-                resolveMatch(leftId, selectedRight);
-                return;
-            }
-            setSelectedLeft((prev) => (prev === leftId ? null : leftId));
-        },
-        [resolveMatch, selectedRight],
-    );
+            const fixedRoundType = pickFixedRoundQuestionType(pool, difficulty);
+            const items = buildGridItems(pool, difficulty, fixedRoundType, distractorLabels);
+            useMatchGameStore.getState().initGrid(items);
 
-    const selectRight = useCallback(
-        (rightId: string) => {
-            if (selectedLeft) {
-                resolveMatch(selectedLeft, rightId);
-                return;
-            }
-            setSelectedRight((prev) => (prev === rightId ? null : rightId));
-        },
-        [resolveMatch, selectedLeft],
-    );
+            setPhase("playing");
+            setScore(0);
+            setStreak(0);
+            setMaxStreak(0);
+            setWrongAttempts(0);
+            setComboPopup(null);
+            setTimeLeft(gameCfg.timePressure ? config.timeLimit : -1);
+            void startSession();
+        } finally {
+            setPrepLoading(false);
+        }
+    }, [cards, config, difficulty, gameCfg.timePressure, startSession]);
+
+    const matchedLen = useMatchGameStore((s) => s.matchedPairIds.length);
 
     useEffect(() => {
         if (phase !== "playing") return;
-        const allMatched = matchedIds.size === leftItems.length && leftItems.length > 0;
-        const timedOut = timeLeft === 0;
-        if (!allMatched && !timedOut) return;
+
+        const cleared = pairCount > 0 && matchedLen >= pairCount;
+        const timedOut = gameCfg.timePressure && timeLeft === 0;
+        const dead = livesModeRef.current && livesLeft <= 0;
+
+        if (!cleared && !timedOut && !dead) return;
 
         if (timerRef.current) clearInterval(timerRef.current);
-        const timeBonus = allMatched ? calcTimeBonus(timeLeft) : 0;
+        const bonus = cleared && gameCfg.timePressure ? calcTimeBonus(Math.max(0, timeLeft)) : 0;
+
         const raf = requestAnimationFrame(() => {
-            const finalScore = scoreRef.current + timeBonus;
+            const finalScore = scoreRef.current + bonus;
             finalScoreRef.current = finalScore;
             setScore(finalScore);
             setPhase("results");
         });
         return () => cancelAnimationFrame(raf);
-    }, [leftItems.length, matchedIds, phase, timeLeft]);
+    }, [phase, matchedLen, timeLeft, gameCfg.timePressure, livesLeft, pairCount]);
 
     useEffect(() => {
         if (phase !== "results" || savedRef.current) return;
@@ -279,9 +335,11 @@ export function useMatchModeSession({
     }, []);
 
     const progress = useMemo(() => {
-        if (config.pairs === 0) return 0;
-        return (matchedIds.size / config.pairs) * 100;
-    }, [config.pairs, matchedIds.size]);
+        if (pairCount === 0) return 0;
+        return (matchedLen / pairCount) * 100;
+    }, [matchedLen, pairCount]);
+
+    const showLives = config.lives > 0;
 
     return {
         phase,
@@ -289,24 +347,22 @@ export function useMatchModeSession({
         difficulty,
         setDifficulty,
         config,
-        leftItems,
-        rightItems,
-        selectedLeft,
-        selectedRight,
-        matchedIds,
-        errorLeft,
-        errorRight,
-        processing,
+        prepLoading,
         score,
         streak,
         maxStreak,
         wrongAttempts,
         timeLeft,
+        timeUnlimited,
+        livesLeft,
+        livesTotal: config.lives,
+        showLives,
+        pairCount,
+        matchedPairs: matchedLen,
         comboPopup,
         progress,
         startGame,
-        selectLeft,
-        selectRight,
+        onCellTap,
         resetToIntro,
         closeSession,
     };

@@ -19,14 +19,16 @@ interface MatchIntroViewProps {
     bestScore: number;
     /** Calculated league/tier based on best score */
     tierInfo: TierInfo;
-    /** Current selected difficulty level (1-3) */
+    /** Current selected difficulty level (1-4) */
     difficulty: MatchDifficulty;
     /** Total cards available in the deck */
     cardCount: number;
     /** Minimum cards required for the current difficulty */
     requiredPairs: number;
+    /** Master may fetch AI distractors before play */
+    prepLoading?: boolean;
     onBack: () => void;
-    onStart: () => void;
+    onStart: () => void | Promise<void>;
     onDifficultyChange: (difficulty: MatchDifficulty) => void;
 }
 
@@ -43,6 +45,7 @@ const MatchIntroView = ({
     difficulty,
     cardCount,
     requiredPairs,
+    prepLoading = false,
     onBack,
     onStart,
     onDifficultyChange,
@@ -65,8 +68,9 @@ const MatchIntroView = ({
             </motion.div>
 
             <h1 className="mb-1 text-3xl font-black text-[#3c3c3c]">Match Mode</h1>
-            <p className="mb-2 text-sm font-bold text-[#afafaf]">
-                Match dynamic prompt-answer pairs across representations
+            <p className="mb-2 max-w-sm text-center text-sm font-bold text-[#afafaf]">
+                One visible grid: match real pairs; AI distractors on higher tiers add interference
+                — timers, mixed prompts, and lives on harder settings.
             </p>
 
             {bestScore > 0 && (
@@ -88,7 +92,7 @@ const MatchIntroView = ({
                     Select Difficulty
                 </p>
                 <div className="flex flex-col gap-2">
-                    {([1, 2, 3] as MatchDifficulty[]).map((level) => {
+                    {([1, 2, 3, 4] as MatchDifficulty[]).map((level) => {
                         const config = DIFFICULTY_CONFIG[level];
                         const disabled = cardCount < config.pairs;
                         const active = difficulty === level && !disabled;
@@ -136,11 +140,11 @@ const MatchIntroView = ({
             <Button
                 variant="primary"
                 color="purple"
-                onClick={onStart}
-                disabled={cardCount < requiredPairs}
+                onClick={() => void onStart()}
+                disabled={cardCount < requiredPairs || prepLoading}
                 className="w-full max-w-sm py-5 text-xl"
             >
-                Play
+                {prepLoading ? "Preparing…" : "Play"}
             </Button>
         </div>
     );

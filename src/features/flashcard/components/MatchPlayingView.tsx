@@ -1,6 +1,5 @@
 /**
- * @file MatchPlayingView
- * Active Gameplay Screen for Match Mode.
+ * @file MatchPlayingView — Match Mode play HUD + grid.
  */
 
 "use client";
@@ -8,9 +7,9 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { Clock, X } from "lucide-react";
 
-import { MiniLeaderboard } from "@/features/game/components";
-
-import type { MatchModeCard } from "../hooks";
+import { LivesDisplay, MiniLeaderboard } from "@/features/game/components";
+import MatchGrid from "./MatchGrid";
+import { useMatchGameStore } from "../stores/useMatchGameStore";
 
 interface MatchPlayingViewProps {
     gameMode: string;
@@ -19,33 +18,16 @@ interface MatchPlayingViewProps {
     score: number;
     streak: number;
     timeLeft: number;
+    timeUnlimited: boolean;
     progress: number;
-    /** Content for the combo/bonus toast notification */
     comboPopup: { id: number; text: string; bonus: number } | null;
-    /** Shuffled list of prompts (left column) */
-    leftItems: MatchModeCard[];
-    /** Shuffled list of answers (right column) */
-    rightItems: MatchModeCard[];
-    /** Set of card IDs that have been successfully paired */
-    matchedIds: Set<string>;
-    /** ID of the currently selected prompt */
-    selectedLeft: string | null;
-    /** ID of the currently selected answer */
-    selectedRight: string | null;
-    /** ID of the prompt that triggered an error animation */
-    errorLeft: string | null;
-    /** ID of the answer that triggered an error animation */
-    errorRight: string | null;
-    /** Prevents input while animations/validations are running */
-    processing: boolean;
+    showLives: boolean;
+    livesLeft: number;
+    livesTotal: number;
     onBack: () => void;
-    onSelectLeft: (id: string) => void;
-    onSelectRight: (id: string) => void;
+    onCellTap: (cellId: string) => void;
 }
 
-/**
- * MatchPlayingView — Functional gameplay screen with 2-column grid.
- */
 const MatchPlayingView = ({
     gameMode,
     currentUserId,
@@ -53,46 +35,53 @@ const MatchPlayingView = ({
     score,
     streak,
     timeLeft,
+    timeUnlimited,
     progress,
     comboPopup,
-    leftItems,
-    rightItems,
-    matchedIds,
-    selectedLeft,
-    selectedRight,
-    errorLeft,
-    errorRight,
-    processing,
+    showLives,
+    livesLeft,
+    livesTotal,
     onBack,
-    onSelectLeft,
-    onSelectRight,
+    onCellTap,
 }: MatchPlayingViewProps) => {
-    const isUrgent = timeLeft <= 10 && timeLeft > 0;
-    const minutes = Math.floor(timeLeft / 60);
-    const seconds = timeLeft % 60;
-    const getTileTextClass = (value: string) => {
-        const len = value.trim().length;
-        if (len <= 6) return "text-xl";
-        if (len <= 12) return "text-lg";
-        return "text-base";
-    };
+    const isUrgent = !timeUnlimited && timeLeft <= 10 && timeLeft > 0;
+    const minutes = Math.floor(Math.max(0, timeLeft) / 60);
+    const seconds = Math.max(0, timeLeft) % 60;
+
+    const cells = useMatchGameStore((s) => s.grid);
+    const selectedIds = useMatchGameStore((s) => s.selectedIds);
+    const matchedPairIds = useMatchGameStore((s) => s.matchedPairIds);
+    const processing = useMatchGameStore((s) => s.processing);
+    const shakeCellIds = useMatchGameStore((s) => s.shakeCellIds);
 
     return (
         <div className="fixed inset-0 z-50 flex flex-col bg-[#F7F7F8]">
-            <header className="flex items-center justify-between p-4">
-                <button onClick={onBack} className="rounded-xl p-2 text-gray-400 hover:bg-gray-200">
+            <header className="flex shrink-0 items-center justify-between p-4">
+                <button
+                    onClick={onBack}
+                    type="button"
+                    className="rounded-xl p-2 text-gray-400 hover:bg-gray-200"
+                >
                     <X size={20} />
                 </button>
 
-                <div
-                    className={`flex items-center gap-1.5 text-xl font-black transition-colors ${
-                        isUrgent ? "animate-pulse text-[#ea2b2b]" : "text-[#3c3c3c]"
-                    }`}
-                >
-                    <Clock size={20} strokeWidth={3} />
-                    <span>
-                        {String(minutes).padStart(2, "0")}:{String(seconds).padStart(2, "0")}
-                    </span>
+                <div className="flex flex-col items-center gap-1">
+                    {showLives ? <LivesDisplay lives={livesLeft} total={livesTotal} /> : null}
+                    <div
+                        className={`flex items-center gap-1.5 text-xl font-black transition-colors ${
+                            isUrgent ? "animate-pulse text-[#ea2b2b]" : "text-[#3c3c3c]"
+                        }`}
+                    >
+                        <Clock size={20} strokeWidth={3} />
+                        {timeUnlimited ? (
+                            <span>∞</span>
+                        ) : (
+                            <span>
+                                {String(minutes).padStart(2, "0")}:
+                                {String(seconds).padStart(2, "0")}
+                            </span>
+                        )}
+                    </div>
                 </div>
 
                 <div className="flex flex-col items-end">
@@ -103,7 +92,7 @@ const MatchPlayingView = ({
                 </div>
             </header>
 
-            <div className="mx-4 h-2.5 overflow-hidden rounded-full bg-gray-200">
+            <div className="mx-4 h-2.5 shrink-0 overflow-hidden rounded-full bg-gray-200">
                 <div
                     className="h-full rounded-full transition-all duration-300"
                     style={{ width: `${progress}%`, backgroundColor: "#ce82ff" }}
@@ -118,7 +107,7 @@ const MatchPlayingView = ({
                         animate={{ opacity: 1, y: 0, scale: 1 }}
                         exit={{ opacity: 0, y: -24, scale: 1.1 }}
                         transition={{ duration: 0.25 }}
-                        className="pointer-events-none fixed top-24 left-1/2 z-50 -translate-x-1/2 rounded-2xl bg-[#ff9600] px-6 py-3 text-center shadow-xl"
+                        className="pointer-events-none fixed top-28 left-1/2 z-50 -translate-x-1/2 rounded-2xl bg-[#ff9600] px-6 py-3 text-center shadow-xl"
                     >
                         <div className="text-base font-black text-white">{comboPopup.text}</div>
                         {comboPopup.bonus > 0 ? (
@@ -137,121 +126,18 @@ const MatchPlayingView = ({
                 currentScore={score}
             />
 
-            <div className="mx-auto flex w-full max-w-lg flex-1 flex-col justify-center overflow-y-auto p-4">
-                <div className="grid grid-cols-2 gap-3">
-                    <div className="flex flex-col gap-2.5">
-                        <div className="mb-0.5 text-center text-[10px] font-black tracking-widest text-[#afafaf] uppercase">
-                            Prompt
-                        </div>
-                        {leftItems.map((item) => {
-                            const isMatched = matchedIds.has(item.cardId);
-                            const isSelected = selectedLeft === item.cardId && !isMatched;
-                            const isError = errorLeft === item.cardId;
+            <p className="mx-auto mt-2 max-w-sm shrink-0 px-4 text-center text-[10px] font-black tracking-widest text-[#afafaf] uppercase">
+                Tap two tiles that belong together — distractors never pair
+            </p>
 
-                            let className =
-                                "flex min-h-[72px] cursor-pointer items-center justify-center rounded-2xl border-2 border-b-4 p-3 text-center font-black transition-all duration-150 select-none";
-                            let style: Record<string, string | number> = {};
-
-                            if (isMatched) {
-                                className +=
-                                    " scale-95 pointer-events-none translate-y-0.5 border-b-2 opacity-30";
-                                style = {
-                                    backgroundColor: "#f2fbf0",
-                                    borderColor: "#58cc02",
-                                    color: "#58cc02",
-                                };
-                            } else if (isError) {
-                                className += " animate-shake translate-y-0.5 border-b-2";
-                                style = {
-                                    backgroundColor: "#ffdfe0",
-                                    borderColor: "#ea2b2b",
-                                    color: "#ea2b2b",
-                                };
-                            } else if (isSelected) {
-                                className += " -translate-y-1 shadow-md border-b-2";
-                                style = {
-                                    backgroundColor: "#f8f0ff",
-                                    borderColor: "#ce82ff",
-                                    color: "#ce82ff",
-                                };
-                            } else {
-                                className +=
-                                    " bg-white border-gray-200 text-[#3c3c3c] hover:-translate-y-1 hover:shadow-md";
-                            }
-
-                            return (
-                                <button
-                                    key={`${item.cardId}-left`}
-                                    disabled={isMatched || processing}
-                                    onClick={() => onSelectLeft(item.cardId)}
-                                    className={className}
-                                    style={style}
-                                >
-                                    <span className={`${getTileTextClass(item.left)} leading-tight wrap-break-word`}>
-                                        {item.left}
-                                    </span>
-                                </button>
-                            );
-                        })}
-                    </div>
-
-                    <div className="flex flex-col gap-2.5">
-                        <div className="mb-0.5 text-center text-[10px] font-black tracking-widest text-[#afafaf] uppercase">
-                            Answer
-                        </div>
-                        {rightItems.map((item) => {
-                            const isMatched = matchedIds.has(item.cardId);
-                            const isSelected = selectedRight === item.cardId && !isMatched;
-                            const isError = errorRight === item.cardId;
-
-                            let className =
-                                "flex min-h-[72px] cursor-pointer items-center justify-center rounded-2xl border-2 border-b-4 p-3 text-center font-black transition-all duration-150 select-none";
-                            let style: Record<string, string | number> = {};
-
-                            if (isMatched) {
-                                className +=
-                                    " scale-95 pointer-events-none translate-y-0.5 border-b-2 opacity-30";
-                                style = {
-                                    backgroundColor: "#f2fbf0",
-                                    borderColor: "#58cc02",
-                                    color: "#58cc02",
-                                };
-                            } else if (isError) {
-                                className += " animate-shake translate-y-0.5 border-b-2";
-                                style = {
-                                    backgroundColor: "#ffdfe0",
-                                    borderColor: "#ea2b2b",
-                                    color: "#ea2b2b",
-                                };
-                            } else if (isSelected) {
-                                className += " -translate-y-1 shadow-md border-b-2";
-                                style = {
-                                    backgroundColor: "#fff8e8",
-                                    borderColor: "#ff9600",
-                                    color: "#ff9600",
-                                };
-                            } else {
-                                className +=
-                                    " bg-white border-gray-200 text-[#3c3c3c] hover:-translate-y-1 hover:shadow-md";
-                            }
-
-                            return (
-                                <button
-                                    key={`${item.cardId}-right`}
-                                    disabled={isMatched || processing}
-                                    onClick={() => onSelectRight(item.cardId)}
-                                    className={className}
-                                    style={style}
-                                >
-                                    <span className={`${getTileTextClass(item.right)} leading-tight wrap-break-word`}>
-                                        {item.right}
-                                    </span>
-                                </button>
-                            );
-                        })}
-                    </div>
-                </div>
-            </div>
+            <MatchGrid
+                cells={cells}
+                selectedIds={selectedIds}
+                matchedPairIds={matchedPairIds}
+                shakeCellIds={shakeCellIds}
+                processing={processing}
+                onCellPress={onCellTap}
+            />
         </div>
     );
 };
