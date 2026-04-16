@@ -52,12 +52,12 @@ const MatchIntroView = ({
 }: MatchIntroViewProps) => {
     return (
         <div className="fixed inset-0 flex flex-col items-center justify-center bg-[#F7F7F8] p-6">
-            <button
+            <Button
+                variant="ghost"
                 onClick={onBack}
-                className="absolute top-4 left-4 rounded-xl p-2 text-gray-400 hover:bg-gray-200"
-            >
-                <X size={20} />
-            </button>
+                className="absolute top-4 left-4 !p-2"
+                icon={X}
+            />
 
             <motion.div
                 initial={{ scale: 0.8, opacity: 0 }}
@@ -96,42 +96,44 @@ const MatchIntroView = ({
                         const config = DIFFICULTY_CONFIG[level];
                         const disabled = cardCount < config.pairs;
                         const active = difficulty === level && !disabled;
+
+                        const levelColorMap: Record<number, "green" | "blue" | "orange" | "red"> = {
+                            1: "green",
+                            2: "blue",
+                            3: "orange",
+                            4: "red",
+                        };
+
                         return (
-                            <button
+                            <Button
                                 key={level}
                                 disabled={disabled}
                                 onClick={() => onDifficultyChange(level)}
-                                className={`flex items-center justify-between rounded-2xl border-2 border-b-4 px-5 py-3.5 text-left transition-all ${
-                                    disabled
-                                        ? "cursor-not-allowed opacity-40"
-                                        : active
-                                          ? "shadow-sm"
-                                          : "border-gray-200 bg-white hover:-translate-y-0.5 hover:shadow-md"
+                                variant={active ? "primary" : "secondary"}
+                                color={levelColorMap[level]}
+                                className={`flex items-center justify-between !px-5 !py-3.5 !text-left transition-all ${
+                                    disabled ? "opacity-40" : ""
                                 }`}
-                                style={
-                                    active
-                                        ? {
-                                              backgroundColor: config.color,
-                                              borderColor: `${config.color}BB`,
-                                          }
-                                        : {}
-                                }
                             >
-                                <div>
-                                    <div
-                                        className={`font-black ${active ? "text-white" : "text-[#3c3c3c]"}`}
-                                    >
-                                        {config.label}
+                                <div className="flex w-full items-center justify-between">
+                                    <div className="text-left">
+                                        <div
+                                            className={`font-black ${active ? "text-white" : "text-[#3c3c3c]"}`}
+                                        >
+                                            {config.label}
+                                        </div>
+                                        <div
+                                            className={`text-xs font-bold ${active ? "text-white/70" : "text-[#afafaf]"}`}
+                                        >
+                                            {config.sub}
+                                            {disabled ? " (need more cards)" : ""}
+                                        </div>
                                     </div>
-                                    <div
-                                        className={`text-xs font-bold ${active ? "text-white/70" : "text-[#afafaf]"}`}
-                                    >
-                                        {config.sub}
-                                        {disabled ? " (need more cards)" : ""}
-                                    </div>
+                                    {active ? (
+                                        <CheckCircle2 size={20} className="shrink-0 text-white" />
+                                    ) : null}
                                 </div>
-                                {active ? <CheckCircle2 size={20} className="text-white" /> : null}
-                            </button>
+                            </Button>
                         );
                     })}
                 </div>

@@ -4,6 +4,8 @@ import { useState } from "react";
 
 import { Check, ChevronDown } from "lucide-react";
 
+import Button from "./Button";
+
 export interface SelectOption<T> {
     value: T;
     label: string;
@@ -42,11 +44,12 @@ const CustomSelect = <T extends string | number>({
 
     return (
         <div className={`relative ${className}`}>
-            <button
+            <Button
+                variant="ghost"
                 className={
                     isCompact
-                        ? "flex items-center gap-1 rounded-lg px-2 py-1 text-sm font-bold text-gray-500 transition-colors hover:bg-gray-200 disabled:opacity-50"
-                        : "flex h-12 items-center gap-2 rounded-xl border-2 border-gray-200 bg-gray-50 px-4 text-sm font-bold text-[#3c3c3c] transition-colors hover:bg-gray-100 disabled:opacity-50"
+                        ? "!flex !items-center !gap-1 !rounded-lg !px-2 !py-1 !text-sm !font-bold !text-gray-500 shadow-none transition-colors hover:bg-gray-200 hover:shadow-none"
+                        : "!flex !h-12 !items-center !gap-2 !rounded-xl border-2 border-gray-200 bg-gray-50 !px-4 !text-sm !font-bold !text-[#3c3c3c] shadow-none transition-colors hover:bg-gray-100 hover:shadow-none"
                 }
                 onClick={() => setIsOpen(!isOpen)}
                 disabled={disabled}
@@ -59,7 +62,7 @@ const CustomSelect = <T extends string | number>({
                     size={isCompact ? 14 : 16}
                     className={`text-gray-400 transition-transform ${isOpen ? "rotate-180" : ""}`}
                 />
-            </button>
+            </Button>
 
             {isOpen && (
                 <>
@@ -68,9 +71,10 @@ const CustomSelect = <T extends string | number>({
                         className={`animate-in fade-in zoom-in-95 absolute top-full ${align === "right" ? "right-0" : "left-0"} z-50 mt-1 w-max min-w-[120px] overflow-hidden rounded-2xl border-2 border-gray-100 bg-white shadow-lg`}
                     >
                         {options.map((opt) => (
-                            <button
+                            <Button
                                 key={opt.value}
-                                className={`flex w-full items-center justify-between gap-4 ${isCompact ? "p-3 text-sm" : "p-4"} text-left font-bold text-[#3c3c3c] capitalize hover:bg-gray-50`}
+                                variant="ghost"
+                                className={`!flex !w-full !items-center !justify-between !gap-4 ${isCompact ? "!p-3 !text-sm" : "!p-4"} !text-left !font-bold !text-[#3c3c3c] capitalize shadow-none hover:bg-gray-50 hover:shadow-none active:translate-y-0`}
                                 onClick={() => {
                                     onChange(opt.value);
                                     setIsOpen(false);
@@ -83,20 +87,21 @@ const CustomSelect = <T extends string | number>({
                                 {value === opt.value && (
                                     <Check style={{ color: themeHex }} size={isCompact ? 14 : 16} />
                                 )}
-                            </button>
+                            </Button>
                         ))}
                         {onRemove && (
                             <>
                                 <div className="my-1 h-0.5 w-full bg-gray-100" />
-                                <button
-                                    className={`flex w-full items-center justify-between ${isCompact ? "p-3 text-sm" : "p-4"} text-left font-bold text-red-500 hover:bg-red-50`}
+                                <Button
+                                    variant="ghost"
+                                    className={`!flex !w-full !items-center !justify-between ${isCompact ? "!p-3 !text-sm" : "!p-4"} !text-left !font-bold !text-red-500 shadow-none hover:bg-red-50 hover:shadow-none active:translate-y-0`}
                                     onClick={() => {
                                         onRemove();
                                         setIsOpen(false);
                                     }}
                                 >
                                     {removeLabel}
-                                </button>
+                                </Button>
                             </>
                         )}
                     </div>

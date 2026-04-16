@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import { signInWithGoogle } from "@/features/user/services";
+import { Button } from "@/shared/components/ui";
 
 export default function LoginPage() {
     const router = useRouter();
@@ -42,18 +43,15 @@ export default function LoginPage() {
 
             {/* Sign-in card */}
             <div className="animate-in fade-in slide-in-from-bottom-6 w-full max-w-sm delay-100 duration-500">
-                <button
+                <Button
                     onClick={handleGoogleSignIn}
-                    disabled={loading}
-                    className="flex w-full items-center justify-center gap-3 rounded-2xl border-2 border-b-4 border-gray-200 bg-white px-6 py-4 font-black text-[#3c3c3c] shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-gray-300 hover:shadow-md active:translate-y-[2px] active:border-b-2 disabled:pointer-events-none disabled:opacity-60"
+                    loading={loading}
+                    variant="secondary"
+                    className="w-full !py-4 !text-[#3c3c3c] !shadow-sm transition-all duration-200"
                 >
-                    {loading ? (
-                        <span className="h-5 w-5 animate-spin rounded-full border-2 border-gray-300 border-t-[#3c3c3c]" />
-                    ) : (
-                        <GoogleIcon />
-                    )}
+                    {!loading && <GoogleIcon />}
                     {loading ? "Signing in…" : "Continue with Google"}
-                </button>
+                </Button>
 
                 {error && (
                     <p className="mt-4 text-center text-sm font-bold text-[#ea2b2b]">{error}</p>

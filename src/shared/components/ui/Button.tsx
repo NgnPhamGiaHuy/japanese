@@ -1,11 +1,19 @@
 "use client";
 
 import { motion } from "framer-motion";
-
-import type { LucideIcon } from "lucide-react";
+import { Loader2, LucideIcon } from "lucide-react";
 
 type AlphabetMode = "hiragana" | "katakana" | "both";
-type ThemeColor = "blue" | "green" | "purple" | "orange" | "red" | "gray" | "teal" | "pink";
+type ThemeColor =
+    | "blue"
+    | "green"
+    | "purple"
+    | "orange"
+    | "red"
+    | "gray"
+    | "teal"
+    | "pink"
+    | (string & {});
 type Variant = "primary" | "secondary" | "outline" | "ghost";
 
 const ALPHABET_MAP: Record<AlphabetMode, ThemeColor> = {
@@ -14,7 +22,7 @@ const ALPHABET_MAP: Record<AlphabetMode, ThemeColor> = {
     both: "purple",
 };
 
-const THEMES: Record<ThemeColor, { bg: string; border: string; hover: string; text: string }> = {
+const THEMES: Record<string, { bg: string; border: string; hover: string; text: string }> = {
     blue: {
         bg: "bg-[#1cb0f6]",
         border: "border-[#1899d6]",
@@ -67,57 +75,97 @@ const THEMES: Record<ThemeColor, { bg: string; border: string; hover: string; te
 
 interface ButtonProps {
     children?: React.ReactNode;
-    onClick?: () => void;
+    onClick?: (e: React.MouseEvent<HTMLButtonElement>) => void;
     variant?: Variant;
     color?: ThemeColor;
     alphabet?: AlphabetMode;
     className?: string;
     icon?: LucideIcon;
+    iconSize?: number;
+    iconClassName?: string;
     disabled?: boolean;
+    loading?: boolean;
+    active?: boolean;
     type?: "button" | "submit";
+    onMouseEnter?: (e: React.MouseEvent<HTMLButtonElement>) => void;
+    onMouseLeave?: (e: React.MouseEvent<HTMLButtonElement>) => void;
+    badge?: React.ReactNode;
     id?: string;
+    title?: string;
     style?: React.CSSProperties;
 }
 
-const Button = ({
+export const Button = ({
     children,
     onClick,
+    onMouseEnter,
+    onMouseLeave,
     variant = "primary",
     color = "blue",
     alphabet,
     className = "",
     icon: Icon,
+    iconSize = 20,
+    iconClassName = "",
     disabled,
+    loading,
+    active,
     type = "button",
     id,
+    title,
     style,
+    badge,
 }: ButtonProps) => {
     const resolvedColor = alphabet ? ALPHABET_MAP[alphabet] : color;
-    const t = THEMES[resolvedColor];
+    const isStandardTheme = typeof resolvedColor === "string" && THEMES[resolvedColor as string];
+    const t = isStandardTheme ? THEMES[resolvedColor as string] : THEMES.blue;
 
     const base =
-        "flex items-center justify-center gap-2 px-4 py-3 md:px-6 md:py-4 rounded-[1rem] md:rounded-2xl font-extrabold transition-all duration-200 select-none disabled:opacity-50 disabled:pointer-events-none";
+        "flex items-center justify-center gap-2 px-4 py-3 md:px-6 md:py-4 rounded-[1rem] md:rounded-2xl font-extrabold transition-all duration-200 select-none cursor-pointer disabled:opacity-50 disabled:pointer-events-none";
 
     const variants: Record<Variant, string> = {
-        primary: `${t.bg} text-white border-b-4 ${t.border} ${t.hover} hover:-translate-y-1 hover:shadow-lg active:border-b-0 active:translate-y-[4px]`,
-        secondary: `bg-white ${t.text} border-2 border-b-4 border-gray-200 hover:bg-gray-50 hover:border-gray-300 hover:-translate-y-1 hover:shadow-md active:border-b-2 active:translate-y-[2px]`,
+        primary: `${isStandardTheme ? t.bg : ""} text-white border-b-4 ${isStandardTheme ? t.border : ""} ${isStandardTheme ? t.hover : ""} hover:-translate-y-1 hover:shadow-lg active:border-b-0 active:translate-y-[4px]`,
+        secondary: `bg-white ${isStandardTheme ? t.text : ""} border-2 border-b-4 border-gray-200 hover:bg-gray-50 hover:border-gray-300 hover:-translate-y-1 hover:shadow-md active:border-b-2 active:translate-y-[2px]`,
         outline: `bg-transparent text-gray-500 border-2 border-b-4 border-gray-200 hover:bg-gray-50 hover:border-gray-300 hover:-translate-y-1 active:border-b-2 active:translate-y-[2px]`,
         ghost: `text-gray-500 hover:text-[#3c3c3c] hover:bg-gray-100 active:bg-gray-200 rounded-xl`,
     };
 
+    // Forced active state for toggle buttons or tabs
+    const activeClass = active ? "ring-2 ring-offset-2 ring-[var(--theme-color)]" : "";
+
+    // If it's a custom hex color and primary/secondary variant, handle via style
+    const customStyle: React.CSSProperties = { ...style };
+    if (!isStandardTheme && typeof resolvedColor === "string") {
+        if (variant === "primary") {
+            customStyle.backgroundColor = resolvedColor;
+            customStyle.borderBottomColor = `${resolvedColor}CC`; // 80% opacity for border
+        } else if (variant === "secondary" || variant === "ghost") {
+            customStyle.color = resolvedColor;
+        }
+    }
+
     return (
         <motion.button
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.95 }}
+            whileHover={disabled || loading ? {} : { scale: variant === "ghost" ? 1.05 : 1.02 }}
+            whileTap={disabled || loading ? {} : { scale: 0.95 }}
+            transition={{ type: "spring", stiffness: 400, damping: 17 }}
             id={id}
+            title={title}
             type={type}
-            onClick={onClick}
-            disabled={disabled}
-            className={`${base} ${variants[variant]} ${className}`}
-            style={style}
+            onClick={(e: any) => !loading && onClick?.(e)}
+            onMouseEnter={onMouseEnter}
+            onMouseLeave={onMouseLeave}
+            disabled={disabled || loading}
+            className={`${base} ${variants[variant]} ${activeClass} ${className}`}
+            style={customStyle}
         >
-            {Icon && <Icon size={20} strokeWidth={2.5} />}
+            {loading ? (
+                <Loader2 size={iconSize} className="animate-spin" />
+            ) : Icon ? (
+                <Icon size={iconSize} strokeWidth={2.5} className={iconClassName} />
+            ) : null}
             {children}
+            {badge && <div className="ml-2">{badge}</div>}
         </motion.button>
     );
 };

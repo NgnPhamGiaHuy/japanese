@@ -14,6 +14,7 @@ import {
 import { useKanaDataset } from "@/features/kana/hooks";
 import { useUserProgress } from "@/features/user/hooks";
 import { ScreenHeader } from "@/shared/components/layout";
+import { Button } from "@/shared/components/ui";
 import { PRINT_FONT } from "@/shared/constants";
 import { playAudio } from "@/shared/utils";
 import { useKanaStore } from "@/store";
@@ -43,29 +44,29 @@ function ChartCell({
     }
 
     return (
-        <motion.button
-            type="button"
-            whileHover={{ scale: 1.05, y: -2 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={() => playAudio(item.char)}
-            className={`flex aspect-square min-h-[48px] flex-col items-center justify-center rounded-xl border-2 border-b-4 transition-colors md:min-h-[56px] md:rounded-2xl ${
-                learned ? learnedBorder : "border-gray-200 bg-white hover:border-gray-300"
-            }`}
-        >
-            <span
-                style={{ fontFamily: PRINT_FONT }}
-                className={`text-lg leading-none font-medium md:text-2xl ${learned ? learnedText : "text-[#3c3c3c]"}`}
+        <motion.div whileHover={{ scale: 1.05, y: -2 }} whileTap={{ scale: 0.95 }} className="flex">
+            <Button
+                variant="ghost"
+                onClick={() => playAudio(item.char)}
+                className={`!flex !aspect-square !min-h-[48px] !flex-col !items-center !justify-center !rounded-xl !border-2 !border-b-4 shadow-none !transition-colors hover:shadow-none active:translate-y-0 md:!min-h-[56px] md:!rounded-2xl ${
+                    learned ? learnedBorder : "!border-gray-200 !bg-white hover:!border-gray-300"
+                }`}
             >
-                {item.char}
-            </span>
-            {showRomaji && (
                 <span
-                    className={`mt-0.5 max-w-[95%] truncate px-0.5 text-[9px] font-bold md:mt-1 md:text-[10px] ${learned ? learnedRomaji : "text-[#afafaf]"}`}
+                    style={{ fontFamily: PRINT_FONT }}
+                    className={`text-lg leading-none font-medium md:text-2xl ${learned ? learnedText : "text-[#3c3c3c]"}`}
                 >
-                    {item.romaji}
+                    {item.char}
                 </span>
-            )}
-        </motion.button>
+                {showRomaji && (
+                    <span
+                        className={`mt-0.5 max-w-[95%] truncate px-0.5 text-[9px] font-bold md:mt-1 md:text-[10px] ${learned ? learnedRomaji : "text-[#afafaf]"}`}
+                    >
+                        {item.romaji}
+                    </span>
+                )}
+            </Button>
+        </motion.div>
     );
 }
 
@@ -169,22 +170,19 @@ export default function KanaChartPage() {
                 backHref="/kana"
                 rightWrapperClassName="flex items-center justify-end min-w-0 shrink-0"
                 right={
-                    <button
-                        type="button"
+                    <Button
+                        variant="ghost"
                         onClick={() => setShowRomaji(!showRomaji)}
-                        className={`flex items-center gap-1.5 rounded-xl border-2 px-3 py-1.5 text-[10px] font-bold transition-all active:scale-95 md:text-xs ${
+                        className={`!flex !items-center !gap-1.5 !rounded-xl !border-2 !px-3 !py-1.5 !text-[10px] !font-bold shadow-none transition-all hover:shadow-none active:translate-y-0 md:!text-xs ${
                             !showRomaji
-                                ? "border-[#ea2b2b] bg-[#ffdfe0] text-[#ea2b2b]"
+                                ? "!border-[#ea2b2b] !bg-[#ffdfe0] !text-[#ea2b2b]"
                                 : `${themeColor.primaryLightBg} ${themeColor.text} ${themeColor.primaryBorder}`
                         }`}
+                        icon={showRomaji ? Eye : EyeOff}
+                        iconSize={14}
                     >
-                        {showRomaji ? (
-                            <Eye size={14} strokeWidth={3} />
-                        ) : (
-                            <EyeOff size={14} strokeWidth={3} />
-                        )}
                         <span className="hidden sm:inline">Romaji</span>
-                    </button>
+                    </Button>
                 }
             />
             <div className="animate-in fade-in mx-auto max-w-4xl px-4 pt-6 pb-28 duration-300">

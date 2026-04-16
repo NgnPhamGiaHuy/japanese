@@ -91,9 +91,13 @@ export default function SharedSpeedPage({ params }: { params: Promise<{ shareId:
         return (
             <div className="fixed inset-0 flex flex-col items-center justify-center bg-[#F7F7F8] p-6 text-center">
                 <h1 className="mb-4 text-2xl font-black text-[#3c3c3c]">Deck Not Found</h1>
-                <button onClick={() => router.back()} className="font-bold text-[#1cb0f6]">
+                <Button
+                    variant="ghost"
+                    onClick={() => router.back()}
+                    className="!font-bold !text-[#1cb0f6] shadow-none hover:shadow-none active:translate-y-0"
+                >
                     Go Back
-                </button>
+                </Button>
             </div>
         );
     }

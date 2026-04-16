@@ -2,13 +2,15 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
-import { BookOpen, Flame, Settings, Trophy } from "lucide-react";
+import { BookOpen, Flame, LogOut, Settings, Trophy } from "lucide-react";
 
 import { useLessons } from "@/features/flashcard/hooks";
 import { useUserProgress } from "@/features/user/hooks";
+import { signOut } from "@/features/user/services";
 import { SCREEN_HEADER_BACK_BUTTON_CLASS, ScreenHeader } from "@/shared/components/layout";
-import { StatCard } from "@/shared/components/ui";
+import { Button, StatCard } from "@/shared/components/ui";
 import { SPACING } from "@/shared/constants";
 import { useAppStore } from "@/store";
 
@@ -16,6 +18,7 @@ export default function ProfilePage() {
     const { userData } = useUserProgress();
     const { lessons } = useLessons();
     const user = useAppStore((s) => s.user);
+    const router = useRouter();
 
     const displayName = user?.displayName ?? "Learner";
     const photoURL = user?.photoURL ?? null;
@@ -24,18 +27,25 @@ export default function ProfilePage() {
     const xpInLevel = userData.xp % 500;
     const xpToNext = 500;
 
+    const handleSignOut = async () => {
+        await signOut();
+        router.replace("/login");
+    };
+
     return (
         <div className="min-h-[100dvh] bg-[#F7F7F8] pb-28">
             <ScreenHeader
                 title="Profile"
                 right={
-                    <Link
-                        href="/settings"
-                        className={SCREEN_HEADER_BACK_BUTTON_CLASS}
-                        aria-label="Settings"
-                    >
-                        <Settings size={22} strokeWidth={2.5} />
-                    </Link>
+                    <div className="flex gap-1">
+                        <Link
+                            href="/settings"
+                            className={SCREEN_HEADER_BACK_BUTTON_CLASS}
+                            aria-label="Settings"
+                        >
+                            <Settings size={22} strokeWidth={2.5} />
+                        </Link>
+                    </div>
                 }
             />
             <div className={`mx-auto max-w-md ${SPACING.pagePadding} pt-6`}>
@@ -103,7 +113,7 @@ export default function ProfilePage() {
                 </div>
 
                 {/* Activity */}
-                <div className="rounded-[2rem] border-2 border-b-4 border-gray-200 bg-white p-6 shadow-sm">
+                <div className="mb-10 rounded-[2rem] border-2 border-b-4 border-gray-200 bg-white p-6 shadow-sm">
                     <h3 className="mb-4 text-lg font-black text-[#3c3c3c]">Activity</h3>
                     <div className="space-y-3">
                         <div className="flex items-center justify-between border-b border-gray-100 py-2 last:border-0">
@@ -118,6 +128,17 @@ export default function ProfilePage() {
                         </div>
                     </div>
                 </div>
+
+                {/* Log Out Button */}
+                <Button
+                    variant="secondary"
+                    color="red"
+                    icon={LogOut}
+                    onClick={handleSignOut}
+                    className="w-full py-5 text-lg"
+                >
+                    Sign Out
+                </Button>
             </div>
         </div>
     );

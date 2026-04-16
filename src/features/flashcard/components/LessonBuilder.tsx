@@ -333,18 +333,18 @@ export const LessonBuilder = ({
                                     className="flex items-center gap-2 rounded-xl border-2 border-gray-200 bg-gray-100 px-3 py-1.5 text-xs font-black text-[#afafaf] uppercase"
                                 >
                                     {tag}
-                                    <button
+                                    <Button
+                                        variant="ghost"
                                         onClick={() =>
                                             setLesson({
                                                 ...lesson,
                                                 tags: lesson.tags.filter((t) => t !== tag),
                                             })
                                         }
-                                        className="hover:text-[#ea2b2b]"
+                                        className="!h-auto !w-auto !p-0.5 hover:text-[#ea2b2b]"
                                         disabled={saving}
-                                    >
-                                        <X size={14} strokeWidth={3} />
-                                    </button>
+                                        icon={X}
+                                    />
                                 </span>
                             ))}
                         </div>
@@ -372,14 +372,14 @@ export const LessonBuilder = ({
                                     "#ea2b2b", // Red
                                     "#ff66bb", // Pink
                                 ].map((color) => (
-                                    <button
+                                    <Button
                                         key={color}
                                         type="button"
                                         onClick={() => setLesson({ ...lesson, themeColor: color })}
-                                        className={`h-12 w-12 rounded-full border-[3px] transition-all hover:scale-110 active:scale-95 ${
+                                        className={`!h-12 !w-12 !min-w-0 !rounded-full !border-[3px] !p-0 shadow-none transition-all hover:scale-110 hover:shadow-none active:translate-y-0 active:scale-95 ${
                                             (lesson.themeColor || "#1cb0f6") === color
-                                                ? "border-black shadow-sm"
-                                                : "border-transparent opacity-80 hover:opacity-100"
+                                                ? "!border-black shadow-sm"
+                                                : "!border-transparent opacity-80 hover:opacity-100"
                                         }`}
                                         style={{ backgroundColor: color }}
                                     />
@@ -392,25 +392,21 @@ export const LessonBuilder = ({
                 {/* Input Mode Tabs (Import Logic Swappers) */}
                 <div className="mb-6 flex overflow-hidden rounded-2xl border-2 border-gray-200 bg-white shadow-sm">
                     {(["ai", "manual", "paste", "file"] as const).map((mode) => (
-                        <button
+                        <Button
                             key={mode}
+                            variant="ghost"
                             onClick={() => {
                                 setImportMode(mode);
                                 setPreviewRows(null);
                             }}
-                            className={`flex flex-1 items-center justify-center gap-1.5 p-4 text-xs font-black tracking-wider uppercase transition-colors ${importMode === mode ? "text-white" : "text-[#afafaf] hover:bg-gray-50"}`}
+                            className={`!flex !flex-1 !items-center !justify-center !gap-1.5 !rounded-none !p-4 !text-xs !font-black !tracking-wider uppercase shadow-none transition-colors hover:shadow-none active:translate-y-0 ${importMode === mode ? "!text-white" : "!text-[#afafaf] hover:!bg-gray-50"}`}
                             style={importMode === mode ? { backgroundColor: themeHex } : {}}
+                            icon={mode === "ai" ? Sparkles : undefined}
+                            iconSize={14}
+                            iconClassName={importMode === "ai" ? "!text-white" : ""}
                         >
-                            {mode === "ai" && (
-                                <Sparkles
-                                    size={14}
-                                    strokeWidth={2.5}
-                                    className={importMode === "ai" ? "text-white" : ""}
-                                    style={importMode !== "ai" ? { color: themeHex } : {}}
-                                />
-                            )}
                             {mode === "ai" ? "AI" : mode}
-                        </button>
+                        </Button>
                     ))}
                 </div>
 
@@ -537,14 +533,16 @@ export const LessonBuilder = ({
                                     `(${cards.length})`
                                 )}
                             </h3>
-                            <button
+                            <Button
                                 onClick={() => setCards([...cards, makeCard()])}
                                 disabled={saving || cardsLoading}
-                                className="flex items-center gap-1 text-sm font-black hover:opacity-80 disabled:opacity-50"
-                                style={{ color: themeHex }}
+                                variant="ghost"
+                                className="!flex !items-center !gap-1 !px-2 !text-sm !font-black shadow-none hover:shadow-none"
+                                color={themeHex}
+                                icon={Plus}
                             >
-                                <Plus size={18} strokeWidth={3} /> Add Card
-                            </button>
+                                Add Card
+                            </Button>
                         </div>
 
                         <div className="space-y-6">
@@ -556,14 +554,16 @@ export const LessonBuilder = ({
                                     <div className="absolute -top-3 -left-3 flex h-10 w-10 -rotate-3 transform items-center justify-center rounded-xl border-b-4 border-black bg-[#3c3c3c] text-lg font-black text-white shadow-sm">
                                         {idx + 1}
                                     </div>
-                                    <button
+                                    <Button
+                                        variant="primary"
+                                        color="red"
                                         onClick={() => removeCard(card.id)}
                                         disabled={saving}
-                                        className="absolute -top-3 -right-3 z-10 flex h-10 w-10 rotate-3 transform items-center justify-center rounded-xl border-b-4 border-[#ea2b2b] bg-[#ea2b2b] text-white opacity-100 shadow-sm transition-all hover:scale-110 active:scale-95 md:opacity-0 md:group-hover:opacity-100"
+                                        className="absolute -top-3 -right-3 z-10 !h-10 !w-10 rotate-3 transform !p-1 opacity-100 transition-all hover:scale-110 active:scale-95 md:opacity-0 md:group-hover:opacity-100"
                                         title="Remove Card"
-                                    >
-                                        <Trash2 size={20} strokeWidth={3} />
-                                    </button>
+                                        icon={Trash2}
+                                        iconSize={22}
+                                    />
 
                                     <div className="mt-4 grid grid-cols-1 gap-6 md:grid-cols-2">
                                         <div className="md:col-span-2">
@@ -571,39 +571,30 @@ export const LessonBuilder = ({
                                                 <label className="text-[10px] font-black tracking-widest text-[#afafaf] uppercase">
                                                     Primary ✱
                                                 </label>
-                                                <button
-                                                    type="button"
+                                                <Button
+                                                    variant="ghost"
                                                     title={
                                                         card.primary?.trim()
                                                             ? "Auto-fill with AI"
                                                             : "Type a word first"
                                                     }
-                                                    disabled={
-                                                        saving ||
-                                                        aiLoadingCardIds.has(card.id) ||
-                                                        !card.primary?.trim()
-                                                    }
+                                                    loading={aiLoadingCardIds.has(card.id)}
+                                                    disabled={saving || !card.primary?.trim()}
                                                     onClick={() =>
                                                         handleAIFillCard(
                                                             card.id,
                                                             card.primary || "",
                                                         )
                                                     }
-                                                    className="flex items-center gap-1 rounded-lg border border-transparent px-2 py-0.5 text-[9px] font-black uppercase transition-all hover:enabled:border-gray-200 hover:enabled:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-30"
-                                                    style={{ color: themeHex }}
+                                                    className="!flex !h-auto !items-center !gap-1 !px-2 !py-0.5 !text-[9px] !font-black uppercase shadow-none hover:shadow-none"
+                                                    color={themeHex}
+                                                    icon={Sparkles}
+                                                    iconSize={10}
                                                 >
-                                                    {aiLoadingCardIds.has(card.id) ? (
-                                                        <Loader2
-                                                            size={10}
-                                                            className="animate-spin"
-                                                        />
-                                                    ) : (
-                                                        <Sparkles size={10} />
-                                                    )}
                                                     {aiLoadingCardIds.has(card.id)
                                                         ? "Filling…"
                                                         : "AI Fill"}
-                                                </button>
+                                                </Button>
                                             </div>
                                             <input
                                                 className={`w-full border-b-2 border-gray-100 bg-transparent pb-2 text-3xl font-black text-[#3c3c3c] transition-colors outline-none focus:border-[var(--theme-color)] ${aiLoadingCardIds.has(card.id) ? "opacity-60" : ""}`}
@@ -688,8 +679,11 @@ export const LessonBuilder = ({
                                                                     "none";
                                                             }}
                                                         />
-                                                        <button
-                                                            onClick={() => {
+                                                        <Button
+                                                            variant="ghost"
+                                                            onClick={(e) => {
+                                                                e.preventDefault();
+                                                                e.stopPropagation();
                                                                 // Track the cleared path so we can delete from Storage on save
                                                                 if (card.imagePath) {
                                                                     clearedImagePathsRef.current.push(
@@ -715,10 +709,10 @@ export const LessonBuilder = ({
                                                                 );
                                                             }}
                                                             disabled={saving}
-                                                            className="absolute inset-0 flex items-center justify-center bg-black/50 text-white opacity-0 transition-opacity hover:opacity-100"
-                                                        >
-                                                            <Trash2 size={24} />
-                                                        </button>
+                                                            className="absolute inset-0 !flex !h-full !w-full !items-center !justify-center !rounded-xl !bg-black/50 !text-white opacity-0 shadow-none transition-opacity hover:opacity-100 hover:shadow-none active:translate-y-0"
+                                                            icon={Trash2}
+                                                            iconSize={24}
+                                                        />
                                                     </div>
                                                 ) : (
                                                     <div className="flex h-20 w-20 items-center justify-center rounded-xl border-2 border-dashed border-gray-300 bg-gray-50 text-gray-400">
@@ -739,14 +733,21 @@ export const LessonBuilder = ({
                                                             )
                                                         }
                                                     />
-                                                    <label
-                                                        htmlFor={`img-upload-${card.id}`}
-                                                        className="inline-block cursor-pointer rounded-xl border-2 border-gray-200 bg-white px-4 py-2 text-sm font-bold text-[#3c3c3c] shadow-sm hover:bg-gray-50"
+                                                    <Button
+                                                        variant="ghost"
+                                                        onClick={() => {
+                                                            document
+                                                                .getElementById(
+                                                                    `img-upload-${card.id}`,
+                                                                )
+                                                                ?.click();
+                                                        }}
+                                                        className="!rounded-xl !border-2 !border-gray-200 !bg-white !px-4 !py-2 !text-sm !font-bold !text-[#3c3c3c] shadow-sm hover:!bg-gray-50 active:translate-y-0"
                                                     >
                                                         {card.previewUrl || card.imageUrl
                                                             ? "Change Image"
                                                             : "Upload Image"}
-                                                    </label>
+                                                    </Button>
                                                 </div>
                                             </div>
                                         </div>
@@ -756,29 +757,30 @@ export const LessonBuilder = ({
 
                             {cards.length > 0 && (
                                 <div className="pt-4 pb-8">
-                                    <button
+                                    <Button
                                         onClick={() => setCards([...cards, makeCard()])}
                                         disabled={saving || cardsLoading}
-                                        className="flex w-full items-center justify-center gap-2 rounded-[1.5rem] border-2 border-b-4 border-gray-200 bg-white py-4 text-sm font-black transition-all hover:bg-gray-50 active:translate-y-0.5 active:border-b-2"
-                                        style={{ color: themeHex }}
+                                        variant="secondary"
+                                        className="w-full !rounded-[1.5rem] !py-4 !text-sm !font-black"
+                                        color={themeHex}
+                                        icon={Plus}
                                     >
-                                        <Plus size={20} strokeWidth={3} /> Add Another Card
-                                    </button>
+                                        Add Another Card
+                                    </Button>
                                 </div>
                             )}
 
                             {!cardsLoading && cards.length === 0 && (
-                                <div
+                                <Button
+                                    variant="ghost"
                                     onClick={() => setCards([makeCard()])}
-                                    className="cursor-pointer rounded-[2rem] border-4 border-dashed border-gray-300 p-12 text-center text-lg font-bold text-[#afafaf] transition-colors hover:border-[var(--theme-color)] hover:bg-white hover:text-[var(--theme-color)]"
+                                    className="!flex !h-auto !w-full !cursor-pointer !flex-col !items-center !justify-center !gap-4 !rounded-[2rem] !border-4 !border-dashed !border-gray-300 !bg-white !p-12 !text-center !text-lg !font-bold !text-[#afafaf] shadow-none transition-colors hover:!border-[var(--theme-color)] hover:!bg-white hover:!text-[var(--theme-color)] hover:shadow-none active:translate-y-0"
+                                    icon={Plus}
+                                    iconSize={48}
+                                    iconClassName="!opacity-50 !mb-0"
                                 >
-                                    <Plus
-                                        size={48}
-                                        className="mx-auto mb-4 opacity-50"
-                                        strokeWidth={2.5}
-                                    />
                                     <p>Click to add your first card</p>
-                                </div>
+                                </Button>
                             )}
                         </div>
                     </div>

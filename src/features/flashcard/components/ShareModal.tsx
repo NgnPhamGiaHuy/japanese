@@ -391,17 +391,18 @@ const ShareModal = ({ lesson, onShareLink, onUpdateRoles, onClose }: ShareModalP
                                                                     </div>
                                                                 </div>
                                                             </div>
-                                                            <button
+                                                            <Button
+                                                                variant="ghost"
                                                                 onClick={() =>
                                                                     void handleRevokeEmailInvite(
                                                                         email,
                                                                     )
                                                                 }
                                                                 disabled={saving}
-                                                                className="text-xs font-bold text-gray-400 transition-colors hover:text-red-500"
+                                                                className="!p-1 !text-xs !font-bold text-gray-400 transition-colors hover:bg-red-50 hover:text-red-500"
                                                             >
                                                                 Revoke
-                                                            </button>
+                                                            </Button>
                                                         </div>
                                                     ),
                                                 )}
@@ -426,8 +427,9 @@ const ShareModal = ({ lesson, onShareLink, onUpdateRoles, onClose }: ShareModalP
 
                                     <div className="relative flex-1">
                                         {/* Privacy picker */}
-                                        <button
-                                            className="flex w-fit items-center gap-2 rounded-lg py-1 pr-2 text-lg font-black text-[#3c3c3c] transition-colors hover:bg-gray-100"
+                                        <Button
+                                            variant="ghost"
+                                            className="flex w-fit items-center gap-2 !py-1 !pr-2 !text-lg !font-black text-[#3c3c3c] hover:bg-gray-100"
                                             onClick={() => setOpenPrivacyMenu((v) => !v)}
                                             disabled={saving}
                                         >
@@ -438,7 +440,7 @@ const ShareModal = ({ lesson, onShareLink, onUpdateRoles, onClose }: ShareModalP
                                                 size={20}
                                                 className={`text-gray-400 transition-transform ${openPrivacyMenu ? "rotate-180" : ""}`}
                                             />
-                                        </button>
+                                        </Button>
 
                                         {openPrivacyMenu && (
                                             <>
@@ -447,15 +449,19 @@ const ShareModal = ({ lesson, onShareLink, onUpdateRoles, onClose }: ShareModalP
                                                     onClick={() => setOpenPrivacyMenu(false)}
                                                 />
                                                 <div className="animate-in fade-in zoom-in-95 absolute top-10 left-0 z-50 w-64 overflow-hidden rounded-2xl border-2 border-gray-100 bg-white shadow-lg">
-                                                    <button
-                                                        className="flex w-full items-center gap-3 border-b-2 border-gray-50 p-4 text-left hover:bg-gray-50"
+                                                    <Button
+                                                        variant="ghost"
+                                                        className="flex w-full items-center !justify-start gap-3 !rounded-none border-b-2 border-gray-50 !p-4 !text-left shadow-none hover:bg-gray-50 hover:shadow-none"
                                                         onClick={() => {
                                                             void handleSaveLinkAccess(false);
                                                             setOpenPrivacyMenu(false);
                                                         }}
                                                     >
-                                                        <Lock className="text-gray-400" size={20} />
-                                                        <div>
+                                                        <Lock
+                                                            className="shrink-0 text-gray-400"
+                                                            size={20}
+                                                        />
+                                                        <div className="flex-1 text-left">
                                                             <div className="font-black text-[#3c3c3c]">
                                                                 Restricted
                                                             </div>
@@ -467,11 +473,13 @@ const ShareModal = ({ lesson, onShareLink, onUpdateRoles, onClose }: ShareModalP
                                                             <Check
                                                                 style={{ color: themeHex }}
                                                                 size={20}
+                                                                className="shrink-0"
                                                             />
                                                         )}
-                                                    </button>
-                                                    <button
-                                                        className="flex w-full items-center gap-3 p-4 text-left hover:bg-gray-50"
+                                                    </Button>
+                                                    <Button
+                                                        variant="ghost"
+                                                        className="flex w-full items-center !justify-start gap-3 !rounded-none !p-4 !text-left shadow-none hover:bg-gray-50 hover:shadow-none"
                                                         onClick={() => {
                                                             void handleSaveLinkAccess(true);
                                                             setOpenPrivacyMenu(false);
@@ -480,8 +488,9 @@ const ShareModal = ({ lesson, onShareLink, onUpdateRoles, onClose }: ShareModalP
                                                         <Globe2
                                                             style={{ color: themeHex }}
                                                             size={20}
+                                                            className="shrink-0"
                                                         />
-                                                        <div>
+                                                        <div className="flex-1 text-left">
                                                             <div className="font-black text-[#3c3c3c]">
                                                                 Anyone with the link
                                                             </div>
@@ -493,9 +502,10 @@ const ShareModal = ({ lesson, onShareLink, onUpdateRoles, onClose }: ShareModalP
                                                             <Check
                                                                 style={{ color: themeHex }}
                                                                 size={20}
+                                                                className="shrink-0"
                                                             />
                                                         )}
-                                                    </button>
+                                                    </Button>
                                                 </div>
                                             </>
                                         )}

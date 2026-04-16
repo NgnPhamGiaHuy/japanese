@@ -26,12 +26,12 @@ interface SpeedIntroViewProps {
 const SpeedIntroView = ({ bestScore, tierInfo, onBack, onStart }: SpeedIntroViewProps) => {
     return (
         <div className="fixed inset-0 flex flex-col items-center justify-center bg-[#F7F7F8] p-6">
-            <button
+            <Button
+                variant="ghost"
                 onClick={onBack}
-                className="absolute top-4 left-4 rounded-xl p-2 text-gray-400 hover:bg-gray-200"
-            >
-                <X size={20} />
-            </button>
+                className="absolute top-4 left-4 !p-2"
+                icon={X}
+            />
 
             <motion.div
                 initial={{ scale: 0.8, opacity: 0 }}

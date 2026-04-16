@@ -10,6 +10,7 @@ import { X } from "lucide-react";
 
 import { MiniLeaderboard } from "@/features/game/components";
 import { SPEED_GAME_CONFIG } from "@/features/game/modes";
+import { Button } from "@/shared/components/ui";
 
 import type { FlashCard } from "../types";
 import type { QuestionType } from "../utils";
@@ -70,9 +71,12 @@ const SpeedPlayingView = ({
     return (
         <div className="fixed inset-0 z-50 flex flex-col bg-[#F7F7F8]">
             <header className="flex items-center justify-between p-4">
-                <button onClick={onBack} className="rounded-xl p-2 text-gray-400 hover:bg-gray-200">
-                    <X size={20} />
-                </button>
+                <Button
+                    variant="ghost"
+                    onClick={onBack}
+                    className="!p-2 text-gray-400 hover:text-gray-600"
+                    icon={X}
+                />
 
                 <div className="flex flex-col items-center">
                     <span className="text-sm font-black text-[#3c3c3c]">
@@ -187,14 +191,15 @@ const SpeedPlayingView = ({
                         }
 
                         return (
-                            <button
+                            <Button
                                 key={index}
+                                variant="ghost"
                                 disabled={answerStatus !== "idle"}
                                 onClick={() => onAnswer(option)}
-                                className={className}
+                                className={`!min-h-[72px] !rounded-2xl !border-2 !border-b-4 !px-5 !py-4 !text-left !text-base !font-bold shadow-none select-none hover:shadow-none active:translate-y-0 ${className}`}
                             >
                                 {option}
-                            </button>
+                            </Button>
                         );
                     })}
                 </div>

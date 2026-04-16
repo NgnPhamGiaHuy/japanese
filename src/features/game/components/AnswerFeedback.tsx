@@ -2,6 +2,7 @@
 
 import { Check, Volume2, X } from "lucide-react";
 
+import { Button } from "@/shared/components/ui";
 import { allowAudio, playAudio } from "@/shared/utils";
 
 import type { KanaChar, QuestionType } from "@/features/kana/types";
@@ -45,14 +46,14 @@ const AnswerFeedback = ({
                         <span className="tracking-wider uppercase">{question?.romaji}</span>
                     </span>
                     {canReplayAudio && (
-                        <button
-                            type="button"
+                        <Button
+                            variant="ghost"
                             onClick={() => playAudio(question.char)}
-                            className="ml-1 shrink-0 rounded-lg bg-black/10 p-1.5 transition-colors hover:bg-black/20"
+                            className="!ml-1 !shrink-0 !rounded-lg !bg-black/10 !p-1.5 shadow-none transition-colors hover:!bg-black/20 hover:shadow-none active:translate-y-0"
                             aria-label="Replay audio"
-                        >
-                            <Volume2 size={14} strokeWidth={2.5} />
-                        </button>
+                            icon={Volume2}
+                            iconSize={14}
+                        />
                     )}
                 </div>
             )}
@@ -71,14 +72,15 @@ const AnswerFeedback = ({
                         <span className="tracking-wider uppercase">{question?.romaji}</span>
                     </span>
                     {canReplayAudio && (
-                        <button
-                            type="button"
+                        <Button
+                            variant="ghost"
                             onClick={() => playAudio(question.char)}
-                            className="ml-1 shrink-0 rounded-lg bg-[#ea2b2b]/10 p-1.5 transition-colors hover:bg-[#ea2b2b]/20"
+                            className="!ml-1 !shrink-0 !rounded-lg !bg-[#ea2b2b]/10 !p-1.5 shadow-none transition-colors hover:!bg-[#ea2b2b]/20 hover:shadow-none active:translate-y-0"
                             aria-label="Replay audio"
-                        >
-                            <Volume2 size={14} strokeWidth={2.5} className="text-[#ea2b2b]" />
-                        </button>
+                            icon={Volume2}
+                            iconSize={14}
+                            iconClassName="text-[#ea2b2b]"
+                        />
                     )}
                 </div>
             )}

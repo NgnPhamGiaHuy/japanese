@@ -160,23 +160,24 @@ export const FlashcardLearn = ({
             <div className="mx-auto flex w-full max-w-md flex-1 flex-col items-center justify-center gap-6 p-4 sm:p-6">
                 <div className="relative flex w-full flex-col items-center justify-center rounded-[2.5rem] border-2 border-b-8 border-gray-200 bg-white p-8 text-center shadow-sm">
                     {card.hint && (
-                        <button
-                            type="button"
+                        <Button
+                            variant="ghost"
                             onClick={() => setHintVisible((v) => !v)}
-                            className="absolute top-4 left-4 flex items-center gap-1.5 rounded-xl border-2 border-gray-100 bg-gray-50 px-3 py-1.5 text-[10px] font-black tracking-wide uppercase transition-colors hover:bg-gray-100"
-                            style={{ color: hintVisible ? themeHex : "#afafaf" }}
+                            className="absolute top-4 left-4 !flex !items-center !gap-1.5 !rounded-xl border-2 border-gray-100 bg-gray-50 !px-3 !py-1.5 !text-[10px] !font-black tracking-wide uppercase shadow-none hover:shadow-none"
+                            color={hintVisible ? themeHex : "#afafaf"}
+                            icon={Lightbulb}
                         >
-                            <Lightbulb size={11} />
                             Hint
-                        </button>
+                        </Button>
                     )}
 
-                    <button
+                    <Button
+                        variant="ghost"
                         onClick={() => playAudio(getAudioText(card))}
-                        className="absolute top-4 right-4 rounded-full bg-gray-100 p-2 text-gray-400 transition-colors hover:bg-gray-200"
-                    >
-                        <Volume2 className="h-5 w-5" />
-                    </button>
+                        className="absolute top-4 right-4 !rounded-full bg-gray-100 !p-2 shadow-none hover:shadow-none active:translate-y-0"
+                        icon={Volume2}
+                        iconClassName="h-5 w-5 text-gray-400"
+                    />
 
                     {/* Furigana — only in mixed stage */}
                     {headerHint && (

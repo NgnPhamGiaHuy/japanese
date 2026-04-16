@@ -203,12 +203,12 @@ export const ImportPreview = ({
                                     )}
                                 </td>
                                 <td className="p-4 text-center">
-                                    <button
+                                    <Button
+                                        variant="ghost"
                                         onClick={() => removeRow(row.id)}
-                                        className="text-gray-300 transition-colors hover:text-red-500"
-                                    >
-                                        <Trash2 size={20} />
-                                    </button>
+                                        className="!p-1 text-gray-300 transition-colors hover:bg-red-50 hover:text-red-500"
+                                        icon={Trash2}
+                                    />
                                 </td>
                             </tr>
                         ))}

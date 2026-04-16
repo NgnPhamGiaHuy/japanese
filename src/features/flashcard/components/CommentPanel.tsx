@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 
 import { MessageSquare, SlidersHorizontal } from "lucide-react";
 
+import { Button } from "@/shared/components/ui";
 import { useAlert } from "@/shared/providers";
 import CommentInput from "./CommentInput";
 import CommentThread from "./CommentThread";
@@ -249,18 +250,20 @@ const CommentPanel = ({
                 </div>
 
                 {resolvedCount > 0 && (
-                    <button
+                    <Button
+                        variant="ghost"
                         onClick={() => setShowResolved((v) => !v)}
-                        className={`flex items-center gap-1 rounded-lg px-2 py-1 text-[11px] font-bold transition-colors ${
+                        className={`!flex !items-center !gap-1 !rounded-lg !px-2 !py-1 !text-[11px] !font-bold shadow-none transition-colors hover:shadow-none active:translate-y-0 ${
                             showResolved
-                                ? "bg-gray-100 text-gray-700"
-                                : "text-gray-400 hover:text-gray-600"
+                                ? "!bg-gray-100 !text-gray-700"
+                                : "!text-gray-400 hover:!text-gray-600"
                         }`}
                         title={showResolved ? "Hide resolved" : `Show ${resolvedCount} resolved`}
+                        icon={SlidersHorizontal}
+                        iconSize={11}
                     >
-                        <SlidersHorizontal size={11} />
                         {showResolved ? "Hide resolved" : `${resolvedCount} resolved`}
-                    </button>
+                    </Button>
                 )}
             </div>
 

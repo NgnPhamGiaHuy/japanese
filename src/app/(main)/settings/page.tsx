@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useUserProgress } from "@/features/user/hooks";
 import { signOut } from "@/features/user/services";
 import { ScreenHeader } from "@/shared/components/layout";
+import { Button } from "@/shared/components/ui";
 import { SPACING } from "@/shared/constants";
 import { useAppStore } from "@/store";
 
@@ -93,9 +94,10 @@ export default function SettingsPage() {
                                 Account
                             </h3>
                         </div>
-                        <button
-                            className="group flex w-full items-center justify-between px-6 py-4 text-left transition-colors hover:bg-[#ffdfe0]"
+                        <Button
+                            variant="ghost"
                             onClick={handleSignOut}
+                            className="!flex !w-full !items-center !justify-between !rounded-none !px-6 !py-4 !text-left shadow-none hover:!bg-[#ffdfe0] hover:shadow-none active:translate-y-0"
                         >
                             <div>
                                 <div className="font-black text-[#ea2b2b]">Sign Out</div>
@@ -103,10 +105,8 @@ export default function SettingsPage() {
                                     Log out of your Google account
                                 </div>
                             </div>
-                            <span className="text-lg font-black text-[#ea2b2b] opacity-50 group-hover:opacity-100">
-                                ›
-                            </span>
-                        </button>
+                            <span className="text-lg font-black text-[#ea2b2b] opacity-50">›</span>
+                        </Button>
                     </div>
                 </div>
             </div>
@@ -128,10 +128,10 @@ function ToggleRow({
     color: string;
 }) {
     const colors: Record<string, string> = {
-        blue: "bg-[#1cb0f6] border-[#1899d6]",
-        green: "bg-[#58cc02] border-[#58a700]",
-        purple: "bg-[#ce82ff] border-[#b65ce8]",
-        orange: "bg-[#ff9600] border-[#cc7800]",
+        blue: "!bg-[#1cb0f6] hover:!bg-[#1cb0f6] !border-[#1899d6]",
+        green: "!bg-[#58cc02] hover:!bg-[#58cc02] !border-[#58a700]",
+        purple: "!bg-[#ce82ff] hover:!bg-[#ce82ff] !border-[#b65ce8]",
+        orange: "!bg-[#ff9600] hover:!bg-[#ff9600] !border-[#cc7800]",
     };
     return (
         <div className="flex items-center justify-between px-6 py-4">
@@ -139,31 +139,32 @@ function ToggleRow({
                 <div className="font-black text-[#3c3c3c]">{label}</div>
                 <div className="text-sm font-bold text-[#afafaf]">{sub}</div>
             </div>
-            <button
+            <Button
+                variant="ghost"
                 onClick={onToggle}
-                className={`relative h-8 w-14 rounded-full border-2 border-b-4 transition-all duration-200 ${value ? `${colors[color]}` : "border-gray-300 bg-gray-200"}`}
+                className={`!relative !h-8 !w-14 !rounded-full !border-2 !border-b-4 !p-0 shadow-none transition-all duration-200 hover:shadow-none active:translate-y-[2px] ${value ? `${colors[color]}` : "!border-gray-300 !bg-gray-200 hover:!bg-gray-200"}`}
             >
                 <div
-                    className={`absolute top-1 h-5 w-5 rounded-full bg-white shadow-sm transition-all duration-300 ${value ? "left-7" : "left-1"}`}
+                    className={`absolute h-5 w-5 rounded-full bg-white shadow-sm transition-all duration-300 ${value ? "left-7" : "left-1"}`}
+                    style={{ top: "2px" }}
                 />
-            </button>
+            </Button>
         </div>
     );
 }
 
 function DangerRow({ label, sub, onClick }: { label: string; sub: string; onClick: () => void }) {
     return (
-        <button
-            className="group flex w-full items-center justify-between px-6 py-4 text-left transition-colors hover:bg-[#ffdfe0]"
+        <Button
+            variant="ghost"
+            className="!flex !w-full !items-center !justify-between !rounded-none !px-6 !py-4 !text-left shadow-none hover:!bg-[#ffdfe0] hover:shadow-none active:translate-y-0"
             onClick={onClick}
         >
             <div>
                 <div className="font-black text-[#ea2b2b]">{label}</div>
                 <div className="text-sm font-bold text-[#afafaf]">{sub}</div>
             </div>
-            <span className="text-lg font-black text-[#ea2b2b] opacity-50 group-hover:opacity-100">
-                ›
-            </span>
-        </button>
+            <span className="text-lg font-black text-[#ea2b2b] opacity-50">›</span>
+        </Button>
     );
 }

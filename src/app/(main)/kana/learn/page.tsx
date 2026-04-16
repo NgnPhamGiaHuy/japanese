@@ -80,20 +80,22 @@ export default function KanaLearnPage() {
                         >
                             {currentIndex + 1} / {dataset.length}
                         </span>
-                        <button
-                            type="button"
+                        <Button
+                            variant="ghost"
                             onClick={() => setIsRandom(!isRandom)}
-                            className={`flex shrink-0 items-center gap-1 rounded-lg border-2 px-2 py-1.5 text-[10px] font-bold transition-all active:scale-95 md:rounded-xl md:px-3 md:py-2 md:text-xs ${
+                            className={`!flex !shrink-0 !items-center !gap-1 !rounded-lg !border-2 !px-2 !py-1.5 !text-[10px] !font-bold shadow-none transition-all hover:shadow-none active:translate-y-0 md:!rounded-xl md:!px-3 md:!py-2 md:!text-xs ${
                                 isRandom
                                     ? `${themeColor.primaryLightBg} ${themeColor.primaryBorder} ${themeColor.text} shadow-sm`
-                                    : "border-gray-200 bg-white text-gray-500 hover:bg-gray-50"
+                                    : "!border-gray-200 !bg-white !text-gray-500 hover:!bg-gray-50"
                             }`}
+                            icon={Shuffle}
+                            iconSize={14}
+                            iconClassName={isRandom ? "stroke-[3px]" : "stroke-[2px]"}
                         >
-                            <Shuffle size={14} strokeWidth={isRandom ? 3 : 2} />
                             <span className="hidden sm:inline">
                                 {isRandom ? "Random" : "Sequential"}
                             </span>
-                        </button>
+                        </Button>
                     </div>
                 </div>
 
@@ -115,12 +117,14 @@ export default function KanaLearnPage() {
                         <span className="absolute top-4 left-4 text-[10px] font-black tracking-widest text-gray-400 uppercase">
                             {char.group}
                         </span>
-                        <button
+                        <Button
+                            variant="ghost"
                             onClick={() => playAudio(char.char)}
-                            className={`absolute top-4 right-4 rounded-full border-2 border-gray-100 bg-gray-50 p-2 transition-transform hover:bg-gray-100 active:scale-95 ${themeColor.text}`}
-                        >
-                            <Volume2 size={20} strokeWidth={2.5} />
-                        </button>
+                            className={`absolute top-4 right-4 !rounded-full !border-2 !border-gray-100 !bg-gray-50 !p-2 shadow-none transition-transform hover:!bg-gray-100 hover:shadow-none active:translate-y-0 ${themeColor.text}`}
+                            icon={Volume2}
+                            iconSize={20}
+                        />
+
                         <div className="mt-10 mb-6 flex min-h-[140px] w-full items-center justify-center md:min-h-[220px]">
                             {isMulti ? (
                                 <span

@@ -23,6 +23,7 @@ import {
     useNotifications,
 } from "@/features/notifications";
 import { ScreenHeader } from "@/shared/components/layout";
+import { Button } from "@/shared/components/ui";
 import { useAppStore } from "@/store";
 
 import type {
@@ -113,44 +114,31 @@ function InviteActions({
 
     return (
         <div className="mt-3 flex gap-2">
-            <button
-                type="button"
+            <Button
                 onClick={handleAccept}
-                disabled={isPending}
-                className="flex flex-1 items-center justify-center gap-1.5 rounded-xl border-2 border-b-4 border-[#1899d6] bg-[#1cb0f6] px-3 py-2 text-xs font-black text-white transition-all hover:bg-[#149fdf] active:translate-y-px active:border-b-2 disabled:opacity-50"
+                loading={isPending}
+                variant="primary"
+                className="!flex-1 !rounded-xl !px-3 !py-2 !text-xs !font-black"
+                icon={Check}
+                iconSize={13}
             >
-                <Check size={13} strokeWidth={3} />
                 Accept
-            </button>
-            <button
-                type="button"
+            </Button>
+            <Button
                 onClick={handleDecline}
-                disabled={isPending}
-                className="flex flex-1 items-center justify-center gap-1.5 rounded-xl border-2 border-b-4 border-gray-300 bg-white px-3 py-2 text-xs font-black text-gray-500 transition-all hover:bg-gray-50 active:translate-y-px active:border-b-2 disabled:opacity-50"
+                loading={isPending}
+                variant="secondary"
+                className="!flex-1 !rounded-xl !border-gray-300 !px-3 !py-2 !text-xs !font-black"
+                icon={X}
+                iconSize={13}
             >
-                <X size={13} strokeWidth={3} />
                 Decline
-            </button>
+            </Button>
         </div>
     );
 }
 
 // ─── Single notification row ──────────────────────────────────────────────────
-//
-// Layout: the outer shell is a <div> (never a <button>) so that InviteActions
-// can render its own <button> elements as siblings — not descendants — of the
-// clickable content area. Nested <button> inside <button> is invalid HTML.
-//
-//  <div row>                   ← outer shell (div, not button)
-//    <span unread-dot />
-//    <div icon />
-//    <div content>             ← clickable via onClick on this div
-//      <p title />
-//      <p message />
-//    </div>
-//    <InviteActions />         ← sibling of content, NOT inside it
-//    <button delete />         ← sibling, valid
-//  </div>
 
 function NotificationRow({
     notification,
@@ -226,14 +214,14 @@ function NotificationRow({
                 </div>
 
                 {/* Delete button — sibling of content div, never nested inside it */}
-                <button
-                    type="button"
+                <Button
+                    variant="ghost"
                     onClick={handleDelete}
                     aria-label="Dismiss notification"
-                    className="mt-0.5 shrink-0 rounded-lg p-1.5 text-gray-300 opacity-0 transition-all group-hover:opacity-100 hover:bg-red-50 hover:text-[#ea2b2b] focus:opacity-100"
-                >
-                    <Trash2 size={15} />
-                </button>
+                    className="!mt-0.5 !shrink-0 !rounded-lg !p-1.5 !text-gray-300 opacity-0 shadow-none transition-all group-hover:opacity-100 hover:!bg-red-50 hover:!text-[#ea2b2b] hover:shadow-none focus:opacity-100 active:translate-y-0"
+                    icon={Trash2}
+                    iconSize={15}
+                />
             </div>
 
             {/* Invite action buttons — rendered OUTSIDE the text div, never nested in it */}
@@ -368,26 +356,30 @@ export default function NotificationsPage() {
                 right={
                     <div className="flex items-center gap-1">
                         {unreadCount > 0 && (
-                            <button
+                            <Button
+                                variant="ghost"
                                 onClick={handleMarkAllRead}
-                                disabled={isMarkingAll}
-                                className="flex items-center gap-1 rounded-xl px-2.5 py-2 text-xs font-black text-[#1cb0f6] transition-colors hover:bg-blue-50 disabled:opacity-50"
+                                loading={isMarkingAll}
+                                className="!flex !items-center !gap-1 !rounded-xl !px-2.5 !py-2 !text-xs !font-black !text-[#1cb0f6] shadow-none transition-colors hover:!bg-blue-50 hover:shadow-none active:translate-y-0"
                                 title="Mark all as read"
+                                icon={CheckCheck}
+                                iconSize={15}
                             >
-                                <CheckCheck size={15} />
                                 <span className="hidden sm:inline">All read</span>
-                            </button>
+                            </Button>
                         )}
                         {notifications.length > 0 && (
-                            <button
+                            <Button
+                                variant="ghost"
                                 onClick={handleClearAll}
-                                disabled={isClearingAll}
-                                className="flex items-center gap-1 rounded-xl px-2.5 py-2 text-xs font-black text-gray-400 transition-colors hover:bg-red-50 hover:text-[#ea2b2b] disabled:opacity-50"
+                                loading={isClearingAll}
+                                className="!flex !items-center !gap-1 !rounded-xl !px-2.5 !py-2 !text-xs !font-black !text-gray-400 shadow-none transition-colors hover:!bg-red-50 hover:!text-[#ea2b2b] hover:shadow-none active:translate-y-0"
                                 title="Clear all notifications"
+                                icon={Trash2}
+                                iconSize={15}
                             >
-                                <Trash2 size={15} />
                                 <span className="hidden sm:inline">Clear</span>
-                            </button>
+                            </Button>
                         )}
                     </div>
                 }
@@ -397,24 +389,30 @@ export default function NotificationsPage() {
             <div className="mx-auto max-w-2xl space-y-4 px-4 pt-4">
                 {/* Filter tabs */}
                 <div className="flex gap-2">
-                    {(["all", "unread"] as const).map((f) => (
-                        <button
-                            key={f}
-                            onClick={() => setFilter(f)}
-                            className={`rounded-xl px-4 py-2 text-sm font-black capitalize transition-colors ${
-                                filter === f
-                                    ? "bg-[#1cb0f6] text-white"
-                                    : "bg-white text-gray-500 hover:bg-gray-100"
-                            }`}
-                        >
-                            {f}
-                            {f === "unread" && unreadCount > 0 && (
-                                <span className="ml-1.5 rounded-full bg-white/30 px-1.5 py-px text-[10px]">
-                                    {unreadCount}
-                                </span>
-                            )}
-                        </button>
-                    ))}
+                    {(["all", "unread"] as const).map((f) => {
+                        const isActive = filter === f;
+                        return (
+                            <Button
+                                key={f}
+                                onClick={() => setFilter(f)}
+                                variant={isActive ? "primary" : "ghost"}
+                                className={`!rounded-xl !px-4 !py-2 !text-sm !font-black capitalize shadow-none transition-colors hover:shadow-none active:translate-y-0 ${
+                                    isActive ? "" : "!bg-white !text-gray-500 hover:!bg-gray-100"
+                                }`}
+                            >
+                                {f}
+                                {f === "unread" && unreadCount > 0 && (
+                                    <span
+                                        className={`ml-1.5 rounded-full px-1.5 py-px text-[10px] ${
+                                            isActive ? "bg-white/30" : "bg-gray-100"
+                                        }`}
+                                    >
+                                        {unreadCount}
+                                    </span>
+                                )}
+                            </Button>
+                        );
+                    })}
                 </div>
 
                 {/* Content */}

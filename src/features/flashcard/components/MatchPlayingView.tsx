@@ -8,6 +8,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { Clock, X } from "lucide-react";
 
 import { LivesDisplay, MiniLeaderboard } from "@/features/game/components";
+import { Button } from "@/shared/components/ui";
 import MatchGrid from "./MatchGrid";
 import { useMatchGameStore } from "../stores/useMatchGameStore";
 
@@ -57,13 +58,12 @@ const MatchPlayingView = ({
     return (
         <div className="fixed inset-0 z-50 flex flex-col bg-[#F7F7F8]">
             <header className="flex shrink-0 items-center justify-between p-4">
-                <button
+                <Button
+                    variant="ghost"
                     onClick={onBack}
-                    type="button"
-                    className="rounded-xl p-2 text-gray-400 hover:bg-gray-200"
-                >
-                    <X size={20} />
-                </button>
+                    className="!p-2 text-gray-400 hover:text-gray-600"
+                    icon={X}
+                />
 
                 <div className="flex flex-col items-center gap-1">
                     {showLives ? <LivesDisplay lives={livesLeft} total={livesTotal} /> : null}

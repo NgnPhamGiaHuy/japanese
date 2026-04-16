@@ -3,6 +3,8 @@ import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import { AlertCircle, CheckCircle, Info, X, XCircle } from "lucide-react";
 
+import { Button } from "@/shared/components/ui";
+
 /** Categorization of the notification severity and visual intent. */
 export type AlertType = "info" | "success" | "warning" | "error";
 
@@ -119,12 +121,12 @@ export const Alert = ({ type, message, onClose }: AlertProps) => {
                 {icon}
             </div>
             <div className="flex-1 text-sm leading-relaxed font-bold">{message}</div>
-            <button
+            <Button
+                variant="ghost"
                 onClick={onClose}
-                className="rounded-xl p-1.5 opacity-40 transition-all hover:bg-black/5 hover:opacity-100"
-            >
-                <X size={18} />
-            </button>
+                className="!p-1.5 opacity-40 transition-all hover:opacity-100"
+                icon={X}
+            />
         </motion.div>
     );
 };

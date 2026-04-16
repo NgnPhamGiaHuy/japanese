@@ -60,36 +60,32 @@ export default function KanaPracticePage() {
                 rightWrapperClassName="flex items-center justify-end gap-1 md:gap-2 shrink-0 min-w-0"
                 right={
                     <>
-                        <button
-                            type="button"
+                        <Button
+                            variant="ghost"
                             onClick={() =>
                                 setPracticeMode((m) => (m >= 3 ? 1 : ((m + 1) as 1 | 2 | 3)))
                             }
-                            className="flex shrink-0 items-center gap-1 rounded-lg border-2 border-gray-200 bg-white px-2 py-1.5 text-[10px] font-bold text-gray-500 transition-all hover:bg-gray-50 active:scale-95 md:rounded-xl md:px-3 md:py-2 md:text-xs"
+                            className="!flex !shrink-0 !items-center !gap-1 !rounded-lg !border-2 !border-gray-200 !bg-white !px-2 !py-1.5 !text-[10px] !font-bold !text-gray-500 shadow-none transition-all hover:!bg-gray-50 hover:shadow-none active:translate-y-0 md:!rounded-xl md:!px-3 md:!py-2 md:!text-xs"
+                            icon={practiceMode === 1 ? PenTool : practiceMode === 2 ? Eye : Brain}
+                            iconSize={14}
                         >
-                            {practiceMode === 1 ? (
-                                <PenTool size={14} />
-                            ) : practiceMode === 2 ? (
-                                <Eye size={14} />
-                            ) : (
-                                <Brain size={14} />
-                            )}
                             <span className="hidden sm:inline">Mode: {modeLabel}</span>
-                        </button>
-                        <button
-                            type="button"
+                        </Button>
+                        <Button
+                            variant="ghost"
                             onClick={() => setIsRandom((r) => !r)}
-                            className={`flex shrink-0 items-center gap-1 rounded-lg border-2 px-2 py-1.5 text-[10px] font-bold transition-all active:scale-95 md:rounded-xl md:px-3 md:py-2 md:text-xs ${
+                            className={`!flex !shrink-0 !items-center !gap-1 !rounded-lg !border-2 !px-2 !py-1.5 !text-[10px] !font-bold shadow-none transition-all hover:shadow-none active:translate-y-0 md:!rounded-xl md:!px-3 md:!py-2 md:!text-xs ${
                                 isRandom
-                                    ? `${themeColor.primaryLightBg} ${themeColor.text} ${themeColor.primaryBorder} shadow-sm`
-                                    : "border-gray-200 bg-white text-gray-500 hover:bg-gray-50"
+                                    ? `!${themeColor.primaryLightBg} !${themeColor.text} !${themeColor.primaryBorder} shadow-sm`
+                                    : "!border-gray-200 !bg-white !text-gray-500 hover:!bg-gray-50"
                             }`}
+                            icon={Shuffle}
+                            iconSize={14}
                         >
-                            <Shuffle size={14} strokeWidth={isRandom ? 3 : 2} />
                             <span className="hidden sm:inline">
                                 {isRandom ? "Random" : "Sequential"}
                             </span>
-                        </button>
+                        </Button>
                     </>
                 }
             />
@@ -116,12 +112,14 @@ export default function KanaPracticePage() {
                                     />
                                 </div>
                             )}
-                            <button
+                            <Button
+                                variant="ghost"
                                 onClick={() => playAudio(char.char)}
-                                className={`ml-auto bg-white p-2 md:ml-0 md:p-3 ${themeColor.text} rounded-full border-2 border-gray-100 transition-transform hover:scale-105 hover:bg-gray-50 active:scale-95`}
-                            >
-                                <Volume2 size={18} strokeWidth={2.5} />
-                            </button>
+                                className={`!ml-auto !rounded-full !border-2 !border-gray-100 !bg-white !p-2 shadow-none transition-transform hover:scale-105 hover:!bg-gray-50 hover:shadow-none active:translate-y-0 active:scale-95 md:!ml-0 md:!p-3`}
+                                icon={Volume2}
+                                iconSize={18}
+                                iconClassName={themeColor.text}
+                            />
                         </div>
                         <div className="flex w-full flex-col items-center md:w-auto">
                             <span className="mb-2 text-xs font-bold text-gray-500 md:text-sm">

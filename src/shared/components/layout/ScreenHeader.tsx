@@ -5,6 +5,8 @@ import { Children } from "react";
 
 import { ArrowLeft } from "lucide-react";
 
+import { Button } from "@/shared/components/ui";
+
 import type { LucideIcon } from "lucide-react";
 
 export const SCREEN_HEADER_BAR_CLASS =
@@ -39,14 +41,13 @@ export const ScreenHeaderBackButton = ({
     className?: string;
 }) => {
     return (
-        <button
-            type="button"
+        <Button
+            variant="ghost"
             onClick={onClick}
-            className={`${SCREEN_HEADER_BACK_BUTTON_CLASS} ${className ?? ""}`}
+            className={`!p-2 shadow-none ${className ?? ""}`}
             aria-label={ariaLabel}
-        >
-            <Icon size={22} strokeWidth={2.5} />
-        </button>
+            icon={Icon}
+        />
     );
 };
 

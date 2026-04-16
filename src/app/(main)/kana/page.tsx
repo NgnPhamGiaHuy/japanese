@@ -19,6 +19,7 @@ import {
 import { AlphabetSwitcher } from "@/features/kana/components";
 import { useKanaDataset } from "@/features/kana/hooks";
 import { useBestScores, useUserProgress } from "@/features/user/hooks";
+import { Button } from "@/shared/components/ui";
 import { HANDWRITING_FONT, PRINT_FONT } from "@/shared/constants";
 import { useAppStore } from "@/store";
 
@@ -48,10 +49,10 @@ function KanaSettingsMenu({
             <div className="mb-1 border-b border-gray-100 px-3 py-2 text-xs font-black tracking-wider text-gray-500 uppercase">
                 Audio Preferences
             </div>
-            <button
-                type="button"
+            <Button
+                variant="ghost"
                 onClick={onToggleAutoPlay}
-                className="flex w-full items-center justify-between rounded-xl px-3 py-3 text-left text-sm font-bold text-[#3c3c3c] transition-colors hover:bg-gray-50"
+                className="!flex !w-full !items-center !justify-between !rounded-xl !px-3 !py-3 !text-left !text-sm !font-bold !text-[#3c3c3c] shadow-none transition-colors hover:!bg-gray-50 hover:shadow-none active:translate-y-0"
             >
                 <span className="flex items-center gap-2">
                     <Volume2 size={16} className="text-gray-500" /> Autoplay Audio
@@ -63,15 +64,15 @@ function KanaSettingsMenu({
                         className={`h-4 w-4 rounded-full bg-white transition-transform ${globalAutoPlay ? "translate-x-4" : "translate-x-0"}`}
                     />
                 </div>
-            </button>
+            </Button>
 
             <div className="mt-2 mb-1 border-b border-gray-100 px-3 py-2 text-xs font-black tracking-wider text-gray-500 uppercase">
                 Display Preferences
             </div>
-            <button
-                type="button"
+            <Button
+                variant="ghost"
                 onClick={onToggleHandwriting}
-                className="flex w-full items-center justify-between rounded-xl px-3 py-3 text-left text-sm font-bold text-[#3c3c3c] transition-colors hover:bg-gray-50"
+                className="!flex !w-full !items-center !justify-between !rounded-xl !px-3 !py-3 !text-left !text-sm !font-bold !text-[#3c3c3c] shadow-none transition-colors hover:!bg-gray-50 hover:shadow-none active:translate-y-0"
             >
                 <span className="flex items-center gap-2">
                     <Type size={16} className="text-gray-500" /> Handwriting Font
@@ -83,45 +84,48 @@ function KanaSettingsMenu({
                         className={`h-4 w-4 rounded-full bg-white transition-transform ${useHandwriting ? "translate-x-4" : "translate-x-0"}`}
                     />
                 </div>
-            </button>
+            </Button>
 
             <div className="mt-2 mb-1 border-b border-gray-100 px-3 py-2 text-xs font-black tracking-wider text-red-500 uppercase">
                 Danger Zone
             </div>
             {!showConfirmReset ? (
-                <button
-                    type="button"
+                <Button
+                    variant="ghost"
                     onClick={(e) => {
                         e.stopPropagation();
                         onRequestReset();
                     }}
-                    className="flex w-full items-center gap-2 rounded-xl px-3 py-3 text-left text-sm font-bold text-red-500 transition-colors hover:bg-red-50"
+                    className="!flex !w-full !items-center !gap-2 !rounded-xl !px-3 !py-3 !text-left !text-sm !font-bold !text-red-500 shadow-none transition-colors hover:!bg-red-50 hover:shadow-none active:translate-y-0"
+                    icon={Trash2}
+                    iconSize={16}
                 >
-                    <Trash2 size={16} /> Reset Progress
-                </button>
+                    Reset Progress
+                </Button>
             ) : (
                 <div className="animate-in zoom-in mt-1 flex flex-col gap-2 rounded-xl border border-red-100 bg-red-50 px-3 py-2 duration-200">
                     <span className="text-xs font-bold text-red-600">
                         Are you sure? This cannot be undone.
                     </span>
                     <div className="flex gap-2">
-                        <button
-                            type="button"
+                        <Button
+                            variant="primary"
+                            color="red"
                             onClick={onWipeProgress}
-                            className="flex-1 rounded-lg bg-red-500 py-1.5 text-xs font-bold text-white transition-colors hover:bg-red-600"
+                            className="!flex-1 !rounded-lg !py-1.5 !text-xs !font-bold shadow-none hover:shadow-none active:translate-y-0"
                         >
                             Wipe it
-                        </button>
-                        <button
-                            type="button"
+                        </Button>
+                        <Button
+                            variant="ghost"
                             onClick={(e) => {
                                 e.stopPropagation();
                                 onCancelResetConfirm();
                             }}
-                            className="flex-1 rounded-lg border border-gray-200 bg-white py-1.5 text-xs font-bold text-gray-700 hover:bg-gray-50"
+                            className="!flex-1 !rounded-lg border border-gray-200 bg-white !py-1.5 !text-xs !font-bold !text-gray-700 shadow-none hover:!bg-gray-50 hover:shadow-none active:translate-y-0"
                         >
                             Cancel
-                        </button>
+                        </Button>
                     </div>
                 </div>
             )}
@@ -293,14 +297,16 @@ export default function KanaHubPage() {
                         </div>
                     </div>
                     <div className="relative">
-                        <button
-                            type="button"
+                        <Button
+                            variant="ghost"
                             onClick={() => setShowSettings(!showSettings)}
-                            className={`rounded-xl border-2 p-2.5 transition-all duration-200 hover:shadow-md active:scale-95 md:rounded-2xl md:p-3 ${showSettings ? "border-gray-300 bg-gray-100 text-gray-800" : "border-gray-200 bg-white text-gray-500 hover:text-gray-700"}`}
+                            className={`!rounded-xl border-2 !p-2.5 shadow-none transition-all duration-200 hover:shadow-md hover:shadow-none active:scale-95 md:!rounded-2xl md:!p-3 ${showSettings ? "!border-gray-300 !bg-gray-100 !text-gray-800" : "!border-gray-200 !bg-white !text-gray-500 hover:!text-gray-700"}`}
                             title="Settings"
-                        >
-                            <Settings size={20} strokeWidth={2.5} className="md:h-6 md:w-6" />
-                        </button>
+                            icon={Settings}
+                            iconSize={20}
+                            iconClassName="md:h-6 md:w-6"
+                        />
+
                         {showSettings && (
                             <KanaSettingsMenu
                                 primaryBg={primaryBg}

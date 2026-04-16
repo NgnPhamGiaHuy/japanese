@@ -10,6 +10,7 @@ import { useState } from "react";
 
 import { CheckCircle, Circle, Edit2, MessageSquare, Trash2 } from "lucide-react";
 
+import { Button } from "@/shared/components/ui";
 import CommentInput from "./CommentInput";
 
 import type { Comment, Reply } from "../types/flashcard.types";
@@ -235,25 +236,25 @@ const CommentItem = ({
 };
 
 function ActionBtn({
-    icon,
+    icon: IconComp,
     label,
     onClick,
-    color = "text-gray-400 hover:text-gray-600",
+    color,
 }: {
-    icon: React.ReactNode;
+    icon: any;
     label: string;
     onClick: () => void;
     color?: string;
 }) {
     return (
-        <button
-            type="button"
+        <Button
+            variant="ghost"
             onClick={onClick}
-            className={`flex items-center gap-1 text-[11px] font-bold transition-colors ${color}`}
+            className={`!flex !h-auto !items-center !gap-1 !p-0 !text-[11px] !font-bold shadow-none transition-colors hover:shadow-none active:translate-y-0 ${color || "!text-gray-400 hover:!text-gray-600"}`}
         >
-            {icon}
+            {IconComp}
             {label}
-        </button>
+        </Button>
     );
 }
 

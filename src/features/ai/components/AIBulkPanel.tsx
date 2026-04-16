@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-import { AlertCircle, Loader2, Settings2, Sparkles, Zap } from "lucide-react";
+import { AlertCircle, Settings2, Sparkles, Zap } from "lucide-react";
 
 import { Button } from "@/shared/components/ui";
 import { hexToThemeColor } from "@/shared/utils";
@@ -52,29 +52,37 @@ interface ModeChipProps {
     color: string;
 }
 
-const ModeChip = ({ active, icon, label, sub, onClick, color }: ModeChipProps) => (
-    <button
-        type="button"
-        onClick={onClick}
-        className="flex flex-1 items-center gap-3 rounded-2xl border-2 border-b-4 px-4 py-3 text-left transition-all"
-        style={
-            active
-                ? { backgroundColor: color, borderColor: `${color}BB`, color: "white" }
-                : { backgroundColor: "white", borderColor: "#e5e7eb", color: "#3c3c3c" }
-        }
-    >
-        <span className="shrink-0">{icon}</span>
-        <span>
-            <div className="text-sm font-black">{label}</div>
-            <div
-                className="text-[10px] font-bold"
-                style={{ color: active ? "rgba(255,255,255,0.75)" : "#afafaf" }}
-            >
-                {sub}
+const ModeChip = ({ active, icon, label, sub, onClick, color }: ModeChipProps) => {
+    return (
+        <Button
+            onClick={onClick}
+            variant={active ? "primary" : "secondary"}
+            className="flex-1 !px-4 !py-3 !text-left"
+            style={
+                active
+                    ? { backgroundColor: color, borderBottomColor: `${color}CC` }
+                    : { backgroundColor: "white", borderBottomColor: "#e5e7eb" }
+            }
+        >
+            <div className="flex items-center gap-3">
+                <span className="shrink-0">{icon}</span>
+                <div className="flex flex-col">
+                    <div
+                        className={`text-sm font-black ${active ? "text-white" : "text-[#3c3c3c]"}`}
+                    >
+                        {label}
+                    </div>
+                    <div
+                        className="text-[10px] font-bold"
+                        style={{ color: active ? "rgba(255,255,255,0.75)" : "#afafaf" }}
+                    >
+                        {sub}
+                    </div>
+                </div>
             </div>
-        </span>
-    </button>
-);
+        </Button>
+    );
+};
 
 const AIBulkPanel = ({ themeColor, onPreview, existingWords = [] }: AIBulkPanelProps) => {
     const { status, error, generate } = useAIDeck();
@@ -163,15 +171,15 @@ const AIBulkPanel = ({ themeColor, onPreview, existingWords = [] }: AIBulkPanelP
 
                 <div className="mt-3 flex flex-wrap gap-2">
                     {TOPIC_SUGGESTIONS.slice(0, 5).map((s) => (
-                        <button
+                        <Button
                             key={s}
-                            type="button"
+                            variant="ghost"
                             onClick={() => setTopic(s)}
                             disabled={isLoading}
-                            className="rounded-xl border-2 border-gray-200 bg-white px-3 py-1.5 text-[10px] font-black tracking-wide text-[#afafaf] uppercase transition-all hover:border-gray-300 hover:text-[#3c3c3c] disabled:opacity-40"
+                            className="border-2 border-gray-200 bg-white !px-3 !py-1.5 !text-[10px] !font-black tracking-wide !text-[#afafaf] uppercase shadow-none hover:border-gray-300 hover:text-[#3c3c3c] hover:shadow-none"
                         >
                             {s}
-                        </button>
+                        </Button>
                     ))}
                 </div>
             </div>
@@ -184,28 +192,26 @@ const AIBulkPanel = ({ themeColor, onPreview, existingWords = [] }: AIBulkPanelP
                         </label>
                         <div className="grid grid-cols-4 gap-2">
                             {COUNT_OPTIONS.map((n) => (
-                                <button
+                                <Button
                                     key={n}
-                                    type="button"
                                     onClick={() => setCount(n)}
                                     disabled={isLoading}
-                                    className="rounded-xl border-2 border-b-4 py-2.5 text-sm font-black transition-all disabled:opacity-40"
+                                    variant={count === n ? "primary" : "secondary"}
+                                    className="!py-2.5 !text-sm !font-black transition-all"
                                     style={
                                         count === n
                                             ? {
                                                   backgroundColor: themeColor,
-                                                  borderColor: `${themeColor}BB`,
-                                                  color: "white",
+                                                  borderBottomColor: `${themeColor}CC`,
                                               }
                                             : {
                                                   backgroundColor: "white",
-                                                  borderColor: "#e5e7eb",
-                                                  color: "#3c3c3c",
+                                                  borderBottomColor: "#e5e7eb",
                                               }
                                     }
                                 >
                                     {n}
-                                </button>
+                                </Button>
                             ))}
                         </div>
                     </div>
@@ -216,23 +222,21 @@ const AIBulkPanel = ({ themeColor, onPreview, existingWords = [] }: AIBulkPanelP
                         </label>
                         <div className="grid grid-cols-5 gap-1.5">
                             {LEVEL_OPTIONS.map((opt) => (
-                                <button
+                                <Button
                                     key={opt.value}
-                                    type="button"
                                     onClick={() => setLevel(opt.value)}
                                     disabled={isLoading}
-                                    className="rounded-xl border-2 border-b-4 py-2 text-center transition-all disabled:opacity-40"
+                                    variant={level === opt.value ? "primary" : "secondary"}
+                                    className="!px-0 !py-2 !text-center transition-all"
                                     style={
                                         level === opt.value
                                             ? {
                                                   backgroundColor: themeColor,
-                                                  borderColor: `${themeColor}BB`,
-                                                  color: "white",
+                                                  borderBottomColor: `${themeColor}CC`,
                                               }
                                             : {
                                                   backgroundColor: "white",
-                                                  borderColor: "#e5e7eb",
-                                                  color: "#3c3c3c",
+                                                  borderBottomColor: "#e5e7eb",
                                               }
                                     }
                                 >
@@ -247,7 +251,7 @@ const AIBulkPanel = ({ themeColor, onPreview, existingWords = [] }: AIBulkPanelP
                                     >
                                         {opt.sub}
                                     </div>
-                                </button>
+                                </Button>
                             ))}
                         </div>
                     </div>
@@ -265,20 +269,14 @@ const AIBulkPanel = ({ themeColor, onPreview, existingWords = [] }: AIBulkPanelP
                 variant="primary"
                 color={themeColorStr}
                 onClick={handleGenerate}
-                disabled={isLoading || !topic.trim()}
+                loading={isLoading}
+                disabled={!topic.trim()}
                 className="w-full py-4 text-lg"
+                icon={Sparkles}
             >
-                {isLoading ? (
-                    <>
-                        <Loader2 size={20} className="animate-spin" />
-                        Generating {effectiveCount} cards…
-                    </>
-                ) : (
-                    <>
-                        <Sparkles size={20} />
-                        Preview {effectiveCount} Generated Cards
-                    </>
-                )}
+                {isLoading
+                    ? `Generating ${effectiveCount} cards…`
+                    : `Preview ${effectiveCount} Generated Cards`}
             </Button>
 
             {isLoading ? (

@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 
 import { RotateCcw } from "lucide-react";
 
+import { Button } from "@/shared/components/ui";
 import KanaStrokeAnimation from "./KanaStrokeAnimation";
 
 interface DrawingCanvasProps {
@@ -92,12 +93,14 @@ const DrawingCanvas = ({
                 onTouchEnd={() => setIsDrawing(false)}
                 onTouchCancel={() => setIsDrawing(false)}
             />
-            <button
+            <Button
+                variant="ghost"
                 onClick={clear}
-                className="absolute right-2 bottom-2 z-20 rounded-lg border border-gray-100 bg-white p-2 text-gray-500 shadow-md transition-transform hover:bg-gray-50 active:scale-95 md:right-3 md:bottom-3 md:rounded-xl"
-            >
-                <RotateCcw size={16} strokeWidth={2.5} className="md:h-5 md:w-5" />
-            </button>
+                className="absolute right-2 bottom-2 z-20 !rounded-lg border border-gray-100 bg-white !p-2 text-gray-500 shadow-md shadow-none hover:shadow-none active:translate-y-0 md:right-3 md:bottom-3 md:!rounded-xl"
+                icon={RotateCcw}
+                iconSize={16}
+                iconClassName="md:h-5 md:w-5"
+            />
         </div>
     );
 };

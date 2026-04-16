@@ -72,52 +72,59 @@ export default function FlashcardIndexPage() {
                         color="purple"
                         onClick={() => router.push("/flashcard/create")}
                         className="-mr-2 !p-2 shadow-none"
-                    >
-                        <Plus size={20} strokeWidth={3} />
-                    </Button>
+                        icon={Plus}
+                        iconSize={20}
+                    />
                 }
             />
 
             <div className={`${SPACING.pagePadding} mx-auto max-w-2xl pt-6`}>
                 {/* ── Tab Switcher ── */}
                 <div className="mb-6 flex gap-2 rounded-2xl bg-gray-100 p-1">
-                    <button
+                    <Button
+                        variant="ghost"
                         onClick={() => handleTabChange("personal")}
-                        className={`flex-1 rounded-xl py-2 text-sm font-black transition-all ${
+                        className={`!flex-1 !rounded-xl !py-2 !text-sm !font-black shadow-none !transition-all hover:shadow-none active:translate-y-0 ${
                             activeTab === "personal"
-                                ? "bg-white text-[#3c3c3c] shadow-sm"
-                                : "text-[#afafaf] hover:text-[#3c3c3c]"
+                                ? "!bg-white !text-[#3c3c3c] shadow-sm"
+                                : "!text-[#afafaf] hover:!bg-transparent hover:!text-[#3c3c3c]"
                         }`}
                     >
                         My Decks
-                    </button>
-                    <button
+                    </Button>
+                    <Button
+                        variant="ghost"
                         onClick={() => handleTabChange("shared")}
-                        className={`flex-1 rounded-xl py-2 text-sm font-black transition-all ${
+                        className={`!flex-1 !rounded-xl !py-2 !text-sm !font-black shadow-none !transition-all hover:shadow-none active:translate-y-0 ${
                             activeTab === "shared"
-                                ? "bg-white text-[#3c3c3c] shadow-sm"
-                                : "text-[#afafaf] hover:text-[#3c3c3c]"
+                                ? "!bg-white !text-[#3c3c3c] shadow-sm"
+                                : "!text-[#afafaf] hover:!bg-transparent hover:!text-[#3c3c3c]"
                         }`}
+                        badge={
+                            sharedLessons.length > 0 && (
+                                <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-[#ce82ff] text-[10px] text-white">
+                                    {sharedLessons.length}
+                                </span>
+                            )
+                        }
                     >
                         Shared with me
-                        {sharedLessons.length > 0 && (
-                            <span className="ml-2 inline-flex h-5 w-5 items-center justify-center rounded-full bg-[#ce82ff] text-[10px] text-white">
-                                {sharedLessons.length}
-                            </span>
-                        )}
-                    </button>
+                    </Button>
                 </div>
 
                 {/* ── Error state ── */}
                 {error && (
                     <div className="mb-6 flex items-center justify-between rounded-2xl border-2 border-[#ea2b2b]/30 bg-[#ffdfe0] px-5 py-4">
                         <p className="text-sm font-bold text-[#ea2b2b]">{error}</p>
-                        <button
+                        <Button
+                            variant="ghost"
                             onClick={() => window.location.reload()}
-                            className="ml-4 flex items-center gap-1 text-xs font-black text-[#ea2b2b] hover:underline"
+                            className="!ml-4 !flex !items-center !gap-1 !text-xs !font-black !text-[#ea2b2b] shadow-none hover:underline hover:shadow-none active:translate-y-0"
+                            icon={RefreshCw}
+                            iconSize={14}
                         >
-                            <RefreshCw size={14} strokeWidth={3} /> Retry
-                        </button>
+                            Retry
+                        </Button>
                     </div>
                 )}
 
@@ -404,44 +411,47 @@ function DeckCard({
                     </div>
                 </div>
 
-                <div className="flex justify-around gap-2 border-t-2 border-gray-100 pt-3 sm:justify-end sm:border-t-0 sm:pt-0">
+                <div className="flex items-center justify-around gap-2 border-t-2 border-gray-50 pt-3 sm:justify-end sm:border-t-0 sm:pt-0">
                     {canShare && (
-                        <button
+                        <Button
+                            variant="ghost"
                             onClick={onShare}
-                            className="flex flex-1 items-center justify-center rounded-xl p-3 text-gray-300 transition-colors hover:bg-[#ebf8e6] hover:text-[#58cc02] sm:flex-none"
+                            className="!flex !h-11 !w-11 !items-center !justify-center !rounded-xl !p-0 !text-gray-300 shadow-none transition-colors hover:!bg-[#ebf8e6] hover:!text-[#58cc02] hover:shadow-none active:translate-y-0"
                             title="Share deck"
-                        >
-                            <Share2 size={20} strokeWidth={2.5} />
-                        </button>
+                            icon={Share2}
+                            iconSize={20}
+                        />
                     )}
                     {canEdit && (
-                        <Link
-                            href={editPath}
-                            className="flex flex-1 items-center justify-center rounded-xl p-3 text-gray-300 transition-colors sm:flex-none"
-                            style={{ color: undefined }}
-                            onMouseEnter={(e) => {
-                                (e.currentTarget as HTMLElement).style.backgroundColor =
-                                    `${themeColor}20`;
-                                (e.currentTarget as HTMLElement).style.color = themeColor;
-                            }}
-                            onMouseLeave={(e) => {
-                                (e.currentTarget as HTMLElement).style.backgroundColor =
-                                    "transparent";
-                                (e.currentTarget as HTMLElement).style.color = "";
-                            }}
-                            title="Edit deck"
-                        >
-                            <Edit2 size={20} strokeWidth={2.5} />
+                        <Link href={editPath}>
+                            <Button
+                                variant="ghost"
+                                className="!flex !h-11 !w-11 !items-center !justify-center !rounded-xl !p-0 !text-gray-300 shadow-none transition-all hover:shadow-none active:translate-y-0"
+                                onMouseEnter={(e) => {
+                                    (e.currentTarget as HTMLElement).style.backgroundColor =
+                                        `${themeColor}20`;
+                                    (e.currentTarget as HTMLElement).style.color = themeColor;
+                                }}
+                                onMouseLeave={(e) => {
+                                    (e.currentTarget as HTMLElement).style.backgroundColor =
+                                        "transparent";
+                                    (e.currentTarget as HTMLElement).style.color = "";
+                                }}
+                                title="Edit deck"
+                                icon={Edit2}
+                                iconSize={20}
+                            />
                         </Link>
                     )}
                     {canDelete && (
-                        <button
+                        <Button
+                            variant="ghost"
                             onClick={onDelete}
-                            className="flex flex-1 items-center justify-center rounded-xl p-3 text-gray-300 transition-colors hover:bg-[#ffdfe0] hover:text-[#ea2b2b] sm:flex-none"
+                            className="!flex !h-11 !w-11 !items-center !justify-center !rounded-xl !p-0 !text-gray-300 shadow-none transition-colors hover:!bg-[#ffdfe0] hover:!text-[#ea2b2b] hover:shadow-none active:translate-y-0"
                             title="Delete deck"
-                        >
-                            <Trash2 size={20} strokeWidth={2.5} />
-                        </button>
+                            icon={Trash2}
+                            iconSize={20}
+                        />
                     )}
                 </div>
             </div>

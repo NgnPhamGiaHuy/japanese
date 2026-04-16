@@ -10,6 +10,7 @@ import { useState } from "react";
 
 import { AlertTriangle } from "lucide-react";
 
+import { Button } from "@/shared/components/ui";
 import CommentItem from "./CommentItem";
 
 import type { Comment } from "../types/flashcard.types";
@@ -84,21 +85,24 @@ const CommentThread = ({
                             {comment.replies.length === 1 ? "reply" : "replies"}?
                         </p>
                         <div className="flex gap-2">
-                            <button
+                            <Button
+                                variant="primary"
+                                color="red"
                                 onClick={async () => {
                                     setShowDeleteConfirm(false);
                                     await onDelete(comment.id);
                                 }}
-                                className="rounded-lg bg-red-500 px-3 py-1 text-[11px] font-black text-white hover:bg-red-600"
+                                className="!rounded-lg !px-3 !py-1 !text-[11px] !font-black shadow-none hover:shadow-none active:translate-y-0"
                             >
                                 Delete
-                            </button>
-                            <button
+                            </Button>
+                            <Button
+                                variant="ghost"
                                 onClick={() => setShowDeleteConfirm(false)}
-                                className="rounded-lg border border-gray-200 bg-white px-3 py-1 text-[11px] font-black text-gray-600 hover:bg-gray-50"
+                                className="!rounded-lg border border-gray-200 bg-white !px-3 !py-1 !text-[11px] !font-black !text-gray-600 shadow-none hover:!bg-gray-50 hover:shadow-none active:translate-y-0"
                             >
                                 Cancel
-                            </button>
+                            </Button>
                         </div>
                     </div>
                 </div>

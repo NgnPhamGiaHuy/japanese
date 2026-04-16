@@ -86,15 +86,16 @@ const KanaQuizPage = () => {
                             How well do you know your kana?
                         </p>
                         <div className="space-y-3">
-                            <button
+                            <Button
                                 id="quiz-mode-choice"
+                                variant="ghost"
                                 onClick={() => startQuiz("choice")}
-                                className="group flex w-full items-center rounded-2xl border-2 border-b-4 border-gray-200 bg-white p-5 text-left transition-all hover:-translate-y-1 hover:shadow-md"
+                                className="!flex !w-full !items-center !rounded-2xl !border-2 !border-b-4 !border-gray-200 !bg-white !p-5 !text-left shadow-none transition-all hover:!-translate-y-1 hover:shadow-md hover:shadow-none active:translate-y-0"
                             >
                                 <div className="mr-4 rounded-xl bg-[#faeaff] p-3">
                                     <Eye size={24} className="text-[#ce82ff]" />
                                 </div>
-                                <div>
+                                <div className="flex flex-col">
                                     <div className="text-lg font-black text-[#3c3c3c]">
                                         Multiple Choice
                                     </div>
@@ -102,16 +103,17 @@ const KanaQuizPage = () => {
                                         Choose from 4 options
                                     </div>
                                 </div>
-                            </button>
-                            <button
+                            </Button>
+                            <Button
                                 id="quiz-mode-type"
+                                variant="ghost"
                                 onClick={() => startQuiz("type")}
-                                className="flex w-full items-center rounded-2xl border-2 border-b-4 border-gray-200 bg-white p-5 text-left transition-all hover:-translate-y-1 hover:shadow-md"
+                                className="!flex !w-full !items-center !rounded-2xl !border-2 !border-b-4 !border-gray-200 !bg-white !p-5 !text-left shadow-none transition-all hover:!-translate-y-1 hover:shadow-md hover:shadow-none active:translate-y-0"
                             >
                                 <div className="mr-4 rounded-xl bg-[#e5f5ff] p-3">
                                     <Keyboard size={24} className="text-[#1cb0f6]" />
                                 </div>
-                                <div>
+                                <div className="flex flex-col">
                                     <div className="text-lg font-black text-[#3c3c3c]">
                                         Type the Romaji
                                     </div>
@@ -119,16 +121,17 @@ const KanaQuizPage = () => {
                                         Type the romanization
                                     </div>
                                 </div>
-                            </button>
-                            <button
+                            </Button>
+                            <Button
                                 id="quiz-mode-smart"
+                                variant="ghost"
                                 onClick={() => startQuiz("smart")}
-                                className="flex w-full items-center rounded-2xl border-2 border-b-4 border-gray-200 bg-white p-5 text-left transition-all hover:-translate-y-1 hover:shadow-md"
+                                className="!flex !w-full !items-center !rounded-2xl !border-2 !border-b-4 !border-gray-200 !bg-white !p-5 !text-left shadow-none transition-all hover:!-translate-y-1 hover:shadow-md hover:shadow-none active:translate-y-0"
                             >
                                 <div className="mr-4 rounded-xl bg-[#fff5e6] p-3">
                                     <Shuffle size={24} className="text-[#ff9600]" />
                                 </div>
-                                <div>
+                                <div className="flex flex-col">
                                     <div className="text-lg font-black text-[#3c3c3c]">
                                         Smart Review
                                     </div>
@@ -136,7 +139,7 @@ const KanaQuizPage = () => {
                                         Focus on your weakest characters
                                     </div>
                                 </div>
-                            </button>
+                            </Button>
                         </div>
                     </div>
                 </div>
@@ -268,14 +271,15 @@ const KanaQuizPage = () => {
                                         state = "bg-white border-gray-200 text-gray-300 opacity-50";
                                 }
                                 return (
-                                    <button
+                                    <Button
                                         key={i}
+                                        variant="ghost"
                                         onClick={() => handleMCAnswer(opt)}
                                         disabled={status !== "idle"}
-                                        className={`h-[72px] rounded-2xl border-2 border-b-4 text-xl font-black shadow-sm transition-all duration-150 select-none ${state}`}
+                                        className={`!h-[72px] !rounded-2xl !border-2 !border-b-4 !text-xl !font-black shadow-none transition-all duration-150 select-none hover:shadow-none active:translate-y-0 ${state}`}
                                     >
                                         {opt.romaji}
-                                    </button>
+                                    </Button>
                                 );
                             })}
                         </div>

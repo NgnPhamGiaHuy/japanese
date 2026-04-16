@@ -78,10 +78,11 @@ const KanaSurvivalPage = () => {
                                 const Icon = icons[mode];
                                 const best = bestScores[`${mode}_${alphabet}`];
                                 return (
-                                    <button
+                                    <Button
                                         key={mode}
+                                        variant="ghost"
                                         onClick={() => game.setChallengeMode(mode)}
-                                        className={`flex w-full items-center rounded-2xl border-2 border-b-4 p-5 text-left transition-all hover:-translate-y-0.5 hover:shadow-md ${game.challengeMode === mode ? "border-[#cc7800] bg-[#ff9600] text-white" : "border-gray-200 bg-white text-[#3c3c3c]"}`}
+                                        className={`!flex !w-full !items-center !rounded-2xl !border-2 !border-b-4 !p-5 !text-left shadow-none transition-all hover:!-translate-y-0.5 hover:shadow-md hover:shadow-none active:translate-y-0 ${game.challengeMode === mode ? "!border-[#cc7800] !bg-[#ff9600] !text-white" : "!border-gray-200 !bg-white !text-[#3c3c3c]"}`}
                                     >
                                         <Icon size={28} className="mr-4 shrink-0" />
                                         <div className="flex-1">
@@ -93,7 +94,7 @@ const KanaSurvivalPage = () => {
                                                       : "Drop Mode"}
                                             </div>
                                             <div
-                                                className={`text-sm font-bold ${game.challengeMode === mode ? "text-white/70" : "text-[#afafaf]"}`}
+                                                className={`text-sm font-bold ${game.challengeMode === mode ? "!text-white/70" : "!text-[#afafaf]"}`}
                                             >
                                                 {mode === "infinity"
                                                     ? "Survive as long as possible"
@@ -107,7 +108,7 @@ const KanaSurvivalPage = () => {
                                                 Best: {best}
                                             </span>
                                         ) : null}
-                                    </button>
+                                    </Button>
                                 );
                             })}
                         </div>
@@ -119,15 +120,17 @@ const KanaSurvivalPage = () => {
                                 </p>
                                 <div className="flex gap-2">
                                     {[1, 2, 5].map((m) => (
-                                        <button
+                                        <Button
                                             key={m}
+                                            variant="ghost"
                                             onClick={() => game.setTimeMinutes(m)}
-                                            className={`flex-1 rounded-xl border-2 border-b-4 py-3 font-black transition-all ${game.timeMinutes === m ? "border-[#cc7800] bg-[#ff9600] text-white" : "border-gray-200 bg-white text-[#3c3c3c]"}`}
+                                            className={`!flex-1 !rounded-xl !border-2 !border-b-4 !py-3 !font-black shadow-none transition-all hover:shadow-none active:translate-y-0 ${game.timeMinutes === m ? "!border-[#cc7800] !bg-[#ff9600] !text-white" : "!border-gray-200 !bg-white !text-[#3c3c3c]"}`}
                                         >
                                             {m}min
-                                        </button>
+                                        </Button>
                                     ))}
                                 </div>
+
                                 <p className="mt-4 text-center text-xs leading-relaxed font-bold text-[#afafaf]">
                                     Streaks add up to{" "}
                                     <span className="text-[#3c3c3c]">
@@ -315,16 +318,17 @@ const KanaSurvivalPage = () => {
                                                 "bg-white border-gray-200 text-gray-300 opacity-50";
                                     }
                                     return (
-                                        <button
+                                        <Button
                                             key={i}
+                                            variant="ghost"
                                             disabled={status !== "idle"}
                                             onClick={() =>
                                                 game.handleAnswer(opt.romaji === question.romaji)
                                             }
-                                            className={`h-[72px] rounded-2xl border-2 border-b-4 text-xl font-black shadow-sm transition-all duration-150 select-none ${state}`}
+                                            className={`!h-[72px] !rounded-2xl !border-2 !border-b-4 !text-xl !font-black shadow-none transition-all duration-150 select-none hover:shadow-none active:translate-y-0 ${state}`}
                                         >
                                             {opt.romaji}
-                                        </button>
+                                        </Button>
                                     );
                                 })}
                             </div>

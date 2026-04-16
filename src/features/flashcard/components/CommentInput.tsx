@@ -10,6 +10,8 @@ import { useEffect, useRef, useState } from "react";
 
 import { CornerDownLeft, X } from "lucide-react";
 
+import { Button } from "@/shared/components/ui";
+
 export interface CommentInputProps {
     /** Prompt text when empty */
     placeholder: string;
@@ -112,31 +114,32 @@ const CommentInput = ({
 
                     <div className="flex items-center gap-1">
                         {onCancel && (
-                            <button
-                                type="button"
+                            <Button
+                                variant="ghost"
                                 onClick={onCancel}
                                 disabled={isSubmitting}
-                                className="flex h-7 w-7 items-center justify-center rounded-lg text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600"
-                                title="Cancel (Esc)"
-                            >
-                                <X size={14} />
-                            </button>
+                                className="!h-7 !w-7 opacity-40 hover:opacity-100"
+                                icon={X}
+                            />
                         )}
-                        <button
-                            type="button"
+                        <Button
+                            variant="primary"
                             onClick={handleSubmit}
                             disabled={isEmpty || isOver || isSubmitting}
-                            className="flex h-7 items-center gap-1 rounded-lg px-2.5 text-[11px] font-black text-white transition-all disabled:opacity-40"
-                            style={{ backgroundColor: isEmpty || isOver ? "#d1d5db" : themeColor }}
-                            title="Send (⌘↵)"
+                            className="!h-7 !px-2.5 !text-[11px] shadow-none hover:shadow-none active:translate-y-0"
+                            style={{
+                                backgroundColor: isEmpty || isOver ? "#d1d5db" : themeColor,
+                                borderBottomColor: isEmpty || isOver ? "#9ca3af" : themeColor,
+                                borderBottomWidth: 0,
+                                transform: "none",
+                            }}
+                            icon={isSubmitting ? undefined : CornerDownLeft}
                         >
                             {isSubmitting ? (
                                 <span className="h-3 w-3 animate-spin rounded-full border-2 border-white border-t-transparent" />
-                            ) : (
-                                <CornerDownLeft size={12} />
-                            )}
+                            ) : null}
                             {isSubmitting ? "Sending" : "Send"}
-                        </button>
+                        </Button>
                     </div>
                 </div>
             </div>

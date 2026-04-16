@@ -145,12 +145,13 @@ export default function SharedStudyPage({ params }: { params: Promise<{ shareId:
         <div className="fixed inset-0 flex flex-col bg-[#F7F7F8]">
             {/* Header */}
             <header className="flex items-center justify-between p-4">
-                <button
+                <Button
+                    variant="ghost"
                     onClick={() => router.back()}
-                    className="rounded-xl p-2 font-bold text-[#afafaf] hover:bg-gray-200"
+                    className="!p-2 !text-[#afafaf] shadow-none hover:!bg-gray-200 hover:shadow-none active:translate-y-0"
                 >
                     ✕
-                </button>
+                </Button>
                 <div className="flex flex-col items-center">
                     <div className="text-xs font-black tracking-widest text-[#afafaf] uppercase">
                         Preview (Read-only)
@@ -200,13 +201,14 @@ export default function SharedStudyPage({ params }: { params: Promise<{ shareId:
 
                     {/* Reveal / back face */}
                     {!revealed ? (
-                        <button
+                        <Button
+                            variant="ghost"
                             onClick={() => setRevealed(true)}
-                            className="w-full rounded-2xl border-2 border-b-4 py-4 text-center font-black text-white transition-all active:translate-y-[2px] active:border-b-2"
+                            className="!w-full !rounded-2xl !border-2 !border-b-4 !py-4 !text-center !font-black !text-white shadow-none !transition-all hover:shadow-none active:translate-y-[2px] active:border-b-2"
                             style={{ backgroundColor: themeHex, borderColor: `${themeHex}BB` }}
                         >
                             Reveal Meaning
-                        </button>
+                        </Button>
                     ) : (
                         <div className="space-y-4">
                             <div
@@ -228,12 +230,14 @@ export default function SharedStudyPage({ params }: { params: Promise<{ shareId:
                                     </p>
                                 )}
                             </div>
-                            <button
+                            <Button
+                                variant="primary"
+                                color="green"
                                 onClick={handleNext}
-                                className="w-full rounded-2xl border-2 border-b-4 border-[#58a700] bg-[#58cc02] py-4 text-center font-black text-white transition-all hover:-translate-y-0.5 hover:shadow-md active:translate-y-[2px] active:border-b-2"
+                                className="!w-full !rounded-2xl !border-2 !border-b-4 !py-4 !text-center !font-black !text-white !transition-all hover:!-translate-y-0.5 hover:!shadow-md active:translate-y-[2px] active:border-b-2"
                             >
                                 {currentIndex < cards.length - 1 ? "Next →" : "Finish Preview"}
-                            </button>
+                            </Button>
                         </div>
                     )}
                 </div>

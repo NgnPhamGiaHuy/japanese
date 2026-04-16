@@ -147,12 +147,18 @@ export default function FlashcardDetailLayout({
                 <div className="relative z-20 px-4 pt-4 text-left">
                     <Link
                         href={isOwner ? "/flashcard?tab=personal" : "/flashcard?tab=shared"}
-                        className="inline-flex items-center justify-center rounded-xl p-2 text-[#3c3c3c] transition-all hover:bg-black/5 hover:shadow-sm"
-                        title="Back to Decks"
+                        className="inline-block"
                     >
-                        <ArrowLeft size={24} strokeWidth={3} />
+                        <Button
+                            variant="ghost"
+                            className="!rounded-xl !p-2 !text-[#3c3c3c] shadow-none transition-all hover:!bg-black/5 hover:shadow-none active:translate-y-0"
+                            title="Back to Decks"
+                            icon={ArrowLeft}
+                            iconSize={24}
+                        />
                     </Link>
                 </div>
+
                 <div className="relative z-10 mx-auto flex max-w-7xl flex-col justify-between gap-6 px-6 pt-4 pb-6 md:flex-row md:items-end">
                     <div>
                         <div className="mb-4 flex flex-wrap items-center gap-2">
@@ -207,15 +213,16 @@ export default function FlashcardDetailLayout({
                             <Button
                                 variant="primary"
                                 color="blue"
-                                className="flex w-full items-center justify-center gap-2 border-b-8 px-8 py-4 text-lg shadow-sm"
+                                className="w-full border-b-8 px-8 py-4 text-lg shadow-sm"
                                 style={
                                     {
                                         backgroundColor: themeHex,
                                         borderColor: `${themeHex}BB`,
                                     } as React.CSSProperties
                                 }
+                                icon={BookOpen}
+                                iconSize={24}
                             >
-                                <BookOpen size={24} />
                                 Start Study
                             </Button>
                         </Link>
@@ -228,10 +235,11 @@ export default function FlashcardDetailLayout({
                                 <Button
                                     variant="secondary"
                                     color="purple"
-                                    className="flex w-full items-center justify-center gap-2"
+                                    className="w-full"
                                     disabled={!canPlay}
+                                    icon={Gamepad2}
+                                    iconSize={18}
                                 >
-                                    <Gamepad2 size={18} />
                                     Match
                                 </Button>
                             </Link>
@@ -242,10 +250,11 @@ export default function FlashcardDetailLayout({
                                 <Button
                                     variant="secondary"
                                     color="orange"
-                                    className="flex w-full items-center justify-center gap-2"
+                                    className="w-full"
                                     disabled={!canPlay}
+                                    icon={Zap}
+                                    iconSize={18}
                                 >
-                                    <Zap size={18} />
                                     Speed
                                 </Button>
                             </Link>
@@ -263,34 +272,67 @@ export default function FlashcardDetailLayout({
                             /* ── OWNER: management actions only, no redundant role info ── */
                             <>
                                 {onEdit && (
-                                    <ActionButton
-                                        icon={<Edit2 size={18} />}
-                                        iconBg={`${themeHex}15`}
-                                        iconColor={themeHex}
-                                        label="Edit Deck"
-                                        sub="Add, remove, or update cards"
+                                    <Button
+                                        variant="ghost"
                                         onClick={onEdit}
-                                    />
+                                        className="!flex !w-full !items-center !justify-start !gap-4 !rounded-2xl border-2 border-transparent !bg-white !px-4 !py-4 shadow-sm transition-all hover:!border-gray-200 active:translate-y-0"
+                                    >
+                                        <div
+                                            className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl"
+                                            style={{
+                                                backgroundColor: `${themeHex}15`,
+                                                color: themeHex,
+                                            }}
+                                        >
+                                            <Edit2 size={22} />
+                                        </div>
+                                        <div className="text-left">
+                                            <div className="text-lg font-black text-[#3c3c3c]">
+                                                Edit Deck
+                                            </div>
+                                            <div className="text-sm font-bold text-[#afafaf]">
+                                                Add, remove, or update cards
+                                            </div>
+                                        </div>
+                                    </Button>
                                 )}
                                 {onCopyLink && (
-                                    <ActionButton
-                                        icon={<Copy size={18} />}
-                                        iconBg="bg-gray-100"
-                                        iconColor="text-gray-600"
-                                        label={linkCopied ? "Link Copied!" : "Copy Share Link"}
-                                        sub="Share this deck with others"
+                                    <Button
+                                        variant="ghost"
                                         onClick={onCopyLink}
-                                    />
+                                        className="!flex !w-full !items-center !justify-start !gap-4 !rounded-2xl border-2 border-transparent !bg-white !px-4 !py-4 shadow-sm transition-all hover:!border-gray-200 active:translate-y-0"
+                                    >
+                                        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gray-100 text-gray-600">
+                                            <Copy size={22} />
+                                        </div>
+                                        <div className="text-left">
+                                            <div className="text-lg font-black text-[#3c3c3c]">
+                                                {linkCopied ? "Link Copied!" : "Copy Share Link"}
+                                            </div>
+                                            <div className="text-sm font-bold text-[#afafaf]">
+                                                Share this deck with others
+                                            </div>
+                                        </div>
+                                    </Button>
                                 )}
                                 {onManageAccess && (
-                                    <ActionButton
-                                        icon={<Lock size={18} />}
-                                        iconBg="bg-blue-50"
-                                        iconColor="text-blue-500"
-                                        label="Manage Access"
-                                        sub="Control who can view or comment"
+                                    <Button
+                                        variant="ghost"
                                         onClick={onManageAccess}
-                                    />
+                                        className="!flex !w-full !items-center !justify-start !gap-4 !rounded-2xl border-2 border-transparent !bg-white !px-4 !py-4 shadow-sm transition-all hover:!border-gray-200 active:translate-y-0"
+                                    >
+                                        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-blue-50 text-blue-500">
+                                            <Lock size={22} />
+                                        </div>
+                                        <div className="text-left">
+                                            <div className="text-lg font-black text-[#3c3c3c]">
+                                                Manage Access
+                                            </div>
+                                            <div className="text-sm font-bold text-[#afafaf]">
+                                                Control who can view or comment
+                                            </div>
+                                        </div>
+                                    </Button>
                                 )}
                             </>
                         ) : (
@@ -368,58 +410,93 @@ export default function FlashcardDetailLayout({
                                 {/* Shared user actions */}
                                 <div className="flex flex-col gap-3">
                                     {canEdit && onEdit && (
-                                        <ActionButton
-                                            icon={<Edit2 size={18} />}
-                                            iconBg={`${themeHex}15`}
-                                            iconColor={themeHex}
-                                            label="Edit Deck Content"
-                                            sub="Modify for all users"
+                                        <Button
+                                            variant="ghost"
                                             onClick={onEdit}
-                                        />
+                                            className="!flex !w-full !items-center !justify-start !gap-4 !rounded-2xl border-2 border-transparent !bg-white !px-4 !py-4 shadow-sm transition-all hover:!border-gray-200 active:translate-y-0"
+                                        >
+                                            <div
+                                                className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl"
+                                                style={{
+                                                    backgroundColor: `${themeHex}15`,
+                                                    color: themeHex,
+                                                }}
+                                            >
+                                                <Edit2 size={22} />
+                                            </div>
+                                            <div className="text-left">
+                                                <div className="text-lg font-black text-[#3c3c3c]">
+                                                    Edit Deck Content
+                                                </div>
+                                                <div className="text-sm font-bold text-[#afafaf]">
+                                                    Modify for all users
+                                                </div>
+                                            </div>
+                                        </Button>
                                     )}
                                     {onDuplicate ? (
-                                        <ActionButton
-                                            icon={
-                                                saving ? (
-                                                    <Loader2 size={18} className="animate-spin" />
-                                                ) : (
-                                                    <CopyPlus size={18} />
-                                                )
-                                            }
-                                            iconBg="bg-gray-100"
-                                            iconColor="text-gray-600"
-                                            label={saving ? "Duplicating..." : "Duplicate Deck"}
-                                            sub="Save a copy to your collection"
+                                        <Button
+                                            variant="ghost"
                                             onClick={onDuplicate}
                                             disabled={saving}
-                                        />
-                                    ) : !currentUserId ? (
-                                        <Link
-                                            href="/login"
-                                            className="group flex w-full items-center gap-3 rounded-xl border-2 border-transparent bg-white px-4 py-3 text-left transition-all hover:border-gray-200 hover:shadow-sm"
+                                            className="!flex !w-full !items-center !justify-start !gap-4 !rounded-2xl border-2 border-transparent !bg-white !px-4 !py-4 shadow-sm transition-all hover:!border-gray-200 active:translate-y-0 disabled:opacity-50"
                                         >
-                                            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-gray-100 text-gray-600">
-                                                <CopyPlus size={18} />
+                                            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gray-100 text-gray-600">
+                                                {saving ? (
+                                                    <Loader2 size={22} className="animate-spin" />
+                                                ) : (
+                                                    <CopyPlus size={22} />
+                                                )}
                                             </div>
-                                            <div>
-                                                <div className="font-black text-[#3c3c3c]">
-                                                    Log in to Duplicate
+                                            <div className="text-left">
+                                                <div className="text-lg font-black text-[#3c3c3c]">
+                                                    {saving ? "Duplicating..." : "Duplicate Deck"}
                                                 </div>
-                                                <div className="text-[11px] font-bold text-[#afafaf]">
-                                                    Sign in to save this deck
+                                                <div className="text-sm font-bold text-[#afafaf]">
+                                                    Save a copy to your collection
                                                 </div>
                                             </div>
+                                        </Button>
+                                    ) : !currentUserId ? (
+                                        <Link href="/login" className="w-full">
+                                            <Button
+                                                variant="ghost"
+                                                className="!flex !w-full !items-center !justify-start !gap-4 !rounded-2xl border-2 border-transparent !bg-white !px-4 !py-4 shadow-sm transition-all hover:!border-gray-200 active:translate-y-0"
+                                            >
+                                                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gray-100 text-gray-600">
+                                                    <CopyPlus size={22} />
+                                                </div>
+                                                <div className="text-left">
+                                                    <div className="text-lg font-black text-[#3c3c3c]">
+                                                        Log in to Duplicate
+                                                    </div>
+                                                    <div className="text-sm font-bold text-[#afafaf]">
+                                                        Sign in to save this deck
+                                                    </div>
+                                                </div>
+                                            </Button>
                                         </Link>
                                     ) : null}
                                     {onCopyLink && (
-                                        <ActionButton
-                                            icon={<Copy size={18} />}
-                                            iconBg="bg-gray-100"
-                                            iconColor="text-gray-600"
-                                            label={linkCopied ? "Link Copied!" : "Copy Share Link"}
-                                            sub="Share this deck with others"
+                                        <Button
+                                            variant="ghost"
                                             onClick={onCopyLink}
-                                        />
+                                            className="!flex !w-full !items-center !justify-start !gap-4 !rounded-2xl border-2 border-transparent !bg-white !px-4 !py-4 shadow-sm transition-all hover:!border-gray-200 active:translate-y-0"
+                                        >
+                                            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gray-100 text-gray-600">
+                                                <Copy size={22} />
+                                            </div>
+                                            <div className="text-left">
+                                                <div className="text-lg font-black text-[#3c3c3c]">
+                                                    {linkCopied
+                                                        ? "Link Copied!"
+                                                        : "Copy Share Link"}
+                                                </div>
+                                                <div className="text-sm font-bold text-[#afafaf]">
+                                                    Share this deck with others
+                                                </div>
+                                            </div>
+                                        </Button>
                                     )}
                                 </div>
                             </>
@@ -531,47 +608,5 @@ export default function FlashcardDetailLayout({
                 </div>
             </div>
         </div>
-    );
-}
-
-// ─── Small reusable action button ─────────────────────────────────────────────
-
-/**
- * Shared button component for the side menu.
- * Displays an icon with a background and multi-line label/subtext.
- */
-function ActionButton({
-    icon,
-    iconBg,
-    iconColor,
-    label,
-    sub,
-    onClick,
-    disabled,
-}: {
-    icon: React.ReactNode;
-    iconBg: string;
-    iconColor: string;
-    label: string;
-    sub: string;
-    onClick: () => void;
-    disabled?: boolean;
-}) {
-    return (
-        <button
-            onClick={onClick}
-            disabled={disabled}
-            className="group flex w-full items-center gap-3 rounded-xl border-2 border-transparent bg-white px-4 py-3 text-left transition-all hover:border-gray-200 hover:shadow-sm disabled:opacity-50"
-        >
-            <div
-                className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg transition-transform group-hover:scale-105 ${iconBg} ${iconColor}`}
-            >
-                {icon}
-            </div>
-            <div>
-                <div className="font-black text-[#3c3c3c]">{label}</div>
-                <div className="text-[11px] font-bold text-[#afafaf]">{sub}</div>
-            </div>
-        </button>
     );
 }

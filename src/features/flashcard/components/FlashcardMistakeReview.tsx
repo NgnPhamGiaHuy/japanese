@@ -261,42 +261,52 @@ export const FlashcardMistakeReview = ({
                                 const isCorrect = choice === card.meaning;
                                 let style: React.CSSProperties = {
                                     backgroundColor: "white",
-                                    borderColor: "#e5e7eb",
-                                    color: "#3c3c3c",
+                                    borderBottomColor: "#e5e7eb",
                                 };
+                                let v: any = "secondary";
                                 if (mcSelected !== null) {
                                     if (isCorrect) {
+                                        v = "primary";
                                         style = {
                                             backgroundColor: "#58cc02",
-                                            borderColor: "#58a700",
-                                            color: "white",
+                                            borderBottomColor: "#58a700",
                                         };
                                     } else if (isSelected) {
+                                        v = "primary";
                                         style = {
                                             backgroundColor: "#ff4b4b",
-                                            borderColor: "#ea2b2b",
-                                            color: "white",
+                                            borderBottomColor: "#ea2b2b",
                                         };
                                     } else {
                                         style = {
                                             backgroundColor: "white",
-                                            borderColor: "#e5e7eb",
-                                            color: "#afafaf",
+                                            borderBottomColor: "#e5e7eb",
                                             opacity: 0.5,
                                         };
                                     }
                                 }
                                 return (
-                                    <button
+                                    <Button
                                         key={choice}
-                                        type="button"
                                         onClick={() => handleMCSelect(choice)}
                                         disabled={mcSelected !== null}
-                                        className="rounded-2xl border-2 border-b-4 px-4 py-4 text-left text-sm font-bold transition-all"
+                                        variant={v}
+                                        className={`!px-4 !py-4 !text-left !text-sm !font-bold shadow-none transition-all hover:shadow-none ${mcSelected !== null && !isCorrect && !isSelected ? "opacity-50" : ""}`}
                                         style={style}
                                     >
-                                        {choice}
-                                    </button>
+                                        <span
+                                            style={{
+                                                color:
+                                                    mcSelected !== null && (isCorrect || isSelected)
+                                                        ? "white"
+                                                        : mcSelected !== null
+                                                          ? "#afafaf"
+                                                          : "#3c3c3c",
+                                            }}
+                                        >
+                                            {choice}
+                                        </span>
+                                    </Button>
                                 );
                             })}
                         </div>
@@ -332,15 +342,17 @@ export const FlashcardMistakeReview = ({
 
                             {/* Back (Memory Encoding with AI Aid) */}
                             <div className="absolute inset-0 flex rotate-y-180 flex-col items-center justify-center rounded-[2.5rem] border-2 border-b-8 border-[#ea2b2b]/20 bg-white p-6 text-center shadow-sm backface-hidden sm:p-8">
-                                <button
+                                <Button
                                     onClick={(e) => {
                                         e.stopPropagation();
                                         playAudio(getAudioText(card));
                                     }}
-                                    className="absolute top-4 right-4 rounded-full bg-gray-100 p-2 text-gray-500 hover:bg-gray-200"
-                                >
-                                    <Volume2 className="h-5 w-5" />
-                                </button>
+                                    className="absolute top-4 right-4 !rounded-full bg-gray-100 !p-2 shadow-none transition-colors hover:shadow-none active:translate-y-0"
+                                    variant="ghost"
+                                    icon={Volume2}
+                                    iconClassName="h-5 w-5 text-gray-500"
+                                />
+
                                 <div className="flex w-full flex-1 flex-col items-center justify-center overflow-y-auto px-2 pt-10 pb-4">
                                     <h2
                                         className="mb-4 text-2xl leading-tight font-black wrap-break-word sm:text-3xl md:text-4xl"

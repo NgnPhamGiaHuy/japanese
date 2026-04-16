@@ -20,6 +20,7 @@ import {
     recommendedAction,
 } from "@/features/flashcard/logic";
 import { useUserProgress } from "@/features/user/hooks";
+import { Button } from "@/shared/components/ui";
 import { useAppStore } from "@/store";
 
 import type { StudyMode } from "@/features/flashcard/types/flashcard.types";
@@ -267,20 +268,23 @@ export default function FlashcardStudyPage({ params }: { params: Promise<{ id: s
 
                         <div className="my-1 h-px w-full bg-gray-200" />
 
-                        <button
+                        <Button
+                            variant="ghost"
                             onClick={() => setShowResetConfirm(true)}
-                            className="flex items-center justify-center gap-2 py-2 text-sm font-bold text-[#afafaf] transition-colors hover:text-[#ea2b2b]"
+                            className="!flex !items-center !justify-center !gap-2 !py-2 !text-sm !font-bold !text-[#afafaf] shadow-none transition-colors hover:!text-[#ea2b2b] hover:shadow-none active:translate-y-0"
+                            icon={RotateCcw}
+                            iconSize={14}
                         >
-                            <RotateCcw size={14} />
                             Reset Progress
-                        </button>
+                        </Button>
 
-                        <button
+                        <Button
+                            variant="ghost"
                             onClick={handleClose}
-                            className="py-3 text-sm font-black text-[#afafaf] transition-colors hover:text-[#3c3c3c]"
+                            className="!py-3 !text-sm !font-black !text-[#afafaf] shadow-none transition-colors hover:!text-[#3c3c3c] hover:shadow-none active:translate-y-0"
                         >
                             Back to Deck
-                        </button>
+                        </Button>
                     </div>
                 </div>
 
@@ -300,20 +304,23 @@ export default function FlashcardStudyPage({ params }: { params: Promise<{ id: s
                                 intervals and review dates will be cleared. This cannot be undone.
                             </p>
                             <div className="flex gap-3">
-                                <button
+                                <Button
+                                    variant="ghost"
                                     onClick={() => setShowResetConfirm(false)}
                                     disabled={resetting}
-                                    className="flex-1 rounded-2xl border-2 border-b-4 border-gray-200 bg-white py-3 text-sm font-black text-[#3c3c3c] transition-all hover:bg-gray-50 disabled:opacity-50"
+                                    className="!flex-1 !rounded-2xl !border-2 !border-b-4 !border-gray-200 !bg-white !py-3 !text-sm !font-black !text-[#3c3c3c] shadow-none transition-all hover:!bg-gray-50 hover:shadow-none active:translate-y-0 disabled:opacity-50"
                                 >
                                     Cancel
-                                </button>
-                                <button
+                                </Button>
+                                <Button
+                                    variant="primary"
+                                    color="red"
                                     onClick={() => void handleReset()}
                                     disabled={resetting}
-                                    className="flex-1 rounded-2xl border-2 border-b-4 border-red-400 bg-[#ea2b2b] py-3 text-sm font-black text-white transition-all hover:bg-red-600 disabled:opacity-50"
+                                    className="!flex-1 !rounded-2xl !border-2 !border-b-4 !py-3 !text-sm !font-black transition-all disabled:opacity-50"
                                 >
                                     {resetting ? "Resetting…" : "Reset All"}
-                                </button>
+                                </Button>
                             </div>
                         </div>
                     </div>
@@ -394,14 +401,15 @@ function ModeButton({
     onClick,
 }: ModeButtonProps) {
     return (
-        <button
+        <Button
+            variant="ghost"
             onClick={onClick}
             disabled={disabled}
-            className={`flex w-full items-center gap-4 rounded-2xl border-2 border-b-4 px-5 py-4 text-left transition-all active:translate-y-[2px] active:border-b-2 ${
+            className={`!flex !w-full !items-center !gap-4 !rounded-2xl !border-2 !border-b-4 !px-5 !py-4 !text-left shadow-none !transition-all hover:shadow-none active:translate-y-[2px] active:border-b-2 ${
                 disabled
-                    ? "cursor-not-allowed opacity-40"
-                    : "hover:-translate-y-0.5 hover:shadow-md"
-            } ${primary ? "text-white shadow-sm" : "bg-white text-[#3c3c3c]"}`}
+                    ? "!cursor-not-allowed !opacity-40"
+                    : "hover:!-translate-y-0.5 hover:!shadow-md"
+            } ${primary ? "!text-white shadow-sm" : "!bg-white !text-[#3c3c3c]"}`}
             style={
                 primary
                     ? { backgroundColor: color, borderColor: `${color}BB` }
@@ -418,7 +426,7 @@ function ModeButton({
             >
                 {icon}
             </div>
-            <div className="flex-1">
+            <div className="flex flex-1 flex-col">
                 <div
                     className={`text-base font-black ${primary ? "text-white" : "text-[#3c3c3c]"}`}
                 >
@@ -430,6 +438,6 @@ function ModeButton({
                     {sub}
                 </div>
             </div>
-        </button>
+        </Button>
     );
 }

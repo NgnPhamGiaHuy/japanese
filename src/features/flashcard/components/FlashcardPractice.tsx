@@ -234,18 +234,17 @@ export const FlashcardPractice = ({
                     <div className="flex w-full flex-col gap-5">
                         <div className="relative flex w-full flex-col items-center justify-center rounded-[2.5rem] border-2 border-b-8 border-gray-200 bg-white px-6 py-8 text-center shadow-sm sm:rounded-[3rem]">
                             {card.hint && (
-                                <button
-                                    type="button"
+                                <Button
+                                    variant="ghost"
                                     onClick={() => setHintVisible((v) => !v)}
-                                    className="absolute top-4 left-4 rounded-xl border-2 border-gray-100 bg-gray-50 p-2 transition-colors hover:bg-gray-100"
+                                    className="absolute top-4 left-4 !rounded-xl border-2 border-gray-100 bg-gray-50 !p-2 shadow-none transition-colors hover:bg-gray-100 hover:shadow-none"
                                     title="Show hint"
-                                >
-                                    <Lightbulb
-                                        size={16}
-                                        style={{ color: hintVisible ? themeHex : "#afafaf" }}
-                                    />
-                                </button>
+                                    icon={Lightbulb}
+                                    iconClassName={hintVisible ? "" : "text-[#afafaf]"}
+                                    style={hintVisible ? { color: themeHex } : {}}
+                                />
                             )}
+
                             {headerHint && (
                                 <span className="mb-2 text-lg font-bold tracking-widest text-[#afafaf]">
                                     {headerHint}
@@ -280,42 +279,48 @@ export const FlashcardPractice = ({
                                 const isCorrect = choice === card.meaning;
                                 let style: React.CSSProperties = {
                                     backgroundColor: "white",
-                                    borderColor: "#e5e7eb",
-                                    color: "#3c3c3c",
+                                    borderBottomColor: "#e5e7eb",
                                 };
+                                let v: any = "secondary";
                                 if (mcSelected !== null) {
                                     if (isCorrect) {
+                                        v = "primary";
                                         style = {
                                             backgroundColor: "#58cc02",
-                                            borderColor: "#58a700",
-                                            color: "white",
+                                            borderBottomColor: "#58a700",
                                         };
                                     } else if (isSelected) {
+                                        v = "primary";
                                         style = {
                                             backgroundColor: "#ff4b4b",
-                                            borderColor: "#ea2b2b",
-                                            color: "white",
+                                            borderBottomColor: "#ea2b2b",
                                         };
                                     } else {
                                         style = {
                                             backgroundColor: "white",
-                                            borderColor: "#e5e7eb",
-                                            color: "#afafaf",
+                                            borderBottomColor: "#e5e7eb",
                                             opacity: 0.5,
                                         };
                                     }
                                 }
                                 return (
-                                    <button
+                                    <Button
                                         key={choice}
-                                        type="button"
                                         onClick={() => handleMCSelect(choice)}
                                         disabled={mcSelected !== null}
-                                        className="rounded-2xl border-2 border-b-4 px-4 py-4 text-left text-sm leading-snug font-bold transition-all"
+                                        variant={v}
+                                        className={`!px-4 !py-4 !text-left !text-sm !leading-snug !font-bold shadow-none transition-all hover:shadow-none ${mcSelected !== null && !isCorrect && !isSelected ? "opacity-50" : ""}`}
                                         style={style}
+                                        color={
+                                            mcSelected !== null && (isCorrect || isSelected)
+                                                ? "white"
+                                                : mcSelected !== null
+                                                  ? "#afafaf"
+                                                  : "#3c3c3c"
+                                        }
                                     >
                                         {choice}
-                                    </button>
+                                    </Button>
                                 );
                             })}
                         </div>
@@ -359,18 +364,18 @@ export const FlashcardPractice = ({
                                 </div>
 
                                 {card.hint && (
-                                    <button
-                                        type="button"
+                                    <Button
+                                        variant="ghost"
                                         onClick={(e) => {
                                             e.stopPropagation();
                                             setHintVisible((v) => !v);
                                         }}
-                                        className="absolute bottom-6 left-6 flex items-center gap-1.5 rounded-xl border-2 border-gray-100 bg-gray-50 px-3 py-1.5 text-[10px] font-black tracking-wide uppercase transition-colors hover:bg-gray-100"
-                                        style={{ color: hintVisible ? themeHex : "#afafaf" }}
+                                        className="absolute bottom-6 left-6 !flex !items-center !gap-1.5 !rounded-xl border-2 border-gray-100 bg-gray-50 !px-3 !py-1.5 !text-[10px] !font-black tracking-wide uppercase shadow-none hover:shadow-none"
+                                        color={hintVisible ? themeHex : "#afafaf"}
+                                        icon={Lightbulb}
                                     >
-                                        <Lightbulb size={11} />
                                         Hint
-                                    </button>
+                                    </Button>
                                 )}
 
                                 {hintVisible && card.hint ? (
@@ -390,15 +395,17 @@ export const FlashcardPractice = ({
 
                             {/* Back Side */}
                             <div className="absolute inset-0 flex rotate-y-180 flex-col items-center justify-center rounded-[2.5rem] border-2 border-b-8 border-gray-200 bg-white p-6 text-center shadow-sm backface-hidden sm:rounded-[3rem] sm:p-8">
-                                <button
+                                <Button
+                                    variant="ghost"
                                     onClick={(e) => {
                                         e.stopPropagation();
                                         playAudio(getAudioText(card));
                                     }}
-                                    className="absolute top-4 right-4 z-10 shrink-0 rounded-full bg-gray-100 p-2 text-gray-500 hover:bg-gray-200"
-                                >
-                                    <Volume2 className="h-5 w-5 sm:h-6 sm:w-6" />
-                                </button>
+                                    className="absolute top-4 right-4 z-10 shrink-0 !rounded-full bg-gray-100 !p-2 shadow-none hover:shadow-none active:translate-y-0"
+                                    icon={Volume2}
+                                    iconClassName="h-5 w-5 sm:h-6 sm:w-6 text-gray-500"
+                                />
+
                                 <div className="flex w-full flex-1 flex-col items-center justify-center overflow-y-auto px-2 pt-10 pb-4 sm:pt-4">
                                     <h2
                                         className="mb-4 text-2xl leading-tight font-black wrap-break-word sm:mb-6 sm:text-3xl md:text-4xl"
