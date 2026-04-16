@@ -1,5 +1,10 @@
 /**
  * Core Flashcard domain model.
+ * 
+ * @remarks
+ * Represents the fundamental unit of study. This structure combines static content 
+ * (scripts, definitions) with dynamic SRS state (intervals, repetitions) and 
+ * enrichment metadata (mnemonics, distraction sets) used by game modes.
  */
 export interface FlashCard {
     /** Unique identifier for the card document */
@@ -65,12 +70,23 @@ export type EditorCard = FlashCard & { imageFile?: File; previewUrl?: string };
 
 /**
  * Deck container for flashcards, including visibility and collaborative metadata.
+ * 
+ * @remarks
+ * Lessons serve as the primary unit of shared knowledge. They manage ownership,
+ * Role-Based Access Control (RBAC), and sharing identifiers while acting as 
+ * a registry for a set of related FlashCard documents.
  */
 export interface Lesson {
     /** Unique document ID for the deck */
     id: string;
     /** UID of the primary deck owner */
     userId?: string;
+    /** Standardized owner UID (source of truth for ownership identity) */
+    ownerId?: string;
+    /** Standardized owner display name (snapshot) */
+    ownerName?: string | null;
+    /** Standardized owner avatar URL snapshot */
+    ownerAvatar?: string | null;
     /** Human-readable title of the lesson */
     title: string;
     /** Short summary of deck contents */
@@ -124,6 +140,13 @@ export interface Lesson {
     /** URL-safe token representing the {ownerId}:{lessonId} pair */
     shareId?: string;
 
+    /** Optional UI metadata: who last changed/share-imported this deck (snapshot) */
+    lastSharedBy?: string;
+    lastSharedByName?: string | null;
+    /** Standardized sharer avatar URL snapshot */
+    lastSharedByAvatar?: string | null;
+    lastSharedAt?: number;
+
     /** Brand color used for the deck's card components and UI highlights */
     themeColor?: string;
 
@@ -135,6 +158,11 @@ export interface Lesson {
 
 /**
  * Snapshot of performance during a single learning/practice session.
+ * 
+ * @remarks
+ * Used purely for transient session reporting and progress feedback.
+ * These stats are typically aggregated into the global UserProgress service
+ * upon session completion.
  */
 export interface StudyStats {
     /** Count of cards successfully recalled */
@@ -156,12 +184,12 @@ export type StudyMode = "learn" | "practice" | "mistake-review";
 // Comment System Types
 
 /**
- * High-level threaded feedback document.
+ * High-level threaded feedback document attached to a specific card.
  *
  * @remarks
- * For optimization, we use a 2-level nesting limit.
- * Parent comments are distinct documents; nested replies are stored in a
- * denormalized array inside the parent.
+ * Implements a hybrid storage strategy: parents are top-level documents in 
+ * the Firestore collection, while replies are nested arrays to optimize
+ * read performance for threaded views.
  */
 export interface Comment {
     /** Firestore document ID */

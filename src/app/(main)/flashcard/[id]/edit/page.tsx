@@ -13,7 +13,7 @@ import { getDoc } from "firebase/firestore";
 
 import { LessonBuilder, useLessons } from "@/features/flashcard";
 import { useCards } from "@/features/flashcard/hooks";
-import { lessonDoc } from "@/features/flashcard/services";
+import { lessonDoc, normalizeLesson } from "@/features/flashcard/services";
 import { useAlert } from "@/shared/providers";
 import { useAppStore } from "@/store";
 
@@ -76,7 +76,13 @@ export default function FlashcardEditPage({ params }: { params: Promise<{ id: st
         ])
             .then(([lessonSnap, cardsSnap]) => {
                 if (lessonSnap.exists()) {
-                    setSharedLesson({ ...lessonSnap.data(), id: lessonSnap.id } as Lesson);
+                    setSharedLesson(
+                        normalizeLesson({
+                            ...lessonSnap.data(),
+                            id: lessonSnap.id,
+                            __ownerIdFallback: ownerId,
+                        }),
+                    );
                 }
                 setSharedCards(cardsSnap.docs.map((d) => ({ ...d.data(), id: d.id }) as FlashCard));
                 setLoadingShared(false);
@@ -106,7 +112,11 @@ export default function FlashcardEditPage({ params }: { params: Promise<{ id: st
 
     return (
         <LessonBuilder
-            editingLesson={{ ...lesson, userId: ownerId ?? lesson.userId }}
+            editingLesson={{
+                ...lesson,
+                ownerId: ownerId ?? lesson.ownerId ?? lesson.userId,
+                userId: ownerId ?? lesson.userId,
+            }}
             initialCards={cards}
             onSave={async (updatedLesson, updatedCards, isNew) => {
                 try {

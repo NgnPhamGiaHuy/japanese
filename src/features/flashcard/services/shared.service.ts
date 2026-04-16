@@ -8,6 +8,7 @@ import { doc, getDoc, getDocs, query, setDoc, where } from "firebase/firestore";
 import { APP_ID, db } from "@/lib/firebase";
 import { syncInviteToCollaborator } from "./access.service";
 import { cardsCol } from "./card.service";
+import { normalizeLesson } from "./lesson.service";
 
 import type { User } from "firebase/auth";
 import type { FlashCard, Lesson } from "../types";
@@ -79,7 +80,11 @@ export async function getSharedLesson(
     const lessonSnap = await getDoc(lessonRef);
     if (!lessonSnap.exists()) return null;
 
-    let lesson = { ...lessonSnap.data(), id: lessonSnap.id } as Lesson;
+    let lesson = normalizeLesson({
+        ...lessonSnap.data(),
+        id: lessonSnap.id,
+        __ownerIdFallback: ownerId,
+    });
 
     // ── Auto-convert pending email invite → collaborator ──────────────────
     // Must happen BEFORE the access gate so restricted decks grant access
@@ -91,14 +96,18 @@ export async function getSharedLesson(
             // Re-fetch so the updated roles are used in the access check below
             const refreshed = await getDoc(lessonRef);
             if (refreshed.exists()) {
-                lesson = { ...refreshed.data(), id: refreshed.id } as Lesson;
+                lesson = normalizeLesson({
+                    ...refreshed.data(),
+                    id: refreshed.id,
+                    __ownerIdFallback: ownerId,
+                });
             }
         }
     }
 
     // ── RBAC Resolution ───────────────────────────────────────────────────
     // Priority: owner → explicit role (includes just-converted invite) → pending email invite → public link
-    const isOwner = currentUserId === ownerId || lesson.roles?.[currentUserId ?? ""] === "owner";
+    const isOwner = lesson.roles?.[currentUserId ?? ""] === "owner";
     const hasExplicitRole = !!(currentUserId && lesson.roles?.[currentUserId]);
 
     // Safety net: if the user has a pending invite that wasn't converted

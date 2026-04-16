@@ -25,7 +25,7 @@ import {
 
 import { CommentPanel } from "@/features/flashcard/components";
 import { useCommentCount } from "@/features/flashcard/hooks";
-import { Button } from "@/shared/components/ui";
+import { Button, UserMeta } from "@/shared/components/ui";
 
 import type { FlashCard, Lesson } from "@/features/flashcard/types";
 
@@ -130,6 +130,14 @@ export default function FlashcardDetailLayout({
     const canEdit = role === "owner" || role === "editor";
     const canComment = role === "owner" || role === "editor" || role === "commenter";
 
+    const createdByName = lesson.ownerName ?? "Unknown";
+    const createdByAvatar = lesson.ownerAvatar ?? null;
+
+    const sharedByName = lesson.lastSharedByName ?? "Unknown";
+    const shouldShowSharedBy = !!lesson.lastSharedBy && (!lesson.ownerId || lesson.lastSharedBy !== lesson.ownerId);
+    const sharedBySubtitle =
+        currentUserId && lesson.lastSharedBy === currentUserId ? "You shared" : "Shared by";
+
     /** Active card for the comment panel display */
     const [selectedCardId, setSelectedCardId] = useState<string | null>(
         cards.length > 0 ? cards[0].id : null,
@@ -192,6 +200,17 @@ export default function FlashcardDetailLayout({
                                 {lesson.description}
                             </p>
                         )}
+
+                        <div className="mt-2 flex flex-col gap-2">
+                            <UserMeta name={createdByName} avatar={createdByAvatar} subtitle="Created by" />
+                            {shouldShowSharedBy && (
+                                <UserMeta
+                                    name={sharedByName}
+                                    avatar={lesson.lastSharedByAvatar ?? null}
+                                    subtitle={sharedBySubtitle}
+                                />
+                            )}
+                        </div>
 
                         {lesson.tags?.length > 0 && (
                             <div className="mt-4 flex flex-wrap gap-2">

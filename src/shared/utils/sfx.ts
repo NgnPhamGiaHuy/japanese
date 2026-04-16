@@ -47,27 +47,45 @@ function getContext(): AudioContext | null {
         impulseBuffer = buildImpulse(audioCtx, 0.9, 2.2);
     }
 
-    if (audioCtx.state === "suspended") {
-        void audioCtx.resume();
-    }
-
     return audioCtx;
 }
 
-/** Unlock audio context on first user gesture */
+/** 
+ * Unlock audio context on first user gesture.
+ * Mobile (iOS/Android) requires a direct "start" of a source node to fully prime the engine.
+ */
 if (typeof window !== "undefined") {
     const unlock = () => {
         const ctx = getContext();
-        if (ctx) {
-            void ctx.resume().then(() => {
-                window.removeEventListener("mousedown", unlock);
-                window.removeEventListener("touchstart", unlock);
-                window.removeEventListener("keydown", unlock);
-            });
+        if (!ctx) return;
+
+        // 1. Essential resume loop
+        if (ctx.state === "suspended") {
+            void ctx.resume();
+        }
+
+        // 2. Play a "silent burst" to wake up hardware (critical for iOS Safari)
+        const buffer = ctx.createBuffer(1, 1, 22050);
+        const source = ctx.createBufferSource();
+        source.buffer = buffer;
+        source.connect(ctx.destination);
+        source.start(0);
+
+        // 3. Clean up — don't remove until we are actually running
+        if (ctx.state === "running") {
+            window.removeEventListener("mousedown", unlock);
+            window.removeEventListener("touchstart", unlock);
+            window.removeEventListener("touchend", unlock);
+            window.removeEventListener("click", unlock);
+            window.removeEventListener("keydown", unlock);
         }
     };
-    window.addEventListener("mousedown", unlock, { passive: true });
-    window.addEventListener("touchstart", unlock, { passive: true });
+
+    // Use non-passive listeners to ensure some mobile engines treat this as a "strong" gesture
+    window.addEventListener("mousedown", unlock);
+    window.addEventListener("touchstart", unlock);
+    window.addEventListener("touchend", unlock);
+    window.addEventListener("click", unlock);
     window.addEventListener("keydown", unlock);
 }
 
@@ -311,6 +329,11 @@ function synthClick(ctx: AudioContext): void {
 export function playSFX(type: SFXType, volume = 1): void {
     const ctx = getContext();
     if (!ctx || !masterGain) return;
+
+    // Last-resort resume for mobile devices that suspend on inactivity
+    if (ctx.state === "suspended") {
+        void ctx.resume();
+    }
 
     // Clamp volume to a safe ceiling — avoid accidental clipping
     masterGain.gain.value = Math.min(volume * 0.72, 1.0);

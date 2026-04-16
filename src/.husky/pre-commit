@@ -1,0 +1,18 @@
+#!/bin/sh
+. "$(dirname "$0")/_/husky.sh"
+
+# Increase robustness by ensuring formatting is perfect and the app still builds.
+echo "🔍 Running pre-commit checks..."
+
+cd src
+
+# 1. Faster checks (Format & Lint staged files)
+echo "✨ Formatting ..."
+prettier --write . || exit 1
+
+# 2. Safety check (Ensure full production build passes)
+# Note: This can be slow. Remove if it hampers your workflow.
+echo "🏗️ Verifying production build..."
+npm run build || exit 1
+
+echo "✅ All checks passed! Committing..."

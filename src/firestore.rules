@@ -1,0 +1,98 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // ─── HELPER FUNCTIONS ───────────────────────────────────────────────────
+    
+    function isSignedIn() {
+      return request.auth != null;
+    }
+    
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+    
+    function getLesson(appId, ownerId, lessonId) {
+      return get(/databases/$(database)/documents/artifacts/$(appId)/users/$(ownerId)/lessons/$(lessonId)).data;
+    }
+
+    // ─── CORE DOMAIN RULES ──────────────────────────────────────────────────
+
+    match /artifacts/{appId} {
+      
+      match /users/{userId} {
+        // User profile and progress
+        allow read, write: if isOwner(userId);
+        
+        match /lessons/{lessonId} {
+          // Check if user has any semantic role or if public access is enabled
+          allow read: if isOwner(userId) 
+                      || (resource.data.roles[request.auth.uid] != null)
+                      || (resource.data.allowLinkAccess == true)
+                      || (resource.data.isPublic == true);
+          
+          allow create: if isOwner(userId);
+          
+          allow update: if isOwner(userId)
+                        || (resource.data.roles[request.auth.uid] == 'editor');
+          
+          allow delete: if isOwner(userId);
+
+          // Nesting for deep comments (Path from comment.service.ts)
+          match /cards/{cardId}/comments/{commentId} {
+            allow read: if isOwner(userId)
+                        || (getLesson(appId, userId, lessonId).roles[request.auth.uid] != null)
+                        || (getLesson(appId, userId, lessonId).allowLinkAccess == true);
+            
+            allow create: if isOwner(userId)
+                          || (getLesson(appId, userId, lessonId).roles[request.auth.uid] in ['owner', 'editor', 'commenter']);
+            
+            allow update, delete: if isOwner(userId)
+                                  || (request.auth.uid == resource.data.userId)
+                                  || (getLesson(appId, userId, lessonId).roles[request.auth.uid] == 'editor');
+          }
+        }
+        
+        match /cards/{cardId} {
+          // Cards carry lessonId. To read/write, check the referenced lesson metadata.
+          allow read: if isOwner(userId)
+                      || (getLesson(appId, userId, resource.data.lessonId).roles[request.auth.uid] != null)
+                      || (getLesson(appId, userId, resource.data.lessonId).allowLinkAccess == true);
+          
+          allow write: if isOwner(userId)
+                       || (getLesson(appId, userId, resource.data.lessonId).roles[request.auth.uid] == 'editor');
+        }
+
+        match /notifications/{notiId} {
+          allow read, update, delete: if isOwner(userId);
+          allow create: if isSignedIn();
+        }
+        
+        match /sharedProgress/{shareId} {
+          allow read, write: if isOwner(userId);
+        }
+      }
+
+      // ─── PENDING NOTIFICATIONS (Pre-login invites) ────────────────────────
+      
+      match /pendingNotifications/{email}/items/{id} {
+        // Users can read pending invites sent to their specific email
+        allow read, delete: if isSignedIn() && request.auth.token.email.lower() == email.lower();
+        // Anyone signed in can send a notification/invite
+        allow create: if isSignedIn();
+      }
+    }
+
+    // ─── COLLECTION GROUP QUERIES ───────────────────────────────────────────
+
+    // Enables discovery of shared decks across the global users collection
+    match /{path=**}/lessons/{lessonId} {
+      allow read: if isSignedIn() && (
+        resource.data.roles[request.auth.uid] != null ||
+        resource.data.collaborators.hasAny([request.auth.uid]) ||
+        resource.data.allowLinkAccess == true
+      );
+    }
+  }
+}

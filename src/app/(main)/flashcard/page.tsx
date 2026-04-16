@@ -16,7 +16,7 @@ import {
     TIER_INFO,
 } from "@/features/game";
 import { ScreenHeader } from "@/shared/components/layout";
-import { Button, ConfirmModal } from "@/shared/components/ui";
+import { Button, ConfirmModal, UserMeta } from "@/shared/components/ui";
 import { CARD_BASE, SPACING } from "@/shared/constants";
 import { useAlert } from "@/shared/providers";
 import { hexToThemeColor } from "@/shared/utils";
@@ -309,9 +309,18 @@ function DeckCard({
     const canShare = role === "owner";
     const canDelete = role === "owner";
 
+    const createdByName = lesson.ownerName ?? "Unknown";
+    const createdByAvatar = lesson.ownerAvatar ?? null;
+    const shouldShowSharedBy =
+        !!lesson.lastSharedBy && (!lesson.ownerId || lesson.lastSharedBy !== lesson.ownerId);
+    const sharedByName = lesson.lastSharedByName ?? "Unknown";
+    const sharedByAvatar = lesson.lastSharedByAvatar ?? null;
+    const sharedBySubtitle = user && lesson.lastSharedBy === user.uid ? "You shared" : "Shared by";
+
     // Path resolution
     const resolvedShareId =
-        lesson.shareId || (lesson.userId ? buildShareId(lesson.userId, lesson.id) : "");
+        lesson.shareId ||
+        (lesson.ownerId ? buildShareId(lesson.ownerId, lesson.id) : lesson.userId ? buildShareId(lesson.userId, lesson.id) : "");
 
     const viewPath = isShared ? `/flashcard/shared/${resolvedShareId}` : `/flashcard/${lesson.id}`;
     const speedPath = isShared
@@ -321,7 +330,7 @@ function DeckCard({
         ? `/flashcard/shared/${resolvedShareId}/match`
         : `/flashcard/${lesson.id}/match`;
     const editPath = isShared
-        ? `/flashcard/${lesson.id}/edit?ownerId=${lesson.userId}`
+        ? `/flashcard/${lesson.id}/edit?ownerId=${lesson.ownerId ?? lesson.userId}`
         : `/flashcard/${lesson.id}/edit`;
 
     return (
@@ -343,6 +352,22 @@ function DeckCard({
                             {lesson.description}
                         </p>
                     )}
+                    <div className="mt-2 flex flex-col gap-1">
+                        <UserMeta
+                            name={createdByName}
+                            avatar={createdByAvatar}
+                            subtitle="Created by"
+                            className="!gap-2"
+                        />
+                        {shouldShowSharedBy && (
+                            <UserMeta
+                                name={sharedByName}
+                                avatar={sharedByAvatar}
+                                subtitle={sharedBySubtitle}
+                                className="!gap-2"
+                            />
+                        )}
+                    </div>
                     {lesson.tags.length > 0 && (
                         <div className="mt-2 flex flex-wrap gap-2">
                             {lesson.tags.map((tag) => (

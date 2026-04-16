@@ -51,6 +51,121 @@ export function buildShareId(userId: string, lessonId: string): string {
     return raw.replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
 }
 
+// ─── Schema normalization (safe read-healing) ──────────────────────────────
+
+type NormalizeLessonInput = Lesson & {
+    /**
+     * Internal, non-persisted hint.
+     * Used when the snapshot doesn't include an owner field (legacy docs).
+     */
+    __ownerIdFallback?: string;
+    /**
+     * Legacy share fields (not referenced by the app code directly anymore).
+     * We keep mapping for backward compatibility.
+     */
+    sharedBy?: string;
+    sharedByName?: string | null;
+    sharedAt?: number;
+};
+
+/**
+ * Normalizes a Lesson snapshot so that:
+ * - `ownerId` and legacy `userId` are both present (compat)
+ * - `roles` always includes the owner role (roles are source-of-truth)
+ * - `ownerName` has a best-effort fallback (zero-join)
+ * - legacy share fields are mapped into `lastSharedBy*`
+ *
+ * Never deletes legacy fields immediately.
+ */
+export function normalizeLesson(raw: unknown): Lesson {
+    const input = raw as NormalizeLessonInput;
+    const { __ownerIdFallback, sharedBy, sharedByName, sharedAt, ...doc } = input ?? ({} as NormalizeLessonInput);
+
+    const ownerId = (doc.ownerId ?? doc.userId ?? __ownerIdFallback) as string | undefined;
+
+    const rolesFromDoc = doc.roles as NonNullable<Lesson["roles"]> | undefined;
+    const normalizedRoles: NonNullable<Lesson["roles"]> | undefined = ownerId
+        ? {
+              ...(rolesFromDoc ?? {}),
+              ...(rolesFromDoc?.[ownerId] ? {} : { [ownerId]: "owner" }),
+          }
+        : rolesFromDoc;
+
+    const collaborators =
+        doc.collaborators ?? (normalizedRoles ? Object.keys(normalizedRoles) : undefined);
+
+    const lastSharedBy = (doc.lastSharedBy ?? sharedBy) as string | undefined;
+    const lastSharedByName =
+        (doc.lastSharedByName ?? sharedByName) ??
+        (lastSharedBy ? doc.collaboratorMeta?.[lastSharedBy]?.displayName ?? null : null);
+
+    const createdAt = typeof doc.createdAt === "number" ? doc.createdAt : Date.now();
+
+    const title = String(doc.title ?? "");
+    const description = String(doc.description ?? "");
+    const tags = Array.isArray(doc.tags) ? doc.tags : [];
+    const cardCount = typeof doc.cardCount === "number" ? doc.cardCount : 0;
+
+    const ownerNameFromMeta = ownerId ? doc.collaboratorMeta?.[ownerId]?.displayName : undefined;
+    const ownerNameRaw = (doc.ownerName ?? ownerNameFromMeta ?? "Unknown") as unknown;
+    const ownerName =
+        typeof ownerNameRaw === "string" && ownerNameRaw.trim().length > 0 ? ownerNameRaw : "Unknown";
+
+    const ownerAvatarRaw = (doc.ownerAvatar ?? null) as unknown;
+    const ownerAvatar =
+        typeof ownerAvatarRaw === "string" && ownerAvatarRaw.trim().length > 0 ? ownerAvatarRaw : null;
+
+    const lastSharedByNameRaw = lastSharedByName as unknown;
+    const lastSharedByNameFinal =
+        typeof lastSharedByNameRaw === "string" && lastSharedByNameRaw.trim().length > 0
+            ? lastSharedByNameRaw
+            : null;
+
+    const lastSharedByAvatarRaw = (doc.lastSharedByAvatar ?? null) as unknown;
+    const lastSharedByAvatar =
+        typeof lastSharedByAvatarRaw === "string" && lastSharedByAvatarRaw.trim().length > 0
+            ? lastSharedByAvatarRaw
+            : null;
+
+    return {
+        // Preserve anything else for forward compatibility first.
+        ...(doc as Record<string, unknown>),
+
+        // Identity + required fields
+        id: String(doc.id ?? ""),
+        title,
+        description,
+        tags,
+        createdAt,
+        cardCount,
+
+        // Core identity + legacy compatibility
+        ownerId,
+        ownerName,
+        ownerAvatar,
+        userId: (doc.userId ?? ownerId) as string | undefined,
+
+        // Access control (roles is source of truth)
+        roles: normalizedRoles,
+        collaborators,
+
+        // Existing flags + metadata
+        allowLinkAccess: doc.allowLinkAccess,
+        publicRole: doc.publicRole,
+        invitedEmails: doc.invitedEmails,
+        collaboratorMeta: doc.collaboratorMeta,
+        isPublic: doc.isPublic,
+        shareId: doc.shareId,
+        themeColor: doc.themeColor,
+
+        // UI metadata
+        lastSharedBy,
+        lastSharedByName: lastSharedByNameFinal,
+        lastSharedByAvatar,
+        lastSharedAt: doc.lastSharedAt ?? sharedAt,
+    } as Lesson;
+}
+
 // ─── Subscribe ────────────────────────────────────────────────────────────
 
 /**
@@ -66,7 +181,7 @@ export function subscribeLessons(
         lessonsCol(userId),
         (snap) => {
             const lessons = snap.docs
-                .map((d) => ({ ...d.data(), id: d.id }) as Lesson)
+                .map((d) => normalizeLesson({ ...d.data(), id: d.id, __ownerIdFallback: userId }))
                 .sort((a, b) => b.createdAt - a.createdAt);
             onUpdate(lessons);
         },
@@ -83,22 +198,70 @@ export function subscribeSharedLessons(
     onUpdate: (lessons: Lesson[]) => void,
     onError: (err: Error) => void,
 ): Unsubscribe {
-    const q = query(
+    const extractOwnerIdFromPath = (docPath: string): string | undefined => {
+        // Expected: .../users/{ownerId}/lessons/{lessonId}
+        const parts = docPath.split("/");
+        const usersIdx = parts.indexOf("users");
+        if (usersIdx === -1) return undefined;
+        return parts[usersIdx + 1];
+    };
+
+    type SnapshotLike = {
+        docs: Array<{
+            id: string;
+            ref: { path: string };
+            data: () => unknown;
+        }>;
+    };
+
+    const mapLessonsFromSnapshot = (snap: SnapshotLike) => {
+        const lessons: Lesson[] = snap.docs
+            .map((d) => {
+                const raw = d.data() as Record<string, unknown>;
+                return normalizeLesson({
+                    ...raw,
+                    id: d.id,
+                    __ownerIdFallback: extractOwnerIdFromPath(d.ref.path),
+                });
+            })
+            .filter((l) => l.roles?.[userId] !== "owner")
+            .sort((a: Lesson, b: Lesson) => b.createdAt - a.createdAt);
+        onUpdate(lessons);
+    };
+
+    // Legacy fallback (works with existing docs that still have `collaborators`)
+    const qCollaborators = query(
         collectionGroup(db, "lessons"),
         where("collaborators", "array-contains", userId),
     );
 
-    return onSnapshot(
-        q,
-        (snap) => {
-            const lessons = snap.docs
-                .map((d) => ({ ...d.data(), id: d.id }) as Lesson)
-                .filter((l) => l.roles?.[userId] !== "owner")
-                .sort((a, b) => b.createdAt - a.createdAt);
-            onUpdate(lessons);
-        },
-        onError,
+    // Preferred query: roles map is the source-of-truth
+    const qRoles = query(
+        collectionGroup(db, "lessons"),
+        where(`roles.${userId}`, "in", ["owner", "editor", "commenter", "viewer"]),
     );
+
+    let currentUnsub: Unsubscribe = () => {};
+
+    const startCollaborators = () => {
+        currentUnsub = onSnapshot(qCollaborators, mapLessonsFromSnapshot, onError);
+    };
+
+    const startRoles = () => {
+        currentUnsub = onSnapshot(
+            qRoles,
+            mapLessonsFromSnapshot,
+            (err) => {
+                console.warn("[subscribeSharedLessons] roles query failed, falling back:", err);
+                // Tear down roles listener and retry with the legacy collaborators query.
+                currentUnsub();
+                startCollaborators();
+            },
+        );
+    };
+
+    startRoles();
+    return () => currentUnsub();
 }
 
 // ─── Read operations ───────────────────────────────────────────────────────
@@ -118,6 +281,9 @@ export async function shareLessonSettings(
     lessonId: string,
     allowLinkAccess: boolean,
     publicRole: Lesson["publicRole"],
+    sharedById: string,
+    sharedByName?: string | null,
+    sharedByAvatar?: string | null,
 ): Promise<void> {
     const shareId = buildShareId(userId, lessonId);
     await setDoc(
@@ -127,6 +293,10 @@ export async function shareLessonSettings(
             allowLinkAccess,
             publicRole,
             isPublic: allowLinkAccess,
+            lastSharedBy: sharedById,
+            lastSharedByName: sharedByName ?? null,
+            lastSharedByAvatar: sharedByAvatar ?? null,
+            lastSharedAt: Date.now(),
         },
         { merge: true },
     );
@@ -141,8 +311,18 @@ export async function updateLessonRoles(
     lessonId: string,
     roles: Record<string, "owner" | "editor" | "commenter" | "viewer">,
     collaborators: string[],
+    sharedById: string,
+    sharedByName?: string | null,
+    sharedByAvatar?: string | null,
 ): Promise<void> {
-    await updateDoc(lessonDoc(userId, lessonId), { roles, collaborators });
+    await updateDoc(lessonDoc(userId, lessonId), {
+        roles,
+        collaborators,
+        lastSharedBy: sharedById,
+        lastSharedByName: sharedByName ?? null,
+        lastSharedByAvatar: sharedByAvatar ?? null,
+        lastSharedAt: Date.now(),
+    });
 }
 
 /**
@@ -214,6 +394,9 @@ export async function saveLessonWithCards(
             ...omitUndefined({ ...lesson }),
             id: targetLessonId,
             userId,
+            ownerId: userId,
+            ownerName: lesson.ownerName ?? null,
+            ownerAvatar: lesson.ownerAvatar ?? null,
             cardCount: cards.length,
             roles: { [userId]: "owner" },
             collaborators: [userId],

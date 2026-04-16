@@ -1,0 +1,30 @@
+rules_version = '2';
+
+service firebase.storage {
+  match /b/{bucket}/o {
+    
+    // Card images
+    match /users/{userId}/cards/{fileName} {
+      // Read: Public (so anyone with a share link can see deck images)
+      allow read: if true; 
+      
+      // Write: Only the owner, with strict validation
+      allow write: if request.auth != null 
+                   && request.auth.uid == userId
+                   && request.resource.size < 2 * 1024 * 1024
+                   && request.resource.contentType.matches('image/.*');
+      
+      // Delete: Only the owner
+      allow delete: if request.auth != null 
+                    && request.auth.uid == userId;
+    }
+    
+    // User profile avatars (if applicable, following the same pattern)
+    match /users/{userId}/avatars/{fileName} {
+      allow read: if true;
+      allow write: if request.auth != null && request.auth.uid == userId
+                   && request.resource.size < 1024 * 1024
+                   && request.resource.contentType.matches('image/.*');
+    }
+  }
+}

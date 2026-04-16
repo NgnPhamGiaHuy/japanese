@@ -59,7 +59,7 @@ const ShareModal = ({ lesson, onShareLink, onUpdateRoles, onClose }: ShareModalP
         currentRole = lesson.publicRole || "viewer";
     }
 
-    const isOwner = currentRole === "owner" || (user && lesson.userId === user.uid);
+    const isOwner = currentRole === "owner";
 
     /** Permission guard: Only owners can invite or change roles of others */
     const canManageRoles = isOwner;
@@ -69,10 +69,11 @@ const ShareModal = ({ lesson, onShareLink, onUpdateRoles, onClose }: ShareModalP
      * Generated from userId + lessonId via buildShareId utility.
      */
     const shareLink = useMemo(() => {
-        if (typeof window === "undefined" || !lesson.userId) return "";
-        const id = buildShareId(lesson.userId, lesson.id);
+        const ownerId = lesson.ownerId ?? lesson.userId;
+        if (typeof window === "undefined" || !ownerId) return "";
+        const id = buildShareId(ownerId, lesson.id);
         return `${window.location.origin}/flashcard/shared/${id}`;
-    }, [lesson.userId, lesson.id]);
+    }, [lesson.ownerId, lesson.userId, lesson.id]);
 
     // ── Local edit state ──────────────────────────────────────────────────
     const [allowLinkAccess, setAllowLinkAccess] = useState<boolean>(
@@ -182,13 +183,15 @@ const ShareModal = ({ lesson, onShareLink, onUpdateRoles, onClose }: ShareModalP
         setInviteError(null);
         setSaving(true);
         try {
-            if (!lesson.userId) return;
+            const ownerId = lesson.ownerId ?? lesson.userId;
+            if (!ownerId) return;
             await inviteByEmail(
-                lesson.userId,
+                ownerId,
                 lesson.id,
                 email,
                 inviteRole as "viewer" | "commenter" | "editor",
                 user?.displayName,
+                user?.photoURL ?? null,
                 lesson.title,
             );
             setInviteEmail("");
@@ -203,10 +206,11 @@ const ShareModal = ({ lesson, onShareLink, onUpdateRoles, onClose }: ShareModalP
     };
 
     const handleRevokeEmailInvite = async (email: string) => {
-        if (!lesson.userId) return;
+        const ownerId = lesson.ownerId ?? lesson.userId;
+        if (!ownerId) return;
         setSaving(true);
         try {
-            await revokeEmailInvite(lesson.userId, lesson.id, email);
+            await revokeEmailInvite(ownerId, lesson.id, email);
             showAlert("success", "Invitation revoked");
         } catch (err) {
             console.error("[ShareModal] handleRevokeEmailInvite failed:", err);

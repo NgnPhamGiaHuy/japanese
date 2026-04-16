@@ -116,8 +116,29 @@ export function useLessons() {
     const saveFullLesson = useCallback(
         async (lesson: Lesson, cards: FlashCard[], isNew: boolean): Promise<void> => {
             if (!user) return;
-            const targetUserId = lesson.userId || user.uid;
-            await LessonService.saveLessonWithCards(targetUserId, lesson, cards, isNew);
+            const ownerId = lesson.ownerId ?? lesson.userId ?? user.uid;
+            const isFunctionalOwner = ownerId === user.uid;
+            const lessonToSave: Lesson = isNew
+                ? {
+                      ...lesson,
+                      ownerId,
+                      userId: ownerId, // legacy compatibility
+                      ownerName: user.displayName ?? null,
+                      ownerAvatar: user.photoURL ?? null,
+                  }
+                : {
+                      ...lesson,
+                      ownerId,
+                      userId: ownerId, // keep legacy compat even during updates
+                      ...(isFunctionalOwner
+                          ? {
+                                ownerName: user.displayName ?? null,
+                                ownerAvatar: user.photoURL ?? null,
+                            }
+                          : {}),
+                  };
+
+            await LessonService.saveLessonWithCards(ownerId, lessonToSave, cards, isNew);
         },
         [user],
     );
@@ -140,6 +161,9 @@ export function useLessons() {
                 lessonId,
                 allowLinkAccess,
                 publicRole,
+                user.uid,
+                user.displayName ?? null,
+                user.photoURL ?? null,
             );
         },
         [user],
@@ -152,7 +176,15 @@ export function useLessons() {
             collaborators: string[],
         ): Promise<void> => {
             if (!user) return;
-            await LessonService.updateLessonRoles(user.uid, lessonId, roles, collaborators);
+            await LessonService.updateLessonRoles(
+                user.uid,
+                lessonId,
+                roles,
+                collaborators,
+                user.uid,
+                user.displayName ?? null,
+                user.photoURL ?? null,
+            );
         },
         [user],
     );

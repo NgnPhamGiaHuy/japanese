@@ -39,8 +39,8 @@ export function resolveUserAccess(user: User | null, lesson: Lesson): DeckAccess
             : "none";
     }
 
-    // Owner always wins
-    if (user.uid === lesson.userId || lesson.roles?.[user.uid] === "owner") {
+    // Owner always wins (roles map is source-of-truth)
+    if (lesson.roles?.[user.uid] === "owner") {
         return "owner";
     }
 
@@ -119,6 +119,11 @@ export async function syncInviteToCollaborator(
             roles: updatedRoles,
             collaborators: updatedCollaborators,
             invitedEmails: updatedInvitedEmails,
+            // Denormalized "last action" metadata for fast UI rendering (zero-join).
+            lastSharedBy: user.uid,
+            lastSharedByName: user.displayName ?? null,
+            lastSharedByAvatar: user.photoURL ?? null,
+            lastSharedAt: Date.now(),
             collaboratorMeta: {
                 [user.uid]: {
                     displayName: user.displayName ?? null,
@@ -160,6 +165,7 @@ export async function inviteByEmail(
     email: string,
     role: "viewer" | "commenter" | "editor",
     senderName?: string | null,
+    senderAvatar?: string | null,
     deckTitle?: string | null,
 ): Promise<void> {
     const normalizedEmail = email.trim().toLowerCase();
@@ -173,6 +179,11 @@ export async function inviteByEmail(
                     invitedAt: Date.now(),
                 },
             },
+            // Stamp last sharer metadata for fast "Shared by" UI.
+            lastSharedBy: ownerId,
+            lastSharedByName: senderName ?? null,
+            lastSharedByAvatar: senderAvatar ?? null,
+            lastSharedAt: Date.now(),
         },
         { merge: true },
     );

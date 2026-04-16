@@ -21,3 +21,7 @@ const StatCard = ({ icon, title, value }: StatCardProps) => {
 };
 
 export default StatCard;
+
+export const Test = () => {
+    return <div>Test</div>;
+};

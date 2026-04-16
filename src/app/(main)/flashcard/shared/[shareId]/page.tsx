@@ -90,12 +90,9 @@ export default function SharedLessonPage({ params }: { params: Promise<{ shareId
     // ── Role resolution (Google Docs model) ──────────────────────────────────
     /**
      * Determines if the user is the functional owner.
-     * Checks both source metadata and explicit Firestore permission roles.
+     * Uses explicit Firestore permission roles (no path-based identity shortcuts).
      */
-    const isOwner = !!(
-        user &&
-        (user.uid === meta.sourceUserId || lesson.roles?.[user.uid] === "owner")
-    );
+    const isOwner = !!(user && lesson.roles?.[user.uid] === "owner");
 
     let role: DeckRole = "viewer";
     if (isOwner) {
@@ -129,6 +126,7 @@ export default function SharedLessonPage({ params }: { params: Promise<{ shareId
                 ...lesson,
                 id: "",
                 userId: user.uid,
+                ownerId: user.uid,
                 shareId: undefined,
                 allowLinkAccess: false,
                 isPublic: false,
