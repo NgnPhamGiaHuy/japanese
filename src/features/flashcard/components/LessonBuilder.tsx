@@ -18,6 +18,7 @@ import { useAppStore } from "@/store";
 import { ImportPreview } from "./ImportPreview";
 import { useCards } from "../hooks/useCards";
 import { deleteCardImage, uploadCardImage } from "../services";
+import { CardValidationError } from "../utils/card.validator";
 import { parseCSV, parseText } from "../utils/parser";
 
 import type { ImportRow } from "./ImportPreview";
@@ -236,6 +237,18 @@ export const LessonBuilder = ({
                 deleteCardImage(path).catch(() => {});
             }
             clearedImagePathsRef.current = [];
+        } catch (err) {
+            if (err instanceof CardValidationError) {
+                const details = err.violations
+                    .map((v) => `"${v.offendingValue}" (${v.rule.replace(/_/g, " ")})`)
+                    .join(", ");
+                showAlert(
+                    "error",
+                    `Some cards violate the Atomic Card principle: ${details}. Each card's primary field must contain exactly one word or phrase — no commas, slashes, or parenthetical expressions.`,
+                );
+            } else {
+                throw err;
+            }
         } finally {
             setSaving(false);
         }
@@ -458,6 +471,7 @@ export const LessonBuilder = ({
                                         meaning: r.meaning || "",
                                         example: r.example || "",
                                         isInvalid: false,
+                                        atomicViolation: r.atomicViolation,
                                     })),
                                     ...result.invalid.map((r, i) => ({
                                         id: `invalid_${Date.now()}_${i}`,
@@ -497,6 +511,7 @@ export const LessonBuilder = ({
                                         meaning: r.meaning || "",
                                         example: r.example || "",
                                         isInvalid: false,
+                                        atomicViolation: r.atomicViolation,
                                     })),
                                     ...result.invalid.map((r, i) => ({
                                         id: `invalid_${Date.now()}_${i}`,

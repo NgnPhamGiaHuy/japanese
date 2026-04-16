@@ -17,13 +17,17 @@
 
     /* DIGITAL FONT (Gothic/Sans-serif)
        Noto Sans JP provides clean, uniform strokes optimized for modern UI */
-    --font-japanese: "Noto Sans JP", "Hiragino Kaku Gothic Pro", "メイリオ", Meiryo, Osaka, "ＭＳ Ｐゴシック", "MS PGothic", sans-serif;
+    --font-japanese:
+        "Noto Sans JP", "Hiragino Kaku Gothic Pro", "メイリオ", Meiryo, Osaka, "ＭＳ Ｐゴシック",
+        "MS PGothic", sans-serif;
 }
 
 /* HANDWRITING FONT
    Klee One mimics natural human stroke order and variable pressure */
 body.handwriting-font {
-    --font-japanese: "Klee One", "Yomogi", "Noto Serif JP", "Yu Mincho", "Hiragino Mincho Pro", "MS PMincho", serif;
+    --font-japanese:
+        "Klee One", "Yomogi", "Noto Serif JP", "Yu Mincho", "Hiragino Mincho Pro", "MS PMincho",
+        serif;
 }
 
 /* =========================================================

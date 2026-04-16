@@ -12,7 +12,6 @@ import { use, useEffect, useState } from "react";
 import { BookOpen } from "lucide-react";
 
 import { getSharedLesson, saveSharedStudyProgress } from "@/features/flashcard/services";
-import { resolveDisplay } from "@/features/flashcard/utils/displayEngine";
 import { Button } from "@/shared/components/ui";
 import { useAppStore } from "@/store";
 
@@ -190,7 +189,7 @@ export default function SharedStudyPage({ params }: { params: Promise<{ shareId:
                             Japanese
                         </div>
                         <div className="text-5xl font-medium break-words text-[#3c3c3c]">
-                            {resolveDisplay(card, { mode: "learn", difficulty: 1 }).question}
+                            {card.primary}
                         </div>
                         {card.alternatives.length > 0 && (
                             <div className="mt-2 text-sm font-bold text-[#afafaf]">

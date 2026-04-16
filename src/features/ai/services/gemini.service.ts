@@ -1,5 +1,6 @@
 import { getGenerativeModel } from "firebase/ai";
 
+import { splitAtomicPrimary, validateAtomicCard } from "@/features/flashcard/utils/card.validator";
 import { firebaseAI } from "@/lib/firebase";
 import { getCardGenerationPrompt, getDeckGenerationPrompt } from "./prompt-builder";
 import { AI_CONFIG } from "../config";
@@ -173,6 +174,19 @@ function parseCard(raw: unknown): GeneratedCard {
         ? (rawDiff as 1 | 2 | 3)
         : undefined;
 
+    const mnemonic =
+        typeof obj.mnemonic === "string" && obj.mnemonic.trim().length > 0
+            ? obj.mnemonic.trim().slice(0, 120)
+            : undefined;
+
+    // clozeTemplate must contain exactly one ___ token
+    const rawCloze =
+        typeof obj.clozeTemplate === "string" && obj.clozeTemplate.trim().length > 0
+            ? obj.clozeTemplate.trim()
+            : undefined;
+    const clozeTokenCount = rawCloze ? (rawCloze.match(/___/g) ?? []).length : 0;
+    const clozeTemplate = clozeTokenCount === 1 ? rawCloze : undefined;
+
     return {
         primary,
         alternatives,
@@ -182,6 +196,8 @@ function parseCard(raw: unknown): GeneratedCard {
         hint,
         usageNote,
         difficulty,
+        mnemonic,
+        clozeTemplate,
     };
 }
 
@@ -236,6 +252,18 @@ export const generateCardData = async (word: string): Promise<GeneratedCard> => 
     try {
         const text = await generateContent(AI_CONFIG.models.card, getCardGenerationPrompt(trimmed));
         const card = parseCard(JSON.parse(extractJSON(text)));
+
+        // Validate atomic card principle; if violated, split and return first atomic card
+        const validation = validateAtomicCard(card);
+        if (!validation.valid) {
+            const atomicPrimaries = splitAtomicPrimary(card.primary);
+            if (atomicPrimaries.length > 0) {
+                const atomicCard: GeneratedCard = { ...card, primary: atomicPrimaries[0] };
+                cardCache.set(cacheKey, atomicCard);
+                return atomicCard;
+            }
+        }
+
         cardCache.set(cacheKey, card);
         return card;
     } catch (err) {
@@ -273,36 +301,56 @@ export const generateMatchDistractors = async (
 
     const prompt = getMatchDistractorsPrompt(hints, safeCount);
 
+    const fallbacks = ["シート", "ツール", "ぬいぐるみ", "めがね", "かう", "うる", "あさ", "ばん"];
+
+    // Build lesson-based fallback meanings from other cards (excluding the first card as the "current" card)
+    const lessonMeanings = cards
+        .slice(1)
+        .map((c) => c.meaning)
+        .filter((m): m is string => typeof m === "string" && m.trim().length > 0)
+        .map((m) => m.trim());
+
     let rawList: string[] = [];
     try {
-        const text = await generateContent(AI_CONFIG.models.card, prompt);
-        const raw = JSON.parse(extractJSON(text)) as { distractors?: unknown };
-        const list = Array.isArray(raw.distractors) ? raw.distractors : [];
-        rawList = list
-            .filter((d): d is string => typeof d === "string" && d.trim().length > 0)
-            .map((d) => d.trim());
-    } catch {
-        rawList = [];
-    }
+        const aiCall = generateContent(AI_CONFIG.models.card, prompt).then((text) => {
+            const raw = JSON.parse(extractJSON(text)) as { distractors?: unknown };
+            const list = Array.isArray(raw.distractors) ? raw.distractors : [];
+            return list
+                .filter((d): d is string => typeof d === "string" && d.trim().length > 0)
+                .map((d) => d.trim());
+        });
 
-    const fallbacks = ["シート", "ツール", "ぬいぐるみ", "めがね", "かう", "うる", "あさ", "ばん"];
+        const timeoutPromise = new Promise<never>((_, reject) =>
+            setTimeout(() => reject(new Error("timeout")), 2000),
+        );
+
+        rawList = await Promise.race([aiCall, timeoutPromise]);
+    } catch {
+        // On timeout or any error, fall back to lesson meanings (or hardcoded list if not enough)
+        rawList = lessonMeanings.length >= 3 ? lessonMeanings : [];
+    }
 
     const out: string[] = [];
     let fb = 0;
     const taken = new Set(blocklist);
 
     for (let i = 0; i < safeCount; i++) {
-        let candidate = rawList[i] ?? fallbacks[fb % fallbacks.length];
+        // Prefer rawList, then lesson meanings, then hardcoded fallbacks
+        const candidate =
+            rawList[i] ??
+            lessonMeanings.find((m) => !taken.has(normLabel(m))) ??
+            fallbacks[fb % fallbacks.length];
         fb++;
+        let resolved = candidate;
         let guard = 0;
-        while (guard < 40 && taken.has(normLabel(candidate))) {
-            candidate = `${fallbacks[fb % fallbacks.length]}${guard}`;
+        while (guard < 40 && taken.has(normLabel(resolved))) {
+            resolved = `${fallbacks[fb % fallbacks.length]}${guard}`;
             fb++;
             guard++;
         }
-        if (taken.has(normLabel(candidate))) candidate = `·${i + 1}`;
-        taken.add(normLabel(candidate));
-        out.push(candidate);
+        if (taken.has(normLabel(resolved))) resolved = `·${i + 1}`;
+        taken.add(normLabel(resolved));
+        out.push(resolved);
     }
 
     return out.slice(0, safeCount);
@@ -335,8 +383,27 @@ export const generateDeck = async (
         );
         const cards = parseCardArray(JSON.parse(extractJSON(text)));
         const deduped = dedupeDeckCards(cards, normalizedExclusions);
-        deckCache.set(cacheKey, deduped);
-        return deduped;
+
+        // Validate atomic card principle; split any non-atomic cards into multiple cards
+        const atomicCards: GeneratedCard[] = [];
+        for (const card of deduped) {
+            const validation = validateAtomicCard(card);
+            if (!validation.valid) {
+                const atomicPrimaries = splitAtomicPrimary(card.primary);
+                if (atomicPrimaries.length > 0) {
+                    for (const primary of atomicPrimaries) {
+                        atomicCards.push({ ...card, primary });
+                    }
+                } else {
+                    atomicCards.push(card);
+                }
+            } else {
+                atomicCards.push(card);
+            }
+        }
+
+        deckCache.set(cacheKey, atomicCards);
+        return atomicCards;
     } catch (err) {
         classifyError(err);
     }

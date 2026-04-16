@@ -43,6 +43,10 @@ ${DECK_JSON_SCHEMA}
 Field rules (apply to every card):
 
 primary (REQUIRED):
+  - MUST contain exactly ONE word or phrase.
+  - NEVER combine multiple forms with commas, slashes, or parentheses.
+  - WRONG: "食べる/飲む", "食べる (taberu)", "食べる, 飲む"
+  - RIGHT: "食べる"
   - The most natural/common display form for the level and topic.
   - Can be kana, kanji, or mixed naturally.
 
@@ -69,6 +73,23 @@ usageNote:
 
 difficulty:
   - 1 = N5, 2 = N4, 3 = N3+
+
+mnemonic:
+  - A memorable story or image that links the Japanese sound to the English meaning. Max 120 characters.
+  - MUST follow this structure: [sound hook] → [vivid scene that IS the meaning].
+  - The scene must directly encode the meaning — not just share a sound with a random object.
+  - WRONG: "yoku sounds like 'yolk' — you often eat eggs with yolk"  (yolk has nothing to do with "often")
+  - WRONG: "neko sounds like 'neck-o' — imagine a neck"  (no meaning encoded)
+  - RIGHT: "yoku = YOke an OX — you do it OFTEN to make it work hard"  (often → repeated action)
+  - RIGHT: "taberu = TABle RUle — at the table, the rule is: EAT"  (eat → the meaning)
+  - RIGHT: "muzukashii = MOO-zoo-CASH — paying cash at a zoo is DIFFICULT"  (difficult → the meaning)
+  - Use any technique: sound-alike story, visual pun, acronym, or absurd scene — as long as the meaning is baked in.
+
+clozeTemplate:
+  - A natural sentence with the target word replaced by exactly one ___ token.
+  - The ___ must appear exactly once in the sentence.
+  - Format: "kana sentence with ___ - English translation with ___"
+  - Example: "まいにち___ をたべる - I eat ___ every day"
 
 Additional rules:
   - Vary word types: nouns, verbs, adjectives, expressions.

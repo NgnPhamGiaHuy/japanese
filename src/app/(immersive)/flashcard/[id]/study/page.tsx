@@ -13,16 +13,13 @@ import { AlertCircle, BookOpen, RefreshCw, RotateCcw } from "lucide-react";
 
 import { FlashcardLearn, FlashcardMistakeReview, FlashcardPractice } from "@/features/flashcard";
 import { useCards, useLessons } from "@/features/flashcard/hooks";
-import {
-    buildSession,
-    getDeckStatus,
-    processAnswer,
-    recommendedAction,
-} from "@/features/flashcard/logic";
+import { buildSession, getDeckStatus, recommendedAction } from "@/features/flashcard/logic";
+import { gradeCard } from "@/features/flashcard/services/card.service";
 import { useUserProgress } from "@/features/user/hooks";
 import { Button } from "@/shared/components/ui";
 import { useAppStore } from "@/store";
 
+import type { Grade } from "@/features/flashcard/services/card.service";
 import type { StudyMode } from "@/features/flashcard/types/flashcard.types";
 
 /**
@@ -90,16 +87,17 @@ export default function FlashcardStudyPage({ params }: { params: Promise<{ id: s
 
     /**
      * Processes an individual card answer and updates SRS data in the backend.
+     * Accepts a Grade value for four-button SM-2 grading.
      *
      * @param card - The flashcard being reviewed
-     * @param knew - Whether the user got the answer correct
+     * @param grade - The SM-2 grade selected by the user
      */
     const handleAnswer = async (
         card: import("@/features/flashcard/types/flashcard.types").FlashCard,
-        knew: boolean,
+        grade: Grade,
     ) => {
         if (!user || !mode) return;
-        await processAnswer(user.uid, card, knew);
+        await gradeCard(user.uid, card.id, card, grade);
     };
 
     /**
@@ -335,6 +333,7 @@ export default function FlashcardStudyPage({ params }: { params: Promise<{ id: s
         return (
             <FlashcardLearn
                 lesson={lesson}
+                userId={user?.uid ?? ""}
                 cards={session.queue}
                 onClose={handleClose}
                 onAnswer={handleAnswer}
@@ -347,6 +346,7 @@ export default function FlashcardStudyPage({ params }: { params: Promise<{ id: s
         return (
             <FlashcardPractice
                 lesson={lesson}
+                userId={user?.uid ?? ""}
                 cards={session.queue}
                 onClose={handleClose}
                 onAnswer={handleAnswer}
@@ -359,6 +359,7 @@ export default function FlashcardStudyPage({ params }: { params: Promise<{ id: s
         return (
             <FlashcardMistakeReview
                 lesson={lesson}
+                userId={user?.uid ?? ""}
                 cards={session.queue}
                 onClose={handleClose}
                 onAnswer={handleAnswer}

@@ -51,6 +51,13 @@ export interface FlashCard {
     usageNote?: string;
     /** AI-assigned complexity level (1=Beginner, 3=Advanced) */
     difficulty?: 1 | 2 | 3;
+
+    /** AI-generated or user-authored memory aid (max 120 chars) */
+    mnemonic?: string;
+    /** Sentence with the target word replaced by ___ for cloze card rendering */
+    clozeTemplate?: string;
+    /** Card rendering mode; defaults to 'standard' when absent */
+    cardType?: "standard" | "cloze";
 }
 
 /**

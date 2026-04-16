@@ -72,6 +72,10 @@ export default function SharedMatchPage({ params }: { params: Promise<{ shareId:
         matchedPairs,
         comboPopup,
         progress,
+        revealedPairId,
+        handleGrade,
+        gradeDistribution,
+        accuracy,
         startGame,
         onCellTap,
         resetToIntro,
@@ -168,6 +172,13 @@ export default function SharedMatchPage({ params }: { params: Promise<{ shareId:
                 router.back();
             }}
             onCellTap={onCellTap}
+            revealedPairId={revealedPairId}
+            onGrade={handleGrade}
+            roundSummary={
+                matchedPairs >= pairCount && pairCount > 0
+                    ? { score, accuracy, gradeDistribution }
+                    : null
+            }
         />
     );
 }

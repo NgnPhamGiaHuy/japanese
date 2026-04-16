@@ -25,7 +25,6 @@ import {
 
 import { CommentPanel } from "@/features/flashcard/components";
 import { useCommentCount } from "@/features/flashcard/hooks";
-import { resolveDisplay } from "@/features/flashcard/utils/displayEngine";
 import { Button } from "@/shared/components/ui";
 
 import type { FlashCard, Lesson } from "@/features/flashcard/types";
@@ -531,12 +530,7 @@ export default function FlashcardDetailLayout({
                                         <div className="mb-1 flex items-start justify-between gap-2">
                                             {/* Concept-first display text */}
                                             <span className="text-3xl font-medium text-[#3c3c3c]">
-                                                {
-                                                    resolveDisplay(card, {
-                                                        mode: "learn",
-                                                        difficulty: 1,
-                                                    }).question
-                                                }
+                                                {card.primary}
                                             </span>
                                             <CardCommentBadge
                                                 ownerId={ownerId}

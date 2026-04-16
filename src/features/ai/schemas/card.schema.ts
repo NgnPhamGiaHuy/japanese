@@ -8,9 +8,11 @@ const CARD_JSON_SCHEMA = `{
   "meaning": "to eat",
   "example": "まいにちごはんをたべる - I eat rice every day",
   "distractors": ["to drink", "to cook", "to buy"],
-  "hint": "ta-BEru sounds like TABle — you eat at a table",
+  "hint": "ta-BEru = TABle — the rule at the table is: EAT",
   "usageNote": "godan verb, used with を particle",
-  "difficulty": 1
+  "difficulty": 1,
+  "mnemonic": "taberu = TABle RUle — at the table, the rule is: EAT",
+  "clozeTemplate": "まいにち___ をたべる - I eat ___ every day"
 }`;
 
 export default CARD_JSON_SCHEMA;

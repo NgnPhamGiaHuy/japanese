@@ -1,7 +1,8 @@
+import { validateAtomicCard } from "./card.validator";
 import { FlashCard } from "../types";
 
 export interface ParseResult {
-    valid: Partial<FlashCard>[];
+    valid: (Partial<FlashCard> & { atomicViolation?: boolean })[];
     invalid: {
         row: string;
         error: string;
@@ -44,18 +45,22 @@ export function parseText(text: string): ParseResult {
 
         if (parts.length >= 3) {
             const secondary = parts[1] && parts[1] !== primary ? parts[1] : undefined;
+            const atomicResult = validateAtomicCard({ primary });
             valid.push({
                 primary,
                 alternatives: secondary ? [secondary] : [],
                 meaning: parts[2],
                 example: parts[3] || "",
+                ...(atomicResult.valid ? {} : { atomicViolation: true }),
             });
         } else if (parts.length === 2) {
+            const atomicResult = validateAtomicCard({ primary });
             valid.push({
                 primary,
                 alternatives: [],
                 meaning: parts[1],
                 example: "",
+                ...(atomicResult.valid ? {} : { atomicViolation: true }),
             });
         } else {
             invalid.push({ row: line, error: "Requires at least 2 columns (primary, meaning)" });

@@ -13,6 +13,7 @@ import {
 } from "@/features/game/modes";
 import { recordGameResult } from "@/features/game/services";
 import { allowAudio, playAudio, shuffleArray } from "@/shared/utils";
+import { gradeCard } from "../services/card.service";
 import { useMatchGameStore } from "../stores/useMatchGameStore";
 import {
     buildQuestionFallback,
@@ -22,6 +23,7 @@ import {
 } from "../utils";
 
 import type { MatchDifficulty } from "@/features/game/modes";
+import type { Grade } from "../services/card.service";
 import type { MatchItem } from "../stores/useMatchGameStore";
 import type { FlashCard } from "../types";
 import type { QuestionType } from "../utils";
@@ -29,6 +31,10 @@ import type { QuestionType } from "../utils";
 type MatchPhase = "intro" | "playing" | "results";
 
 export type { MatchItem };
+
+/** Minimum and maximum card pairs per round (Requirement 7.6) */
+const MIN_PAIRS = 4;
+const MAX_PAIRS = 12;
 
 function buildGridItems(
     pool: FlashCard[],
@@ -53,6 +59,7 @@ function buildGridItems(
         const pairId = card.id;
         const a = `${pairId}-a`;
         const b = `${pairId}-b`;
+        // Stimulus tile shows prompt (primary), answer tile shows answer (meaning)
         items.push({ id: a, pairId, value: pair.prompt, isDistractor: false });
         items.push({ id: b, pairId, value: pair.answer, isDistractor: false });
         occupied.add(nl(pair.prompt));
@@ -102,6 +109,19 @@ export function useMatchModeSession({
     const [livesLeft, setLivesLeft] = useState(0);
     const [pairCount, setPairCount] = useState(0);
 
+    // ── Stimulus-first reveal state (Requirement 7.1, 7.2) ──────────────────
+    /** The pairId currently revealed (answer tile visible + grade buttons shown) */
+    const [revealedPairId, setRevealedPairId] = useState<string | null>(null);
+    /** Cards that were marked as mistakes and re-queued within the session */
+    const [mistakeCardIds, setMistakeCardIds] = useState<string[]>([]);
+    /** Grade distribution for round summary (Requirement 7.7) */
+    const [gradeDistribution, setGradeDistribution] = useState<Record<Grade, number>>({
+        Again: 0,
+        Hard: 0,
+        Good: 0,
+        Easy: 0,
+    });
+
     const [comboPopup, setComboPopup] = useState<{
         id: number;
         text: string;
@@ -148,79 +168,100 @@ export function useMatchModeSession({
         };
     }, [phase, timeUnlimited]);
 
-    const resolveTwo = useCallback(
-        (idA: string, idB: string) => {
-            const { grid, matchedPairIds } = useMatchGameStore.getState();
-            const a = grid.find((c) => c.id === idA);
-            const b = grid.find((c) => c.id === idB);
-            if (!a || !b) {
-                useMatchGameStore.getState().setProcessing(false);
+    /**
+     * Called when the user taps a stimulus tile (the `-a` cell).
+     * Reveals the corresponding answer tile and grade buttons (Requirement 7.2).
+     */
+    const handleStimTap = useCallback((pairId: string) => {
+        const { matchedPairIds } = useMatchGameStore.getState();
+        // Ignore taps on already-matched pairs
+        if (matchedPairIds.includes(pairId)) return;
+        setRevealedPairId(pairId);
+    }, []);
+
+    /**
+     * Called when the user selects a grade for the currently revealed pair.
+     * Calls gradeCard, marks the pair complete, and clears revealedPairId (Requirement 7.3).
+     */
+    const handleGrade = useCallback(
+        async (pairId: string, grade: Grade) => {
+            // Find the card for this pair
+            const card = cards.find((c) => c.id === pairId);
+
+            // Call gradeCard if we have a userId and card
+            if (userId && card) {
+                try {
+                    await gradeCard(userId, pairId, card, grade);
+                } catch (e) {
+                    console.warn("[MatchMode] gradeCard failed", e);
+                }
+            }
+
+            // Track grade distribution for round summary
+            setGradeDistribution((prev) => ({
+                ...prev,
+                [grade]: prev[grade] + 1,
+            }));
+
+            if (grade === "Again") {
+                // "Wrong" tap: record mistake and re-queue (Requirement 7.5)
+                setMistakeCardIds((prev) => (prev.includes(pairId) ? prev : [...prev, pairId]));
+                setWrongAttempts((prev) => prev + 1);
+                setScore((prev) => {
+                    const next = Math.max(0, prev - WRONG_PENALTY);
+                    syncScore(next);
+                    return next;
+                });
+                setStreak(0);
+                // Shake the answer tile to signal wrong
+                const bId = `${pairId}-b`;
+                useMatchGameStore.getState().setShake([bId]);
+                setTimeout(() => {
+                    useMatchGameStore.getState().clearShake();
+                    setRevealedPairId(null);
+                }, 720);
                 return;
             }
 
-            const sameReal =
-                !a.isDistractor && !b.isDistractor && a.pairId != null && a.pairId === b.pairId;
-
-            if (sameReal) {
-                setStreak((prev) => {
-                    const newStreak = prev + 1;
-                    const points = calcMatchPoints(newStreak);
-                    setScore((s) => {
-                        const next = s + points;
-                        syncScore(next);
-                        return next;
-                    });
-                    setMaxStreak((m) => Math.max(m, newStreak));
-
-                    const label = comboLabel(newStreak);
-                    if (label) {
-                        const popupId = ++comboIdRef.current;
-                        setComboPopup({ id: popupId, text: label, bonus: points - 100 });
-                        setTimeout(() => {
-                            setComboPopup((current) => (current?.id === popupId ? null : current));
-                        }, 1400);
-                    }
-
-                    return newStreak;
+            // Correct grade (Hard / Good / Easy): award points and mark pair matched
+            setStreak((prev) => {
+                const newStreak = prev + 1;
+                const points = calcMatchPoints(newStreak);
+                setScore((s) => {
+                    const next = s + points;
+                    syncScore(next);
+                    return next;
                 });
+                setMaxStreak((m) => Math.max(m, newStreak));
 
-                useMatchGameStore.getState().addMatchedPairId(a.pairId!);
-
-                if (allowAudio("match", "feedback")) {
-                    const source = cards.find((c) => c.id === a.pairId);
-                    if (source) playAudio(getAudioText(source));
+                const label = comboLabel(newStreak);
+                if (label) {
+                    const popupId = ++comboIdRef.current;
+                    setComboPopup({ id: popupId, text: label, bonus: points - 100 });
+                    setTimeout(() => {
+                        setComboPopup((current) => (current?.id === popupId ? null : current));
+                    }, 1400);
                 }
 
-                setTimeout(() => {
-                    useMatchGameStore.getState().setProcessing(false);
-                }, 180);
-                return;
-            }
-
-            setStreak(0);
-            setWrongAttempts((prev) => prev + 1);
-            setScore((prev) => {
-                const next = Math.max(0, prev - WRONG_PENALTY);
-                syncScore(next);
-                return next;
+                return newStreak;
             });
 
-            const loseLife = livesModeRef.current;
-            if (loseLife) {
-                setLivesLeft((l) => Math.max(0, l - 1));
+            useMatchGameStore.getState().addMatchedPairId(pairId);
+
+            if (allowAudio("match", "feedback")) {
+                const source = cards.find((c) => c.id === pairId);
+                if (source) playAudio(getAudioText(source));
             }
 
-            useMatchGameStore.getState().setShake([idA, idB]);
-
-            setTimeout(() => {
-                useMatchGameStore.getState().clearShake();
-                useMatchGameStore.getState().setSelected([]);
-                useMatchGameStore.getState().setProcessing(false);
-            }, 720);
+            setRevealedPairId(null);
         },
-        [cards, syncScore],
+        [cards, syncScore, userId],
     );
 
+    /**
+     * Legacy tap handler for the old game-style matching (kept for backward compat).
+     * In the new stimulus-first flow, stimulus taps go through handleStimTap.
+     */
     const onCellTap = useCallback(
         (id: string) => {
             const current = useMatchGameStore.getState();
@@ -232,35 +273,35 @@ export function useMatchModeSession({
                 return;
             }
 
-            if (current.selectedIds.length === 0) {
-                current.setSelected([id]);
+            // Stimulus tile (ends with -a): trigger stimulus-first reveal
+            if (c.pairId && id.endsWith("-a")) {
+                handleStimTap(c.pairId);
                 return;
             }
 
-            if (current.selectedIds.length === 1) {
-                const first = current.selectedIds[0];
-                if (first === id) {
-                    current.setSelected([]);
-                    return;
-                }
-                current.setSelected([first, id]);
-                current.setProcessing(true);
-                setTimeout(() => resolveTwo(first, id), 120);
-            }
+            // Distractor or answer tile tapped directly — ignore in stimulus-first mode
         },
-        [resolveTwo],
+        [handleStimTap],
     );
 
     const startGame = useCallback(async () => {
-        const safePairs = Math.min(config.pairs, cards.length);
-        if (safePairs < 1) return;
+        // Enforce min 4 / max 12 pairs (Requirement 7.6)
+        const safePairs = Math.min(
+            Math.max(Math.min(config.pairs, cards.length), MIN_PAIRS),
+            MAX_PAIRS,
+        );
+        if (safePairs < MIN_PAIRS && cards.length < MIN_PAIRS) return;
+
+        const actualPairs = Math.min(Math.max(cards.length, MIN_PAIRS), MAX_PAIRS);
+        const clampedPairs = Math.min(actualPairs, cards.length);
+        if (clampedPairs < 1) return;
 
         setPrepLoading(true);
         savedRef.current = false;
         finalScoreRef.current = 0;
 
         try {
-            const pool = shuffleArray(cards).slice(0, safePairs);
+            const pool = shuffleArray(cards).slice(0, clampedPairs);
             setPairCount(pool.length);
             livesModeRef.current = config.lives > 0;
             setLivesLeft(livesModeRef.current ? config.lives : 0);
@@ -284,6 +325,9 @@ export function useMatchModeSession({
             setMaxStreak(0);
             setWrongAttempts(0);
             setComboPopup(null);
+            setRevealedPairId(null);
+            setMistakeCardIds([]);
+            setGradeDistribution({ Again: 0, Hard: 0, Good: 0, Easy: 0 });
             setTimeLeft(gameCfg.timePressure ? config.timeLimit : -1);
             void startSession();
         } finally {
@@ -328,6 +372,9 @@ export function useMatchModeSession({
 
     const resetToIntro = useCallback(() => {
         setPhase("intro");
+        setRevealedPairId(null);
+        setMistakeCardIds([]);
+        setGradeDistribution({ Again: 0, Hard: 0, Good: 0, Easy: 0 });
     }, []);
 
     const closeSession = useCallback(() => {
@@ -340,6 +387,17 @@ export function useMatchModeSession({
     }, [matchedLen, pairCount]);
 
     const showLives = config.lives > 0;
+
+    // Accuracy: (total graded - Again count) / total graded
+    const totalGraded =
+        gradeDistribution.Again +
+        gradeDistribution.Hard +
+        gradeDistribution.Good +
+        gradeDistribution.Easy;
+    const accuracy =
+        totalGraded > 0
+            ? Math.round(((totalGraded - gradeDistribution.Again) / totalGraded) * 100)
+            : 0;
 
     return {
         phase,
@@ -361,6 +419,13 @@ export function useMatchModeSession({
         matchedPairs: matchedLen,
         comboPopup,
         progress,
+        // Stimulus-first reveal
+        revealedPairId,
+        handleStimTap,
+        handleGrade,
+        mistakeCardIds,
+        gradeDistribution,
+        accuracy,
         startGame,
         onCellTap,
         resetToIntro,

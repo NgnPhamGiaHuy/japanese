@@ -9,19 +9,23 @@ const DECK_JSON_SCHEMA = `[
     "meaning": "to eat",
     "example": "まいにちごはんをたべる - I eat rice every day",
     "distractors": ["to drink", "to cook", "to buy"],
-    "hint": "ta-BEru sounds like TABle — you eat at a table",
+    "hint": "ta-BEru = TABle — the rule at the table is: EAT",
     "usageNote": "godan verb, used with を particle",
-    "difficulty": 1
+    "difficulty": 1,
+    "mnemonic": "taberu = TABle RUle — at the table, the rule is: EAT",
+    "clozeTemplate": "まいにち___ をたべる - I eat ___ every day"
   },
   {
-    "primary": "食べ物",
-    "alternatives": ["たべもの", "tabemono"],
-    "meaning": "food",
-    "example": "このたべものはおいしい - This food is delicious",
-    "distractors": ["drink", "restaurant", "recipe"],
-    "hint": "tabemono = tabe (eat) + mono (thing) = eat-thing = food",
-    "usageNote": "",
-    "difficulty": 3
+    "primary": "難しい",
+    "alternatives": ["むずかしい", "muzukashii"],
+    "meaning": "difficult",
+    "example": "このもんだいはむずかしい - This problem is difficult",
+    "distractors": ["easy", "boring", "important"],
+    "hint": "muzukashii = MOO-zoo-CASH — paying cash at a zoo is DIFFICULT",
+    "usageNote": "i-adjective",
+    "difficulty": 2,
+    "mnemonic": "muzukashii = MOO-zoo-CASH — paying cash at a zoo is DIFFICULT",
+    "clozeTemplate": "このもんだいは___ - This problem is ___"
   }
 ]`;
 

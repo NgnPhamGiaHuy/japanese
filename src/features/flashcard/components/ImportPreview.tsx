@@ -6,10 +6,11 @@
 
 import { useState } from "react";
 
-import { AlertCircle, CheckCircle2, Trash2 } from "lucide-react";
+import { AlertCircle, AlertTriangle, CheckCircle2, Scissors, Trash2 } from "lucide-react";
 
 import { Button } from "@/shared/components/ui";
 import { hexToThemeColor } from "@/shared/utils";
+import { splitAtomicPrimary } from "../utils/card.validator";
 
 /**
  * Represents a single row of imported data in the staging area.
@@ -28,6 +29,8 @@ export interface ImportRow {
     errorMsg?: string;
     /** The original unparsed string (useful for debugging raw import failures) */
     originalText?: string;
+    /** Flag indicating the primary field violates the Atomic Card principle */
+    atomicViolation?: boolean;
 }
 
 interface ImportPreviewProps {
@@ -87,6 +90,27 @@ export const ImportPreview = ({
 
     const removeRow = (id: string) => {
         setRows((prev) => prev.filter((r) => r.id !== id));
+    };
+
+    /**
+     * Splits a flagged atomic-violation row into multiple atomic rows,
+     * one per detected primary form.
+     */
+    const splitRow = (id: string) => {
+        setRows((prev) => {
+            const idx = prev.findIndex((r) => r.id === id);
+            if (idx === -1) return prev;
+            const row = prev[idx];
+            const atomicPrimaries = splitAtomicPrimary(row.primary);
+            if (atomicPrimaries.length === 0) return prev;
+            const newRows = atomicPrimaries.map((p, i) => ({
+                ...row,
+                id: `split_${Date.now()}_${i}`,
+                primary: p,
+                atomicViolation: false,
+            }));
+            return [...prev.slice(0, idx), ...newRows, ...prev.slice(idx + 1)];
+        });
     };
 
     const validCount = rows.filter((r) => !r.isInvalid).length;
@@ -196,6 +220,14 @@ export const ImportPreview = ({
                                         >
                                             <AlertCircle size={20} />
                                         </div>
+                                    ) : row.atomicViolation ? (
+                                        <div
+                                            role="alert"
+                                            className="flex items-center justify-center text-orange-500"
+                                            title="Non-atomic card: primary contains multiple forms. Click Split to separate."
+                                        >
+                                            <AlertTriangle size={20} />
+                                        </div>
                                     ) : (
                                         <div className="flex items-center justify-center text-green-500">
                                             <CheckCircle2 size={20} />
@@ -203,12 +235,25 @@ export const ImportPreview = ({
                                     )}
                                 </td>
                                 <td className="p-4 text-center">
-                                    <Button
-                                        variant="ghost"
-                                        onClick={() => removeRow(row.id)}
-                                        className="!p-1 text-gray-300 transition-colors hover:bg-red-50 hover:text-red-500"
-                                        icon={Trash2}
-                                    />
+                                    <div className="flex items-center justify-center gap-1">
+                                        {row.atomicViolation && (
+                                            <Button
+                                                variant="ghost"
+                                                onClick={() => splitRow(row.id)}
+                                                className="!p-1 text-orange-400 transition-colors hover:bg-orange-50 hover:text-orange-600"
+                                                icon={Scissors}
+                                                title="Split into atomic cards"
+                                            >
+                                                Split
+                                            </Button>
+                                        )}
+                                        <Button
+                                            variant="ghost"
+                                            onClick={() => removeRow(row.id)}
+                                            className="!p-1 text-gray-300 transition-colors hover:bg-red-50 hover:text-red-500"
+                                            icon={Trash2}
+                                        />
+                                    </div>
                                 </td>
                             </tr>
                         ))}

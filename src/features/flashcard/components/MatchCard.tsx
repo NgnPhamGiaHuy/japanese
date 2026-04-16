@@ -9,6 +9,8 @@ interface MatchCardProps {
     surface: MatchCardSurface;
     disabled: boolean;
     onPress: () => void;
+    /** Keyboard navigation support for stimulus tiles (Requirement 7.4) */
+    tabIndex?: number;
 }
 
 const surfaceRing: Record<MatchCardSurface, string> = {
@@ -18,13 +20,14 @@ const surfaceRing: Record<MatchCardSurface, string> = {
     error: "border-[#ea2b2b] text-[#ea2b2b] bg-[#ffdfe0]",
 };
 
-const MatchCard = ({ label, surface, disabled, onPress }: MatchCardProps) => {
+const MatchCard = ({ label, surface, disabled, onPress, tabIndex }: MatchCardProps) => {
     return (
         <motion.button
             type="button"
             layout
             disabled={disabled}
             onClick={onPress}
+            tabIndex={tabIndex}
             className={[
                 "flex min-h-[76px] w-full cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-b-4 p-2 text-center font-black transition-all duration-150 select-none",
                 surfaceRing[surface],

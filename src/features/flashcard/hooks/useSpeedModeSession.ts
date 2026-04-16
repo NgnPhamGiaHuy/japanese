@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
+import { generateMatchDistractors } from "@/features/ai/services/gemini.service";
 import { useGameSession } from "@/features/game/hooks";
 import {
     calcSpeedPoints,
@@ -58,6 +59,7 @@ export function useSpeedModeSession({
     const [correctCount, setCorrectCount] = useState(0);
     const [answerStatus, setAnswerStatus] = useState<AnswerStatus>("idle");
     const [selectedOption, setSelectedOption] = useState<string | null>(null);
+    const [aiDistractors, setAiDistractors] = useState<string[]>([]);
 
     const [timerFraction, setTimerFraction] = useState(1);
     const questionStartRef = useRef(0);
@@ -90,19 +92,51 @@ export function useSpeedModeSession({
         return { ...buildQuestion(currentCard, type), type };
     }, [currentCard, difficultyLevel, questionIndex]);
 
-    const options = useMemo(() => {
-        if (!currentCard || allCards.length < 4) return [];
-        if (!currentQuestion) return [];
-
-        const distractors = allCards
+    // Fallback: 3 random meaning values from other cards in the same lesson
+    const fallbackDistractors = useMemo(() => {
+        if (!currentCard || !currentQuestion) return [];
+        const others = allCards
             .filter((card) => card.id !== currentCard.id)
-            .map((card) => {
-                if (currentQuestion.type === "primary_to_meaning") return card.meaning;
-                return card.primary;
-            })
-            .filter((value) => value && value !== currentQuestion.answer);
-        return shuffleArray([currentQuestion.answer, ...shuffleArray(distractors).slice(0, 3)]);
+            .map((card) =>
+                currentQuestion.type === "primary_to_meaning" ? card.meaning : card.primary,
+            )
+            .filter((value): value is string => Boolean(value) && value !== currentQuestion.answer);
+        return shuffleArray(others).slice(0, 3);
     }, [allCards, currentCard, currentQuestion]);
+
+    // Fetch AI distractors asynchronously when the question changes
+    useEffect(() => {
+        if (!currentCard || !currentQuestion || allCards.length < 4) {
+            setAiDistractors([]);
+            return;
+        }
+
+        let cancelled = false;
+
+        void generateMatchDistractors(allCards, 3)
+            .then((result) => {
+                if (!cancelled) setAiDistractors(result);
+            })
+            .catch(() => {
+                if (!cancelled) setAiDistractors([]);
+            });
+
+        return () => {
+            cancelled = true;
+        };
+        // Re-run only when the question changes (questionIndex drives currentCard/currentQuestion)
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [questionIndex]);
+
+    const options = useMemo(() => {
+        if (!currentCard || !currentQuestion) return [];
+
+        // Use AI distractors if available, otherwise fall back to lesson meanings
+        const distractorPool = aiDistractors.length >= 3 ? aiDistractors : fallbackDistractors;
+        const chosen = distractorPool.filter((d) => d !== currentQuestion.answer).slice(0, 3);
+
+        return shuffleArray([currentQuestion.answer, ...chosen]);
+    }, [aiDistractors, currentCard, currentQuestion, fallbackDistractors]);
 
     const stopTimer = useCallback(() => {
         if (!timerIntervalRef.current) return;
@@ -148,6 +182,7 @@ export function useSpeedModeSession({
         setCorrectCount(0);
         setAnswerStatus("idle");
         setSelectedOption(null);
+        setAiDistractors([]);
         savedRef.current = false;
         setPhase("playing");
         void startSession();

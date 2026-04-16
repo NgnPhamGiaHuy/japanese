@@ -6,10 +6,17 @@ import { useEffect, useRef } from "react";
 import { Clock, Flame, Sword, Trophy, X } from "lucide-react";
 
 import {
-    AnswerFeedback, GameStreakScoreStack, Leaderboard, LivesDisplay, MiniLeaderboard,
+    AnswerFeedback,
+    GameStreakScoreStack,
+    Leaderboard,
+    LivesDisplay,
+    MiniLeaderboard,
 } from "@/features/game/components";
 import {
-    TIME_ATTACK_MAX_STREAK_BONUS_SEC, TIME_ATTACK_WRONG_PENALTY_SEC, useKanaDataset, useSurvivalGame,
+    TIME_ATTACK_MAX_STREAK_BONUS_SEC,
+    TIME_ATTACK_WRONG_PENALTY_SEC,
+    useKanaDataset,
+    useSurvivalGame,
 } from "@/features/kana/hooks";
 import { useBestScores } from "@/features/user/hooks";
 import { ScreenHeader, ScreenHeaderBackButton, ScreenHeaderRow } from "@/shared/components/layout";

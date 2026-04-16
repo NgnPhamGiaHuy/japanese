@@ -1,6 +1,5 @@
-import type { FlashCard } from "../types";
+import type { FlashCard, StudyMode } from "../types";
 
-export type DisplayMode = "learn" | "practice" | "challenge" | "game";
 export type QuestionType =
     | "primary_to_meaning"
     | "alternative_to_primary"
@@ -17,20 +16,6 @@ export function getAudioText(card: FlashCard): string {
 
 function pickAlternative(card: FlashCard): string | null {
     return card.alternatives.find((value) => value && value !== card.primary) || null;
-}
-
-export function resolveDisplay(
-    card: FlashCard,
-    context: { mode: DisplayMode; difficulty: number },
-) {
-    const alt = pickAlternative(card);
-    return {
-        // Retrieval-first: keep primary as default target across study modes.
-        question: pickPrimaryText(card),
-        answer: card.meaning,
-        hint:
-            context.mode === "learn" || context.mode === "practice" ? alt || undefined : undefined,
-    };
 }
 
 export function getSupportedQuestionTypes(card: FlashCard): QuestionType[] {
@@ -132,4 +117,95 @@ export function chooseMatchQuestionTypeForCard(
         return chooseQuestionType(card, { difficulty: Math.min(3, difficulty), preferPrimary });
     }
     return fixedRoundType;
+}
+
+// ─── Display_Engine: resolveCardFaces ────────────────────────────────────────
+
+/**
+ * The stimulus side of a flashcard.
+ * Standard cards expose `primary`; cloze cards expose `clozeTemplate`.
+ * `imageUrl` is always available on the front when present.
+ */
+export interface CardFront {
+    primary?: string; // standard cards
+    imageUrl?: string;
+    clozeTemplate?: string; // cloze cards only
+}
+
+/**
+ * The answer side of a flashcard, revealed after the user responds.
+ * `mnemonic` is only populated in `learn` mode.
+ */
+export interface CardBack {
+    meaning: string;
+    example: string;
+    alternatives: string[];
+    hint?: string;
+    usageNote?: string;
+    mnemonic?: string; // learn mode only
+}
+
+/** Strict front/back split for a single card. */
+export interface CardFaces {
+    front: CardFront;
+    back: CardBack;
+}
+
+/**
+ * Thrown by `resolveCardFaces` when a card cannot be rendered because its
+ * `primary` field is empty or missing.
+ */
+export class CardDisplayError extends Error {
+    constructor(message: string) {
+        super(message);
+        this.name = "CardDisplayError";
+    }
+}
+
+/**
+ * Resolves the strict front/back split for a card.
+ *
+ * Rules:
+ * - Standard card: front = `{ primary, imageUrl? }`,
+ *   back = `{ meaning, example, alternatives, hint?, usageNote?, mnemonic? (learn only) }`.
+ * - Cloze card (`cardType === 'cloze'` AND non-empty `clozeTemplate`):
+ *   front = `{ clozeTemplate, imageUrl? }`, back includes `primary` as the answer.
+ * - Cloze fallback: if `cardType === 'cloze'` but `clozeTemplate` is empty/missing,
+ *   renders as a standard card.
+ * - Throws `CardDisplayError` if `primary` is empty or missing.
+ * - Mnemonic appears on back only when `mode === 'learn'`.
+ *
+ * @param card - The FlashCard to resolve.
+ * @param mode - Study mode; controls mnemonic visibility.
+ */
+export function resolveCardFaces(card: FlashCard, mode?: StudyMode): CardFaces {
+    if (!card.primary) {
+        throw new CardDisplayError("Card primary field is required for display");
+    }
+
+    const isCloze =
+        card.cardType === "cloze" &&
+        typeof card.clozeTemplate === "string" &&
+        card.clozeTemplate.trim().length > 0;
+
+    const front: CardFront = isCloze
+        ? {
+              clozeTemplate: card.clozeTemplate,
+              ...(card.imageUrl !== undefined && { imageUrl: card.imageUrl }),
+          }
+        : {
+              primary: card.primary,
+              ...(card.imageUrl !== undefined && { imageUrl: card.imageUrl }),
+          };
+
+    const back: CardBack = {
+        meaning: card.meaning,
+        example: card.example,
+        alternatives: card.alternatives,
+        ...(card.hint !== undefined && { hint: card.hint }),
+        ...(card.usageNote !== undefined && { usageNote: card.usageNote }),
+        ...(mode === "learn" && card.mnemonic !== undefined && { mnemonic: card.mnemonic }),
+    };
+
+    return { front, back };
 }

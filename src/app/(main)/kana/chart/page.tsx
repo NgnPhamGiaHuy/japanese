@@ -5,14 +5,20 @@ import { Fragment, useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import { Eye, EyeOff } from "lucide-react";
 
-import type { ChartBlock } from "@/features/kana/data";
-import { buildChartBlocks, CHART_SECTION_TITLES, HIRAGANA_DATA, KATAKANA_DATA, } from "@/features/kana/data";
+import {
+    buildChartBlocks,
+    CHART_SECTION_TITLES,
+    HIRAGANA_DATA,
+    KATAKANA_DATA,
+} from "@/features/kana/data";
 import { useKanaDataset } from "@/features/kana/hooks";
 import { useUserProgress } from "@/features/user/hooks";
 import { ScreenHeader } from "@/shared/components/layout";
 import { Button } from "@/shared/components/ui";
 import { playAudio } from "@/shared/utils";
 import { useKanaStore } from "@/store";
+
+import type { ChartBlock } from "@/features/kana/data";
 import type { KanaChar } from "@/features/kana/types";
 
 function ChartCell({
@@ -43,9 +49,14 @@ function ChartCell({
             className="aspect-square w-full"
         >
             <Button
+                variant="secondary"
                 onClick={() => playAudio(item.char)}
-                className={`flex h-full w-full flex-col items-center justify-center rounded-xl border-2 border-b-4 transition-colors duration-150 active:translate-y-[1px] active:border-b-2 md:rounded-2xl ${
-                    learned ? learnedBorder : "border-gray-200 bg-white hover:border-gray-300"
+                className={`!flex !h-full !w-full !flex-col !items-center !justify-center !p-0 shadow-none !transition-all duration-200 ${
+                    learned
+                        ? isH
+                            ? "!border-[#58cc02]/30 !bg-[#58cc02]/10 hover:!bg-[#58cc02]/20"
+                            : "!border-[#1cb0f6]/30 !bg-[#1cb0f6]/10 hover:!bg-[#1cb0f6]/20"
+                        : "hover:!bg-gray-50"
                 }`}
             >
                 <span

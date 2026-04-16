@@ -6,15 +6,19 @@
 
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import { AlertCircle, Brain, Check, Lightbulb, Loader2, Volume2, X } from "lucide-react";
 
 import { useAICard } from "@/features/ai";
 import { Button } from "@/shared/components/ui";
 import { hexToThemeColor, playAudio, shuffleArray } from "@/shared/utils";
-import { getAudioText, resolveDisplay } from "../utils/displayEngine";
+import { useAppStore } from "@/store";
+import { reinsertCard } from "../logic/learningEngine";
+import { gradeCard } from "../services/card.service";
+import { getAudioText, resolveCardFaces } from "../utils/displayEngine";
 
+import type { Grade } from "../services/card.service";
 import type { FlashCard, Lesson, StudyStats } from "../types";
 
 /**
@@ -30,12 +34,14 @@ import type { FlashCard, Lesson, StudyStats } from "../types";
 interface FlashcardMistakeReviewProps {
     /** The deck metadata */
     lesson: Lesson;
+    /** The userId of the authenticated user */
+    userId: string;
     /** The subset of missed cards */
     cards: FlashCard[];
     /** Manual exit handler */
     onClose: () => void;
     /** Persistent state updater */
-    onAnswer: (card: FlashCard, knew: boolean) => Promise<void>;
+    onAnswer: (card: FlashCard, grade: Grade) => Promise<void>;
     /** Session completion callback */
     onComplete: (stats: StudyStats) => void;
 }
@@ -43,6 +49,7 @@ interface FlashcardMistakeReviewProps {
 /**
  * Custom hook for lazy-loading AI mnemonics.
  * Triggers generation only when the card is first revealed to optimize token usage.
+ * Resets when the card changes so each card gets its own fresh tip.
  *
  * @param card - The target card
  * @param revealed - Reveal flag (trigger)
@@ -52,8 +59,16 @@ const useAIExplanation = (card: FlashCard | undefined, revealed: boolean) => {
     const aiLoading = status === "loading";
     const [explanation, setExplanation] = useState<string | null>(null);
 
+    // Reset explanation whenever the card changes so the previous card's tip
+    // doesn't bleed into the next card.
     useEffect(() => {
-        if (!revealed || !card || explanation) return;
+        setExplanation(null);
+    }, [card?.id]);
+
+    useEffect(() => {
+        if (!revealed || !card) return;
+        // Don't re-fetch if we already have a tip for this card
+        if (explanation !== null) return;
         if (card.hint) {
             setExplanation(card.hint);
         } else {
@@ -71,17 +86,21 @@ const useAIExplanation = (card: FlashCard | undefined, revealed: boolean) => {
  * FlashcardMistakeReview Component
  *
  * @example
- * <FlashcardMistakeReview lesson={deck} cards={fails} onComplete={handleRedeem} />
+ * <FlashcardMistakeReview lesson={deck} cards={fails} userId={uid} onComplete={handleRedeem} />
  */
 export const FlashcardMistakeReview = ({
     lesson,
+    userId,
     cards,
     onClose,
     onAnswer,
     onComplete,
 }: FlashcardMistakeReviewProps) => {
     const themeHex = lesson.themeColor || "#1cb0f6";
+    const { globalAutoPlay } = useAppStore();
 
+    /** Local queue state — initialized from cards prop, supports Again re-insertion */
+    const [queue, setQueue] = useState<FlashCard[]>(() => [...cards]);
     const [currentIndex, setCurrentIndex] = useState(0);
     const [isFlipped, setIsFlipped] = useState(false);
 
@@ -94,7 +113,17 @@ export const FlashcardMistakeReview = ({
 
     const [showSummary, setShowSummary] = useState(false);
 
-    const card = cards[currentIndex];
+    const card = queue[currentIndex];
+
+    // Play audio when the card is flipped to the back face
+    const prevFlippedRef = useRef(false);
+    useEffect(() => {
+        const justFlipped = isFlipped && !prevFlippedRef.current;
+        if (justFlipped && globalAutoPlay && card) {
+            playAudio(getAudioText(card));
+        }
+        prevFlippedRef.current = isFlipped;
+    }, [isFlipped, globalAutoPlay, card]);
 
     const mcChoices = useMemo<string[] | null>(() => {
         const d = card?.distractors;
@@ -126,18 +155,21 @@ export const FlashcardMistakeReview = ({
     // Guard for fast transition between states
     if (!card) return null;
 
-    const display = resolveDisplay(card, { mode: "challenge", difficulty: card.difficulty ?? 2 });
-    const displayFront = display.question;
-    const displayHint = display.hint || null;
-    const altSubtitle = card.alternatives.find((value) => value !== displayFront) || null;
+    const faces = resolveCardFaces(card, "mistake-review");
+    const displayFront = faces.front.clozeTemplate ?? faces.front.primary ?? "";
+    const back = faces.back;
+    const displayHint = back.hint || null;
+    const altSubtitle = back.alternatives.find((value) => value !== displayFront) || null;
     const headerHint = displayHint && displayHint !== altSubtitle ? displayHint : null;
-    const progress = (currentIndex / cards.length) * 100;
+    const progress = (currentIndex / queue.length) * 100;
 
     /**
      * Session Flow Control
      * Triggers SRS update and either advances or completes the session.
+     * NOTE: Does NOT call incrementDailyReviewCount — mistake-review cards were already counted.
      */
-    const advance = async (knew: boolean) => {
+    const handleGrade = async (grade: Grade) => {
+        const knew = grade === "Good" || grade === "Easy";
         const nextMistakes = knew ? stats.mistakeCardIds : [...stats.mistakeCardIds, card.id];
         const nextStats: StudyStats = {
             correct: stats.correct + (knew ? 1 : 0),
@@ -147,11 +179,21 @@ export const FlashcardMistakeReview = ({
         setStats(nextStats);
         setIsFlipped(false);
         setMcSelected(null);
-        await onAnswer(card, knew);
-        if (currentIndex < cards.length - 1) {
-            setCurrentIndex((i) => i + 1);
+
+        await gradeCard(userId, card.id, card, grade);
+        await onAnswer(card, grade);
+
+        if (grade === "Again") {
+            // Re-insert 3–5 positions ahead in the queue
+            const newQueue = reinsertCard(queue, currentIndex);
+            setQueue(newQueue);
+            // currentIndex stays the same — the next card is now at the same index
         } else {
-            setShowSummary(true);
+            if (currentIndex < queue.length - 1) {
+                setCurrentIndex((i) => i + 1);
+            } else {
+                setShowSummary(true);
+            }
         }
     };
 
@@ -159,9 +201,10 @@ export const FlashcardMistakeReview = ({
         if (mcSelected !== null) return;
         setMcSelected(choice);
         const correct = choice === card.meaning;
+        const grade: Grade = correct ? "Good" : "Again";
         /** Short delay for visual feedback before auto-advancing */
         setTimeout(() => {
-            void advance(correct);
+            void handleGrade(grade);
         }, 900);
     };
 
@@ -221,7 +264,7 @@ export const FlashcardMistakeReview = ({
                     </div>
                 </div>
                 <span className="w-12 text-right text-sm font-black text-[#afafaf]">
-                    {currentIndex + 1}/{cards.length}
+                    {currentIndex + 1}/{queue.length}
                 </span>
             </header>
 
@@ -242,7 +285,7 @@ export const FlashcardMistakeReview = ({
                                 </span>
                             )}
                             <div className="flex w-full flex-1 flex-col items-center justify-center px-2 py-2">
-                                <h1 className="w-full text-center text-3xl leading-tight font-black break-words text-[#3c3c3c] select-none sm:text-4xl md:text-5xl">
+                                <h1 className="w-full text-center text-3xl leading-tight font-black wrap-break-word text-[#3c3c3c] select-none sm:text-4xl md:text-5xl">
                                     {displayFront}
                                 </h1>
                                 {altSubtitle && (
@@ -263,7 +306,7 @@ export const FlashcardMistakeReview = ({
                                     backgroundColor: "white",
                                     borderBottomColor: "#e5e7eb",
                                 };
-                                let v: any = "secondary";
+                                let v: "primary" | "secondary" = "secondary";
                                 if (mcSelected !== null) {
                                     if (isCorrect) {
                                         v = "primary";
@@ -326,7 +369,7 @@ export const FlashcardMistakeReview = ({
                                     </span>
                                 )}
                                 <div className="flex w-full flex-1 flex-col items-center justify-center px-2 py-4">
-                                    <h1 className="w-full text-center text-3xl leading-tight font-black break-words text-[#3c3c3c] select-none sm:text-4xl md:text-5xl">
+                                    <h1 className="w-full text-center text-3xl leading-tight font-black wrap-break-word text-[#3c3c3c] select-none sm:text-4xl md:text-5xl">
                                         {displayFront}
                                     </h1>
                                     {altSubtitle && (
@@ -358,12 +401,12 @@ export const FlashcardMistakeReview = ({
                                         className="mb-4 text-2xl leading-tight font-black wrap-break-word sm:text-3xl md:text-4xl"
                                         style={{ color: themeHex }}
                                     >
-                                        {card.meaning}
+                                        {back.meaning}
                                     </h2>
-                                    {card.example && (
+                                    {back.example && (
                                         <div className="mt-2 w-full rounded-2xl border-2 border-gray-100 bg-gray-50 p-4 text-left">
                                             <p className="text-sm font-bold text-[#3c3c3c] sm:text-base">
-                                                {card.example}
+                                                {back.example}
                                             </p>
                                         </div>
                                     )}
@@ -393,27 +436,40 @@ export const FlashcardMistakeReview = ({
                             </div>
                         </div>
 
-                        {/* Confirmation Interaction */}
+                        {/* Four-button Grade UI — visible only after flip */}
                         <div
-                            className={`mt-6 flex w-full gap-2 transition-opacity duration-300 ${isFlipped ? "opacity-100" : "pointer-events-none opacity-0"}`}
+                            className={`mt-6 grid w-full grid-cols-2 gap-3 transition-opacity duration-300 ${isFlipped ? "opacity-100" : "pointer-events-none opacity-0"}`}
                             onClick={(e) => e.stopPropagation()}
                         >
-                            <Button
-                                variant="secondary"
-                                color="orange"
-                                onClick={() => void advance(false)}
-                                className="flex-1 py-4 text-lg"
+                            <button
+                                aria-label="Again — card will repeat soon"
+                                onClick={() => void handleGrade("Again")}
+                                className="rounded-[1.25rem] border-2 border-b-8 border-[#ea2b2b]/60 bg-[#ff4b4b] py-4 text-base font-black text-white shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-[#ff4b4b] focus-visible:ring-offset-2 active:translate-y-0 active:border-b-2"
                             >
-                                Still Hard
-                            </Button>
-                            <Button
-                                variant="primary"
-                                color="green"
-                                onClick={() => void advance(true)}
-                                className="flex-1 py-4 text-lg"
+                                Again
+                            </button>
+                            <button
+                                aria-label="Hard — interval shortened"
+                                onClick={() => void handleGrade("Hard")}
+                                className="rounded-[1.25rem] border-2 border-b-8 border-[#e07000]/60 bg-[#ff9600] py-4 text-base font-black text-white shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-[#ff9600] focus-visible:ring-offset-2 active:translate-y-0 active:border-b-2"
                             >
-                                Got It ✓
-                            </Button>
+                                Hard
+                            </button>
+                            <button
+                                aria-label="Good — normal interval"
+                                onClick={() => void handleGrade("Good")}
+                                className="rounded-[1.25rem] border-2 border-b-8 border-[#58a700]/60 bg-[#58cc02] py-4 text-base font-black text-white shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-[#58cc02] focus-visible:ring-offset-2 active:translate-y-0 active:border-b-2"
+                            >
+                                Good
+                            </button>
+                            <button
+                                aria-label="Easy — interval extended"
+                                onClick={() => void handleGrade("Easy")}
+                                className="rounded-[1.25rem] border-2 border-b-8 border-[#0090c0]/60 py-4 text-base font-black text-white shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1cb0f6] focus-visible:ring-offset-2 active:translate-y-0 active:border-b-2"
+                                style={{ backgroundColor: themeHex }}
+                            >
+                                Easy
+                            </button>
                         </div>
                     </>
                 )}

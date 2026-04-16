@@ -125,42 +125,79 @@ const SRS_EASE_MAX = 2.5;
 const SRS_EASE_DEFAULT = 2.5;
 
 /**
- * Core SRS Algorithm (SM2-inspired)
+ * Four-button SM-2 grade values.
  *
- * @remarks
- * Logic orchestration:
- * 1. **Success (Knew)**: Increments repetitions and scales interval by the current `easeFactor`.
- *    Interval steps: 0 -> 1 -> 6 -> round(old_interval * ease).
- * 2. **Failure (Forgot)**: Resets repetitions and interval, but preserves a slightly
- *    lower `easeFactor` to account for difficulty.
+ * - `Again` (0): Forgot — reset card to beginning.
+ * - `Hard`  (1): Recalled with significant difficulty.
+ * - `Good`  (2): Recalled correctly with some effort.
+ * - `Easy`  (3): Recalled instantly and effortlessly.
+ */
+export type Grade = "Again" | "Hard" | "Good" | "Easy";
+
+/**
+ * Applies SM-2 four-button grading to a card and persists the updated SRS fields.
+ *
+ * Grade → SM-2 mapping:
+ *   Again (0): reset repetitions to 0, interval to 1, easeFactor -= 0.20 (min 1.3)
+ *   Hard  (1): keep repetitions, interval = max(1, round(prev × 0.8)), easeFactor -= 0.15 (min 1.3)
+ *   Good  (2): increment repetitions, interval = round(prev × easeFactor × 1.0), easeFactor unchanged
+ *   Easy  (3): increment repetitions, interval = round(prev × easeFactor × 1.3), easeFactor += 0.15 (max 2.5)
+ *
+ * First-repetition bootstrapping (repetitions === 0 before grading):
+ *   Good/Easy: interval → 1 (first exposure, not formula)
+ *   After first Good (repetitions becomes 1): next Good → interval 6
+ *   Subsequent (repetitions ≥ 2): standard SM-2 formula applies
  *
  * @param userId - UID of the card owner.
  * @param cardId - Target card ID.
  * @param currentCard - Prior state for differential calculation.
- * @param knew - The user's self-reported recall status.
+ * @param grade - The user's four-button recall quality rating.
  */
-export async function updateCardProgress(
+export async function gradeCard(
     userId: string,
     cardId: string,
     currentCard: FlashCard,
-    knew: boolean,
+    grade: Grade,
 ): Promise<void> {
     let { easeFactor, interval, repetitions } = currentCard;
 
-    if (knew) {
-        if (repetitions === 0) interval = 1;
-        else if (repetitions === 1) interval = 6;
-        else interval = Math.round(interval * easeFactor);
+    switch (grade) {
+        case "Again":
+            repetitions = 0;
+            interval = 1;
+            easeFactor = Math.max(SRS_EASE_MIN, easeFactor - 0.2);
+            break;
 
-        repetitions += 1;
-        easeFactor = Math.min(SRS_EASE_MAX, easeFactor + 0.1);
-    } else {
-        repetitions = 0;
-        interval = 1;
-        easeFactor = Math.max(SRS_EASE_MIN, easeFactor - 0.2);
+        case "Hard":
+            // repetitions unchanged
+            interval = Math.max(1, Math.round(interval * 0.8));
+            easeFactor = Math.max(SRS_EASE_MIN, easeFactor - 0.15);
+            break;
+
+        case "Good":
+            if (repetitions === 0) {
+                interval = 1;
+            } else if (repetitions === 1) {
+                interval = 6;
+            } else {
+                interval = Math.round(interval * easeFactor * 1.0);
+            }
+            repetitions += 1;
+            // easeFactor unchanged
+            break;
+
+        case "Easy":
+            if (repetitions === 0) {
+                interval = 1;
+            } else {
+                interval = Math.round(interval * easeFactor * 1.3);
+            }
+            repetitions += 1;
+            easeFactor = Math.min(SRS_EASE_MAX, easeFactor + 0.15);
+            break;
     }
 
-    const nextReviewAt = Date.now() + interval * 24 * 60 * 60 * 1000;
+    const nextReviewAt = Date.now() + interval * 86400000;
 
     await updateDoc(cardDoc(userId, cardId), {
         interval,
@@ -168,6 +205,30 @@ export async function updateCardProgress(
         easeFactor,
         nextReviewAt,
     });
+}
+
+/**
+ * Core SRS Algorithm (SM2-inspired) — backward-compatible wrapper around `gradeCard`.
+ *
+ * @remarks
+ * Maps the binary `knew` flag to a `Grade`:
+ * - `knew = true`  → `"Good"`
+ * - `knew = false` → `"Again"`
+ *
+ * @param userId - UID of the card owner.
+ * @param cardId - Target card ID.
+ * @param currentCard - Prior state for differential calculation.
+ * @param knew - The user's self-reported recall status.
+ *
+ * @deprecated Prefer `gradeCard` with an explicit `Grade` for full SM-2 precision.
+ */
+export async function updateCardProgress(
+    userId: string,
+    cardId: string,
+    currentCard: FlashCard,
+    knew: boolean,
+): Promise<void> {
+    return gradeCard(userId, cardId, currentCard, knew ? "Good" : "Again");
 }
 
 // ─── Reset Progress ───────────────────────────────────────────────────────

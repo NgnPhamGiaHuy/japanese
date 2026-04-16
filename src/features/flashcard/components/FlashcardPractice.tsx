@@ -13,8 +13,11 @@ import { Check, Lightbulb, RefreshCw, Volume2, X } from "lucide-react";
 import { Button } from "@/shared/components/ui";
 import { hexToThemeColor, playAudio, shuffleArray } from "@/shared/utils";
 import { useAppStore } from "@/store";
-import { getAudioText, resolveDisplay } from "../utils/displayEngine";
+import { getDailyProgress, incrementDailyReviewCount, reinsertCard } from "../logic/learningEngine";
+import { gradeCard } from "../services/card.service";
+import { getAudioText, resolveCardFaces } from "../utils/displayEngine";
 
+import type { Grade } from "../services/card.service";
 import type { FlashCard, Lesson, StudyStats } from "../types";
 
 /**
@@ -31,12 +34,14 @@ import type { FlashCard, Lesson, StudyStats } from "../types";
 interface FlashcardPracticeProps {
     /** The deck metadata */
     lesson: Lesson;
+    /** The userId of the authenticated user */
+    userId: string;
     /** The batch of cards due for review */
     cards: FlashCard[];
     /** Triggered on manual exit */
     onClose: () => void;
     /** Persistence handler for SRS state updates */
-    onAnswer: (card: FlashCard, knew: boolean) => Promise<void>;
+    onAnswer: (card: FlashCard, grade: Grade) => Promise<void>;
     /** Final transition to reward/summary screen */
     onComplete: (stats: StudyStats) => void;
 }
@@ -45,10 +50,11 @@ interface FlashcardPracticeProps {
  * FlashcardPractice Component
  *
  * @example
- * <FlashcardPractice lesson={lesson} cards={dueCards} onAnswer={handleSrs} />
+ * <FlashcardPractice lesson={lesson} cards={dueCards} userId={uid} onAnswer={handleSrs} />
  */
 export const FlashcardPractice = ({
     lesson,
+    userId,
     cards,
     onClose,
     onAnswer,
@@ -57,6 +63,8 @@ export const FlashcardPractice = ({
     const { globalAutoPlay } = useAppStore();
     const themeHex = lesson.themeColor || "#1cb0f6";
 
+    /** Local queue state — initialized from cards prop, supports Again re-insertion */
+    const [queue, setQueue] = useState<FlashCard[]>(() => [...cards]);
     const [currentIndex, setCurrentIndex] = useState(0);
     const [isFlipped, setIsFlipped] = useState(false);
 
@@ -74,6 +82,13 @@ export const FlashcardPractice = ({
     const [mcSelected, setMcSelected] = useState<string | null>(null);
     const prevFlippedRef = useRef(false);
 
+    /** Fetch daily progress on mount for informational purposes */
+    useEffect(() => {
+        if (userId) {
+            void getDailyProgress(userId);
+        }
+    }, [userId]);
+
     /**
      * Pronunciation Reinforcement
      * Plays audio upon "reveal" (flipping the card) to bond visual memory with sound.
@@ -81,13 +96,13 @@ export const FlashcardPractice = ({
     useEffect(() => {
         const justFlipped = isFlipped && !prevFlippedRef.current;
         if (justFlipped && globalAutoPlay) {
-            const card = cards[currentIndex];
+            const card = queue[currentIndex];
             if (card) playAudio(getAudioText(card));
         }
         prevFlippedRef.current = isFlipped;
-    }, [isFlipped, globalAutoPlay, cards, currentIndex]);
+    }, [isFlipped, globalAutoPlay, queue, currentIndex]);
 
-    const card = cards[currentIndex];
+    const card = queue[currentIndex];
 
     /**
      * Multiple Choice Choice Generation
@@ -127,18 +142,20 @@ export const FlashcardPractice = ({
     // Safety guard for transition logic
     if (!card) return null;
 
-    const display = resolveDisplay(card, { mode: "practice", difficulty: card.difficulty ?? 1 });
-    const displayFront = display.question;
-    const displayHint = display.hint || null;
-    const altSubtitle = card.alternatives.find((value) => value !== displayFront) || null;
+    const faces = resolveCardFaces(card, "practice");
+    const displayFront = faces.front.clozeTemplate ?? faces.front.primary ?? "";
+    const back = faces.back;
+    const displayHint = back.hint || null;
+    const altSubtitle = back.alternatives.find((value) => value !== displayFront) || null;
     const headerHint = displayHint && displayHint !== altSubtitle ? displayHint : null;
-    const progress = (currentIndex / cards.length) * 100;
+    const progress = (currentIndex / queue.length) * 100;
 
     /**
-     * Advancement Orchestrator
-     * Resets local UI states (flipped, hints, mc) and moves to next card or summary.
+     * Advancement Orchestrator for flip mode.
+     * Handles grade, re-insertion for Again, daily count increment, and queue advancement.
      */
-    const advance = async (knew: boolean) => {
+    const handleGrade = async (grade: Grade) => {
+        const knew = grade === "Good" || grade === "Easy";
         const nextMistakes = knew ? stats.mistakeCardIds : [...stats.mistakeCardIds, card.id];
         const nextStats: StudyStats = {
             correct: stats.correct + (knew ? 1 : 0),
@@ -149,11 +166,22 @@ export const FlashcardPractice = ({
         setIsFlipped(false);
         setHintVisible(false);
         setMcSelected(null);
-        await onAnswer(card, knew);
-        if (currentIndex < cards.length - 1) {
-            setCurrentIndex((i) => i + 1);
+
+        await gradeCard(userId, card.id, card, grade);
+        await incrementDailyReviewCount(userId);
+        await onAnswer(card, grade);
+
+        if (grade === "Again") {
+            // Re-insert 3–5 positions ahead in the queue
+            const newQueue = reinsertCard(queue, currentIndex);
+            setQueue(newQueue);
+            // currentIndex stays the same — the next card is now at the same index
         } else {
-            setShowSummary(true);
+            if (currentIndex < queue.length - 1) {
+                setCurrentIndex((i) => i + 1);
+            } else {
+                setShowSummary(true);
+            }
         }
     };
 
@@ -161,8 +189,9 @@ export const FlashcardPractice = ({
         if (mcSelected !== null) return;
         setMcSelected(choice);
         const correct = choice === card.meaning;
+        const grade: Grade = correct ? "Good" : "Again";
         /** Short delay to allow user to see the success/error colors before advancing */
-        setTimeout(() => void advance(correct), 750);
+        setTimeout(() => void handleGrade(grade), 750);
     };
 
     // ── Summary (XP and Accuracy Report) ───────────────────────────────────
@@ -224,7 +253,7 @@ export const FlashcardPractice = ({
                     </div>
                 </div>
                 <span className="w-12 text-right text-sm font-black text-[#afafaf]">
-                    {currentIndex + 1}/{cards.length}
+                    {currentIndex + 1}/{queue.length}
                 </span>
             </header>
 
@@ -251,7 +280,7 @@ export const FlashcardPractice = ({
                                 </span>
                             )}
                             <div className="flex w-full flex-1 flex-col items-center justify-center px-2 py-2">
-                                <h1 className="w-full text-center text-3xl leading-tight font-black break-words text-[#3c3c3c] select-none sm:text-4xl md:text-5xl">
+                                <h1 className="w-full text-center text-3xl leading-tight font-black wrap-break-word text-[#3c3c3c] select-none sm:text-4xl md:text-5xl">
                                     {displayFront}
                                 </h1>
                                 {altSubtitle && (
@@ -281,7 +310,7 @@ export const FlashcardPractice = ({
                                     backgroundColor: "white",
                                     borderBottomColor: "#e5e7eb",
                                 };
-                                let v: any = "secondary";
+                                let v: "primary" | "secondary" = "secondary";
                                 if (mcSelected !== null) {
                                     if (isCorrect) {
                                         v = "primary";
@@ -352,7 +381,7 @@ export const FlashcardPractice = ({
                                 )}
                                 <div className="flex w-full flex-1 flex-col items-center justify-center overflow-y-auto px-2 pt-2 pb-8">
                                     <h1
-                                        className={`w-full text-center leading-tight font-black break-words text-[#3c3c3c] select-none ${card.imageUrl ? "text-2xl sm:text-3xl" : "text-3xl sm:text-4xl md:text-5xl"}`}
+                                        className={`w-full text-center leading-tight font-black wrap-break-word text-[#3c3c3c] select-none ${card.imageUrl ? "text-2xl sm:text-3xl" : "text-3xl sm:text-4xl md:text-5xl"}`}
                                     >
                                         {displayFront}
                                     </h1>
@@ -411,22 +440,22 @@ export const FlashcardPractice = ({
                                         className="mb-4 text-2xl leading-tight font-black wrap-break-word sm:mb-6 sm:text-3xl md:text-4xl"
                                         style={{ color: themeHex }}
                                     >
-                                        {card.meaning}
+                                        {back.meaning}
                                     </h2>
-                                    {card.example && (
+                                    {back.example && (
                                         <div className="mt-2 w-full shrink-0 rounded-2xl border-2 border-gray-100 bg-gray-50 p-4 text-left sm:mt-4 sm:p-5">
                                             <p className="text-sm font-bold wrap-break-word text-[#3c3c3c] sm:text-base md:text-lg">
-                                                {card.example}
+                                                {back.example}
                                             </p>
                                         </div>
                                     )}
-                                    {card.usageNote && (
+                                    {back.usageNote && (
                                         <div className="mt-3 flex items-center gap-1.5 rounded-xl border border-gray-200 bg-gray-50 px-3 py-1.5">
                                             <span className="text-[10px] font-black tracking-wide text-[#afafaf] uppercase">
                                                 Usage
                                             </span>
                                             <span className="text-xs font-bold text-[#3c3c3c]">
-                                                {card.usageNote}
+                                                {back.usageNote}
                                             </span>
                                         </div>
                                     )}
@@ -434,27 +463,40 @@ export const FlashcardPractice = ({
                             </div>
                         </div>
 
-                        {/* Interaction: SRS Performance Scale (binary for now) */}
+                        {/* Four-button Grade UI — visible only after flip */}
                         <div
-                            className={`mt-6 flex w-full gap-2 transition-opacity duration-300 sm:mt-10 sm:gap-4 ${isFlipped ? "opacity-100" : "pointer-events-none opacity-0"}`}
+                            className={`mt-6 grid w-full grid-cols-2 gap-3 transition-opacity duration-300 sm:mt-10 ${isFlipped ? "opacity-100" : "pointer-events-none opacity-0"}`}
                             onClick={(e) => e.stopPropagation()}
                         >
-                            <Button
-                                variant="secondary"
-                                color="orange"
-                                onClick={() => void advance(false)}
-                                className="flex-1 py-4 text-lg"
+                            <button
+                                aria-label="Again — card will repeat soon"
+                                onClick={() => void handleGrade("Again")}
+                                className="rounded-[1.25rem] border-2 border-b-8 border-[#ea2b2b]/60 bg-[#ff4b4b] py-4 text-base font-black text-white shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-[#ff4b4b] focus-visible:ring-offset-2 active:translate-y-0 active:border-b-2"
                             >
-                                Review Again
-                            </Button>
-                            <Button
-                                variant="primary"
-                                color="green"
-                                onClick={() => void advance(true)}
-                                className="flex-1 py-4 text-lg"
+                                Again
+                            </button>
+                            <button
+                                aria-label="Hard — interval shortened"
+                                onClick={() => void handleGrade("Hard")}
+                                className="rounded-[1.25rem] border-2 border-b-8 border-[#e07000]/60 bg-[#ff9600] py-4 text-base font-black text-white shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-[#ff9600] focus-visible:ring-offset-2 active:translate-y-0 active:border-b-2"
                             >
-                                Got It ✓
-                            </Button>
+                                Hard
+                            </button>
+                            <button
+                                aria-label="Good — normal interval"
+                                onClick={() => void handleGrade("Good")}
+                                className="rounded-[1.25rem] border-2 border-b-8 border-[#58a700]/60 bg-[#58cc02] py-4 text-base font-black text-white shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-[#58cc02] focus-visible:ring-offset-2 active:translate-y-0 active:border-b-2"
+                            >
+                                Good
+                            </button>
+                            <button
+                                aria-label="Easy — interval extended"
+                                onClick={() => void handleGrade("Easy")}
+                                className="rounded-[1.25rem] border-2 border-b-8 border-[#0090c0]/60 py-4 text-base font-black text-white shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1cb0f6] focus-visible:ring-offset-2 active:translate-y-0 active:border-b-2"
+                                style={{ backgroundColor: themeHex }}
+                            >
+                                Easy
+                            </button>
                         </div>
                     </>
                 )}

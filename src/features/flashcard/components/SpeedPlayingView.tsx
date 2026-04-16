@@ -34,7 +34,6 @@ interface SpeedPlayingViewProps {
     difficultyConfig: {
         label: string;
         color: string;
-        showHint: boolean;
     };
     ui: {
         questionNumber: number;
@@ -134,12 +133,6 @@ const SpeedPlayingView = ({
                     transition={{ duration: 0.18 }}
                     className={`mb-8 w-full text-center ${answerStatus === "wrong" ? "animate-shake" : ""}`}
                 >
-                    {difficultyConfig.showHint && currentCard.alternatives[0] ? (
-                        <p className="mb-2 text-lg font-bold tracking-widest text-[#afafaf]">
-                            {currentCard.alternatives[0]}
-                        </p>
-                    ) : null}
-
                     <h1 className="text-[5rem] leading-none font-black text-[#3c3c3c] drop-shadow-sm sm:text-[6rem]">
                         {currentQuestion?.prompt ?? currentCard.primary}
                     </h1>
@@ -203,6 +196,26 @@ const SpeedPlayingView = ({
                         );
                     })}
                 </div>
+
+                {/* Back_Face reveal: show card meaning after wrong answer or timer expiry */}
+                <AnimatePresence>
+                    {answerStatus !== "idle" && currentCard.meaning ? (
+                        <motion.div
+                            initial={{ opacity: 0, y: 8 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0 }}
+                            transition={{ duration: 0.2 }}
+                            className="mt-4 w-full rounded-2xl border border-gray-200 bg-white px-5 py-3 text-center"
+                        >
+                            <p className="text-xs font-black tracking-widest text-[#afafaf] uppercase">
+                                Meaning
+                            </p>
+                            <p className="mt-1 text-base font-bold text-[#3c3c3c]">
+                                {currentCard.meaning}
+                            </p>
+                        </motion.div>
+                    ) : null}
+                </AnimatePresence>
             </div>
 
             <div className="flex justify-center gap-1 pb-6">

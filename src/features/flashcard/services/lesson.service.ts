@@ -24,6 +24,7 @@ import {
 import { APP_ID, db } from "@/lib/firebase";
 import { cardDoc, cardsCol } from "./card.service";
 import { deleteCardImage } from "./image.service";
+import { CardValidationError, validateAtomicCard } from "../utils/card.validator";
 
 import type { Unsubscribe } from "firebase/firestore";
 import type { FlashCard, Lesson } from "../types";
@@ -193,6 +194,15 @@ export async function saveLessonWithCards(
         throw new Error("Lesson title is required");
     }
     validateCardIds(cards);
+
+    // ── Atomic Card validation — must pass before any Firestore write ─────
+    const allViolations = cards.flatMap((card) => validateAtomicCard(card).violations);
+    if (allViolations.length > 0) {
+        throw new CardValidationError(
+            "One or more cards violate the Atomic Card principle",
+            allViolations,
+        );
+    }
 
     const batch = writeBatch(db);
     let targetLessonId = lesson.id;

@@ -1,32 +1,39 @@
 /**
  * @file FlashcardLearn
- * Kana-first introduction mode. Exposes vocabulary progressively:
- * kana → meaning → kanji (only when the learner is ready).
+ * Recall-based introduction mode. Shows only the Front_Face until the user
+ * taps "Show Answer", then reveals the Back_Face with four SM-2 grade buttons.
  */
 
 "use client";
 
 import { useEffect, useRef, useState } from "react";
 
-import { BookOpen, Lightbulb, Volume2, X } from "lucide-react";
+import { BookOpen, Volume2, X } from "lucide-react";
 
 import { Button } from "@/shared/components/ui";
 import { hexToThemeColor, playAudio } from "@/shared/utils";
 import { useAppStore } from "@/store";
-import { getAudioText, resolveDisplay } from "../utils/displayEngine";
+import { reinsertCard } from "../logic/learningEngine";
+import { gradeCard } from "../services/card.service";
+import { getAudioText, resolveCardFaces } from "../utils/displayEngine";
 
+import type { Grade } from "../services/card.service";
 import type { FlashCard, Lesson, StudyStats } from "../types";
 
 interface FlashcardLearnProps {
     lesson: Lesson;
+    /** The userId of the authenticated user, required for gradeCard calls */
+    userId: string;
     cards: FlashCard[];
     onClose: () => void;
-    onAnswer: (card: FlashCard, knew: boolean) => Promise<void>;
+    /** Called after each grade with the card and the Grade value */
+    onAnswer: (card: FlashCard, grade: Grade) => Promise<void>;
     onComplete: (stats: StudyStats) => void;
 }
 
 export const FlashcardLearn = ({
     lesson,
+    userId,
     cards,
     onClose,
     onAnswer,
@@ -35,6 +42,8 @@ export const FlashcardLearn = ({
     const { globalAutoPlay } = useAppStore();
     const themeHex = lesson.themeColor || "#1cb0f6";
 
+    /** Local queue state — initialized from cards prop, supports Again re-insertion */
+    const [queue, setQueue] = useState<FlashCard[]>(() => [...cards]);
     const [currentIndex, setCurrentIndex] = useState(0);
     const [revealed, setRevealed] = useState(false);
     const [stats, setStats] = useState<StudyStats>({
@@ -43,17 +52,17 @@ export const FlashcardLearn = ({
         mistakeCardIds: [],
     });
     const [showSummary, setShowSummary] = useState(false);
-    const [hintVisible, setHintVisible] = useState(false);
+    const showAnswerRef = useRef<HTMLButtonElement>(null);
     const prevRevealedRef = useRef(false);
 
     useEffect(() => {
         const justRevealed = revealed && !prevRevealedRef.current;
         if (justRevealed && globalAutoPlay) {
-            const card = cards[currentIndex];
+            const card = queue[currentIndex];
             if (card) playAudio(getAudioText(card));
         }
         prevRevealedRef.current = revealed;
-    }, [revealed, globalAutoPlay, cards, currentIndex]);
+    }, [revealed, globalAutoPlay, queue, currentIndex]);
 
     if (cards.length === 0) {
         return (
@@ -72,17 +81,20 @@ export const FlashcardLearn = ({
         );
     }
 
-    const card = cards[currentIndex];
+    const card = queue[currentIndex];
     if (!card) return null;
 
-    const display = resolveDisplay(card, { mode: "learn", difficulty: card.difficulty ?? 1 });
-    const displayFront = display.question;
-    const displayHint = display.hint || null;
-    const altSubtitle = card.alternatives.find((value) => value !== displayFront) || null;
-    const headerHint = displayHint && displayHint !== altSubtitle ? displayHint : null;
-    const progress = (currentIndex / cards.length) * 100;
+    const faces = resolveCardFaces(card, "learn");
+    const displayFront = faces.front.clozeTemplate ?? faces.front.primary ?? "";
+    const back = faces.back;
+    const progress = (currentIndex / queue.length) * 100;
 
-    const advance = async (knew: boolean) => {
+    const handleShowAnswer = () => {
+        setRevealed(true);
+    };
+
+    const handleGrade = async (grade: Grade) => {
+        const knew = grade === "Good" || grade === "Easy";
         const nextMistakes = knew ? stats.mistakeCardIds : [...stats.mistakeCardIds, card.id];
         const nextStats: StudyStats = {
             correct: stats.correct + (knew ? 1 : 0),
@@ -90,13 +102,25 @@ export const FlashcardLearn = ({
             mistakeCardIds: nextMistakes,
         };
         setStats(nextStats);
-        setRevealed(false);
-        setHintVisible(false);
-        await onAnswer(card, knew);
-        if (currentIndex < cards.length - 1) {
-            setCurrentIndex((i) => i + 1);
+
+        // Call gradeCard directly for SM-2 precision
+        await gradeCard(userId, card.id, card, grade);
+        // Also notify parent
+        await onAnswer(card, grade);
+
+        if (grade === "Again") {
+            // Re-insert 3–5 positions ahead in the queue
+            const newQueue = reinsertCard(queue, currentIndex);
+            setQueue(newQueue);
+            setRevealed(false);
+            // currentIndex stays the same — the next card is now at the same index
         } else {
-            setShowSummary(true);
+            setRevealed(false);
+            if (currentIndex < queue.length - 1) {
+                setCurrentIndex((i) => i + 1);
+            } else {
+                setShowSummary(true);
+            }
         }
     };
 
@@ -153,24 +177,13 @@ export const FlashcardLearn = ({
                     </div>
                 </div>
                 <span className="w-12 text-right text-sm font-black text-[#afafaf]">
-                    {currentIndex + 1}/{cards.length}
+                    {currentIndex + 1}/{queue.length}
                 </span>
             </header>
 
             <div className="mx-auto flex w-full max-w-md flex-1 flex-col items-center justify-center gap-6 p-4 sm:p-6">
+                {/* Card face */}
                 <div className="relative flex w-full flex-col items-center justify-center rounded-[2.5rem] border-2 border-b-8 border-gray-200 bg-white p-8 text-center shadow-sm">
-                    {card.hint && (
-                        <Button
-                            variant="ghost"
-                            onClick={() => setHintVisible((v) => !v)}
-                            className="absolute top-4 left-4 !flex !items-center !gap-1.5 !rounded-xl border-2 border-gray-100 bg-gray-50 !px-3 !py-1.5 !text-[10px] !font-black tracking-wide uppercase shadow-none hover:shadow-none"
-                            color={hintVisible ? themeHex : "#afafaf"}
-                            icon={Lightbulb}
-                        >
-                            Hint
-                        </Button>
-                    )}
-
                     <Button
                         variant="ghost"
                         onClick={() => playAudio(getAudioText(card))}
@@ -178,13 +191,6 @@ export const FlashcardLearn = ({
                         icon={Volume2}
                         iconClassName="h-5 w-5 text-gray-400"
                     />
-
-                    {/* Furigana — only in mixed stage */}
-                    {headerHint && (
-                        <span className="mb-1 text-lg font-bold tracking-widest text-[#afafaf]">
-                            {headerHint}
-                        </span>
-                    )}
 
                     {card.imageUrl && (
                         <div className="mb-4 h-32 w-full overflow-hidden rounded-2xl">
@@ -198,69 +204,98 @@ export const FlashcardLearn = ({
                         </div>
                     )}
 
-                    {/* Primary display — stage-aware */}
+                    {/* Front face — always visible */}
                     <div className="flex w-full flex-1 flex-col items-center justify-center px-2 py-4">
-                        <h1 className="w-full text-center text-4xl leading-tight font-black break-words text-[#3c3c3c] select-none sm:text-5xl">
+                        <h1 className="w-full text-center text-4xl leading-tight font-black wrap-break-word text-[#3c3c3c] select-none sm:text-5xl">
                             {displayFront}
                         </h1>
-                        {altSubtitle && (
-                            <p className="mt-2 text-lg font-bold text-[#afafaf]">{altSubtitle}</p>
-                        )}
                     </div>
 
-                    <div className="my-4 h-px w-full bg-gray-100" />
+                    {/* Back face — revealed after "Show Answer" */}
+                    {revealed && (
+                        <>
+                            <div className="my-4 h-px w-full bg-gray-100" />
 
-                    <p className="text-2xl font-black sm:text-3xl" style={{ color: themeHex }}>
-                        {card.meaning}
-                    </p>
-
-                    {card.example && (
-                        <div className="mt-4 w-full rounded-2xl border-2 border-gray-100 bg-gray-50 p-4 text-left">
-                            <p className="text-sm font-bold text-[#3c3c3c] sm:text-base">
-                                {card.example}
+                            <p
+                                className="text-2xl font-black sm:text-3xl"
+                                style={{ color: themeHex }}
+                            >
+                                {back.meaning}
                             </p>
-                        </div>
-                    )}
 
-                    {card.usageNote && (
-                        <div className="mt-3 flex items-center gap-1.5 rounded-xl border border-gray-200 bg-gray-50 px-3 py-1.5">
-                            <span className="text-[10px] font-black tracking-wide text-[#afafaf] uppercase">
-                                Usage
-                            </span>
-                            <span className="text-xs font-bold text-[#3c3c3c]">
-                                {card.usageNote}
-                            </span>
-                        </div>
-                    )}
+                            {back.example && (
+                                <div className="mt-4 w-full rounded-2xl border-2 border-gray-100 bg-gray-50 p-4 text-left">
+                                    <p className="text-sm font-bold text-[#3c3c3c] sm:text-base">
+                                        {back.example}
+                                    </p>
+                                </div>
+                            )}
 
-                    {hintVisible && card.hint && (
-                        <div
-                            className="mt-4 w-full rounded-2xl px-4 py-2.5 text-sm font-bold text-white"
+                            {back.usageNote && (
+                                <div className="mt-3 flex items-center gap-1.5 rounded-xl border border-gray-200 bg-gray-50 px-3 py-1.5">
+                                    <span className="text-[10px] font-black tracking-wide text-[#afafaf] uppercase">
+                                        Usage
+                                    </span>
+                                    <span className="text-xs font-bold text-[#3c3c3c]">
+                                        {back.usageNote}
+                                    </span>
+                                </div>
+                            )}
+
+                            {back.mnemonic && (
+                                <div className="mt-3 w-full rounded-2xl border-2 border-[#ffe5c7] bg-[#fff8f0] p-3 text-left">
+                                    <p className="text-xs font-bold text-[#ff9600]">
+                                        💡 {back.mnemonic}
+                                    </p>
+                                </div>
+                            )}
+                        </>
+                    )}
+                </div>
+
+                {/* Controls */}
+                {!revealed ? (
+                    <button
+                        ref={showAnswerRef}
+                        onClick={handleShowAnswer}
+                        className="w-full rounded-[1.5rem] border-2 border-b-8 border-gray-200 bg-white py-4 text-lg font-black text-[#3c3c3c] shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 active:translate-y-0 active:border-b-2"
+                        style={{ "--tw-ring-color": themeHex } as React.CSSProperties}
+                    >
+                        Show Answer
+                    </button>
+                ) : (
+                    <div className="grid w-full grid-cols-2 gap-3">
+                        <button
+                            aria-label="Again — card will repeat soon"
+                            onClick={() => void handleGrade("Again")}
+                            className="rounded-[1.25rem] border-2 border-b-8 border-[#ea2b2b]/60 bg-[#ff4b4b] py-4 text-base font-black text-white shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-[#ff4b4b] focus-visible:ring-offset-2 active:translate-y-0 active:border-b-2"
+                        >
+                            Again
+                        </button>
+                        <button
+                            aria-label="Hard — interval shortened"
+                            onClick={() => void handleGrade("Hard")}
+                            className="rounded-[1.25rem] border-2 border-b-8 border-[#e07000]/60 bg-[#ff9600] py-4 text-base font-black text-white shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-[#ff9600] focus-visible:ring-offset-2 active:translate-y-0 active:border-b-2"
+                        >
+                            Hard
+                        </button>
+                        <button
+                            aria-label="Good — normal interval"
+                            onClick={() => void handleGrade("Good")}
+                            className="rounded-[1.25rem] border-2 border-b-8 border-[#58a700]/60 bg-[#58cc02] py-4 text-base font-black text-white shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-[#58cc02] focus-visible:ring-offset-2 active:translate-y-0 active:border-b-2"
+                        >
+                            Good
+                        </button>
+                        <button
+                            aria-label="Easy — interval extended"
+                            onClick={() => void handleGrade("Easy")}
+                            className="rounded-[1.25rem] border-2 border-b-8 border-[#0090c0]/60 py-4 text-base font-black text-white shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1cb0f6] focus-visible:ring-offset-2 active:translate-y-0 active:border-b-2"
                             style={{ backgroundColor: themeHex }}
                         >
-                            💡 {card.hint}
-                        </div>
-                    )}
-                </div>
-
-                <div className="flex w-full gap-3">
-                    <Button
-                        variant="secondary"
-                        color="orange"
-                        onClick={() => void advance(false)}
-                        className="flex-1 py-4 text-lg"
-                    >
-                        Study More
-                    </Button>
-                    <Button
-                        variant="primary"
-                        color="green"
-                        onClick={() => void advance(true)}
-                        className="flex-1 py-4 text-lg"
-                    >
-                        Got It ✓
-                    </Button>
-                </div>
+                            Easy
+                        </button>
+                    </div>
+                )}
             </div>
         </div>
     );
