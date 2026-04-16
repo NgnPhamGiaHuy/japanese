@@ -67,9 +67,9 @@ export const DIFFICULTY_CONFIG: Record<MatchDifficulty, DifficultyConfig> = {
         pairs: 8,
         timeLimit: 120,
         label: "Hard",
-        sub: "8 pairs · 4 distractors · timer · lives",
+        sub: "8 pairs · 8 distractors · timer · lives",
         color: "#ff9600",
-        distractorTiles: 4,
+        distractorTiles: 8,
         lives: 4,
         game: {
             pairType: "fixed",
@@ -80,9 +80,9 @@ export const DIFFICULTY_CONFIG: Record<MatchDifficulty, DifficultyConfig> = {
         pairs: 6,
         timeLimit: 120,
         label: "Master",
-        sub: "6 pairs · 5 distractors · mixed prompts · timer",
+        sub: "6 pairs · 14 distractors · mixed prompts · timer",
         color: "#ea2b2b",
-        distractorTiles: 5,
+        distractorTiles: 14,
         lives: 5,
         game: {
             pairType: "mixed",

@@ -287,23 +287,26 @@ function blocklistFromCards(cards: FlashCard[]): Set<string> {
 
 /**
  * Decoy tiles: visually/semantically similar to pool content; deduped against targets.
+ * Strictly separates Japanese and English to prevent mixed-language tiles.
  */
 export const generateMatchDistractors = async (
     cards: FlashCard[],
     count: number,
 ): Promise<string[]> => {
-    const safeCount = Math.min(Math.max(count, 1), 8);
+    const safeCount = Math.min(Math.max(count, 1), 12); // Slightly higher internal limit
     const blocklist = blocklistFromCards(cards);
-    const hints = cards
-        .slice(0, 12)
-        .map((c) => [c.primary, ...(c.alternatives || []), c.meaning].filter(Boolean).join(" / "))
-        .join("\n");
 
-    const prompt = getMatchDistractorsPrompt(hints, safeCount);
+    // Separate Japanese and English to teach the AI the "atomic" tile principle
+    const targetJapanese = Array.from(
+        new Set(cards.flatMap((c) => [c.primary, ...(c.alternatives || [])]).filter(Boolean)),
+    ).join(", ");
+    const targetEnglish = Array.from(new Set(cards.map((c) => c.meaning).filter(Boolean))).join(
+        ", ",
+    );
+
+    const prompt = getMatchDistractorsPrompt(targetJapanese, targetEnglish, safeCount);
 
     const fallbacks = ["シート", "ツール", "ぬいぐるみ", "めがね", "かう", "うる", "あさ", "ばん"];
-
-    // Build lesson-based fallback meanings from other cards (excluding the first card as the "current" card)
     const lessonMeanings = cards
         .slice(1)
         .map((c) => c.meaning)
@@ -312,21 +315,13 @@ export const generateMatchDistractors = async (
 
     let rawList: string[] = [];
     try {
-        const aiCall = generateContent(AI_CONFIG.models.card, prompt).then((text) => {
-            const raw = JSON.parse(extractJSON(text)) as { distractors?: unknown };
-            const list = Array.isArray(raw.distractors) ? raw.distractors : [];
-            return list
-                .filter((d): d is string => typeof d === "string" && d.trim().length > 0)
-                .map((d) => d.trim());
-        });
-
-        const timeoutPromise = new Promise<never>((_, reject) =>
-            setTimeout(() => reject(new Error("timeout")), 2000),
-        );
-
-        rawList = await Promise.race([aiCall, timeoutPromise]);
+        const text = await generateContent(AI_CONFIG.models.card, prompt);
+        const raw = JSON.parse(extractJSON(text)) as { distractors?: unknown };
+        const list = Array.isArray(raw.distractors) ? raw.distractors : [];
+        rawList = list
+            .filter((d): d is string => typeof d === "string" && d.trim().length > 0)
+            .map((d) => d.trim().split(" / ")[0]); // Safety: strip any slashes the AI might have still included
     } catch {
-        // On timeout or any error, fall back to lesson meanings (or hardcoded list if not enough)
         rawList = lessonMeanings.length >= 3 ? lessonMeanings : [];
     }
 
@@ -335,7 +330,6 @@ export const generateMatchDistractors = async (
     const taken = new Set(blocklist);
 
     for (let i = 0; i < safeCount; i++) {
-        // Prefer rawList, then lesson meanings, then hardcoded fallbacks
         const candidate =
             rawList[i] ??
             lessonMeanings.find((m) => !taken.has(normLabel(m))) ??

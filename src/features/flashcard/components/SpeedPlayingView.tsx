@@ -125,7 +125,7 @@ const SpeedPlayingView = ({
                 currentScore={score}
             />
 
-            <div className="mx-auto flex w-full max-w-md flex-1 flex-col items-center justify-center p-6">
+            <div className="mx-auto flex w-full max-w-md flex-1 flex-col items-center justify-center px-6 pt-6">
                 <motion.div
                     key={questionIndex}
                     initial={{ opacity: 0, y: 16 }}
@@ -133,9 +133,24 @@ const SpeedPlayingView = ({
                     transition={{ duration: 0.18 }}
                     className={`mb-8 w-full text-center ${answerStatus === "wrong" ? "animate-shake" : ""}`}
                 >
-                    <h1 className="text-[5rem] leading-none font-black text-[#3c3c3c] drop-shadow-sm sm:text-[6rem]">
-                        {currentQuestion?.prompt ?? currentCard.primary}
-                    </h1>
+                    {(() => {
+                        const text = currentQuestion?.prompt ?? currentCard.primary;
+                        const len = text.length;
+                        const sizeClass =
+                            len <= 4
+                                ? "text-[5rem] sm:text-[6rem]"
+                                : len <= 8
+                                  ? "text-[3.25rem] sm:text-[4.25rem]"
+                                  : "text-[2.25rem] sm:text-[3rem]";
+
+                        return (
+                            <h1
+                                className={`${sizeClass} leading-[1.1] font-black tracking-tight text-[#3c3c3c] drop-shadow-sm transition-all duration-300`}
+                            >
+                                {text}
+                            </h1>
+                        );
+                    })()}
 
                     <AnimatePresence>
                         {questionIndex === SPEED_GAME_CONFIG.LEVELS[2].threshold &&
@@ -196,8 +211,11 @@ const SpeedPlayingView = ({
                         );
                     })}
                 </div>
+            </div>
 
-                {/* Back_Face reveal: show card meaning after wrong answer or timer expiry */}
+            {/* Back_Face reveal: show card meaning after wrong answer or timer expiry */}
+            {/* Fixed height container prevents layout jumping in the main game area above */}
+            <div className="mx-auto flex h-[110px] w-full max-w-md items-center px-6">
                 <AnimatePresence>
                     {answerStatus !== "idle" && currentCard.meaning ? (
                         <motion.div
@@ -205,7 +223,7 @@ const SpeedPlayingView = ({
                             animate={{ opacity: 1, y: 0 }}
                             exit={{ opacity: 0 }}
                             transition={{ duration: 0.2 }}
-                            className="mt-4 w-full rounded-2xl border border-gray-200 bg-white px-5 py-3 text-center"
+                            className="w-full rounded-2xl border border-gray-200 bg-white px-5 py-3 text-center"
                         >
                             <p className="text-xs font-black tracking-widest text-[#afafaf] uppercase">
                                 Meaning

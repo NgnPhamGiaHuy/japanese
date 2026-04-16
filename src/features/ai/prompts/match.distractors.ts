@@ -2,23 +2,33 @@
  * Prompt for Match Mode decoy tiles — interference (similar form/meaning), not trivia.
  */
 
-export function getMatchDistractorsPrompt(hintsBlock: string, count: number): string {
-    const safeCount = Math.min(Math.max(count, 1), 8);
+export function getMatchDistractorsPrompt(
+    targetJapanese: string,
+    targetEnglish: string,
+    count: number,
+): string {
+    const safeCount = Math.min(Math.max(count, 1), 12);
 
-    return `You help design a Japanese flashcard matching game grounded in cognitive science.
+    return `You help design a Japanese flashcard matching game.
 
-Learners see ALL tiles face-up in one grid. Targets below are REAL vocabulary (already paired elsewhere). You output ONLY decoy labels that must NOT form any valid pair here.
+Learners see ALL tiles face-up in one grid. The grid contains two types of tiles:
+1. PURE Japanese labels (hiragana/kanji)
+2. PURE English meanings
 
-Targets (decoys must NOT duplicate any string below, even partially overlapping in meaning when ambiguous):
-${hintsBlock}
+You output ONLY decoy labels (distractors) that MUST match one of these two types.
+
+Target Japanese (from the current deck): ${targetJapanese}
+Target English (from the current deck): ${targetEnglish}
 
 Return JSON ONLY: { "distractors": string[] }
 
-Rules:
-- Exactly ${safeCount} strings in "distractors".
-- Interference (prefer 2+ of these): (1) visually similar kana/kanji e.g. シ vs ツ, ぬ vs め; (2) same English gloss family e.g. buy/sell; (3) same POS or collocate.
-- Short labels only (≤24 chars each) — match how flashcard tiles look.
-- Prefer Japanese script (hiragana/kanji); no romaji-only; no English unless the targets use English meanings on cards.
-- Distinct from every target string AND from each other. No duplicates.
-- Wrong answers by design: plausible confusions, not random unrelated words.`;
+STRICT RULES for distractors:
+- Exactly ${safeCount} strings.
+- ATOMIC TILES: Each string must be EITHER pure Japanese OR pure English. 
+- NO MIXED CONTENT: Never combine Japanese and English in one string. 
+- NO SEPARATORS: Never use slashes (/), parentheses (), or commas (,) to combine multiple forms.
+- VISUAL INTERFERENCE: For Japanese decoys, use visually similar kana/kanji (e.g., シ vs ツ, は vs ほ).
+- SEMANTIC INTERFERENCE: For English decoys, use words from the same semantic domain (e.g., if "buy" is a target, use "sell" as a decoy).
+- WRONG ANSWERS: Every decoy must be a plausible confusion, but must NOT form a valid pair with any target.
+- Length limit: ≤20 characters per string.`;
 }
