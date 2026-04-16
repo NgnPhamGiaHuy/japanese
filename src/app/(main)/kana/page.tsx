@@ -20,13 +20,11 @@ import { AlphabetSwitcher } from "@/features/kana/components";
 import { useKanaDataset } from "@/features/kana/hooks";
 import { useBestScores, useUserProgress } from "@/features/user/hooks";
 import { Button } from "@/shared/components/ui";
-import { HANDWRITING_FONT, PRINT_FONT } from "@/shared/constants";
 import { useAppStore } from "@/store";
 
 function KanaSettingsMenu({
     primaryBg,
     globalAutoPlay,
-    useHandwriting,
     showConfirmReset,
     onToggleAutoPlay,
     onToggleHandwriting,
@@ -36,7 +34,6 @@ function KanaSettingsMenu({
 }: {
     primaryBg: string;
     globalAutoPlay: boolean;
-    useHandwriting: boolean;
     showConfirmReset: boolean;
     onToggleAutoPlay: () => void;
     onToggleHandwriting: () => void;
@@ -44,6 +41,7 @@ function KanaSettingsMenu({
     onCancelResetConfirm: () => void;
     onWipeProgress: () => void;
 }) {
+    const useHandwriting = useAppStore((s) => s.useHandwriting);
     return (
         <div className="animate-in fade-in zoom-in-95 absolute top-full right-0 z-50 mt-2 w-56 rounded-[1rem] border-2 border-gray-200 bg-white p-2 shadow-xl duration-200">
             <div className="mb-1 border-b border-gray-100 px-3 py-2 text-xs font-black tracking-wider text-gray-500 uppercase">
@@ -253,7 +251,6 @@ export default function KanaHubPage() {
 
     const isH = alphabet === "hiragana";
     const isBoth = alphabet === "both";
-    const activeFont = useHandwriting ? HANDWRITING_FONT : PRINT_FONT;
 
     const primaryBg = isBoth ? "bg-[#ce82ff]" : isH ? "bg-[#58cc02]" : "bg-[#1cb0f6]";
     const primaryBorderB = isBoth
@@ -280,7 +277,6 @@ export default function KanaHubPage() {
                     <div className="flex items-center gap-3 md:gap-4">
                         <div
                             className={`flex h-12 w-12 items-center justify-center rounded-xl font-medium text-white md:h-16 md:w-16 md:rounded-2xl ${isBoth ? "px-1 text-center text-xl leading-tight font-black md:text-2xl" : "text-3xl md:text-4xl"} -rotate-6 transform border-b-4 shadow-sm transition-colors duration-500 ${primaryBg} ${primaryBorderB}`}
-                            style={{ fontFamily: activeFont }}
                         >
                             {isBoth ? "あ/ア" : isH ? "あ" : "ア"}
                         </div>
@@ -311,7 +307,6 @@ export default function KanaHubPage() {
                             <KanaSettingsMenu
                                 primaryBg={primaryBg}
                                 globalAutoPlay={globalAutoPlay}
-                                useHandwriting={useHandwriting}
                                 showConfirmReset={showConfirmReset}
                                 onToggleAutoPlay={() => {
                                     toggleAutoPlay();

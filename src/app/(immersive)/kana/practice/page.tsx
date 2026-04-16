@@ -8,14 +8,10 @@ import { DrawingCanvas, KanaStrokeAnimation } from "@/features/kana/components";
 import { useKanaDataset } from "@/features/kana/hooks";
 import { ScreenHeader } from "@/shared/components/layout";
 import { Button } from "@/shared/components/ui";
-import { HANDWRITING_FONT, PRINT_FONT } from "@/shared/constants";
 import { playAudio } from "@/shared/utils";
-import { useAppStore } from "@/store";
 
 export default function KanaPracticePage() {
     const { dataset, alphabet, themeColor } = useKanaDataset();
-    const { useHandwriting } = useAppStore();
-    const activeFont = useHandwriting ? HANDWRITING_FONT : PRINT_FONT;
 
     const [currentIndex, setCurrentIndex] = useState(0);
     const [isRandom, setIsRandom] = useState(false);
@@ -106,7 +102,6 @@ export default function KanaPracticePage() {
                                 <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-lg border-2 border-gray-100 bg-white shadow-sm md:h-32 md:w-32 md:rounded-2xl">
                                     <KanaStrokeAnimation
                                         charStr={char.char}
-                                        activeFont={activeFont}
                                         svgClassName="w-[80%] h-[80%]"
                                         strokeColor={themeColor.primary}
                                     />
@@ -127,7 +122,6 @@ export default function KanaPracticePage() {
                             </span>
                             <DrawingCanvas
                                 char={char.char}
-                                activeFont={activeFont}
                                 showGuide={practiceMode === 1}
                                 stepKey={practiceMode}
                                 strokeColor={themeColor.primary}

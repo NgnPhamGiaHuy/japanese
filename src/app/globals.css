@@ -1,3 +1,4 @@
+@import url("https://fonts.googleapis.com/css2?family=Klee+One:wght@400;600&family=Noto+Sans+JP:wght@400;700;900&family=Noto+Serif+JP:wght@400;700&family=Nunito:wght@400;700;900&family=Yoji+Syuku&family=Yomogi&display=swap");
 @import "tailwindcss";
 
 /* =========================================================
@@ -13,6 +14,16 @@
     --color-text: #3c3c3c;
     --color-muted: #afafaf;
     --font-ui: "Nunito", "Segoe UI", system-ui, sans-serif;
+
+    /* DIGITAL FONT (Gothic/Sans-serif)
+       Noto Sans JP provides clean, uniform strokes optimized for modern UI */
+    --font-japanese: "Noto Sans JP", "Hiragino Kaku Gothic Pro", "メイリオ", Meiryo, Osaka, "ＭＳ Ｐゴシック", "MS PGothic", sans-serif;
+}
+
+/* HANDWRITING FONT
+   Klee One mimics natural human stroke order and variable pressure */
+body.handwriting-font {
+    --font-japanese: "Klee One", "Yomogi", "Noto Serif JP", "Yu Mincho", "Hiragino Mincho Pro", "MS PMincho", serif;
 }
 
 /* =========================================================
@@ -26,10 +37,15 @@ html,
 body {
     margin: 0;
     padding: 0;
-    font-family: var(--font-ui);
+    font-family: var(--font-ui), var(--font-japanese);
     background: var(--color-bg);
     color: var(--color-text);
     -webkit-font-smoothing: antialiased;
+
+    /* JAPANESE TYPOGRAPHY BEST PRACTICES */
+    font-size: 16px;
+    line-height: 1.6;
+    letter-spacing: 0.05em;
 }
 
 /* =========================================================
@@ -38,6 +54,7 @@ body {
 .hide-scrollbar::-webkit-scrollbar {
     display: none;
 }
+
 .hide-scrollbar {
     -ms-overflow-style: none;
     scrollbar-width: none;
@@ -70,6 +87,7 @@ body {
         transform: translateX(10px);
     }
 }
+
 .animate-shake {
     animation: shake 0.4s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
 }
@@ -84,6 +102,7 @@ body {
         transform: translateY(-25px) scale(1.2);
     }
 }
+
 .animate-float-up {
     animation: floatUp 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
 }
@@ -94,12 +113,15 @@ body {
 .perspective-1000 {
     perspective: 1000px;
 }
+
 .preserve-3d {
     transform-style: preserve-3d;
 }
+
 .backface-hidden {
     backface-visibility: hidden;
 }
+
 .rotate-y-180 {
     transform: rotateY(180deg);
 }

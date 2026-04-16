@@ -9,19 +9,17 @@ import { useKanaDataset } from "@/features/kana/hooks";
 import { useUserProgress } from "@/features/user/hooks";
 import { ScreenHeader } from "@/shared/components/layout";
 import { Button } from "@/shared/components/ui";
-import { HANDWRITING_FONT, PRINT_FONT } from "@/shared/constants";
 import { playAudio } from "@/shared/utils";
 import { useAppStore } from "@/store";
 
 export default function KanaLearnPage() {
     const { dataset, alphabet, themeColor } = useKanaDataset();
     const { markLearned } = useUserProgress();
-    const { useHandwriting, globalAutoPlay } = useAppStore();
+    const { globalAutoPlay } = useAppStore();
 
     const [currentIndex, setCurrentIndex] = useState(0);
     const [isRandom, setIsRandom] = useState(false);
 
-    const activeFont = useHandwriting ? HANDWRITING_FONT : PRINT_FONT;
     const char = dataset[currentIndex];
     const isMulti = char?.char.length > 1;
 
@@ -127,17 +125,13 @@ export default function KanaLearnPage() {
 
                         <div className="mt-10 mb-6 flex min-h-[140px] w-full items-center justify-center md:min-h-[220px]">
                             {isMulti ? (
-                                <span
-                                    className="text-[5rem] leading-none font-medium text-[#3c3c3c] drop-shadow-sm select-none md:text-[8rem]"
-                                    style={{ fontFamily: activeFont }}
-                                >
+                                <span className="text-[5rem] leading-none font-medium text-[#3c3c3c] drop-shadow-sm select-none md:text-[8rem]">
                                     {char.char}
                                 </span>
                             ) : (
                                 <div className="h-32 w-32 md:h-48 md:w-48">
                                     <KanaStrokeAnimation
                                         charStr={char.char}
-                                        activeFont={activeFont}
                                         svgClassName="w-full h-full"
                                         strokeColor={themeColor.primary}
                                     />

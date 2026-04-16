@@ -12,16 +12,9 @@ interface AnswerFeedbackProps {
     question: KanaChar | null;
     questionType?: QuestionType;
     primaryBg: string;
-    activeFont: string;
 }
 
-const AnswerFeedback = ({
-    status,
-    question,
-    questionType,
-    primaryBg,
-    activeFont,
-}: AnswerFeedbackProps) => {
+const AnswerFeedback = ({ status, question, questionType, primaryBg }: AnswerFeedbackProps) => {
     if (status === "idle") return <div className="mt-4 h-12 md:mt-6 md:h-16" />;
 
     // Show a "play again" button only for listen-type questions in the feedback stage
@@ -36,10 +29,7 @@ const AnswerFeedback = ({
                     <Check size={20} strokeWidth={3} className="shrink-0 md:h-6 md:w-6" />
                     <span className="truncate">Brilliant!</span>
                     <span className="ml-1 flex shrink-0 items-center gap-1 rounded-lg bg-black/10 px-2 py-0.5 text-xs font-bold md:text-sm">
-                        <span
-                            style={{ fontFamily: activeFont }}
-                            className="mt-0.5 text-base leading-none font-medium md:text-lg"
-                        >
+                        <span className="mt-0.5 text-base leading-none font-medium md:text-lg">
                             {question?.char}
                         </span>
                         <span className="mx-0.5 opacity-50">-</span>
@@ -62,10 +52,7 @@ const AnswerFeedback = ({
                     <X size={20} strokeWidth={3} className="shrink-0 md:h-6 md:w-6" />
                     <span className="truncate">Answer:</span>
                     <span className="ml-1 flex shrink-0 items-center gap-1 rounded-lg bg-[#ea2b2b]/10 px-2 py-0.5 text-xs font-bold text-[#ea2b2b] md:text-sm">
-                        <span
-                            style={{ fontFamily: activeFont }}
-                            className="mt-0.5 text-base leading-none font-medium md:text-lg"
-                        >
+                        <span className="mt-0.5 text-base leading-none font-medium md:text-lg">
                             {question?.char}
                         </span>
                         <span className="mx-0.5 opacity-50">-</span>

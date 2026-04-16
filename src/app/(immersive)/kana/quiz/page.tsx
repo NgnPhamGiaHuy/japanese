@@ -12,9 +12,7 @@ import {
 import { useKanaDataset, useQuizEngine } from "@/features/kana/hooks";
 import { ScreenHeader, ScreenHeaderBackButton, ScreenHeaderRow } from "@/shared/components/layout";
 import { Button } from "@/shared/components/ui";
-import { HANDWRITING_FONT, PRINT_FONT } from "@/shared/constants";
 import { checkTypedAnswer } from "@/shared/utils";
-import { useAppStore } from "@/store";
 
 type QuizMode = "choice" | "type" | "smart";
 
@@ -22,8 +20,6 @@ const TARGET_SCORE = 20;
 
 const KanaQuizPage = () => {
     const { dataset, alphabet, themeColor } = useKanaDataset();
-    const { useHandwriting } = useAppStore();
-    const activeFont = useHandwriting ? HANDWRITING_FONT : PRINT_FONT;
 
     const [quizMode, setQuizMode] = useState<QuizMode>("choice");
     const [typedInput, setTypedInput] = useState("");
@@ -90,7 +86,7 @@ const KanaQuizPage = () => {
                                 id="quiz-mode-choice"
                                 variant="ghost"
                                 onClick={() => startQuiz("choice")}
-                                className="!flex !w-full !items-center !rounded-2xl !border-2 !border-b-4 !border-gray-200 !bg-white !p-5 !text-left shadow-none transition-all hover:!-translate-y-1 hover:shadow-md hover:shadow-none active:translate-y-0"
+                                className="!flex !w-full !items-center !justify-start !rounded-2xl !border-2 !border-b-4 !border-gray-200 !bg-white !p-5 !text-left shadow-none transition-all hover:!-translate-y-1 hover:shadow-md hover:shadow-none active:translate-y-0"
                             >
                                 <div className="mr-4 rounded-xl bg-[#faeaff] p-3">
                                     <Eye size={24} className="text-[#ce82ff]" />
@@ -108,7 +104,7 @@ const KanaQuizPage = () => {
                                 id="quiz-mode-type"
                                 variant="ghost"
                                 onClick={() => startQuiz("type")}
-                                className="!flex !w-full !items-center !rounded-2xl !border-2 !border-b-4 !border-gray-200 !bg-white !p-5 !text-left shadow-none transition-all hover:!-translate-y-1 hover:shadow-md hover:shadow-none active:translate-y-0"
+                                className="!flex !w-full !items-center !justify-start !rounded-2xl !border-2 !border-b-4 !border-gray-200 !bg-white !p-5 !text-left shadow-none transition-all hover:!-translate-y-1 hover:shadow-md hover:shadow-none active:translate-y-0"
                             >
                                 <div className="mr-4 rounded-xl bg-[#e5f5ff] p-3">
                                     <Keyboard size={24} className="text-[#1cb0f6]" />
@@ -126,7 +122,7 @@ const KanaQuizPage = () => {
                                 id="quiz-mode-smart"
                                 variant="ghost"
                                 onClick={() => startQuiz("smart")}
-                                className="!flex !w-full !items-center !rounded-2xl !border-2 !border-b-4 !border-gray-200 !bg-white !p-5 !text-left shadow-none transition-all hover:!-translate-y-1 hover:shadow-md hover:shadow-none active:translate-y-0"
+                                className="!flex !w-full !items-center !justify-start !rounded-2xl !border-2 !border-b-4 !border-gray-200 !bg-white !p-5 !text-left shadow-none transition-all hover:!-translate-y-1 hover:shadow-md hover:shadow-none active:translate-y-0"
                             >
                                 <div className="mr-4 rounded-xl bg-[#fff5e6] p-3">
                                     <Shuffle size={24} className="text-[#ff9600]" />
@@ -228,10 +224,7 @@ const KanaQuizPage = () => {
                     <div
                         className={`mb-4 flex h-[200px] w-full flex-col items-center justify-center rounded-[3rem] border-2 border-b-8 border-gray-200 bg-white px-4 py-8 shadow-sm sm:h-[240px] ${status === "wrong" ? "animate-shake" : ""}`}
                     >
-                        <span
-                            style={{ fontFamily: activeFont }}
-                            className="text-[7rem] leading-none font-medium text-[#3c3c3c] select-none sm:text-[8rem]"
-                        >
+                        <span className="text-[7rem] leading-none font-medium text-[#3c3c3c] select-none sm:text-[8rem]">
                             {question.char}
                         </span>
                     </div>
@@ -290,7 +283,6 @@ const KanaQuizPage = () => {
                         question={question}
                         questionType={questionType}
                         primaryBg={themeColor.bg}
-                        activeFont={activeFont}
                     />
                 </div>
             )}

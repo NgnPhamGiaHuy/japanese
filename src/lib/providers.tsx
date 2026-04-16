@@ -2,6 +2,7 @@
 
 import { NotificationsProvider } from "@/features/notifications";
 import { useFirebaseAuth } from "@/features/user/hooks";
+import { FontSyncer } from "@/lib/FontSyncer";
 import { AlertProvider } from "@/shared/providers";
 import { useAppStore } from "@/store";
 
@@ -31,6 +32,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
     useFirebaseAuth();
     return (
         <AlertProvider>
+            <FontSyncer />
             <AuthGate>
                 <NotificationsProvider>{children}</NotificationsProvider>
             </AuthGate>

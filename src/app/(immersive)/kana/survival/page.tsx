@@ -6,29 +6,20 @@ import { useEffect, useRef } from "react";
 import { Clock, Flame, Sword, Trophy, X } from "lucide-react";
 
 import {
-    AnswerFeedback,
-    GameStreakScoreStack,
-    Leaderboard,
-    LivesDisplay,
-    MiniLeaderboard,
+    AnswerFeedback, GameStreakScoreStack, Leaderboard, LivesDisplay, MiniLeaderboard,
 } from "@/features/game/components";
 import {
-    TIME_ATTACK_MAX_STREAK_BONUS_SEC,
-    TIME_ATTACK_WRONG_PENALTY_SEC,
-    useKanaDataset,
-    useSurvivalGame,
+    TIME_ATTACK_MAX_STREAK_BONUS_SEC, TIME_ATTACK_WRONG_PENALTY_SEC, useKanaDataset, useSurvivalGame,
 } from "@/features/kana/hooks";
 import { useBestScores } from "@/features/user/hooks";
 import { ScreenHeader, ScreenHeaderBackButton, ScreenHeaderRow } from "@/shared/components/layout";
 import { Button } from "@/shared/components/ui";
-import { HANDWRITING_FONT, PRINT_FONT } from "@/shared/constants";
 import { formatTime } from "@/shared/utils";
 import { useAppStore } from "@/store";
 
 const KanaSurvivalPage = () => {
     const { dataset, alphabet } = useKanaDataset();
-    const { useHandwriting, user } = useAppStore();
-    const activeFont = useHandwriting ? HANDWRITING_FONT : PRINT_FONT;
+    const { user } = useAppStore();
     const { bestScores, saveScore } = useBestScores();
 
     const game = useSurvivalGame({
@@ -298,10 +289,7 @@ const KanaSurvivalPage = () => {
                             <div
                                 className={`mb-4 flex h-[180px] w-full items-center justify-center rounded-[3rem] border-2 border-b-8 border-gray-200 bg-white shadow-sm sm:h-[220px] ${status === "wrong" ? "animate-shake" : ""}`}
                             >
-                                <span
-                                    style={{ fontFamily: activeFont }}
-                                    className="text-[7rem] leading-none font-medium text-[#3c3c3c] select-none sm:text-[8rem]"
-                                >
+                                <span className="text-[7rem] leading-none font-medium text-[#3c3c3c] select-none sm:text-[8rem]">
                                     {question.char}
                                 </span>
                             </div>
@@ -337,7 +325,6 @@ const KanaSurvivalPage = () => {
                                 question={question}
                                 questionType={questionType}
                                 primaryBg="bg-[#ff9600]"
-                                activeFont={activeFont}
                             />
                         </>
                     )}
@@ -391,7 +378,6 @@ const KanaSurvivalPage = () => {
                         >
                             <div
                                 className={`text-4xl font-medium drop-shadow-sm ${isActive ? "text-[#ff9600]" : "text-[#3c3c3c]"}`}
-                                style={{ fontFamily: activeFont }}
                             >
                                 {word.char}
                             </div>

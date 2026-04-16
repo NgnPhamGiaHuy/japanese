@@ -9,7 +9,6 @@ import KanaStrokeAnimation from "./KanaStrokeAnimation";
 
 interface DrawingCanvasProps {
     char: string;
-    activeFont: string;
     showGuide?: boolean;
     stepKey?: number;
     strokeColor?: string;
@@ -17,7 +16,6 @@ interface DrawingCanvasProps {
 
 const DrawingCanvas = ({
     char,
-    activeFont,
     showGuide = true,
     stepKey = 1,
     strokeColor = "#58cc02",
@@ -73,7 +71,6 @@ const DrawingCanvas = ({
                 <div className="pointer-events-none absolute inset-0 flex items-center justify-center opacity-25">
                     <KanaStrokeAnimation
                         charStr={char}
-                        activeFont={activeFont}
                         svgClassName="w-[80%] h-[80%]"
                         strokeColor={strokeColor}
                     />

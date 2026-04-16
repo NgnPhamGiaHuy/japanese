@@ -5,22 +5,15 @@ import { Fragment, useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import { Eye, EyeOff } from "lucide-react";
 
-import {
-    buildChartBlocks,
-    CHART_SECTION_TITLES,
-    HIRAGANA_DATA,
-    KATAKANA_DATA,
-} from "@/features/kana/data";
+import type { ChartBlock } from "@/features/kana/data";
+import { buildChartBlocks, CHART_SECTION_TITLES, HIRAGANA_DATA, KATAKANA_DATA, } from "@/features/kana/data";
 import { useKanaDataset } from "@/features/kana/hooks";
 import { useUserProgress } from "@/features/user/hooks";
 import { ScreenHeader } from "@/shared/components/layout";
 import { Button } from "@/shared/components/ui";
-import { PRINT_FONT } from "@/shared/constants";
 import { playAudio } from "@/shared/utils";
 import { useKanaStore } from "@/store";
-
-import type { ChartBlock } from "@/features/kana/data/chartLayouts";
-import type { KanaChar } from "@/features/kana/types/kana.types";
+import type { KanaChar } from "@/features/kana/types";
 
 function ChartCell({
     item,
@@ -38,29 +31,41 @@ function ChartCell({
     const learnedRomaji = isH ? "text-[#58a700]" : "text-[#1899d6]";
 
     if (!item) {
-        return (
-            <div className="aspect-square min-h-[48px] rounded-xl border-2 border-b-4 border-transparent border-b-transparent md:min-h-[56px] md:rounded-2xl" />
-        );
+        return <div className="aspect-square w-full rounded-xl border-2 border-transparent" />;
     }
 
+    const isMulti = item.char.length > 1;
+
     return (
-        <motion.div whileHover={{ scale: 1.05, y: -2 }} whileTap={{ scale: 0.95 }} className="flex">
+        <motion.div
+            whileHover={{ scale: 1.06, y: -2 }}
+            whileTap={{ scale: 0.94 }}
+            className="aspect-square w-full"
+        >
             <Button
-                variant="ghost"
                 onClick={() => playAudio(item.char)}
-                className={`!flex !aspect-square !min-h-[48px] !flex-col !items-center !justify-center !rounded-xl !border-2 !border-b-4 shadow-none !transition-colors hover:shadow-none active:translate-y-0 md:!min-h-[56px] md:!rounded-2xl ${
-                    learned ? learnedBorder : "!border-gray-200 !bg-white hover:!border-gray-300"
+                className={`flex h-full w-full flex-col items-center justify-center rounded-xl border-2 border-b-4 transition-colors duration-150 active:translate-y-[1px] active:border-b-2 md:rounded-2xl ${
+                    learned ? learnedBorder : "border-gray-200 bg-white hover:border-gray-300"
                 }`}
             >
                 <span
-                    style={{ fontFamily: PRINT_FONT }}
-                    className={`text-lg leading-none font-medium md:text-2xl ${learned ? learnedText : "text-[#3c3c3c]"}`}
+                    style={{
+                        fontSize: isMulti
+                            ? "clamp(0.6rem, 3.5cqi, 1.25rem)"
+                            : "clamp(0.9rem, 4.5cqi, 1.75rem)",
+                        lineHeight: 1,
+                    }}
+                    className={`font-medium ${learned ? learnedText : "text-[#3c3c3c]"}`}
                 >
                     {item.char}
                 </span>
+
                 {showRomaji && (
                     <span
-                        className={`mt-0.5 max-w-[95%] truncate px-0.5 text-[9px] font-bold md:mt-1 md:text-[10px] ${learned ? learnedRomaji : "text-[#afafaf]"}`}
+                        style={{ fontSize: "clamp(0.45rem, 1.8cqi, 0.625rem)" }}
+                        className={`mt-0.5 w-full truncate text-center font-bold ${
+                            learned ? learnedRomaji : "text-[#afafaf]"
+                        }`}
                     >
                         {item.romaji}
                     </span>
@@ -84,42 +89,41 @@ function ChartBlockGrid({
     blockKeyPrefix: string;
 }) {
     const n = block.headers.length;
-    const narrow = n === 3 ? "max-w-xl mx-auto" : "";
 
     return (
-        <div className={narrow}>
-            <div
-                className="grid gap-1.5 md:gap-2"
-                style={{
-                    gridTemplateColumns: `minmax(1.5rem,auto) repeat(${n}, minmax(0,1fr))`,
-                }}
-            >
-                <div />
-                {block.headers.map((h) => (
-                    <div
-                        key={h}
-                        className="py-0.5 text-center text-[10px] font-black tracking-wide text-gray-400 uppercase md:text-xs"
-                    >
-                        {h}
+        <div
+            className="grid w-full gap-1 sm:gap-1.5 md:gap-2"
+            style={{
+                gridTemplateColumns: `1.5rem repeat(${n}, 1fr)`,
+            }}
+        >
+            <div />
+            {block.headers.map((h) => (
+                <div
+                    key={h}
+                    className="pb-1 text-center text-[9px] font-black tracking-wide text-gray-400 uppercase sm:text-[10px] md:text-xs"
+                >
+                    {h}
+                </div>
+            ))}
+
+            {block.rows.map((row, ri) => (
+                <Fragment key={`${blockKeyPrefix}-${ri}-${row.label}`}>
+                    <div className="flex items-center justify-end text-[9px] font-black text-gray-400 tabular-nums sm:text-[10px] md:text-xs">
+                        {row.label}
                     </div>
-                ))}
-                {block.rows.map((row, ri) => (
-                    <Fragment key={`${blockKeyPrefix}-${ri}-${row.label}`}>
-                        <div className="flex items-center justify-end pr-1 text-[10px] font-black text-gray-500 tabular-nums md:text-xs">
-                            {row.label}
-                        </div>
-                        {row.cells.map((cell, ci) => (
-                            <ChartCell
-                                key={`${blockKeyPrefix}-${ri}-${ci}`}
-                                item={cell}
-                                showRomaji={showRomaji}
-                                learned={cell ? isLearned(cell.char) : false}
-                                isH={isH}
-                            />
-                        ))}
-                    </Fragment>
-                ))}
-            </div>
+
+                    {row.cells.map((cell, ci) => (
+                        <ChartCell
+                            key={`${blockKeyPrefix}-${ri}-${ci}`}
+                            item={cell}
+                            showRomaji={showRomaji}
+                            learned={cell ? isLearned(cell.char) : false}
+                            isH={isH}
+                        />
+                    ))}
+                </Fragment>
+            ))}
         </div>
     );
 }
@@ -146,22 +150,16 @@ export default function KanaChartPage() {
 
     const combinedSections = useMemo(() => {
         if (!isBoth) return null;
-        const out: {
-            title: string;
-            hiragana?: ChartBlock;
-            katakana?: ChartBlock;
-        }[] = [];
+        const out: { title: string; hiragana?: ChartBlock; katakana?: ChartBlock }[] = [];
         for (const title of CHART_SECTION_TITLES) {
             const hiragana = hiraBlocks.find((b) => b.title === title);
             const katakana = kataBlocks.find((b) => b.title === title);
-            if (hiragana || katakana) {
-                out.push({ title, hiragana, katakana });
-            }
+            if (hiragana || katakana) out.push({ title, hiragana, katakana });
         }
         return out;
     }, [isBoth, hiraBlocks, kataBlocks]);
 
-    const headingClassSingle = alphabet === "katakana" ? "text-[#1cb0f6]" : "text-[#58cc02]";
+    const headingColorSingle = alphabet === "katakana" ? "text-[#1cb0f6]" : "text-[#58cc02]";
 
     return (
         <div className="min-h-[100dvh] bg-[#F7F7F8]">
@@ -172,7 +170,7 @@ export default function KanaChartPage() {
                 right={
                     <Button
                         variant="ghost"
-                        onClick={() => setShowRomaji(!showRomaji)}
+                        onClick={() => setShowRomaji((v) => !v)}
                         className={`!flex !items-center !gap-1.5 !rounded-xl !border-2 !px-3 !py-1.5 !text-[10px] !font-bold shadow-none transition-all hover:shadow-none active:translate-y-0 md:!text-xs ${
                             !showRomaji
                                 ? "!border-[#ea2b2b] !bg-[#ffdfe0] !text-[#ea2b2b]"
@@ -185,28 +183,29 @@ export default function KanaChartPage() {
                     </Button>
                 }
             />
-            <div className="animate-in fade-in mx-auto max-w-4xl px-4 pt-6 pb-28 duration-300">
+
+            <div className="animate-in fade-in mx-auto w-full max-w-2xl px-3 pt-6 pb-28 duration-300 sm:px-4">
                 {isBoth && (
-                    <p className="mx-auto mb-4 max-w-md text-center text-[10px] font-bold text-[#afafaf] md:text-xs">
+                    <p className="mx-auto mb-4 max-w-sm text-center text-[10px] font-bold text-[#afafaf] md:text-xs">
                         Hiragana and katakana for the same sounds are grouped by section. Extended
                         loanword katakana appears only under Katakana.
                     </p>
                 )}
 
-                <div className="flex flex-col gap-8 md:gap-10">
+                <div className="flex flex-col gap-4 md:gap-6">
                     {combinedSections &&
                         combinedSections.map(({ title, hiragana, katakana }) => (
                             <div
                                 key={title}
-                                className="rounded-[2rem] border-2 border-b-4 border-gray-200 bg-white p-5 shadow-sm md:p-8"
+                                className="rounded-2xl border-2 border-b-4 border-gray-200 bg-white p-4 shadow-sm sm:rounded-3xl sm:p-5 md:p-6"
                             >
-                                <h2 className="mb-4 border-b-2 border-gray-100 pb-3 text-xl font-black tracking-widest text-[#ce82ff] uppercase md:mb-6 md:pb-4 md:text-2xl">
+                                <h2 className="mb-3 border-b-2 border-gray-100 pb-2.5 text-base font-black tracking-widest text-[#ce82ff] uppercase sm:text-lg md:text-xl">
                                     {title}
                                 </h2>
-                                <div className="flex flex-col gap-6 md:gap-8">
+                                <div className="flex flex-col gap-4 md:gap-6">
                                     {hiragana && (
                                         <div>
-                                            <h3 className="mb-3 pl-0.5 text-xs font-black tracking-widest text-[#58cc02] uppercase md:text-sm">
+                                            <h3 className="mb-2 text-[10px] font-black tracking-widest text-[#58cc02] uppercase md:text-xs">
                                                 Hiragana
                                             </h3>
                                             <ChartBlockGrid
@@ -220,7 +219,7 @@ export default function KanaChartPage() {
                                     )}
                                     {katakana && (
                                         <div>
-                                            <h3 className="mb-3 pl-0.5 text-xs font-black tracking-widest text-[#1cb0f6] uppercase md:text-sm">
+                                            <h3 className="mb-2 text-[10px] font-black tracking-widest text-[#1cb0f6] uppercase md:text-xs">
                                                 Katakana
                                             </h3>
                                             <ChartBlockGrid
@@ -240,10 +239,10 @@ export default function KanaChartPage() {
                         singleBlocks?.map((block) => (
                             <div
                                 key={block.title}
-                                className="rounded-[2rem] border-2 border-b-4 border-gray-200 bg-white p-5 shadow-sm md:p-8"
+                                className="rounded-2xl border-2 border-b-4 border-gray-200 bg-white p-4 shadow-sm sm:rounded-3xl sm:p-5 md:p-6"
                             >
                                 <h2
-                                    className={`mb-4 border-b-2 border-gray-100 pb-3 text-xl font-black tracking-widest uppercase md:mb-6 md:pb-4 md:text-2xl ${headingClassSingle}`}
+                                    className={`mb-3 border-b-2 border-gray-100 pb-2.5 text-base font-black tracking-widest uppercase sm:text-lg md:text-xl ${headingColorSingle}`}
                                 >
                                     {block.title}
                                 </h2>

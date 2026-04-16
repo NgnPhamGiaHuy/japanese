@@ -45,14 +45,12 @@ async function fetchKanaSvg(char: string): Promise<SvgData | null> {
 
 interface KanaStrokeAnimationProps {
     charStr: string;
-    activeFont?: string;
     svgClassName?: string;
     strokeColor?: string;
 }
 
 const KanaStrokeAnimation = ({
     charStr,
-    activeFont,
     svgClassName = "w-12 h-12 md:w-24 md:h-24",
     strokeColor = "#1cb0f6",
 }: KanaStrokeAnimationProps) => {
@@ -120,11 +118,7 @@ const KanaStrokeAnimation = ({
                         </g>
                     </svg>
                 ) : (
-                    <span
-                        key={idx}
-                        className="text-3xl font-medium text-gray-300 md:text-5xl"
-                        style={{ fontFamily: activeFont }}
-                    >
+                    <span key={idx} className="text-3xl font-medium text-gray-300 md:text-5xl">
                         {item.char}
                     </span>
                 ),
