@@ -8,24 +8,23 @@
 
 import { useEffect, useRef, useState } from "react";
 
-import { Image as ImageIcon, Loader2, Plus, Sparkles, Trash2, X } from "lucide-react";
+import { Reorder } from "framer-motion";
+import { Loader2, Plus, Sparkles, X } from "lucide-react";
 
 import { AIBulkPanel, useAICard } from "@/features/ai";
 import { Button } from "@/shared/components/ui";
 import { useAlert } from "@/shared/providers";
 import { hexToThemeColor } from "@/shared/utils";
 import { useAppStore } from "@/store";
-import { ImportPreview } from "./ImportPreview";
+import DraggableCard from "./DraggableCard";
+import ImportPreview from "./ImportPreview";
 import { useCards } from "../hooks/useCards";
 import { deleteCardImage, uploadCardImage } from "../services";
 import { CardValidationError } from "../utils/card.validator";
 import { parseCSV, parseText } from "../utils/parser";
 
 import type { ImportRow } from "./ImportPreview";
-import type { FlashCard, Lesson } from "../types";
-
-/** Extended FlashCard type for managing temporary local file state during editing */
-type EditorCard = FlashCard & { imageFile?: File; previewUrl?: string };
+import type { EditorCard, FlashCard, Lesson } from "../types";
 
 interface LessonBuilderProps {
     /** Callback triggered when the user commits the full deck (new or edited) */
@@ -74,7 +73,8 @@ const makeCard = (): EditorCard => ({
  * @example
  * <LessonBuilder editingLesson={myDeck} onSave={handleSave} onClose={closeModal} />
  */
-export const LessonBuilder = ({
+
+const LessonBuilder = ({
     onSave,
     onDelete,
     onClose,
@@ -105,6 +105,8 @@ export const LessonBuilder = ({
     const [cards, setCards] = useState<EditorCard[]>(initialCards || []);
     const [tagInput, setTagInput] = useState("");
     const [saving, setSaving] = useState(false);
+
+    const themeHex = lesson.themeColor || "#1cb0f6";
 
     /** Determines the current ingestion UI (AI vs Manual vs Import) */
     const [importMode, setImportMode] = useState<"ai" | "manual" | "paste" | "file">(
@@ -279,7 +281,6 @@ export const LessonBuilder = ({
         setCards((prev) => prev.filter((c) => c.id !== id));
     };
 
-    const themeHex = lesson.themeColor || "#1cb0f6";
     const themeColorStr = hexToThemeColor(themeHex);
 
     /** Deduplicated list of Japanese words for AI bulk generation context */
@@ -325,7 +326,7 @@ export const LessonBuilder = ({
                     <input
                         type="text"
                         placeholder="Deck Title ✱ (e.g. JLPT N5 Verbs)"
-                        className="w-full border-b-2 border-transparent bg-transparent pb-2 text-3xl font-black text-[#3c3c3c] placeholder-gray-300 transition-colors outline-none focus:border-[var(--theme-color)]"
+                        className="w-full border-b-2 border-transparent bg-transparent pb-2 text-3xl font-black text-[#3c3c3c] placeholder-gray-300 transition-colors outline-none select-text focus:border-[var(--theme-color)]"
                         value={lesson.title}
                         onChange={(e) => setLesson({ ...lesson, title: e.target.value })}
                         autoFocus={!editingLesson}
@@ -333,7 +334,7 @@ export const LessonBuilder = ({
                     />
                     <textarea
                         placeholder="Describe what this deck is about..."
-                        className="h-20 w-full resize-none border-b-2 border-transparent bg-transparent font-bold text-[#afafaf] placeholder-gray-300 transition-colors outline-none focus:border-[var(--theme-color)]"
+                        className="h-20 w-full resize-none border-b-2 border-transparent bg-transparent font-bold text-[#afafaf] placeholder-gray-300 transition-colors outline-none select-text focus:border-[var(--theme-color)]"
                         value={lesson.description}
                         onChange={(e) => setLesson({ ...lesson, description: e.target.value })}
                         disabled={saving}
@@ -365,7 +366,7 @@ export const LessonBuilder = ({
                             type="text"
                             placeholder="Add tag and press Enter..."
                             value={tagInput}
-                            className="mb-4 w-full max-w-xs rounded-xl border-2 border-gray-200 bg-white px-4 py-3 text-sm font-bold placeholder-gray-300 transition-colors outline-none focus:border-[var(--theme-color)]"
+                            className="mb-4 w-full max-w-xs rounded-xl border-2 border-gray-200 bg-white px-4 py-3 text-sm font-bold placeholder-gray-300 transition-colors outline-none select-text focus:border-[var(--theme-color)]"
                             onChange={(e) => setTagInput(e.target.value)}
                             onKeyDown={addTag}
                             disabled={saving}
@@ -561,214 +562,31 @@ export const LessonBuilder = ({
                         </div>
 
                         <div className="space-y-6">
-                            {cards.map((card, idx) => (
-                                <div
-                                    key={card.id}
-                                    className="group relative rounded-[2rem] border-2 border-b-8 border-gray-200 bg-white p-6 shadow-sm transition-colors focus-within:border-[var(--theme-color)]"
-                                >
-                                    <div className="absolute -top-3 -left-3 flex h-10 w-10 -rotate-3 transform items-center justify-center rounded-xl border-b-4 border-black bg-[#3c3c3c] text-lg font-black text-white shadow-sm">
-                                        {idx + 1}
-                                    </div>
-                                    <Button
-                                        variant="primary"
-                                        color="red"
-                                        onClick={() => removeCard(card.id)}
-                                        disabled={saving}
-                                        className="absolute -top-3 -right-3 z-10 !h-10 !w-10 rotate-3 transform !p-1 opacity-100 transition-all hover:scale-110 active:scale-95 md:opacity-0 md:group-hover:opacity-100"
-                                        title="Remove Card"
-                                        icon={Trash2}
-                                        iconSize={22}
+                            <Reorder.Group
+                                axis="y"
+                                values={cards}
+                                onReorder={setCards}
+                                className="space-y-6"
+                            >
+                                {cards.map((card, idx) => (
+                                    <DraggableCard
+                                        key={card.id}
+                                        card={card}
+                                        idx={idx}
+                                        saving={saving}
+                                        themeHex={themeHex}
+                                        aiLoading={aiLoadingCardIds.has(card.id)}
+                                        aiError={aiCardErrors[card.id]}
+                                        onRemove={removeCard}
+                                        onUpdate={updateCard}
+                                        onAIFill={handleAIFillCard}
+                                        onImageChange={handleImageChange}
+                                        onImageClear={(path) =>
+                                            clearedImagePathsRef.current.push(path)
+                                        }
                                     />
-
-                                    <div className="mt-4 grid grid-cols-1 gap-6 md:grid-cols-2">
-                                        <div className="md:col-span-2">
-                                            <div className="mb-1 flex items-center justify-between">
-                                                <label className="text-[10px] font-black tracking-widest text-[#afafaf] uppercase">
-                                                    Primary ✱
-                                                </label>
-                                                <Button
-                                                    variant="ghost"
-                                                    title={
-                                                        card.primary?.trim()
-                                                            ? "Auto-fill with AI"
-                                                            : "Type a word first"
-                                                    }
-                                                    loading={aiLoadingCardIds.has(card.id)}
-                                                    disabled={saving || !card.primary?.trim()}
-                                                    onClick={() =>
-                                                        handleAIFillCard(
-                                                            card.id,
-                                                            card.primary || "",
-                                                        )
-                                                    }
-                                                    className="!flex !h-auto !items-center !gap-1 !px-2 !py-0.5 !text-[9px] !font-black uppercase shadow-none hover:shadow-none"
-                                                    color={themeHex}
-                                                    icon={Sparkles}
-                                                    iconSize={10}
-                                                >
-                                                    {aiLoadingCardIds.has(card.id)
-                                                        ? "Filling…"
-                                                        : "AI Fill"}
-                                                </Button>
-                                            </div>
-                                            <input
-                                                className={`w-full border-b-2 border-gray-100 bg-transparent pb-2 text-3xl font-black text-[#3c3c3c] transition-colors outline-none focus:border-[var(--theme-color)] ${aiLoadingCardIds.has(card.id) ? "opacity-60" : ""}`}
-                                                placeholder="食べる / たべる"
-                                                value={card.primary || ""}
-                                                onChange={(e) =>
-                                                    updateCard(card.id, "primary", e.target.value)
-                                                }
-                                                disabled={saving || aiLoadingCardIds.has(card.id)}
-                                            />
-                                            {aiCardErrors[card.id] && (
-                                                <p className="mt-1 text-[10px] font-bold text-[#ea2b2b]">
-                                                    {aiCardErrors[card.id]}
-                                                </p>
-                                            )}
-                                        </div>
-                                        {(["alternative"] as const).map((repKey) => (
-                                            <div key={repKey}>
-                                                <label className="mb-1 block text-[10px] font-black tracking-widest text-[#afafaf] uppercase">
-                                                    Alternative
-                                                </label>
-                                                <input
-                                                    className="w-full border-b-2 border-gray-100 bg-transparent pb-2 text-xl font-bold text-[#3c3c3c] transition-colors outline-none focus:border-[var(--theme-color)]"
-                                                    placeholder="Alternate form (optional)"
-                                                    value={card.alternatives?.[0] || ""}
-                                                    onChange={(e) =>
-                                                        updateCard(
-                                                            card.id,
-                                                            "alternatives",
-                                                            e.target.value ? [e.target.value] : [],
-                                                        )
-                                                    }
-                                                    disabled={saving}
-                                                />
-                                            </div>
-                                        ))}
-                                        <div className="md:col-span-2">
-                                            <label className="mb-1 block text-[10px] font-black tracking-widest text-[#afafaf] uppercase">
-                                                Meaning ✱
-                                            </label>
-                                            <input
-                                                className="w-full border-b-2 border-gray-100 bg-transparent pb-2 text-xl font-bold text-[#3c3c3c] transition-colors outline-none focus:border-[var(--theme-color)]"
-                                                placeholder="To eat"
-                                                value={card.meaning}
-                                                onChange={(e) =>
-                                                    updateCard(card.id, "meaning", e.target.value)
-                                                }
-                                                disabled={saving}
-                                            />
-                                        </div>
-                                        <div className="md:col-span-2">
-                                            <label className="mb-1 block text-[10px] font-black tracking-widest text-[#afafaf] uppercase">
-                                                Example Sentence (Optional)
-                                            </label>
-                                            <input
-                                                className="w-full border-b-2 border-gray-100 bg-transparent pb-2 text-base font-bold text-[#3c3c3c] transition-colors outline-none focus:border-[var(--theme-color)]"
-                                                placeholder="りんごを食べる。"
-                                                value={card.example}
-                                                onChange={(e) =>
-                                                    updateCard(card.id, "example", e.target.value)
-                                                }
-                                                disabled={saving}
-                                            />
-                                        </div>
-                                        <div className="md:col-span-2">
-                                            <label className="mb-1 block text-[10px] font-black tracking-widest text-[#afafaf] uppercase">
-                                                Card Image (Optional)
-                                            </label>
-                                            <div className="mt-2 flex items-center gap-4">
-                                                {card.previewUrl || card.imageUrl ? (
-                                                    <div className="relative h-20 w-20 overflow-hidden rounded-xl border-2 border-gray-200">
-                                                        <img
-                                                            key={card.previewUrl || card.imageUrl}
-                                                            src={card.previewUrl || card.imageUrl}
-                                                            alt="Card preview"
-                                                            className="h-full w-full object-cover"
-                                                            crossOrigin="anonymous"
-                                                            referrerPolicy="no-referrer"
-                                                            onError={(e) => {
-                                                                // Fallback if the URL fails
-                                                                e.currentTarget.style.display =
-                                                                    "none";
-                                                            }}
-                                                        />
-                                                        <Button
-                                                            variant="ghost"
-                                                            onClick={(e) => {
-                                                                e.preventDefault();
-                                                                e.stopPropagation();
-                                                                // Track the cleared path so we can delete from Storage on save
-                                                                if (card.imagePath) {
-                                                                    clearedImagePathsRef.current.push(
-                                                                        card.imagePath,
-                                                                    );
-                                                                }
-                                                                setCards((prev) =>
-                                                                    prev.map((c) =>
-                                                                        c.id === card.id
-                                                                            ? {
-                                                                                  ...c,
-                                                                                  imageFile:
-                                                                                      undefined,
-                                                                                  previewUrl:
-                                                                                      undefined,
-                                                                                  imageUrl:
-                                                                                      undefined,
-                                                                                  imagePath:
-                                                                                      undefined,
-                                                                              }
-                                                                            : c,
-                                                                    ),
-                                                                );
-                                                            }}
-                                                            disabled={saving}
-                                                            className="absolute inset-0 !flex !h-full !w-full !items-center !justify-center !rounded-xl !bg-black/50 !text-white opacity-0 shadow-none transition-opacity hover:opacity-100 hover:shadow-none active:translate-y-0"
-                                                            icon={Trash2}
-                                                            iconSize={24}
-                                                        />
-                                                    </div>
-                                                ) : (
-                                                    <div className="flex h-20 w-20 items-center justify-center rounded-xl border-2 border-dashed border-gray-300 bg-gray-50 text-gray-400">
-                                                        <ImageIcon size={24} />
-                                                    </div>
-                                                )}
-                                                <div className="flex-1">
-                                                    <input
-                                                        type="file"
-                                                        accept="image/*"
-                                                        id={`img-upload-${card.id}`}
-                                                        className="hidden"
-                                                        disabled={saving}
-                                                        onChange={(e) =>
-                                                            handleImageChange(
-                                                                e.target.files?.[0] || null,
-                                                                card.id,
-                                                            )
-                                                        }
-                                                    />
-                                                    <Button
-                                                        variant="ghost"
-                                                        onClick={() => {
-                                                            document
-                                                                .getElementById(
-                                                                    `img-upload-${card.id}`,
-                                                                )
-                                                                ?.click();
-                                                        }}
-                                                        className="!rounded-xl !border-2 !border-gray-200 !bg-white !px-4 !py-2 !text-sm !font-bold !text-[#3c3c3c] shadow-sm hover:!bg-gray-50 active:translate-y-0"
-                                                    >
-                                                        {card.previewUrl || card.imageUrl
-                                                            ? "Change Image"
-                                                            : "Upload Image"}
-                                                    </Button>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            ))}
+                                ))}
+                            </Reorder.Group>
 
                             {cards.length > 0 && (
                                 <div className="pt-4 pb-8">

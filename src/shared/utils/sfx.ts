@@ -155,8 +155,8 @@ function synthCorrect(ctx: AudioContext): void {
 
     // ── Note layout (Duolingo-style ascending two-tone) ──────────────────
     const notes: Array<{ freq: number; delay: number; peak: number; decay: number }> = [
-        { freq: 523.25, delay: 0.0,   peak: 0.55, decay: 0.55 }, // C5 — first chime
-        { freq: 659.25, delay: 0.10,  peak: 0.50, decay: 0.70 }, // E5 — second chime (delayed)
+        { freq: 523.25, delay: 0.0, peak: 0.55, decay: 0.55 }, // C5 — first chime
+        { freq: 659.25, delay: 0.1, peak: 0.5, decay: 0.7 }, // E5 — second chime (delayed)
     ];
 
     // Shared bus so both notes feed the same reverb
@@ -232,7 +232,7 @@ function synthWrong(ctx: AudioContext): void {
 
     // Two slightly discordant tones for a muffled "bwong" feel
     const tones = [
-        { freq: 290, peak: 0.50, decay: 0.45 }, // root
+        { freq: 290, peak: 0.5, decay: 0.45 }, // root
         { freq: 240, peak: 0.38, decay: 0.35 }, // minor-second below — creates mild dissonance
     ];
 

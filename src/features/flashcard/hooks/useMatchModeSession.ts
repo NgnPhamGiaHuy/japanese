@@ -4,14 +4,21 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { generateMatchDistractors } from "@/features/ai/services";
 import { useGameSession } from "@/features/game/hooks";
-import type { MatchDifficulty } from "@/features/game/modes";
-import { calcMatchPoints, calcTimeBonus, comboLabel, DIFFICULTY_CONFIG, WRONG_PENALTY, } from "@/features/game/modes";
+import {
+    calcMatchPoints,
+    calcTimeBonus,
+    comboLabel,
+    DIFFICULTY_CONFIG,
+    WRONG_PENALTY,
+} from "@/features/game/modes";
 import { recordGameResult } from "@/features/game/services";
 import { allowAudio, playAudio, playSFX, shuffleArray } from "@/shared/utils";
 import { gradeCard } from "../services";
-import type { MatchItem } from "../stores/useMatchGameStore";
 import { useMatchGameStore } from "../stores/useMatchGameStore";
 import { getAudioText } from "../utils";
+
+import type { MatchDifficulty } from "@/features/game/modes";
+import type { MatchItem } from "../stores/useMatchGameStore";
 import type { FlashCard } from "../types";
 
 type MatchPhase = "intro" | "playing" | "results";

@@ -60,6 +60,9 @@ export interface FlashCard {
     cardType?: "standard" | "cloze";
 }
 
+/** Extended FlashCard type for managing temporary local file state during editing */
+export type EditorCard = FlashCard & { imageFile?: File; previewUrl?: string };
+
 /**
  * Deck container for flashcards, including visibility and collaborative metadata.
  */
