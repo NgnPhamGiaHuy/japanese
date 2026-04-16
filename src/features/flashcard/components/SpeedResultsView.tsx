@@ -20,6 +20,7 @@ interface SpeedResultsViewProps {
     score: number;
     bestScore: number;
     correctCount: number;
+    totalQuestions: number;
     maxStreak: number;
     tierInfo: TierInfo;
     gameMode: string;
@@ -35,6 +36,7 @@ const SpeedResultsView = ({
     score,
     bestScore,
     correctCount,
+    totalQuestions,
     maxStreak,
     tierInfo,
     gameMode,
@@ -43,10 +45,7 @@ const SpeedResultsView = ({
     onCollectXP,
 }: SpeedResultsViewProps) => {
     const isNewBest = score > bestScore;
-    const accuracy =
-        SPEED_GAME_CONFIG.TOTAL_QUESTIONS > 0
-            ? Math.round((correctCount / SPEED_GAME_CONFIG.TOTAL_QUESTIONS) * 100)
-            : 0;
+    const accuracy = totalQuestions > 0 ? Math.round((correctCount / totalQuestions) * 100) : 0;
     const xpEarned = Math.round(score / 10);
 
     const { innerWidth: width, innerHeight: height } =
@@ -111,7 +110,7 @@ const SpeedResultsView = ({
                     {[
                         { value: correctCount, label: "Correct", color: "#58cc02" },
                         {
-                            value: SPEED_GAME_CONFIG.TOTAL_QUESTIONS - correctCount,
+                            value: Math.max(0, totalQuestions - correctCount),
                             label: "Wrong",
                             color: "#ea2b2b",
                         },

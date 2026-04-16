@@ -62,10 +62,10 @@ export function subscribeCards(
         (snap) => {
             const cards = snap.docs
                 .map((d) => assertCardSchema(userId, { ...d.data(), id: d.id } as FlashCard))
-                // Sort by explicit sortOrder first, then by document ID as tiebreaker
+                // Sort by explicit order (fractional indexing) first, then by document ID as tiebreaker
                 .sort((a, b) => {
-                    const aOrder = a.sortOrder ?? Infinity;
-                    const bOrder = b.sortOrder ?? Infinity;
+                    const aOrder = a.order ?? a.sortOrder ?? Infinity;
+                    const bOrder = b.order ?? b.sortOrder ?? Infinity;
                     if (aOrder !== bOrder) return aOrder - bOrder;
                     return a.id.localeCompare(b.id);
                 });
@@ -116,6 +116,13 @@ export async function updateCard(userId: string, card: FlashCard): Promise<void>
 
 export async function deleteCard(userId: string, cardId: string): Promise<void> {
     await deleteDoc(cardDoc(userId, cardId));
+}
+
+/**
+ * Updates the order of a single card for O(1) performance.
+ */
+export async function reorderCard(userId: string, cardId: string, newOrder: number): Promise<void> {
+    await updateDoc(cardDoc(userId, cardId), { order: newOrder });
 }
 
 // ─── SRS Processing ───────────────────────────────────────────────────────

@@ -28,7 +28,7 @@ interface AlertProps {
  * @example
  * <Alert type="success" message="File saved!" onClose={handleDismiss} />
  */
-export const Alert = ({ type, message, onClose }: AlertProps) => {
+const Alert = ({ type, message, onClose }: AlertProps) => {
     const [isPaused, setIsPaused] = useState(false);
     // Persists the remaining duration across re-renders when paused
     const timeLeft = useRef<number>(0);

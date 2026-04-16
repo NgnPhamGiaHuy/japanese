@@ -6,6 +6,7 @@
 import { doc, getDoc, getDocs, query, setDoc, where } from "firebase/firestore";
 
 import { APP_ID, db } from "@/lib/firebase";
+import { sortByOrder } from "@/shared/utils/reorder";
 import { syncInviteToCollaborator } from "./access.service";
 import { cardsCol } from "./card.service";
 import { normalizeLesson } from "./lesson.service";
@@ -123,7 +124,7 @@ export async function getSharedLesson(
     }
 
     const cardsSnap = await getDocs(query(cardsCol(ownerId), where("lessonId", "==", lessonId)));
-    const cards = cardsSnap.docs.map((d) => ({ ...d.data(), id: d.id }) as FlashCard);
+    const cards = sortByOrder(cardsSnap.docs.map((d) => ({ ...d.data(), id: d.id }) as FlashCard));
 
     return {
         lesson,

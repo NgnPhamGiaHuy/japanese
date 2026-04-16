@@ -16,7 +16,7 @@ interface UserMetaProps {
  * @remarks
  * Handles various separators (spaces, dashes, dots) to extract meaningful characters.
  * Defaults to "??" for empty strings.
- * 
+ *
  * @param name - The full display name of the user.
  * @returns A 1-2 character uppercase string.
  */
@@ -43,7 +43,7 @@ function getInitials(name: string): string {
  * <UserMeta name="Tanaka" avatar={null} subtitle="Owner" />
  * ```
  */
-export default function UserMeta({ name, avatar, subtitle, className }: UserMetaProps) {
+const UserMeta = ({ name, avatar, subtitle, className }: UserMetaProps) => {
     const initials = getInitials(name);
 
     const avatarStyle: CSSProperties | undefined = avatar
@@ -62,11 +62,7 @@ export default function UserMeta({ name, avatar, subtitle, className }: UserMeta
             >
                 {avatar ? (
                     // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                        src={avatar}
-                        alt={name}
-                        className="h-full w-full object-cover"
-                    />
+                    <img src={avatar} alt={name} className="h-full w-full object-cover" />
                 ) : (
                     <span className="text-xs font-black tracking-widest">{initials}</span>
                 )}
@@ -74,7 +70,7 @@ export default function UserMeta({ name, avatar, subtitle, className }: UserMeta
 
             <div className="min-w-0">
                 {subtitle && (
-                    <div className="truncate text-[11px] font-black tracking-widest uppercase text-gray-400">
+                    <div className="truncate text-[11px] font-black tracking-widest text-gray-400 uppercase">
                         {subtitle}
                     </div>
                 )}
@@ -82,5 +78,6 @@ export default function UserMeta({ name, avatar, subtitle, className }: UserMeta
             </div>
         </div>
     );
-}
+};
 
+export default UserMeta;

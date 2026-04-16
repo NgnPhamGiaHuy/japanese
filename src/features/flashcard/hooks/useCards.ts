@@ -89,6 +89,14 @@ export function useCards(lessonId?: string, ownerId?: string) {
         [user],
     );
 
+    const reorderCard = useCallback(
+        async (cardId: string, newOrder: number): Promise<void> => {
+            if (!user) return;
+            await CardService.reorderCard(user.uid, cardId, newOrder);
+        },
+        [user],
+    );
+
     const resetCard = useCallback(
         async (cardId: string): Promise<void> => {
             if (!user) return;
@@ -110,6 +118,7 @@ export function useCards(lessonId?: string, ownerId?: string) {
         createCard,
         updateCard,
         deleteCard,
+        reorderCard,
         resetCard,
         resetLesson,
     };

@@ -1,2 +1,3 @@
-export * from "./parser";
+export * from "./card.validator";
 export * from "./displayEngine";
+export * from "./parser";

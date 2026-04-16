@@ -3,19 +3,25 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { useGameSession } from "@/features/game/hooks";
-import {
-    calcSpeedPoints,
-    getDifficultyForQuestion,
-    SPEED_GAME_CONFIG,
-    timerColor,
-} from "@/features/game/modes";
+import { calcSpeedPoints, SPEED_GAME_CONFIG, timerColor } from "@/features/game/modes";
 import { recordGameResult } from "@/features/game/services";
 import { allowAudio, playAudio, playSFX, shuffleArray } from "@/shared/utils";
-import { buildQuestion, chooseQuestionType, getAudioText } from "../utils";
+import {
+    buildSmartDistractors,
+    chooseAdaptiveQuestionType,
+    deriveAdaptiveDifficulty,
+    initCardMemory,
+    pickNextCardFromMemory,
+    recordMemoryOutcome,
+} from "../logic/speedIntelligence";
+import { buildQuestion, getAudioText } from "../utils";
 
+import type { AdaptiveLevel, AnswerEvent } from "../logic/speedIntelligence";
 import type { FlashCard } from "../types";
+import type { QuestionType } from "../utils";
 
 const TIMER_TICK_MS = 80;
+const QUEUE_BUFFER = 4;
 type SpeedPhase = "intro" | "playing" | "results";
 type AnswerStatus = "idle" | "correct" | "wrong";
 
@@ -58,12 +64,17 @@ export function useSpeedModeSession({
     const [correctCount, setCorrectCount] = useState(0);
     const [answerStatus, setAnswerStatus] = useState<AnswerStatus>("idle");
     const [selectedOption, setSelectedOption] = useState<string | null>(null);
+    const [adaptiveLevel, setAdaptiveLevel] = useState<AdaptiveLevel>(1);
+    const [cardQueue, setCardQueue] = useState<FlashCard[]>([]);
 
     const [timerFraction, setTimerFraction] = useState(1);
     const questionStartRef = useRef(0);
     const questionLimitRef = useRef(5);
     const timerIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
     const savedRef = useRef(false);
+    const recentShownRef = useRef<string[]>([]);
+    const answerHistoryRef = useRef<AnswerEvent[]>([]);
+    const memoryRef = useRef(initCardMemory(allCards));
 
     const { startSession, syncScore, endSession } = useGameSession({
         userId: userId ?? null,
@@ -72,34 +83,51 @@ export function useSpeedModeSession({
         currentBest: bestScore,
     });
 
-    const cardQueue = useMemo(() => {
-        if (!lessonExists || allCards.length === 0) return [];
-        return shuffleArray([...allCards]).slice(0, SPEED_GAME_CONFIG.TOTAL_QUESTIONS + 5);
-    }, [allCards, lessonExists]);
-
     const currentCard = cardQueue[questionIndex];
-    const difficultyLevel = getDifficultyForQuestion(questionIndex);
-    const difficultyConfig = SPEED_GAME_CONFIG.LEVELS[difficultyLevel];
+    const difficultyConfig = SPEED_GAME_CONFIG.LEVELS[adaptiveLevel];
+
+    const refillQueue = useCallback(
+        (queue: FlashCard[], targetLength: number, level: AdaptiveLevel): FlashCard[] => {
+            if (!lessonExists || allCards.length === 0) return [];
+            const nextQueue = [...queue];
+            const startLength = nextQueue.length;
+            while (
+                nextQueue.length < targetLength &&
+                nextQueue.length < SPEED_GAME_CONFIG.TOTAL_QUESTIONS
+            ) {
+                const nextCard =
+                    pickNextCardFromMemory({
+                        cards: allCards,
+                        memory: memoryRef.current,
+                        questionIndex: nextQueue.length,
+                        recentShownIds: recentShownRef.current,
+                        reservedQueueIds: nextQueue.map((c) => c.id),
+                        adaptiveLevel: level,
+                    }) ?? shuffleArray(allCards)[0];
+                if (!nextCard) break;
+                nextQueue.push(nextCard);
+            }
+            return nextQueue.length === startLength ? queue : nextQueue;
+        },
+        [allCards, lessonExists],
+    );
 
     const currentQuestion = useMemo(() => {
         if (!currentCard) return null;
-        const type = chooseQuestionType(currentCard, {
-            difficulty: difficultyLevel,
-            preferPrimary: true,
-        });
+        const type = chooseAdaptiveQuestionType(currentCard, adaptiveLevel);
         return { ...buildQuestion(currentCard, type), type };
-    }, [currentCard, difficultyLevel, questionIndex]);
+    }, [adaptiveLevel, currentCard]);
 
-    // Build 3 distractors from other cards' meanings (same language as the answer)
     const options = useMemo(() => {
         if (!currentCard || !currentQuestion) return [];
-        const distractors = allCards
-            .filter((card) => card.id !== currentCard.id)
-            .map((card) =>
-                currentQuestion.type === "primary_to_meaning" ? card.meaning : card.primary,
-            )
-            .filter((value): value is string => Boolean(value) && value !== currentQuestion.answer);
-        const chosen = shuffleArray(distractors).slice(0, 3);
+        const chosen = buildSmartDistractors({
+            allCards,
+            currentCard,
+            answer: currentQuestion.answer,
+            questionType: currentQuestion.type as QuestionType,
+            // Keep option order stable during answer feedback.
+            memory: {},
+        });
         return shuffleArray([currentQuestion.answer, ...chosen]);
     }, [allCards, currentCard, currentQuestion]);
 
@@ -115,15 +143,41 @@ export function useSpeedModeSession({
         setAnswerStatus("wrong");
         setStreak(0);
         setTimerFraction(0);
+        if (currentCard) {
+            recordMemoryOutcome({
+                memory: memoryRef.current,
+                cardId: currentCard.id,
+                questionIndex,
+                correct: false,
+                responseMs: questionLimitRef.current * 1000,
+            });
+            answerHistoryRef.current.push({
+                cardId: currentCard.id,
+                correct: false,
+                responseMs: questionLimitRef.current * 1000,
+            });
+            setAdaptiveLevel(deriveAdaptiveDifficulty(0, answerHistoryRef.current, adaptiveLevel));
+        }
         if (currentCard && allowAudio("speed", "feedback")) {
             setTimeout(() => playAudio(getAudioText(currentCard)), 250);
         }
         setTimeout(() => {
             setAnswerStatus("idle");
             setSelectedOption(null);
-            setQuestionIndex((prev) => prev + 1);
+            if (currentCard) {
+                recentShownRef.current = [...recentShownRef.current, currentCard.id].slice(-10);
+            }
+            const nextIndex = questionIndex + 1;
+            setCardQueue((prev) =>
+                refillQueue(
+                    prev,
+                    Math.min(SPEED_GAME_CONFIG.TOTAL_QUESTIONS, nextIndex + QUEUE_BUFFER),
+                    adaptiveLevel,
+                ),
+            );
+            setQuestionIndex(nextIndex);
         }, 1100);
-    }, [currentCard, stopTimer]);
+    }, [adaptiveLevel, currentCard, questionIndex, refillQueue, stopTimer]);
 
     const startQuestionTimer = useCallback(
         (limitSecs: number) => {
@@ -150,33 +204,34 @@ export function useSpeedModeSession({
         setCorrectCount(0);
         setAnswerStatus("idle");
         setSelectedOption(null);
+        setAdaptiveLevel(1);
         savedRef.current = false;
+        recentShownRef.current = [];
+        answerHistoryRef.current = [];
+        memoryRef.current = initCardMemory(allCards);
+        setCardQueue(refillQueue([], Math.min(SPEED_GAME_CONFIG.TOTAL_QUESTIONS, QUEUE_BUFFER), 1));
         setPhase("playing");
         void startSession();
-    }, [startSession]);
+    }, [allCards, refillQueue, startSession]);
 
     useEffect(() => {
         if (phase !== "playing") return;
-        if (
-            questionIndex >= SPEED_GAME_CONFIG.TOTAL_QUESTIONS ||
-            questionIndex >= cardQueue.length
-        ) {
+        if (questionIndex >= SPEED_GAME_CONFIG.TOTAL_QUESTIONS) {
             stopTimer();
             return;
         }
-        const limitSecs =
-            SPEED_GAME_CONFIG.LEVELS[getDifficultyForQuestion(questionIndex)].timeLimit;
+        if (!currentCard) return;
+        const limitSecs = SPEED_GAME_CONFIG.LEVELS[adaptiveLevel].timeLimit;
         const raf = requestAnimationFrame(() => startQuestionTimer(limitSecs));
         return () => {
             cancelAnimationFrame(raf);
             stopTimer();
         };
-    }, [cardQueue.length, phase, questionIndex, startQuestionTimer, stopTimer]);
+    }, [adaptiveLevel, currentCard, phase, questionIndex, startQuestionTimer, stopTimer]);
 
     useEffect(() => {
         if (phase !== "playing") return;
-        const done =
-            questionIndex >= SPEED_GAME_CONFIG.TOTAL_QUESTIONS || questionIndex >= cardQueue.length;
+        const done = questionIndex >= SPEED_GAME_CONFIG.TOTAL_QUESTIONS;
         if (!done) return;
 
         stopTimer();
@@ -193,7 +248,6 @@ export function useSpeedModeSession({
     }, [
         addXP,
         bestScore,
-        cardQueue.length,
         displayName,
         endSession,
         gameMode,
@@ -212,8 +266,24 @@ export function useSpeedModeSession({
             const elapsed = (Date.now() - questionStartRef.current) / 1000;
             const remaining = Math.max(0, questionLimitRef.current - elapsed);
             setSelectedOption(selected);
+            const responseMs = Math.max(0, Date.now() - questionStartRef.current);
+            const isCorrect = Boolean(currentQuestion && selected === currentQuestion.answer);
 
-            if (currentQuestion && selected === currentQuestion.answer) {
+            recordMemoryOutcome({
+                memory: memoryRef.current,
+                cardId: currentCard.id,
+                questionIndex,
+                correct: isCorrect,
+                responseMs,
+                mistakenChoice: isCorrect ? null : selected,
+            });
+            answerHistoryRef.current.push({
+                cardId: currentCard.id,
+                correct: isCorrect,
+                responseMs,
+            });
+
+            if (isCorrect && currentQuestion) {
                 const newStreak = streak + 1;
                 const points = calcSpeedPoints(remaining, questionLimitRef.current, newStreak);
                 const nextScore = score + points;
@@ -237,14 +307,41 @@ export function useSpeedModeSession({
                     setTimeout(() => playAudio(getAudioText(currentCard)), 250);
                 }
             }
+            setAdaptiveLevel(
+                deriveAdaptiveDifficulty(
+                    isCorrect ? streak + 1 : 0,
+                    answerHistoryRef.current,
+                    adaptiveLevel,
+                ),
+            );
 
             setTimeout(() => {
                 setAnswerStatus("idle");
                 setSelectedOption(null);
-                setQuestionIndex((prev) => prev + 1);
+                recentShownRef.current = [...recentShownRef.current, currentCard.id].slice(-10);
+                const nextIndex = questionIndex + 1;
+                setCardQueue((prev) =>
+                    refillQueue(
+                        prev,
+                        Math.min(SPEED_GAME_CONFIG.TOTAL_QUESTIONS, nextIndex + QUEUE_BUFFER),
+                        adaptiveLevel,
+                    ),
+                );
+                setQuestionIndex(nextIndex);
             }, 1100);
         },
-        [answerStatus, currentCard, currentQuestion, score, stopTimer, streak, syncScore],
+        [
+            adaptiveLevel,
+            answerStatus,
+            currentCard,
+            currentQuestion,
+            questionIndex,
+            refillQueue,
+            score,
+            stopTimer,
+            streak,
+            syncScore,
+        ],
     );
 
     useEffect(() => () => stopTimer(), [stopTimer]);
@@ -256,9 +353,11 @@ export function useSpeedModeSession({
         const { SCORING, UI } = SPEED_GAME_CONFIG;
         const multiplier = Math.floor(streak / SCORING.COMBO_STEP) + 1;
         const secondsLeft = Math.ceil(timerFraction * difficultyConfig.timeLimit);
+        const totalQuestions = SPEED_GAME_CONFIG.TOTAL_QUESTIONS;
 
         return {
             questionNumber: questionIndex + 1,
+            totalQuestions,
             multiplier,
             secondsLeft,
             isUrgent: timerFraction < UI.URGENT_THRESHOLD,

@@ -13,7 +13,7 @@ interface UserAvatarProps {
  * Renders a circular user profile image with an active state.
  * Falls back to a Trophy icon if no image is provided.
  */
-export const UserAvatar = ({
+const UserAvatar = ({
     src,
     active,
     activeColor = "text-[#1cb0f6]",

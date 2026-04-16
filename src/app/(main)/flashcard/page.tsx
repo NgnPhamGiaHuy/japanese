@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { memo, useEffect, useRef, useState } from "react";
 
 import { BookOpen, Edit2, Gamepad2, Plus, RefreshCw, Share2, Trash2, Zap } from "lucide-react";
 
@@ -16,10 +16,10 @@ import {
     TIER_INFO,
 } from "@/features/game";
 import { ScreenHeader } from "@/shared/components/layout";
-import { Button, ConfirmModal, UserMeta } from "@/shared/components/ui";
+import { Button, ConfirmModal, ReorderItem, ReorderList, UserMeta } from "@/shared/components/ui";
 import { CARD_BASE, SPACING } from "@/shared/constants";
 import { useAlert } from "@/shared/providers";
-import { hexToThemeColor } from "@/shared/utils";
+import { hexToThemeColor, reorderWithFractionalIndex } from "@/shared/utils";
 import { useAppStore } from "@/store";
 
 /**
@@ -60,8 +60,42 @@ export default function FlashcardIndexPage() {
     const [sharingLesson, setSharingLesson] = useState<Lesson | null>(null);
     const [deletingLesson, setDeletingLesson] = useState<Lesson | null>(null);
     const [isDeleting, setIsDeleting] = useState(false);
+    const activeDragLessonIdRef = useRef<string | null>(null);
+
+    const { reorderLesson } = useLessons();
+
+    /** Real-time sorting logic (Fractional Indexing) */
+    const [orderedLessons, setOrderedLessons] = useState<Lesson[]>([]);
+
+    useEffect(() => {
+        setOrderedLessons(activeTab === "personal" ? lessons : sharedLessons);
+    }, [lessons, sharedLessons, activeTab]);
 
     const displayLessons = activeTab === "personal" ? lessons : sharedLessons;
+
+    const handleLessonsReorder = async (nextLessons: Lesson[]) => {
+        setOrderedLessons(nextLessons);
+
+        const activeId = activeDragLessonIdRef.current;
+        if (!activeId || activeTab !== "personal") return;
+
+        const oldIndex = orderedLessons.findIndex((lesson) => lesson.id === activeId);
+        const newIndex = nextLessons.findIndex((lesson) => lesson.id === activeId);
+        if (oldIndex === -1 || newIndex === -1 || oldIndex === newIndex) return;
+
+        try {
+            const { movedId, newOrder } = reorderWithFractionalIndex(
+                orderedLessons,
+                oldIndex,
+                newIndex,
+            );
+            await reorderLesson(movedId, newOrder);
+        } catch (err) {
+            console.error("[handleLessonsReorder] Reorder failed:", err);
+            setOrderedLessons(activeTab === "personal" ? lessons : sharedLessons);
+            showAlert("error", "Reorder failed");
+        }
+    };
 
     return (
         <div className="min-h-[100dvh] bg-[#F7F7F8] pb-28">
@@ -195,10 +229,16 @@ export default function FlashcardIndexPage() {
                 )}
 
                 {/* ── Lesson list ── */}
-                {!loading && !error && displayLessons.length > 0 && (
-                    <div className="space-y-4">
-                        {displayLessons.map((lesson) => (
-                            <DeckCard
+                {!loading && !error && orderedLessons.length > 0 && (
+                    <ReorderList
+                        items={orderedLessons}
+                        onReorder={(nextLessons) => {
+                            void handleLessonsReorder(nextLessons);
+                        }}
+                        className="space-y-4"
+                    >
+                        {orderedLessons.map((lesson) => (
+                            <SortableDeckCard
                                 key={lesson.id}
                                 lesson={lesson}
                                 isShared={activeTab === "shared"}
@@ -206,9 +246,16 @@ export default function FlashcardIndexPage() {
                                 speedStats={gameStats[speedGameMode(lesson.id)]}
                                 onDelete={() => setDeletingLesson(lesson)}
                                 onShare={() => setSharingLesson(lesson)}
+                                canReorder={activeTab === "personal"}
+                                onDragStart={() => {
+                                    activeDragLessonIdRef.current = lesson.id;
+                                }}
+                                onDragEnd={() => {
+                                    activeDragLessonIdRef.current = null;
+                                }}
                             />
                         ))}
-                    </div>
+                    </ReorderList>
                 )}
             </div>
 
@@ -278,6 +325,31 @@ function TierBadge({ score, className = "" }: { score: number; className?: strin
     );
 }
 
+const SortableDeckCard = memo(function SortableDeckCard(
+    props: Parameters<typeof DeckCard>[0] & {
+        canReorder?: boolean;
+        onDragStart: () => void;
+        onDragEnd: () => void;
+    },
+) {
+    const { canReorder, onDragStart, onDragEnd, ...deckCardProps } = props;
+
+    return (
+        <ReorderItem
+            value={props.lesson}
+            disabled={!canReorder}
+            onDragStart={onDragStart}
+            onDragEnd={onDragEnd}
+            handleIconSize={20}
+            handlePositionClassName="absolute -right-2 top-1/2 -translate-y-1/2 sm:-right-3"
+            handleClassName="absolute -right-2 top-1/2 z-20 flex h-14 w-6 -translate-y-1/2 cursor-pointer items-center justify-center rounded-xl border-2 border-gray-200 bg-white text-gray-300 shadow-sm transition-all hover:scale-110 hover:border-gray-300 hover:text-gray-500 active:cursor-grabbing active:scale-95 group-hover:block sm:-right-3 md:hidden md:group-hover:flex"
+            className="group relative"
+        >
+            <DeckCard {...deckCardProps} />
+        </ReorderItem>
+    );
+});
+
 /**
  * Individual Deck Entry on Dashboard
  *
@@ -320,7 +392,11 @@ function DeckCard({
     // Path resolution
     const resolvedShareId =
         lesson.shareId ||
-        (lesson.ownerId ? buildShareId(lesson.ownerId, lesson.id) : lesson.userId ? buildShareId(lesson.userId, lesson.id) : "");
+        (lesson.ownerId
+            ? buildShareId(lesson.ownerId, lesson.id)
+            : lesson.userId
+              ? buildShareId(lesson.userId, lesson.id)
+              : "");
 
     const viewPath = isShared ? `/flashcard/shared/${resolvedShareId}` : `/flashcard/${lesson.id}`;
     const speedPath = isShared
@@ -335,7 +411,7 @@ function DeckCard({
 
     return (
         <div
-            className={`${CARD_BASE} transition-all hover:-translate-y-0.5 hover:shadow-md ${SPACING.cardPadding}`}
+            className={`group relative ${CARD_BASE} transition-all hover:-translate-y-0.5 hover:shadow-md ${SPACING.cardPadding} hover:z-10`}
         >
             <div className="mb-4 flex items-start justify-between">
                 <div className="flex-1 pr-4">

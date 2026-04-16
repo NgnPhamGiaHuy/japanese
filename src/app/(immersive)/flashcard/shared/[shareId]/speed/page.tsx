@@ -146,6 +146,7 @@ export default function SharedSpeedPage({ params }: { params: Promise<{ shareId:
                 score={score}
                 bestScore={bestScore}
                 correctCount={correctCount}
+                totalQuestions={ui.totalQuestions}
                 maxStreak={maxStreak}
                 tierInfo={finalTierInfo}
                 gameMode={gameMode}

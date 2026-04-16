@@ -1,9 +1,9 @@
 /**
  * Core Flashcard domain model.
- * 
+ *
  * @remarks
- * Represents the fundamental unit of study. This structure combines static content 
- * (scripts, definitions) with dynamic SRS state (intervals, repetitions) and 
+ * Represents the fundamental unit of study. This structure combines static content
+ * (scripts, definitions) with dynamic SRS state (intervals, repetitions) and
  * enrichment metadata (mnemonics, distraction sets) used by game modes.
  */
 export interface FlashCard {
@@ -44,7 +44,9 @@ export interface FlashCard {
         meaningRecall?: number;
     };
 
-    /** Explicit sort order within the lesson — determines display sequence */
+    /** Explicit sort order within the lesson (Fractional Indexing) */
+    order?: number;
+    /** Legacy sort order field (deprecated) */
     sortOrder?: number;
 
     // AI-enriched fields
@@ -70,10 +72,10 @@ export type EditorCard = FlashCard & { imageFile?: File; previewUrl?: string };
 
 /**
  * Deck container for flashcards, including visibility and collaborative metadata.
- * 
+ *
  * @remarks
  * Lessons serve as the primary unit of shared knowledge. They manage ownership,
- * Role-Based Access Control (RBAC), and sharing identifiers while acting as 
+ * Role-Based Access Control (RBAC), and sharing identifiers while acting as
  * a registry for a set of related FlashCard documents.
  */
 export interface Lesson {
@@ -150,6 +152,9 @@ export interface Lesson {
     /** Brand color used for the deck's card components and UI highlights */
     themeColor?: string;
 
+    /** Explicit sort order on dashboard (Fractional Indexing) */
+    order?: number;
+
     /** If this lesson was imported from a shared source, the original lesson doc ID */
     sourceLessonId?: string;
     /** If this lesson was imported from a shared source, the original owner's UID */
@@ -158,7 +163,7 @@ export interface Lesson {
 
 /**
  * Snapshot of performance during a single learning/practice session.
- * 
+ *
  * @remarks
  * Used purely for transient session reporting and progress feedback.
  * These stats are typically aggregated into the global UserProgress service
@@ -187,7 +192,7 @@ export type StudyMode = "learn" | "practice" | "mistake-review";
  * High-level threaded feedback document attached to a specific card.
  *
  * @remarks
- * Implements a hybrid storage strategy: parents are top-level documents in 
+ * Implements a hybrid storage strategy: parents are top-level documents in
  * the Firestore collection, while replies are nested arrays to optimize
  * read performance for threaded views.
  */

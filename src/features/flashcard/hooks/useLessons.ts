@@ -189,6 +189,14 @@ export function useLessons() {
         [user],
     );
 
+    const reorderLesson = useCallback(
+        async (lessonId: string, newOrder: number): Promise<void> => {
+            if (!user) return;
+            await LessonService.reorderLesson(user.uid, lessonId, newOrder);
+        },
+        [user],
+    );
+
     return {
         ...state,
         updateLesson,
@@ -196,5 +204,6 @@ export function useLessons() {
         saveFullLesson,
         shareLesson,
         updateLessonRoles,
+        reorderLesson,
     };
 }

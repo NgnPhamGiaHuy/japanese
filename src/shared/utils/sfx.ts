@@ -50,7 +50,7 @@ function getContext(): AudioContext | null {
     return audioCtx;
 }
 
-/** 
+/**
  * Unlock audio context on first user gesture.
  * Mobile (iOS/Android) requires a direct "start" of a source node to fully prime the engine.
  */

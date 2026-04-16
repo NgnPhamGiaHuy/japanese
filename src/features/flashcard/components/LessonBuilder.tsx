@@ -8,11 +8,10 @@
 
 import { useEffect, useRef, useState } from "react";
 
-import { Reorder } from "framer-motion";
 import { Loader2, Plus, Sparkles, X } from "lucide-react";
 
 import { AIBulkPanel, useAICard } from "@/features/ai";
-import { Button } from "@/shared/components/ui";
+import { Button, ReorderList } from "@/shared/components/ui";
 import { useAlert } from "@/shared/providers";
 import { hexToThemeColor } from "@/shared/utils";
 import { useAppStore } from "@/store";
@@ -562,10 +561,10 @@ const LessonBuilder = ({
                         </div>
 
                         <div className="space-y-6">
-                            <Reorder.Group
+                            <ReorderList
                                 axis="y"
-                                values={cards}
                                 onReorder={setCards}
+                                items={cards}
                                 className="space-y-6"
                             >
                                 {cards.map((card, idx) => (
@@ -586,7 +585,7 @@ const LessonBuilder = ({
                                         }
                                     />
                                 ))}
-                            </Reorder.Group>
+                            </ReorderList>
 
                             {cards.length > 0 && (
                                 <div className="pt-4 pb-8">

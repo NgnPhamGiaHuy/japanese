@@ -95,7 +95,7 @@ interface ButtonProps {
     style?: React.CSSProperties;
 }
 
-export const Button = ({
+const Button = ({
     children,
     onClick,
     onMouseEnter,

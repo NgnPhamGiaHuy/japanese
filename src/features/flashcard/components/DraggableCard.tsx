@@ -1,9 +1,8 @@
 "use client";
 
-import { Reorder, useDragControls } from "framer-motion";
-import { GripVertical, Image as ImageIcon, Sparkles, Trash2 } from "lucide-react";
+import { Image as ImageIcon, Sparkles, Trash2 } from "lucide-react";
 
-import { Button } from "@/shared/components/ui";
+import { Button, ReorderItem } from "@/shared/components/ui";
 
 import type { EditorCard } from "../types";
 
@@ -38,26 +37,15 @@ const DraggableCard = ({
     onImageChange,
     onImageClear,
 }: DraggableCardProps) => {
-    const dragControls = useDragControls();
-
     return (
-        <Reorder.Item
+        <ReorderItem
             value={card}
-            dragListener={false}
-            dragControls={dragControls}
+            disabled={saving}
             className="group relative rounded-[2rem] border-2 border-b-8 border-gray-200 bg-white p-6 shadow-sm transition-colors select-none focus-within:border-[var(--theme-color)]"
         >
             {/* Index Badge */}
             <div className="absolute -top-3 -left-3 flex h-10 w-10 -rotate-3 transform items-center justify-center rounded-xl border-b-4 border-black bg-[#3c3c3c] text-lg font-black text-white shadow-sm transition-all group-active:scale-110">
                 {idx + 1}
-            </div>
-
-            {/* Drag Handle */}
-            <div
-                onPointerDown={(e) => dragControls.start(e)}
-                className="absolute top-1/2 -left-8 -translate-y-1/2 cursor-grab opacity-0 transition-all group-hover:opacity-100 hover:scale-110 active:cursor-grabbing md:-left-10"
-            >
-                <GripVertical size={24} className="text-gray-300 hover:text-gray-500" />
             </div>
 
             {/* Remove Button */}
@@ -217,7 +205,7 @@ const DraggableCard = ({
                     </div>
                 </div>
             </div>
-        </Reorder.Item>
+        </ReorderItem>
     );
 };
 

@@ -1,24 +1,24 @@
 {
-  "indexes": [
-    {
-      "collectionGroup": "notifications",
-      "queryScope": "COLLECTION",
-      "fields": [
-        { "fieldPath": "isDeleted", "order": "ASCENDING" },
-        { "fieldPath": "createdAt", "order": "DESCENDING" }
-      ]
-    }
-  ],
-  "fieldOverrides": [
-    {
-      "collectionGroup": "lessons",
-      "fieldPath": "roles",
-      "indexes": [
+    "indexes": [
         {
-          "queryScope": "COLLECTION_GROUP",
-          "order": "ASCENDING"
+            "collectionGroup": "notifications",
+            "queryScope": "COLLECTION",
+            "fields": [
+                { "fieldPath": "isDeleted", "order": "ASCENDING" },
+                { "fieldPath": "createdAt", "order": "DESCENDING" }
+            ]
         }
-      ]
-    }
-  ]
+    ],
+    "fieldOverrides": [
+        {
+            "collectionGroup": "lessons",
+            "fieldPath": "roles",
+            "indexes": [
+                {
+                    "queryScope": "COLLECTION_GROUP",
+                    "order": "ASCENDING"
+                }
+            ]
+        }
+    ]
 }

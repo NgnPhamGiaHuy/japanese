@@ -79,7 +79,8 @@ type NormalizeLessonInput = Lesson & {
  */
 export function normalizeLesson(raw: unknown): Lesson {
     const input = raw as NormalizeLessonInput;
-    const { __ownerIdFallback, sharedBy, sharedByName, sharedAt, ...doc } = input ?? ({} as NormalizeLessonInput);
+    const { __ownerIdFallback, sharedBy, sharedByName, sharedAt, ...doc } =
+        input ?? ({} as NormalizeLessonInput);
 
     const ownerId = (doc.ownerId ?? doc.userId ?? __ownerIdFallback) as string | undefined;
 
@@ -96,8 +97,9 @@ export function normalizeLesson(raw: unknown): Lesson {
 
     const lastSharedBy = (doc.lastSharedBy ?? sharedBy) as string | undefined;
     const lastSharedByName =
-        (doc.lastSharedByName ?? sharedByName) ??
-        (lastSharedBy ? doc.collaboratorMeta?.[lastSharedBy]?.displayName ?? null : null);
+        doc.lastSharedByName ??
+        sharedByName ??
+        (lastSharedBy ? (doc.collaboratorMeta?.[lastSharedBy]?.displayName ?? null) : null);
 
     const createdAt = typeof doc.createdAt === "number" ? doc.createdAt : Date.now();
 
@@ -109,11 +111,15 @@ export function normalizeLesson(raw: unknown): Lesson {
     const ownerNameFromMeta = ownerId ? doc.collaboratorMeta?.[ownerId]?.displayName : undefined;
     const ownerNameRaw = (doc.ownerName ?? ownerNameFromMeta ?? "Unknown") as unknown;
     const ownerName =
-        typeof ownerNameRaw === "string" && ownerNameRaw.trim().length > 0 ? ownerNameRaw : "Unknown";
+        typeof ownerNameRaw === "string" && ownerNameRaw.trim().length > 0
+            ? ownerNameRaw
+            : "Unknown";
 
     const ownerAvatarRaw = (doc.ownerAvatar ?? null) as unknown;
     const ownerAvatar =
-        typeof ownerAvatarRaw === "string" && ownerAvatarRaw.trim().length > 0 ? ownerAvatarRaw : null;
+        typeof ownerAvatarRaw === "string" && ownerAvatarRaw.trim().length > 0
+            ? ownerAvatarRaw
+            : null;
 
     const lastSharedByNameRaw = lastSharedByName as unknown;
     const lastSharedByNameFinal =
@@ -182,7 +188,12 @@ export function subscribeLessons(
         (snap) => {
             const lessons = snap.docs
                 .map((d) => normalizeLesson({ ...d.data(), id: d.id, __ownerIdFallback: userId }))
-                .sort((a, b) => b.createdAt - a.createdAt);
+                .sort((a, b) => {
+                    const aOrder = a.order ?? Infinity;
+                    const bOrder = b.order ?? Infinity;
+                    if (aOrder !== bOrder) return aOrder - bOrder;
+                    return b.createdAt - a.createdAt;
+                });
             onUpdate(lessons);
         },
         onError,
@@ -225,7 +236,12 @@ export function subscribeSharedLessons(
                 });
             })
             .filter((l) => l.roles?.[userId] !== "owner")
-            .sort((a: Lesson, b: Lesson) => b.createdAt - a.createdAt);
+            .sort((a: Lesson, b: Lesson) => {
+                const aOrder = a.order ?? Infinity;
+                const bOrder = b.order ?? Infinity;
+                if (aOrder !== bOrder) return aOrder - bOrder;
+                return b.createdAt - a.createdAt;
+            });
         onUpdate(lessons);
     };
 
@@ -248,16 +264,12 @@ export function subscribeSharedLessons(
     };
 
     const startRoles = () => {
-        currentUnsub = onSnapshot(
-            qRoles,
-            mapLessonsFromSnapshot,
-            (err) => {
-                console.warn("[subscribeSharedLessons] roles query failed, falling back:", err);
-                // Tear down roles listener and retry with the legacy collaborators query.
-                currentUnsub();
-                startCollaborators();
-            },
-        );
+        currentUnsub = onSnapshot(qRoles, mapLessonsFromSnapshot, (err) => {
+            console.warn("[subscribeSharedLessons] roles query failed, falling back:", err);
+            // Tear down roles listener and retry with the legacy collaborators query.
+            currentUnsub();
+            startCollaborators();
+        });
     };
 
     startRoles();
@@ -271,6 +283,17 @@ export function subscribeSharedLessons(
 export async function updateLesson(userId: string, lesson: Lesson): Promise<void> {
     const { id, ...data } = lesson;
     await setDoc(lessonDoc(userId, id), data, { merge: true });
+}
+
+/**
+ * Updates the order of a single lesson (O(1) write).
+ */
+export async function reorderLesson(
+    userId: string,
+    lessonId: string,
+    newOrder: number,
+): Promise<void> {
+    await updateDoc(lessonDoc(userId, lessonId), { order: newOrder });
 }
 
 /**
@@ -455,6 +478,7 @@ export async function saveLessonWithCards(
         const cardData = omitUndefined({
             ...rawData,
             lessonId: targetLessonId,
+            order: i * 1000,
             sortOrder: i,
             easeFactor: rawData.easeFactor ?? 2.5,
             interval: rawData.interval ?? 0,

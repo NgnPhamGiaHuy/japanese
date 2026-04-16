@@ -37,6 +37,7 @@ interface SpeedPlayingViewProps {
     };
     ui: {
         questionNumber: number;
+        totalQuestions: number;
         multiplier: number;
         secondsLeft: number;
         isUrgent: boolean;
@@ -79,7 +80,7 @@ const SpeedPlayingView = ({
 
                 <div className="flex flex-col items-center">
                     <span className="text-sm font-black text-[#3c3c3c]">
-                        Q{ui.questionNumber} / {SPEED_GAME_CONFIG.TOTAL_QUESTIONS}
+                        Q{ui.questionNumber} / {ui.totalQuestions}
                     </span>
                     <span
                         className="text-[10px] font-black"
@@ -237,7 +238,7 @@ const SpeedPlayingView = ({
             </div>
 
             <div className="flex justify-center gap-1 pb-6">
-                {Array.from({ length: SPEED_GAME_CONFIG.TOTAL_QUESTIONS }).map((_, index) => (
+                {Array.from({ length: ui.totalQuestions }).map((_, index) => (
                     <div
                         key={index}
                         className="h-1.5 w-1.5 rounded-full transition-colors"

@@ -15,6 +15,7 @@ import { LessonBuilder, useLessons } from "@/features/flashcard";
 import { useCards } from "@/features/flashcard/hooks";
 import { lessonDoc, normalizeLesson } from "@/features/flashcard/services";
 import { useAlert } from "@/shared/providers";
+import { sortByOrder } from "@/shared/utils";
 import { useAppStore } from "@/store";
 
 import type { FlashCard, Lesson } from "@/features/flashcard/types";
@@ -84,7 +85,11 @@ export default function FlashcardEditPage({ params }: { params: Promise<{ id: st
                         }),
                     );
                 }
-                setSharedCards(cardsSnap.docs.map((d) => ({ ...d.data(), id: d.id }) as FlashCard));
+                setSharedCards(
+                    sortByOrder(
+                        cardsSnap.docs.map((d) => ({ ...d.data(), id: d.id }) as FlashCard),
+                    ),
+                );
                 setLoadingShared(false);
             })
             .catch(() => setLoadingShared(false));

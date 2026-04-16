@@ -10,12 +10,29 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 
 import {
+    closestCenter,
+    DndContext,
+    KeyboardSensor,
+    MouseSensor,
+    TouchSensor,
+    useSensor,
+    useSensors,
+} from "@dnd-kit/core";
+import {
+    rectSortingStrategy,
+    SortableContext,
+    sortableKeyboardCoordinates,
+    useSortable,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
+import {
     ArrowLeft,
     BookOpen,
     Copy,
     CopyPlus,
     Edit2,
     Gamepad2,
+    GripVertical,
     Info,
     Loader2,
     Lock,
@@ -26,8 +43,10 @@ import {
 import { CommentPanel } from "@/features/flashcard/components";
 import { useCommentCount } from "@/features/flashcard/hooks";
 import { Button, UserMeta } from "@/shared/components/ui";
+import { reorderWithFractionalIndex } from "@/shared/utils/reorder";
 
-import type { FlashCard, Lesson } from "@/features/flashcard/types";
+import type { DragEndEvent } from "@dnd-kit/core";
+import type { FlashCard, Lesson } from "@/features/flashcard/types"; // ─── Types ────────────────────────────────────────────────────────────────────
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -69,6 +88,8 @@ interface FlashcardDetailLayoutProps {
     onManageAccess?: () => void;
     /** Visual loading state for duplication */
     saving?: boolean;
+    /** Callback for O(1) single card reordering */
+    onReorderCard?: (cardId: string, newOrder: number) => Promise<void>;
 }
 
 // ─── Comment badge (per-card, needs own component to avoid hook-in-loop) ─────
@@ -123,18 +144,21 @@ export default function FlashcardDetailLayout({
     onEdit,
     onManageAccess,
     saving = false,
+    onReorderCard,
 }: FlashcardDetailLayoutProps) {
     const { lesson, cards, ownerId, lessonId, role, isOwner, basePath } = ctx;
     const themeHex = lesson.themeColor || "#1cb0f6";
     const canPlay = cards.length >= 4;
     const canEdit = role === "owner" || role === "editor";
     const canComment = role === "owner" || role === "editor" || role === "commenter";
+    const [orderedCards, setOrderedCards] = useState(cards);
 
     const createdByName = lesson.ownerName ?? "Unknown";
     const createdByAvatar = lesson.ownerAvatar ?? null;
 
     const sharedByName = lesson.lastSharedByName ?? "Unknown";
-    const shouldShowSharedBy = !!lesson.lastSharedBy && (!lesson.ownerId || lesson.lastSharedBy !== lesson.ownerId);
+    const shouldShowSharedBy =
+        !!lesson.lastSharedBy && (!lesson.ownerId || lesson.lastSharedBy !== lesson.ownerId);
     const sharedBySubtitle =
         currentUserId && lesson.lastSharedBy === currentUserId ? "You shared" : "Shared by";
 
@@ -142,6 +166,41 @@ export default function FlashcardDetailLayout({
     const [selectedCardId, setSelectedCardId] = useState<string | null>(
         cards.length > 0 ? cards[0].id : null,
     );
+
+    useEffect(() => {
+        setOrderedCards(cards);
+    }, [cards]);
+
+    const sensors = useSensors(
+        useSensor(MouseSensor, { activationConstraint: { distance: 8 } }),
+        useSensor(TouchSensor, { activationConstraint: { delay: 250, tolerance: 5 } }),
+        useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
+    );
+
+    const handleDragEnd = async (event: DragEndEvent) => {
+        const { active, over } = event;
+        if (!over || active.id === over.id) return;
+
+        const oldIndex = orderedCards.findIndex((c) => c.id === active.id);
+        const newIndex = orderedCards.findIndex((c) => c.id === over.id);
+        if (oldIndex === -1 || newIndex === -1) return;
+
+        const { nextItems, movedId, newOrder } = reorderWithFractionalIndex(
+            orderedCards,
+            oldIndex,
+            newIndex,
+        );
+
+        setOrderedCards(nextItems);
+
+        if (!onReorderCard) return;
+        try {
+            await onReorderCard(movedId, newOrder);
+        } catch (err) {
+            console.error("[handleDragEnd] Reorder failed:", err);
+            setOrderedCards(cards);
+        }
+    };
 
     /** Ensure page starts at top on mount or deck change */
     useEffect(() => {
@@ -202,7 +261,11 @@ export default function FlashcardDetailLayout({
                         )}
 
                         <div className="mt-2 flex flex-col gap-2">
-                            <UserMeta name={createdByName} avatar={createdByAvatar} subtitle="Created by" />
+                            <UserMeta
+                                name={createdByName}
+                                avatar={createdByAvatar}
+                                subtitle="Created by"
+                            />
                             {shouldShowSharedBy && (
                                 <UserMeta
                                     name={sharedByName}
@@ -529,63 +592,32 @@ export default function FlashcardDetailLayout({
                     {/* CENTER PANEL — scrolls with page */}
                     <main className="flex flex-col">
                         <h2 className="mb-4 border-b-2 border-gray-200 pb-2 text-xl font-black text-[#3c3c3c]">
-                            Preview ({cards.length} Cards)
+                            Preview ({orderedCards.length} Cards)
                         </h2>
                         <div className="grid gap-4 sm:grid-cols-2">
-                            {cards.map((card, idx) => (
-                                <div
-                                    key={card.id || idx}
-                                    onClick={() => setSelectedCardId(card.id)}
-                                    className={`group flex cursor-pointer flex-col rounded-2xl border-2 bg-white p-5 shadow-sm transition-shadow hover:shadow-md ${
-                                        selectedCardId === card.id
-                                            ? "border-[var(--theme)]"
-                                            : "border-gray-200"
-                                    }`}
-                                    style={
-                                        selectedCardId === card.id
-                                            ? ({
-                                                  "--theme": themeHex,
-                                                  borderColor: themeHex,
-                                              } as React.CSSProperties)
-                                            : undefined
-                                    }
+                            <DndContext
+                                sensors={sensors}
+                                collisionDetection={closestCenter}
+                                onDragEnd={handleDragEnd}
+                            >
+                                <SortableContext
+                                    items={orderedCards.map((c) => c.id)}
+                                    strategy={rectSortingStrategy}
                                 >
-                                    <div className="flex-1">
-                                        <div className="mb-1 flex items-start justify-between gap-2">
-                                            {/* Concept-first display text */}
-                                            <span className="text-3xl font-medium text-[#3c3c3c]">
-                                                {card.primary}
-                                            </span>
-                                            <CardCommentBadge
-                                                ownerId={ownerId}
-                                                lessonId={lessonId}
-                                                cardId={card.id}
-                                            />
-                                        </div>
-                                        {card.alternatives.length > 0 && (
-                                            <div className="text-sm font-bold text-gray-400">
-                                                {card.alternatives[0]}
-                                            </div>
-                                        )}
-                                        <div
-                                            className="mt-3 text-lg font-black"
-                                            style={{ color: themeHex }}
-                                        >
-                                            {card.meaning}
-                                        </div>
-                                    </div>
-                                    {card.imageUrl && (
-                                        <div className="mt-4 h-32 overflow-hidden rounded-xl border-2 border-gray-100 bg-gray-50">
-                                            {/* eslint-disable-next-line @next/next/no-img-element */}
-                                            <img
-                                                src={card.imageUrl}
-                                                alt="Card preview"
-                                                className="h-full w-full object-contain"
-                                            />
-                                        </div>
-                                    )}
-                                </div>
-                            ))}
+                                    {orderedCards.map((card) => (
+                                        <SortableCardItem
+                                            key={card.id}
+                                            card={card}
+                                            isSelected={selectedCardId === card.id}
+                                            onClick={() => setSelectedCardId(card.id)}
+                                            themeHex={themeHex}
+                                            ownerId={ownerId}
+                                            lessonId={lessonId}
+                                            canReorder={canEdit}
+                                        />
+                                    ))}
+                                </SortableContext>
+                            </DndContext>
                         </div>
                     </main>
 
@@ -624,6 +656,123 @@ export default function FlashcardDetailLayout({
                         ) : null}
                     </aside>
                 </div>
+            </div>
+        </div>
+    );
+}
+
+/**
+ * SortableCardItem Component
+ *
+ * @remarks
+ * Uses a 2D sortable grid implementation.
+ */
+function SortableCardItem({
+    card,
+    isSelected,
+    onClick,
+    themeHex,
+    ownerId,
+    lessonId,
+    canReorder,
+}: {
+    card: FlashCard;
+    isSelected: boolean;
+    onClick: () => void;
+    themeHex: string;
+    ownerId: string;
+    lessonId: string;
+    canReorder: boolean;
+}) {
+    const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+        id: card.id,
+        disabled: !canReorder,
+    });
+
+    const style = {
+        transform: CSS.Transform.toString(transform),
+        transition,
+        zIndex: isDragging ? 50 : undefined,
+        opacity: isDragging ? 0.72 : undefined,
+        "--theme": themeHex,
+        borderColor: isSelected ? themeHex : undefined,
+    } as React.CSSProperties;
+
+    return (
+        <div
+            ref={setNodeRef}
+            style={style}
+            className={`group relative flex flex-col rounded-3xl border-2 bg-white p-6 shadow-sm transition-all hover:bg-gray-50/50 hover:shadow-md active:border-blue-200 active:bg-blue-50/50 ${
+                isSelected ? "border-[var(--theme)]" : "border-gray-200"
+            }`}
+        >
+            {canReorder && (
+                <button
+                    type="button"
+                    {...attributes}
+                    {...listeners}
+                    className="absolute top-3 right-3 z-10 flex h-9 w-9 cursor-pointer items-center justify-center rounded-full bg-gray-100 text-gray-400 transition-colors hover:bg-gray-200 hover:text-gray-600 active:cursor-grabbing"
+                    aria-label="Reorder card"
+                    onClick={(e) => e.stopPropagation()}
+                >
+                    <GripVertical size={18} />
+                </button>
+            )}
+
+            <div
+                onClick={(e) => {
+                    if ((e.target as HTMLElement).closest("button")) return;
+                    onClick();
+                }}
+                onMouseDown={(e) => {
+                    const target = e.target as HTMLElement;
+                    if (
+                        target.classList.contains("select-text") ||
+                        target.closest(".select-text")
+                    ) {
+                        e.stopPropagation();
+                    }
+                }}
+                className="flex flex-1 cursor-pointer flex-col"
+            >
+                <div className="flex-1">
+                    <div className="mb-2 flex items-start justify-between gap-4">
+                        {/* Concept: Large, clear, and selectable with text-specific cursor */}
+                        <span className="cursor-text text-3xl font-black tracking-tight text-[#3c3c3c] select-text">
+                            {card.primary}
+                        </span>
+                        <div className="shrink-0 pt-1">
+                            <CardCommentBadge
+                                ownerId={ownerId}
+                                lessonId={lessonId}
+                                cardId={card.id}
+                            />
+                        </div>
+                    </div>
+
+                    {card.alternatives.length > 0 && (
+                        <div className="mb-4 cursor-text text-sm font-bold text-[#afafaf] select-text">
+                            {card.alternatives[0]}
+                        </div>
+                    )}
+
+                    <div
+                        className="mt-auto inline-block cursor-text rounded-xl px-0 py-1 text-xl font-black select-text"
+                        style={{ color: themeHex }}
+                    >
+                        {card.meaning}
+                    </div>
+                </div>
+
+                {card.imageUrl && (
+                    <div className="mt-6 aspect-video overflow-hidden rounded-2xl border-2 border-gray-50 bg-gray-50/50">
+                        <img
+                            src={card.imageUrl}
+                            alt="Card preview"
+                            className="h-full w-full object-contain transition-transform duration-500 group-hover:scale-[1.02]"
+                        />
+                    </div>
+                )}
             </div>
         </div>
     );

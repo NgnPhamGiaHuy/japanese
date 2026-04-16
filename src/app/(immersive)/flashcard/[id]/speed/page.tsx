@@ -133,6 +133,7 @@ export default function SpeedQuizPage({ params }: { params: Promise<{ id: string
                 score={score}
                 bestScore={bestScore}
                 correctCount={correctCount}
+                totalQuestions={ui.totalQuestions}
                 maxStreak={maxStreak}
                 tierInfo={finalTierInfo}
                 gameMode={gameMode}

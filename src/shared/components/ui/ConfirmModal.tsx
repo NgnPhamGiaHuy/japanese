@@ -40,7 +40,7 @@ const VARIANTS = {
     },
 };
 
-export const ConfirmModal = ({
+const ConfirmModal = ({
     isOpen,
     onClose,
     onConfirm,
