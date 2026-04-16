@@ -16,7 +16,7 @@ import {
     TIER_INFO,
 } from "@/features/game";
 import { ScreenHeader } from "@/shared/components/layout";
-import { Button } from "@/shared/components/ui";
+import { Button, ConfirmModal } from "@/shared/components/ui";
 import { CARD_BASE, SPACING } from "@/shared/constants";
 import { useAlert } from "@/shared/providers";
 import { hexToThemeColor } from "@/shared/utils";
@@ -58,6 +58,8 @@ export default function FlashcardIndexPage() {
     }, [user]);
 
     const [sharingLesson, setSharingLesson] = useState<Lesson | null>(null);
+    const [deletingLesson, setDeletingLesson] = useState<Lesson | null>(null);
+    const [isDeleting, setIsDeleting] = useState(false);
 
     const displayLessons = activeTab === "personal" ? lessons : sharedLessons;
 
@@ -202,17 +204,7 @@ export default function FlashcardIndexPage() {
                                 isShared={activeTab === "shared"}
                                 matchStats={gameStats[matchGameMode(lesson.id)]}
                                 speedStats={gameStats[speedGameMode(lesson.id)]}
-                                onDelete={async () => {
-                                    if (confirm("Delete this deck?")) {
-                                        try {
-                                            await deleteLesson(lesson.id);
-                                            showAlert("success", "Deck deleted");
-                                        } catch (err) {
-                                            console.error("[FlashcardIndex] Delete failed:", err);
-                                            showAlert("error", "Failed to delete deck");
-                                        }
-                                    }
-                                }}
+                                onDelete={() => setDeletingLesson(lesson)}
                                 onShare={() => setSharingLesson(lesson)}
                             />
                         ))}
@@ -237,6 +229,30 @@ export default function FlashcardIndexPage() {
                         />
                     );
                 })()}
+
+            <ConfirmModal
+                isOpen={!!deletingLesson}
+                onClose={() => setDeletingLesson(null)}
+                onConfirm={async () => {
+                    if (!deletingLesson) return;
+                    setIsDeleting(true);
+                    try {
+                        await deleteLesson(deletingLesson.id);
+                        showAlert("success", "Deck deleted");
+                        setDeletingLesson(null);
+                    } catch (err) {
+                        console.error("[FlashcardIndex] Delete failed:", err);
+                        showAlert("error", "Failed to delete deck");
+                    } finally {
+                        setIsDeleting(false);
+                    }
+                }}
+                title="Delete Deck?"
+                message={`Are you sure you want to permanent delete "${deletingLesson?.title}"? This action cannot be undone.`}
+                confirmText="Delete"
+                variant="danger"
+                loading={isDeleting}
+            />
         </div>
     );
 }
