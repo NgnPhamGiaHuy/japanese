@@ -1,3 +1,3 @@
 export * from "./useKanaDataset";
-export * from "./useQuizEngine";
+export * from "./useKanaQuizSession";
 export * from "./useSurvivalGame";

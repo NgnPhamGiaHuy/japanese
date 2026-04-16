@@ -1,23 +1,39 @@
+/**
+ * Kana Survival Mode session hook.
+ *
+ * @remarks
+ * Orchestrates three challenge modes:
+ * - Infinity: 3 lives, survive as long as possible
+ * - Time Attack: countdown timer, streaks add time, wrong answers cost seconds
+ * - Drop: real-time falling characters typed via keyboard
+ *
+ * Uses the engine's session infrastructure (useGameSession) for Firestore sync
+ * with the same stable-ref pattern used across all game mode hooks.
+ *
+ * Drop Mode uses a requestAnimationFrame loop and is incompatible with
+ * GameEngine's Q&A loop — it remains self-contained here.
+ */
+
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 
 import { comboMultiplier, useGameSession } from "@/features/game";
 import { getValidRomaji, playSFX } from "@/shared/utils";
-import { useQuizEngine } from "./useQuizEngine";
+import { useKanaQuizSession } from "./useKanaQuizSession";
 
 import type { ChallengeMode, DropWord, KanaChar, SurvivalPhase } from "../types";
 
-/** Time Attack: seconds removed on each wrong answer. */
+/** Seconds removed from the clock on each wrong answer in Time Attack. */
 export const TIME_ATTACK_WRONG_PENALTY_SEC = 10;
 
 /**
- * Max seconds granted per correct — must stay **below** {@link TIME_ATTACK_WRONG_PENALTY_SEC}
- * so mistakes drain the clock and runs always end.
+ * Maximum seconds added per correct answer in Time Attack.
+ * Kept below {@link TIME_ATTACK_WRONG_PENALTY_SEC} so the clock always runs out.
  */
 export const TIME_ATTACK_MAX_STREAK_BONUS_SEC = 2;
 
-/** Bonus after a correct answer (uses streak *after* this hit). Capped under wrong penalty. */
+/** Bonus seconds after a correct answer, capped below the wrong penalty. */
 const timeAttackStreakBonusSec = (streakAfterCorrect: number): number =>
     Math.min(TIME_ATTACK_MAX_STREAK_BONUS_SEC, 1 + streakAfterCorrect);
 
@@ -30,6 +46,17 @@ interface UseSurvivalGameProps {
     onSaveScore: (score: number, name: string, modeKey: string) => void;
 }
 
+/**
+ * Survival Mode session controller.
+ *
+ * @remarks
+ * Manages the full lifecycle of a survival session:
+ * - Mode selection (infinity / time / drop)
+ * - Lives tracking and game-over detection
+ * - Time Attack countdown with streak bonuses
+ * - Drop Mode RAF loop with progressive difficulty
+ * - Firestore session sync via useGameSession
+ */
 export const useSurvivalGame = ({
     dataset,
     alphabet,
@@ -51,9 +78,6 @@ export const useSurvivalGame = ({
 
     const isGameOverRef = useRef(false);
     const challengeModeRef = useRef(challengeMode);
-    useEffect(() => {
-        challengeModeRef.current = challengeMode;
-    }, [challengeMode]);
 
     const activeModeKey =
         challengeMode === "infinity"
@@ -62,7 +86,6 @@ export const useSurvivalGame = ({
               ? `time_${timeMinutes}_${alphabet}`
               : `drop_${alphabet}`;
 
-    // ── Firebase session ─────────────────────────────────────────────────────
     const { startSession, syncScore, endSession } = useGameSession({
         userId,
         userName: userName || localName || "Player",
@@ -70,6 +93,38 @@ export const useSurvivalGame = ({
         currentBest,
     });
 
+    // Stable refs — keeps callbacks current without triggering session rebuilds.
+    const syncScoreRef = useRef(syncScore);
+    const endSessionRef = useRef(endSession);
+    const onSaveScoreRef = useRef(onSaveScore);
+    const userNameRef = useRef(userName);
+    const localNameRef = useRef(localName);
+    const activeModeKeyRef = useRef(activeModeKey);
+
+    /**
+     * Keeps all callback refs current after every render.
+     *
+     * @remarks
+     * useLayoutEffect runs synchronously before the browser paints, ensuring
+     * refs are fresh before any subsequent effect or event handler reads them.
+     */
+    useLayoutEffect(() => {
+        syncScoreRef.current = syncScore;
+        endSessionRef.current = endSession;
+        onSaveScoreRef.current = onSaveScore;
+        userNameRef.current = userName;
+        localNameRef.current = localName;
+        activeModeKeyRef.current = activeModeKey;
+        challengeModeRef.current = challengeMode;
+    });
+
+    /**
+     * Quiz engine for infinity and time attack modes.
+     *
+     * @remarks
+     * Combo scoring enabled — streaks multiply points.
+     * Time Attack bonus is applied inside onCorrectCombo.
+     */
     const onCorrectCombo = useCallback((info: { points: number; streak: number }) => {
         setLastPoints(info.points);
         setPointsAnimKey(Date.now());
@@ -82,7 +137,13 @@ export const useSurvivalGame = ({
         });
     }, []);
 
-    const engine = useQuizEngine(dataset, { comboScoring: true, onCorrectCombo });
+    const engine = useKanaQuizSession({
+        dataset,
+        gameMode: activeModeKey,
+        userId,
+        displayName: userName || localName,
+        onCorrectCombo,
+    });
 
     // ── Time-attack countdown ─────────────────────────────────────────────────
     useEffect(() => {
@@ -93,6 +154,7 @@ export const useSurvivalGame = ({
             isGameOverRef.current
         )
             return;
+
         const timer = setInterval(() => setTimeLeft((t) => Math.max(0, t - 1)), 1000);
         return () => clearInterval(timer);
     }, [phase, challengeMode, timeLeft]);
@@ -107,28 +169,18 @@ export const useSurvivalGame = ({
         ) {
             isGameOverRef.current = true;
             const finalScore = engine.score;
-            onSaveScore(finalScore, userName || localName, activeModeKey);
-            endSession(finalScore);
+            onSaveScoreRef.current(finalScore, userNameRef.current || localNameRef.current, activeModeKeyRef.current);
+            void endSessionRef.current(finalScore);
             setPhase("gameover");
         }
-    }, [
-        timeLeft,
-        phase,
-        challengeMode,
-        activeModeKey,
-        engine.score,
-        userName,
-        localName,
-        onSaveScore,
-        endSession,
-    ]);
+    }, [timeLeft, phase, challengeMode, engine.score]);
 
-    // ── Live score sync → Firestore (debounced via useGameSession) ────────────
+    // ── Live score sync ───────────────────────────────────────────────────────
     useEffect(() => {
         if (phase === "playing") {
-            syncScore(engine.score);
+            syncScoreRef.current(engine.score);
         }
-    }, [engine.score, phase, syncScore]);
+    }, [engine.score, phase]);
 
     // ── Game start ───────────────────────────────────────────────────────────
     const startGame = useCallback(() => {
@@ -139,6 +191,7 @@ export const useSurvivalGame = ({
         isGameOverRef.current = false;
         dropScore.current = 0;
         dropStreak.current = 0;
+
         if (challengeMode === "time") {
             const initial = timeMinutes * 60;
             setTimeLeft(initial);
@@ -146,35 +199,37 @@ export const useSurvivalGame = ({
         } else {
             setTimeLeft(0);
         }
+
         engine.generateQuestion();
         setPhase("playing");
-        // Create Firebase session asynchronously
-        startSession();
+        void startSession();
     }, [challengeMode, timeMinutes, engine, startSession]);
 
-    // ── Answer handling ───────────────────────────────────────────────────────
+    // ── Answer handling (infinity / time) ────────────────────────────────────
     const handleAnswer = useCallback(
         (isCorrect: boolean) => {
             if (!isCorrect && challengeMode === "time") {
                 setTimeLeft((t) => Math.max(0, t - TIME_ATTACK_WRONG_PENALTY_SEC));
             }
+
             if (!isCorrect && challengeMode === "infinity") {
                 const newLives = lives - 1;
                 setLives(newLives);
                 if (newLives <= 0 && !isGameOverRef.current) {
                     isGameOverRef.current = true;
                     const finalScore = engine.score;
-                    onSaveScore(finalScore, userName || localName, activeModeKey);
-                    endSession(finalScore);
+                    onSaveScoreRef.current(finalScore, userNameRef.current || localNameRef.current, activeModeKeyRef.current);
+                    void endSessionRef.current(finalScore);
                     setPhase("gameover");
                     return;
                 }
             }
+
             engine.processAnswer(isCorrect, () => {
                 if (!isGameOverRef.current) engine.generateQuestion();
             });
         },
-        [challengeMode, lives, engine, userName, localName, activeModeKey, onSaveScore, endSession],
+        [challengeMode, lives, engine],
     );
 
     // ── Drop game state ───────────────────────────────────────────────────────
@@ -190,6 +245,17 @@ export const useSurvivalGame = ({
     const dropScore = useRef(0);
     const dropStreak = useRef(0);
 
+    /**
+     * RAF loop for Drop Mode.
+     *
+     * @remarks
+     * Spawns falling characters with progressive difficulty:
+     * - Speed increases over time
+     * - Spawn interval decreases
+     * - More complex character groups unlock after 30/60/90 seconds
+     *
+     * Words that fall off screen cost a life. Lives reaching 0 ends the game.
+     */
     const updateDropGame = useCallback(
         (time: number) => {
             if (isGameOverRef.current) return;
@@ -207,17 +273,8 @@ export const useSurvivalGame = ({
 
             if (time - (state.lastSpawn || 0) > spawnInterval && state.words.length < maxWords) {
                 const allowedGroups = [
-                    "vowels",
-                    "k-row",
-                    "s-row",
-                    "t-row",
-                    "n-row",
-                    "h-row",
-                    "m-row",
-                    "y-row",
-                    "r-row",
-                    "w-row",
-                    "n-misc",
+                    "vowels", "k-row", "s-row", "t-row", "n-row",
+                    "h-row", "m-row", "y-row", "r-row", "w-row", "n-misc",
                 ];
                 if (elapsed > 30) allowedGroups.push("dakuten", "handakuten");
                 if (elapsed > 60) allowedGroups.push("yōon", "yōon-voiced");
@@ -259,8 +316,8 @@ export const useSurvivalGame = ({
                     if (n <= 0 && !isGameOverRef.current) {
                         isGameOverRef.current = true;
                         const finalScore = dropScore.current;
-                        onSaveScore(finalScore, userName || localName, activeModeKey);
-                        endSession(finalScore);
+                        onSaveScoreRef.current(finalScore, userNameRef.current || localNameRef.current, activeModeKeyRef.current);
+                        void endSessionRef.current(finalScore);
                         setPhase("gameover");
                     }
                     return n;
@@ -272,7 +329,7 @@ export const useSurvivalGame = ({
             setDropTick((t) => t + 1);
             if (!isGameOverRef.current) rafRef.current = requestAnimationFrame(updateDropGame);
         },
-        [dataset, userName, localName, activeModeKey, onSaveScore, endSession],
+        [dataset],
     );
 
     useEffect(() => {
@@ -291,6 +348,14 @@ export const useSurvivalGame = ({
         return () => cancelAnimationFrame(rafRef.current);
     }, [phase, challengeMode, updateDropGame]);
 
+    /**
+     * Handles keyboard input for Drop Mode.
+     *
+     * @remarks
+     * Matches typed characters against falling words' valid romaji options.
+     * Activates the lowest (most urgent) matching word on first keypress.
+     * Completes a word when the full romaji is typed.
+     */
     const handleDropTyping = useCallback(
         (inputChar: string) => {
             if (!inputChar.match(/[a-z]/)) return;
@@ -358,12 +423,13 @@ export const useSurvivalGame = ({
         },
         [engine],
     );
+
+    // ── Drop score sync ───────────────────────────────────────────────────────
     useEffect(() => {
         if (phase === "playing" && challengeMode === "drop") {
-            syncScore(dropScore.current);
+            syncScoreRef.current(dropScore.current);
         }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [dropTick, phase, challengeMode, syncScore]);
+    }, [dropTick, phase, challengeMode]);
 
     return {
         phase,

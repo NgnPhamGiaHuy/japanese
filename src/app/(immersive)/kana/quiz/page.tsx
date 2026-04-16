@@ -9,58 +9,65 @@ import {
     gameQuizStreakColumnClassName,
     StreakComboBadge,
 } from "@/features/game/components";
-import { useKanaDataset, useQuizEngine } from "@/features/kana/hooks";
+import { useKanaDataset, useKanaQuizSession } from "@/features/kana/hooks";
 import { ScreenHeader, ScreenHeaderBackButton, ScreenHeaderRow } from "@/shared/components/layout";
 import { Button } from "@/shared/components/ui";
 import { checkTypedAnswer } from "@/shared/utils";
+import { useAppStore } from "@/store";
 
 type QuizMode = "choice" | "type" | "smart";
 
-const TARGET_SCORE = 20;
-
 const KanaQuizPage = () => {
     const { dataset, alphabet, themeColor } = useKanaDataset();
+    const { user } = useAppStore();
 
     const [quizMode, setQuizMode] = useState<QuizMode>("choice");
     const [typedInput, setTypedInput] = useState("");
     const [phase, setPhase] = useState<"setup" | "playing" | "done">("setup");
 
-    const engine = useQuizEngine(dataset);
+    const session = useKanaQuizSession({
+        dataset,
+        gameMode: `kana_quiz_${alphabet}`,
+        userId: user?.uid,
+        displayName: user?.displayName,
+    });
 
     const startQuiz = (mode: QuizMode) => {
         setQuizMode(mode);
-        engine.resetEngine();
-        if (mode === "smart") engine.buildSmartDeck(TARGET_SCORE);
-        engine.generateQuestion(mode === "type" ? "type" : "read");
+        session.startQuiz();
+        if (mode === "smart") session.buildSmartDeck(session.targetScore);
+        session.generateQuestion(mode === "type" ? "type" : "read");
         setPhase("playing");
     };
 
     const handleMCAnswer = (option: { romaji: string }) => {
-        if (engine.status !== "idle" || !engine.question) return;
-        const isCorrect = option.romaji === engine.question.romaji;
-        const nextScore = engine.score + (isCorrect ? 1 : 0);
+        if (session.status !== "idle" || !session.question) return;
+        const isCorrect = option.romaji === session.question.romaji;
+        const nextScore = session.score + (isCorrect ? 1 : 0);
 
-        engine.processAnswer(isCorrect, () => {
+        session.processAnswer(isCorrect, () => {
             setTypedInput("");
-            if (nextScore >= TARGET_SCORE) {
+            if (nextScore >= session.targetScore) {
+                session.finishQuiz(nextScore);
                 setPhase("done");
             } else {
-                engine.generateQuestion(quizMode === "type" ? "type" : "read");
+                session.generateQuestion(quizMode === "type" ? "type" : "read");
             }
         });
     };
 
     const handleTypeAnswer = () => {
-        if (engine.status !== "idle" || !engine.question) return;
-        const isCorrect = checkTypedAnswer(typedInput, engine.question.romaji);
-        const nextScore = engine.score + (isCorrect ? 1 : 0);
+        if (session.status !== "idle" || !session.question) return;
+        const isCorrect = checkTypedAnswer(typedInput, session.question.romaji);
+        const nextScore = session.score + (isCorrect ? 1 : 0);
 
-        engine.processAnswer(isCorrect, () => {
+        session.processAnswer(isCorrect, () => {
             setTypedInput("");
-            if (nextScore >= TARGET_SCORE) {
+            if (nextScore >= session.targetScore) {
+                session.finishQuiz(nextScore);
                 setPhase("done");
             } else {
-                engine.generateQuestion("type");
+                session.generateQuestion("type");
             }
         });
     };
@@ -145,7 +152,7 @@ const KanaQuizPage = () => {
 
     // ---- DONE ----
     if (phase === "done") {
-        const isPerfect = engine.score >= TARGET_SCORE;
+        const isPerfect = session.score >= session.targetScore;
         return (
             <div className="fixed inset-0 z-50 flex flex-col overflow-y-auto bg-[#F7F7F8]">
                 <div className="mx-auto flex w-full max-w-md flex-col items-center px-4 py-8">
@@ -161,9 +168,9 @@ const KanaQuizPage = () => {
                     <p className="mb-1 text-xl font-bold text-[#afafaf]">
                         Score:{" "}
                         <span className={`mx-1 text-3xl font-black ${themeColor.text}`}>
-                            {engine.score}
+                            {session.score}
                         </span>
-                        <span className="text-base text-[#afafaf]">/ {TARGET_SCORE}</span>
+                        <span className="text-base text-[#afafaf]">/ {session.targetScore}</span>
                     </p>
                     <p className="mb-6 text-sm font-bold text-[#afafaf]">
                         {isPerfect ? "You answered all questions correctly!" : "Keep practising!"}
@@ -191,7 +198,7 @@ const KanaQuizPage = () => {
     }
 
     // ---- PLAYING ----
-    const { question, questionType, options, status, score, streak } = engine;
+    const { question, questionType, options, status, score, streak } = session;
 
     return (
         <div className="fixed inset-0 z-50 flex flex-col bg-[#F7F7F8]">
@@ -205,7 +212,7 @@ const KanaQuizPage = () => {
                     <div
                         className={`h-full rounded-full transition-all duration-500 ease-out ${themeColor.bg}`}
                         style={{
-                            width: `${Math.min((score / TARGET_SCORE) * 100, 100)}%`,
+                            width: `${Math.min((score / session.targetScore) * 100, 100)}%`,
                         }}
                     />
                 </div>
@@ -214,7 +221,7 @@ const KanaQuizPage = () => {
                     <span
                         className={`text-[10px] font-black tabular-nums md:text-sm ${themeColor.text}`}
                     >
-                        {score}/{TARGET_SCORE}
+                        {score}/{session.targetScore}
                     </span>
                 </div>
             </ScreenHeaderRow>
@@ -261,7 +268,8 @@ const KanaQuizPage = () => {
                                         state =
                                             "bg-[#58cc02] text-white border-[#58a700] translate-y-[2px] border-b-2";
                                     else
-                                        state = "bg-white border-gray-200 text-gray-300 opacity-50";
+                                        state =
+                                            "bg-white border-gray-200 text-gray-300 opacity-50";
                                 }
                                 return (
                                     <Button
