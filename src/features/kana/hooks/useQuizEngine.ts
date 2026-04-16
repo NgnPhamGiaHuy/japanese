@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 
 import { comboMultiplier } from "@/features/game";
 import { useUserProgress } from "@/features/user";
-import { allowAudio, playAudio, shuffleArray } from "@/shared/utils";
+import { allowAudio, playAudio, playSFX, shuffleArray } from "@/shared/utils";
 import { VISUAL_GROUPS } from "../data";
 
 import type { KanaChar, QuestionType } from "../types";
@@ -126,8 +126,10 @@ export function useQuizEngine(dataset: KanaChar[], opts?: QuizEngineOptions) {
                 setStreak(nextStreak);
                 const pts = comboScoring ? comboMultiplier(nextStreak) : 1;
                 setScore((s) => s + pts);
+                playSFX("correct");
                 onCorrectComboRef.current?.({ points: pts, streak: nextStreak });
             } else {
+                playSFX("wrong");
                 streakRef.current = 0;
                 setStreak(0);
                 if (question) {

@@ -10,7 +10,7 @@ import {
     timerColor,
 } from "@/features/game/modes";
 import { recordGameResult } from "@/features/game/services";
-import { allowAudio, playAudio, shuffleArray } from "@/shared/utils";
+import { allowAudio, playAudio, playSFX, shuffleArray } from "@/shared/utils";
 import { buildQuestion, chooseQuestionType, getAudioText } from "../utils";
 
 import type { FlashCard } from "../types";
@@ -111,15 +111,18 @@ export function useSpeedModeSession({
 
     const handleTimeout = useCallback(() => {
         stopTimer();
+        playSFX("wrong");
         setAnswerStatus("wrong");
         setStreak(0);
         setTimerFraction(0);
-        if (currentCard && allowAudio("speed", "feedback")) playAudio(getAudioText(currentCard));
+        if (currentCard && allowAudio("speed", "feedback")) {
+            setTimeout(() => playAudio(getAudioText(currentCard)), 250);
+        }
         setTimeout(() => {
             setAnswerStatus("idle");
             setSelectedOption(null);
             setQuestionIndex((prev) => prev + 1);
-        }, 600);
+        }, 1100);
     }, [currentCard, stopTimer]);
 
     const startQuestionTimer = useCallback(
@@ -215,6 +218,7 @@ export function useSpeedModeSession({
                 const points = calcSpeedPoints(remaining, questionLimitRef.current, newStreak);
                 const nextScore = score + points;
 
+                playSFX("correct");
                 setAnswerStatus("correct");
                 setStreak(newStreak);
                 setMaxStreak((prev) => Math.max(prev, newStreak));
@@ -222,18 +226,23 @@ export function useSpeedModeSession({
                 setScore(nextScore);
                 syncScore(nextScore);
 
-                if (allowAudio("speed", "feedback")) playAudio(getAudioText(currentCard));
+                if (allowAudio("speed", "feedback")) {
+                    setTimeout(() => playAudio(getAudioText(currentCard)), 250);
+                }
             } else {
+                playSFX("wrong");
                 setAnswerStatus("wrong");
                 setStreak(0);
-                if (allowAudio("speed", "feedback")) playAudio(getAudioText(currentCard));
+                if (allowAudio("speed", "feedback")) {
+                    setTimeout(() => playAudio(getAudioText(currentCard)), 250);
+                }
             }
 
             setTimeout(() => {
                 setAnswerStatus("idle");
                 setSelectedOption(null);
                 setQuestionIndex((prev) => prev + 1);
-            }, 700);
+            }, 1100);
         },
         [answerStatus, currentCard, currentQuestion, score, stopTimer, streak, syncScore],
     );

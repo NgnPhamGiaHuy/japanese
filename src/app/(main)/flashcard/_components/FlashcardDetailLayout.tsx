@@ -7,7 +7,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import {
     ArrowLeft,
@@ -134,6 +134,11 @@ export default function FlashcardDetailLayout({
     const [selectedCardId, setSelectedCardId] = useState<string | null>(
         cards.length > 0 ? cards[0].id : null,
     );
+
+    /** Ensure page starts at top on mount or deck change */
+    useEffect(() => {
+        window.scrollTo(0, 0);
+    }, [lessonId]);
 
     return (
         <div className="min-h-screen bg-[#F7F7F8]">

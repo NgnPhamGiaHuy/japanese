@@ -11,7 +11,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Check, Lightbulb, RefreshCw, Volume2, X } from "lucide-react";
 
 import { Button } from "@/shared/components/ui";
-import { hexToThemeColor, playAudio, shuffleArray } from "@/shared/utils";
+import { hexToThemeColor, playAudio, playSFX, shuffleArray } from "@/shared/utils";
 import { useAppStore } from "@/store";
 import { getDailyProgress, incrementDailyReviewCount, reinsertCard } from "../logic/learningEngine";
 import { gradeCard } from "../services/card.service";
@@ -166,6 +166,11 @@ export const FlashcardPractice = ({
         setIsFlipped(false);
         setHintVisible(false);
         setMcSelected(null);
+        if (knew) {
+            playSFX("correct");
+        } else {
+            playSFX("wrong");
+        }
 
         await gradeCard(userId, card.id, card, grade);
         await incrementDailyReviewCount(userId);
@@ -265,7 +270,10 @@ export const FlashcardPractice = ({
                             {card.hint && (
                                 <Button
                                     variant="ghost"
-                                    onClick={() => setHintVisible((v) => !v)}
+                                    onClick={() => {
+                                        playSFX("click");
+                                        setHintVisible((v) => !v);
+                                    }}
                                     className="absolute top-4 left-4 !rounded-xl border-2 border-gray-100 bg-gray-50 !p-2 shadow-none transition-colors hover:bg-gray-100 hover:shadow-none"
                                     title="Show hint"
                                     icon={Lightbulb}
@@ -359,7 +367,10 @@ export const FlashcardPractice = ({
                     <>
                         <div
                             className={`perspective-1000 preserve-3d relative flex aspect-3/4 w-full cursor-pointer flex-col justify-center transition-all duration-500 ${isFlipped ? "rotate-y-180" : ""}`}
-                            onClick={() => setIsFlipped((f) => !f)}
+                            onClick={() => {
+                                playSFX("click");
+                                setIsFlipped((f) => !f);
+                            }}
                         >
                             {/* Front Side */}
                             <div className="absolute inset-0 flex flex-col items-center justify-center rounded-[2.5rem] border-2 border-b-8 border-gray-200 bg-white p-6 text-center shadow-sm backface-hidden hover:-translate-y-1 hover:shadow-md">
@@ -397,6 +408,7 @@ export const FlashcardPractice = ({
                                         variant="ghost"
                                         onClick={(e) => {
                                             e.stopPropagation();
+                                            playSFX("click");
                                             setHintVisible((v) => !v);
                                         }}
                                         className="absolute bottom-6 left-6 !flex !items-center !gap-1.5 !rounded-xl border-2 border-gray-100 bg-gray-50 !px-3 !py-1.5 !text-[10px] !font-black tracking-wide uppercase shadow-none hover:shadow-none"

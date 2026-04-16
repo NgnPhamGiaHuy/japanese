@@ -12,7 +12,7 @@ import { AlertCircle, Brain, Check, Lightbulb, Loader2, Volume2, X } from "lucid
 
 import { useAICard } from "@/features/ai";
 import { Button } from "@/shared/components/ui";
-import { hexToThemeColor, playAudio, shuffleArray } from "@/shared/utils";
+import { hexToThemeColor, playAudio, playSFX, shuffleArray } from "@/shared/utils";
 import { useAppStore } from "@/store";
 import { reinsertCard } from "../logic/learningEngine";
 import { gradeCard } from "../services/card.service";
@@ -177,6 +177,11 @@ export const FlashcardMistakeReview = ({
             mistakeCardIds: nextMistakes,
         };
         setStats(nextStats);
+        if (knew) {
+            playSFX("correct");
+        } else {
+            playSFX("wrong");
+        }
         setIsFlipped(false);
         setMcSelected(null);
 
@@ -359,7 +364,10 @@ export const FlashcardMistakeReview = ({
                     <>
                         <div
                             className={`perspective-1000 preserve-3d relative flex aspect-3/4 w-full cursor-pointer flex-col justify-center transition-all duration-500 ${isFlipped ? "rotate-y-180" : ""}`}
-                            onClick={() => setIsFlipped((f) => !f)}
+                            onClick={() => {
+                                playSFX("click");
+                                setIsFlipped((f) => !f);
+                            }}
                         >
                             {/* Front (Recall Trigger) */}
                             <div className="absolute inset-0 flex flex-col items-center justify-center rounded-[2.5rem] border-2 border-b-8 border-[#ea2b2b]/20 bg-white p-6 text-center shadow-sm backface-hidden hover:-translate-y-1 hover:shadow-md">

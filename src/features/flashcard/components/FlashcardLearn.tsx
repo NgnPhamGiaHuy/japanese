@@ -11,7 +11,7 @@ import { useEffect, useRef, useState } from "react";
 import { BookOpen, Volume2, X } from "lucide-react";
 
 import { Button } from "@/shared/components/ui";
-import { hexToThemeColor, playAudio } from "@/shared/utils";
+import { hexToThemeColor, playAudio, playSFX } from "@/shared/utils";
 import { useAppStore } from "@/store";
 import { reinsertCard } from "../logic/learningEngine";
 import { gradeCard } from "../services/card.service";
@@ -90,6 +90,7 @@ export const FlashcardLearn = ({
     const progress = (currentIndex / queue.length) * 100;
 
     const handleShowAnswer = () => {
+        playSFX("click");
         setRevealed(true);
     };
 
@@ -102,6 +103,11 @@ export const FlashcardLearn = ({
             mistakeCardIds: nextMistakes,
         };
         setStats(nextStats);
+        if (knew) {
+            playSFX("correct");
+        } else {
+            playSFX("wrong");
+        }
 
         // Call gradeCard directly for SM-2 precision
         await gradeCard(userId, card.id, card, grade);

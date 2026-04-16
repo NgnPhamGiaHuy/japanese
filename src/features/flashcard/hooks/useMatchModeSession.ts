@@ -7,7 +7,7 @@ import { useGameSession } from "@/features/game/hooks";
 import type { MatchDifficulty } from "@/features/game/modes";
 import { calcMatchPoints, calcTimeBonus, comboLabel, DIFFICULTY_CONFIG, WRONG_PENALTY, } from "@/features/game/modes";
 import { recordGameResult } from "@/features/game/services";
-import { allowAudio, playAudio, shuffleArray } from "@/shared/utils";
+import { allowAudio, playAudio, playSFX, shuffleArray } from "@/shared/utils";
 import { gradeCard } from "../services";
 import type { MatchItem } from "../stores/useMatchGameStore";
 import { useMatchGameStore } from "../stores/useMatchGameStore";
@@ -149,6 +149,7 @@ export function useMatchModeSession({
                 !a.isDistractor && !b.isDistractor && a.pairId != null && a.pairId === b.pairId;
 
             if (isMatch) {
+                playSFX("correct");
                 setStreak((prev) => {
                     const newStreak = prev + 1;
                     const points = calcMatchPoints(newStreak);
@@ -172,26 +173,28 @@ export function useMatchModeSession({
 
                 useMatchGameStore.getState().addMatchedPairId(a.pairId!);
 
-                // Grade the matched card as "Good" automatically
+                // Play pronunciation with a slight delay so SFX "ting" is heard first
                 if (userId && a.pairId) {
                     const card = cards.find((c) => c.id === a.pairId);
                     if (card) {
                         void gradeCard(userId, a.pairId, card, "Good").catch(() => {});
-                    }
-                }
 
-                if (allowAudio("match", "feedback")) {
-                    const source = cards.find((c) => c.id === a.pairId);
-                    if (source) playAudio(getAudioText(source));
+                        if (allowAudio("match", "feedback")) {
+                            setTimeout(() => {
+                                playAudio(getAudioText(card));
+                            }, 300);
+                        }
+                    }
                 }
 
                 setTimeout(() => {
                     useMatchGameStore.getState().setProcessing(false);
-                }, 180);
+                }, 400);
                 return;
             }
 
             // Wrong match
+            playSFX("wrong");
             setStreak(0);
             setWrongAttempts((prev) => prev + 1);
             setScore((prev) => {
@@ -226,6 +229,7 @@ export function useMatchModeSession({
             }
 
             if (current.selectedIds.length === 0) {
+                playSFX("click");
                 current.setSelected([id]);
                 return;
             }
@@ -236,6 +240,7 @@ export function useMatchModeSession({
                     current.setSelected([]);
                     return;
                 }
+                playSFX("click");
                 current.setSelected([first, id]);
                 current.setProcessing(true);
                 setTimeout(() => resolveTwo(first, id), 120);

@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import { comboMultiplier, useGameSession } from "@/features/game";
-import { getValidRomaji } from "@/shared/utils";
+import { getValidRomaji, playSFX } from "@/shared/utils";
 import { useQuizEngine } from "./useQuizEngine";
 
 import type { ChallengeMode, DropWord, KanaChar, SurvivalPhase } from "../types";
@@ -305,11 +305,13 @@ export const useSurvivalGame = ({
                     if (still.length > 0) {
                         target.typed = newTyped;
                         target.validOptions = still;
+                        playSFX("click");
                         hit = true;
                         if (still.some((o) => o === newTyped)) {
                             state.words = state.words.filter((w) => w.id !== target.id);
                             state.activeId = null;
                             dropStreak.current += 1;
+                            playSFX("correct");
                             const pts = comboMultiplier(dropStreak.current);
                             dropScore.current += pts;
                             setLastPoints(pts);
@@ -330,11 +332,13 @@ export const useSurvivalGame = ({
                         o.startsWith(inputChar),
                     );
                     state.activeId = target.id;
+                    playSFX("click");
                     hit = true;
                     if (target.validOptions.some((o) => o === inputChar)) {
                         state.words = state.words.filter((w) => w.id !== target.id);
                         state.activeId = null;
                         dropStreak.current += 1;
+                        playSFX("correct");
                         const pts = comboMultiplier(dropStreak.current);
                         dropScore.current += pts;
                         setLastPoints(pts);
@@ -345,6 +349,7 @@ export const useSurvivalGame = ({
 
             if (!hit) {
                 dropStreak.current = 0;
+                playSFX("wrong");
                 engine.setStatus("wrong");
                 setErrorFlash(true);
                 setTimeout(() => setErrorFlash(false), 200);
