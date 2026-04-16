@@ -78,33 +78,6 @@ export interface SpeedDifficultyConfig {
     color: string;
 }
 
-/**
- * Maps question index (0-based) to a difficulty level.
- * Uses thresholds defined in the config.
- */
-export function getDifficultyForQuestion(questionIndex: number): SpeedDifficulty {
-    const levels = SPEED_GAME_CONFIG.LEVELS;
-    if (questionIndex < levels[2].threshold) return 1;
-    if (questionIndex < levels[3].threshold) return 2;
-    return 3;
-}
-
-// ─── Score helpers ────────────────────────────────────────────────────────────
-
-/**
- * Calculates the score for a single correct answer.
- *
- * @param timeRemaining  Seconds left on the question timer.
- * @param timeLimit      Total seconds allowed for this question.
- * @param streak         Consecutive correct streak INCLUDING this answer.
- */
-export function calcSpeedPoints(timeRemaining: number, timeLimit: number, streak: number): number {
-    const { BASE_POINTS, MAX_SPEED_BONUS, COMBO_STEP } = SPEED_GAME_CONFIG.SCORING;
-    const speedRatio = Math.max(0, timeRemaining / timeLimit);
-    const speedBonus = Math.round(speedRatio * MAX_SPEED_BONUS);
-    const multiplier = Math.floor(streak / COMBO_STEP) + 1;
-    return (BASE_POINTS + speedBonus) * multiplier;
-}
 
 /** Timer bar color based on fraction of time remaining (1 = full, 0 = expired). */
 export function timerColor(fraction: number): string {

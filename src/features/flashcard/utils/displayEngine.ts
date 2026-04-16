@@ -70,54 +70,6 @@ export function buildQuestion(
     return { prompt: card.meaning, answer: pickPrimaryText(card) };
 }
 
-export type MatchDifficultyTier = 1 | 2 | 3 | 4;
-
-/** One question-type for the whole round when pairType is `fixed` (no per-card mixing). */
-export function pickFixedRoundQuestionType(
-    cards: FlashCard[],
-    difficultyTier: MatchDifficultyTier,
-): QuestionType {
-    const base = cards[0];
-    if (!base) return "primary_to_meaning";
-    const supported = getSupportedQuestionTypes(base);
-    if (difficultyTier <= 2) {
-        return supported.includes("primary_to_meaning") ? "primary_to_meaning" : supported[0];
-    }
-    if (difficultyTier === 3 && supported.includes("meaning_to_primary") && Math.random() < 0.35) {
-        return "meaning_to_primary";
-    }
-    return "primary_to_meaning";
-}
-
-export function buildQuestionFallback(
-    card: FlashCard,
-    type: QuestionType,
-): { prompt: string; answer: string } {
-    if (type === "example_to_primary" && !card.example?.trim()) {
-        return buildQuestion(card, "primary_to_meaning");
-    }
-    if (type === "alternative_to_primary" && !pickAlternative(card)) {
-        return buildQuestion(card, "primary_to_meaning");
-    }
-    return buildQuestion(card, type);
-}
-
-/**
- * Picks a representation mapping per card (mixed Master uses interleaving).
- * When `pairType` is fixed, pass `fixedRoundType` from `pickFixedRoundQuestionType`.
- */
-export function chooseMatchQuestionTypeForCard(
-    card: FlashCard,
-    pairType: "fixed" | "mixed",
-    fixedRoundType: QuestionType,
-    difficulty: MatchDifficultyTier,
-    preferPrimary: boolean,
-): QuestionType {
-    if (pairType === "mixed") {
-        return chooseQuestionType(card, { difficulty: Math.min(3, difficulty), preferPrimary });
-    }
-    return fixedRoundType;
-}
 
 // ─── Display_Engine: resolveCardFaces ────────────────────────────────────────
 
