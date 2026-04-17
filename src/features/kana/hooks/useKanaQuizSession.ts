@@ -115,7 +115,6 @@ export function useKanaQuizSession({
         userId: userId ?? null,
         userName: displayName ?? "Player",
         gameMode,
-        currentBest: bestScore,
     });
 
     // Stable refs so callbacks never hold stale closures.

@@ -214,30 +214,6 @@ export async function gradeCard(
     });
 }
 
-/**
- * Core SRS Algorithm (SM2-inspired) — backward-compatible wrapper around `gradeCard`.
- *
- * @remarks
- * Maps the binary `knew` flag to a `Grade`:
- * - `knew = true`  → `"Good"`
- * - `knew = false` → `"Again"`
- *
- * @param userId - UID of the card owner.
- * @param cardId - Target card ID.
- * @param currentCard - Prior state for differential calculation.
- * @param knew - The user's self-reported recall status.
- *
- * @deprecated Prefer `gradeCard` with an explicit `Grade` for full SM-2 precision.
- */
-export async function updateCardProgress(
-    userId: string,
-    cardId: string,
-    currentCard: FlashCard,
-    knew: boolean,
-): Promise<void> {
-    return gradeCard(userId, cardId, currentCard, knew ? "Good" : "Again");
-}
-
 // ─── Reset Progress ───────────────────────────────────────────────────────
 
 const FRESH_SRS_STATE = {

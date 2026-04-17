@@ -46,13 +46,23 @@ const MatchGame = ({ data }: MatchGameProps) => {
     const gameMode = data.gameMode("match");
     const bestScore = useFlashcardGameBestScore(user?.uid, gameMode);
 
+    const isSharedContext = data.source.type === "shared";
+    const shareId = isSharedContext
+        ? (data.source as { type: "shared"; shareId: string }).shareId
+        : undefined;
+    const sourceUserId = isSharedContext ? (data.lesson.ownerId ?? undefined) : undefined;
+    const sourceLessonId = isSharedContext ? data.lesson.id : undefined;
+
     const game = useMatchModeSession({
         cards: data.cards,
         gameMode,
-        bestScore,
         userId: user?.uid,
         displayName: user?.displayName,
         addXP,
+        isSharedContext,
+        shareId,
+        sourceUserId,
+        sourceLessonId,
     });
 
     const tier = scoreToTier(bestScore);

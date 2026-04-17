@@ -145,7 +145,7 @@ export function useLessons() {
 
     /**
      * Toggles public sharing for a lesson.  Generates a stable shareId,
-     * writes `isPublic` and `publicRole` to Firestore.
+     * writes `isPublic`, `allowLinkAccess`, and `publicRole` to Firestore.
      *
      * Delegates entirely to the service — no Firebase calls here.
      */
@@ -154,6 +154,7 @@ export function useLessons() {
             lessonId: string,
             allowLinkAccess: boolean,
             publicRole: Lesson["publicRole"],
+            isPublic?: boolean,
         ): Promise<void> => {
             if (!user) return;
             await LessonService.shareLessonSettings(
@@ -164,6 +165,7 @@ export function useLessons() {
                 user.uid,
                 user.displayName ?? null,
                 user.photoURL ?? null,
+                isPublic,
             );
         },
         [user],
@@ -190,9 +192,9 @@ export function useLessons() {
     );
 
     const reorderLesson = useCallback(
-        async (lessonId: string, newOrder: number): Promise<void> => {
+        async (ownerId: string, lessonId: string, newOrder: number): Promise<void> => {
             if (!user) return;
-            await LessonService.reorderLesson(user.uid, lessonId, newOrder);
+            await LessonService.reorderLesson(ownerId, lessonId, newOrder);
         },
         [user],
     );
@@ -206,4 +208,38 @@ export function useLessons() {
         updateLessonRoles,
         reorderLesson,
     };
+}
+
+/**
+ * Real-time hook for publicly discoverable flashcard decks from all users.
+ *
+ * @remarks
+ * Subscribes to all lessons where `isPublic === true` via a collectionGroup query.
+ * Excludes the current user's own decks (they already appear in "My Decks").
+ * Safe to call when unauthenticated — returns an empty list.
+ */
+export function usePublicLessons() {
+    const user = useAppStore((s) => s.user);
+    const [publicLessons, setPublicLessons] = useState<Lesson[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+
+    useEffect(() => {
+        setLoading(true);
+        const unsub = LessonService.subscribePublicLessons(
+            user?.uid ?? null,
+            (lessons) => {
+                setPublicLessons(lessons);
+                setLoading(false);
+            },
+            (err) => {
+                console.error("[usePublicLessons]", err);
+                setError("Failed to load public decks");
+                setLoading(false);
+            },
+        );
+        return unsub;
+    }, [user?.uid]);
+
+    return { publicLessons, loading, error };
 }

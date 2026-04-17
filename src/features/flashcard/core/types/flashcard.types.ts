@@ -241,29 +241,15 @@ export interface Reply {
 }
 
 /**
- * Contextual author metadata used for UI resolution (badges, permissions).
+ * Deep-readonly projection of Lesson for shared contexts.
+ * Sensitive RBAC fields are omitted — callers cannot read or write them.
  */
-export interface CommentAuthorInfo {
-    /** Foreign key to Auth system */
-    userId: string;
-    /** Resolved display name */
-    displayName?: string;
-    /** Fallback contact string */
-    email?: string;
-    /** Current calculated role for the current deck scope */
-    role: "owner" | "editor" | "commenter" | "viewer";
-    /** Avatar URL reference */
-    photoURL?: string;
-}
+export type SharedLessonViewModel = Readonly<
+    Omit<Lesson, "roles" | "collaborators" | "invitedEmails" | "collaboratorMeta">
+>;
 
 /**
- * Aggregate social metrics for a specific card.
+ * Deep-readonly projection of FlashCard for shared contexts.
+ * SRS fields are present as read-only snapshots; no writes are permitted.
  */
-export interface CardCommentMeta {
-    /** Reference card */
-    cardId: string;
-    /** Total engagement count (Parents + Replies) */
-    totalComments: number;
-    /** Count of active threads requiring attention */
-    unresolvedCount: number;
-}
+export type SharedCardViewModel = Readonly<FlashCard>;

@@ -25,7 +25,6 @@ export function useBestScores() {
     const saveScore = useCallback(
         async (score: number, playerName: string, modeKey: string) => {
             if (!user) return;
-            const currentBest = bestScores[modeKey] ?? 0;
             const displayName = (user.displayName || playerName || "Player").substring(0, 20);
             try {
                 await submitScore({
@@ -33,13 +32,12 @@ export function useBestScores() {
                     displayName,
                     gameMode: modeKey,
                     score,
-                    currentBest,
                 });
             } catch (err) {
                 console.error("[useBestScores] Save error:", err);
             }
         },
-        [user, bestScores],
+        [user],
     );
 
     return { bestScores, saveScore };

@@ -1,3 +1,4 @@
+;
 /**
  * Service orchestrator for Lesson (Deck) metadata and atomic deep-saves.
  *
@@ -8,26 +9,38 @@
  * 3. **Diff-based Saving**: Complex atomic upsert that normalizes IDs and garbage-collects unused assets.
  */
 
-import {
-    collection,
-    collectionGroup,
-    doc,
-    getDocs,
-    onSnapshot,
-    query,
-    setDoc,
-    updateDoc,
-    where,
-    writeBatch,
-} from "firebase/firestore";
+/**
+ * Service orchestrator for Lesson (Deck) metadata and atomic deep-saves.
+ *
+ * @remarks
+ * High-value logic zone:
+ * 1. **RT Subscription**: Syncs deck metadata.
+ * 2. **Deep-Deletes**: Batch commitment to clear entire card collections plus Storage blobs.
+ * 3. **Diff-based Saving**: Complex atomic upsert that normalizes IDs and garbage-collects unused assets.
+ */
+/**
+ * Service orchestrator for Lesson (Deck) metadata and atomic deep-saves.
+ *
+ * @remarks
+ * High-value logic zone:
+ * 1. **RT Subscription**: Syncs deck metadata.
+ * 2. **Deep-Deletes**: Batch commitment to clear entire card collections plus Storage blobs.
+ * 3. **Diff-based Saving**: Complex atomic upsert that normalizes IDs and garbage-collects unused assets.
+ */
+import { collection, collectionGroup, doc, getDocs, onSnapshot, query, setDoc, updateDoc, where, writeBatch } from "firebase/firestore";
+
+
 
 import { APP_ID, db } from "@/lib/firebase";
 import { cardDoc, cardsCol } from "./card.service";
 import { deleteCardImage } from "./image.service";
-import { CardValidationError, validateAtomicCard } from "../utils/card.validator";
+import { CardValidationError, validateAtomicCard } from "../utils";
+
+
 
 import type { Unsubscribe } from "firebase/firestore";
-import type { FlashCard, Lesson } from "../types";
+import type { FlashCard, Lesson } from "../types"; // ─── Firestore path helpers ────────────────────────────────────────────────
+
 
 // ─── Firestore path helpers ────────────────────────────────────────────────
 
@@ -276,7 +289,45 @@ export function subscribeSharedLessons(
     return () => currentUnsub();
 }
 
-// ─── Read operations ───────────────────────────────────────────────────────
+/**
+ * Real-time subscription to all publicly discoverable lessons across all users.
+ *
+ * @remarks
+ * Uses a collectionGroup query on `isPublic == true`. Requires the Firestore
+ * index defined in firestore.indexes.json for collectionGroup "lessons" on isPublic.
+ * Results are sorted by creation date descending (newest first).
+ * Excludes the current user's own decks so they don't see duplicates.
+ */
+export function subscribePublicLessons(
+    currentUserId: string | null,
+    onUpdate: (lessons: Lesson[]) => void,
+    onError: (err: Error) => void,
+): Unsubscribe {
+    const extractOwnerIdFromPath = (docPath: string): string | undefined => {
+        const parts = docPath.split("/");
+        const usersIdx = parts.indexOf("users");
+        if (usersIdx === -1) return undefined;
+        return parts[usersIdx + 1];
+    };
+
+    const q = query(collectionGroup(db, "lessons"), where("isPublic", "==", true));
+
+    return onSnapshot(
+        q,
+        (snap) => {
+            const lessons: Lesson[] = snap.docs
+                .map((d) => {
+                    const ownerId = extractOwnerIdFromPath(d.ref.path);
+                    return normalizeLesson({ ...d.data(), id: d.id, __ownerIdFallback: ownerId });
+                })
+                // Exclude the viewer's own decks — they already appear in "My Decks".
+                .filter((l) => !currentUserId || l.ownerId !== currentUserId)
+                .sort((a, b) => b.createdAt - a.createdAt);
+            onUpdate(lessons);
+        },
+        onError,
+    );
+}
 
 // ─── Write operations ──────────────────────────────────────────────────────
 
@@ -298,6 +349,9 @@ export async function reorderLesson(
 
 /**
  * Updates link-based share settings for a lesson.
+ *
+ * @param isPublic - When true, the deck is fully public and discoverable without a link.
+ *                   When false with allowLinkAccess true, the deck is link-only (not discoverable).
  */
 export async function shareLessonSettings(
     userId: string,
@@ -307,6 +361,7 @@ export async function shareLessonSettings(
     sharedById: string,
     sharedByName?: string | null,
     sharedByAvatar?: string | null,
+    isPublic?: boolean,
 ): Promise<void> {
     const shareId = buildShareId(userId, lessonId);
     await setDoc(
@@ -315,7 +370,7 @@ export async function shareLessonSettings(
             shareId,
             allowLinkAccess,
             publicRole,
-            isPublic: allowLinkAccess,
+            isPublic: isPublic ?? allowLinkAccess,
             lastSharedBy: sharedById,
             lastSharedByName: sharedByName ?? null,
             lastSharedByAvatar: sharedByAvatar ?? null,

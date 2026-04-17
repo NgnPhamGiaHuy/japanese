@@ -1,15 +1,29 @@
 import { useRouter } from "next/navigation";
 
-import { BookOpen, Plus } from "lucide-react";
+import { BookOpen, Plus, Sparkles } from "lucide-react";
 
 import { Button } from "@/shared/components/ui";
 
 interface DashboardEmptyProps {
-    activeTab: "personal" | "shared";
+    activeTab: "personal" | "shared" | "discover";
 }
 
 const DashboardEmpty = ({ activeTab }: DashboardEmptyProps) => {
     const router = useRouter();
+
+    if (activeTab === "discover") {
+        return (
+            <div className="py-20 text-center">
+                <div className="mx-auto mb-6 flex h-24 w-24 -rotate-6 items-center justify-center rounded-[2rem] border-b-8 border-[#46a302] bg-[#58cc02] text-white shadow-sm">
+                    <Sparkles size={48} strokeWidth={3} />
+                </div>
+                <h2 className="mb-2 text-2xl font-black text-[#3c3c3c]">No public decks yet</h2>
+                <p className="font-bold text-[#afafaf]">
+                    Public decks from other learners will appear here.
+                </p>
+            </div>
+        );
+    }
 
     return (
         <div className="py-20 text-center">

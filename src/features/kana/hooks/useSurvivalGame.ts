@@ -42,7 +42,6 @@ interface UseSurvivalGameProps {
     alphabet: string;
     userId: string | null;
     userName: string;
-    currentBest?: number;
     onSaveScore: (score: number, name: string, modeKey: string) => void;
 }
 
@@ -62,7 +61,6 @@ export const useSurvivalGame = ({
     alphabet,
     userId,
     userName,
-    currentBest = 0,
     onSaveScore,
 }: UseSurvivalGameProps) => {
     const [phase, setPhase] = useState<SurvivalPhase>("setup");
@@ -90,7 +88,6 @@ export const useSurvivalGame = ({
         userId,
         userName: userName || localName || "Player",
         gameMode: activeModeKey,
-        currentBest,
     });
 
     // Stable refs — keeps callbacks current without triggering session rebuilds.

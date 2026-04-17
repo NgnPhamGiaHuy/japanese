@@ -78,11 +78,10 @@ export default function FlashcardDetailPage({ params }: { params: Promise<{ id: 
     };
 
     /**
-     * Generates a unique share link based on existing shareId or a newly generated one.
-     * Uses the browser clipboard API.
+     * Copies the share link to clipboard.
+     * Always available — opens ShareModal first if sharing hasn't been enabled yet.
      */
     const handleCopyLink = async () => {
-        if (!lesson.shareId && !lesson.allowLinkAccess) return;
         const shareId = lesson.shareId || buildShareId(user.uid, id);
         await navigator.clipboard.writeText(
             `${window.location.origin}/flashcard/shared/${shareId}`,
@@ -100,7 +99,7 @@ export default function FlashcardDetailPage({ params }: { params: Promise<{ id: 
                 currentUserName={user.displayName}
                 currentUserEmail={user.email}
                 linkCopied={linkCopied}
-                onCopyLink={lesson.shareId || lesson.allowLinkAccess ? handleCopyLink : undefined}
+                onCopyLink={handleCopyLink}
                 onManageAccess={() => setSharingLesson(true)}
                 onEdit={() => router.push(`/flashcard/${id}/edit`)}
                 onReorderCard={reorderCard}
@@ -109,8 +108,8 @@ export default function FlashcardDetailPage({ params }: { params: Promise<{ id: 
             {sharingLesson && (
                 <ShareModal
                     lesson={lesson}
-                    onShareLink={async (allowLinkAccess, publicRole) => {
-                        await shareLesson(id, allowLinkAccess, publicRole);
+                    onShareLink={async (allowLinkAccess, publicRole, isPublic) => {
+                        await shareLesson(id, allowLinkAccess, publicRole, isPublic);
                     }}
                     onUpdateRoles={async (roles, collabs) => {
                         await updateLessonRoles(id, roles, collabs);

@@ -59,7 +59,6 @@ export interface GameResultInput {
     displayName: string;
     gameMode: string;
     score: number;
-    currentBest?: number;
 }
 
 // ─── Internal helpers ─────────────────────────────────────────────────────────
@@ -176,10 +175,6 @@ export const updateGameScore = async (sessionId: string, score: number): Promise
 /**
  * Marks a session as finished and flushes the final score to both the public
  * leaderboard and the user's personal best (only if `finalScore` is a new high).
- *
- * @remarks
- * The `currentBest` parameter is now IGNORED - the function fetches the latest
- * value from the database atomically to prevent race conditions.
  */
 export const finishGameSession = async (
     sessionId: string,
@@ -187,7 +182,6 @@ export const finishGameSession = async (
     userId: string,
     displayName: string,
     gameMode: string,
-    currentBest: number = 0, // ⚠️ DEPRECATED: Kept for backward compatibility, not used
 ): Promise<void> => {
     try {
         await updateDoc(doc(sessionsCol(), sessionId), {
@@ -204,23 +198,15 @@ export const finishGameSession = async (
 };
 
 /**
- * Standalone score submission — use when there is no managed session
- * (e.g. a short one-shot game that skips the full session lifecycle).
- *
+ * Standalone score submission — use when there is no managed session.
  * Promotes the score to the leaderboard and personal best if it is a new high.
- *
- * @remarks
- * The `currentBest` parameter is now IGNORED - the function fetches the latest
- * value from the database atomically to prevent race conditions.
  */
 export const submitScore = async ({
     userId,
     displayName,
     gameMode,
     score,
-    currentBest = 0, // ⚠️ DEPRECATED: Kept for backward compatibility, not used
 }: GameResultInput): Promise<void> => {
-    // ✅ No longer passes currentBest - fetched atomically inside
     await persistBestScore(userId, displayName, gameMode, score);
 };
 
@@ -283,19 +269,14 @@ export interface GameStatEntry {
 
 /**
  * Records a completed game.
- *  - Always increments `totalGames` and stamps `lastPlayedAt`.
- *  - Promotes `bestScore` + `tier` on the leaderboard iff `score` is a new high.
- *
- * @remarks
- * The `currentBest` parameter is now IGNORED - the function fetches the latest
- * value from the database atomically to prevent race conditions.
+ * Always increments `totalGames` and stamps `lastPlayedAt`.
+ * Promotes `bestScore` + `tier` on the leaderboard iff `score` is a new high.
  */
 export const recordGameResult = async (
     userId: string,
     displayName: string,
     gameMode: string,
     score: number,
-    currentBest: number = 0, // ⚠️ DEPRECATED: Kept for backward compatibility, not used
 ): Promise<void> => {
     const now = new Date().toISOString();
 

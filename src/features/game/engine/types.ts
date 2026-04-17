@@ -135,6 +135,14 @@ export interface GameEngineConfig {
     onSessionEnd: (finalScore: number) => Promise<void>;
     onAudioPlay?: (text: string) => void;
     onSFXPlay?: (sfx: "correct" | "wrong" | "click") => void;
+    /** When true, overrides score/session callbacks to write to viewer's sharedProgress only. */
+    isSharedContext?: boolean;
+    /** Required when isSharedContext is true — the shareId from the URL token. */
+    shareId?: string;
+    /** UID of the deck owner; used to scope sharedProgress writes. */
+    sourceUserId?: string;
+    /** Lesson ID of the source deck; stored in sharedProgress documents. */
+    sourceLessonId?: string;
 }
 
 /**

@@ -40,6 +40,10 @@ interface UseSpeedModeSessionParams {
     userId?: string;
     displayName?: string | null;
     addXP: (amount: number) => Promise<void>;
+    isSharedContext?: boolean;
+    shareId?: string;
+    sourceUserId?: string;
+    sourceLessonId?: string;
 }
 
 /**
@@ -61,6 +65,10 @@ export function useSpeedModeSession({
     userId,
     displayName,
     addXP,
+    isSharedContext,
+    shareId,
+    sourceUserId,
+    sourceLessonId,
 }: UseSpeedModeSessionParams) {
     const strategy = useMemo(() => new SpeedModeStrategy(), []);
 
@@ -77,6 +85,10 @@ export function useSpeedModeSession({
         userId,
         displayName: displayName ?? undefined,
         addXP,
+        isSharedContext,
+        shareId,
+        sourceUserId,
+        sourceLessonId,
     });
 
     /**

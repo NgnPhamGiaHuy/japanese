@@ -34,7 +34,6 @@ const KanaSurvivalPage = () => {
         alphabet,
         userId: user?.uid ?? null,
         userName: user?.displayName ?? "",
-        currentBest: 0,
         onSaveScore: saveScore,
     });
 

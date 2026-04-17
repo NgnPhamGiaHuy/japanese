@@ -2,11 +2,11 @@
 
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 
-import { getAudioText } from "@/features/flashcard/core/utils";
+import { getAudioText, saveSharedStudyProgress } from "@/features/flashcard/core";
 import { recordGameResult } from "@/features/game/services";
 import { allowAudio, playAudio, playSFX } from "@/shared/utils";
 import { useGameSession } from "./useGameSession";
-import { GameEngine } from "../engine/core/GameEngine";
+import { GameEngine } from "../engine";
 
 import type { FlashCard } from "@/features/flashcard/core/types";
 import type { GameState, ModeStrategy } from "../engine/types";
@@ -19,6 +19,10 @@ interface UseGameEngineConfig {
     userId?: string;
     displayName?: string;
     addXP: (amount: number) => Promise<void>;
+    isSharedContext?: boolean;
+    shareId?: string;
+    sourceUserId?: string;
+    sourceLessonId?: string;
 }
 
 export function useGameEngine(config: UseGameEngineConfig) {
@@ -31,12 +35,16 @@ export function useGameEngine(config: UseGameEngineConfig) {
     const gameModeRef = useRef(config.gameMode);
     const userIdRef = useRef(config.userId);
     const displayNameRef = useRef(config.displayName);
+    const isSharedContextRef = useRef(config.isSharedContext ?? false);
+    const shareIdRef = useRef(config.shareId);
+    const sourceUserIdRef = useRef(config.sourceUserId);
+    const sourceLessonIdRef = useRef(config.sourceLessonId);
 
     const { startSession, syncScore, endSession } = useGameSession({
-        userId: config.userId ?? null,
+        // In shared context, skip creating a public game_sessions document.
+        userId: config.isSharedContext ? null : (config.userId ?? null),
         userName: config.displayName ?? "Player",
-        gameMode: config.gameMode,
-        currentBest: config.bestScore,
+        gameMode: config.isSharedContext ? null : config.gameMode,
     });
 
     const syncScoreRef = useRef(syncScore);
@@ -57,6 +65,10 @@ export function useGameEngine(config: UseGameEngineConfig) {
         gameModeRef.current = config.gameMode;
         userIdRef.current = config.userId;
         displayNameRef.current = config.displayName;
+        isSharedContextRef.current = config.isSharedContext ?? false;
+        shareIdRef.current = config.shareId;
+        sourceUserIdRef.current = config.sourceUserId;
+        sourceLessonIdRef.current = config.sourceLessonId;
         syncScoreRef.current = syncScore;
         endSessionRef.current = endSession;
     });
@@ -81,8 +93,38 @@ export function useGameEngine(config: UseGameEngineConfig) {
             strategy: config.strategy,
             userId: userIdRef.current,
             displayName: displayNameRef.current,
-            onScoreSync: (score) => syncScoreRef.current(score),
+            onScoreSync: (score) => {
+                if (isSharedContextRef.current) {
+                    // In shared context, write viewer progress only — never touch public sessions.
+                    const uid = userIdRef.current;
+                    const sid = shareIdRef.current;
+                    const srcUid = sourceUserIdRef.current;
+                    const srcLid = sourceLessonIdRef.current;
+                    if (uid && sid && srcUid && srcLid) {
+                        void saveSharedStudyProgress(uid, sid, srcUid, srcLid, score).catch(
+                            () => {},
+                        );
+                    }
+                    return;
+                }
+                syncScoreRef.current(score);
+            },
             onSessionEnd: async (finalScore) => {
+                if (isSharedContextRef.current) {
+                    // Shared context: write to viewer's sharedProgress, skip leaderboard.
+                    const uid = userIdRef.current;
+                    const sid = shareIdRef.current;
+                    const srcUid = sourceUserIdRef.current;
+                    const srcLid = sourceLessonIdRef.current;
+                    if (uid && sid && srcUid && srcLid) {
+                        await saveSharedStudyProgress(uid, sid, srcUid, srcLid, finalScore);
+                        await addXPRef.current(Math.round(finalScore / 10));
+                    }
+                    // Anonymous viewer: no Firestore writes at all.
+                    return;
+                }
+
+                // Personal context: existing path unchanged.
                 await addXPRef.current(Math.round(finalScore / 10));
                 await endSessionRef.current(finalScore);
 
@@ -93,7 +135,6 @@ export function useGameEngine(config: UseGameEngineConfig) {
                         displayNameRef.current ?? "Player",
                         gameModeRef.current,
                         finalScore,
-                        bestScoreRef.current,
                     );
                 }
             },
@@ -148,7 +189,10 @@ export function useGameEngine(config: UseGameEngineConfig) {
     }, [state?.feedbackStatus, state?.currentQuestion, config.cards, config.strategy.name]);
 
     const startGame = useCallback(async () => {
-        await startSession();
+        // In shared context, skip creating a Firestore session document.
+        if (!isSharedContextRef.current) {
+            await startSession();
+        }
         engineRef.current?.startGame();
     }, [startSession]);
 

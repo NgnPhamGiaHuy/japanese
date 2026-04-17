@@ -2,7 +2,17 @@
 
 import { useEffect, useMemo, useState } from "react";
 
-import { Check, ChevronDown, Copy, Globe2, Lock, Mail, ShieldAlert, X } from "lucide-react";
+import {
+    Check,
+    ChevronDown,
+    Copy,
+    Globe2,
+    Lock,
+    Mail,
+    ShieldAlert,
+    Sparkles,
+    X,
+} from "lucide-react";
 
 import { buildShareId, inviteByEmail, revokeEmailInvite } from "@/features/flashcard/core/services";
 import { Button, CustomSelect } from "@/shared/components/ui";
@@ -18,7 +28,7 @@ import type { Lesson } from "../types";
  *
  * @remarks
  * Orchestrates a "Google Docs" style permissions model. Manages:
- * 1. Public Access: Toggling "Anyone with the link" and default roles.
+ * 1. Public Access: Three modes — Restricted, Link-only, Fully Public.
  * 2. Targeted Invites: Email-based invitations with explicit RBAC.
  * 3. Role Life-cycle: Updating and revoking existing collaborator access.
  *
@@ -29,6 +39,14 @@ import type { Lesson } from "../types";
 /** Access levels defining what actions a user can perform on a shared deck. */
 export type Role = "owner" | "editor" | "commenter" | "viewer";
 
+/**
+ * Three-tier privacy model:
+ * - restricted: only explicitly invited users
+ * - link: anyone with the share link (not discoverable)
+ * - public: fully public, discoverable without a link
+ */
+type PrivacyMode = "restricted" | "link" | "public";
+
 const sharingOptions: SelectOption<Role>[] = [
     { value: "viewer", label: "Viewer" },
     { value: "commenter", label: "Commenter" },
@@ -38,8 +56,15 @@ const sharingOptions: SelectOption<Role>[] = [
 interface ShareModalProps {
     /** The deck being shared */
     lesson: Lesson;
-    /** Callback for toggling public link access and default public role */
-    onShareLink: (allowLinkAccess: boolean, publicRole: Lesson["publicRole"]) => Promise<void>;
+    /**
+     * Callback for toggling public link access and default public role.
+     * isPublic=true means fully public (discoverable); allowLinkAccess=true with isPublic=false means link-only.
+     */
+    onShareLink: (
+        allowLinkAccess: boolean,
+        publicRole: Lesson["publicRole"],
+        isPublic?: boolean,
+    ) => Promise<void>;
     /** Callback for specific user role management */
     onUpdateRoles: (newRoles: Record<string, Role>, newCollaborators: string[]) => Promise<void>;
     /** Close logic */
@@ -76,12 +101,20 @@ const ShareModal = ({ lesson, onShareLink, onUpdateRoles, onClose }: ShareModalP
     }, [lesson.ownerId, lesson.userId, lesson.id]);
 
     // ── Local edit state ──────────────────────────────────────────────────
-    const [allowLinkAccess, setAllowLinkAccess] = useState<boolean>(
-        !!lesson.allowLinkAccess || !!lesson.isPublic,
-    );
+    const derivePrivacyMode = (): PrivacyMode => {
+        if (lesson.isPublic) return "public";
+        if (lesson.allowLinkAccess) return "link";
+        return "restricted";
+    };
+
+    const [privacyMode, setPrivacyMode] = useState<PrivacyMode>(derivePrivacyMode);
     const [publicRole, setPublicRole] = useState<Lesson["publicRole"]>(
         lesson.publicRole ?? "viewer",
     );
+
+    // Derived booleans from privacyMode for service calls.
+    const allowLinkAccess = privacyMode !== "restricted";
+    const isPublicMode = privacyMode === "public";
 
     const [roles, setRoles] = useState<Record<string, Role>>(lesson.roles || {});
     const [inviteEmail, setInviteEmail] = useState("");
@@ -90,7 +123,9 @@ const ShareModal = ({ lesson, onShareLink, onUpdateRoles, onClose }: ShareModalP
 
     // Sync when the lesson prop changes (for real-time consistency)
     useEffect(() => {
-        setAllowLinkAccess(!!lesson.allowLinkAccess || !!lesson.isPublic);
+        if (lesson.isPublic) setPrivacyMode("public");
+        else if (lesson.allowLinkAccess) setPrivacyMode("link");
+        else setPrivacyMode("restricted");
         setPublicRole(lesson.publicRole ?? "viewer");
         setRoles(lesson.roles || {});
     }, [lesson]);
@@ -111,28 +146,36 @@ const ShareModal = ({ lesson, onShareLink, onUpdateRoles, onClose }: ShareModalP
         setTimeout(() => setCopied(false), 2000);
     };
 
-    /** Handles the "Anyone with link" toggle */
-    const handleSaveLinkAccess = async (access: boolean) => {
-        setAllowLinkAccess(access);
+    /** Handles privacy mode change — persists to Firestore immediately. */
+    const handleSavePrivacyMode = async (mode: PrivacyMode) => {
+        const prev = privacyMode;
+        setPrivacyMode(mode);
         setSaving(true);
         try {
-            await onShareLink(access, publicRole);
-            showAlert("success", access ? "Public link access enabled" : "Privacy restricted");
+            const newAllowLink = mode !== "restricted";
+            const newIsPublic = mode === "public";
+            await onShareLink(newAllowLink, publicRole, newIsPublic);
+            const labels: Record<PrivacyMode, string> = {
+                restricted: "Access restricted",
+                link: "Link sharing enabled",
+                public: "Deck is now public",
+            };
+            showAlert("success", labels[mode]);
         } catch (err) {
-            console.error("[ShareModal] handleSaveLinkAccess failed:", err);
-            setAllowLinkAccess(!access);
+            console.error("[ShareModal] handleSavePrivacyMode failed:", err);
+            setPrivacyMode(prev);
             showAlert("error", "Failed to update privacy settings");
         } finally {
             setSaving(false);
         }
     };
 
-    /** Handles the default role for public visitors */
+    /** Handles the default role for public/link visitors */
     const handleSavePublicRole = async (role: Lesson["publicRole"]) => {
         setPublicRole(role);
         setSaving(true);
         try {
-            await onShareLink(allowLinkAccess, role);
+            await onShareLink(allowLinkAccess, role, isPublicMode);
             showAlert("success", `Default role set to ${role}`);
         } catch (err) {
             console.error("[ShareModal] handleSavePublicRole failed:", err);
@@ -422,7 +465,9 @@ const ShareModal = ({ lesson, onShareLink, onUpdateRoles, onClose }: ShareModalP
                             <div className="mb-6 flex flex-col gap-4 rounded-2xl border-2 border-gray-100 p-4">
                                 <div className="flex items-start gap-4">
                                     <div className="mt-1 flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gray-100">
-                                        {allowLinkAccess ? (
+                                        {privacyMode === "public" ? (
+                                            <Sparkles className="text-[#58cc02]" size={20} />
+                                        ) : privacyMode === "link" ? (
                                             <Globe2 style={{ color: themeHex }} size={20} />
                                         ) : (
                                             <Lock className="text-gray-400" size={20} />
@@ -437,9 +482,11 @@ const ShareModal = ({ lesson, onShareLink, onUpdateRoles, onClose }: ShareModalP
                                             onClick={() => setOpenPrivacyMenu((v) => !v)}
                                             disabled={saving}
                                         >
-                                            {allowLinkAccess
-                                                ? "Anyone with the link"
-                                                : "Restricted"}
+                                            {privacyMode === "public"
+                                                ? "Public"
+                                                : privacyMode === "link"
+                                                  ? "Anyone with the link"
+                                                  : "Restricted"}
                                             <ChevronDown
                                                 size={20}
                                                 className={`text-gray-400 transition-transform ${openPrivacyMenu ? "rotate-180" : ""}`}
@@ -452,12 +499,15 @@ const ShareModal = ({ lesson, onShareLink, onUpdateRoles, onClose }: ShareModalP
                                                     className="fixed inset-0 z-40"
                                                     onClick={() => setOpenPrivacyMenu(false)}
                                                 />
-                                                <div className="animate-in fade-in zoom-in-95 absolute top-10 left-0 z-50 w-64 overflow-hidden rounded-2xl border-2 border-gray-100 bg-white shadow-lg">
+                                                <div className="animate-in fade-in zoom-in-95 absolute top-10 left-0 z-50 w-72 overflow-hidden rounded-2xl border-2 border-gray-100 bg-white shadow-lg">
+                                                    {/* Restricted */}
                                                     <Button
                                                         variant="ghost"
                                                         className="flex w-full items-center !justify-start gap-3 !rounded-none border-b-2 border-gray-50 !p-4 !text-left shadow-none hover:bg-gray-50 hover:shadow-none"
                                                         onClick={() => {
-                                                            void handleSaveLinkAccess(false);
+                                                            void handleSavePrivacyMode(
+                                                                "restricted",
+                                                            );
                                                             setOpenPrivacyMenu(false);
                                                         }}
                                                     >
@@ -470,10 +520,10 @@ const ShareModal = ({ lesson, onShareLink, onUpdateRoles, onClose }: ShareModalP
                                                                 Restricted
                                                             </div>
                                                             <div className="text-xs font-bold text-gray-400">
-                                                                Only people with access can open
+                                                                Only invited people can open
                                                             </div>
                                                         </div>
-                                                        {!allowLinkAccess && (
+                                                        {privacyMode === "restricted" && (
                                                             <Check
                                                                 style={{ color: themeHex }}
                                                                 size={20}
@@ -481,11 +531,13 @@ const ShareModal = ({ lesson, onShareLink, onUpdateRoles, onClose }: ShareModalP
                                                             />
                                                         )}
                                                     </Button>
+
+                                                    {/* Link-only */}
                                                     <Button
                                                         variant="ghost"
-                                                        className="flex w-full items-center !justify-start gap-3 !rounded-none !p-4 !text-left shadow-none hover:bg-gray-50 hover:shadow-none"
+                                                        className="flex w-full items-center !justify-start gap-3 !rounded-none border-b-2 border-gray-50 !p-4 !text-left shadow-none hover:bg-gray-50 hover:shadow-none"
                                                         onClick={() => {
-                                                            void handleSaveLinkAccess(true);
+                                                            void handleSavePrivacyMode("link");
                                                             setOpenPrivacyMenu(false);
                                                         }}
                                                     >
@@ -499,14 +551,43 @@ const ShareModal = ({ lesson, onShareLink, onUpdateRoles, onClose }: ShareModalP
                                                                 Anyone with the link
                                                             </div>
                                                             <div className="text-xs font-bold text-gray-400">
-                                                                Anyone on the internet can view
+                                                                Anyone with the link can view
                                                             </div>
                                                         </div>
-                                                        {allowLinkAccess && (
+                                                        {privacyMode === "link" && (
                                                             <Check
                                                                 style={{ color: themeHex }}
                                                                 size={20}
                                                                 className="shrink-0"
+                                                            />
+                                                        )}
+                                                    </Button>
+
+                                                    {/* Fully public */}
+                                                    <Button
+                                                        variant="ghost"
+                                                        className="flex w-full items-center !justify-start gap-3 !rounded-none !p-4 !text-left shadow-none hover:bg-gray-50 hover:shadow-none"
+                                                        onClick={() => {
+                                                            void handleSavePrivacyMode("public");
+                                                            setOpenPrivacyMenu(false);
+                                                        }}
+                                                    >
+                                                        <Sparkles
+                                                            className="shrink-0 text-[#58cc02]"
+                                                            size={20}
+                                                        />
+                                                        <div className="flex-1 text-left">
+                                                            <div className="font-black text-[#3c3c3c]">
+                                                                Public
+                                                            </div>
+                                                            <div className="text-xs font-bold text-gray-400">
+                                                                Visible to everyone — no link needed
+                                                            </div>
+                                                        </div>
+                                                        {privacyMode === "public" && (
+                                                            <Check
+                                                                className="shrink-0 text-[#58cc02]"
+                                                                size={20}
                                                             />
                                                         )}
                                                     </Button>
@@ -515,23 +596,27 @@ const ShareModal = ({ lesson, onShareLink, onUpdateRoles, onClose }: ShareModalP
                                         )}
 
                                         <p className="mt-1 text-sm font-bold text-[#afafaf]">
-                                            {allowLinkAccess
-                                                ? "Anyone on the internet with the link can view."
-                                                : "Only added people can open with the link."}
+                                            {privacyMode === "public"
+                                                ? "Visible to everyone — no link required."
+                                                : privacyMode === "link"
+                                                  ? "Anyone with the link can view."
+                                                  : "Only invited people can open this deck."}
                                         </p>
                                     </div>
                                 </div>
 
-                                {/* Role picker (only when public) */}
-                                {allowLinkAccess && (
+                                {/* Role picker — shown for link and public modes */}
+                                {privacyMode !== "restricted" && (
                                     <div className="relative ml-14 flex items-center justify-between border-t-2 border-gray-100 pt-3">
                                         <span className="text-sm font-bold text-gray-400">
-                                            Role
+                                            Default role
                                         </span>
                                         <CustomSelect
                                             value={publicRole || "viewer"}
                                             options={sharingOptions}
-                                            onChange={(r) => void handleSavePublicRole(r as any)}
+                                            onChange={(r) =>
+                                                void handleSavePublicRole(r as Lesson["publicRole"])
+                                            }
                                             disabled={saving}
                                             themeHex={themeHex}
                                             align="right"

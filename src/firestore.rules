@@ -17,6 +17,11 @@ service cloud.firestore {
       return get(/databases/$(database)/documents/artifacts/$(appId)/users/$(ownerId)/lessons/$(lessonId)).data;
     }
 
+    // Returns true when a lesson document allows public (anonymous) read access.
+    function isPublicLesson(lessonData) {
+      return lessonData.isPublic == true || lessonData.allowLinkAccess == true;
+    }
+
     // ─── CORE DOMAIN RULES ──────────────────────────────────────────────────
 
     match /artifacts/{appId} {
@@ -26,42 +31,45 @@ service cloud.firestore {
         allow read, write: if isOwner(userId);
         
         match /lessons/{lessonId} {
-          // Check if user has any semantic role or if public access is enabled
-          allow read: if isOwner(userId) 
-                      || (resource.data.roles[request.auth.uid] != null)
-                      || (resource.data.allowLinkAccess == true)
-                      || (resource.data.isPublic == true);
+          // Public decks are readable by anyone (including anonymous users).
+          // Role-based access still requires authentication.
+          allow read: if isPublicLesson(resource.data)
+                      || isOwner(userId)
+                      || (isSignedIn() && resource.data.roles[request.auth.uid] != null);
           
           allow create: if isOwner(userId);
           
+          // Only owner or explicit editor role may mutate lesson metadata.
           allow update: if isOwner(userId)
-                        || (resource.data.roles[request.auth.uid] == 'editor');
+                        || (isSignedIn() && resource.data.roles[request.auth.uid] == 'editor');
           
           allow delete: if isOwner(userId);
 
           // Nesting for deep comments (Path from comment.service.ts)
           match /cards/{cardId}/comments/{commentId} {
             allow read: if isOwner(userId)
-                        || (getLesson(appId, userId, lessonId).roles[request.auth.uid] != null)
-                        || (getLesson(appId, userId, lessonId).allowLinkAccess == true);
+                        || isPublicLesson(getLesson(appId, userId, lessonId))
+                        || (isSignedIn() && getLesson(appId, userId, lessonId).roles[request.auth.uid] != null);
             
             allow create: if isOwner(userId)
-                          || (getLesson(appId, userId, lessonId).roles[request.auth.uid] in ['owner', 'editor', 'commenter']);
+                          || (isSignedIn() && getLesson(appId, userId, lessonId).roles[request.auth.uid] in ['owner', 'editor', 'commenter']);
             
             allow update, delete: if isOwner(userId)
-                                  || (request.auth.uid == resource.data.userId)
-                                  || (getLesson(appId, userId, lessonId).roles[request.auth.uid] == 'editor');
+                                  || (isSignedIn() && request.auth.uid == resource.data.userId)
+                                  || (isSignedIn() && getLesson(appId, userId, lessonId).roles[request.auth.uid] == 'editor');
           }
         }
         
         match /cards/{cardId} {
-          // Cards carry lessonId. To read/write, check the referenced lesson metadata.
+          // Cards are readable when the parent lesson is public or the viewer has a role.
+          // Anonymous reads are allowed when the parent lesson is public.
           allow read: if isOwner(userId)
-                      || (getLesson(appId, userId, resource.data.lessonId).roles[request.auth.uid] != null)
-                      || (getLesson(appId, userId, resource.data.lessonId).allowLinkAccess == true);
+                      || isPublicLesson(getLesson(appId, userId, resource.data.lessonId))
+                      || (isSignedIn() && getLesson(appId, userId, resource.data.lessonId).roles[request.auth.uid] != null);
           
+          // Only owner or editor may write cards — never from a shared/anonymous context.
           allow write: if isOwner(userId)
-                       || (getLesson(appId, userId, resource.data.lessonId).roles[request.auth.uid] == 'editor');
+                       || (isSignedIn() && getLesson(appId, userId, resource.data.lessonId).roles[request.auth.uid] == 'editor');
         }
 
         match /notifications/{notiId} {
@@ -70,6 +78,7 @@ service cloud.firestore {
         }
         
         match /sharedProgress/{shareId} {
+          // Only the viewer who owns this progress document may read or write it.
           allow read, write: if isOwner(userId);
         }
       }
@@ -86,13 +95,15 @@ service cloud.firestore {
 
     // ─── COLLECTION GROUP QUERIES ───────────────────────────────────────────
 
-    // Enables discovery of shared decks across the global users collection
+    // Enables discovery of shared decks across the global users collection.
+    // Public decks are readable without authentication; role-based access requires auth.
     match /{path=**}/lessons/{lessonId} {
-      allow read: if isSignedIn() && (
-        resource.data.roles[request.auth.uid] != null ||
-        resource.data.collaborators.hasAny([request.auth.uid]) ||
-        resource.data.allowLinkAccess == true
-      );
+      allow read: if resource.data.isPublic == true
+                  || resource.data.allowLinkAccess == true
+                  || (isSignedIn() && (
+                       resource.data.roles[request.auth.uid] != null ||
+                       resource.data.collaborators.hasAny([request.auth.uid])
+                     ));
     }
   }
 }

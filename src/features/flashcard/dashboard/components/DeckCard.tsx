@@ -8,9 +8,10 @@
 
 import Link from "next/link";
 
-import { BookOpen, Edit2, Gamepad2, Share2, Trash2, Zap } from "lucide-react";
+import { BookOpen, Edit2, Gamepad2, Globe2, Share2, Trash2, Zap } from "lucide-react";
 
 import { buildShareId } from "@/features/flashcard";
+import { useVisibility, VisibilityLevel } from "@/features/flashcard/core/hooks/useVisibility";
 import { Button, TierBadge, UserMeta } from "@/shared/components/ui";
 import { CARD_BASE, SPACING } from "@/shared/constants";
 import { hexToThemeColor } from "@/shared/utils";
@@ -28,6 +29,7 @@ const DeckCard = ({
 }: DeckCardProps) => {
     const { user } = useAppStore();
     const themeColor = lesson.themeColor || "#1cb0f6";
+    const visibility = useVisibility(lesson);
 
     const role = user ? lesson.roles?.[user.uid] : "viewer";
     const canEdit = role === "owner" || role === "editor";
@@ -72,6 +74,18 @@ const DeckCard = ({
                         {isShared && (
                             <span className="inline-flex items-center rounded-lg bg-gray-100 px-2 py-1 text-[9px] font-black tracking-tight text-[#afafaf] uppercase">
                                 Shared
+                            </span>
+                        )}
+                        {!isShared && visibility.level !== VisibilityLevel.PRIVATE && (
+                            <span
+                                className={`inline-flex items-center gap-1 rounded-lg px-2 py-1 text-[9px] font-black tracking-tight uppercase ${
+                                    visibility.level === VisibilityLevel.PUBLIC
+                                        ? "bg-[#ebf8e6] text-[#58cc02]"
+                                        : "bg-[#fff9e6] text-[#ef8f00]"
+                                }`}
+                            >
+                                <visibility.icon size={10} />
+                                {visibility.label}
                             </span>
                         )}
                     </div>
@@ -182,10 +196,16 @@ const DeckCard = ({
                     {canShare && (
                         <Button
                             variant="ghost"
-                            onClick={onShare}
-                            className="!flex !h-11 !w-11 !items-center !justify-center !rounded-xl !p-0 !text-gray-300 shadow-none transition-colors hover:!bg-[#ebf8e6] hover:!text-[#58cc02] hover:shadow-none active:translate-y-0"
-                            title="Share deck"
-                            icon={Share2}
+                            onClick={() => onShare?.()}
+                            className={`!flex !h-11 !w-11 !items-center !justify-center !rounded-xl !p-0 shadow-none transition-colors hover:shadow-none active:translate-y-0 ${
+                                visibility.level === VisibilityLevel.PUBLIC
+                                    ? "!text-[#58cc02] hover:!bg-[#ebf8e6]"
+                                    : visibility.level === VisibilityLevel.SHARED
+                                      ? "!text-[#ef8f00] hover:!bg-[#fff9e6]"
+                                      : "!text-gray-300 hover:!bg-gray-100"
+                            }`}
+                            title={visibility.description}
+                            icon={visibility.icon}
                             iconSize={20}
                         />
                     )}
@@ -213,7 +233,7 @@ const DeckCard = ({
                     {canDelete && (
                         <Button
                             variant="ghost"
-                            onClick={onDelete}
+                            onClick={() => onDelete?.()}
                             className="!flex !h-11 !w-11 !items-center !justify-center !rounded-xl !p-0 !text-gray-300 shadow-none transition-colors hover:!bg-[#ffdfe0] hover:!text-[#ea2b2b] hover:shadow-none active:translate-y-0"
                             title="Delete deck"
                             icon={Trash2}

@@ -11,7 +11,7 @@
 
 import Link from "next/link";
 
-import { BookOpen, Copy, CopyPlus, Edit2, Info, Loader2, Lock } from "lucide-react";
+import { BookOpen, Copy, CopyPlus, Edit2, Globe2, Info, Loader2, Lock } from "lucide-react";
 
 import { Button } from "@/shared/components/ui";
 
@@ -32,6 +32,8 @@ const DetailActionsPanel = ({
     const canEdit = role === "owner" || role === "editor";
 
     if (isOwner) {
+        const isShared = !!(lesson.shareId || lesson.allowLinkAccess || lesson.isPublic);
+
         return (
             <aside className="flex flex-col gap-4">
                 {onEdit && (
@@ -57,7 +59,45 @@ const DetailActionsPanel = ({
                         </div>
                     </Button>
                 )}
-                {onCopyLink && (
+
+                {/* Share / Manage Access — always visible for owners */}
+                {onManageAccess && (
+                    <Button
+                        variant="ghost"
+                        onClick={onManageAccess}
+                        className="!flex !w-full !items-center !justify-start !gap-4 !rounded-2xl border-2 border-transparent !bg-white !px-4 !py-4 shadow-sm transition-all hover:!border-gray-200 active:translate-y-0"
+                    >
+                        <div
+                            className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl ${
+                                isShared
+                                    ? "bg-[#ebf8e6] text-[#58cc02]"
+                                    : "bg-blue-50 text-blue-500"
+                            }`}
+                        >
+                            {isShared ? <Globe2 size={22} /> : <Lock size={22} />}
+                        </div>
+                        <div className="text-left">
+                            <div className="flex items-center gap-2">
+                                <span className="text-lg font-black text-[#3c3c3c]">
+                                    {isShared ? "Manage Access" : "Share Deck"}
+                                </span>
+                                {isShared && (
+                                    <span className="rounded-lg bg-[#ebf8e6] px-2 py-0.5 text-[10px] font-black tracking-wider text-[#58cc02] uppercase">
+                                        Public
+                                    </span>
+                                )}
+                            </div>
+                            <div className="text-sm font-bold text-[#afafaf]">
+                                {isShared
+                                    ? "Control who can view or comment"
+                                    : "Enable link sharing for this deck"}
+                            </div>
+                        </div>
+                    </Button>
+                )}
+
+                {/* Copy link — only when sharing is active */}
+                {isShared && onCopyLink && (
                     <Button
                         variant="ghost"
                         onClick={onCopyLink}
@@ -72,23 +112,6 @@ const DetailActionsPanel = ({
                             </div>
                             <div className="text-sm font-bold text-[#afafaf]">
                                 Share this deck with others
-                            </div>
-                        </div>
-                    </Button>
-                )}
-                {onManageAccess && (
-                    <Button
-                        variant="ghost"
-                        onClick={onManageAccess}
-                        className="!flex !w-full !items-center !justify-start !gap-4 !rounded-2xl border-2 border-transparent !bg-white !px-4 !py-4 shadow-sm transition-all hover:!border-gray-200 active:translate-y-0"
-                    >
-                        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-blue-50 text-blue-500">
-                            <Lock size={22} />
-                        </div>
-                        <div className="text-left">
-                            <div className="text-lg font-black text-[#3c3c3c]">Manage Access</div>
-                            <div className="text-sm font-bold text-[#afafaf]">
-                                Control who can view or comment
                             </div>
                         </div>
                     </Button>

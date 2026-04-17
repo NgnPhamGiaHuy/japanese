@@ -14,7 +14,17 @@ import { useAppStore } from "@/store";
 import { loadFlashcardData } from "./flashcard-loader";
 import { useCards, useLessons } from "../hooks";
 
-import type { FlashcardLoaderState, FlashcardSource } from "./types";
+import type { FlashcardData, FlashcardLoaderState, FlashcardSource } from "./types";
+
+/**
+ * Module-level cache for shared deck data.
+ *
+ * @remarks
+ * Session-scoped (cleared on full page reload). Prevents redundant Firestore
+ * reads when navigating between game-mode routes for the same shareId.
+ * Keyed by shareId string.
+ */
+const sharedDataCache = new Map<string, FlashcardData>();
 
 /**
  * Loads flashcard data from the specified source.
@@ -36,7 +46,7 @@ import type { FlashcardLoaderState, FlashcardSource } from "./types";
  * ```
  */
 export function useFlashcardLoader(source: FlashcardSource): FlashcardLoaderState {
-    const { user } = useAppStore();
+    const { user, isAuthReady } = useAppStore();
     const [state, setState] = useState<FlashcardLoaderState>({
         data: null,
         isLoading: true,
@@ -104,8 +114,27 @@ export function useFlashcardLoader(source: FlashcardSource): FlashcardLoaderStat
             return;
         }
 
-        // Shared deck: load directly
+        // Shared deck: defer until Firebase auth has resolved to avoid false 404s
+        // on slow networks where the user object arrives after mount.
         if (source.type === "shared") {
+            if (!isAuthReady) return;
+
+            const { shareId } = source;
+
+            // Serve from cache when available — prevents redundant Firestore reads
+            // when navigating between game-mode routes for the same shareId.
+            const cached = sharedDataCache.get(shareId);
+            if (cached) {
+                setState({
+                    data: cached,
+                    isLoading: false,
+                    isReady: true,
+                    isNotFound: false,
+                    error: null,
+                });
+                return;
+            }
+
             setState({
                 data: null,
                 isLoading: true,
@@ -127,6 +156,7 @@ export function useFlashcardLoader(source: FlashcardSource): FlashcardLoaderStat
                             error: null,
                         });
                     } else {
+                        sharedDataCache.set(shareId, data);
                         setState({
                             data,
                             isLoading: false,
@@ -139,6 +169,8 @@ export function useFlashcardLoader(source: FlashcardSource): FlashcardLoaderStat
                 .catch((error) => {
                     if (cancelled) return;
 
+                    // Preserve typed SharedLoadError instances so callers can
+                    // distinguish network/quota failures from not-found conditions.
                     setState({
                         data: null,
                         isLoading: false,
@@ -164,6 +196,7 @@ export function useFlashcardLoader(source: FlashcardSource): FlashcardLoaderStat
         lessons,
         cards,
         user?.uid,
+        isAuthReady,
     ]);
 
     return state;

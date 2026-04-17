@@ -8,7 +8,6 @@ export interface UseGameSessionOptions {
     userId: string | null;
     userName: string;
     gameMode: string | null;
-    currentBest?: number;
 }
 
 /**
@@ -19,12 +18,7 @@ export interface UseGameSessionOptions {
  * Score state remains local for instant UI responsiveness;
  * Firestore is written to asynchronously via debounce.
  */
-export function useGameSession({
-    userId,
-    userName,
-    gameMode,
-    currentBest = 0,
-}: UseGameSessionOptions) {
+export function useGameSession({ userId, userName, gameMode }: UseGameSessionOptions) {
     const sessionIdRef = useRef<string | null>(null);
     const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
     const lastSyncedScore = useRef(0);
@@ -93,7 +87,6 @@ export function useGameSession({
                     userId,
                     userName || "Player",
                     gameMode,
-                    currentBest,
                 );
             } catch (err) {
                 console.error("[useGameSession] Failed to finish session:", err);
@@ -102,7 +95,7 @@ export function useGameSession({
                 lastSyncedScore.current = 0;
             }
         },
-        [userId, userName, gameMode, currentBest],
+        [userId, userName, gameMode],
     );
 
     return { startSession, syncScore, endSession, isSessionActive };

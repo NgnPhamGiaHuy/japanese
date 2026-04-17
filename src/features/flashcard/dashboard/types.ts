@@ -6,7 +6,7 @@ import type { Lesson } from "@/features/flashcard/core/types";
 import type { GameStatEntry } from "@/features/game";
 
 export interface DashboardTab {
-    id: "personal" | "shared";
+    id: "personal" | "shared" | "discover";
     label: string;
     badge?: number;
 }
@@ -16,8 +16,8 @@ export interface DeckCardProps {
     isShared?: boolean;
     matchStats?: GameStatEntry;
     speedStats?: GameStatEntry;
-    onDelete: () => void;
-    onShare: () => void;
+    onDelete?: () => void;
+    onShare?: () => void;
 }
 
 export interface SortableDeckCardProps extends DeckCardProps {
