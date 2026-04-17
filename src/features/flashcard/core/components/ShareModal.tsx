@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 
 import { buildShareId, inviteByEmail, revokeEmailInvite } from "@/features/flashcard/core/services";
+import { sanitizePublicRole } from "@/features/flashcard/core/utils/rbac";
 import { Button, CustomSelect } from "@/shared/components/ui";
 import { useAlert } from "@/shared/providers";
 import { hexToThemeColor } from "@/shared/utils";
@@ -51,6 +52,15 @@ const sharingOptions: SelectOption<Role>[] = [
     { value: "viewer", label: "Viewer" },
     { value: "commenter", label: "Commenter" },
     { value: "editor", label: "Editor" },
+];
+
+/**
+ * Options for the public/link "Default role" picker.
+ * Editor is intentionally excluded — public access is capped at commenter.
+ */
+const publicRoleOptions: SelectOption<"viewer" | "commenter">[] = [
+    { value: "viewer", label: "Viewer" },
+    { value: "commenter", label: "Commenter" },
 ];
 
 interface ShareModalProps {
@@ -108,8 +118,8 @@ const ShareModal = ({ lesson, onShareLink, onUpdateRoles, onClose }: ShareModalP
     };
 
     const [privacyMode, setPrivacyMode] = useState<PrivacyMode>(derivePrivacyMode);
-    const [publicRole, setPublicRole] = useState<Lesson["publicRole"]>(
-        lesson.publicRole ?? "viewer",
+    const [publicRole, setPublicRole] = useState<"viewer" | "commenter">(
+        sanitizePublicRole(lesson.publicRole),
     );
 
     // Derived booleans from privacyMode for service calls.
@@ -126,7 +136,7 @@ const ShareModal = ({ lesson, onShareLink, onUpdateRoles, onClose }: ShareModalP
         if (lesson.isPublic) setPrivacyMode("public");
         else if (lesson.allowLinkAccess) setPrivacyMode("link");
         else setPrivacyMode("restricted");
-        setPublicRole(lesson.publicRole ?? "viewer");
+        setPublicRole(sanitizePublicRole(lesson.publicRole));
         setRoles(lesson.roles || {});
     }, [lesson]);
 
@@ -170,8 +180,8 @@ const ShareModal = ({ lesson, onShareLink, onUpdateRoles, onClose }: ShareModalP
         }
     };
 
-    /** Handles the default role for public/link visitors */
-    const handleSavePublicRole = async (role: Lesson["publicRole"]) => {
+    /** Handles the default role for public/link visitors — capped at commenter. */
+    const handleSavePublicRole = async (role: "viewer" | "commenter") => {
         setPublicRole(role);
         setSaving(true);
         try {
@@ -605,7 +615,7 @@ const ShareModal = ({ lesson, onShareLink, onUpdateRoles, onClose }: ShareModalP
                                     </div>
                                 </div>
 
-                                {/* Role picker — shown for link and public modes */}
+                                {/* Role picker — shown for link and public modes, capped at commenter */}
                                 {privacyMode !== "restricted" && (
                                     <div className="relative ml-14 flex items-center justify-between border-t-2 border-gray-100 pt-3">
                                         <span className="text-sm font-bold text-gray-400">
@@ -613,9 +623,11 @@ const ShareModal = ({ lesson, onShareLink, onUpdateRoles, onClose }: ShareModalP
                                         </span>
                                         <CustomSelect
                                             value={publicRole || "viewer"}
-                                            options={sharingOptions}
+                                            options={publicRoleOptions}
                                             onChange={(r) =>
-                                                void handleSavePublicRole(r as Lesson["publicRole"])
+                                                void handleSavePublicRole(
+                                                    r as "viewer" | "commenter",
+                                                )
                                             }
                                             disabled={saving}
                                             themeHex={themeHex}

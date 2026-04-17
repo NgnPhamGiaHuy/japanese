@@ -109,8 +109,11 @@ export interface Lesson {
     collaborators?: string[];
     /** Flag allowing anyone with the shareId to view/comment based on global policy */
     allowLinkAccess?: boolean;
-    /** Permission level granted to guest/link viewers */
-    publicRole?: "viewer" | "commenter" | "editor";
+    /**
+     * Permission level granted to guest/link viewers.
+     * Intentionally capped at "commenter" — "editor" is never granted via public link.
+     */
+    publicRole?: "viewer" | "commenter";
 
     /**
      * Pending email invites — converted to collaborators on first login.
@@ -253,3 +256,16 @@ export type SharedLessonViewModel = Readonly<
  * SRS fields are present as read-only snapshots; no writes are permitted.
  */
 export type SharedCardViewModel = Readonly<FlashCard>;
+
+/**
+ * Canonical role type for deck access control.
+ * Single source of truth — import from here, not from individual utility files.
+ *
+ * Priority (highest → lowest): owner > editor > commenter > viewer > none
+ * - owner:     Full control — edit, delete, manage sharing, manage roles
+ * - editor:    Edit cards and content (explicit invite only, never via public link)
+ * - commenter: Comment on cards, play games, study
+ * - viewer:    Read-only — play games, study, no comments
+ * - none:      No access — deck is private and user has no invite
+ */
+export type DeckAccessRole = "owner" | "editor" | "commenter" | "viewer" | "none";

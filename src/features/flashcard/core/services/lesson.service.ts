@@ -1,4 +1,3 @@
-;
 /**
  * Service orchestrator for Lesson (Deck) metadata and atomic deep-saves.
  *
@@ -27,20 +26,26 @@
  * 2. **Deep-Deletes**: Batch commitment to clear entire card collections plus Storage blobs.
  * 3. **Diff-based Saving**: Complex atomic upsert that normalizes IDs and garbage-collects unused assets.
  */
-import { collection, collectionGroup, doc, getDocs, onSnapshot, query, setDoc, updateDoc, where, writeBatch } from "firebase/firestore";
-
-
+import {
+    collection,
+    collectionGroup,
+    doc,
+    getDocs,
+    onSnapshot,
+    query,
+    setDoc,
+    updateDoc,
+    where,
+    writeBatch,
+} from "firebase/firestore";
 
 import { APP_ID, db } from "@/lib/firebase";
 import { cardDoc, cardsCol } from "./card.service";
 import { deleteCardImage } from "./image.service";
 import { CardValidationError, validateAtomicCard } from "../utils";
 
-
-
 import type { Unsubscribe } from "firebase/firestore";
-import type { FlashCard, Lesson } from "../types"; // ─── Firestore path helpers ────────────────────────────────────────────────
-
+import type { FlashCard, Lesson } from "../types";
 
 // ─── Firestore path helpers ────────────────────────────────────────────────
 

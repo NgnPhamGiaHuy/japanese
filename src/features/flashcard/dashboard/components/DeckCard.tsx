@@ -6,12 +6,27 @@
  * Provides entry points to Study, Speed Quiz, and Match game.
  */
 
+/**
+ * DeckCard — Individual deck entry on dashboard
+ *
+ * @remarks
+ * Displays deck metadata (title, tags, count) and high score badges.
+ * Provides entry points to Study, Speed Quiz, and Match game.
+ */
+/**
+ * DeckCard — Individual deck entry on dashboard
+ *
+ * @remarks
+ * Displays deck metadata (title, tags, count) and high score badges.
+ * Provides entry points to Study, Speed Quiz, and Match game.
+ */
 import Link from "next/link";
 
-import { BookOpen, Edit2, Gamepad2, Globe2, Share2, Trash2, Zap } from "lucide-react";
+import { BookOpen, Edit2, Gamepad2, Trash2, Zap } from "lucide-react";
 
 import { buildShareId } from "@/features/flashcard";
-import { useVisibility, VisibilityLevel } from "@/features/flashcard/core/hooks/useVisibility";
+import { useVisibility, VisibilityLevel } from "@/features/flashcard/core";
+import { resolveRole } from "@/features/flashcard/core/utils/rbac";
 import { Button, TierBadge, UserMeta } from "@/shared/components/ui";
 import { CARD_BASE, SPACING } from "@/shared/constants";
 import { hexToThemeColor } from "@/shared/utils";
@@ -31,10 +46,10 @@ const DeckCard = ({
     const themeColor = lesson.themeColor || "#1cb0f6";
     const visibility = useVisibility(lesson);
 
-    const role = user ? lesson.roles?.[user.uid] : "viewer";
-    const canEdit = role === "owner" || role === "editor";
-    const canShare = role === "owner";
-    const canDelete = role === "owner";
+    const resolvedRole = resolveRole({ lesson, userId: user?.uid });
+    const canEdit = resolvedRole === "owner" || resolvedRole === "editor";
+    const canShare = resolvedRole === "owner";
+    const canDelete = resolvedRole === "owner";
 
     const createdByName = lesson.ownerName ?? "Unknown";
     const createdByAvatar = lesson.ownerAvatar ?? null;

@@ -10,10 +10,17 @@ import { sortByOrder } from "@/shared/utils/reorder";
 import { syncInviteToCollaborator } from "./access.service";
 import { cardsCol } from "./card.service";
 import { normalizeLesson } from "./lesson.service";
+import { resolveRole } from "../utils/rbac";
 
 import type { User } from "firebase/auth";
 import type { DocumentSnapshot } from "firebase/firestore";
-import type { FlashCard, Lesson, SharedCardViewModel, SharedLessonViewModel } from "../types";
+import type {
+    DeckAccessRole,
+    FlashCard,
+    Lesson,
+    SharedCardViewModel,
+    SharedLessonViewModel,
+} from "../types";
 
 // ─── Decode helper ─────────────────────────────────────────────────────────────
 
@@ -87,6 +94,7 @@ export interface SharedSessionMeta {
     sourceLessonId: string;
     shareId: string;
     isShared: true;
+    viewerRole: DeckAccessRole;
 }
 
 // ─── Fetch shared lesson ──────────────────────────────────────────────────────
@@ -207,10 +215,23 @@ export async function getSharedLesson(
 
         const cards = sortByOrder(await fetchAllCards(ownerId, lessonId, lesson.cardCount ?? 0));
 
+        // Resolve role while lesson.roles is still intact — before stripSensitiveFields removes it.
+        const viewerRole = resolveRole({
+            lesson,
+            userId: currentUserId,
+            userEmail: currentUser?.email ?? null,
+        });
+
         return {
             lesson: stripSensitiveFields(lesson),
             cards: cards as SharedCardViewModel[],
-            meta: { sourceUserId: ownerId, sourceLessonId: lessonId, shareId, isShared: true },
+            meta: {
+                sourceUserId: ownerId,
+                sourceLessonId: lessonId,
+                shareId,
+                isShared: true,
+                viewerRole,
+            },
         };
     } catch (err) {
         const code = (err as { code?: string }).code;
@@ -254,12 +275,3 @@ export async function saveSharedStudyProgress(
         { merge: true },
     );
 }
-
-// ─── Game mode key builder for shared decks ───────────────────────────────────
-
-/**
- * Builds a unique game mode key for shared deck sessions.
- * Uses "shared_" prefix to prevent collision with personal deck stats.
- */
-export const sharedMatchGameMode = (shareId: string) => `shared_match_${shareId}`;
-export const sharedSpeedGameMode = (shareId: string) => `shared_speed_${shareId}`;

@@ -1,9 +1,9 @@
 import { useMemo } from "react";
 
-import { getVisibilityConfig, VisibilityLevel } from "../utils/visibility";
+import { getVisibilityConfig, VisibilityLevel } from "../utils";
 
-import type { Lesson } from "../types/flashcard.types";
-import type { VisibilityConfig } from "../utils/visibility";
+import type { Lesson } from "../types";
+import type { VisibilityConfig } from "../utils";
 
 /**
  * Hook to resolve and memoize the visibility configuration for a lesson.
@@ -12,10 +12,7 @@ import type { VisibilityConfig } from "../utils/visibility";
  * semantic state without re-implementing switch logic.
  */
 export function useVisibility(lesson: Lesson): VisibilityConfig {
-    return useMemo(
-        () => getVisibilityConfig(lesson),
-        [lesson.isPublic, lesson.allowLinkAccess, lesson.collaborators, lesson.roles],
-    );
+    return useMemo(() => getVisibilityConfig(lesson), [lesson]);
 }
 
 export { VisibilityLevel };

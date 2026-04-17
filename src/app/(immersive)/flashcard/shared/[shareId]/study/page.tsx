@@ -16,7 +16,7 @@
 import { useRouter } from "next/navigation";
 import { use } from "react";
 
-import { useFlashcardLoader } from "@/features/flashcard/core/hooks";
+import { useFlashcardLoader } from "@/features/flashcard/core";
 import { StudySession } from "@/features/flashcard/games/study";
 import { LoadingSpinner, NotFoundScreen } from "@/shared/components/ui";
 

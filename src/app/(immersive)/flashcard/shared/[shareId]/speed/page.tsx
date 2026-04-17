@@ -18,7 +18,7 @@ import { use } from "react";
 
 import { Zap } from "lucide-react";
 
-import { useFlashcardLoader } from "@/features/flashcard/core/hooks";
+import { useFlashcardLoader } from "@/features/flashcard/core";
 import { SpeedGame } from "@/features/flashcard/games/speed";
 import { Button, LoadingSpinner, NotFoundScreen } from "@/shared/components/ui";
 

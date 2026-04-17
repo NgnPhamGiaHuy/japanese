@@ -14,7 +14,7 @@
 import { notFound } from "next/navigation";
 import { use } from "react";
 
-import { useFlashcardLoader } from "@/features/flashcard/core/hooks";
+import { useFlashcardLoader } from "@/features/flashcard/core";
 import { StudySession } from "@/features/flashcard/games/study";
 
 export default function FlashcardStudyPage({ params }: { params: Promise<{ id: string }> }) {

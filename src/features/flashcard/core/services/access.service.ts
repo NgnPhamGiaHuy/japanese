@@ -10,72 +10,35 @@
 
 import { deleteField, setDoc } from "firebase/firestore";
 
-import { notifyInvite, notifyRoleChange } from "@/features/notifications";
+import { notifyInvite } from "@/features/notifications";
 import { buildShareId, lessonDoc } from "./lesson.service";
+import { resolveRole } from "../utils/rbac";
 
 import type { User } from "firebase/auth";
-import type { Lesson } from "../types";
+import type { DeckAccessRole, Lesson } from "../types";
 
-// ─── Role type ────────────────────────────────────────────────────────────────
-
-export type DeckAccessRole = "owner" | "editor" | "commenter" | "viewer" | "none";
+// Re-export for callers that import DeckAccessRole from access.service
+export type { DeckAccessRole };
 
 // ─── Core access resolver ─────────────────────────────────────────────────────
 
 /**
  * Resolves the effective role for a user on a given lesson.
+ * Delegates to the canonical RBAC engine in `rbac.ts`.
  *
- * Priority order:
- * 1. Owner (userId match or owner role)
- * 2. Explicit role in roles map (invited by UID / already converted)
- * 3. Pending email invite (not yet converted — treated as the invited role)
- * 4. Public link access (publicRole)
- * 5. None
+ * @deprecated Prefer `resolveRole` from `rbac.ts` for new code.
  */
 export function resolveUserAccess(user: User | null, lesson: Lesson): DeckAccessRole {
-    if (!user) {
-        return lesson.allowLinkAccess || lesson.isPublic
-            ? ((lesson.publicRole as DeckAccessRole) ?? "viewer")
-            : "none";
-    }
-
-    // Owner always wins (roles map is source-of-truth)
-    if (lesson.roles?.[user.uid] === "owner") {
-        return "owner";
-    }
-
-    // Explicit UID-based role (already converted invite or direct assignment)
-    const explicitRole = lesson.roles?.[user.uid];
-    if (explicitRole) return explicitRole as DeckAccessRole;
-
-    // Pending email invite — grant the invited role even before conversion
-    if (user.email) {
-        const normalizedEmail = user.email.trim().toLowerCase();
-        const pendingInvite = lesson.invitedEmails?.[normalizedEmail];
-        if (pendingInvite) return pendingInvite.role as DeckAccessRole;
-    }
-
-    // Public link fallback
-    if (lesson.allowLinkAccess || lesson.isPublic) {
-        return (lesson.publicRole as DeckAccessRole) ?? "viewer";
-    }
-
-    return "none";
+    return resolveRole({
+        lesson,
+        userId: user?.uid ?? null,
+        userEmail: user?.email ?? null,
+    });
 }
 
-// ─── Permission helpers ───────────────────────────────────────────────────────
+// ─── Permission helpers — delegate to rbac.ts ─────────────────────────────────
 
-export function canEdit(role: DeckAccessRole): boolean {
-    return role === "owner" || role === "editor";
-}
-
-export function canComment(role: DeckAccessRole): boolean {
-    return role === "owner" || role === "editor" || role === "commenter";
-}
-
-export function canStudy(role: DeckAccessRole): boolean {
-    return role !== "none";
-}
+export { canEdit, canComment, canView as canStudy } from "../utils/rbac";
 
 // ─── Invite → Collaborator conversion ────────────────────────────────────────
 
@@ -119,7 +82,6 @@ export async function syncInviteToCollaborator(
             roles: updatedRoles,
             collaborators: updatedCollaborators,
             invitedEmails: updatedInvitedEmails,
-            // Denormalized "last action" metadata for fast UI rendering (zero-join).
             lastSharedBy: user.uid,
             lastSharedByName: user.displayName ?? null,
             lastSharedByAvatar: user.photoURL ?? null,

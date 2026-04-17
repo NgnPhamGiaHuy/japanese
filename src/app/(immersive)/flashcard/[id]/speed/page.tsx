@@ -14,7 +14,7 @@
 import { notFound } from "next/navigation";
 import { use } from "react";
 
-import { useFlashcardLoader } from "@/features/flashcard/core/hooks";
+import { useFlashcardLoader } from "@/features/flashcard/core";
 import { SpeedConstraintError, SpeedGame } from "@/features/flashcard/games/speed";
 
 export default function SpeedQuizPage({ params }: { params: Promise<{ id: string }> }) {

@@ -19,7 +19,7 @@ import { useAlert } from "@/shared/providers";
 import { useAppStore } from "@/store";
 
 import type { FlashCard } from "@/features/flashcard/core/types";
-import type { DeckContext, DeckRole } from "@/features/flashcard/detail";
+import type { DeckContext } from "@/features/flashcard/detail";
 
 /**
  * Shared Deck View
@@ -103,16 +103,10 @@ export default function SharedLessonPage({ params }: { params: Promise<{ shareId
 
     const { lesson, cards, meta } = result;
 
-    // Role resolution — Google Docs model.
-    // SharedLessonViewModel has roles stripped, so we check via meta for owner detection.
-    const isOwner = !!(user && user.uid === meta.sourceUserId);
-
-    let role: DeckRole = "viewer";
-    if (isOwner) {
-        role = "owner";
-    } else if (lesson.allowLinkAccess || lesson.isPublic) {
-        role = (lesson.publicRole as DeckRole) || "viewer";
-    }
+    const isOwner = meta.viewerRole === "owner";
+    const role = (
+        meta.viewerRole === "none" ? "viewer" : meta.viewerRole
+    ) as import("@/features/flashcard/detail").DeckRole;
 
     const ctx: DeckContext = {
         lesson: lesson as unknown as import("@/features/flashcard/core/types").Lesson,
@@ -185,8 +179,13 @@ export default function SharedLessonPage({ params }: { params: Promise<{ shareId
                 onCopyLink={handleCopyLink}
                 onManageAccess={isOwner ? () => setSharingLesson(true) : undefined}
                 onEdit={
-                    isOwner
-                        ? () => router.push(`/flashcard/${meta.sourceLessonId}/edit`)
+                    role === "owner" || role === "editor"
+                        ? () =>
+                              router.push(
+                                  isOwner
+                                      ? `/flashcard/${meta.sourceLessonId}/edit`
+                                      : `/flashcard/${meta.sourceLessonId}/edit?ownerId=${meta.sourceUserId}&returnTo=/flashcard/shared/${shareId}`,
+                              )
                         : undefined
                 }
             />

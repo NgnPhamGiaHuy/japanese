@@ -1,5 +1,6 @@
-import type { LucideIcon } from "lucide-react";
 import { Globe2, Lock, Users } from "lucide-react";
+
+import type { LucideIcon } from "lucide-react";
 import type { Lesson } from "../types";
 
 /**

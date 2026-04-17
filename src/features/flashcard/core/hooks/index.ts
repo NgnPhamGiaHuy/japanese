@@ -4,4 +4,4 @@ export * from "./useFlashcardGameBestScore";
 export * from "./useLessons";
 export * from "./useMatchGameStore";
 export * from "./useSharedLesson";
-export * from "../loaders";
+export * from "./useVisibility";
