@@ -1,6 +1,6 @@
 /**
  * Generates intelligent distractors for multiple-choice questions.
- * 
+ *
  * @remarks
  * Uses semantic similarity, lexical overlap, and confusion history to create
  * plausible wrong answers that test genuine understanding rather than random guessing.
@@ -8,13 +8,13 @@
 
 import { shuffleArray } from "@/shared/utils";
 
-import type { FlashCard } from "@/features/flashcard/types";
-import type { QuestionType } from "@/features/flashcard/utils";
+import type { FlashCard } from "@/features/flashcard/core/types";
+import type { QuestionType } from "@/features/flashcard/core/utils";
 import type { CardMemoryState } from "../memory/CardMemoryManager";
 
 /**
  * Classifies English meanings by grammatical shape.
- * 
+ *
  * @remarks
  * Used to generate semantically similar distractors (e.g., other verbs for verb questions).
  */
@@ -27,7 +27,7 @@ function getMeaningShape(meaning: string): "verb" | "adjective" | "other" {
 
 /**
  * Calculates lexical similarity between two strings.
- * 
+ *
  * @remarks
  * Combines prefix matching and character overlap to score visual/phonetic similarity.
  * Higher scores indicate more confusable pairs.
@@ -51,14 +51,14 @@ function lexicalScore(a: string, b: string): number {
 export class DistractorBuilder {
     /**
      * Builds smart distractors using semantic and confusion-based scoring.
-     * 
+     *
      * @remarks
      * Scoring factors:
      * - Semantic similarity (same grammatical category)
      * - Lexical similarity (visual/phonetic overlap)
      * - Historical confusion (previously mistaken choices)
      * - Difficulty alignment (similar difficulty level)
-     * 
+     *
      * Selects top-scoring candidates to maximize question difficulty while
      * maintaining fairness.
      */
@@ -112,7 +112,7 @@ export class DistractorBuilder {
 
     /**
      * Builds random distractors as fallback.
-     * 
+     *
      * @remarks
      * Used when smart distractor generation is disabled or fails.
      * Simply selects random cards excluding the correct answer.

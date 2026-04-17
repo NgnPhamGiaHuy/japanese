@@ -16,12 +16,12 @@
  */
 
 import { GameStateMachine } from "./GameStateMachine";
-import { TimerController } from "./TimerController";
-import { ScoringEngine } from "./ScoringEngine";
 import { ProgressionTracker } from "./ProgressionTracker";
+import { ScoringEngine } from "./ScoringEngine";
+import { TimerController } from "./TimerController";
 import { QuestionEngine } from "../questions";
 
-import type { AnswerResult, GameEngineConfig, GameState, ModeStrategy, TimerState, } from "../types";
+import type { AnswerResult, GameEngineConfig, GameState, ModeStrategy, TimerState } from "../types";
 
 export class GameEngine {
     private state: GameState;

@@ -78,7 +78,6 @@ export interface SpeedDifficultyConfig {
     color: string;
 }
 
-
 /** Timer bar color based on fraction of time remaining (1 = full, 0 = expired). */
 export function timerColor(fraction: number): string {
     const { TIMER_COLORS } = SPEED_GAME_CONFIG.UI;

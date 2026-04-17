@@ -9,15 +9,15 @@
 import { useRouter } from "next/navigation";
 import { use, useState } from "react";
 
-import { ShareModal } from "@/features/flashcard/components";
-import { useCards, useLessons } from "@/features/flashcard/hooks";
-import { buildShareId } from "@/features/flashcard/services";
+import { ShareModal } from "@/features/flashcard/core/components";
+import { useCards, useLessons } from "@/features/flashcard/core/hooks";
+import { buildShareId } from "@/features/flashcard/core/services";
+import { FlashcardDetailLayout } from "@/features/flashcard/detail";
 import { Button } from "@/shared/components/ui";
 import { useAlert } from "@/shared/providers";
 import { useAppStore } from "@/store";
-import FlashcardDetailLayout from "../_components/FlashcardDetailLayout";
 
-import type { DeckContext } from "../_components/FlashcardDetailLayout";
+import type { DeckContext } from "@/features/flashcard/detail";
 
 /**
  * Deck Detail Page (Personal)

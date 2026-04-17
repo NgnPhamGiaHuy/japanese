@@ -1,7 +1,14 @@
 /**
- * @file SharedMatchPage
- * Game mode for SHARED flashcard decks.
- * Allows users to play the Match game on decks shared by others without importing them.
+ * Shared Match Mode Page — Pure Orchestrator
+ *
+ * @remarks
+ * Responsibilities (ONLY):
+ * - Extract route params
+ * - Load shared flashcard data via unified loader
+ * - Handle loading/404 states
+ * - Render MatchGame feature root
+ *
+ * NO business logic, NO game state, NO direct service calls.
  */
 
 "use client";
@@ -9,165 +16,25 @@
 import { useRouter } from "next/navigation";
 import { use } from "react";
 
-import {
-    MatchIntroView,
-    MatchPlayingView,
-    MatchResultsView,
-} from "@/features/flashcard/components";
-import {
-    useFlashcardGameBestScore,
-    useMatchModeSession,
-    useSharedLesson,
-} from "@/features/flashcard/hooks";
-import { sharedMatchGameMode } from "@/features/flashcard/services";
-import { scoreToTier, TIER_INFO } from "@/features/game/logic";
-import { useUserProgress } from "@/features/user/hooks";
-import { Button } from "@/shared/components/ui";
-import { useAppStore } from "@/store";
+import { useFlashcardLoader } from "@/features/flashcard/core/hooks";
+import { MatchGame } from "@/features/flashcard/games/match";
+import { LoadingSpinner, NotFoundScreen } from "@/shared/components/ui";
 
-/**
- * Shared Match Mode Page
- *
- * @remarks
- * Orchestrates a match session for a publicly shared deck.
- * Uses `sharedMatchGameMode` to ensure leaderboard and best score keys are unique
- * to the shared instance, preventing overlap with the user's personal decks.
- */
 export default function SharedMatchPage({ params }: { params: Promise<{ shareId: string }> }) {
     const { shareId } = use(params);
     const router = useRouter();
-    const { user } = useAppStore();
-    const { addXP } = useUserProgress();
+    const loader = useFlashcardLoader({ type: "shared", shareId });
 
-    // Fetches lesson data using the share token instead of a permanent deck ID
-    const { result, status } = useSharedLesson(shareId);
-
-    /**
-     * The game mode key is scoped to this shareId — no collision with personal decks.
-     * This is critical for maintaining accurate per-deck leaderboards.
-     */
-    const gameMode = sharedMatchGameMode(shareId);
-    const bestScore = useFlashcardGameBestScore(user?.uid, gameMode);
-
-    /**
-     * Managed game session state.
-     * Operates on the transient 'result' cards from the shared lesson service.
-     */
-    const {
-        phase,
-        difficulty,
-        setDifficulty,
-        config,
-        prepLoading,
-        score,
-        streak,
-        maxStreak,
-        wrongAttempts,
-        timeLeft,
-        timeUnlimited,
-        livesLeft,
-        livesTotal,
-        showLives,
-        pairCount,
-        matchedPairs,
-        comboPopup,
-        progress,
-        startGame,
-        onCellTap,
-        resetToIntro,
-        closeSession,
-    } = useMatchModeSession({
-        cards: result?.cards ?? [],
-        gameMode,
-        bestScore,
-        userId: user?.uid,
-        displayName: user?.displayName,
-        addXP,
-    });
-
-    if (status === "loading") {
-        return (
-            <div className="fixed inset-0 flex items-center justify-center bg-[#F7F7F8]">
-                <div className="h-8 w-8 animate-spin rounded-full border-4 border-gray-200 border-t-[#ce82ff]" />
-            </div>
-        );
+    // ── Loading State ──────────────────────────────────────────────────────
+    if (loader.isLoading) {
+        return <LoadingSpinner color="#ce82ff" />;
     }
 
-    if (status !== "ready" || !result) {
-        return (
-            <div className="fixed inset-0 flex flex-col items-center justify-center bg-[#F7F7F8] p-6 text-center">
-                <h1 className="mb-4 text-2xl font-black text-[#3c3c3c]">Deck Not Found</h1>
-                <Button
-                    variant="ghost"
-                    onClick={() => router.back()}
-                    className="!font-bold !text-[#1cb0f6] shadow-none hover:shadow-none active:translate-y-0"
-                >
-                    Go Back
-                </Button>
-            </div>
-        );
+    // ── 404 Guard ──────────────────────────────────────────────────────────
+    if (loader.isNotFound || !loader.data) {
+        return <NotFoundScreen title="Deck Not Found" onBack={() => router.back()} />;
     }
 
-    const tier = scoreToTier(bestScore);
-    const tierInfo = TIER_INFO[tier];
-
-    // Phase 1: Intro (Shared Deck Context)
-    if (phase === "intro") {
-        return (
-            <MatchIntroView
-                bestScore={bestScore}
-                tierInfo={tierInfo}
-                difficulty={difficulty}
-                cardCount={result.cards.length}
-                requiredPairs={config.pairs}
-                prepLoading={prepLoading}
-                onBack={() => router.back()}
-                onStart={startGame}
-                onDifficultyChange={setDifficulty}
-            />
-        );
-    }
-
-    // Phase 3: Results (Shared Leaderboard Submission)
-    if (phase === "results") {
-        const finalTierInfo = TIER_INFO[scoreToTier(score)];
-        return (
-            <MatchResultsView
-                score={score}
-                bestScore={bestScore}
-                matchedCount={matchedPairs}
-                totalCount={pairCount}
-                wrongAttempts={wrongAttempts}
-                maxStreak={maxStreak}
-                tierInfo={finalTierInfo}
-                gameMode={gameMode}
-                currentUserId={user?.uid}
-                onPlayAgain={resetToIntro}
-                onCollectXP={() => router.push(`/flashcard/shared/${shareId}`)}
-            />
-        );
-    }
-
-    // Phase 2: Active Gameplay
-    return (
-        <MatchPlayingView
-            gameMode={gameMode}
-            currentUserId={user?.uid}
-            currentUserName={user?.displayName ?? "You"}
-            score={score}
-            streak={streak}
-            timeLeft={timeLeft}
-            timeUnlimited={timeUnlimited}
-            progress={progress}
-            comboPopup={comboPopup}
-            showLives={showLives}
-            livesLeft={livesLeft}
-            livesTotal={livesTotal}
-            onBack={() => {
-                closeSession();
-                router.back();
-            }}
-            onCellTap={onCellTap}
-        />
-    );
+    // ── Delegate to Feature ────────────────────────────────────────────────
+    return <MatchGame data={loader.data} />;
 }

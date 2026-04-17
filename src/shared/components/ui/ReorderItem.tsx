@@ -41,6 +41,8 @@ const ReorderItem = <T,>({
             className={className}
             onDragStart={onDragStart}
             onDragEnd={onDragEnd}
+            initial={false}
+            transition={{ duration: 0.2 }}
         >
             {!disabled && showHandle && (
                 <button

@@ -1,0 +1,229 @@
+/**
+ * DeckCard — Individual deck entry on dashboard
+ *
+ * @remarks
+ * Displays deck metadata (title, tags, count) and high score badges.
+ * Provides entry points to Study, Speed Quiz, and Match game.
+ */
+
+import Link from "next/link";
+
+import { BookOpen, Edit2, Gamepad2, Share2, Trash2, Zap } from "lucide-react";
+
+import { buildShareId } from "@/features/flashcard";
+import { Button, TierBadge, UserMeta } from "@/shared/components/ui";
+import { CARD_BASE, SPACING } from "@/shared/constants";
+import { hexToThemeColor } from "@/shared/utils";
+import { useAppStore } from "@/store";
+
+import type { DeckCardProps } from "../types";
+
+const DeckCard = ({
+    lesson,
+    isShared,
+    matchStats,
+    speedStats,
+    onDelete,
+    onShare,
+}: DeckCardProps) => {
+    const { user } = useAppStore();
+    const themeColor = lesson.themeColor || "#1cb0f6";
+
+    const role = user ? lesson.roles?.[user.uid] : "viewer";
+    const canEdit = role === "owner" || role === "editor";
+    const canShare = role === "owner";
+    const canDelete = role === "owner";
+
+    const createdByName = lesson.ownerName ?? "Unknown";
+    const createdByAvatar = lesson.ownerAvatar ?? null;
+    const shouldShowSharedBy =
+        !!lesson.lastSharedBy && (!lesson.ownerId || lesson.lastSharedBy !== lesson.ownerId);
+    const sharedByName = lesson.lastSharedByName ?? "Unknown";
+    const sharedByAvatar = lesson.lastSharedByAvatar ?? null;
+    const sharedBySubtitle = user && lesson.lastSharedBy === user.uid ? "You shared" : "Shared by";
+
+    const resolvedShareId =
+        lesson.shareId ||
+        (lesson.ownerId
+            ? buildShareId(lesson.ownerId, lesson.id)
+            : lesson.userId
+              ? buildShareId(lesson.userId, lesson.id)
+              : "");
+
+    const viewPath = isShared ? `/flashcard/shared/${resolvedShareId}` : `/flashcard/${lesson.id}`;
+    const speedPath = isShared
+        ? `/flashcard/shared/${resolvedShareId}/speed`
+        : `/flashcard/${lesson.id}/speed`;
+    const matchPath = isShared
+        ? `/flashcard/shared/${resolvedShareId}/match`
+        : `/flashcard/${lesson.id}/match`;
+    const editPath = isShared
+        ? `/flashcard/${lesson.id}/edit?ownerId=${lesson.ownerId ?? lesson.userId}`
+        : `/flashcard/${lesson.id}/edit`;
+
+    return (
+        <div
+            className={`group relative ${CARD_BASE} transition-all hover:-translate-y-0.5 hover:shadow-md ${SPACING.cardPadding} hover:z-10`}
+        >
+            <div className="mb-4 flex items-start justify-between">
+                <div className="flex-1 pr-4">
+                    <div className="flex items-center gap-2">
+                        <h3 className="text-xl font-black text-[#3c3c3c]">{lesson.title}</h3>
+                        {isShared && (
+                            <span className="inline-flex items-center rounded-lg bg-gray-100 px-2 py-1 text-[9px] font-black tracking-tight text-[#afafaf] uppercase">
+                                Shared
+                            </span>
+                        )}
+                    </div>
+                    {lesson.description && (
+                        <p className="mt-1 line-clamp-2 text-sm font-bold text-[#afafaf]">
+                            {lesson.description}
+                        </p>
+                    )}
+                    <div className="mt-2 flex flex-col gap-1">
+                        <UserMeta
+                            name={createdByName}
+                            avatar={createdByAvatar}
+                            subtitle="Created by"
+                            className="!gap-2"
+                        />
+                        {shouldShowSharedBy && (
+                            <UserMeta
+                                name={sharedByName}
+                                avatar={sharedByAvatar}
+                                subtitle={sharedBySubtitle}
+                                className="!gap-2"
+                            />
+                        )}
+                    </div>
+                    {lesson.tags.length > 0 && (
+                        <div className="mt-2 flex flex-wrap gap-2">
+                            {lesson.tags.map((tag) => (
+                                <span
+                                    key={tag}
+                                    style={{
+                                        color: themeColor,
+                                        backgroundColor: `${themeColor}20`,
+                                    }}
+                                    className="rounded-lg px-2 py-1 text-[10px] font-black tracking-wider uppercase"
+                                >
+                                    {tag}
+                                </span>
+                            ))}
+                        </div>
+                    )}
+                </div>
+                <div className="flex shrink-0 flex-col items-center">
+                    <div
+                        className="mb-1 flex h-14 w-14 items-center justify-center rounded-2xl"
+                        style={{ backgroundColor: `${themeColor}20` }}
+                    >
+                        <span className="text-2xl font-black" style={{ color: themeColor }}>
+                            {lesson.cardCount}
+                        </span>
+                    </div>
+                    <span className="text-[9px] font-black text-[#afafaf] uppercase">cards</span>
+                </div>
+            </div>
+
+            <div className="mt-2 flex flex-col gap-3 sm:mt-0 sm:flex-row sm:gap-2">
+                <div className="flex flex-1 gap-2">
+                    <Link href={viewPath} className="flex-1">
+                        <Button
+                            variant="primary"
+                            color={hexToThemeColor(themeColor)}
+                            icon={BookOpen}
+                            className="w-full flex-col gap-1 px-1 py-2 text-[10px] md:flex-row md:gap-2 md:px-2 md:py-3 md:text-sm"
+                        >
+                            <span className="truncate">View</span>
+                        </Button>
+                    </Link>
+
+                    <div className="relative flex-1">
+                        {speedStats && (
+                            <TierBadge
+                                score={speedStats.bestScore}
+                                className="absolute -top-2 left-1/2 z-10 -translate-x-1/2"
+                            />
+                        )}
+                        <Link href={speedPath} className="block">
+                            <Button
+                                variant="secondary"
+                                color="orange"
+                                icon={Zap}
+                                className="w-full flex-col gap-1 px-1 py-2 text-[10px] md:flex-row md:gap-2 md:px-2 md:py-3 md:text-sm"
+                            >
+                                <span className="truncate">Speed</span>
+                            </Button>
+                        </Link>
+                    </div>
+
+                    <div className="relative flex-1">
+                        {matchStats && (
+                            <TierBadge
+                                score={matchStats.bestScore}
+                                className="absolute -top-2 left-1/2 z-10 -translate-x-1/2"
+                            />
+                        )}
+                        <Link href={matchPath} className="block">
+                            <Button
+                                variant="secondary"
+                                color="purple"
+                                icon={Gamepad2}
+                                className="w-full flex-col gap-1 px-1 py-2 text-[10px] md:flex-row md:gap-2 md:px-2 md:py-3 md:text-sm"
+                            >
+                                <span className="truncate">Match</span>
+                            </Button>
+                        </Link>
+                    </div>
+                </div>
+
+                <div className="flex items-center justify-around gap-2 border-t-2 border-gray-50 pt-3 sm:justify-end sm:border-t-0 sm:pt-0">
+                    {canShare && (
+                        <Button
+                            variant="ghost"
+                            onClick={onShare}
+                            className="!flex !h-11 !w-11 !items-center !justify-center !rounded-xl !p-0 !text-gray-300 shadow-none transition-colors hover:!bg-[#ebf8e6] hover:!text-[#58cc02] hover:shadow-none active:translate-y-0"
+                            title="Share deck"
+                            icon={Share2}
+                            iconSize={20}
+                        />
+                    )}
+                    {canEdit && (
+                        <Link href={editPath}>
+                            <Button
+                                variant="ghost"
+                                className="!flex !h-11 !w-11 !items-center !justify-center !rounded-xl !p-0 !text-gray-300 shadow-none transition-all hover:shadow-none active:translate-y-0"
+                                onMouseEnter={(e) => {
+                                    (e.currentTarget as HTMLElement).style.backgroundColor =
+                                        `${themeColor}20`;
+                                    (e.currentTarget as HTMLElement).style.color = themeColor;
+                                }}
+                                onMouseLeave={(e) => {
+                                    (e.currentTarget as HTMLElement).style.backgroundColor =
+                                        "transparent";
+                                    (e.currentTarget as HTMLElement).style.color = "";
+                                }}
+                                title="Edit deck"
+                                icon={Edit2}
+                                iconSize={20}
+                            />
+                        </Link>
+                    )}
+                    {canDelete && (
+                        <Button
+                            variant="ghost"
+                            onClick={onDelete}
+                            className="!flex !h-11 !w-11 !items-center !justify-center !rounded-xl !p-0 !text-gray-300 shadow-none transition-colors hover:!bg-[#ffdfe0] hover:!text-[#ea2b2b] hover:shadow-none active:translate-y-0"
+                            title="Delete deck"
+                            icon={Trash2}
+                            iconSize={20}
+                        />
+                    )}
+                </div>
+            </div>
+        </div>
+    );
+};
+
+export default DeckCard;

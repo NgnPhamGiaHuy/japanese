@@ -169,7 +169,11 @@ export const useSurvivalGame = ({
         ) {
             isGameOverRef.current = true;
             const finalScore = engine.score;
-            onSaveScoreRef.current(finalScore, userNameRef.current || localNameRef.current, activeModeKeyRef.current);
+            onSaveScoreRef.current(
+                finalScore,
+                userNameRef.current || localNameRef.current,
+                activeModeKeyRef.current,
+            );
             void endSessionRef.current(finalScore);
             setPhase("gameover");
         }
@@ -218,7 +222,11 @@ export const useSurvivalGame = ({
                 if (newLives <= 0 && !isGameOverRef.current) {
                     isGameOverRef.current = true;
                     const finalScore = engine.score;
-                    onSaveScoreRef.current(finalScore, userNameRef.current || localNameRef.current, activeModeKeyRef.current);
+                    onSaveScoreRef.current(
+                        finalScore,
+                        userNameRef.current || localNameRef.current,
+                        activeModeKeyRef.current,
+                    );
                     void endSessionRef.current(finalScore);
                     setPhase("gameover");
                     return;
@@ -273,8 +281,17 @@ export const useSurvivalGame = ({
 
             if (time - (state.lastSpawn || 0) > spawnInterval && state.words.length < maxWords) {
                 const allowedGroups = [
-                    "vowels", "k-row", "s-row", "t-row", "n-row",
-                    "h-row", "m-row", "y-row", "r-row", "w-row", "n-misc",
+                    "vowels",
+                    "k-row",
+                    "s-row",
+                    "t-row",
+                    "n-row",
+                    "h-row",
+                    "m-row",
+                    "y-row",
+                    "r-row",
+                    "w-row",
+                    "n-misc",
                 ];
                 if (elapsed > 30) allowedGroups.push("dakuten", "handakuten");
                 if (elapsed > 60) allowedGroups.push("yōon", "yōon-voiced");
@@ -316,7 +333,11 @@ export const useSurvivalGame = ({
                     if (n <= 0 && !isGameOverRef.current) {
                         isGameOverRef.current = true;
                         const finalScore = dropScore.current;
-                        onSaveScoreRef.current(finalScore, userNameRef.current || localNameRef.current, activeModeKeyRef.current);
+                        onSaveScoreRef.current(
+                            finalScore,
+                            userNameRef.current || localNameRef.current,
+                            activeModeKeyRef.current,
+                        );
                         void endSessionRef.current(finalScore);
                         setPhase("gameover");
                     }

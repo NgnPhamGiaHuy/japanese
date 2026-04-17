@@ -8,7 +8,7 @@ import { Button } from "@/shared/components/ui";
 import { hexToThemeColor } from "@/shared/utils";
 import { useAIDeck } from "../hooks";
 
-import type { ImportRow } from "@/features/flashcard/components/ImportPreview";
+import type { ImportRow } from "@/features/flashcard/core/components/ImportPreview";
 import type { AIGenerateMode, JLPTLevel } from "../types";
 
 interface AIBulkPanelProps {

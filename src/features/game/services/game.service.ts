@@ -2,11 +2,13 @@ import {
     addDoc,
     collection,
     doc,
+    getDoc,
     increment,
     limit,
     onSnapshot,
     orderBy,
     query,
+    runTransaction,
     serverTimestamp,
     setDoc,
     updateDoc,
@@ -63,35 +65,74 @@ export interface GameResultInput {
 // ─── Internal helpers ─────────────────────────────────────────────────────────
 
 /**
- * Writes the final score to the public leaderboard and the user's personal
- * best if (and only if) `score` beats `currentBest`.
+ * Atomically writes the final score to the public leaderboard and the user's
+ * personal best if (and only if) `score` beats the current database value.
  *
- * Private — consumed by `finishGameSession` and `submitScore`.
+ * @remarks
+ * Uses Firestore transaction to ensure:
+ * - Read-check-write atomicity (no race conditions)
+ * - Concurrent-safe (automatic retries on conflicts)
+ * - No stale data (always reads latest value at write time)
+ *
+ * Private — consumed by `finishGameSession`, `submitScore`, and `recordGameResult`.
  */
 async function persistBestScore(
     userId: string,
     displayName: string,
     gameMode: string,
     score: number,
-    currentBest: number,
 ): Promise<void> {
-    if (score <= 0 || score <= currentBest) return;
+    if (score <= 0) {
+        console.log(`[persistBestScore] Invalid score ${score}, skipping`);
+        return;
+    }
 
     const now = new Date().toISOString();
+    const lbRef = lbDoc(gameMode, userId);
+    const statsRef = personalBestDoc(userId, gameMode);
 
-    await setDoc(lbDoc(gameMode, userId), {
-        userId,
-        displayName: displayName.substring(0, 20),
-        score,
-        gameMode,
-        timestamp: now,
-    });
+    try {
+        // ✅ ATOMIC TRANSACTION: Read-Check-Write in single operation
+        await runTransaction(db, async (transaction) => {
+            // Read current best score from database
+            const statsSnap = await transaction.get(statsRef);
+            const currentBest = statsSnap.data()?.bestScore ?? 0;
 
-    await setDoc(
-        personalBestDoc(userId, gameMode),
-        { bestScore: score, tier: scoreToTier(score), lastUpdated: now },
-        { merge: true },
-    );
+            // Guard: Only proceed if new score is higher
+            if (score <= currentBest) {
+                console.log(
+                    `[persistBestScore] Score ${score} <= current best ${currentBest} for ${gameMode}, skipping`,
+                );
+                return; // Transaction aborts, no writes
+            }
+
+            // Write new best score atomically to both locations
+            transaction.set(lbRef, {
+                userId,
+                displayName: displayName.substring(0, 20),
+                score,
+                gameMode,
+                timestamp: now,
+            });
+
+            transaction.set(
+                statsRef,
+                {
+                    bestScore: score,
+                    tier: scoreToTier(score),
+                    lastUpdated: now,
+                },
+                { merge: true },
+            );
+
+            console.log(
+                `[persistBestScore] ✅ New best for ${gameMode}: ${score} (previous: ${currentBest})`,
+            );
+        });
+    } catch (error) {
+        console.error(`[persistBestScore] Transaction failed for ${gameMode}:`, error);
+        throw error;
+    }
 }
 
 // ─── Game Sessions ────────────────────────────────────────────────────────────
@@ -135,6 +176,10 @@ export const updateGameScore = async (sessionId: string, score: number): Promise
 /**
  * Marks a session as finished and flushes the final score to both the public
  * leaderboard and the user's personal best (only if `finalScore` is a new high).
+ *
+ * @remarks
+ * The `currentBest` parameter is now IGNORED - the function fetches the latest
+ * value from the database atomically to prevent race conditions.
  */
 export const finishGameSession = async (
     sessionId: string,
@@ -142,7 +187,7 @@ export const finishGameSession = async (
     userId: string,
     displayName: string,
     gameMode: string,
-    currentBest: number = 0,
+    currentBest: number = 0, // ⚠️ DEPRECATED: Kept for backward compatibility, not used
 ): Promise<void> => {
     try {
         await updateDoc(doc(sessionsCol(), sessionId), {
@@ -154,7 +199,8 @@ export const finishGameSession = async (
         console.warn("[GameService] finishGameSession session update skipped:", err);
     }
 
-    await persistBestScore(userId, displayName, gameMode, finalScore, currentBest);
+    // ✅ No longer passes currentBest - fetched atomically inside
+    await persistBestScore(userId, displayName, gameMode, finalScore);
 };
 
 /**
@@ -162,15 +208,20 @@ export const finishGameSession = async (
  * (e.g. a short one-shot game that skips the full session lifecycle).
  *
  * Promotes the score to the leaderboard and personal best if it is a new high.
+ *
+ * @remarks
+ * The `currentBest` parameter is now IGNORED - the function fetches the latest
+ * value from the database atomically to prevent race conditions.
  */
 export const submitScore = async ({
     userId,
     displayName,
     gameMode,
     score,
-    currentBest = 0,
+    currentBest = 0, // ⚠️ DEPRECATED: Kept for backward compatibility, not used
 }: GameResultInput): Promise<void> => {
-    await persistBestScore(userId, displayName, gameMode, score, currentBest);
+    // ✅ No longer passes currentBest - fetched atomically inside
+    await persistBestScore(userId, displayName, gameMode, score);
 };
 
 // ─── Leaderboard ──────────────────────────────────────────────────────────────
@@ -234,13 +285,17 @@ export interface GameStatEntry {
  * Records a completed game.
  *  - Always increments `totalGames` and stamps `lastPlayedAt`.
  *  - Promotes `bestScore` + `tier` on the leaderboard iff `score` is a new high.
+ *
+ * @remarks
+ * The `currentBest` parameter is now IGNORED - the function fetches the latest
+ * value from the database atomically to prevent race conditions.
  */
 export const recordGameResult = async (
     userId: string,
     displayName: string,
     gameMode: string,
     score: number,
-    currentBest: number = 0,
+    currentBest: number = 0, // ⚠️ DEPRECATED: Kept for backward compatibility, not used
 ): Promise<void> => {
     const now = new Date().toISOString();
 
@@ -251,8 +306,8 @@ export const recordGameResult = async (
         { merge: true },
     );
 
-    // Conditionally update best score + leaderboard
-    await persistBestScore(userId, displayName, gameMode, score, currentBest);
+    // ✅ No longer passes currentBest - fetched atomically inside
+    await persistBestScore(userId, displayName, gameMode, score);
 };
 
 /**

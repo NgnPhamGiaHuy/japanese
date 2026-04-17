@@ -3,8 +3,8 @@
  * These types are shared across all game modes and provide a single source of truth.
  */
 
-import type { FlashCard } from "@/features/flashcard/types";
-import type { QuestionType } from "@/features/flashcard/utils";
+import type { FlashCard } from "@/features/flashcard/core/types";
+import type { QuestionType } from "@/features/flashcard/core/utils";
 
 export type GamePhase = "intro" | "playing" | "feedback" | "results";
 export type FeedbackStatus = "idle" | "correct" | "wrong" | "timeout";
@@ -112,7 +112,11 @@ export interface ModeStrategy {
     readonly totalQuestions: number;
 
     getTimeLimit(level: number, questionIndex: number): number;
-    getDifficultyLevel(questionIndex: number, streak: number, history: readonly AnswerEvent[]): number;
+    getDifficultyLevel(
+        questionIndex: number,
+        streak: number,
+        history: readonly AnswerEvent[],
+    ): number;
     calculatePoints(params: ScoringParams): number;
     getQuestionConfig(level: number): QuestionGenerationConfig;
     shouldAdvanceLevel(state: GameState): boolean;

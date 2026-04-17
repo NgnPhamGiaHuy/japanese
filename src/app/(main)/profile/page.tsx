@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 
 import { BookOpen, Flame, LogOut, Settings, Trophy } from "lucide-react";
 
-import { useLessons } from "@/features/flashcard/hooks";
+import { useLessons } from "@/features/flashcard/core/hooks";
 import { useUserProgress } from "@/features/user/hooks";
 import { signOut } from "@/features/user/services";
 import { SCREEN_HEADER_BACK_BUTTON_CLASS, ScreenHeader } from "@/shared/components/layout";

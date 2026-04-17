@@ -1,4 +1,3 @@
-;
 /**
  * Intelligent card selection engine using weighted probability.
  *
@@ -23,11 +22,8 @@
  */
 import { shuffleArray } from "@/shared/utils";
 
-
-
-import type { FlashCard } from "@/features/flashcard/types";
+import type { FlashCard } from "@/features/flashcard/core/types";
 import type { CardMemoryManager } from "./CardMemoryManager";
-
 
 const RECENT_MEMORY_WINDOW = 10;
 const HARD_MIN_GAP = 3;

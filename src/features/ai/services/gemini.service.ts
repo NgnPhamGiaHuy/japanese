@@ -1,12 +1,15 @@
 import { getGenerativeModel } from "firebase/ai";
 
-import { splitAtomicPrimary, validateAtomicCard } from "@/features/flashcard/utils/card.validator";
+import {
+    splitAtomicPrimary,
+    validateAtomicCard,
+} from "@/features/flashcard/core/utils/card.validator";
 import { firebaseAI } from "@/lib/firebase";
 import { getCardGenerationPrompt, getDeckGenerationPrompt } from "./prompt-builder";
 import { AI_CONFIG } from "../config";
 import { getMatchDistractorsPrompt } from "../prompts/match.distractors";
 
-import type { FlashCard } from "@/features/flashcard/types";
+import type { FlashCard } from "@/features/flashcard/core/types";
 import type { GeneratedCard, JLPTLevel } from "../types";
 
 export type { GeneratedCard, JLPTLevel } from "../types";

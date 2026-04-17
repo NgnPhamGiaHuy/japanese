@@ -7,7 +7,7 @@
  * scheduling similar to SM-2 algorithm.
  */
 
-import type { FlashCard } from "@/features/flashcard/types";
+import type { FlashCard } from "@/features/flashcard/core/types";
 
 const INITIAL_RESPONSE_MS = 2400;
 const EMA_ALPHA = 0.25;

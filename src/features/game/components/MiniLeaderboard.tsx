@@ -61,7 +61,7 @@ const MiniLeaderboard = ({
           ];
 
     return (
-        <div className="fixed top-4 right-4 z-40 hidden w-48 flex-col gap-1 rounded-xl border border-gray-100 bg-white/90 p-3 shadow-md backdrop-blur-sm md:flex">
+        <div className="fixed top-32 right-4 z-40 hidden w-48 flex-col gap-1 rounded-xl border border-gray-100 bg-white/90 p-3 shadow-md backdrop-blur-sm md:flex">
             <div className="mb-1 flex items-center gap-2 border-b border-gray-100 pb-1">
                 <Trophy size={14} className="text-[#ff9600]" />
                 <span className="text-xs font-bold tracking-wider text-gray-400 uppercase">

@@ -15,16 +15,17 @@ export type StreakHudVariant = "compact" | "default";
 
 /** Right HUD: timer → streak → score. Stable widths, items vertically centered. */
 const HUD_RIGHT_CLASS =
-    "flex shrink-0 flex-row flex-nowrap items-center justify-end gap-8 md:gap-10";
+    "flex shrink-0 flex-row flex-nowrap items-center justify-end gap-2 md:gap-8 lg:gap-10";
 
 /** Recall quiz: streak + score column (unchanged width). */
 export const gameQuizStreakColumnClassName =
     "flex w-[5.5rem] shrink-0 flex-col items-end justify-center gap-1.5 md:w-32";
 
-const TIMER_CELL = "flex h-12 w-16 shrink-0 items-center justify-end md:w-[4.5rem]";
-const STREAK_SLOT = "flex h-12 w-[5.5rem] shrink-0 items-center justify-center md:w-[5.75rem]";
+const TIMER_CELL = "flex h-12 w-12 shrink-0 items-center justify-end md:w-16 lg:w-[4.5rem]";
+const STREAK_SLOT =
+    "flex h-12 w-[4.5rem] shrink-0 items-center justify-center md:w-[5.5rem] lg:w-[5.75rem]";
 const SCORE_CELL =
-    "flex min-h-12 min-w-[3rem] flex-col items-end justify-center gap-0.5 md:min-w-[3.25rem]";
+    "flex min-h-12 min-w-[2.5rem] flex-col items-end justify-center gap-0.5 md:min-w-[3rem] lg:min-w-[3.25rem]";
 const BONUS_LINE = "flex h-5 w-full min-h-5 items-center justify-end";
 
 interface StreakComboBadgeProps {
@@ -83,18 +84,18 @@ const StreakComboBadge = ({
         <div className={STREAK_SLOT}>
             <motion.div
                 animate={controls}
-                className={`inline-flex w-21 max-w-full items-center justify-center gap-1 px-2.5 py-2 md:w-22 md:px-3 ${STREAK_PILL} ${
+                className={`inline-flex w-full max-w-full items-center justify-center gap-0.5 px-1.5 py-1.5 md:gap-1 md:px-2.5 md:py-2 lg:px-3 ${STREAK_PILL} ${
                     streak === 0 ? "opacity-30" : "opacity-100"
                 } transition-opacity duration-200`}
             >
-                <span className="text-lg leading-none md:text-xl" aria-hidden>
+                <span className="text-sm leading-none md:text-lg lg:text-xl" aria-hidden>
                     🔥
                 </span>
-                <span className="text-lg font-black text-white tabular-nums md:text-xl">
+                <span className="text-sm font-black text-white tabular-nums md:text-lg lg:text-xl">
                     {streak}
                 </span>
                 <span
-                    className={`inline-flex min-w-8 justify-center rounded-md bg-white/20 px-1 py-0.5 text-xs font-black text-white tabular-nums md:min-w-9 md:text-sm ${
+                    className={`inline-flex min-w-6 justify-center rounded-md bg-white/20 px-0.5 py-0.5 text-[10px] font-black text-white tabular-nums md:min-w-8 md:px-1 md:text-xs lg:min-w-9 lg:text-sm ${
                         mult != null ? "" : "pointer-events-none invisible text-transparent"
                     }`}
                     aria-hidden={mult == null}
@@ -118,7 +119,7 @@ interface GameStreakScoreStackProps {
 }
 
 const DEFAULT_SCORE_CLASS =
-    "text-4xl font-black tabular-nums leading-none tracking-tight text-[#ff9600] md:text-5xl";
+    "text-2xl font-black tabular-nums leading-none tracking-tight text-[#ff9600] md:text-4xl lg:text-5xl";
 
 /**
  * Top bar right group: [ Timer | Streak | Score ]. Fixed slots; bonus line always reserves height.
@@ -142,7 +143,7 @@ const GameStreakScoreStack = ({
                     startSlot
                 ) : (
                     <span
-                        className="invisible block w-full text-right text-lg font-semibold tabular-nums select-none md:text-xl"
+                        className="invisible block w-full text-right text-sm font-semibold tabular-nums select-none md:text-lg lg:text-xl"
                         aria-hidden
                     >
                         0:00
@@ -158,7 +159,7 @@ const GameStreakScoreStack = ({
                 <div className={BONUS_LINE}>
                     <span
                         key={showBonus ? pointsAnimKey : "bonus-reserved"}
-                        className={`text-sm font-bold tabular-nums md:text-base ${
+                        className={`text-xs font-bold tabular-nums md:text-sm lg:text-base ${
                             showBonus
                                 ? "text-[#34c759]"
                                 : "pointer-events-none invisible select-none"

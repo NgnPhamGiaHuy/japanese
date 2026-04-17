@@ -9,16 +9,16 @@
 import { useRouter } from "next/navigation";
 import { use, useEffect, useState } from "react";
 
-import { ShareModal } from "@/features/flashcard/components";
-import { useLessons } from "@/features/flashcard/hooks";
-import { getSharedLesson, SharedLessonResult } from "@/features/flashcard/services";
+import { ShareModal } from "@/features/flashcard/core/components";
+import { useLessons } from "@/features/flashcard/core/hooks";
+import { getSharedLesson, SharedLessonResult } from "@/features/flashcard/core/services";
+import { FlashcardDetailLayout } from "@/features/flashcard/detail";
 import { Button } from "@/shared/components/ui";
 import { useAlert } from "@/shared/providers";
 import { useAppStore } from "@/store";
-import FlashcardDetailLayout from "../../_components/FlashcardDetailLayout";
 
-import type { FlashCard } from "@/features/flashcard/types";
-import type { DeckContext, DeckRole } from "../../_components/FlashcardDetailLayout";
+import type { FlashCard } from "@/features/flashcard/core/types";
+import type { DeckContext, DeckRole } from "@/features/flashcard/detail";
 
 /**
  * Shared Deck View

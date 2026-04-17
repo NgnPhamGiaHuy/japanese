@@ -277,7 +277,7 @@ const KanaSurvivalPage = () => {
                         startSlot={
                             game.challengeMode === "time" ? (
                                 <span
-                                    className={`block w-full text-right text-lg font-semibold tracking-tight tabular-nums md:text-xl ${game.timeLeft <= 5 ? "animate-pulse text-[#ea2b2b]" : "text-[#ff9600]"}`}
+                                    className={`block w-full text-right text-sm font-semibold tracking-tight tabular-nums md:text-lg lg:text-xl ${game.timeLeft <= 5 ? "animate-pulse text-[#ea2b2b]" : "text-[#ff9600]"}`}
                                 >
                                     {formatTime(game.timeLeft)}
                                 </span>
@@ -371,7 +371,7 @@ const KanaSurvivalPage = () => {
                     score={game.dropScore.current}
                     lastPoints={game.lastPoints}
                     pointsAnimKey={game.pointsAnimKey}
-                    scoreClassName="text-4xl font-black tabular-nums leading-none tracking-tight text-[#ffb347] md:text-5xl"
+                    scoreClassName="text-2xl font-black tabular-nums leading-none tracking-tight text-[#ffb347] md:text-4xl lg:text-5xl"
                 />
             </ScreenHeaderRow>
             <div className="relative flex-1">

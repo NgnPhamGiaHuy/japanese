@@ -12,13 +12,13 @@ import { use, useEffect, useState } from "react";
 import { getDoc } from "firebase/firestore";
 
 import { LessonBuilder, useLessons } from "@/features/flashcard";
-import { useCards } from "@/features/flashcard/hooks";
-import { lessonDoc, normalizeLesson } from "@/features/flashcard/services";
+import { useCards } from "@/features/flashcard/core/hooks";
+import { lessonDoc, normalizeLesson } from "@/features/flashcard/core/services";
 import { useAlert } from "@/shared/providers";
 import { sortByOrder } from "@/shared/utils";
 import { useAppStore } from "@/store";
 
-import type { FlashCard, Lesson } from "@/features/flashcard/types";
+import type { FlashCard, Lesson } from "@/features/flashcard/core/types";
 
 /**
  * Flashcard Edit View
@@ -69,7 +69,7 @@ export default function FlashcardEditPage({ params }: { params: Promise<{ id: st
 
         Promise.all([
             getDoc(lessonDoc(ownerId, id)),
-            import("@/features/flashcard/services/card.service").then(({ cardsCol }) =>
+            import("@/features/flashcard/core/services/card.service").then(({ cardsCol }) =>
                 import("firebase/firestore").then(({ getDocs, query, where }) =>
                     getDocs(query(cardsCol(ownerId), where("lessonId", "==", id))),
                 ),

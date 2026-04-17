@@ -1,20 +1,20 @@
 /**
  * Orchestrates question generation for game sessions.
- * 
+ *
  * @remarks
  * Coordinates card selection, question type determination, and distractor generation
  * to produce complete Question objects ready for presentation. Maintains recency
  * tracking to prevent immediate repetition.
  */
 
+import { buildQuestion } from "@/features/flashcard/core/utils";
 import { shuffleArray } from "@/shared/utils";
-import { buildQuestion } from "@/features/flashcard/utils";
-import { CardMemoryManager } from "../memory/CardMemoryManager";
-import { CardSelector } from "../memory/CardSelector";
 import { DistractorBuilder } from "./DistractorBuilder";
 import { QuestionTypeSelector } from "./QuestionTypeSelector";
+import { CardMemoryManager } from "../memory/CardMemoryManager";
+import { CardSelector } from "../memory/CardSelector";
 
-import type { FlashCard } from "@/features/flashcard/types";
+import type { FlashCard } from "@/features/flashcard/core/types";
 import type { ModeStrategy, Question } from "../types";
 
 export class QuestionEngine {
@@ -37,7 +37,7 @@ export class QuestionEngine {
 
     /**
      * Generates a complete question for the specified difficulty level.
-     * 
+     *
      * @remarks
      * Pipeline:
      * 1. Select card using weighted probability (CardSelector)
@@ -45,7 +45,7 @@ export class QuestionEngine {
      * 3. Build prompt and answer from card data
      * 4. Generate smart distractors (DistractorBuilder)
      * 5. Shuffle options and package as Question object
-     * 
+     *
      * Tracks recently shown cards to prevent immediate repetition.
      */
     generateQuestion(level: number): Question {
@@ -81,12 +81,7 @@ export class QuestionEngine {
                   questionType,
                   memory: this.cardMemory.getState() as Record<string, any>,
               })
-            : this.distractorBuilder.buildRandom(
-                  this.cards,
-                  card,
-                  answer,
-                  config.distractorCount,
-              );
+            : this.distractorBuilder.buildRandom(this.cards, card, answer, config.distractorCount);
 
         const options = shuffleArray([answer, ...distractors]);
 
