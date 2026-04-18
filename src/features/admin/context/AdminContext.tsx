@@ -32,8 +32,7 @@ const AdminProvider = ({ children }: { children: React.ReactNode }) => {
 
         const fetchRole = async () => {
             try {
-                const token = await getAdminIdToken();
-                const result = await fetchAdminRoleAction(token);
+                const result = await fetchAdminRoleAction();
                 setRole(result.ok ? result.data.role : null);
             } catch (err) {
                 console.error("Failed to fetch admin role:", err);

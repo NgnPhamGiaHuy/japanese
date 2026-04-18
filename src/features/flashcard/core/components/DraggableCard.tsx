@@ -3,6 +3,7 @@
 import { Image as ImageIcon, Sparkles, Trash2 } from "lucide-react";
 
 import { Button, ReorderItem } from "@/shared/components/ui";
+import { splitAlternatives, joinAlternatives } from "../utils/formatting";
 
 import type { EditorCard } from "../types";
 
@@ -41,10 +42,10 @@ const DraggableCard = ({
         <ReorderItem
             value={card}
             disabled={saving}
-            className="group relative rounded-[2rem] border-2 border-b-8 border-gray-200 bg-white p-6 shadow-sm transition-colors select-none focus-within:border-[var(--theme-color)]"
+            className="group relative rounded-3xl border-2 border-b-8 border-gray-200 bg-white p-4 shadow-sm transition-colors select-none focus-within:border-[var(--theme-color)] sm:rounded-[2rem] sm:p-6"
         >
             {/* Index Badge */}
-            <div className="absolute -top-3 -left-3 flex h-10 w-10 -rotate-3 transform items-center justify-center rounded-xl border-b-4 border-black bg-[#3c3c3c] text-lg font-black text-white shadow-sm transition-all group-active:scale-110">
+            <div className="absolute -top-2 -left-2 flex h-8 w-8 -rotate-3 transform items-center justify-center rounded-lg border-b-4 border-black bg-[#3c3c3c] text-sm font-black text-white shadow-sm transition-all group-active:scale-110 sm:-top-3 sm:-left-3 sm:h-10 sm:w-10 sm:rounded-xl sm:text-lg">
                 {idx + 1}
             </div>
 
@@ -54,17 +55,17 @@ const DraggableCard = ({
                 color="red"
                 onClick={() => onRemove(card.id)}
                 disabled={saving}
-                className="absolute -top-3 -right-3 z-10 !h-10 !w-10 rotate-3 transform !p-1 opacity-100 transition-all hover:scale-110 active:scale-95 md:opacity-0 md:group-hover:opacity-100"
+                className="absolute -top-2 -right-2 z-10 !h-8 !w-8 rotate-3 transform !p-1 opacity-100 transition-all hover:scale-110 active:scale-95 sm:-top-3 sm:-right-3 sm:!h-10 sm:!w-10 md:opacity-0 md:group-hover:opacity-100"
                 title="Remove Card"
                 icon={Trash2}
-                iconSize={22}
+                iconSize={18}
             />
 
-            <div className="mt-4 grid grid-cols-1 gap-6 select-text md:grid-cols-2">
+            <div className="mt-4 grid grid-cols-1 gap-5 select-text sm:gap-6 md:grid-cols-2">
                 {/* Primary Word */}
                 <div className="md:col-span-2">
                     <div className="mb-1 flex items-center justify-between">
-                        <label className="text-[10px] font-black tracking-widest text-[#afafaf] uppercase">
+                        <label className="text-[9px] font-black tracking-widest text-[#afafaf] uppercase sm:text-[10px]">
                             Primary ✱
                         </label>
                         <Button
@@ -73,7 +74,7 @@ const DraggableCard = ({
                             loading={aiLoading}
                             disabled={saving || !card.primary?.trim()}
                             onClick={() => onAIFill(card.id, card.primary || "")}
-                            className="!flex !h-auto !items-center !gap-1 !px-2 !py-0.5 !text-[9px] !font-black uppercase shadow-none hover:shadow-none"
+                            className="!flex !h-auto !items-center !gap-1 !px-2 !py-0.5 !text-[8.5px] !font-black uppercase shadow-none hover:shadow-none sm:!text-[9px]"
                             color={themeHex}
                             icon={Sparkles}
                             iconSize={10}
@@ -82,33 +83,29 @@ const DraggableCard = ({
                         </Button>
                     </div>
                     <input
-                        className={`w-full border-b-2 border-gray-100 bg-transparent pb-2 text-3xl font-black text-[#3c3c3c] transition-colors outline-none select-text focus:border-[var(--theme-color)] ${aiLoading ? "opacity-60" : ""}`}
+                        className={`w-full border-b-2 border-gray-100 bg-transparent pb-1 text-xl font-black text-[#3c3c3c] transition-colors outline-none select-text focus:border-[var(--theme-color)] sm:pb-2 sm:text-3xl ${aiLoading ? "opacity-60" : ""}`}
                         placeholder="食べる / たべる"
                         value={card.primary || ""}
                         onChange={(e) => onUpdate(card.id, "primary", e.target.value)}
                         disabled={saving || aiLoading}
                     />
                     {aiError && (
-                        <p className="mt-1 text-[10px] font-bold text-[#ea2b2b]">{aiError}</p>
+                        <p className="mt-1 text-[9px] font-bold text-[#ea2b2b] sm:text-[10px]">{aiError}</p>
                     )}
                 </div>
 
                 {/* Alternative Form */}
                 {(["alternative"] as const).map((repKey) => (
                     <div key={repKey}>
-                        <label className="mb-1 block text-[10px] font-black tracking-widest text-[#afafaf] uppercase">
+                        <label className="mb-1 block text-[9px] font-black tracking-widest text-[#afafaf] uppercase sm:text-[10px]">
                             Alternative
                         </label>
                         <input
-                            className="w-full border-b-2 border-gray-100 bg-transparent pb-2 text-xl font-bold text-[#3c3c3c] transition-colors outline-none select-text focus:border-[var(--theme-color)]"
-                            placeholder="Alternate form (optional)"
-                            value={card.alternatives?.[0] || ""}
+                            className="w-full border-b-2 border-gray-100 bg-transparent pb-1 text-base font-bold text-[#3c3c3c] transition-colors outline-none select-text focus:border-[var(--theme-color)] sm:pb-2 sm:text-xl"
+                            placeholder="Alternate forms (e.g. 漢字 / かな)"
+                            value={joinAlternatives(card.alternatives)}
                             onChange={(e) =>
-                                onUpdate(
-                                    card.id,
-                                    "alternatives",
-                                    e.target.value ? [e.target.value] : [],
-                                )
+                                onUpdate(card.id, "alternatives", splitAlternatives(e.target.value))
                             }
                             disabled={saving}
                         />
@@ -117,11 +114,11 @@ const DraggableCard = ({
 
                 {/* Meaning */}
                 <div className="md:col-span-2">
-                    <label className="mb-1 block text-[10px] font-black tracking-widest text-[#afafaf] uppercase">
+                    <label className="mb-1 block text-[9px] font-black tracking-widest text-[#afafaf] uppercase sm:text-[10px]">
                         Meaning ✱
                     </label>
                     <input
-                        className="w-full border-b-2 border-gray-100 bg-transparent pb-2 text-xl font-bold text-[#3c3c3c] transition-colors outline-none select-text focus:border-[var(--theme-color)]"
+                        className="w-full border-b-2 border-gray-100 bg-transparent pb-1 text-base font-bold text-[#3c3c3c] transition-colors outline-none select-text focus:border-[var(--theme-color)] sm:pb-2 sm:text-xl"
                         placeholder="To eat"
                         value={card.meaning}
                         onChange={(e) => onUpdate(card.id, "meaning", e.target.value)}
@@ -131,11 +128,11 @@ const DraggableCard = ({
 
                 {/* Example Sentence */}
                 <div className="md:col-span-2">
-                    <label className="mb-1 block text-[10px] font-black tracking-widest text-[#afafaf] uppercase">
+                    <label className="mb-1 block text-[9px] font-black tracking-widest text-[#afafaf] uppercase sm:text-[10px]">
                         Example Sentence (Optional)
                     </label>
                     <input
-                        className="w-full border-b-2 border-gray-100 bg-transparent pb-2 text-base font-bold text-[#3c3c3c] transition-colors outline-none select-text focus:border-[var(--theme-color)]"
+                        className="w-full border-b-2 border-gray-100 bg-transparent pb-1 text-sm font-bold text-[#3c3c3c] transition-colors outline-none select-text focus:border-[var(--theme-color)] sm:pb-2 sm:text-base"
                         placeholder="りんごを食べる。"
                         value={card.example}
                         onChange={(e) => onUpdate(card.id, "example", e.target.value)}

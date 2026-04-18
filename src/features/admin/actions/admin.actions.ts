@@ -1,6 +1,14 @@
 "use server";
 
-import { adminAuth, adminDb, APP_ID, assertPermissionFromToken } from "../services/admin.service";
+import { cookies } from "next/headers";
+
+import {
+    adminAuth,
+    adminDb,
+    APP_ID,
+    assertAdminAction,
+    assertPermissionFromToken,
+} from "../services/admin.service";
 import {
     getAdminAnalytics,
     getContentBreakdown,
@@ -43,21 +51,20 @@ function fail(err: unknown): ActionResult<never> {
 }
 
 export async function fetchUsersAction(
-    idToken: string,
     pageToken?: string,
     pageSize = 25,
 ): Promise<ActionResult<PaginatedUsers>> {
     try {
-        await assertPermissionFromToken(idToken, "canManageUsers");
+        await assertAdminAction("canManageUsers");
         return ok(await getUsersPaginated(pageToken, pageSize));
     } catch (err) {
         return fail(err);
     }
 }
 
-export async function fetchAdminStatsAction(idToken: string): Promise<ActionResult<AdminStats>> {
+export async function fetchAdminStatsAction(): Promise<ActionResult<AdminStats>> {
     try {
-        await assertPermissionFromToken(idToken, "canViewDashboard");
+        await assertAdminAction("canViewDashboard");
         return ok(await getAdminStats());
     } catch (err) {
         return fail(err);
@@ -65,13 +72,15 @@ export async function fetchAdminStatsAction(idToken: string): Promise<ActionResu
 }
 
 export async function setAdminRoleAction(
-    idToken: string,
     targetUid: string,
     grant: boolean,
 ): Promise<ActionResult<{ uid: string; isAdmin: boolean }>> {
     try {
-        const { uid, role } = await assertPermissionFromToken(idToken, "canPromoteUsers");
-        const decoded = await adminAuth.verifyIdToken(idToken);
+        const { uid, role } = await assertAdminAction("canPromoteUsers");
+        // We still verify token for additional security if needed, or we just use the UID from session
+        const cookieStore = await cookies();
+        const token = cookieStore.get("auth-token")?.value!;
+        const decoded = await adminAuth.verifyIdToken(token);
         await setAdminRole(targetUid, grant, uid);
         await recordLog({
             action: grant ? "Granted admin role" : "Revoked admin role",
@@ -88,13 +97,12 @@ export async function setAdminRoleAction(
     }
 }
 
-export async function deleteUserAction(
-    idToken: string,
-    targetUid: string,
-): Promise<ActionResult<{ uid: string }>> {
+export async function deleteUserAction(targetUid: string): Promise<ActionResult<{ uid: string }>> {
     try {
-        const { uid, role } = await assertPermissionFromToken(idToken, "canDeleteUsers");
-        const decoded = await adminAuth.verifyIdToken(idToken);
+        const { uid, role } = await assertAdminAction("canDeleteUsers");
+        const cookieStore = await cookies();
+        const token = cookieStore.get("auth-token")?.value!;
+        const decoded = await adminAuth.verifyIdToken(token);
         await deleteUser(targetUid, uid);
         await recordLog({
             action: "Deleted user account",
@@ -111,9 +119,9 @@ export async function deleteUserAction(
     }
 }
 
-export async function fetchAnalyticsAction(idToken: string): Promise<ActionResult<AnalyticsData>> {
+export async function fetchAnalyticsAction(): Promise<ActionResult<AnalyticsData>> {
     try {
-        await assertPermissionFromToken(idToken, "canViewAnalytics");
+        await assertAdminAction("canViewAnalytics");
         return ok(await getAdminAnalytics());
     } catch (err) {
         return fail(err);
@@ -121,22 +129,23 @@ export async function fetchAnalyticsAction(idToken: string): Promise<ActionResul
 }
 
 export async function fetchLogsAction(
-    idToken: string,
     filters: AdminLogFilters,
     startAfterDocId?: string | null,
 ): Promise<ActionResult<PaginatedLogs>> {
     try {
-        await assertPermissionFromToken(idToken, "canViewReports");
+        await assertAdminAction("canViewReports");
         return ok(await getLogs(filters, 100, startAfterDocId));
     } catch (err) {
         return fail(err);
     }
 }
 
-export async function createTestLogAction(idToken: string) {
+export async function createTestLogAction() {
     try {
-        const { uid, role } = await assertPermissionFromToken(idToken, "canViewReports");
-        const decoded = await adminAuth.verifyIdToken(idToken);
+        const { uid, role } = await assertAdminAction("canViewReports");
+        const cookieStore = await cookies();
+        const token = cookieStore.get("auth-token")?.value!;
+        const decoded = await adminAuth.verifyIdToken(token);
         await recordLog({
             action: "Manual Test Log Triggered",
             level: "info",
@@ -155,21 +164,18 @@ export async function createTestLogAction(idToken: string) {
     }
 }
 
-export async function fetchDashboardOverviewAction(idToken: string) {
+export async function fetchDashboardOverviewAction() {
     try {
-        await assertPermissionFromToken(idToken, "canViewDashboard");
+        await assertAdminAction("canViewDashboard");
         return ok(await getDashboardOverview());
     } catch (err) {
         return fail(err);
     }
 }
 
-export async function fetchDeckCardsAction(
-    idToken: string,
-    path: string,
-): Promise<ActionResult<any[]>> {
+export async function fetchDeckCardsAction(path: string): Promise<ActionResult<any[]>> {
     try {
-        await assertPermissionFromToken(idToken, "canManageContent");
+        await assertAdminAction("canManageContent");
         return ok(await getDeckCards(path));
     } catch (err) {
         return fail(err);
@@ -177,24 +183,22 @@ export async function fetchDeckCardsAction(
 }
 
 export async function fetchGlobalContentAction(
-    idToken: string,
     limit = 50,
 ): Promise<ActionResult<PaginatedContent>> {
     try {
-        await assertPermissionFromToken(idToken, "canManageContent");
+        await assertAdminAction("canManageContent");
         return ok(await getGlobalContentPaginated(limit));
     } catch (err) {
         return fail(err);
     }
 }
 
-export async function deleteGlobalFlashcardAction(
-    idToken: string,
-    path: string,
-): Promise<ActionResult<void>> {
+export async function deleteGlobalFlashcardAction(path: string): Promise<ActionResult<void>> {
     try {
-        const { uid, role } = await assertPermissionFromToken(idToken, "canManageContent");
-        const decoded = await adminAuth.verifyIdToken(idToken);
+        const { uid, role } = await assertAdminAction("canManageContent");
+        const cookieStore = await cookies();
+        const token = cookieStore.get("auth-token")?.value!;
+        const decoded = await adminAuth.verifyIdToken(token);
         await deleteGlobalFlashcard(path);
 
         await recordLog({
@@ -214,22 +218,21 @@ export async function deleteGlobalFlashcardAction(
 }
 
 export async function fetchAdminRoleAction(
-    idToken: string,
+    idToken?: string,
 ): Promise<ActionResult<{ role: "admin" | "superadmin" }>> {
     try {
-        const caller = await assertPermissionFromToken(idToken, "canViewDashboard");
+        const caller = idToken
+            ? await assertPermissionFromToken(idToken, "canViewDashboard")
+            : await assertAdminAction("canViewDashboard");
         return ok({ role: caller.role });
     } catch (err) {
         return fail(err);
     }
 }
 
-export async function fetchDrilldownUsersAction(
-    idToken: string,
-    filter: { date?: string; role?: string },
-) {
+export async function fetchDrilldownUsersAction(filter: { date?: string; role?: string }) {
     try {
-        await assertPermissionFromToken(idToken, "canViewAnalytics");
+        await assertAdminAction("canViewAnalytics");
         if (filter.date) return ok(await getUsersByDate(filter.date));
         if (filter.role) return ok(await getUsersByRole(filter.role));
         return ok([]);
@@ -238,27 +241,27 @@ export async function fetchDrilldownUsersAction(
     }
 }
 
-export async function fetchDrilldownFeatureAction(idToken: string, feature: string) {
+export async function fetchDrilldownFeatureAction(feature: string) {
     try {
-        await assertPermissionFromToken(idToken, "canViewAnalytics");
+        await assertAdminAction("canViewAnalytics");
         return ok(await getFeatureUsageDetails(feature));
     } catch (err) {
         return fail(err);
     }
 }
 
-export async function fetchDrilldownContentAction(idToken: string, category: string) {
+export async function fetchDrilldownContentAction(category: string) {
     try {
-        await assertPermissionFromToken(idToken, "canViewAnalytics");
+        await assertAdminAction("canViewAnalytics");
         return ok(await getContentBreakdown(category));
     } catch (err) {
         return fail(err);
     }
 }
 
-export async function exportAnalyticsAction(idToken: string): Promise<ActionResult<any[]>> {
+export async function exportAnalyticsAction(): Promise<ActionResult<any[]>> {
     try {
-        await assertPermissionFromToken(idToken, "canViewAnalytics");
+        await assertAdminAction("canViewAnalytics");
 
         const snapshots = await adminDb
             .collection("analytics_daily")
@@ -301,9 +304,9 @@ export async function exportAnalyticsAction(idToken: string): Promise<ActionResu
 /**
  * AI TRAINING EXPORT: Raw User Progress Dataset
  */
-export async function exportUsersDatasetAction(idToken: string): Promise<ActionResult<any[]>> {
+export async function exportUsersDatasetAction(): Promise<ActionResult<any[]>> {
     try {
-        await assertPermissionFromToken(idToken, "canViewAnalytics");
+        await assertAdminAction("canViewAnalytics");
         const snap = await adminDb
             .collection("artifacts")
             .doc(APP_ID)
@@ -331,9 +334,9 @@ export async function exportUsersDatasetAction(idToken: string): Promise<ActionR
 /**
  * AI TRAINING EXPORT: Global Content Metadata Dataset
  */
-export async function exportContentDatasetAction(idToken: string): Promise<ActionResult<any[]>> {
+export async function exportContentDatasetAction(): Promise<ActionResult<any[]>> {
     try {
-        await assertPermissionFromToken(idToken, "canViewAnalytics");
+        await assertAdminAction("canViewAnalytics");
         const snap = await adminDb.collectionGroup("lessons").limit(1000).get();
 
         return ok(
@@ -360,9 +363,9 @@ export async function exportContentDatasetAction(idToken: string): Promise<Actio
 /**
  * AI TRAINING EXPORT: System Log Behavioral Dataset
  */
-export async function exportLogsDatasetAction(idToken: string): Promise<ActionResult<any[]>> {
+export async function exportLogsDatasetAction(): Promise<ActionResult<any[]>> {
     try {
-        await assertPermissionFromToken(idToken, "canViewAnalytics");
+        await assertAdminAction("canViewAnalytics");
         const snap = await adminDb
             .collection("system_logs")
             .orderBy("timestamp", "desc")

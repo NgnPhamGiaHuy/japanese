@@ -88,7 +88,7 @@ const useAIExplanation = (card: FlashCard | undefined, revealed: boolean) => {
  * @example
  * <FlashcardMistakeReview lesson={deck} cards={fails} userId={uid} onComplete={handleRedeem} />
  */
-export const FlashcardMistakeReview = ({
+const FlashcardMistakeReview = ({
     lesson,
     userId,
     cards,

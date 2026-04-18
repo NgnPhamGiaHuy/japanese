@@ -20,8 +20,8 @@ export function useGlobalContent() {
     const query = useQuery({
         queryKey: adminQueryKeys.content(),
         queryFn: async () => {
-            const token = await getAdminIdToken();
-            const result = await fetchGlobalContentAction(token);
+            await getAdminIdToken();
+            const result = await fetchGlobalContentAction();
             if (!result.ok) throw new Error(result.error);
             return result.data;
         },
@@ -29,8 +29,8 @@ export function useGlobalContent() {
 
     const loadCardsMutation = useMutation({
         mutationFn: async (path: string) => {
-            const token = await getAdminIdToken();
-            const result = await fetchDeckCardsAction(token, path);
+            await getAdminIdToken();
+            const result = await fetchDeckCardsAction(path);
             if (!result.ok) throw new Error(result.error);
             return result.data;
         },
@@ -38,8 +38,8 @@ export function useGlobalContent() {
 
     const deleteMutation = useMutation({
         mutationFn: async (path: string) => {
-            const token = await getAdminIdToken();
-            const result = await deleteGlobalFlashcardAction(token, path);
+            await getAdminIdToken();
+            const result = await deleteGlobalFlashcardAction(path);
             if (!result.ok) throw new Error(result.error);
         },
         onSuccess: () => {

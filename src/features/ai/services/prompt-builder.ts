@@ -1,4 +1,4 @@
-import { buildCardPrompt, buildDeckPrompt } from "../prompts";
+import { buildCardPrompt, buildDeckPrompt, generateDeckFromImagesPrompt } from "../prompts";
 
 import type { JLPTLevel } from "../types";
 
@@ -10,3 +10,6 @@ export const getDeckGenerationPrompt = (
     level: JLPTLevel,
     existingWords: string[] = [],
 ): string => buildDeckPrompt(topic, count, level, existingWords);
+
+export const getDeckFromImagesPrompt = (context?: { userLevel?: string }) =>
+    generateDeckFromImagesPrompt(context);

@@ -35,7 +35,7 @@ import type { Comment } from "../types";
  */
 
 /** Error lookup table used for normalizing Firestore/Logic errors into user-friendly strings. */
-function mapError(err: unknown, fallback: string): string {
+const mapError = (err: unknown, fallback: string): string => {
     if (err instanceof CommentError) {
         switch (err.code) {
             case CommentErrorCode.PERMISSION_DENIED:
@@ -51,7 +51,7 @@ function mapError(err: unknown, fallback: string): string {
         }
     }
     return fallback;
-}
+};
 
 /** Configuration for the comment lifecycle and access control. */
 export interface CommentPanelProps {

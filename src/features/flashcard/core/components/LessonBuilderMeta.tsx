@@ -18,7 +18,7 @@ interface LessonBuilderMetaProps {
     saving: boolean;
 }
 
-export const LessonBuilderMeta: React.FC<LessonBuilderMetaProps> = ({
+const LessonBuilderMeta: React.FC<LessonBuilderMetaProps> = ({
     lesson,
     setLesson,
     tagInput,
@@ -32,26 +32,26 @@ export const LessonBuilderMeta: React.FC<LessonBuilderMetaProps> = ({
         <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="space-y-4 rounded-[2rem] border-2 border-b-8 border-gray-200 bg-white p-6 shadow-sm"
+            className="space-y-4 rounded-3xl border-2 border-b-8 border-gray-200 bg-white p-4 shadow-sm sm:rounded-[2rem] sm:p-6"
         >
             <input
                 type="text"
                 placeholder="Deck Title ✱ (e.g. JLPT N5 Verbs)"
-                className="w-full border-b-2 border-transparent bg-transparent pb-2 text-3xl font-black text-[#3c3c3c] placeholder-gray-300 transition-colors outline-none focus:border-[var(--theme-color)]"
+                className="w-full border-b-2 border-transparent bg-transparent pb-2 text-2xl font-black text-[#3c3c3c] placeholder-gray-300 transition-colors outline-none focus:border-[var(--theme-color)] sm:text-3xl"
                 value={lesson.title}
                 onChange={(e) => setLesson({ ...lesson, title: e.target.value })}
                 disabled={saving}
             />
             <textarea
                 placeholder="Describe what this deck is about..."
-                className="h-20 w-full resize-none border-b-2 border-transparent bg-transparent font-bold text-[#afafaf] placeholder-gray-300 transition-colors outline-none focus:border-[var(--theme-color)]"
+                className="h-16 w-full resize-none border-b-2 border-transparent bg-transparent font-bold text-[#afafaf] placeholder-gray-300 transition-colors outline-none focus:border-[var(--theme-color)] sm:h-20"
                 value={lesson.description}
                 onChange={(e) => setLesson({ ...lesson, description: e.target.value })}
                 disabled={saving}
             />
 
             <div className="pt-2">
-                <div className="mb-4 flex flex-wrap gap-2.5">
+                <div className="mb-4 flex flex-wrap gap-2 sm:gap-2.5">
                     <AnimatePresence>
                         {(lesson.categories || []).map((cat: string) => (
                             <motion.div
@@ -63,7 +63,7 @@ export const LessonBuilderMeta: React.FC<LessonBuilderMetaProps> = ({
                                     setTagInput(cat);
                                     removeCategory(cat);
                                 }}
-                                className="group flex cursor-pointer items-center gap-2 rounded-2xl border-b-4 border-black/10 px-3.5 py-2 text-[10px] font-black tracking-widest text-white shadow-sm transition-all hover:-translate-y-0.5"
+                                className="group flex cursor-pointer items-center gap-2 rounded-xl border-b-4 border-black/10 px-3 py-1.5 text-[9px] font-black tracking-widest text-white shadow-sm transition-all hover:-translate-y-0.5 sm:rounded-2xl sm:px-3.5 sm:py-2 sm:text-[10px]"
                                 style={{ backgroundColor: themeHex }}
                             >
                                 <span className="opacity-60">TYPE:</span>
@@ -84,9 +84,9 @@ export const LessonBuilderMeta: React.FC<LessonBuilderMetaProps> = ({
                     </AnimatePresence>
                 </div>
 
-                <div className="space-y-3">
-                    <div className="flex items-center gap-2 px-1">
-                        <span className="text-[10px] font-black tracking-widest text-gray-300 uppercase">
+                <div className="space-y-4">
+                    <div className="flex flex-col gap-2 px-1 sm:flex-row sm:items-center">
+                        <span className="text-[9px] font-black tracking-widest text-gray-300 uppercase sm:text-[10px]">
                             Suggestions:
                         </span>
                         <div className="flex flex-wrap gap-1.5">
@@ -98,7 +98,7 @@ export const LessonBuilderMeta: React.FC<LessonBuilderMetaProps> = ({
                                         saving || lesson.categories?.includes(sug.toLowerCase())
                                     }
                                     onClick={() => addTag(sug)}
-                                    className="rounded-xl border-b-2 border-gray-200 bg-white px-3 py-1.5 text-[10px] font-black tracking-widest text-gray-500 uppercase transition-all hover:-translate-y-0.5 disabled:opacity-30"
+                                    className="rounded-lg border-b-2 border-gray-200 bg-white px-2.5 py-1 text-[9px] font-black tracking-widest text-gray-500 uppercase transition-all hover:-translate-y-0.5 disabled:opacity-30 sm:rounded-xl sm:px-3 sm:py-1.5 sm:text-[10px]"
                                 >
                                     {sug}
                                 </button>
@@ -111,12 +111,12 @@ export const LessonBuilderMeta: React.FC<LessonBuilderMetaProps> = ({
                             type="text"
                             placeholder='Type "Kanji" or custom tags...'
                             value={tagInput}
-                            className="w-full rounded-2xl border-2 border-b-4 border-gray-100 bg-gray-50/50 px-5 py-3.5 text-sm font-bold text-[#3c3c3c] placeholder-gray-300 transition-all outline-none focus:border-[var(--theme-color)] focus:bg-white focus:ring-4 focus:ring-[var(--theme-color)]/5"
+                            className="w-full rounded-xl border-2 border-b-4 border-gray-100 bg-gray-50/50 px-4 py-3 text-sm font-bold text-[#3c3c3c] placeholder-gray-300 transition-all outline-none focus:border-[var(--theme-color)] focus:bg-white focus:ring-4 focus:ring-[var(--theme-color)]/5 sm:rounded-2xl sm:px-5 sm:py-3.5"
                             onChange={(e) => setTagInput(e.target.value)}
                             onKeyDown={(e) => e.key === "Enter" && addTag(tagInput)}
                             disabled={saving}
                         />
-                        <div className="absolute top-1/2 right-5 -translate-y-1/2 text-[9px] font-black tracking-widest text-gray-400 uppercase">
+                        <div className="absolute top-1/2 right-4 -translate-y-1/2 text-[8px] font-black tracking-widest text-gray-400 uppercase sm:right-5 sm:text-[9px]">
                             ENTER TO ADD
                         </div>
                     </div>
@@ -124,17 +124,17 @@ export const LessonBuilderMeta: React.FC<LessonBuilderMetaProps> = ({
 
                 {/* Theme Picker */}
                 <div className="mt-6 border-t-2 border-gray-100 pt-6">
-                    <label className="mb-3 block text-xs font-black tracking-wider text-gray-400 uppercase">
+                    <label className="mb-3 block text-[10px] font-black tracking-wider text-gray-400 uppercase sm:text-xs">
                         Theme Color
                     </label>
-                    <div className="flex flex-wrap gap-3">
+                    <div className="flex flex-wrap gap-2.5 sm:gap-3">
                         {["#1cb0f6", "#58cc02", "#ff9600", "#ce82ff", "#ea2b2b", "#ff66bb"].map(
                             (color) => (
                                 <button
                                     key={color}
                                     type="button"
                                     onClick={() => setLesson({ ...lesson, themeColor: color })}
-                                    className={`h-10 w-10 rounded-full border-[3px] transition-all hover:scale-110 ${
+                                    className={`h-9 w-9 rounded-full border-[3px] transition-all hover:scale-110 sm:h-10 sm:w-10 ${
                                         (lesson.themeColor || "#1cb0f6") === color
                                             ? "border-black"
                                             : "border-transparent"
@@ -149,3 +149,5 @@ export const LessonBuilderMeta: React.FC<LessonBuilderMetaProps> = ({
         </motion.div>
     );
 };
+
+export default LessonBuilderMeta;

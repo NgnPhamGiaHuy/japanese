@@ -20,8 +20,8 @@ export function useUsers(pageToken?: string, pageSize = 25) {
     const usersQuery = useQuery({
         queryKey: adminQueryKeys.users(pageToken, pageSize),
         queryFn: async () => {
-            const token = await getAdminIdToken();
-            const result = await fetchUsersAction(token, pageToken, pageSize);
+            await getAdminIdToken();
+            const result = await fetchUsersAction(pageToken, pageSize);
             if (!result.ok) throw new Error(result.error);
             return result.data;
         },
@@ -31,8 +31,8 @@ export function useUsers(pageToken?: string, pageSize = 25) {
     const statsQuery = useQuery({
         queryKey: adminQueryKeys.stats(),
         queryFn: async () => {
-            const token = await getAdminIdToken();
-            const result = await fetchAdminStatsAction(token);
+            await getAdminIdToken();
+            const result = await fetchAdminStatsAction();
             if (!result.ok) throw new Error(result.error);
             return result.data;
         },
@@ -47,8 +47,8 @@ export function useUsers(pageToken?: string, pageSize = 25) {
 
     const promoteMutation = useMutation({
         mutationFn: async (uid: string) => {
-            const token = await getAdminIdToken();
-            const result = await setAdminRoleAction(token, uid, true);
+            await getAdminIdToken();
+            const result = await setAdminRoleAction(uid, true);
             if (!result.ok) throw new Error(result.error);
             return result.data;
         },
@@ -57,8 +57,8 @@ export function useUsers(pageToken?: string, pageSize = 25) {
 
     const demoteMutation = useMutation({
         mutationFn: async (uid: string) => {
-            const token = await getAdminIdToken();
-            const result = await setAdminRoleAction(token, uid, false);
+            await getAdminIdToken();
+            const result = await setAdminRoleAction(uid, false);
             if (!result.ok) throw new Error(result.error);
             return result.data;
         },
@@ -67,8 +67,8 @@ export function useUsers(pageToken?: string, pageSize = 25) {
 
     const deleteMutation = useMutation({
         mutationFn: async (uid: string) => {
-            const token = await getAdminIdToken();
-            const result = await deleteUserAction(token, uid);
+            await getAdminIdToken();
+            const result = await deleteUserAction(uid);
             if (!result.ok) throw new Error(result.error);
             return result.data;
         },
@@ -77,10 +77,10 @@ export function useUsers(pageToken?: string, pageSize = 25) {
 
     const bulkSetRoleMutation = useMutation({
         mutationFn: async ({ uids, grant }: { uids: string[]; grant: boolean }) => {
-            const token = await getAdminIdToken();
+            await getAdminIdToken();
             await Promise.all(
                 uids.map(async (uid) => {
-                    const result = await setAdminRoleAction(token, uid, grant);
+                    const result = await setAdminRoleAction(uid, grant);
                     if (!result.ok) throw new Error(result.error);
                 }),
             );
@@ -90,10 +90,10 @@ export function useUsers(pageToken?: string, pageSize = 25) {
 
     const bulkDeleteMutation = useMutation({
         mutationFn: async (uids: string[]) => {
-            const token = await getAdminIdToken();
+            await getAdminIdToken();
             await Promise.all(
                 uids.map(async (uid) => {
-                    const result = await deleteUserAction(token, uid);
+                    const result = await deleteUserAction(uid);
                     if (!result.ok) throw new Error(result.error);
                 }),
             );

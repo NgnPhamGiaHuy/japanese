@@ -1,138 +1,129 @@
-"use client";
-
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import { v4 as uuidv4 } from "uuid";
 
+import useAICard from "@/features/ai/hooks/useAICard";
+import { parseText } from "../utils/parser";
+import { joinAlternatives } from "../utils/formatting";
+
 import type { EditorCard, FlashCard, Lesson } from "../types";
 
-interface UseLessonBuilderProps {
-    initialLesson?: Lesson;
-    initialCards?: FlashCard[];
-}
+export const makeCard = (order = 0): EditorCard => ({
+    id: `c_${uuidv4()}`,
+    primary: "",
+    alternatives: [],
+    meaning: "",
+    example: "",
+    order,
+});
 
-/**
- * Hook to manage the state and logic for building or editing a flashcard lesson.
- * Strictly encapsulates business logic from the UI as per project standards.
- */
-export function useLessonBuilder({ initialLesson, initialCards }: UseLessonBuilderProps = {}) {
+export function useLessonBuilder({
+    initialLesson,
+    initialCards,
+}: { initialLesson?: Lesson; initialCards?: FlashCard[] } = {}) {
     const [lesson, setLesson] = useState<Partial<Lesson>>(
         initialLesson || {
             title: "",
             description: "",
             themeColor: "#1cb0f6",
             createdAt: Date.now(),
-            cardCount: 0,
             categories: ["vocabulary"],
         },
     );
-
-    const [cards, setCards] = useState<EditorCard[]>(
-        initialCards?.map((c) => ({ ...c })) || [
-            { id: uuidv4(), primary: "", alternatives: [], meaning: "", order: 0 },
-        ],
-    );
-
+    const [cards, setCards] = useState<EditorCard[]>(initialCards?.map((c) => ({ ...c })) || []);
     const [pasteText, setPasteText] = useState("");
     const [previewRows, setPreviewRows] = useState<any[] | null>(null);
     const [tagInput, setTagInput] = useState("");
-    const [inputMode, setInputMode] = useState<"ai" | "manual" | "paste" | "file">("manual");
+    const [inputMode, setInputMode] = useState<"ai" | "manual" | "paste" | "uploads">("manual");
+    const [aiStatus, setAiStatus] = useState<Record<string, { loading: boolean; error?: string }>>(
+        {},
+    );
 
-    // Memoized theme hex for CSS variables
-    const themeHex = useMemo(() => lesson.themeColor || "#1cb0f6", [lesson.themeColor]);
+    const aiCard = useAICard();
+    const themeHex = lesson.themeColor || "#1cb0f6";
+    const clearedImagePathsRef = useRef<string[]>([]);
 
-    /** Deduplicated list of Japanese words for AI bulk generation context */
+    useEffect(() => {
+        if (inputMode === "paste") return;
+        const lines = cards.map((c) => {
+            const parts = [
+                c.primary || "",
+                joinAlternatives(c.alternatives),
+                c.meaning || "",
+                c.example || "",
+            ];
+            return parts.map((p) => (p.includes(",") ? `"${p.replace(/"/g, '""')}"` : p)).join(",");
+        });
+        setPasteText(lines.join("\n"));
+    }, [cards, inputMode, setPasteText]);
+
+    const handleLiveSync = (rawText: string) => {
+        const { valid } = parseText(rawText);
+        setCards((prev) => {
+            // Create a pool of existing cards to match against
+            const pool = [...prev];
+
+            return valid.map((parsed, idx) => {
+                const key = (parsed.primary || "").trim().toLowerCase();
+
+                // Find first match in pool
+                const poolIdx = pool.findIndex(
+                    (c) => (c.primary || "").trim().toLowerCase() === key,
+                );
+
+                let existing = null;
+                if (poolIdx !== -1) {
+                    existing = pool[poolIdx];
+                    pool.splice(poolIdx, 1);
+                }
+
+                return existing
+                    ? { ...existing, ...parsed }
+                    : { ...makeCard(idx), ...parsed };
+            });
+        });
+    };
+
+
+    const handleAIFillCard = async (cardId: string, word: string) => {
+        if (!word.trim()) return;
+        setAiStatus((prev) => ({ ...prev, [cardId]: { loading: true } }));
+        const result = await aiCard.generate(word.trim());
+        setAiStatus((prev) => ({
+            ...prev,
+            [cardId]: { loading: false, error: aiCard.error || undefined },
+        }));
+        if (result) {
+            setCards((prev) => prev.map((c) => (c.id === cardId ? { ...c, ...result } : c)));
+        }
+    };
+
+    const updateCard = (id: string, field: keyof EditorCard, value: any) =>
+        setCards((prev) => prev.map((c) => (c.id === id ? { ...c, [field]: value } : c)));
+
+    const handleImportConfirm = (validRows: any[]) => {
+        const newCards = validRows.map((r, i) => ({ ...makeCard(cards.length + i), ...r }));
+        setCards(
+            inputMode === "ai" || inputMode === "uploads"
+                ? (prev) => [...prev, ...newCards]
+                : newCards,
+        );
+        setPreviewRows(null);
+        setInputMode("manual");
+    };
+
     const existingWordsForAI = useMemo(
         () =>
             Array.from(
                 new Set(
                     cards
-                        .flatMap((card) => [card.primary || "", ...(card.alternatives || [])])
-                        .map((value) => value.trim())
-                        .filter((value) => value.length > 0),
+                        .flatMap((c) => [c.primary || "", ...(c.alternatives || [])])
+                        .map((v) => v.trim())
+                        .filter(Boolean),
                 ),
             ),
         [cards],
     );
-
-    const addTag = (val: string) => {
-        const trimmed = val.trim().toLowerCase();
-        if (!trimmed) return;
-
-        const currentCats = lesson.categories || [];
-        if (!currentCats.includes(trimmed) && currentCats.length < 3) {
-            setLesson((prev) => ({ ...prev, categories: [...currentCats, trimmed] }));
-            setTagInput("");
-        }
-    };
-
-    const removeCategory = (cat: string) => {
-        setLesson((prev) => ({ ...prev, categories: prev.categories?.filter((c) => c !== cat) }));
-    };
-
-    const addCard = () => {
-        setCards((prev) => [
-            ...prev,
-            { id: uuidv4(), primary: "", alternatives: [], meaning: "", order: prev.length },
-        ]);
-    };
-
-    const deleteCard = (id: string) => {
-        setCards((prev) => {
-            const filtered = prev.filter((c) => c.id !== id);
-            return filtered.length > 0
-                ? filtered
-                : [{ id: uuidv4(), primary: "", alternatives: [], meaning: "", order: 0 }];
-        });
-    };
-
-    const updateCard = (id: string, field: keyof EditorCard, value: any) => {
-        setCards((prev) => prev.map((c) => (c.id === id ? { ...c, [field]: value } : c)));
-    };
-
-    const handleImageChange = (file: File | null, id: string) => {
-        if (!file) return;
-        const previewUrl = URL.createObjectURL(file);
-        updateCard(id, "imageFile", file);
-        updateCard(id, "previewUrl", previewUrl);
-    };
-
-    const handleLiveSync = (rawText: string) => {
-        const lines = rawText.split("\n").filter((l) => l.trim().length > 0);
-        const newCards = lines.map((line, index) => {
-            const parts = line.split(",").map((p) => p.trim());
-            return {
-                id: `sync_${index}`,
-                primary: parts[0] || "",
-                alternatives: parts[1] ? [parts[1]] : [],
-                meaning: parts[2] || "",
-                example: parts[3] || "",
-                order: index,
-            };
-        });
-        if (newCards.length > 0) {
-            setCards(newCards);
-        }
-    };
-
-    const handleImportConfirm = (validRows: any[]) => {
-        const newCards = validRows.map((r) => ({
-            id: uuidv4(),
-            primary: r.primary || r.alternative || "",
-            alternatives: r.alternative ? [r.alternative] : [],
-            meaning: r.meaning,
-            example: r.example,
-            order: cards.length,
-        }));
-
-        if (inputMode === "ai") {
-            setCards((prev) => [...prev, ...newCards]);
-        } else {
-            setCards(newCards);
-        }
-        setPreviewRows(null);
-        setInputMode("manual");
-    };
 
     return {
         lesson,
@@ -148,14 +139,34 @@ export function useLessonBuilder({ initialLesson, initialCards }: UseLessonBuild
         previewRows,
         setPreviewRows,
         themeHex,
-        existingWordsForAI,
-        addTag,
-        removeCategory,
-        addCard,
-        deleteCard,
-        updateCard,
-        handleImageChange,
+        aiStatus,
+        clearedImagePathsRef,
         handleLiveSync,
+        handleAIFillCard,
         handleImportConfirm,
+        updateCard,
+        existingWordsForAI,
+        addTag: (val: string) => {
+            const trimmed = val.trim().toLowerCase();
+            if (trimmed && (lesson.categories || []).length < 3) {
+                setLesson((prev) => ({
+                    ...prev,
+                    categories: [...(prev.categories || []), trimmed],
+                }));
+                setTagInput("");
+            }
+        },
+        removeCategory: (cat: string) =>
+            setLesson((prev) => ({
+                ...prev,
+                categories: prev.categories?.filter((c) => c !== cat),
+            })),
+        addCard: () => setCards((prev) => [...prev, makeCard(prev.length)]),
+        deleteCard: (id: string) => setCards((prev) => prev.filter((c) => c.id !== id)),
+        handleImageChange: (file: File | null, id: string) => {
+            if (!file) return;
+            updateCard(id, "imageFile", file);
+            updateCard(id, "previewUrl", URL.createObjectURL(file));
+        },
     };
 }

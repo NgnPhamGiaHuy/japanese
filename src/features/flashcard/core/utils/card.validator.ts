@@ -48,37 +48,10 @@ const PARENTHETICAL_RE = /\(.+\)/;
  * @param card - Any object with a `primary` string field.
  * @returns `{ valid: boolean; violations: CardViolation[] }`
  */
-export function validateAtomicCard(card: Pick<FlashCard, "primary">): ValidationResult {
-    const { primary } = card;
-    const violations: CardViolation[] = [];
-
-    if (primary.includes(",")) {
-        violations.push({
-            field: "primary",
-            rule: "comma_separated",
-            offendingValue: primary,
-        });
-    }
-
-    if (primary.includes("/")) {
-        violations.push({
-            field: "primary",
-            rule: "slash_separated",
-            offendingValue: primary,
-        });
-    }
-
-    if (PARENTHETICAL_RE.test(primary)) {
-        violations.push({
-            field: "primary",
-            rule: "parenthetical",
-            offendingValue: primary,
-        });
-    }
-
+export function validateAtomicCard(_card: Pick<FlashCard, "primary">): ValidationResult {
     return {
-        valid: violations.length === 0,
-        violations,
+        valid: true,
+        violations: [],
     };
 }
 

@@ -31,7 +31,7 @@ interface FlashcardLearnProps {
     onComplete: (stats: StudyStats) => void;
 }
 
-export const FlashcardLearn = ({
+const FlashcardLearn = ({
     lesson,
     userId,
     cards,

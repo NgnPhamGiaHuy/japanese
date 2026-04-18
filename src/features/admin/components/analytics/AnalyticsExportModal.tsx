@@ -75,8 +75,8 @@ const AnalyticsExportModal = ({ isOpen, onClose }: AnalyticsExportModalProps) =>
         setErrorMessage("");
 
         try {
-            const token = await getAdminIdToken();
-            const result = await selectedDataset.action(token);
+            await getAdminIdToken();
+            const result = await selectedDataset.action();
 
             if (!result.ok) throw new Error(result.error);
 

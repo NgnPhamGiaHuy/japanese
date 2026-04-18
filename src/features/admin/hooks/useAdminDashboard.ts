@@ -11,8 +11,8 @@ export function useAdminDashboard() {
     return useQuery({
         queryKey: adminQueryKeys.dashboard(),
         queryFn: async () => {
-            const token = await getAdminIdToken();
-            const result = await fetchDashboardOverviewAction(token);
+            await getAdminIdToken();
+            const result = await fetchDashboardOverviewAction();
             if (!result.ok) throw new Error(result.error);
             return result.data;
         },

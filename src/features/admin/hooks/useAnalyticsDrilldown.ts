@@ -33,27 +33,27 @@ export const useAnalyticsDrilldown = () => {
         queryKey: ["analytics", "drilldown", selection?.type, selection?.value],
         queryFn: async () => {
             if (!selection) return null;
-            const token = await getAdminIdToken();
+            await getAdminIdToken();
 
             switch (selection.type) {
                 case "user_growth":
-                    const resUsersDate = await fetchDrilldownUsersAction(token, {
+                    const resUsersDate = await fetchDrilldownUsersAction({
                         date: selection.value,
                     });
                     if (!resUsersDate.ok) throw new Error(resUsersDate.error);
                     return resUsersDate.data;
                 case "role":
-                    const resUsersRole = await fetchDrilldownUsersAction(token, {
+                    const resUsersRole = await fetchDrilldownUsersAction({
                         role: selection.value,
                     });
                     if (!resUsersRole.ok) throw new Error(resUsersRole.error);
                     return resUsersRole.data;
                 case "feature":
-                    const resFeature = await fetchDrilldownFeatureAction(token, selection.value);
+                    const resFeature = await fetchDrilldownFeatureAction(selection.value);
                     if (!resFeature.ok) throw new Error(resFeature.error);
                     return resFeature.data;
                 case "content":
-                    const resContent = await fetchDrilldownContentAction(token, selection.value);
+                    const resContent = await fetchDrilldownContentAction(selection.value);
                     if (!resContent.ok) throw new Error(resContent.error);
                     return resContent.data;
                 default:

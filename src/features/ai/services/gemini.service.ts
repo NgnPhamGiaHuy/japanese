@@ -113,6 +113,19 @@ async function callFirebaseFallback(modelName: string, prompt: string): Promise<
     return result.response.text();
 }
 
+async function fileToBase64(file: File): Promise<{ mimeType: string; data: string }> {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => {
+            const result = reader.result as string;
+            const data = result.split(",")[1];
+            resolve({ mimeType: file.type, data });
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+    });
+}
+
 /**
  * Generates content using the direct API key first.
  * Falls back to Firebase AI if the key is not configured or the direct call fails.
@@ -128,6 +141,62 @@ async function generateContent(modelName: string, prompt: string): Promise<strin
         }
     }
     return callFirebaseFallback(modelName, prompt);
+}
+
+async function generateMultimodalContent(
+    modelName: string,
+    prompt: string,
+    files: File[],
+): Promise<string> {
+    const base64Files = await Promise.all(files.map(fileToBase64));
+
+    if (DIRECT_API_KEY) {
+        try {
+            const url = `${GEMINI_BASE}/${modelName}:generateContent?key=${DIRECT_API_KEY}`;
+            const body = {
+                contents: [
+                    {
+                        parts: [
+                            { text: prompt },
+                            ...base64Files.map((f) => ({
+                                inline_data: { mime_type: f.mimeType, data: f.data },
+                            })),
+                        ],
+                    },
+                ],
+                generationConfig: {
+                    temperature: AI_CONFIG.generation.temperature,
+                    topP: AI_CONFIG.generation.topP,
+                    maxOutputTokens: AI_CONFIG.generation.maxOutputTokens,
+                    responseMimeType: "application/json",
+                },
+            };
+
+            const res = await fetch(url, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(body),
+            });
+
+            if (res.ok) {
+                const data = await res.json();
+                return data?.candidates?.[0]?.content?.parts?.[0]?.text ?? "";
+            }
+        } catch (err) {
+            console.warn("[AI] Direct Multimodal failed, falling back to Firebase:", err);
+        }
+    }
+
+    // Firebase fallback
+    const model = getFirebaseModel(modelName);
+    const parts = [
+        prompt,
+        ...base64Files.map((f) => ({
+            inlineData: { mimeType: f.mimeType, data: f.data },
+        })),
+    ];
+    const result = await model.generateContent(parts);
+    return result.response.text();
 }
 
 function parseCard(raw: unknown): GeneratedCard {
@@ -378,29 +447,72 @@ export const generateDeck = async (
             AI_CONFIG.models.deck,
             getDeckGenerationPrompt(trimmed, safeCnt, level, normalizedExclusions),
         );
-        const cards = parseCardArray(JSON.parse(extractJSON(text)));
-        const deduped = dedupeDeckCards(cards, normalizedExclusions);
+        const rawCards = parseCardArray(JSON.parse(extractJSON(text)));
 
-        // Validate atomic card principle; split any non-atomic cards into multiple cards
-        const atomicCards: GeneratedCard[] = [];
-        for (const card of deduped) {
+        // 1. Split non-atomic cards
+        let splitCards: GeneratedCard[] = [];
+        for (const card of rawCards) {
             const validation = validateAtomicCard(card);
             if (!validation.valid) {
                 const atomicPrimaries = splitAtomicPrimary(card.primary);
-                if (atomicPrimaries.length > 0) {
-                    for (const primary of atomicPrimaries) {
-                        atomicCards.push({ ...card, primary });
-                    }
-                } else {
-                    atomicCards.push(card);
-                }
-            } else {
-                atomicCards.push(card);
-            }
+                splitCards.push(
+                    ...(atomicPrimaries.length > 0
+                        ? atomicPrimaries.map((p) => ({ ...card, primary: p }))
+                        : [card]),
+                );
+            } else splitCards.push(card);
         }
+
+        // 2. Deduplicate against existing and within the new set
+        const atomicCards = dedupeDeckCards(splitCards, normalizedExclusions);
 
         deckCache.set(cacheKey, atomicCards);
         return atomicCards;
+    } catch (err) {
+        classifyError(err);
+    }
+};
+
+export const generateDeckFromImages = async (
+    files: File[],
+    context?: { userLevel?: string },
+    existingWords: string[] = [],
+): Promise<{ title: string; description: string; cards: GeneratedCard[] }> => {
+    if (files.length === 0) throw new AIServiceError("No images provided", "api_error");
+
+    const { getDeckFromImagesPrompt } = await import("./prompt-builder");
+    const prompt = getDeckFromImagesPrompt(context);
+
+    try {
+        const text = await generateMultimodalContent(AI_CONFIG.models.deck, prompt, files);
+        const data = JSON.parse(extractJSON(text));
+
+        const title = data.title || "Image Discovery Deck";
+        const description = data.description || "Generated from uploaded images";
+        const rawCards = parseCardArray(data.cards || []);
+
+        const normalizedExclusions = Array.from(
+            new Set(existingWords.map((word) => normalizeToken(word)).filter(Boolean)),
+        );
+
+        // 1. Split non-atomic cards
+        let splitCards: GeneratedCard[] = [];
+        for (const card of rawCards) {
+            const validation = validateAtomicCard(card);
+            if (!validation.valid) {
+                const atomicPrimaries = splitAtomicPrimary(card.primary);
+                splitCards.push(
+                    ...(atomicPrimaries.length > 0
+                        ? atomicPrimaries.map((p) => ({ ...card, primary: p }))
+                        : [card]),
+                );
+            } else splitCards.push(card);
+        }
+
+        // 2. Deduplicate
+        const atomicCards = dedupeDeckCards(splitCards, normalizedExclusions);
+
+        return { title, description, cards: atomicCards };
     } catch (err) {
         classifyError(err);
     }

@@ -1,5 +1,7 @@
 import "server-only";
 
+import { cookies } from "next/headers";
+
 import { adminAuth, adminDb } from "@/lib/firebase-admin";
 import { hasPermission, normalizeAdminRole } from "../utils/rbac";
 
@@ -48,4 +50,11 @@ export async function assertPermissionFromToken(
         throw new Error(`FORBIDDEN: You do not have permission to ${action}`);
     }
     return caller;
+}
+
+export async function assertAdminAction(action: PermissionAction): Promise<CallerContext> {
+    const cookieStore = await cookies();
+    const token = cookieStore.get("auth-token")?.value;
+    if (!token) throw new Error("UNAUTHORIZED: Session token missing");
+    return assertPermissionFromToken(token, action);
 }

@@ -105,36 +105,36 @@ const AIBulkPanel = ({ themeColor, onPreview, existingWords = [] }: AIBulkPanelP
         const rows: ImportRow[] = cards.map((c, i) => ({
             id: `ai_${Date.now()}_${i}`,
             primary: c.primary ?? "",
-            alternative: c.alternatives?.[0] ?? "",
-            meaning: c.meaning,
-            example: c.example,
-            isInvalid: false,
+            alternatives: c.alternatives ?? [],
+            meaning: c.meaning ?? "",
+            example: c.example ?? "",
+            isInvalid: !(c.primary?.trim() && (c.meaning || "").trim()),
         }));
 
         onPreview(rows);
     };
 
     return (
-        <div className="space-y-6 rounded-4xl border-2 border-b-8 border-gray-200 bg-white p-6 shadow-sm">
+        <div className="space-y-6 rounded-3xl border-2 border-b-8 border-gray-200 bg-white p-4 shadow-sm sm:rounded-4xl sm:p-6">
             <div className="flex items-center gap-3">
                 <div
                     className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl"
                     style={{ backgroundColor: `${themeColor}18` }}
                 >
-                    <Sparkles size={20} style={{ color: themeColor }} />
+                    <Sparkles size={18} style={{ color: themeColor }} className="sm:size-[20px]" />
                 </div>
                 <div>
-                    <h3 className="text-xl font-black text-[#3c3c3c]">Generate Deck with AI</h3>
-                    <p className="text-[10px] font-bold tracking-wide text-[#afafaf] uppercase">
+                    <h3 className="text-lg font-black text-[#3c3c3c] sm:text-xl">Generate Deck with AI</h3>
+                    <p className="text-[9px] font-bold tracking-wide text-[#afafaf] uppercase sm:text-[10px]">
                         Describe a topic · review before saving
                     </p>
                 </div>
             </div>
 
-            <div className="flex gap-3">
+            <div className="flex flex-col gap-2.5 sm:flex-row sm:gap-3">
                 <ModeChip
                     active={mode === "quick"}
-                    icon={<Zap size={16} />}
+                    icon={<Zap size={14} className="sm:size-[16px]" />}
                     label="Quick"
                     sub={`${QUICK_DEFAULT_COUNT} cards · ${QUICK_DEFAULT_LEVEL}`}
                     onClick={() => setMode("quick")}
@@ -142,7 +142,7 @@ const AIBulkPanel = ({ themeColor, onPreview, existingWords = [] }: AIBulkPanelP
                 />
                 <ModeChip
                     active={mode === "guided"}
-                    icon={<Settings2 size={16} />}
+                    icon={<Settings2 size={14} className="sm:size-[16px]" />}
                     label="Guided"
                     sub="Custom count & level"
                     onClick={() => setMode("guided")}
@@ -156,7 +156,7 @@ const AIBulkPanel = ({ themeColor, onPreview, existingWords = [] }: AIBulkPanelP
                 </label>
                 <input
                     type="text"
-                    className="w-full rounded-2xl border-2 border-b-4 border-gray-200 bg-white px-5 py-4 text-lg font-bold text-[#3c3c3c] placeholder-gray-300 transition-colors outline-none"
+                    className="w-full rounded-2xl border-2 border-b-4 border-gray-200 bg-white px-4 py-3.5 text-base font-bold text-[#3c3c3c] placeholder-gray-300 transition-colors outline-none sm:px-5 sm:py-4 sm:text-lg"
                     placeholder="e.g. N5 food vocabulary"
                     value={topic}
                     onChange={(e) => setTopic(e.target.value)}
@@ -169,14 +169,14 @@ const AIBulkPanel = ({ themeColor, onPreview, existingWords = [] }: AIBulkPanelP
                     maxLength={80}
                 />
 
-                <div className="mt-3 flex flex-wrap gap-2">
+                <div className="mt-3 flex flex-wrap gap-1.5 sm:gap-2">
                     {TOPIC_SUGGESTIONS.slice(0, 5).map((s) => (
                         <Button
                             key={s}
                             variant="ghost"
                             onClick={() => setTopic(s)}
                             disabled={isLoading}
-                            className="border-2 border-gray-200 bg-white !px-3 !py-1.5 !text-[10px] !font-black tracking-wide !text-[#afafaf] uppercase shadow-none hover:border-gray-300 hover:text-[#3c3c3c] hover:shadow-none"
+                            className="border-2 border-gray-200 bg-white !px-2.5 !py-1 !text-[9px] !font-black tracking-wide !text-[#afafaf] uppercase shadow-none hover:border-gray-300 hover:text-[#3c3c3c] hover:shadow-none sm:!px-3 sm:!py-1.5 sm:!text-[10px]"
                         >
                             {s}
                         </Button>
@@ -185,7 +185,7 @@ const AIBulkPanel = ({ themeColor, onPreview, existingWords = [] }: AIBulkPanelP
             </div>
 
             {mode === "guided" && (
-                <div className="space-y-4 rounded-2xl border-2 border-dashed border-gray-200 bg-gray-50 p-4">
+                <div className="space-y-4 rounded-2xl border-2 border-dashed border-gray-100 bg-gray-50/50 p-4">
                     <div>
                         <label className="mb-2 block text-[10px] font-black tracking-widest text-[#afafaf] uppercase">
                             Number of Cards
@@ -197,7 +197,7 @@ const AIBulkPanel = ({ themeColor, onPreview, existingWords = [] }: AIBulkPanelP
                                     onClick={() => setCount(n)}
                                     disabled={isLoading}
                                     variant={count === n ? "primary" : "secondary"}
-                                    className="!py-2.5 !text-sm !font-black transition-all"
+                                    className="!py-2 !text-xs !font-black transition-all sm:!py-2.5 sm:!text-sm"
                                     style={
                                         count === n
                                             ? {
@@ -220,14 +220,14 @@ const AIBulkPanel = ({ themeColor, onPreview, existingWords = [] }: AIBulkPanelP
                         <label className="mb-2 block text-[10px] font-black tracking-widest text-[#afafaf] uppercase">
                             JLPT Level
                         </label>
-                        <div className="grid grid-cols-5 gap-1.5">
+                        <div className="grid grid-cols-3 gap-2 sm:grid-cols-5 sm:gap-1.5">
                             {LEVEL_OPTIONS.map((opt) => (
                                 <Button
                                     key={opt.value}
                                     onClick={() => setLevel(opt.value)}
                                     disabled={isLoading}
                                     variant={level === opt.value ? "primary" : "secondary"}
-                                    className="!px-0 !py-2 !text-center transition-all"
+                                    className="!px-0 !py-2 !text-center transition-all sm:!py-2"
                                     style={
                                         level === opt.value
                                             ? {

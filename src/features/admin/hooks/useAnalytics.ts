@@ -11,8 +11,8 @@ export function useAnalytics() {
     return useQuery({
         queryKey: adminQueryKeys.analytics(),
         queryFn: async () => {
-            const token = await getAdminIdToken();
-            const result = await fetchAnalyticsAction(token);
+            await getAdminIdToken();
+            const result = await fetchAnalyticsAction();
             if (!result.ok) throw new Error(result.error);
             return result.data;
         },

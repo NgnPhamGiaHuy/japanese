@@ -52,7 +52,7 @@ interface FlashcardPracticeProps {
  * @example
  * <FlashcardPractice lesson={lesson} cards={dueCards} userId={uid} onAnswer={handleSrs} />
  */
-export const FlashcardPractice = ({
+const FlashcardPractice = ({
     lesson,
     userId,
     cards,

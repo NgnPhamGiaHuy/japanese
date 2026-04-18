@@ -38,7 +38,7 @@ export interface CommentItemProps {
 }
 
 // ─── Markdown renderer (pure function, no state) ──────────────────────────────
-function renderMarkdown(raw: string): string {
+const renderMarkdown = (raw: string): string => {
     return raw
         .replace(/&/g, "&amp;")
         .replace(/</g, "&lt;")
@@ -57,10 +57,10 @@ function renderMarkdown(raw: string): string {
             '<a href="$1" target="_blank" rel="noopener noreferrer" class="text-[#1cb0f6] underline">$1</a>',
         )
         .replace(/\n/g, "<br>");
-}
+};
 
 // ─── Relative time ────────────────────────────────────────────────────────────
-function relativeTime(ts: number): string {
+const relativeTime = (ts: number): string => {
     const diff = Date.now() - ts;
     const m = Math.floor(diff / 60000);
     if (m < 1) return "just now";
@@ -70,7 +70,7 @@ function relativeTime(ts: number): string {
     const d = Math.floor(h / 24);
     if (d < 7) return `${d}d ago`;
     return new Date(ts).toLocaleDateString("en-US", { month: "short", day: "numeric" });
-}
+};
 
 const ROLE_COLORS: Record<string, string> = {
     owner: "bg-purple-100 text-purple-700",
@@ -235,7 +235,7 @@ const CommentItem = ({
     );
 };
 
-function ActionBtn({
+const ActionBtn = ({
     icon: IconComp,
     label,
     onClick,
@@ -245,7 +245,7 @@ function ActionBtn({
     label: string;
     onClick: () => void;
     color?: string;
-}) {
+}) => {
     return (
         <Button
             variant="ghost"
@@ -256,6 +256,6 @@ function ActionBtn({
             {label}
         </Button>
     );
-}
+};
 
 export default CommentItem;

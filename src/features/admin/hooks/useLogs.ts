@@ -24,8 +24,8 @@ export function useLogs(filters: AdminLogFilters) {
             setIsLoading(true);
             setError(null);
             try {
-                const idToken = await getToken();
-                const result = await fetchLogsAction(idToken, filters, cursorId);
+                await getToken();
+                const result = await fetchLogsAction(filters, cursorId);
                 if (!result.ok) throw new Error(result.error);
 
                 setLogs(result.data.logs);
@@ -75,8 +75,8 @@ export function useLogs(filters: AdminLogFilters) {
     }, [currentPage, pageTokens, fetchPage]);
 
     const createManualLog = useCallback(async () => {
-        const token = await getToken();
-        const result = await createTestLogAction(token);
+        await getToken();
+        const result = await createTestLogAction();
         if (!result.ok) throw new Error(result.error);
         if (currentPage === 0) fetchPage(null, 0);
     }, [getToken, currentPage, fetchPage]);

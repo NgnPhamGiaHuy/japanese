@@ -20,7 +20,7 @@ export interface ImportRow {
     /** Unique temporary ID for list management */
     id: string;
     primary: string;
-    alternative: string;
+    alternatives: string[];
     meaning: string;
     example: string;
     /** Flag indicating if the row meets the minimum requirements for a valid card */
@@ -55,7 +55,7 @@ interface ImportPreviewProps {
  * @example
  * <ImportPreview initialRows={parsedData} onConfirm={handleAdd} onCancel={closePreview} />
  */
-export const ImportPreview = ({
+const ImportPreview = ({
     initialRows,
     onConfirm,
     onCancel,
@@ -72,7 +72,7 @@ export const ImportPreview = ({
      * @param field - ImportRow property
      * @param value - New string value
      */
-    const updateRow = (id: string, field: keyof ImportRow, value: string) => {
+    const updateRow = <K extends keyof ImportRow>(id: string, field: K, value: ImportRow[K]) => {
         setRows((prev) =>
             prev.map((row) => {
                 if (row.id === id) {
@@ -142,16 +142,16 @@ export const ImportPreview = ({
             </div>
 
             {/* Validation Table */}
-            <div className="overflow-x-auto rounded-2xl border-2 border-gray-200 bg-white shadow-sm">
-                <table className="w-full text-left font-bold text-[#3c3c3c]">
-                    <thead className="border-b-2 border-gray-200 bg-gray-50 text-xs tracking-widest text-[#afafaf] uppercase">
+            <div className="overflow-hidden rounded-2xl border-2 border-gray-200 bg-white shadow-sm sm:overflow-x-auto">
+                <table className="w-full table-fixed text-left font-bold text-[#3c3c3c]">
+                    <thead className="border-b-2 border-gray-200 bg-gray-50 text-[10px] tracking-widest text-[#afafaf] uppercase sm:text-xs">
                         <tr>
-                            <th className="p-4">Primary</th>
-                            <th className="p-4">Alternative</th>
-                            <th className="p-4">Meaning</th>
-                            <th className="p-4">Example</th>
-                            <th className="p-4 text-center">Status</th>
-                            <th className="p-4 text-center">Actions</th>
+                            <th className="w-[22%] p-2 sm:p-4">Primary</th>
+                            <th className="w-[20%] p-2 sm:p-4">Alternatives</th>
+                            <th className="w-[18%] p-2 sm:p-4">Meaning</th>
+                            <th className="w-[22%] p-2 sm:p-4">Example</th>
+                            <th className="w-[8%] p-2 text-center sm:p-4">Status</th>
+                            <th className="w-[10%] p-2 text-center sm:p-4">Actions</th>
                         </tr>
                     </thead>
                     <tbody className="divide-y-2 divide-gray-100">
@@ -160,9 +160,9 @@ export const ImportPreview = ({
                                 key={row.id}
                                 className={`transition-colors ${row.isInvalid ? "bg-red-50/50" : "hover:bg-gray-50"}`}
                             >
-                                <td className="p-2">
+                                <td className="p-1 sm:p-2">
                                     <input
-                                        className="w-full rounded-lg border-2 border-transparent bg-transparent p-2 outline-none focus:border-[var(--theme-color)] focus:bg-white"
+                                        className="w-full rounded-lg border-2 border-transparent bg-transparent p-1.5 text-xs outline-none focus:border-[var(--theme-color)] focus:bg-white sm:p-2 sm:text-sm"
                                         style={
                                             { "--theme-color": themeColor } as React.CSSProperties
                                         }
@@ -170,25 +170,32 @@ export const ImportPreview = ({
                                         onChange={(e) =>
                                             updateRow(row.id, "primary", e.target.value)
                                         }
-                                        placeholder="Primary form"
+                                        placeholder="Primary"
                                     />
                                 </td>
-                                <td className="p-2">
+                                <td className="p-1 sm:p-2">
                                     <input
-                                        className="w-full rounded-lg border-2 border-transparent bg-transparent p-2 outline-none focus:border-[var(--theme-color)] focus:bg-white"
+                                        className="w-full rounded-lg border-2 border-transparent bg-transparent p-1.5 text-xs font-medium text-[#afafaf] outline-none focus:border-[var(--theme-color)] focus:bg-white sm:p-2 sm:text-sm"
                                         style={
                                             { "--theme-color": themeColor } as React.CSSProperties
                                         }
-                                        value={row.alternative}
+                                        value={(row.alternatives || []).join(" / ")}
                                         onChange={(e) =>
-                                            updateRow(row.id, "alternative", e.target.value)
+                                            updateRow(
+                                                row.id,
+                                                "alternatives",
+                                                e.target.value
+                                                    .split(/[,/]/)
+                                                    .map((s) => s.trim())
+                                                    .filter(Boolean),
+                                            )
                                         }
-                                        placeholder="Alternative (optional)"
+                                        placeholder="Alt..."
                                     />
                                 </td>
-                                <td className="p-2">
+                                <td className="p-1 sm:p-2">
                                     <input
-                                        className="w-full rounded-lg border-2 border-transparent bg-transparent p-2 outline-none focus:border-[var(--theme-color)] focus:bg-white"
+                                        className="w-full rounded-lg border-2 border-transparent bg-transparent p-1.5 text-xs outline-none focus:border-[var(--theme-color)] focus:bg-white sm:p-2 sm:text-sm"
                                         style={
                                             { "--theme-color": themeColor } as React.CSSProperties
                                         }
@@ -199,9 +206,9 @@ export const ImportPreview = ({
                                         placeholder="Meaning"
                                     />
                                 </td>
-                                <td className="p-2">
+                                <td className="p-1 sm:p-2">
                                     <input
-                                        className="w-full rounded-lg border-2 border-transparent bg-transparent p-2 text-sm text-[#3c3c3c] outline-none focus:border-[var(--theme-color)] focus:bg-white"
+                                        className="w-full rounded-lg border-2 border-transparent bg-transparent p-1.5 text-[10px] font-medium text-[#afafaf] outline-none focus:border-[var(--theme-color)] focus:bg-white sm:p-2 sm:text-xs"
                                         style={
                                             { "--theme-color": themeColor } as React.CSSProperties
                                         }
@@ -209,44 +216,25 @@ export const ImportPreview = ({
                                         onChange={(e) =>
                                             updateRow(row.id, "example", e.target.value)
                                         }
-                                        placeholder="Optional"
+                                        placeholder="Optional example"
                                     />
                                 </td>
-                                <td className="p-4 text-center">
+                                <td className="p-1 text-center sm:p-2">
                                     {row.isInvalid ? (
                                         <div
                                             className="flex items-center justify-center text-red-500"
                                             title={row.errorMsg || row.originalText}
                                         >
-                                            <AlertCircle size={20} />
-                                        </div>
-                                    ) : row.atomicViolation ? (
-                                        <div
-                                            role="alert"
-                                            className="flex items-center justify-center text-orange-500"
-                                            title="Non-atomic card: primary contains multiple forms. Click Split to separate."
-                                        >
-                                            <AlertTriangle size={20} />
+                                            <AlertCircle size={14} className="sm:size-[18px]" />
                                         </div>
                                     ) : (
                                         <div className="flex items-center justify-center text-green-500">
-                                            <CheckCircle2 size={20} />
+                                            <CheckCircle2 size={14} className="sm:size-[18px]" />
                                         </div>
                                     )}
                                 </td>
-                                <td className="p-4 text-center">
-                                    <div className="flex items-center justify-center gap-1">
-                                        {row.atomicViolation && (
-                                            <Button
-                                                variant="ghost"
-                                                onClick={() => splitRow(row.id)}
-                                                className="!p-1 text-orange-400 transition-colors hover:bg-orange-50 hover:text-orange-600"
-                                                icon={Scissors}
-                                                title="Split into atomic cards"
-                                            >
-                                                Split
-                                            </Button>
-                                        )}
+                                <td className="p-1 text-center sm:p-2">
+                                    <div className="flex items-center justify-center gap-0.5 sm:gap-1">
                                         <Button
                                             variant="ghost"
                                             onClick={() => removeRow(row.id)}
