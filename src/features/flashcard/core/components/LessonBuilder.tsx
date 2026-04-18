@@ -1,14 +1,17 @@
 "use client";
 
 import React, { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { useLessonBuilder } from "../hooks/useLessonBuilder";
-import { LessonBuilderMeta } from "./LessonBuilderMeta";
+
+import { AnimatePresence, motion } from "framer-motion";
+import { Save, X } from "lucide-react";
+
+import { Button } from "@/shared/components/ui";
 import { LessonBuilderCardList } from "./LessonBuilderCardList";
 import { LessonBuilderImportPane } from "./LessonBuilderImportPane";
+import { LessonBuilderMeta } from "./LessonBuilderMeta";
+import { useLessonBuilder } from "../hooks/useLessonBuilder";
+
 import type { FlashCard, Lesson } from "../types";
-import { X, Save } from "lucide-react";
-import { Button } from "@/shared/components/ui";
 
 interface LessonBuilderProps {
     editingLesson?: Lesson;
@@ -42,7 +45,7 @@ const LessonBuilder: React.FC<LessonBuilderProps> = ({
     };
 
     return (
-        <div 
+        <div
             className="fixed inset-0 z-50 flex flex-col overflow-y-auto bg-[#F7F7F8]"
             style={{ "--theme-color": builder.themeHex } as React.CSSProperties}
         >
@@ -51,10 +54,10 @@ const LessonBuilder: React.FC<LessonBuilderProps> = ({
                 <h2 className="text-xl font-black text-[#3c3c3c]">
                     {editingLesson ? "Edit Deck" : "New Deck"}
                 </h2>
-                <Button 
-                    variant="primary" 
-                    onClick={handleSave} 
-                    disabled={saving} 
+                <Button
+                    variant="primary"
+                    onClick={handleSave}
+                    disabled={saving}
                     icon={Save}
                     className="shadow-lg"
                 >
@@ -65,11 +68,11 @@ const LessonBuilder: React.FC<LessonBuilderProps> = ({
             <main className="mx-auto w-full max-w-3xl space-y-12 p-8 pb-32">
                 <LessonBuilderMeta {...builder} saving={saving} />
 
-                <LessonBuilderImportPane 
-                    {...builder} 
+                <LessonBuilderImportPane
+                    {...builder}
                     existingWords={builder.existingWordsForAI}
                     handleImportConfirm={builder.handleImportConfirm}
-                    saving={saving} 
+                    saving={saving}
                 />
 
                 <AnimatePresence mode="wait">
@@ -79,7 +82,7 @@ const LessonBuilder: React.FC<LessonBuilderProps> = ({
                             animate={{ opacity: 1, y: 0 }}
                             exit={{ opacity: 0, y: -20 }}
                         >
-                            <LessonBuilderCardList 
+                            <LessonBuilderCardList
                                 cards={builder.cards}
                                 setCards={builder.setCards}
                                 updateCard={builder.updateCard}

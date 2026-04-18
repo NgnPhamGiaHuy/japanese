@@ -30,14 +30,14 @@ export async function getAdminAnalytics(days = 30): Promise<AnalyticsData> {
         docs.length > 0
             ? docs
             : [
-                {
-                    date: new Date().toISOString().split("T")[0],
-                    totalUsers: 0,
-                    newUsers: 0,
-                    activeUsers: 0,
-                    errors: 0,
-                },
-            ];
+                  {
+                      date: new Date().toISOString().split("T")[0],
+                      totalUsers: 0,
+                      newUsers: 0,
+                      activeUsers: 0,
+                      errors: 0,
+                  },
+              ];
 
     // Sort ascending for charts
     const sorted = [...baseDocs].sort((a, b) => a.date.localeCompare(b.date));
@@ -317,8 +317,8 @@ export async function getUsersByDate(date: string) {
             timestamp: data.createdAt?.toDate
                 ? data.createdAt.toDate().toISOString()
                 : typeof data.createdAt === "number"
-                    ? new Date(data.createdAt).toISOString()
-                    : new Date().toISOString(),
+                  ? new Date(data.createdAt).toISOString()
+                  : new Date().toISOString(),
             metadata: {
                 source: "user_growth",
                 registrationDate: date,
@@ -356,8 +356,8 @@ export async function getUsersByRole(role: string) {
                 timestamp: data.createdAt?.toDate
                     ? data.createdAt.toDate().toISOString()
                     : typeof data.createdAt === "number"
-                        ? new Date(data.createdAt).toISOString()
-                        : new Date().toISOString(),
+                      ? new Date(data.createdAt).toISOString()
+                      : new Date().toISOString(),
                 metadata: {
                     lastSeenAt: data.lastSeenAt,
                     role: "user",
@@ -567,17 +567,30 @@ export async function getContentBreakdown(category: string) {
         const explicitType = lesson.type?.toLowerCase();
         const text = `${lesson.title || ""} ${lesson.description || ""}`.toLowerCase();
 
-        const isVocab = cats.some((c: string) => c.includes("vocab") || c.includes("tango")) ||
-                        explicitType?.includes("vocab") || explicitType?.includes("tango") ||
-                        text.includes("vocabulary") || text.includes("vocab") || text.includes("tango") || text.includes("deck") || text.includes("words") || text.includes("単語");
+        const isVocab =
+            cats.some((c: string) => c.includes("vocab") || c.includes("tango")) ||
+            explicitType?.includes("vocab") ||
+            explicitType?.includes("tango") ||
+            text.includes("vocabulary") ||
+            text.includes("vocab") ||
+            text.includes("tango") ||
+            text.includes("deck") ||
+            text.includes("words") ||
+            text.includes("単語");
 
-        const isGrammar = cats.some((c: string) => c.includes("grammar") || c.includes("bunpou")) ||
-                          explicitType?.includes("grammar") || explicitType?.includes("bunpou") ||
-                          text.includes("grammar") || text.includes("bunpou") || text.includes("文法");
+        const isGrammar =
+            cats.some((c: string) => c.includes("grammar") || c.includes("bunpou")) ||
+            explicitType?.includes("grammar") ||
+            explicitType?.includes("bunpou") ||
+            text.includes("grammar") ||
+            text.includes("bunpou") ||
+            text.includes("文法");
 
-        const isKanji = cats.some((c: string) => c.includes("kanji")) ||
-                        explicitType?.includes("kanji") ||
-                        text.includes("kanji") || text.includes("漢字");
+        const isKanji =
+            cats.some((c: string) => c.includes("kanji")) ||
+            explicitType?.includes("kanji") ||
+            text.includes("kanji") ||
+            text.includes("漢字");
 
         const hasAnyExplicit = cats.length > 0 || !!explicitType;
         const matchedPrimary = isVocab || isGrammar || isKanji;
@@ -611,8 +624,8 @@ export async function getContentBreakdown(category: string) {
         timestamp: lesson.createdAt?.toDate
             ? lesson.createdAt.toDate().toISOString()
             : typeof lesson.createdAt === "number"
-                ? new Date(lesson.createdAt).toISOString()
-                : null,
+              ? new Date(lesson.createdAt).toISOString()
+              : null,
         metadata: {
             category: (lesson.categories || [])[0] || needle,
             categories: lesson.categories,

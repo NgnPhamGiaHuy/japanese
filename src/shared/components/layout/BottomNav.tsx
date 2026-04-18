@@ -5,8 +5,8 @@ import { usePathname } from "next/navigation";
 
 import { Bell, BookOpen, Gamepad2, Shield } from "lucide-react";
 
-import { useNotifications } from "@/features/notifications";
 import { useAdminRole } from "@/features/admin/context/AdminContext";
+import { useNotifications } from "@/features/notifications";
 import { UserAvatar } from "@/shared/components/ui";
 import { useAppStore } from "@/store";
 
@@ -132,7 +132,7 @@ export const BottomNav = () => {
 
                         <div className="relative">
                             {active ? route.activeIcon : route.icon}
-                            
+
                             {/* Unread badge for Alerts */}
                             {route.badge != null && route.badge > 0 && (
                                 <span className="absolute -top-1.5 -right-1.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-[#ea2b2b] px-1 text-[9px] font-black text-white">

@@ -1,9 +1,12 @@
 "use client";
 
 import React from "react";
+
 import { Sparkles } from "lucide-react";
+
 import { Button } from "@/shared/components/ui";
 import { ImportPreview } from "./ImportPreview";
+
 // import AIBulkPanel from "./AIBulkPanel"; // Assuming it's in the same dir
 
 interface LessonBuilderImportPaneProps {
@@ -44,7 +47,7 @@ export const LessonBuilderImportPane: React.FC<LessonBuilderImportPaneProps> = (
                             setInputMode(mode);
                             setPreviewRows(null);
                         }}
-                        className={`flex-1 !rounded-none !p-4 !text-xs !font-black uppercase tracking-wider ${
+                        className={`flex-1 !rounded-none !p-4 !text-xs !font-black tracking-wider uppercase ${
                             inputMode === mode ? "!text-white" : "!text-gray-400 hover:bg-gray-50"
                         }`}
                         style={inputMode === mode ? { backgroundColor: themeHex } : {}}

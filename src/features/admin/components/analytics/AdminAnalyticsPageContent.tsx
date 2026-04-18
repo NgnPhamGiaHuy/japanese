@@ -1,9 +1,12 @@
 "use client";
 
+import { useState } from "react";
+
 import { BarChart3, Calendar, Download } from "lucide-react";
 
 import { Button, LoadingSpinner } from "@/shared/components/ui";
 import AnalyticsDetailModal from "./AnalyticsDetailModal";
+import AnalyticsExportModal from "./AnalyticsExportModal";
 import ContentDistributionChart from "./ContentDistributionChart";
 import EngagementChart from "./EngagementChart";
 import ErrorTrendChart from "./ErrorTrendChart";
@@ -11,7 +14,7 @@ import RetentionChart from "./RetentionChart";
 import GrowthChart from "../dashboard/GrowthChart";
 import RoleChart from "../dashboard/RoleChart";
 import { AdminEmptyState, AdminErrorState, AdminPageHeader, AdminPageLayout } from "../shared";
-import { useAnalytics, useAnalyticsDrilldown } from "../../hooks";
+import { useAdminToken, useAnalytics, useAnalyticsDrilldown } from "../../hooks";
 
 /**
  * Admin Analytics Dashboard Page.
@@ -21,6 +24,7 @@ import { useAnalytics, useAnalyticsDrilldown } from "../../hooks";
  */
 const AdminAnalyticsPageContent = () => {
     const { data, isLoading, error, refetch } = useAnalytics();
+    const [isExportModalOpen, setIsExportModalOpen] = useState(false);
     const {
         selection,
         data: drilldownData,
@@ -87,7 +91,11 @@ const AdminAnalyticsPageContent = () => {
                             <Calendar size={14} />
                             Last 30 Days
                         </Button>
-                        <Button variant="primary" className="gap-2 !px-4 !py-2 text-sm">
+                        <Button
+                            variant="primary"
+                            className="gap-2 !px-4 !py-2 text-sm"
+                            onClick={() => setIsExportModalOpen(true)}
+                        >
                             <Download size={14} />
                             Export CSV
                         </Button>
@@ -124,6 +132,11 @@ const AdminAnalyticsPageContent = () => {
                 data={drilldownData}
                 isLoading={isDrilldownLoading}
                 error={drilldownError}
+            />
+
+            <AnalyticsExportModal
+                isOpen={isExportModalOpen}
+                onClose={() => setIsExportModalOpen(false)}
             />
 
             <div className="mt-8 rounded-3xl border-2 border-dashed border-gray-200 p-8 text-center">

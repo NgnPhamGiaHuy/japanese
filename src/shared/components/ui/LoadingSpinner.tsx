@@ -35,9 +35,7 @@ export function LoadingSpinner({
 
     if (!fullScreen) {
         return (
-            <div className="flex h-full min-h-[70vh] w-full flex-col items-center justify-center">
-                {spinner}
-            </div>
+            <div className="flex w-full flex-col items-center justify-center py-10">{spinner}</div>
         );
     }
 

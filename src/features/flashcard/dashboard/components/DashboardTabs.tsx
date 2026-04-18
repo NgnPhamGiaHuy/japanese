@@ -14,9 +14,10 @@ interface DashboardTabsProps {
 }
 
 const tabClass = (active: boolean) =>
-    `!flex-1 !rounded-xl !py-2 !text-sm !font-black shadow-none !transition-all hover:shadow-none active:translate-y-0 ${active
-        ? "!bg-white !text-[#3c3c3c] shadow-sm"
-        : "!text-[#afafaf] hover:!bg-transparent hover:!text-[#3c3c3c]"
+    `!flex-1 !rounded-xl !py-2 !text-sm !font-black shadow-none !transition-all hover:shadow-none active:translate-y-0 ${
+        active
+            ? "!bg-white !text-[#3c3c3c] shadow-sm"
+            : "!text-[#afafaf] hover:!bg-transparent hover:!text-[#3c3c3c]"
     }`;
 
 const DashboardTabs = ({

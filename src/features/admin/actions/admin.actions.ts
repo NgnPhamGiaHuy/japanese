@@ -1,7 +1,6 @@
 "use server";
 
-import { adminAuth } from "@/lib/firebase-admin";
-import { assertPermissionFromToken } from "../services/admin.service";
+import { adminAuth, adminDb, APP_ID, assertPermissionFromToken } from "../services/admin.service";
 import {
     getAdminAnalytics,
     getContentBreakdown,
@@ -252,6 +251,141 @@ export async function fetchDrilldownContentAction(idToken: string, category: str
     try {
         await assertPermissionFromToken(idToken, "canViewAnalytics");
         return ok(await getContentBreakdown(category));
+    } catch (err) {
+        return fail(err);
+    }
+}
+
+export async function exportAnalyticsAction(idToken: string): Promise<ActionResult<any[]>> {
+    try {
+        await assertPermissionFromToken(idToken, "canViewAnalytics");
+
+        const snapshots = await adminDb
+            .collection("analytics_daily")
+            .orderBy("date", "desc")
+            .limit(100)
+            .get();
+
+        const docs = snapshots.docs.map((d) => d.data());
+
+        // Use authoritative live fallback if daily snapshots haven't been generated yet
+        if (docs.length === 0) {
+            const stats = await getAdminStats();
+            const today = new Date().toISOString().split("T")[0];
+
+            // Return a single live record so the export works immediately
+            return ok([
+                {
+                    date: today,
+                    totalUsers: stats.totalUsers,
+                    newUsers: 0,
+                    activeUsers: stats.activeUsersToday,
+                    sessions: stats.totalSessions,
+                    errors: Math.round(stats.totalSessions * (stats.errorRate / 100)),
+                    flashcardsCreated: stats.totalFlashcards,
+                    featureUsage: {
+                        flashcards: 0,
+                        kana: 0,
+                        matching: 0,
+                    },
+                },
+            ]);
+        }
+
+        return ok(docs);
+    } catch (err) {
+        return fail(err);
+    }
+}
+
+/**
+ * AI TRAINING EXPORT: Raw User Progress Dataset
+ */
+export async function exportUsersDatasetAction(idToken: string): Promise<ActionResult<any[]>> {
+    try {
+        await assertPermissionFromToken(idToken, "canViewAnalytics");
+        const snap = await adminDb
+            .collection("artifacts")
+            .doc(APP_ID)
+            .collection("users")
+            .limit(1000)
+            .get();
+
+        return ok(
+            snap.docs.map((d) => ({
+                uid: d.id,
+                ...d.data(),
+                createdAt: d.data().createdAt?.toDate
+                    ? d.data().createdAt.toDate().toISOString()
+                    : d.data().createdAt,
+                lastSeenAt: d.data().lastSeenAt?.toDate
+                    ? d.data().lastSeenAt.toDate().toISOString()
+                    : d.data().lastSeenAt,
+            })),
+        );
+    } catch (err) {
+        return fail(err);
+    }
+}
+
+/**
+ * AI TRAINING EXPORT: Global Content Metadata Dataset
+ */
+export async function exportContentDatasetAction(idToken: string): Promise<ActionResult<any[]>> {
+    try {
+        await assertPermissionFromToken(idToken, "canViewAnalytics");
+        const snap = await adminDb.collectionGroup("lessons").limit(1000).get();
+
+        return ok(
+            snap.docs.map((d) => {
+                const data = d.data();
+                return {
+                    lessonId: d.id,
+                    ownerId: d.ref.parent.parent?.id,
+                    title: data.title,
+                    category: (data.categories || [])[0] || "uncategorized",
+                    cardCount: data.cardCount || 0,
+                    isShared: !!data.sharedAt,
+                    createdAt: data.createdAt?.toDate
+                        ? data.createdAt.toDate().toISOString()
+                        : data.createdAt,
+                };
+            }),
+        );
+    } catch (err) {
+        return fail(err);
+    }
+}
+
+/**
+ * AI TRAINING EXPORT: System Log Behavioral Dataset
+ */
+export async function exportLogsDatasetAction(idToken: string): Promise<ActionResult<any[]>> {
+    try {
+        await assertPermissionFromToken(idToken, "canViewAnalytics");
+        const snap = await adminDb
+            .collection("system_logs")
+            .orderBy("timestamp", "desc")
+            .limit(1000)
+            .get();
+
+        return ok(
+            snap.docs.map((d) => {
+                const data = d.data();
+                return {
+                    id: d.id,
+                    timestamp: data.timestamp?.toDate
+                        ? data.timestamp.toDate().toISOString()
+                        : data.timestamp,
+                    userId: data.userId || "system",
+                    action: data.action,
+                    level: data.level,
+                    ...(typeof data.metadata === "object"
+                        ? data.metadata
+                        : { rawMetadata: data.metadata }),
+                };
+            }),
+        );
     } catch (err) {
         return fail(err);
     }

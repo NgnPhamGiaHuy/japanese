@@ -1,8 +1,10 @@
 "use client";
 
 import React from "react";
+
+import { AnimatePresence, motion } from "framer-motion";
 import { X } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
+
 import { Button } from "@/shared/components/ui";
 
 interface LessonBuilderMetaProps {
@@ -27,7 +29,7 @@ export const LessonBuilderMeta: React.FC<LessonBuilderMetaProps> = ({
     saving,
 }) => {
     return (
-        <motion.div 
+        <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             className="space-y-4 rounded-[2rem] border-2 border-b-8 border-gray-200 bg-white p-6 shadow-sm"
@@ -84,13 +86,17 @@ export const LessonBuilderMeta: React.FC<LessonBuilderMetaProps> = ({
 
                 <div className="space-y-3">
                     <div className="flex items-center gap-2 px-1">
-                        <span className="text-[10px] font-black tracking-widest text-gray-300 uppercase">Suggestions:</span>
+                        <span className="text-[10px] font-black tracking-widest text-gray-300 uppercase">
+                            Suggestions:
+                        </span>
                         <div className="flex flex-wrap gap-1.5">
                             {["Vocabulary", "Grammar", "Kanji"].map((sug) => (
                                 <button
                                     key={sug}
                                     type="button"
-                                    disabled={saving || lesson.categories?.includes(sug.toLowerCase())}
+                                    disabled={
+                                        saving || lesson.categories?.includes(sug.toLowerCase())
+                                    }
                                     onClick={() => addTag(sug)}
                                     className="rounded-xl border-b-2 border-gray-200 bg-white px-3 py-1.5 text-[10px] font-black tracking-widest text-gray-500 uppercase transition-all hover:-translate-y-0.5 disabled:opacity-30"
                                 >
@@ -110,27 +116,33 @@ export const LessonBuilderMeta: React.FC<LessonBuilderMetaProps> = ({
                             onKeyDown={(e) => e.key === "Enter" && addTag(tagInput)}
                             disabled={saving}
                         />
-                        <div className="absolute right-5 top-1/2 -translate-y-1/2 text-[9px] font-black tracking-widest text-gray-400 uppercase">
+                        <div className="absolute top-1/2 right-5 -translate-y-1/2 text-[9px] font-black tracking-widest text-gray-400 uppercase">
                             ENTER TO ADD
                         </div>
                     </div>
                 </div>
 
                 {/* Theme Picker */}
-                <div className="border-t-2 border-gray-100 pt-6 mt-6">
-                    <label className="mb-3 block text-xs font-black tracking-wider text-gray-400 uppercase">Theme Color</label>
+                <div className="mt-6 border-t-2 border-gray-100 pt-6">
+                    <label className="mb-3 block text-xs font-black tracking-wider text-gray-400 uppercase">
+                        Theme Color
+                    </label>
                     <div className="flex flex-wrap gap-3">
-                        {["#1cb0f6", "#58cc02", "#ff9600", "#ce82ff", "#ea2b2b", "#ff66bb"].map((color) => (
-                            <button
-                                key={color}
-                                type="button"
-                                onClick={() => setLesson({ ...lesson, themeColor: color })}
-                                className={`h-10 w-10 rounded-full border-[3px] transition-all hover:scale-110 ${
-                                    (lesson.themeColor || "#1cb0f6") === color ? "border-black" : "border-transparent"
-                                }`}
-                                style={{ backgroundColor: color }}
-                            />
-                        ))}
+                        {["#1cb0f6", "#58cc02", "#ff9600", "#ce82ff", "#ea2b2b", "#ff66bb"].map(
+                            (color) => (
+                                <button
+                                    key={color}
+                                    type="button"
+                                    onClick={() => setLesson({ ...lesson, themeColor: color })}
+                                    className={`h-10 w-10 rounded-full border-[3px] transition-all hover:scale-110 ${
+                                        (lesson.themeColor || "#1cb0f6") === color
+                                            ? "border-black"
+                                            : "border-transparent"
+                                    }`}
+                                    style={{ backgroundColor: color }}
+                                />
+                            ),
+                        )}
                     </div>
                 </div>
             </div>
