@@ -1,6 +1,30 @@
 {
     "indexes": [
         {
+            "collectionGroup": "system_logs",
+            "queryScope": "COLLECTION",
+            "fields": [
+                { "fieldPath": "level", "order": "ASCENDING" },
+                { "fieldPath": "timestamp", "order": "DESCENDING" }
+            ]
+        },
+        {
+            "collectionGroup": "system_logs",
+            "queryScope": "COLLECTION",
+            "fields": [
+                { "fieldPath": "entityType", "order": "ASCENDING" },
+                { "fieldPath": "timestamp", "order": "DESCENDING" }
+            ]
+        },
+        {
+            "collectionGroup": "system_logs",
+            "queryScope": "COLLECTION",
+            "fields": [
+                { "fieldPath": "userId", "order": "ASCENDING" },
+                { "fieldPath": "timestamp", "order": "DESCENDING" }
+            ]
+        },
+        {
             "collectionGroup": "notifications",
             "queryScope": "COLLECTION",
             "fields": [

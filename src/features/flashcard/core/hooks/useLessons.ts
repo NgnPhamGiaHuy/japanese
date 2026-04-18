@@ -5,7 +5,7 @@ import { useCallback, useEffect, useState } from "react";
 import { useAppStore } from "@/store";
 import * as LessonService from "../services";
 
-import type { FlashCard, Lesson } from "../types";
+import type { DeckAccessRole, FlashCard, Lesson } from "../types";
 
 /**
  * Internal state for the lessons collection.
@@ -42,18 +42,14 @@ export function useLessons() {
         error: null,
     });
 
-    const [prevUserId, setPrevUserId] = useState(user?.uid);
-    if (user?.uid !== prevUserId) {
-        setPrevUserId(user?.uid);
+    useEffect(() => {
         setState({
             lessons: [],
             sharedLessons: [],
             loading: !!user,
             error: null,
         });
-    }
 
-    useEffect(() => {
         if (!user) return;
 
         // Subscribe to personal lessons
@@ -174,7 +170,7 @@ export function useLessons() {
     const updateLessonRoles = useCallback(
         async (
             lessonId: string,
-            roles: Record<string, "owner" | "editor" | "commenter" | "viewer">,
+            roles: Record<string, DeckAccessRole>,
             collaborators: string[],
         ): Promise<void> => {
             if (!user) return;

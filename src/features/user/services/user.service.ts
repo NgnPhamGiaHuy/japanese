@@ -39,5 +39,10 @@ export const updateUserProgress = async (
         : INITIAL_USER_DATA;
 
     const next = updateFn(prev);
-    await setDoc(ref, { progress: next }, { merge: true });
+    await setDoc(ref, { progress: next, lastSeenAt: new Date().toISOString() }, { merge: true });
+};
+
+export const updateLastSeen = async (userId: string): Promise<void> => {
+    const ref = userDoc(userId);
+    await setDoc(ref, { lastSeenAt: new Date().toISOString() }, { merge: true });
 };

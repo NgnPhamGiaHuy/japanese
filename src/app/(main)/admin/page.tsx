@@ -1,15 +1,12 @@
+import { AdminOverviewPage } from "@/features/admin/components";
+
 /**
- * Admin Dashboard Page — Pure orchestrator.
+ * Main entry point for the Admin Dashboard.
  *
- * @remarks
- * Responsibilities (ONLY):
- * - Render AdminDashboard feature root
- *
- * NO business logic, NO state management, NO direct service calls.
+ * @remarks Orchestrates the primary administrative overview and dashboard analytics.
+ * @example
+ * <AdminPage />
  */
-
-import { AdminDashboard } from "@/features/admin";
-
 export default function AdminPage() {
-    return <AdminDashboard />;
+    return <AdminOverviewPage />;
 }

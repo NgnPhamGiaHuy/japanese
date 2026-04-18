@@ -1,4 +1,4 @@
-import { Globe2, Lock, Users } from "lucide-react";
+import { Globe2, Lock, Sparkles } from "lucide-react";
 
 import type { LucideIcon } from "lucide-react";
 import type { Lesson } from "../types";
@@ -21,29 +21,33 @@ export interface VisibilityConfig {
     label: string;
     description: string;
     variant: "default" | "success" | "warning";
+    color?: string;
 }
 
 export const VISIBILITY_MAPPINGS: Record<VisibilityLevel, VisibilityConfig> = {
     [VisibilityLevel.PRIVATE]: {
         level: VisibilityLevel.PRIVATE,
         icon: Lock,
-        label: "Private",
-        description: "Only you can see this deck",
+        label: "Restricted",
+        description: "Only invited people can open",
         variant: "default",
+        color: "#afafaf",
     },
     [VisibilityLevel.SHARED]: {
         level: VisibilityLevel.SHARED,
-        icon: Users,
-        label: "Shared",
-        description: "Visible to people with the link or specific access",
+        icon: Globe2,
+        label: "Anyone with the link",
+        description: "Anyone with the link can view",
         variant: "warning",
+        color: "#1cb0f6", // Will be overridden by themeHex in many places, but this is the default
     },
     [VisibilityLevel.PUBLIC]: {
         level: VisibilityLevel.PUBLIC,
-        icon: Globe2,
+        icon: Sparkles,
         label: "Public",
         description: "Visible to everyone — no link required",
         variant: "success",
+        color: "#ffc800", // Vibrant Gold for 'Featured/Community' discovery
     },
 };
 
@@ -60,15 +64,22 @@ export function getVisibilityLevel(lesson: Lesson): VisibilityLevel {
         return VisibilityLevel.PUBLIC;
     }
 
-    const hasCollaborators =
-        (lesson.collaborators && lesson.collaborators.length > 0) ||
-        (lesson.roles && Object.keys(lesson.roles).length > 1);
-
-    if (lesson.allowLinkAccess || hasCollaborators) {
+    if (lesson.allowLinkAccess) {
         return VisibilityLevel.SHARED;
     }
 
     return VisibilityLevel.PRIVATE;
+}
+
+/**
+ * Resolves the final display color for a visibility config,
+ * applying theme overrides (e.g., Shared uses the deck color).
+ */
+export function resolveVisibilityColor(config: VisibilityConfig, themeColor?: string): string {
+    if (config.level === VisibilityLevel.SHARED && themeColor) {
+        return themeColor;
+    }
+    return config.color || "#afafaf";
 }
 
 /**

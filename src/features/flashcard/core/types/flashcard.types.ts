@@ -104,7 +104,7 @@ export interface Lesson {
      * Role-Based Access Control (RBAC) map.
      * Key: User UID, Value: Semantic permission level.
      */
-    roles?: Record<string, "owner" | "editor" | "commenter" | "viewer">;
+    roles?: Record<string, DeckAccessRole>;
     /** List of explicit UIDs with access to this deck */
     collaborators?: string[];
     /** Flag allowing anyone with the shareId to view/comment based on global policy */

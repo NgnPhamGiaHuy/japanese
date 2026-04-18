@@ -1,32 +1,43 @@
-/**
- * LoadingSpinner Component
- *
- * @remarks
- * Reusable loading spinner with customizable color.
- * Used across all loading states in the app.
- */
+import { Loader2 } from "lucide-react";
 
 interface LoadingSpinnerProps {
-    /** Hex color for the spinner (default: #1cb0f6) */
     color?: string;
-    /** Size in pixels (default: 32) */
     size?: number;
+    fullScreen?: boolean;
+    label?: string;
 }
 
-/**
- * Full-screen centered loading spinner
- */
-export function LoadingSpinner({ color = "#1cb0f6", size = 32 }: LoadingSpinnerProps) {
+export function LoadingSpinner({
+    color = "#1cb0f6",
+    size = 32,
+    fullScreen = true,
+    label,
+}: LoadingSpinnerProps) {
+    const spinner = (
+        <div className="flex flex-col items-center justify-center gap-4">
+            <div className="relative flex items-center justify-center">
+                <Loader2 size={size} style={{ color }} className="animate-spin" />
+                <div
+                    className="absolute animate-ping rounded-full opacity-10"
+                    style={{ backgroundColor: color, width: size * 0.7, height: size * 0.7 }}
+                />
+            </div>
+            {label && (
+                <div className="flex flex-col items-center gap-1">
+                    <p className="text-lg font-black tracking-tight text-[#3c3c3c]">{label}</p>
+                    <p className="text-xs font-bold tracking-widest text-[#afafaf] uppercase">
+                        Crunching latest platform data
+                    </p>
+                </div>
+            )}
+        </div>
+    );
+
+    if (!fullScreen) return spinner;
+
     return (
-        <div className="fixed inset-0 flex items-center justify-center bg-[#F7F7F8]">
-            <div
-                className="animate-spin rounded-full border-4 border-gray-200"
-                style={{
-                    width: size,
-                    height: size,
-                    borderTopColor: color,
-                }}
-            />
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-[#F7F7F8]/80 backdrop-blur-sm">
+            {spinner}
         </div>
     );
 }

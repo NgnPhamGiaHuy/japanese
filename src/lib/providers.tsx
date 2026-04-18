@@ -1,7 +1,11 @@
 "use client";
 
+import { useState } from "react";
+
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+
 import { NotificationsProvider } from "@/features/notifications";
-import { useFirebaseAuth } from "@/features/user/hooks";
+import { useActivityTracker, useFirebaseAuth } from "@/features/user/hooks";
 import { FontSyncer } from "@/lib/FontSyncer";
 import { AlertProvider } from "@/shared/providers";
 import { useAppStore } from "@/store";
@@ -30,12 +34,31 @@ function AuthGate({ children }: { children: React.ReactNode }) {
 /** Client-side shell that initialises Firebase auth and wraps the app */
 export function Providers({ children }: { children: React.ReactNode }) {
     useFirebaseAuth();
+    useActivityTracker();
+    const [queryClient] = useState(
+        () =>
+            new QueryClient({
+                defaultOptions: {
+                    queries: {
+                        staleTime: 30_000,
+                        refetchOnWindowFocus: false,
+                        retry: 1,
+                    },
+                    mutations: {
+                        retry: 1,
+                    },
+                },
+            }),
+    );
+
     return (
-        <AlertProvider>
-            <FontSyncer />
-            <AuthGate>
-                <NotificationsProvider>{children}</NotificationsProvider>
-            </AuthGate>
-        </AlertProvider>
+        <QueryClientProvider client={queryClient}>
+            <AlertProvider>
+                <FontSyncer />
+                <AuthGate>
+                    <NotificationsProvider>{children}</NotificationsProvider>
+                </AuthGate>
+            </AlertProvider>
+        </QueryClientProvider>
     );
 }

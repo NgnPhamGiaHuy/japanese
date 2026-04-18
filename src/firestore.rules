@@ -12,6 +12,14 @@ service cloud.firestore {
     function isOwner(userId) {
       return isSignedIn() && request.auth.uid == userId;
     }
+
+    function isSystemAdmin() {
+      return isSignedIn() && (
+        request.auth.token.superadmin == true ||
+        request.auth.token.admin == true ||
+        exists(/databases/$(database)/documents/admins/$(request.auth.uid))
+      );
+    }
     
     function getLesson(appId, ownerId, lessonId) {
       return get(/databases/$(database)/documents/artifacts/$(appId)/users/$(ownerId)/lessons/$(lessonId)).data;
@@ -91,6 +99,18 @@ service cloud.firestore {
         // Anyone signed in can send a notification/invite
         allow create: if isSignedIn();
       }
+    }
+
+    // ─── ADMIN & SYSTEM LOGS ───────────────────────────────────────────────
+
+    match /admins/{uid} {
+      allow read: if isSignedIn() && request.auth.uid == uid;
+      allow write: if false;
+    }
+
+    match /system_logs/{logId} {
+      allow read: if isSystemAdmin();
+      allow create, update, delete: if false;
     }
 
     // ─── COLLECTION GROUP QUERIES ───────────────────────────────────────────

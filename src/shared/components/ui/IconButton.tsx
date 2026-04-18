@@ -1,10 +1,11 @@
+"use client";
+
 /**
  * IconButton — Circular icon button
  *
  * @remarks
  * Used for action buttons with icons only (no text).
  */
-
 import type { LucideIcon } from "lucide-react";
 
 interface IconButtonProps {

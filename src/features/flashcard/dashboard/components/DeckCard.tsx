@@ -26,7 +26,7 @@ import { BookOpen, Edit2, Gamepad2, Trash2, Zap } from "lucide-react";
 
 import { buildShareId } from "@/features/flashcard";
 import { useVisibility, VisibilityLevel } from "@/features/flashcard/core";
-import { resolveRole } from "@/features/flashcard/core/utils/rbac";
+import { resolveRole, ROLE_CONFIG } from "@/features/flashcard/core/utils/rbac";
 import { Button, TierBadge, UserMeta } from "@/shared/components/ui";
 import { CARD_BASE, SPACING } from "@/shared/constants";
 import { hexToThemeColor } from "@/shared/utils";
@@ -78,6 +78,8 @@ const DeckCard = ({
         ? `/flashcard/${lesson.id}/edit?ownerId=${lesson.ownerId ?? lesson.userId}`
         : `/flashcard/${lesson.id}/edit`;
 
+    const roleInfo = ROLE_CONFIG[resolvedRole];
+
     return (
         <div
             className={`group relative ${CARD_BASE} transition-all hover:-translate-y-0.5 hover:shadow-md ${SPACING.cardPadding} hover:z-10`}
@@ -87,17 +89,25 @@ const DeckCard = ({
                     <div className="flex items-center gap-2">
                         <h3 className="text-xl font-black text-[#3c3c3c]">{lesson.title}</h3>
                         {isShared && (
-                            <span className="inline-flex items-center rounded-lg bg-gray-100 px-2 py-1 text-[9px] font-black tracking-tight text-[#afafaf] uppercase">
-                                Shared
+                            <span
+                                style={{
+                                    color: roleInfo.color,
+                                    backgroundColor: `${roleInfo.color}15`,
+                                }}
+                                className="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-[9px] font-black tracking-tight uppercase"
+                                title={`You have ${roleInfo.label} permissions`}
+                            >
+                                <roleInfo.icon size={10} />
+                                {roleInfo.label}
                             </span>
                         )}
                         {!isShared && visibility.level !== VisibilityLevel.PRIVATE && (
                             <span
-                                className={`inline-flex items-center gap-1 rounded-lg px-2 py-1 text-[9px] font-black tracking-tight uppercase ${
-                                    visibility.level === VisibilityLevel.PUBLIC
-                                        ? "bg-[#ebf8e6] text-[#58cc02]"
-                                        : "bg-[#fff9e6] text-[#ef8f00]"
-                                }`}
+                                style={{
+                                    color: visibility.effectiveColor,
+                                    backgroundColor: `${visibility.effectiveColor}15`,
+                                }}
+                                className="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-[9px] font-black tracking-tight uppercase"
                             >
                                 <visibility.icon size={10} />
                                 {visibility.label}
@@ -212,15 +222,21 @@ const DeckCard = ({
                         <Button
                             variant="ghost"
                             onClick={() => onShare?.()}
-                            className={`!flex !h-11 !w-11 !items-center !justify-center !rounded-xl !p-0 shadow-none transition-colors hover:shadow-none active:translate-y-0 ${
-                                visibility.level === VisibilityLevel.PUBLIC
-                                    ? "!text-[#58cc02] hover:!bg-[#ebf8e6]"
-                                    : visibility.level === VisibilityLevel.SHARED
-                                      ? "!text-[#ef8f00] hover:!bg-[#fff9e6]"
-                                      : "!text-gray-300 hover:!bg-gray-100"
-                            }`}
+                            className="!flex !h-11 !w-11 !items-center !justify-center !rounded-xl !p-0 shadow-none transition-colors hover:shadow-none active:translate-y-0"
+                            style={{
+                                color: isShared ? roleInfo.color : visibility.effectiveColor,
+                            }}
+                            onMouseEnter={(e) => {
+                                (e.currentTarget as HTMLElement).style.backgroundColor = isShared
+                                    ? `${roleInfo.color}15`
+                                    : `${visibility.effectiveColor}15`;
+                            }}
+                            onMouseLeave={(e) => {
+                                (e.currentTarget as HTMLElement).style.backgroundColor =
+                                    "transparent";
+                            }}
                             title={visibility.description}
-                            icon={visibility.icon}
+                            icon={isShared ? roleInfo.icon : visibility.icon}
                             iconSize={20}
                         />
                     )}

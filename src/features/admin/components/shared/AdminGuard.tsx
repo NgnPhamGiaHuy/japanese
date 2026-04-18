@@ -2,27 +2,27 @@
 
 import { useEffect, useState } from "react";
 
-import { doc, getDoc } from "firebase/firestore";
 import { Loader2, ShieldAlert } from "lucide-react";
 
-import { db } from "@/lib/firebase";
 import { EmptyState } from "@/shared/components/ui";
 import { useAppStore } from "@/store";
+import { fetchAdminRoleAction } from "../../actions";
+import { useAdminToken } from "../../hooks";
 
 interface AdminGuardProps {
     children: React.ReactNode;
 }
 
 /**
- * AdminGuard — Client-side route guard for /admin routes.
+ * Global Admin Route Guard.
  *
- * @remarks
- * Syncs with the Firestore 'admins' collection to verify the user's role.
- * This provides a smooth UX by blocking the entire page before the dashboard loads.
- * Server actions still perform their own independent validation for security.
+ * @remarks Enforces RBAC on the client-side by verifying ID tokens and
+ * querying the server for role claims. Prevents unauthorized access to
+ * the /admin path before the page content is mounted.
  */
-export function AdminGuard({ children }: AdminGuardProps) {
+const AdminGuard = ({ children }: AdminGuardProps) => {
     const { user, isAuthReady } = useAppStore();
+    const getAdminIdToken = useAdminToken();
     const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
     const [loading, setLoading] = useState(true);
 
@@ -37,8 +37,12 @@ export function AdminGuard({ children }: AdminGuardProps) {
 
         const checkAdmin = async () => {
             try {
-                const adminDoc = await getDoc(doc(db, "admins", user.uid));
-                setIsAdmin(adminDoc.exists() && adminDoc.data()?.role === "superadmin");
+                const token = await getAdminIdToken();
+                const result = await fetchAdminRoleAction(token);
+                setIsAdmin(
+                    result.ok &&
+                        (result.data.role === "admin" || result.data.role === "superadmin"),
+                );
             } catch (error) {
                 console.error("Admin check failed:", error);
                 setIsAdmin(false);
@@ -74,4 +78,6 @@ export function AdminGuard({ children }: AdminGuardProps) {
     }
 
     return <>{children}</>;
-}
+};
+
+export default AdminGuard;

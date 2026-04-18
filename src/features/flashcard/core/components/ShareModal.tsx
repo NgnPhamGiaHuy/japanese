@@ -15,12 +15,19 @@ import {
 } from "lucide-react";
 
 import { buildShareId, inviteByEmail, revokeEmailInvite } from "@/features/flashcard/core/services";
-import { sanitizePublicRole } from "@/features/flashcard/core/utils/rbac";
+import { ROLE_CONFIG, sanitizePublicRole } from "@/features/flashcard/core/utils/rbac";
+import {
+    resolveVisibilityColor,
+    VISIBILITY_MAPPINGS,
+    VisibilityLevel,
+} from "@/features/flashcard/core/utils/visibility";
+import { enqueueClientLog } from "@/lib/logging/browser";
 import { Button, CustomSelect } from "@/shared/components/ui";
 import { useAlert } from "@/shared/providers";
 import { hexToThemeColor } from "@/shared/utils";
 import { useAppStore } from "@/store";
 
+import type { DeckAccessRole } from "@/features/flashcard/core/types";
 import type { SelectOption } from "@/shared/components/ui";
 import type { Lesson } from "../types";
 
@@ -38,7 +45,7 @@ import type { Lesson } from "../types";
  */
 
 /** Access levels defining what actions a user can perform on a shared deck. */
-export type Role = "owner" | "editor" | "commenter" | "viewer";
+export type Role = DeckAccessRole;
 
 /**
  * Three-tier privacy model:
@@ -49,9 +56,24 @@ export type Role = "owner" | "editor" | "commenter" | "viewer";
 type PrivacyMode = "restricted" | "link" | "public";
 
 const sharingOptions: SelectOption<Role>[] = [
-    { value: "viewer", label: "Viewer" },
-    { value: "commenter", label: "Commenter" },
-    { value: "editor", label: "Editor" },
+    {
+        value: "viewer",
+        label: ROLE_CONFIG.viewer.label,
+        icon: ROLE_CONFIG.viewer.icon,
+        color: ROLE_CONFIG.viewer.color,
+    },
+    {
+        value: "commenter",
+        label: ROLE_CONFIG.commenter.label,
+        icon: ROLE_CONFIG.commenter.icon,
+        color: ROLE_CONFIG.commenter.color,
+    },
+    {
+        value: "editor",
+        label: ROLE_CONFIG.editor.label,
+        icon: ROLE_CONFIG.editor.icon,
+        color: ROLE_CONFIG.editor.color,
+    },
 ];
 
 /**
@@ -59,8 +81,18 @@ const sharingOptions: SelectOption<Role>[] = [
  * Editor is intentionally excluded — public access is capped at commenter.
  */
 const publicRoleOptions: SelectOption<"viewer" | "commenter">[] = [
-    { value: "viewer", label: "Viewer" },
-    { value: "commenter", label: "Commenter" },
+    {
+        value: "viewer",
+        label: ROLE_CONFIG.viewer.label,
+        icon: ROLE_CONFIG.viewer.icon,
+        color: ROLE_CONFIG.viewer.color,
+    },
+    {
+        value: "commenter",
+        label: ROLE_CONFIG.commenter.label,
+        icon: ROLE_CONFIG.commenter.icon,
+        color: ROLE_CONFIG.commenter.color,
+    },
 ];
 
 interface ShareModalProps {
@@ -83,6 +115,22 @@ interface ShareModalProps {
 const ShareModal = ({ lesson, onShareLink, onUpdateRoles, onClose }: ShareModalProps) => {
     const { user } = useAppStore();
     const { showAlert } = useAlert();
+
+    const auditClient = (action: string, extra: Record<string, unknown>) => {
+        if (!user) return;
+        enqueueClientLog(() => user.getIdToken(), {
+            action,
+            entityType: "lesson",
+            entityId: lesson.id,
+            level: "info",
+            metadata: {
+                userName: user.displayName ?? undefined,
+                userEmail: user.email ?? undefined,
+                lessonTitle: lesson.title,
+                ...extra,
+            },
+        });
+    };
 
     // ── Role derivation (Logic Orchestration) ──────────────────────────────────
     /**
@@ -165,6 +213,11 @@ const ShareModal = ({ lesson, onShareLink, onUpdateRoles, onClose }: ShareModalP
             const newAllowLink = mode !== "restricted";
             const newIsPublic = mode === "public";
             await onShareLink(newAllowLink, publicRole, newIsPublic);
+            auditClient("lesson.share.privacy_updated", {
+                mode,
+                allowLinkAccess: newAllowLink,
+                isPublic: newIsPublic,
+            });
             const labels: Record<PrivacyMode, string> = {
                 restricted: "Access restricted",
                 link: "Link sharing enabled",
@@ -186,6 +239,7 @@ const ShareModal = ({ lesson, onShareLink, onUpdateRoles, onClose }: ShareModalP
         setSaving(true);
         try {
             await onShareLink(allowLinkAccess, role, isPublicMode);
+            auditClient("lesson.share.public_role_updated", { publicRole: role });
             showAlert("success", `Default role set to ${role}`);
         } catch (err) {
             console.error("[ShareModal] handleSavePublicRole failed:", err);
@@ -207,6 +261,9 @@ const ShareModal = ({ lesson, onShareLink, onUpdateRoles, onClose }: ShareModalP
         setSaving(true);
         try {
             await onUpdateRoles(newRoles, newCollaborators);
+            auditClient("lesson.share.roles_updated", {
+                collaboratorCount: newCollaborators.length,
+            });
             showAlert("success", "Collaborator permissions updated");
         } catch (err) {
             console.error("[ShareModal] commitRolesUpdate failed:", err);
@@ -384,8 +441,23 @@ const ShareModal = ({ lesson, onShareLink, onUpdateRoles, onClose }: ShareModalP
                                                 className="flex items-center justify-between rounded-xl px-2 py-2 transition-colors hover:bg-gray-50"
                                             >
                                                 <div className="flex items-center gap-3">
-                                                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gray-200 font-bold text-gray-500">
-                                                        {initial}
+                                                    <div className="relative">
+                                                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gray-200 font-bold text-gray-500">
+                                                            {initial}
+                                                        </div>
+                                                        <div
+                                                            className="absolute -right-1 -bottom-1 flex h-4 w-4 items-center justify-center rounded-full border-2 border-white text-[8px] text-white"
+                                                            style={{
+                                                                backgroundColor:
+                                                                    ROLE_CONFIG[r].color,
+                                                            }}
+                                                        >
+                                                            {(() => {
+                                                                const RoleIcon =
+                                                                    ROLE_CONFIG[r].icon;
+                                                                return <RoleIcon size={8} />;
+                                                            })()}
+                                                        </div>
                                                     </div>
                                                     <div>
                                                         <div className="font-black text-[#3c3c3c]">
@@ -475,13 +547,25 @@ const ShareModal = ({ lesson, onShareLink, onUpdateRoles, onClose }: ShareModalP
                             <div className="mb-6 flex flex-col gap-4 rounded-2xl border-2 border-gray-100 p-4">
                                 <div className="flex items-start gap-4">
                                     <div className="mt-1 flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gray-100">
-                                        {privacyMode === "public" ? (
-                                            <Sparkles className="text-[#58cc02]" size={20} />
-                                        ) : privacyMode === "link" ? (
-                                            <Globe2 style={{ color: themeHex }} size={20} />
-                                        ) : (
-                                            <Lock className="text-gray-400" size={20} />
-                                        )}
+                                        {(() => {
+                                            const v =
+                                                VISIBILITY_MAPPINGS[
+                                                    privacyMode === "public"
+                                                        ? VisibilityLevel.PUBLIC
+                                                        : privacyMode === "link"
+                                                          ? VisibilityLevel.SHARED
+                                                          : VisibilityLevel.PRIVATE
+                                                ];
+                                            const Icon = v.icon;
+                                            return (
+                                                <Icon
+                                                    style={{
+                                                        color: resolveVisibilityColor(v, themeHex),
+                                                    }}
+                                                    size={20}
+                                                />
+                                            );
+                                        })()}
                                     </div>
 
                                     <div className="relative flex-1">
@@ -492,11 +576,15 @@ const ShareModal = ({ lesson, onShareLink, onUpdateRoles, onClose }: ShareModalP
                                             onClick={() => setOpenPrivacyMenu((v) => !v)}
                                             disabled={saving}
                                         >
-                                            {privacyMode === "public"
-                                                ? "Public"
-                                                : privacyMode === "link"
-                                                  ? "Anyone with the link"
-                                                  : "Restricted"}
+                                            {
+                                                VISIBILITY_MAPPINGS[
+                                                    privacyMode === "public"
+                                                        ? VisibilityLevel.PUBLIC
+                                                        : privacyMode === "link"
+                                                          ? VisibilityLevel.SHARED
+                                                          : VisibilityLevel.PRIVATE
+                                                ].label
+                                            }
                                             <ChevronDown
                                                 size={20}
                                                 className={`text-gray-400 transition-transform ${openPrivacyMenu ? "rotate-180" : ""}`}
@@ -510,107 +598,78 @@ const ShareModal = ({ lesson, onShareLink, onUpdateRoles, onClose }: ShareModalP
                                                     onClick={() => setOpenPrivacyMenu(false)}
                                                 />
                                                 <div className="animate-in fade-in zoom-in-95 absolute top-10 left-0 z-50 w-72 overflow-hidden rounded-2xl border-2 border-gray-100 bg-white shadow-lg">
-                                                    {/* Restricted */}
-                                                    <Button
-                                                        variant="ghost"
-                                                        className="flex w-full items-center !justify-start gap-3 !rounded-none border-b-2 border-gray-50 !p-4 !text-left shadow-none hover:bg-gray-50 hover:shadow-none"
-                                                        onClick={() => {
-                                                            void handleSavePrivacyMode(
-                                                                "restricted",
-                                                            );
-                                                            setOpenPrivacyMenu(false);
-                                                        }}
-                                                    >
-                                                        <Lock
-                                                            className="shrink-0 text-gray-400"
-                                                            size={20}
-                                                        />
-                                                        <div className="flex-1 text-left">
-                                                            <div className="font-black text-[#3c3c3c]">
-                                                                Restricted
-                                                            </div>
-                                                            <div className="text-xs font-bold text-gray-400">
-                                                                Only invited people can open
-                                                            </div>
-                                                        </div>
-                                                        {privacyMode === "restricted" && (
-                                                            <Check
-                                                                style={{ color: themeHex }}
-                                                                size={20}
-                                                                className="shrink-0"
-                                                            />
-                                                        )}
-                                                    </Button>
+                                                    {(
+                                                        ["restricted", "link", "public"] as const
+                                                    ).map((mode) => {
+                                                        const level =
+                                                            mode === "public"
+                                                                ? VisibilityLevel.PUBLIC
+                                                                : mode === "link"
+                                                                  ? VisibilityLevel.SHARED
+                                                                  : VisibilityLevel.PRIVATE;
+                                                        const v = VISIBILITY_MAPPINGS[level];
+                                                        const Icon = v.icon;
+                                                        const isSelected = privacyMode === mode;
 
-                                                    {/* Link-only */}
-                                                    <Button
-                                                        variant="ghost"
-                                                        className="flex w-full items-center !justify-start gap-3 !rounded-none border-b-2 border-gray-50 !p-4 !text-left shadow-none hover:bg-gray-50 hover:shadow-none"
-                                                        onClick={() => {
-                                                            void handleSavePrivacyMode("link");
-                                                            setOpenPrivacyMenu(false);
-                                                        }}
-                                                    >
-                                                        <Globe2
-                                                            style={{ color: themeHex }}
-                                                            size={20}
-                                                            className="shrink-0"
-                                                        />
-                                                        <div className="flex-1 text-left">
-                                                            <div className="font-black text-[#3c3c3c]">
-                                                                Anyone with the link
-                                                            </div>
-                                                            <div className="text-xs font-bold text-gray-400">
-                                                                Anyone with the link can view
-                                                            </div>
-                                                        </div>
-                                                        {privacyMode === "link" && (
-                                                            <Check
-                                                                style={{ color: themeHex }}
-                                                                size={20}
-                                                                className="shrink-0"
-                                                            />
-                                                        )}
-                                                    </Button>
-
-                                                    {/* Fully public */}
-                                                    <Button
-                                                        variant="ghost"
-                                                        className="flex w-full items-center !justify-start gap-3 !rounded-none !p-4 !text-left shadow-none hover:bg-gray-50 hover:shadow-none"
-                                                        onClick={() => {
-                                                            void handleSavePrivacyMode("public");
-                                                            setOpenPrivacyMenu(false);
-                                                        }}
-                                                    >
-                                                        <Sparkles
-                                                            className="shrink-0 text-[#58cc02]"
-                                                            size={20}
-                                                        />
-                                                        <div className="flex-1 text-left">
-                                                            <div className="font-black text-[#3c3c3c]">
-                                                                Public
-                                                            </div>
-                                                            <div className="text-xs font-bold text-gray-400">
-                                                                Visible to everyone — no link needed
-                                                            </div>
-                                                        </div>
-                                                        {privacyMode === "public" && (
-                                                            <Check
-                                                                className="shrink-0 text-[#58cc02]"
-                                                                size={20}
-                                                            />
-                                                        )}
-                                                    </Button>
+                                                        return (
+                                                            <Button
+                                                                key={mode}
+                                                                variant="ghost"
+                                                                className="flex w-full items-center !justify-start gap-3 !rounded-none border-b-2 border-gray-50 !p-4 !text-left shadow-none hover:bg-gray-50 hover:shadow-none"
+                                                                onClick={() => {
+                                                                    void handleSavePrivacyMode(
+                                                                        mode,
+                                                                    );
+                                                                    setOpenPrivacyMenu(false);
+                                                                }}
+                                                            >
+                                                                <Icon
+                                                                    className="shrink-0"
+                                                                    style={{
+                                                                        color: resolveVisibilityColor(
+                                                                            v,
+                                                                            themeHex,
+                                                                        ),
+                                                                    }}
+                                                                    size={20}
+                                                                />
+                                                                <div className="flex-1 text-left">
+                                                                    <div className="font-black text-[#3c3c3c]">
+                                                                        {v.label}
+                                                                    </div>
+                                                                    <div className="text-xs font-bold text-gray-400">
+                                                                        {v.description}
+                                                                    </div>
+                                                                </div>
+                                                                {isSelected && (
+                                                                    <Check
+                                                                        style={{
+                                                                            color: resolveVisibilityColor(
+                                                                                v,
+                                                                                themeHex,
+                                                                            ),
+                                                                        }}
+                                                                        size={20}
+                                                                        className="shrink-0"
+                                                                    />
+                                                                )}
+                                                            </Button>
+                                                        );
+                                                    })}
                                                 </div>
                                             </>
                                         )}
 
                                         <p className="mt-1 text-sm font-bold text-[#afafaf]">
-                                            {privacyMode === "public"
-                                                ? "Visible to everyone — no link required."
-                                                : privacyMode === "link"
-                                                  ? "Anyone with the link can view."
-                                                  : "Only invited people can open this deck."}
+                                            {
+                                                VISIBILITY_MAPPINGS[
+                                                    privacyMode === "public"
+                                                        ? VisibilityLevel.PUBLIC
+                                                        : privacyMode === "link"
+                                                          ? VisibilityLevel.SHARED
+                                                          : VisibilityLevel.PRIVATE
+                                                ].description
+                                            }
                                         </p>
                                     </div>
                                 </div>

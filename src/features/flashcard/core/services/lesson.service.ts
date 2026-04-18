@@ -45,7 +45,7 @@ import { deleteCardImage } from "./image.service";
 import { CardValidationError, validateAtomicCard } from "../utils";
 
 import type { Unsubscribe } from "firebase/firestore";
-import type { FlashCard, Lesson } from "../types";
+import type { DeckAccessRole, FlashCard, Lesson } from "../types";
 
 // ─── Firestore path helpers ────────────────────────────────────────────────
 
@@ -392,7 +392,7 @@ export async function shareLessonSettings(
 export async function updateLessonRoles(
     userId: string,
     lessonId: string,
-    roles: Record<string, "owner" | "editor" | "commenter" | "viewer">,
+    roles: Record<string, DeckAccessRole>,
     collaborators: string[],
     sharedById: string,
     sharedByName?: string | null,

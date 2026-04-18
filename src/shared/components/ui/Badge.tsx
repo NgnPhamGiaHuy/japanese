@@ -1,9 +1,4 @@
-/**
- * Badge — Reusable badge component
- *
- * @remarks
- * Used for counts, status indicators, and labels across the app.
- */
+import { LucideIcon } from "lucide-react";
 
 import type { ReactNode } from "react";
 
@@ -12,6 +7,8 @@ interface BadgeProps {
     variant?: "default" | "primary" | "success" | "warning" | "danger" | "info";
     size?: "sm" | "md" | "lg";
     className?: string;
+    icon?: LucideIcon;
+    dot?: boolean;
 }
 
 const VARIANT_STYLES = {
@@ -29,11 +26,20 @@ const SIZE_STYLES = {
     lg: "h-6 min-w-6 px-2 text-xs",
 };
 
-export function Badge({ children, variant = "default", size = "md", className = "" }: BadgeProps) {
+export function Badge({
+    children,
+    variant = "default",
+    size = "md",
+    className = "",
+    icon: Icon,
+    dot,
+}: BadgeProps) {
     return (
         <span
-            className={`inline-flex items-center justify-center rounded-full font-black ${VARIANT_STYLES[variant]} ${SIZE_STYLES[size]} ${className}`}
+            className={`inline-flex items-center justify-center gap-1 overflow-hidden rounded-full font-black ${VARIANT_STYLES[variant]} ${SIZE_STYLES[size]} ${className}`}
         >
+            {dot && <span className="h-1.5 w-1.5 rounded-full bg-current opacity-70" />}
+            {Icon && <Icon size={size === "sm" ? 10 : size === "lg" ? 14 : 12} />}
             {children}
         </span>
     );

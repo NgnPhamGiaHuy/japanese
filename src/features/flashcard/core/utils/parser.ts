@@ -31,7 +31,26 @@ export function parseText(text: string): ParseResult {
 
     lines.forEach((line) => {
         const separator = line.includes("\t") ? "\t" : ",";
-        const parts = line.split(separator).map((p) => p.trim());
+
+        // Robust CSV split that respects double quotes
+        // Matches either (field inside quotes) OR (field outside quotes until next separator)
+        const regex = new RegExp(
+            `\\s*("(?:[^"]|"")*"|[^${separator}]*)\\s*(?:${separator}|$)`,
+            "g",
+        );
+
+        const parts: string[] = [];
+        let match;
+        while ((match = regex.exec(line)) !== null) {
+            let part = match[1] || "";
+            // Remove surrounding quotes and handle escaped double quotes
+            if (part.startsWith('"') && part.endsWith('"')) {
+                part = part.slice(1, -1).replace(/""/g, '"');
+            }
+            parts.push(part.trim());
+            if (match.index === regex.lastIndex) regex.lastIndex++; // Prevent infinite loops
+            if (!line.slice(match.index + match[0].length)) break; // Stop at end of line
+        }
 
         const primary = parts[0];
 

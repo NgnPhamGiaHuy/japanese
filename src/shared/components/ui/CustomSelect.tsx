@@ -1,4 +1,5 @@
 "use client";
+"use client";
 
 import { useState } from "react";
 
@@ -9,7 +10,8 @@ import Button from "./Button";
 export interface SelectOption<T> {
     value: T;
     label: string;
-    icon?: React.ComponentType<{ size?: number; className?: string }>;
+    icon?: React.ComponentType<{ size?: number; className?: string; style?: React.CSSProperties }>;
+    color?: string;
 }
 
 interface CustomSelectProps<T> {
@@ -55,7 +57,11 @@ const CustomSelect = <T extends string | number>({
                 disabled={disabled}
             >
                 {selectedOption?.icon && (
-                    <selectedOption.icon size={isCompact ? 14 : 16} className="shrink-0" />
+                    <selectedOption.icon
+                        size={isCompact ? 14 : 16}
+                        className="shrink-0"
+                        style={selectedOption.color ? { color: selectedOption.color } : undefined}
+                    />
                 )}
                 <span className="capitalize">{selectedOption?.label || value}</span>
                 <ChevronDown
@@ -81,7 +87,12 @@ const CustomSelect = <T extends string | number>({
                                 }}
                             >
                                 <div className="flex items-center gap-2">
-                                    {opt.icon && <opt.icon size={isCompact ? 14 : 16} />}
+                                    {opt.icon && (
+                                        <opt.icon
+                                            size={isCompact ? 14 : 16}
+                                            style={opt.color ? { color: opt.color } : undefined}
+                                        />
+                                    )}
                                     {opt.label}
                                 </div>
                                 {value === opt.value && (

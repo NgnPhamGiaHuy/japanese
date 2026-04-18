@@ -132,12 +132,76 @@ const LessonBuilder = ({
     }, [isNew, cardsLoading, existingCards, initialCards]);
 
     /**
-     * Contextual AI Fill
-     * Uses the current word to fetch alternatives, meaning, and examples.
-     *
-     * @param cardId - The target card's local/remote ID
-     * @param word - The Japanese word to look up
+     * Card-to-Text Synchronization
+     * Automatically regenerates the raw paste text whenever the visual card state changes.
+     * This keeps the 'Paste' mode always up to date with the 'Manual' mode.
      */
+    useEffect(() => {
+        // Prevent sync-back if the user is currently in paste mode to avoid cursor jumps
+        if (importMode === "paste" || cards.length === 0) {
+            if (cards.length === 0) setPasteText("");
+            return;
+        }
+
+        const lines = cards.map((c) => {
+            const alternative = c.alternatives?.[0] || "";
+            const parts = [c.primary || "", alternative, c.meaning || "", c.example || ""];
+
+            return parts
+                .map((p) => {
+                    const escaped = p.replace(/"/g, '""');
+                    return escaped.includes(",") || escaped.includes('"')
+                        ? `"${escaped}"`
+                        : escaped;
+                })
+                .join(",");
+        });
+
+        setPasteText(lines.join("\n"));
+    }, [cards]);
+
+    /**
+     * Live Reconciliation Engine
+     * Converts raw text back into cards while attempting to preserve
+     * existing metadata (ids, images, SRS) by matching primary words.
+     */
+    const handleLiveSync = (text: string) => {
+        const result = parseText(text);
+        if (result.invalid.length > 0) return; // Wait for valid text
+
+        const parsedEntries = result.valid;
+
+        setCards((prev) => {
+            // Map existing cards for quick lookup by primary word
+            const existingMap = new Map(prev.map((c) => [c.primary.trim().toLowerCase(), c]));
+
+            return parsedEntries.map((parsed, idx) => {
+                const key = (parsed.primary || "").trim().toLowerCase();
+                const existing = existingMap.get(key);
+
+                if (existing) {
+                    // Update content but preserve metadata
+                    return {
+                        ...existing,
+                        primary: parsed.primary!,
+                        alternatives: parsed.alternatives || [],
+                        meaning: parsed.meaning || "",
+                        example: parsed.example || "",
+                    };
+                }
+
+                // New entry
+                return {
+                    ...makeCard(),
+                    primary: parsed.primary!,
+                    alternatives: parsed.alternatives || [],
+                    meaning: parsed.meaning || "",
+                    example: parsed.example || "",
+                    id: `new_${Date.now()}_${idx}`,
+                };
+            });
+        });
+    };
     const handleAIFillCard = async (cardId: string, word: string) => {
         if (!word.trim()) return;
         setAILoadingCardIds((prev) => new Set(prev).add(cardId));
@@ -437,10 +501,17 @@ const LessonBuilder = ({
                                 meaning: r.meaning,
                                 example: r.example,
                             }));
-                            setCards((prev) => [...prev, ...newCards]);
+
+                            if (importMode === "ai") {
+                                // AI mode is traditionally additive
+                                setCards((prev) => [...prev, ...newCards]);
+                            } else {
+                                // Paste/File mode acts as a full-deck sync/replace
+                                setCards(newCards);
+                            }
+
                             setPreviewRows(null);
                             setImportMode("manual");
-                            setPasteText("");
                         }}
                     />
                 ) : importMode === "ai" ? (
@@ -451,46 +522,44 @@ const LessonBuilder = ({
                     />
                 ) : importMode === "paste" ? (
                     <div className="space-y-4">
+                        <div className="flex items-center justify-between px-2">
+                            <label className="text-xs font-black tracking-wider text-[#afafaf] uppercase">
+                                Raw Text Editor (CSV Format)
+                            </label>
+                            <span className="text-[10px] font-bold text-[#afafaf]">
+                                Auto-syncing to card list...
+                            </span>
+                        </div>
                         <textarea
-                            className="h-64 w-full resize-none rounded-2xl border-2 border-gray-200 bg-white p-4 font-bold text-[#3c3c3c] outline-none focus:border-[var(--theme-color)]"
-                            placeholder="Paste your text here...&#10;Format:&#10;primary,meaning&#10;primary,secondary,meaning"
+                            className="h-96 w-full resize-none rounded-2xl border-2 border-gray-200 bg-white p-4 font-bold text-[#3c3c3c] outline-none focus:border-[var(--theme-color)]"
+                            placeholder="Paste your text here...&#10;Format: primary,alternative,meaning,example"
                             value={pasteText}
-                            onChange={(e) => setPasteText(e.target.value)}
+                            onChange={(e) => {
+                                const newText = e.target.value;
+                                setPasteText(newText);
+                                handleLiveSync(newText);
+                            }}
                             disabled={saving}
                         />
-                        <Button
-                            variant="primary"
-                            color={themeColorStr}
-                            onClick={() => {
-                                const result = parseText(pasteText);
-                                const rows: ImportRow[] = [
-                                    ...result.valid.map((r, i) => ({
-                                        id: `valid_${Date.now()}_${i}`,
-                                        primary: r.primary || "",
-                                        alternative: r.alternatives?.[0] || "",
-                                        meaning: r.meaning || "",
-                                        example: r.example || "",
-                                        isInvalid: false,
-                                        atomicViolation: r.atomicViolation,
-                                    })),
-                                    ...result.invalid.map((r, i) => ({
-                                        id: `invalid_${Date.now()}_${i}`,
-                                        primary: r.row || "",
-                                        alternative: "",
-                                        meaning: "",
-                                        example: "",
-                                        isInvalid: true,
-                                        errorMsg: r.error,
-                                        originalText: r.row,
-                                    })),
-                                ];
-                                setPreviewRows(rows);
-                            }}
-                            disabled={!pasteText.trim()}
-                            className="w-full"
-                        >
-                            Preview
-                        </Button>
+                        <div className="rounded-2xl border-2 border-b-4 border-[var(--theme-color)]/20 bg-[var(--theme-color)]/5 p-5 transition-colors">
+                            <div className="flex items-start gap-3">
+                                <div className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[var(--theme-color)] text-[10px] text-white">
+                                    i
+                                </div>
+                                <div className="space-y-1">
+                                    <p className="text-xs font-black tracking-tight text-[#3c3c3c]">
+                                        Active Real-time Sync
+                                    </p>
+                                    <p className="text-[11px] leading-relaxed font-bold text-[#5a5a5a]">
+                                        Changes here are instantly applied to your cards. Use the
+                                        standard format:
+                                        <code className="ml-1.5 inline-block rounded-md bg-white px-2 py-0.5 font-black text-[var(--theme-color)] shadow-md ring-1 ring-[var(--theme-color)]/10">
+                                            word,kana,meaning,example
+                                        </code>
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 ) : importMode === "file" ? (
                     <div className="flex flex-col items-center justify-center space-y-4 rounded-[2rem] border-4 border-dashed border-gray-300 bg-white p-12 text-center transition-colors hover:border-[var(--theme-color)]">
