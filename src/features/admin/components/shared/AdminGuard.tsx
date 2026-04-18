@@ -2,9 +2,9 @@
 
 import { useEffect, useState } from "react";
 
-import { Loader2, ShieldAlert } from "lucide-react";
+import { ShieldAlert } from "lucide-react";
 
-import { EmptyState } from "@/shared/components/ui";
+import { EmptyState, LoadingSpinner } from "@/shared/components/ui";
 import { useAppStore } from "@/store";
 import { fetchAdminRoleAction } from "../../actions";
 import { useAdminToken } from "../../hooks";
@@ -55,12 +55,7 @@ const AdminGuard = ({ children }: AdminGuardProps) => {
     }, [user, isAuthReady]);
 
     if (loading || !isAuthReady) {
-        return (
-            <div className="flex min-h-[60vh] flex-col items-center justify-center gap-4">
-                <Loader2 className="h-10 w-10 animate-spin text-[#1cb0f6]" />
-                <p className="text-sm font-bold text-[#afafaf]">Verifying permissions…</p>
-            </div>
-        );
+        return <LoadingSpinner label="Verifying permissions…" />;
     }
 
     if (!isAdmin) {

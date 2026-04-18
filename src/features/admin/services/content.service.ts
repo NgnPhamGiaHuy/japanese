@@ -41,12 +41,17 @@ export async function getGlobalContentPaginated(limit = 50): Promise<PaginatedCo
             ownerAvatar: owner.avatar,
             title: data.title || "Untitled Deck",
             description: data.description || "",
-            cardCount: data.cardCount || 0,
-            createdAt:
-                typeof data.createdAt === "number"
-                    ? new Date(data.createdAt).toISOString()
-                    : new Date().toISOString(),
+            cardCount: typeof data.cardCount === "number" ? data.cardCount : 0,
+            createdAt: (() => {
+                if (data.createdAt?.toDate) return (data.createdAt.toDate() as Date).toISOString();
+                if (typeof data.createdAt === "number")
+                    return new Date(data.createdAt).toISOString();
+                if (typeof data.createdAt === "string") return data.createdAt;
+                return null;
+            })(),
             path: doc.ref.path,
+            categories: data.categories || [],
+            themeColor: data.themeColor || "#1cb0f6",
         };
     });
 

@@ -7,6 +7,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { NotificationsProvider } from "@/features/notifications";
 import { useActivityTracker, useFirebaseAuth } from "@/features/user/hooks";
 import { FontSyncer } from "@/lib/FontSyncer";
+import AdminProvider from "@/features/admin/context/AdminContext";
 import { AlertProvider } from "@/shared/providers";
 import { useAppStore } from "@/store";
 
@@ -56,7 +57,9 @@ export function Providers({ children }: { children: React.ReactNode }) {
             <AlertProvider>
                 <FontSyncer />
                 <AuthGate>
-                    <NotificationsProvider>{children}</NotificationsProvider>
+                    <AdminProvider>
+                        <NotificationsProvider>{children}</NotificationsProvider>
+                    </AdminProvider>
                 </AuthGate>
             </AlertProvider>
         </QueryClientProvider>

@@ -4,22 +4,22 @@ import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from "recharts";
 
 import { AdminChartContainer } from "../shared";
 
-const COLORS = ["#ce82ff", "#1cb0f6", "#58cc02", "#ffc800", "#ff4b4b"];
+const COLORS = ["#1cb0f6", "#58cc02", "#ce82ff", "#ffc800", "#ff4b4b"];
 
-interface RoleChartProps {
+interface ContentDistributionChartProps {
     data: { name: string; value: number }[];
-    onClick?: (role: string) => void;
+    onClick?: (category: string) => void;
 }
 
 /**
- * Access Role Distribution Pie Chart.
+ * Flashcard Content Distribution Pie Chart.
  *
- * @remarks Displays the proportion of users assigned to different administrative
- * and standard roles using a donut-style radial chart.
+ * @remarks Visualizes the volume of flashcards across different learning categories
+ * such as Vocabulary, Grammar, and Kanji.
  */
-const RoleChart = ({ data, onClick }: RoleChartProps) => {
+const ContentDistributionChart = ({ data, onClick }: ContentDistributionChartProps) => {
     return (
-        <AdminChartContainer title="Access Roles">
+        <AdminChartContainer title="Content Distribution">
             <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                     <Pie
@@ -65,4 +65,4 @@ const RoleChart = ({ data, onClick }: RoleChartProps) => {
     );
 };
 
-export default RoleChart;
+export default ContentDistributionChart;

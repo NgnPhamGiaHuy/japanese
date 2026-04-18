@@ -7,8 +7,10 @@ export interface AdminDeck {
     title: string;
     description: string;
     cardCount: number;
-    createdAt: string;
+    createdAt: string | null;
     path: string;
+    categories?: string[];
+    themeColor?: string;
 }
 
 export interface PaginatedContent {

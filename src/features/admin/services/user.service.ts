@@ -60,15 +60,16 @@ export async function getUsersPaginated(
 }
 
 export async function getAdminStats(): Promise<AdminStats> {
-    // 1. Try to get cached counters
+    // 1. Try to get cached counters from metadata/counters
     const metaRef = adminDb.collection("metadata").doc("counters");
     const metaSnap = await metaRef.get();
-    const data = metaSnap.data() || {};
+    const cached = metaSnap.exists ? (metaSnap.data() ?? {}) : null;
 
-    // 2. Robust Fallback: Real-time count if cache is empty or zero
-    // Using Firestore .count() is efficient and highly accurate
-    let totalUsers = data.totalUsers || 0;
-    if (totalUsers === 0) {
+    // 2. Real-time count fallback — only when cache is absent (not when legitimately 0)
+    let totalUsers: number;
+    if (cached !== null && typeof cached.totalUsers === "number") {
+        totalUsers = cached.totalUsers;
+    } else {
         const countSnap = await adminDb
             .collection("artifacts")
             .doc(APP_ID)
@@ -78,23 +79,37 @@ export async function getAdminStats(): Promise<AdminStats> {
         totalUsers = countSnap.data().count;
     }
 
-    let totalDecks = data.totalFlashcards || 0;
-    if (totalDecks === 0) {
-        // We now count 'lessons' (Deck groups) as the primary content unit
+    // totalFlashcards = total lesson decks (the primary content unit in this app)
+    let totalFlashcards: number;
+    if (cached !== null && typeof cached.totalFlashcards === "number") {
+        totalFlashcards = cached.totalFlashcards;
+    } else {
         const countSnap = await adminDb.collectionGroup("lessons").count().get();
-        totalDecks = countSnap.data().count;
+        totalFlashcards = countSnap.data().count;
     }
 
-    const adminSnap = await adminDb.collection("admins").where("role", "==", "admin").get();
-    const activeAdmins = adminSnap.size;
+    const adminSnap = await adminDb.collection("admins").get();
+    const activeAdmins = adminSnap.docs.filter((d) => d.data().role === "admin").length;
+    const activeSuperAdmins = adminSnap.docs.filter((d) => d.data().role === "superadmin").length;
+
+    // Only use real values from cache — never fabricate activity metrics
+    const activeUsersToday =
+        cached !== null && typeof cached.activeUsersToday === "number"
+            ? cached.activeUsersToday
+            : 0;
+    const totalSessions =
+        cached !== null && typeof cached.totalSessions === "number" ? cached.totalSessions : 0;
+    const errorRate =
+        cached !== null && typeof cached.errorRate === "number" ? cached.errorRate : 0;
 
     return {
         totalUsers,
-        activeUsersToday: data.activeUsersToday || Math.ceil(totalUsers * 0.4),
-        totalFlashcards: totalDecks, // We map Decks to the 'Flashcards' label for the UI
-        totalSessions: data.totalSessions || totalUsers * 5,
-        errorRate: data.errorRate || 0,
+        activeUsersToday,
+        totalFlashcards,
+        totalSessions,
+        errorRate,
         activeAdmins,
+        activeSuperAdmins,
     };
 }
 

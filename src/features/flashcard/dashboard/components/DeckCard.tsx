@@ -135,22 +135,24 @@ const DeckCard = ({
                             />
                         )}
                     </div>
-                    {lesson.tags.length > 0 && (
-                        <div className="mt-2 flex flex-wrap gap-2">
-                            {lesson.tags.map((tag) => (
-                                <span
-                                    key={tag}
-                                    style={{
-                                        color: themeColor,
-                                        backgroundColor: `${themeColor}20`,
-                                    }}
-                                    className="rounded-lg px-2 py-1 text-[10px] font-black tracking-wider uppercase"
-                                >
-                                    {tag}
-                                </span>
-                            ))}
-                        </div>
-                    )}
+
+                    <div className="mt-3 flex flex-wrap gap-2">
+                        {(lesson.categories && lesson.categories.length > 0
+                            ? lesson.categories.slice(0, 3)
+                            : ["other"]
+                        ).map((cat) => (
+                            <span
+                                key={cat}
+                                style={{
+                                    color: themeColor,
+                                    backgroundColor: `${themeColor}20`,
+                                }}
+                                className="rounded-lg px-2 py-1 text-[10px] font-black tracking-wider uppercase"
+                            >
+                                {cat}
+                            </span>
+                        ))}
+                    </div>
                 </div>
                 <div className="flex shrink-0 flex-col items-center">
                     <div

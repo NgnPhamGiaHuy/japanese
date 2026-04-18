@@ -2,7 +2,8 @@
 
 import { FileText, Settings, Shield } from "lucide-react";
 
-import { Button, Card } from "@/shared/components/ui";
+import { Button } from "@/shared/components/ui";
+import { AdminCard } from "../shared";
 
 /**
  * Administrative Quick Actions Card.
@@ -12,10 +13,7 @@ import { Button, Card } from "@/shared/components/ui";
  */
 const QuickActionsCard = () => {
     return (
-        <Card variant="dashboard" className="border-2 border-b-8 border-gray-100">
-            <h3 className="mb-4 text-xs font-black tracking-widest text-[#3c3c3c] uppercase">
-                Quick Actions
-            </h3>
+        <AdminCard title="Quick Actions">
             <div className="grid grid-cols-1 gap-2">
                 <Button
                     variant="ghost"
@@ -39,7 +37,7 @@ const QuickActionsCard = () => {
                     Security Review
                 </Button>
             </div>
-        </Card>
+        </AdminCard>
     );
 };
 

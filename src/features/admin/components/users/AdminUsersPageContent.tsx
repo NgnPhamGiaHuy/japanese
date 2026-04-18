@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { Users as UsersIcon } from "lucide-react";
 
@@ -19,9 +19,14 @@ import { hasPermission } from "../../utils/rbac";
  * identity and access management (IAM).
  */
 const AdminUsersPageContent = () => {
+    const [mounted, setMounted] = useState(false);
     const { role } = useAdminRole();
     const [pageTokens, setPageTokens] = useState<(string | undefined)[]>([undefined]);
     const [currentPage, setCurrentPage] = useState(0);
+
+    useEffect(() => {
+        setMounted(true);
+    }, []);
 
     const {
         users,
@@ -44,9 +49,18 @@ const AdminUsersPageContent = () => {
         }
     };
 
-    if (isLoadingUsers) return <LoadingSpinner fullScreen={false} label="Loading users..." />;
+    if (!mounted || isLoadingUsers)
+        return (
+            <AdminPageLayout>
+                <LoadingSpinner fullScreen={false} label="Loading users..." />
+            </AdminPageLayout>
+        );
     if (usersError)
-        return <AdminErrorState message={usersError.message} onRetry={() => refetchUsers()} />;
+        return (
+            <AdminPageLayout>
+                <AdminErrorState message={usersError.message} onRetry={() => refetchUsers()} />
+            </AdminPageLayout>
+        );
 
     return (
         <AdminPageLayout>

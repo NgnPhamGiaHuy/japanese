@@ -2,8 +2,7 @@
 
 import { useMemo, useState } from "react";
 
-import { clsx } from "clsx";
-import { FileText } from "lucide-react";
+import { ChevronLeft, ChevronRight, FileText } from "lucide-react";
 
 import { Button, LoadingSpinner } from "@/shared/components/ui";
 import LogsFilters from "./LogsFilters";
@@ -12,16 +11,13 @@ import LogsVirtualList from "./LogsVirtualList";
 import { AdminEmptyState, AdminErrorState, AdminPageHeader, AdminPageLayout } from "../shared";
 import { useLogs } from "../../hooks";
 
-import type { AdminLogFilters, LogLevel } from "../../types";
-
-const LEVEL_ORDER: LogLevel[] = ["error", "warn", "security", "info"];
+import type { AdminLogFilters } from "../../types";
 
 /**
  * Admin Reports & Audit Logs Page.
  *
  * @remarks Provides a high-performance virtualized stream of system activity.
  * Coordinates real-time filtering, pagination, and statistical summaries.
- * Delegates data transformation to useLogs hook to remain strictly UI-focused.
  */
 const AdminReportsPageContent = () => {
     const [filters, setFilters] = useState<AdminLogFilters>({});
@@ -31,9 +27,11 @@ const AdminReportsPageContent = () => {
         countsByType,
         isLoading,
         error,
-        fetchNextPage,
+        currentPage,
+        goToNextPage,
+        goToPreviousPage,
         hasNextPage,
-        isFetchingNextPage,
+        hasPreviousPage,
         createManualLog,
     } = useLogs(filters);
 
@@ -45,6 +43,7 @@ const AdminReportsPageContent = () => {
                 title="Reports"
                 description="System logs and audit trail — filter by level, type, date, or full-text search."
                 icon={FileText}
+                isLive={true}
                 actions={<Button onClick={() => createManualLog()}>Emit Test Log</Button>}
             />
             <LogsFilters filters={filters} onChange={setFilters} />
@@ -62,31 +61,35 @@ const AdminReportsPageContent = () => {
                             <h2 className="text-xs font-black tracking-widest text-[#3c3c3c] uppercase">
                                 Audit Trail
                             </h2>
-                            <div className="flex items-center gap-2">
-                                <span
-                                    className="h-2 w-2 animate-pulse rounded-full bg-[#58cc02]"
-                                    title="Real-time monitoring"
-                                />
-                                <span className="text-[10px] font-black tracking-widest text-[#afafaf] uppercase">
-                                    Live Stream
-                                </span>
-                            </div>
                         </div>
 
                         <LogsVirtualList logs={logs} />
 
-                        {hasNextPage && (
-                            <div className="border-t-2 border-gray-50 p-6">
+                        {/* Pagination Footer */}
+                        <div className="flex items-center justify-between border-t-2 border-gray-50 bg-gray-50/10 px-6 py-4">
+                            <div className="text-[10px] font-black tracking-widest text-[#afafaf] uppercase">
+                                Page {currentPage + 1}
+                            </div>
+
+                            <div className="flex gap-2">
                                 <Button
-                                    onClick={() => fetchNextPage()}
-                                    loading={isFetchingNextPage}
-                                    variant="primary"
-                                    className="w-full !rounded-2xl !py-4 !text-base shadow-lg shadow-[#1cb0f6]/20 transition-transform hover:scale-[1.01] active:scale-[0.99]"
+                                    onClick={() => goToPreviousPage()}
+                                    disabled={!hasPreviousPage}
+                                    variant="secondary"
+                                    className="!rounded-xl !p-2 transition-all active:scale-95"
                                 >
-                                    Load More Logs
+                                    <ChevronLeft className="h-4 w-4" />
+                                </Button>
+                                <Button
+                                    onClick={() => goToNextPage()}
+                                    disabled={!hasNextPage}
+                                    variant="secondary"
+                                    className="!rounded-xl !p-2 transition-all active:scale-95"
+                                >
+                                    <ChevronRight className="h-4 w-4" />
                                 </Button>
                             </div>
-                        )}
+                        </div>
                     </div>
                 </div>
             )}
@@ -95,9 +98,16 @@ const AdminReportsPageContent = () => {
             {error && <AdminErrorState message={error.message} />}
             {isEmpty && (
                 <AdminEmptyState
-                    title="No logs found"
-                    description="Try changing filters."
+                    title="No logs match your filters"
+                    description="We couldn't find any audit logs for the selected criteria. Try adjusting your time range or log levels."
                     icon={FileText}
+                    action={
+                        Object.keys(filters).length > 0 ? (
+                            <Button variant="secondary" onClick={() => setFilters({})}>
+                                Clear Filters
+                            </Button>
+                        ) : undefined
+                    }
                 />
             )}
         </AdminPageLayout>

@@ -25,6 +25,7 @@ export function useUsers(pageToken?: string, pageSize = 25) {
             if (!result.ok) throw new Error(result.error);
             return result.data;
         },
+        refetchInterval: 30000, // 30 seconds for live status updates
     });
 
     const statsQuery = useQuery({

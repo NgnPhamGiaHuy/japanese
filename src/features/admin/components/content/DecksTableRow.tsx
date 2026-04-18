@@ -29,6 +29,23 @@ const DecksTableRow = ({ deck, onView, onDelete, isDeleting }: DecksTableRowProp
                     <span className="line-clamp-1 max-w-md text-xs font-bold text-[#afafaf]">
                         {deck.description || "No description provided."}
                     </span>
+                    <div className="mt-2 flex flex-wrap gap-1.5">
+                        {(deck.categories && deck.categories.length > 0
+                            ? deck.categories.slice(0, 3)
+                            : ["other"]
+                        ).map((cat) => (
+                            <span
+                                key={cat}
+                                className="rounded-md px-1.5 py-0.5 text-[9px] font-black tracking-tight uppercase"
+                                style={{
+                                    backgroundColor: `${deck.themeColor || "#1cb0f6"}15`,
+                                    color: deck.themeColor || "#1cb0f6",
+                                }}
+                            >
+                                {cat}
+                            </span>
+                        ))}
+                    </div>
                 </div>
             </td>
             <td className="px-6 py-4">
@@ -68,7 +85,7 @@ const DecksTableRow = ({ deck, onView, onDelete, isDeleting }: DecksTableRowProp
             <td className="px-6 py-4">
                 <div className="flex items-center gap-2 text-xs font-bold text-[#afafaf]">
                     <Calendar size={12} />
-                    {format(new Date(deck.createdAt), "MMM d, yyyy")}
+                    {deck.createdAt ? format(new Date(deck.createdAt), "MMM d, yyyy") : "—"}
                 </div>
             </td>
             <td className="px-6 py-4 text-right">

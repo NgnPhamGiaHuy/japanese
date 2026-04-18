@@ -1,6 +1,7 @@
 export * from "./useAdminDashboard";
 export * from "./useAdminToken";
 export * from "./useAnalytics";
+export * from "./useAnalyticsDrilldown";
 export * from "./useGlobalContent";
 export * from "./useLogs";
 export * from "./useUsers";

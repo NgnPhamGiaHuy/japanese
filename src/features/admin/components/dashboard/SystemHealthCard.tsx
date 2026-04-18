@@ -1,10 +1,11 @@
 "use client";
 
-import { Card } from "@/shared/components/ui";
+import { AdminCard } from "../shared";
 
 interface SystemHealthCardProps {
     errorRate: number;
     activeAdmins: number;
+    activeSuperAdmins: number;
 }
 
 /**
@@ -13,12 +14,13 @@ interface SystemHealthCardProps {
  * @remarks Displays real-time operational metrics like error rate and administrative presence.
  * Uses conditional styling to highlight high error rates.
  */
-const SystemHealthCard = ({ errorRate, activeAdmins }: SystemHealthCardProps) => {
+const SystemHealthCard = ({
+    errorRate,
+    activeAdmins,
+    activeSuperAdmins,
+}: SystemHealthCardProps) => {
     return (
-        <Card variant="dashboard" className="border-2 border-gray-100 bg-gray-50/30">
-            <h3 className="mb-4 text-xs font-black tracking-widest text-[#3c3c3c] uppercase">
-                System Health
-            </h3>
+        <AdminCard title="System Health">
             <div className="space-y-4">
                 <div className="flex items-center justify-between">
                     <span className="text-xs font-bold text-[#afafaf]">Error Rate</span>
@@ -39,11 +41,13 @@ const SystemHealthCard = ({ errorRate, activeAdmins }: SystemHealthCardProps) =>
                     />
                 </div>
                 <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold text-[#afafaf]">Active Admins</span>
-                    <span className="font-black text-[#3c3c3c]">{activeAdmins}</span>
+                    <span className="text-xs font-bold text-[#afafaf]">Active Team</span>
+                    <span className="font-black text-[#3c3c3c]">
+                        {activeAdmins}A / {activeSuperAdmins}S
+                    </span>
                 </div>
             </div>
-        </Card>
+        </AdminCard>
     );
 };
 

@@ -3,9 +3,10 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-import { Bell, BookOpen, Gamepad2 } from "lucide-react";
+import { Bell, BookOpen, Gamepad2, Shield } from "lucide-react";
 
 import { useNotifications } from "@/features/notifications";
+import { useAdminRole } from "@/features/admin/context/AdminContext";
 import { UserAvatar } from "@/shared/components/ui";
 import { useAppStore } from "@/store";
 
@@ -22,8 +23,12 @@ interface NavRoute {
     badge?: number;
 }
 
-function buildRoutes(unreadCount: number, userPhoto?: string | null): NavRoute[] {
-    return [
+function buildRoutes(
+    unreadCount: number,
+    userPhoto?: string | null,
+    isAdmin?: boolean,
+): NavRoute[] {
+    const routes: NavRoute[] = [
         {
             href: "/",
             label: "Home",
@@ -67,21 +72,35 @@ function buildRoutes(unreadCount: number, userPhoto?: string | null): NavRoute[]
             activeColor: "text-[#1cb0f6]",
             badge: unreadCount,
         },
-        {
-            href: "/profile",
-            label: "Profile",
-            icon: <UserAvatar src={userPhoto} active={false} activeColor="text-[#ff9600]" />,
-            activeIcon: <UserAvatar src={userPhoto} active={true} activeColor="text-[#ff9600]" />,
-            activeColor: "text-[#ff9600]",
-        },
     ];
+
+    if (isAdmin) {
+        routes.push({
+            href: "/admin",
+            label: "Admin",
+            icon: <Shield size={NAV_ICON_SIZE} strokeWidth={NAV_ICON_STROKE_IDLE} />,
+            activeIcon: <Shield size={NAV_ICON_SIZE} strokeWidth={NAV_ICON_STROKE_ACTIVE} />,
+            activeColor: "text-[#ea2b2b]",
+        });
+    }
+
+    routes.push({
+        href: "/profile",
+        label: "Profile",
+        icon: <UserAvatar src={userPhoto} active={false} activeColor="text-[#ff9600]" />,
+        activeIcon: <UserAvatar src={userPhoto} active={true} activeColor="text-[#ff9600]" />,
+        activeColor: "text-[#ff9600]",
+    });
+
+    return routes;
 }
 
 export const BottomNav = () => {
     const pathname = usePathname();
     const { user } = useAppStore();
     const { unreadCount } = useNotifications();
-    const ROUTES = buildRoutes(unreadCount, user?.photoURL);
+    const { role } = useAdminRole();
+    const ROUTES = buildRoutes(unreadCount, user?.photoURL, !!role);
 
     const isActive = (href: string) => {
         if (href === "/") return pathname === "/";
@@ -106,13 +125,26 @@ export const BottomNav = () => {
                         }`}
                         aria-current={active ? "page" : undefined}
                     >
+                        {/* Premium Glow for Active Admin Tab */}
+                        {active && route.label === "Admin" && (
+                            <div className="absolute inset-0 z-[-1] animate-pulse rounded-full bg-[#ea2b2b]/10 blur-md" />
+                        )}
+
                         <div className="relative">
                             {active ? route.activeIcon : route.icon}
-                            {/* Unread badge */}
+                            
+                            {/* Unread badge for Alerts */}
                             {route.badge != null && route.badge > 0 && (
                                 <span className="absolute -top-1.5 -right-1.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-[#ea2b2b] px-1 text-[9px] font-black text-white">
                                     {route.badge > 99 ? "99+" : route.badge}
                                 </span>
+                            )}
+
+                            {/* Admin Indicator Badge for Profile */}
+                            {route.label === "Profile" && role && (
+                                <div className="absolute -top-1 -right-1 flex h-3.5 w-3.5 items-center justify-center rounded-full border-2 border-white bg-[#ea2b2b] shadow-sm">
+                                    <Shield size={6} className="text-white" fill="currentColor" />
+                                </div>
                             )}
                         </div>
                         <span className="text-[9px] font-black tracking-wider uppercase">

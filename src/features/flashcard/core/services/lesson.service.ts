@@ -123,7 +123,6 @@ export function normalizeLesson(raw: unknown): Lesson {
 
     const title = String(doc.title ?? "");
     const description = String(doc.description ?? "");
-    const tags = Array.isArray(doc.tags) ? doc.tags : [];
     const cardCount = typeof doc.cardCount === "number" ? doc.cardCount : 0;
 
     const ownerNameFromMeta = ownerId ? doc.collaboratorMeta?.[ownerId]?.displayName : undefined;
@@ -159,7 +158,6 @@ export function normalizeLesson(raw: unknown): Lesson {
         id: String(doc.id ?? ""),
         title,
         description,
-        tags,
         createdAt,
         cardCount,
 

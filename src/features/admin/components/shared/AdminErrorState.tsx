@@ -17,7 +17,7 @@ interface AdminErrorStateProps {
  */
 const AdminErrorState = ({ message, onRetry }: AdminErrorStateProps) => {
     return (
-        <div className="space-y-4">
+        <div className="flex min-h-[70vh] flex-col items-center justify-center space-y-4">
             <EmptyState
                 icon={AlertTriangle}
                 title="Unable to load admin data"

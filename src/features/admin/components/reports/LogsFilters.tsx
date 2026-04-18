@@ -9,13 +9,12 @@ import {
     Info,
     Lock,
     RotateCcw,
-    Search,
     Shield,
     Terminal,
 } from "lucide-react";
 
-import { CustomDatePicker, CustomSelect } from "@/shared/components/ui";
-import DateRangeFilter from "./DateRangeFilter";
+import { CustomSelect } from "@/shared/components/ui";
+import { AdminDateRangeFilter, AdminSearchInput } from "../shared";
 import { LOG_LEVEL_OPTIONS, LOG_TYPE_OPTIONS } from "../../utils/filters";
 
 import type { SelectOption } from "@/shared/components/ui";
@@ -78,20 +77,12 @@ const LogsFilters = ({ filters, onChange }: LogsFiltersProps) => {
     return (
         <div className="flex flex-col gap-6 rounded-[2.5rem] border-2 border-b-8 border-gray-100 bg-white p-6 shadow-sm transition-all hover:border-gray-200">
             <div className="flex flex-col gap-4 lg:flex-row lg:items-center">
-                <div className="relative flex-1">
-                    <Search
-                        className="absolute top-1/2 left-4 -translate-y-1/2 text-gray-400"
-                        size={18}
-                    />
-                    <input
-                        value={filters.search ?? ""}
-                        onChange={(e) =>
-                            onChange({ ...filters, search: e.target.value || undefined })
-                        }
-                        placeholder="Search action, user, email, metadata…"
-                        className="h-12 w-full rounded-2xl border-2 border-gray-100 bg-gray-50/50 pr-4 pl-11 text-sm font-black text-[#3c3c3c] transition-all outline-none placeholder:font-bold placeholder:text-[#afafaf] focus:border-[#1cb0f6] focus:bg-white focus:ring-4 focus:ring-[#1cb0f6]/5"
-                    />
-                </div>
+                <AdminSearchInput
+                    value={filters.search ?? ""}
+                    onChange={(v) => onChange({ ...filters, search: v || undefined })}
+                    placeholder="Search action, user, email, metadata…"
+                    className="flex-1"
+                />
 
                 <div className="flex items-center gap-3">
                     <CustomSelect
@@ -113,11 +104,19 @@ const LogsFilters = ({ filters, onChange }: LogsFiltersProps) => {
                 </div>
             </div>
 
-            <DateRangeFilter
+            <AdminDateRangeFilter
                 startDate={filters.startDate}
                 endDate={filters.endDate}
-                onChange={onChange}
-                filters={filters}
+                onStartChange={(v) => onChange({ ...filters, startDate: v })}
+                onEndChange={(v) => onChange({ ...filters, endDate: v })}
+                onReset={() => onChange({})}
+                hasActiveFilters={
+                    !!filters.search ||
+                    !!filters.level ||
+                    !!filters.type ||
+                    !!filters.startDate ||
+                    !!filters.endDate
+                }
             />
         </div>
     );

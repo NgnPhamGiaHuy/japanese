@@ -2,76 +2,84 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 
-import { collection, limit, onSnapshot, orderBy, query } from "firebase/firestore";
-
-import { db } from "@/lib/firebase";
-import {
-    firestoreDataToSystemRecord,
-    SYSTEM_LOGS_COLLECTION,
-    systemLogToAdminView,
-} from "@/lib/logging";
 import { useAdminToken } from "./useAdminToken";
-import { createTestLogAction } from "../actions";
-import { applyLogFilters } from "../utils/filters";
+import { createTestLogAction, fetchLogsAction } from "../actions";
 
 import type { AdminLog, AdminLogFilters } from "../types";
 
 /**
- * Real-time system logs from Firestore `system_logs` (single source of truth).
- * Loads a rolling window; "load more" expands the subscription window.
+ * High-performance paginated system logs.
+ * Filtering is performed server-side; this hook only manages pagination state.
  */
 export function useLogs(filters: AdminLogFilters) {
-    const [rawLogs, setRawLogs] = useState<AdminLog[]>([]);
-    const [windowLimit, setWindowLimit] = useState(200);
+    const [logs, setLogs] = useState<AdminLog[]>([]);
+    const [pageTokens, setPageTokens] = useState<(string | null)[]>([null]);
+    const [currentPage, setCurrentPage] = useState(0);
     const [isLoading, setIsLoading] = useState(true);
-    const [isFetchingNextPage, setIsFetchingNextPage] = useState(false);
     const [error, setError] = useState<Error | null>(null);
     const getToken = useAdminToken();
 
-    useEffect(() => {
-        setIsFetchingNextPage(true);
-        const q = query(
-            collection(db, SYSTEM_LOGS_COLLECTION),
-            orderBy("timestamp", "desc"),
-            limit(windowLimit),
-        );
-        const unsub = onSnapshot(
-            q,
-            (snap) => {
-                const next = snap.docs.map((d) =>
-                    systemLogToAdminView(
-                        firestoreDataToSystemRecord(d.id, d.data() as Record<string, unknown>),
-                    ),
-                );
-                setRawLogs(next);
-                setIsLoading(false);
-                setIsFetchingNextPage(false);
-                setError(null);
-            },
-            (err) => {
+    const fetchPage = useCallback(
+        async (cursorId: string | null, pageIdx: number) => {
+            setIsLoading(true);
+            setError(null);
+            try {
+                const idToken = await getToken();
+                const result = await fetchLogsAction(idToken, filters, cursorId);
+                if (!result.ok) throw new Error(result.error);
+
+                setLogs(result.data.logs);
+                setCurrentPage(pageIdx);
+
+                // Register next page token if we haven't seen it yet
+                if (result.data.nextPageToken) {
+                    setPageTokens((prev) => {
+                        if (prev[pageIdx + 1] === result.data.nextPageToken) return prev;
+                        const next = prev.slice(0, pageIdx + 1);
+                        next.push(result.data.nextPageToken);
+                        return next;
+                    });
+                } else {
+                    // No more pages — trim any stale tokens beyond current
+                    setPageTokens((prev) => prev.slice(0, pageIdx + 1));
+                }
+            } catch (err) {
                 setError(err instanceof Error ? err : new Error(String(err)));
+            } finally {
                 setIsLoading(false);
-                setIsFetchingNextPage(false);
-            },
-        );
-        return () => unsub();
-    }, [windowLimit]);
+            }
+        },
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+        [JSON.stringify(filters), getToken],
+    );
 
-    const logs = useMemo(() => applyLogFilters(rawLogs, filters), [rawLogs, filters]);
+    // Reset and re-fetch when filters change
+    useEffect(() => {
+        setPageTokens([null]);
+        setCurrentPage(0);
+        fetchPage(null, 0);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [JSON.stringify(filters)]);
 
-    const fetchNextPage = useCallback(() => {
-        setWindowLimit((n) => Math.min(n + 250, 5000));
-    }, []);
+    const goToNextPage = useCallback(() => {
+        const nextToken = pageTokens[currentPage + 1];
+        if (nextToken !== undefined) {
+            fetchPage(nextToken, currentPage + 1);
+        }
+    }, [currentPage, pageTokens, fetchPage]);
 
-    const hasNextPage = windowLimit < 5000;
+    const goToPreviousPage = useCallback(() => {
+        if (currentPage > 0) {
+            fetchPage(pageTokens[currentPage - 1], currentPage - 1);
+        }
+    }, [currentPage, pageTokens, fetchPage]);
 
     const createManualLog = useCallback(async () => {
         const token = await getToken();
         const result = await createTestLogAction(token);
-        if (!result.ok) {
-            throw new Error(result.error);
-        }
-    }, [getToken]);
+        if (!result.ok) throw new Error(result.error);
+        if (currentPage === 0) fetchPage(null, 0);
+    }, [getToken, currentPage, fetchPage]);
 
     const { countsByLevel, countsByType } = useMemo(() => {
         const levelMap: Record<string, number> = {};
@@ -91,9 +99,11 @@ export function useLogs(filters: AdminLogFilters) {
         countsByType,
         isLoading,
         error,
-        fetchNextPage,
-        hasNextPage,
-        isFetchingNextPage,
+        currentPage,
+        goToNextPage,
+        goToPreviousPage,
+        hasNextPage: pageTokens.length > currentPage + 1,
+        hasPreviousPage: currentPage > 0,
         createManualLog,
     };
 }

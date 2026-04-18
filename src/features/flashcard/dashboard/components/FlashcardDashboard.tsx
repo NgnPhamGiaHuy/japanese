@@ -86,6 +86,7 @@ const FlashcardDashboard = () => {
                     onTabChange={handleTabChange}
                     sharedCount={sharedLessons.length}
                     publicCount={publicLessons.length}
+                    personalCount={lessons.length}
                 />
 
                 {error && <DashboardError error={error} />}

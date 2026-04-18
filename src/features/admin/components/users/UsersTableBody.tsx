@@ -2,6 +2,8 @@
 
 import { flexRender } from "@tanstack/react-table";
 
+import { LoadingSpinner } from "@/shared/components/ui";
+
 import type { Table } from "@tanstack/react-table";
 import type { AdminUser } from "../../types";
 
@@ -16,30 +18,15 @@ interface UsersTableBodyProps {
  * @remarks Responsible for rendering table rows and their corresponding cells
  * using TanStack Table's flexRender. Handles empty and loading states.
  */
-export const UsersTableBody = ({ table, loading }: UsersTableBodyProps) => {
+const UsersTableBody = ({ table, loading }: UsersTableBodyProps) => {
     const rows = table.getRowModel().rows;
 
     if (loading) {
         return (
             <tbody>
                 <tr>
-                    <td colSpan={5} className="py-16 text-center text-sm font-bold text-[#afafaf]">
-                        <div className="flex items-center justify-center gap-2">
-                            <div className="h-4 w-4 animate-spin rounded-full border-2 border-gray-200 border-t-[#1cb0f6]" />
-                            Loading users...
-                        </div>
-                    </td>
-                </tr>
-            </tbody>
-        );
-    }
-
-    if (rows.length === 0) {
-        return (
-            <tbody>
-                <tr>
-                    <td colSpan={5} className="py-16 text-center text-sm font-bold text-[#afafaf]">
-                        No users found
+                    <td colSpan={6} className="py-16 text-center text-sm font-bold text-[#afafaf]">
+                        <LoadingSpinner fullScreen={false} label="Loading users..." />
                     </td>
                 </tr>
             </tbody>
@@ -69,3 +56,5 @@ export const UsersTableBody = ({ table, loading }: UsersTableBodyProps) => {
         </tbody>
     );
 };
+
+export default UsersTableBody;

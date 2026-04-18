@@ -1,12 +1,15 @@
 "use client";
 
-import { Card } from "@/shared/components/ui";
-import { UsersActionConfirmModal } from "./UsersActionConfirmModal";
-import { UsersTableBody } from "./UsersTableBody";
-import { UsersTableHeader } from "./UsersTableHeader";
-import { UsersTablePagination } from "./UsersTablePagination";
-import { UsersTableToolbar } from "./UsersTableToolbar";
-import { useUsersTable } from "../../hooks/useUsersTable";
+import { Users as UsersIcon } from "lucide-react";
+
+import { Button } from "@/shared/components/ui";
+import UsersActionConfirmModal from "./UsersActionConfirmModal";
+import UsersTableBody from "./UsersTableBody";
+import UsersTableHeader from "./UsersTableHeader";
+import UsersTablePagination from "./UsersTablePagination";
+import UsersTableToolbar from "./UsersTableToolbar";
+import { AdminEmptyState, AdminTable } from "../shared";
+import { useUsersTable } from "../../hooks";
 
 import type { AdminUser } from "../../types";
 
@@ -35,7 +38,14 @@ interface UsersTableProps {
  * Adheres to < 120 lines by delegating logic to useUsersTable hook.
  */
 const UsersTable = (props: UsersTableProps) => {
-    const { totalUsers = 0, loading = false, currentPage = 0, canDelete, canPromote } = props;
+    const {
+        users,
+        totalUsers = 0,
+        loading = false,
+        currentPage = 0,
+        canDelete,
+        canPromote,
+    } = props;
     const totalPages = Math.ceil(totalUsers / 25);
 
     const {
@@ -50,11 +60,14 @@ const UsersTable = (props: UsersTableProps) => {
     } = useUsersTable(props);
 
     const selectedRows = table.getSelectedRowModel().rows;
+    const filteredRows = table.getFilteredRowModel().rows;
+    const hasData = users.length > 0;
+    const hasResults = filteredRows.length > 0;
 
     return (
         <>
-            <Card variant="default" padding="none" className="overflow-hidden">
-                <div className="h-16 border-b-2 border-gray-100">
+            <AdminTable
+                toolbar={
                     <UsersTableToolbar
                         selectedCount={selectedRows.length}
                         globalFilter={globalFilter}
@@ -81,26 +94,48 @@ const UsersTable = (props: UsersTableProps) => {
                             })
                         }
                     />
-                </div>
-
-                <div className="overflow-x-auto">
-                    <table className="w-full min-w-[860px] table-fixed">
+                }
+                pagination={
+                    hasResults ? (
+                        <UsersTablePagination
+                            {...props}
+                            currentPage={currentPage}
+                            totalPages={totalPages}
+                            totalUsers={totalUsers}
+                            loading={loading}
+                            hasPrevPage={props.hasPrevPage ?? false}
+                            hasNextPage={props.hasNextPage ?? false}
+                            maxDiscoveredPage={props.maxDiscoveredPage ?? 1}
+                        />
+                    ) : undefined
+                }
+            >
+                {hasResults ? (
+                    <>
                         <UsersTableHeader table={table} />
                         <UsersTableBody table={table} loading={loading} />
-                    </table>
-                </div>
-
-                <UsersTablePagination
-                    {...props}
-                    currentPage={currentPage}
-                    totalPages={totalPages}
-                    totalUsers={totalUsers}
-                    loading={loading}
-                    hasPrevPage={props.hasPrevPage ?? false}
-                    hasNextPage={props.hasNextPage ?? false}
-                    maxDiscoveredPage={props.maxDiscoveredPage ?? 1}
-                />
-            </Card>
+                    </>
+                ) : (
+                    <div className="col-span-full">
+                        <AdminEmptyState
+                            title={globalFilter ? "No users match your search" : "No users found"}
+                            description={
+                                globalFilter
+                                    ? `Try adjusting your search for "${globalFilter}" or clearing filters.`
+                                    : "Individual user accounts will appear here as they register on the platform."
+                            }
+                            icon={UsersIcon}
+                            action={
+                                globalFilter ? (
+                                    <Button variant="secondary" onClick={() => setGlobalFilter("")}>
+                                        Clear Search
+                                    </Button>
+                                ) : undefined
+                            }
+                        />
+                    </div>
+                )}
+            </AdminTable>
 
             <UsersActionConfirmModal
                 pendingAction={pendingAction}

@@ -1,6 +1,6 @@
 "use client";
 
-import { ConfirmModal } from "@/shared/components/ui";
+import { AdminConfirmModal } from "../shared";
 
 interface UsersActionConfirmModalProps {
     pendingAction: { type: "delete" | "promote" | "demote"; uids: string[] } | null;
@@ -13,9 +13,9 @@ interface UsersActionConfirmModalProps {
  * Specialized Confirmation Modal for User Management.
  *
  * @remarks Handles bulk and individual permission/deletion confirmations.
- * Following component rules, this isolates complex modal messaging logic.
+ * Reuses the AdminConfirmModal as the single source of truth for admin actions.
  */
-export const UsersActionConfirmModal = ({
+const UsersActionConfirmModal = ({
     pendingAction,
     isProcessing,
     onClose,
@@ -26,7 +26,7 @@ export const UsersActionConfirmModal = ({
     const { type, uids } = pendingAction;
 
     return (
-        <ConfirmModal
+        <AdminConfirmModal
             isOpen={!!pendingAction}
             onClose={onClose}
             onConfirm={onConfirm}
@@ -44,7 +44,9 @@ export const UsersActionConfirmModal = ({
             }
             confirmText="Confirm"
             variant={type === "delete" ? "danger" : "info"}
-            loading={isProcessing}
+            isLoading={isProcessing}
         />
     );
 };
+
+export default UsersActionConfirmModal;

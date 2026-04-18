@@ -4,11 +4,18 @@ import Link from "next/link";
 
 import { Activity, BookOpen, Database, Users, Zap } from "lucide-react";
 
-import { Button, Card, LoadingSpinner } from "@/shared/components/ui";
+import { Button, LoadingSpinner } from "@/shared/components/ui";
 import QuickActionsCard from "./QuickActionsCard";
 import SystemHealthCard from "./SystemHealthCard";
-import { LogRow, LogsSummaryHeader } from "../reports";
-import { AdminErrorState, AdminPageHeader, AdminPageLayout, AdminStatCard } from "../shared";
+import { LogRow } from "../reports";
+import {
+    AdminCard,
+    AdminEmptyState,
+    AdminErrorState,
+    AdminPageHeader,
+    AdminPageLayout,
+    AdminStatCard,
+} from "../shared";
 import { useAdminDashboard } from "../../hooks";
 
 /**
@@ -20,13 +27,20 @@ import { useAdminDashboard } from "../../hooks";
 const AdminOverviewPage = () => {
     const { data, isLoading, error, refetch } = useAdminDashboard();
 
-    if (isLoading) return <LoadingSpinner fullScreen={false} label="Loading overview..." />;
+    if (isLoading)
+        return (
+            <AdminPageLayout>
+                <LoadingSpinner fullScreen={false} label="Loading overview..." />
+            </AdminPageLayout>
+        );
     if (error || !data) {
         return (
-            <AdminErrorState
-                message={error?.message ?? "Overview failed to load"}
-                onRetry={() => refetch()}
-            />
+            <AdminPageLayout>
+                <AdminErrorState
+                    message={error?.message ?? "Overview failed to load"}
+                    onRetry={() => refetch()}
+                />
+            </AdminPageLayout>
         );
     }
 
@@ -55,11 +69,6 @@ const AdminOverviewPage = () => {
             />
 
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                <LogsSummaryHeader
-                    totalLoaded={stats.totalUsers}
-                    countsByLevel={{}}
-                    countsByType={{}}
-                />
                 <AdminStatCard
                     label="Total Users"
                     value={stats.totalUsers}
@@ -82,35 +91,37 @@ const AdminOverviewPage = () => {
             </div>
 
             <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-                <div className="space-y-4 lg:col-span-2">
-                    <div className="flex items-center justify-between px-2">
-                        <h2 className="text-sm font-black tracking-widest text-[#3c3c3c] uppercase">
-                            Operational Feed
-                        </h2>
+                <AdminCard
+                    title="Operational Feed"
+                    padding="none"
+                    className="lg:col-span-2"
+                    actions={
                         <Link
                             href="/admin/reports"
                             className="text-[10px] font-black tracking-widest text-[#1cb0f6] uppercase hover:underline"
                         >
                             Full Audit Trail
                         </Link>
+                    }
+                >
+                    <div className="divide-y divide-gray-50">
+                        {recentActivity.length > 0 ? (
+                            recentActivity.map((log) => <LogRow key={log.id} log={log} />)
+                        ) : (
+                            <AdminEmptyState
+                                title="No recent activity"
+                                description="Operation logs will appear here as they happen."
+                                icon={Activity}
+                            />
+                        )}
                     </div>
-                    <Card padding="none" className="overflow-hidden border-2 border-gray-100">
-                        <div className="divide-y divide-gray-50">
-                            {recentActivity.length > 0 ? (
-                                recentActivity.map((log) => <LogRow key={log.id} log={log} />)
-                            ) : (
-                                <div className="p-12 text-center text-sm font-bold text-[#afafaf]">
-                                    No recent activity recorded.
-                                </div>
-                            )}
-                        </div>
-                    </Card>
-                </div>
+                </AdminCard>
 
                 <div className="space-y-6">
                     <SystemHealthCard
                         errorRate={stats.errorRate}
                         activeAdmins={stats.activeAdmins}
+                        activeSuperAdmins={stats.activeSuperAdmins}
                     />
                     <QuickActionsCard />
                 </div>

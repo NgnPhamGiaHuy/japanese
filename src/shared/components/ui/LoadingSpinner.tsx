@@ -33,7 +33,13 @@ export function LoadingSpinner({
         </div>
     );
 
-    if (!fullScreen) return spinner;
+    if (!fullScreen) {
+        return (
+            <div className="flex h-full min-h-[70vh] w-full flex-col items-center justify-center">
+                {spinner}
+            </div>
+        );
+    }
 
     return (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-[#F7F7F8]/80 backdrop-blur-sm">

@@ -2,7 +2,14 @@
 
 import { adminAuth } from "@/lib/firebase-admin";
 import { assertPermissionFromToken } from "../services/admin.service";
-import { getAdminAnalytics, getDashboardOverview } from "../services/analytics.service";
+import {
+    getAdminAnalytics,
+    getContentBreakdown,
+    getDashboardOverview,
+    getFeatureUsageDetails,
+    getUsersByDate,
+    getUsersByRole,
+} from "../services/analytics.service";
 import {
     deleteGlobalFlashcard,
     getDeckCards,
@@ -65,14 +72,15 @@ export async function setAdminRoleAction(
 ): Promise<ActionResult<{ uid: string; isAdmin: boolean }>> {
     try {
         const { uid, role } = await assertPermissionFromToken(idToken, "canPromoteUsers");
+        const decoded = await adminAuth.verifyIdToken(idToken);
         await setAdminRole(targetUid, grant, uid);
         await recordLog({
             action: grant ? "Granted admin role" : "Revoked admin role",
             level: "info",
             type: "ADMIN_ACTION",
             userId: uid,
-            userName: "Admin",
-            userEmail: "admin@local",
+            userName: typeof decoded.name === "string" && decoded.name ? decoded.name : "Admin",
+            userEmail: typeof decoded.email === "string" ? decoded.email : "—",
             metadata: { targetUid, grant, role },
         });
         return ok({ uid: targetUid, isAdmin: grant });
@@ -87,14 +95,15 @@ export async function deleteUserAction(
 ): Promise<ActionResult<{ uid: string }>> {
     try {
         const { uid, role } = await assertPermissionFromToken(idToken, "canDeleteUsers");
+        const decoded = await adminAuth.verifyIdToken(idToken);
         await deleteUser(targetUid, uid);
         await recordLog({
             action: "Deleted user account",
             level: "warn",
             type: "ADMIN_ACTION",
             userId: uid,
-            userName: "Admin",
-            userEmail: "admin@local",
+            userName: typeof decoded.name === "string" && decoded.name ? decoded.name : "Admin",
+            userEmail: typeof decoded.email === "string" ? decoded.email : "—",
             metadata: { targetUid, role },
         });
         return ok({ uid: targetUid });
@@ -119,7 +128,7 @@ export async function fetchLogsAction(
 ): Promise<ActionResult<PaginatedLogs>> {
     try {
         await assertPermissionFromToken(idToken, "canViewReports");
-        return ok(await getLogs(filters, 50, startAfterDocId));
+        return ok(await getLogs(filters, 100, startAfterDocId));
     } catch (err) {
         return fail(err);
     }
@@ -186,6 +195,7 @@ export async function deleteGlobalFlashcardAction(
 ): Promise<ActionResult<void>> {
     try {
         const { uid, role } = await assertPermissionFromToken(idToken, "canManageContent");
+        const decoded = await adminAuth.verifyIdToken(idToken);
         await deleteGlobalFlashcard(path);
 
         await recordLog({
@@ -193,8 +203,8 @@ export async function deleteGlobalFlashcardAction(
             level: "warn",
             type: "ADMIN_ACTION",
             userId: uid,
-            userName: "Admin",
-            userEmail: "admin@local",
+            userName: typeof decoded.name === "string" && decoded.name ? decoded.name : "Admin",
+            userEmail: typeof decoded.email === "string" ? decoded.email : "—",
             metadata: { path, role },
         });
 
@@ -210,6 +220,38 @@ export async function fetchAdminRoleAction(
     try {
         const caller = await assertPermissionFromToken(idToken, "canViewDashboard");
         return ok({ role: caller.role });
+    } catch (err) {
+        return fail(err);
+    }
+}
+
+export async function fetchDrilldownUsersAction(
+    idToken: string,
+    filter: { date?: string; role?: string },
+) {
+    try {
+        await assertPermissionFromToken(idToken, "canViewAnalytics");
+        if (filter.date) return ok(await getUsersByDate(filter.date));
+        if (filter.role) return ok(await getUsersByRole(filter.role));
+        return ok([]);
+    } catch (err) {
+        return fail(err);
+    }
+}
+
+export async function fetchDrilldownFeatureAction(idToken: string, feature: string) {
+    try {
+        await assertPermissionFromToken(idToken, "canViewAnalytics");
+        return ok(await getFeatureUsageDetails(feature));
+    } catch (err) {
+        return fail(err);
+    }
+}
+
+export async function fetchDrilldownContentAction(idToken: string, category: string) {
+    try {
+        await assertPermissionFromToken(idToken, "canViewAnalytics");
+        return ok(await getContentBreakdown(category));
     } catch (err) {
         return fail(err);
     }

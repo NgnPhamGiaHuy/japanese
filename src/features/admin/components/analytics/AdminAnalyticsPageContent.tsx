@@ -2,14 +2,16 @@
 
 import { BarChart3, Calendar, Download } from "lucide-react";
 
-import { Button, Card, LoadingSpinner } from "@/shared/components/ui";
+import { Button, LoadingSpinner } from "@/shared/components/ui";
+import AnalyticsDetailModal from "./AnalyticsDetailModal";
+import ContentDistributionChart from "./ContentDistributionChart";
 import EngagementChart from "./EngagementChart";
 import ErrorTrendChart from "./ErrorTrendChart";
 import RetentionChart from "./RetentionChart";
 import GrowthChart from "../dashboard/GrowthChart";
 import RoleChart from "../dashboard/RoleChart";
-import { AdminErrorState, AdminPageHeader, AdminPageLayout } from "../shared";
-import { useAnalytics } from "../../hooks";
+import { AdminEmptyState, AdminErrorState, AdminPageHeader, AdminPageLayout } from "../shared";
+import { useAnalytics, useAnalyticsDrilldown } from "../../hooks";
 
 /**
  * Admin Analytics Dashboard Page.
@@ -19,14 +21,57 @@ import { useAnalytics } from "../../hooks";
  */
 const AdminAnalyticsPageContent = () => {
     const { data, isLoading, error, refetch } = useAnalytics();
+    const {
+        selection,
+        data: drilldownData,
+        isLoading: isDrilldownLoading,
+        error: drilldownError,
+        openDrilldown,
+        closeDrilldown,
+    } = useAnalyticsDrilldown();
 
-    if (isLoading) return <LoadingSpinner fullScreen={false} label="Loading deep insights..." />;
+    if (isLoading)
+        return (
+            <AdminPageLayout>
+                <LoadingSpinner fullScreen={false} label="Loading deep insights..." />
+            </AdminPageLayout>
+        );
     if (error || !data) {
         return (
-            <AdminErrorState
-                message={error?.message ?? "Analytics failed to load"}
-                onRetry={() => refetch()}
-            />
+            <AdminPageLayout>
+                <AdminErrorState
+                    message={error?.message ?? "Analytics failed to load"}
+                    onRetry={() => refetch()}
+                />
+            </AdminPageLayout>
+        );
+    }
+
+    const drilldownTitle = selection ? `Drilling down: ${selection.label}` : "";
+    const drilldownDesc = selection
+        ? `Viewing detailed records associated with ${selection.value}. Records are live from Firebase.`
+        : "";
+
+    const isGlobalEmpty =
+        data.growth.length === 0 &&
+        data.engagement.length === 0 &&
+        data.retention.length === 0 &&
+        data.errorTrends.length === 0;
+
+    if (isGlobalEmpty) {
+        return (
+            <AdminPageLayout>
+                <AdminPageHeader
+                    title="Advanced Analytics"
+                    description="Cohort behavior and system performance insights."
+                    icon={BarChart3}
+                />
+                <AdminEmptyState
+                    title="No analytics data"
+                    description="System metrics are computed daily. Data will appear here once the first batch is processed."
+                    icon={BarChart3}
+                />
+            </AdminPageLayout>
         );
     }
 
@@ -51,32 +96,35 @@ const AdminAnalyticsPageContent = () => {
             />
 
             <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-                <Card variant="dashboard" padding="lg" className="border-2 border-gray-100">
-                    <GrowthChart data={data.growth} />
-                </Card>
-
-                <Card variant="dashboard" padding="lg" className="border-2 border-gray-100">
-                    <RoleChart data={data.roles} />
-                </Card>
-
-                <Card variant="dashboard" padding="lg" className="border-2 border-gray-100">
-                    <EngagementChart data={data.engagement} />
-                </Card>
-
-                <Card variant="dashboard" padding="lg" className="border-2 border-gray-100">
-                    <RetentionChart data={data.retention} />
-                </Card>
-
-                <div className="lg:col-span-2">
-                    <Card
-                        variant="dashboard"
-                        padding="lg"
-                        className="border-2 border-gray-100 bg-red-50/10"
-                    >
-                        <ErrorTrendChart data={data.errorTrends} />
-                    </Card>
-                </div>
+                <GrowthChart
+                    data={data.growth}
+                    onClick={(date) => openDrilldown("user_growth", "Registration Growth", date)}
+                />
+                <RoleChart
+                    data={data.roles}
+                    onClick={(role) => openDrilldown("role", "Administrative Distribution", role)}
+                />
+                <EngagementChart
+                    data={data.engagement}
+                    onClick={(feat) => openDrilldown("feature", "Feature Engagement", feat)}
+                />
+                <ContentDistributionChart
+                    data={data.content}
+                    onClick={(cat) => openDrilldown("content", "Content Breakdown", cat)}
+                />
+                <RetentionChart data={data.retention} />
+                <ErrorTrendChart data={data.errorTrends} />
             </div>
+
+            <AnalyticsDetailModal
+                isOpen={!!selection}
+                onClose={closeDrilldown}
+                title={drilldownTitle}
+                description={drilldownDesc}
+                data={drilldownData}
+                isLoading={isDrilldownLoading}
+                error={drilldownError}
+            />
 
             <div className="mt-8 rounded-3xl border-2 border-dashed border-gray-200 p-8 text-center">
                 <p className="text-xs font-bold tracking-widest text-[#afafaf] uppercase">

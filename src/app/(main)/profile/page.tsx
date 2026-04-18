@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { BookOpen, Flame, LogOut, Settings, Trophy } from "lucide-react";
 
 import { useLessons } from "@/features/flashcard/core/hooks";
+import { useAdminRole } from "@/features/admin/context/AdminContext";
 import { useUserProgress } from "@/features/user/hooks";
 import { signOut } from "@/features/user/services";
 import { SCREEN_HEADER_BACK_BUTTON_CLASS, ScreenHeader } from "@/shared/components/layout";
@@ -17,6 +18,7 @@ import { useAppStore } from "@/store";
 export default function ProfilePage() {
     const { userData } = useUserProgress();
     const { lessons } = useLessons();
+    const { role } = useAdminRole();
     const user = useAppStore((s) => s.user);
     const router = useRouter();
 
@@ -66,8 +68,17 @@ export default function ProfilePage() {
                             </div>
                         )}
                     </div>
-                    <h2 className="text-2xl font-black text-[#3c3c3c]">{displayName}</h2>
-                    <div className="mt-1 flex items-center gap-2">
+
+                    <div className="flex flex-col items-center gap-1">
+                        <h2 className="text-2xl font-black text-[#3c3c3c]">{displayName}</h2>
+                        {role && (
+                            <div className="flex items-center rounded-full border border-[#ea2b2b] bg-[#ea2b2b]/10 px-2.5 py-0.5 text-[10px] font-black tracking-wider text-[#ea2b2b] uppercase">
+                                {role === "superadmin" ? "Super Staff" : "Staff"}
+                            </div>
+                        )}
+                    </div>
+
+                    <div className="mt-2 flex items-center gap-2">
                         <span className="text-lg font-black text-[#ff9600]">Lv.{level}</span>
                         <span className="text-base font-bold text-[#afafaf]">·</span>
                         <span className="text-sm font-bold text-[#afafaf]">

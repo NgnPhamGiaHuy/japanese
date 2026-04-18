@@ -18,6 +18,7 @@ export { EmptyState } from "./EmptyState";
 export { TierBadge } from "./TierBadge";
 export { ModeSelectionCard } from "./ModeSelectionCard";
 export { LoadingSpinner } from "./LoadingSpinner";
+export { default as Modal } from "./Modal";
 export { NotFoundScreen } from "./NotFoundScreen";
 
 export type { SelectOption } from "./CustomSelect";

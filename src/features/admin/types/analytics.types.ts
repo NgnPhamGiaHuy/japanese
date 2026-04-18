@@ -5,6 +5,7 @@ export interface AdminStats {
     totalSessions: number;
     errorRate: number; // percentage
     activeAdmins: number;
+    activeSuperAdmins: number;
 }
 
 export interface GrowthPoint {
@@ -41,6 +42,7 @@ export interface AnalyticsData {
     engagement: EngagementPoint[];
     retention: RetentionPoint[];
     roles: RolePoint[];
+    content: RolePoint[];
     errorTrends: { date: string; errors: number }[];
     timeRange: "7d" | "30d" | "90d";
 }

@@ -68,7 +68,11 @@ export interface FlashCard {
 }
 
 /** Extended FlashCard type for managing temporary local file state during editing */
-export type EditorCard = FlashCard & { imageFile?: File; previewUrl?: string };
+export type EditorCard = Partial<FlashCard> & {
+    id: string;
+    imageFile?: File;
+    previewUrl?: string;
+};
 
 /**
  * Deck container for flashcards, including visibility and collaborative metadata.
@@ -94,9 +98,11 @@ export interface Lesson {
     /** Short summary of deck contents */
     description: string;
     /** Categorical labels for search and filtering */
-    tags: string[];
-    /** Creation epoch for sorting */
     createdAt: number;
+    /** Primary content categories (e.g., ['vocabulary', 'kanji']) */
+    categories?: string[];
+    /** Content sub-type (e.g., 'vocal', 'bunpou') */
+    type?: string;
     /** Total number of cards in the deck (denormalized for list views) */
     cardCount: number;
 

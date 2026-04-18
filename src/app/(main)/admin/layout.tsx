@@ -12,15 +12,13 @@ import AdminProvider from "@/features/admin/context/AdminContext";
  */
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
     return (
-        <AdminProvider>
-            <AdminGuard>
-                <div className="flex min-h-screen bg-[#F7F7F8]">
-                    <AdminSidebar />
-                    <main className="flex-1 lg:pl-64">
-                        <div className="mx-auto min-h-screen max-w-7xl pb-32">{children}</div>
-                    </main>
-                </div>
-            </AdminGuard>
-        </AdminProvider>
+        <AdminGuard>
+            <div className="flex min-h-screen bg-[#F7F7F8]">
+                <AdminSidebar />
+                <main className="flex-1 lg:pl-64">
+                    <div className="mx-auto min-h-screen max-w-7xl pb-32">{children}</div>
+                </main>
+            </div>
+        </AdminGuard>
     );
 }

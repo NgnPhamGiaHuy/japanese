@@ -7,76 +7,72 @@ import {
     systemLogToAdminView,
 } from "@/lib/logging";
 import { persistSystemLog } from "@/lib/logging/server";
-import { adminDb } from "./admin.service";
+import { adminAuth, adminDb } from "./admin.service";
 import { applyLogFilters } from "../utils/filters";
 
 import type { AdminLog, AdminLogFilters, PaginatedLogs } from "../types";
 
-export async function ensureLogsSeeded(): Promise<void> {
-    const existing = await adminDb.collection(SYSTEM_LOGS_COLLECTION).limit(1).get();
-    if (!existing.empty) return;
-
-    await persistSystemLog({
-        userId: "system",
-        action: "System logging initialized",
-        entityType: "system",
-        metadata: {
-            userName: "System",
-            userEmail: "system@local",
-            logType: "SYSTEM",
-            seed: true,
-            createdAt: new Date().toISOString(),
-        },
-        level: "info",
-        source: "server",
-    });
-}
-
 /**
- * Server-side log fetch (dashboard, exports). Prefer the real-time client hook for the Reports UI.
- * Pagination cursors refer to raw Firestore document order; in-memory filters may shorten pages.
+ * Server-side log fetch (dashboard, reports).
  */
 export async function getLogs(
     filters: AdminLogFilters = {},
     limit = 50,
-    startAfterDocId?: string | null,
+    startAfterId?: string | null,
 ): Promise<PaginatedLogs> {
-    const isUnfiltered =
-        !filters.level &&
-        !filters.type &&
-        !filters.search &&
-        !filters.startDate &&
-        !filters.endDate &&
-        !startAfterDocId;
-    if (isUnfiltered) {
-        await ensureLogsSeeded();
-    }
-
     const safeLimit = Math.min(Math.max(Math.floor(limit), 1), 200);
-    const overfetch = Math.min(600, Math.max(safeLimit * 5, 120));
 
     let q = adminDb.collection(SYSTEM_LOGS_COLLECTION).orderBy("timestamp", "desc");
-    if (startAfterDocId) {
-        const cursor = await adminDb.collection(SYSTEM_LOGS_COLLECTION).doc(startAfterDocId).get();
+
+    // 2. Pagination Cursor
+    if (startAfterId) {
+        const cursor = await adminDb.collection(SYSTEM_LOGS_COLLECTION).doc(startAfterId).get();
         if (cursor.exists) {
             q = q.startAfter(cursor);
         }
     }
 
-    const snap = await q.limit(overfetch).get();
-    const mapped = snap.docs.map((d) =>
+    // 3. Robust In-Memory Filtering Pool
+    const poolSize = filters.level || filters.type || filters.search ? 1000 : safeLimit + 1;
+    const snap = await q.limit(poolSize).get();
+
+    let logs = snap.docs.map((d) =>
         systemLogToAdminView(
             firestoreDataToSystemRecord(d.id, d.data() as Record<string, unknown>),
         ),
     );
-    const filtered = applyLogFilters(mapped, filters);
-    const hasNext = filtered.length > safeLimit || snap.docs.length === overfetch;
-    const logs = filtered.slice(0, safeLimit);
-    const lastRaw = snap.docs[snap.docs.length - 1];
+
+    // 4. In-Memory Filter Execution (Resilient to missing indexes)
+    if (filters.level || filters.type || filters.search) {
+        logs = applyLogFilters(logs, filters);
+    }
+
+    // 5. ENRICHMENT: Link with Users & Content
+    const uids = Array.from(new Set(logs.map((l) => l.userId).filter(Boolean)));
+    if (uids.length > 0) {
+        try {
+            const users = await adminAuth.getUsers(uids.map((uid) => ({ uid: uid! })));
+            const userMap = new Map(users.users.map((u) => [u.uid, u]));
+
+            logs.forEach((l) => {
+                const u = l.userId ? userMap.get(l.userId) : null;
+                if (u) {
+                    l.userName = u.displayName || u.email?.split("@")[0] || "User";
+                    l.userEmail = u.email || "";
+                }
+            });
+        } catch (e) {
+            console.warn("[getLogs] Enrichment failed:", e);
+        }
+    }
+
+    const hasNext = logs.length > safeLimit;
+    const resultLogs = logs.slice(0, safeLimit);
+    const nextPageToken = hasNext ? snap.docs[safeLimit - 1]?.id : null;
 
     return {
-        logs,
-        nextPageToken: hasNext && lastRaw ? lastRaw.id : null,
+        logs: resultLogs,
+        nextPageToken: nextPageToken || null,
     };
 }
 

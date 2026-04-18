@@ -13,7 +13,6 @@ interface EmptyStateProps {
     title: string;
     description: string;
     action?: ReactNode;
-    iconColor?: string;
     iconBg?: string;
     iconBorder?: string;
 }
@@ -23,7 +22,6 @@ export function EmptyState({
     title,
     description,
     action,
-    iconColor = "#ce82ff",
     iconBg = "bg-[#ce82ff]",
     iconBorder = "border-[#b65ce8]",
 }: EmptyStateProps) {
@@ -36,7 +34,7 @@ export function EmptyState({
             </div>
             <h2 className="mb-2 text-2xl font-black text-[#3c3c3c]">{title}</h2>
             <p className="mb-8 font-bold text-[#afafaf]">{description}</p>
-            {action}
+            <div className="flex justify-center">{action}</div>
         </div>
     );
 }

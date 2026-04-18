@@ -16,7 +16,7 @@ interface UsersTableHeaderProps {
  * @remarks Manages column headers, sorting toggles, and alignment logic.
  * Follows component rules by focusing purely on header UI.
  */
-export const UsersTableHeader = ({ table }: UsersTableHeaderProps) => {
+const UsersTableHeader = ({ table }: UsersTableHeaderProps) => {
     return (
         <thead className="bg-gray-50/50">
             {table.getHeaderGroups().map((headerGroup) => (
@@ -66,3 +66,5 @@ export const UsersTableHeader = ({ table }: UsersTableHeaderProps) => {
         </thead>
     );
 };
+
+export default UsersTableHeader;

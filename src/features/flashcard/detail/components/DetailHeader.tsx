@@ -100,22 +100,23 @@ const DetailHeader = ({ ctx, onEdit }: DetailHeaderProps) => {
                         )}
                     </div>
 
-                    {lesson.tags?.length > 0 && (
-                        <div className="mt-4 flex flex-wrap gap-2">
-                            {lesson.tags.map((tag) => (
-                                <span
-                                    key={tag}
-                                    className="rounded-lg px-2 py-1 text-[10px] font-black tracking-wider uppercase"
-                                    style={{
-                                        color: themeHex,
-                                        backgroundColor: `${themeHex}20`,
-                                    }}
-                                >
-                                    {tag}
-                                </span>
-                            ))}
-                        </div>
-                    )}
+                    <div className="mt-4 flex flex-wrap gap-2">
+                        {(lesson.categories && lesson.categories.length > 0
+                            ? lesson.categories.slice(0, 3)
+                            : ["other"]
+                        ).map((cat) => (
+                            <span
+                                key={cat}
+                                className="rounded-lg px-2 py-1 text-[10px] font-black tracking-wider uppercase"
+                                style={{
+                                    color: themeHex,
+                                    backgroundColor: `${themeHex}20`,
+                                }}
+                            >
+                                {cat}
+                            </span>
+                        ))}
+                    </div>
                 </div>
 
                 <div className="flex shrink-0 flex-col gap-3">

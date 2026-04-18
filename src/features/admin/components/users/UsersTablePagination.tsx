@@ -21,7 +21,7 @@ interface UsersTablePaginationProps {
  * @remarks Implements intelligent page button rendering with '...' truncations
  * for large page counts, ensuring a clean UI regardless of user volume.
  */
-export const UsersTablePagination = ({
+const UsersTablePagination = ({
     currentPage,
     totalPages,
     totalUsers,
@@ -77,7 +77,7 @@ export const UsersTablePagination = ({
                                 isActive
                                     ? "bg-[#1cb0f6] text-white shadow-md shadow-[#1cb0f6]/20"
                                     : isDiscovered
-                                      ? "text-[#afafaf] hover:bg-gray-100 hover:text-[#3c3c3c]"
+                                      ? "text-[#afafaf] hover:bg-gray-50 hover:text-[#3c3c3c]"
                                       : "cursor-not-allowed text-gray-200"
                             }`}
                         >
@@ -99,3 +99,5 @@ export const UsersTablePagination = ({
         </div>
     );
 };
+
+export default UsersTablePagination;

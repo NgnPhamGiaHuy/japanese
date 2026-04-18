@@ -2,13 +2,21 @@
 
 import { useState } from "react";
 
-import { Box, Database, Filter, Layers, Search, Trash2 } from "lucide-react";
+import { Box, Database, Filter, Layers, Trash2 } from "lucide-react";
 
 import { Button, LoadingSpinner } from "@/shared/components/ui";
 import { ContentOverviewStats } from "./ContentOverviewStats";
 import DeckDetailsPanel from "./DeckDetailsPanel";
 import DecksTable from "./DecksTable";
-import { AdminErrorState, AdminPageHeader, AdminPageLayout, AdminStatCard } from "../shared";
+import {
+    AdminConfirmModal,
+    AdminEmptyState,
+    AdminErrorState,
+    AdminPageHeader,
+    AdminPageLayout,
+    AdminSearchInput,
+    AdminStatCard,
+} from "../shared";
 import { useGlobalContent } from "../../hooks";
 
 /**
@@ -33,9 +41,20 @@ const AdminContentPageContent = () => {
     } = useGlobalContent();
     const [searchTerm, setSearchTerm] = useState("");
     const [selectedDeckTitle, setSelectedDeckTitle] = useState("");
+    const [deckToDelete, setDeckToDelete] = useState<string | null>(null);
 
-    if (isLoading) return <LoadingSpinner fullScreen={false} label="Auditing global decks..." />;
-    if (error) return <AdminErrorState message={error.message} onRetry={() => refetch()} />;
+    if (isLoading)
+        return (
+            <AdminPageLayout>
+                <LoadingSpinner fullScreen={false} label="Auditing global decks..." />
+            </AdminPageLayout>
+        );
+    if (error)
+        return (
+            <AdminPageLayout>
+                <AdminErrorState message={error.message} onRetry={() => refetch()} />
+            </AdminPageLayout>
+        );
 
     const filteredItems =
         data?.items.filter(
@@ -51,14 +70,10 @@ const AdminContentPageContent = () => {
         await loadCards(path);
     };
 
-    const handleDelete = async (path: string) => {
-        if (
-            confirm(
-                "Are you sure you want to permanently delete this Entire Flashcard Set (Deck)? All words within this deck will also be removed. This action cannot be undone.",
-            )
-        ) {
-            await deleteCard(path);
-        }
+    const handleDelete = async () => {
+        if (!deckToDelete) return;
+        await deleteCard(deckToDelete);
+        setDeckToDelete(null);
     };
 
     return (
@@ -82,28 +97,37 @@ const AdminContentPageContent = () => {
                 filteredCount={filteredItems.length}
             />
 
-            <div className="space-y-4">
-                <div className="relative">
-                    <Search
-                        className="absolute top-1/2 left-4 -translate-y-1/2 text-gray-400"
-                        size={18}
-                    />
-                    <input
-                        type="text"
-                        placeholder="Search by deck title, description or owner email..."
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        className="h-12 w-full rounded-2xl border-2 border-gray-100 bg-white pr-4 pl-11 text-sm font-black text-[#3c3c3c] transition-all outline-none placeholder:font-bold placeholder:text-[#afafaf] focus:border-[#1cb0f6] focus:ring-4 focus:ring-[#1cb0f6]/5"
-                    />
-                </div>
+            <AdminSearchInput
+                placeholder="Search by deck title, description or owner email..."
+                value={searchTerm}
+                onChange={setSearchTerm}
+            />
 
+            {filteredItems.length > 0 ? (
                 <DecksTable
                     items={filteredItems}
-                    onDelete={handleDelete}
+                    onDelete={(path) => setDeckToDelete(path)}
                     onView={handleView}
                     isDeleting={isDeleting}
                 />
-            </div>
+            ) : (
+                <AdminEmptyState
+                    title={searchTerm ? "No results found" : "No decks available"}
+                    description={
+                        searchTerm
+                            ? `No flashcard sets match "${searchTerm}". Try a different term.`
+                            : "Platform flashcard sets will appear here once users create them."
+                    }
+                    icon={Database}
+                    action={
+                        searchTerm ? (
+                            <Button variant="secondary" onClick={() => setSearchTerm("")}>
+                                Clear Search
+                            </Button>
+                        ) : undefined
+                    }
+                />
+            )}
 
             <DeckDetailsPanel
                 isOpen={!!selectedDeckPath}
@@ -111,6 +135,16 @@ const AdminContentPageContent = () => {
                 deckTitle={selectedDeckTitle}
                 cards={cards}
                 isLoading={isLoadingCards}
+            />
+
+            <AdminConfirmModal
+                isOpen={!!deckToDelete}
+                onClose={() => setDeckToDelete(null)}
+                onConfirm={handleDelete}
+                title="Delete Flashcard Set?"
+                message="Are you sure you want to permanently delete this Entire Flashcard Set (Deck)? All words within this deck will also be removed. This action cannot be undone."
+                variant="danger"
+                isLoading={isDeleting}
             />
         </AdminPageLayout>
     );
