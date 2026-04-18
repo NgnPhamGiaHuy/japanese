@@ -37,6 +37,8 @@ export interface GameIntroScreenProps {
     startButtonColor?: "purple" | "orange" | "blue" | "green" | "red";
     /** Whether start button is disabled */
     startDisabled?: boolean;
+    /** Whether start button is loading */
+    loading?: boolean;
     /** Optional children for mode-specific content */
     children?: React.ReactNode;
     onBack: () => void;
@@ -55,6 +57,7 @@ export function GameIntroScreen({
     startButtonColor = "purple",
     startDisabled = false,
     children,
+    loading = false,
     onBack,
     onStart,
 }: GameIntroScreenProps) {
@@ -102,6 +105,7 @@ export function GameIntroScreen({
                 color={startButtonColor}
                 onClick={() => void onStart()}
                 disabled={startDisabled}
+                loading={loading}
                 className="w-full max-w-sm py-5 text-xl"
             >
                 {startButtonText}

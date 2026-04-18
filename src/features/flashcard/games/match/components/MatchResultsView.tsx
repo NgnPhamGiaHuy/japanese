@@ -61,6 +61,7 @@ const MatchResultsView = ({
             primaryColor="purple"
             onPlayAgain={onPlayAgain}
             onCollectXP={onCollectXP}
+            xpEarned={score}
         />
     );
 };

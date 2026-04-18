@@ -479,7 +479,7 @@ export function useMatchModeSession({
         savedRef.current = true;
 
         const finalScore = finalScoreRef.current;
-        void addXPRef.current(Math.round(finalScore / 10));
+        void addXPRef.current(finalScore);
 
         if (isSharedContextRef.current) {
             // Shared context: write to viewer's sharedProgress only, skip leaderboard.

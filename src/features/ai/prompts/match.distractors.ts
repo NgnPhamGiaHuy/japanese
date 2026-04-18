@@ -1,34 +1,37 @@
 /**
- * Prompt for Match Mode decoy tiles — interference (similar form/meaning), not trivia.
+ * Board-aware distractor generator
+ * Prevent duplicates + semantic collisions
  */
 
-export function getMatchDistractorsPrompt(
-    targetJapanese: string,
-    targetEnglish: string,
-    count: number,
-): string {
-    const safeCount = Math.min(Math.max(count, 1), 12);
+export function getMatchDistractorsPrompt(existingTiles: string[], count: number): string {
+    const safeCount = Math.min(Math.max(count, 1), 24);
+    const japCount = Math.ceil(safeCount * 0.9);
+    const engCount = safeCount - japCount;
 
-    return `You help design a Japanese flashcard matching game.
+    return `You are a Japanese pedagogy expert and game designer.
+  
+TASK:
+Generate exactly ${safeCount} unique decoy tiles (distractors) for a Japanese matching game.
 
-Learners see ALL tiles face-up in one grid. The grid contains two types of tiles:
-1. PURE Japanese labels (hiragana/kanji)
-2. PURE English meanings
+THE BOARD (DO NOT REPEAT OR USE SYNONYMS OF THESE):
+${JSON.stringify(existingTiles)}
 
-You output ONLY decoy labels (distractors) that MUST match one of these two types.
+---
 
-Target Japanese (from the current deck): ${targetJapanese}
-Target English (from the current deck): ${targetEnglish}
+STRICT QUOTA:
+- Generate exactly ${japCount} Japanese words (Hiragana/Katakana/Kanji).
+- Generate exactly ${engCount} English meanings (Actual translations).
 
-Return JSON ONLY: { "distractors": string[] }
+RULES:
+1. NO DUPLICATES: Check the board above carefully. Do not repeat any word or variation of it.
+2. NO SYNONYMS: If "Good morning" is on board, do NOT generate "Morning" or "Hello".
+3. NO ROMAJI: Japanese tiles must be in Japanese script. English tiles must be English.
+4. ATOMIC: Each string is exactly ONE tile. No slashes or commas.
+5. NO CROSS-MATCHES: Your distractors must NOT form a valid pair with any board tile.
 
-STRICT RULES for distractors:
-- Exactly ${safeCount} strings.
-- ATOMIC TILES: Each string must be EITHER pure Japanese OR pure English. 
-- NO MIXED CONTENT: Never combine Japanese and English in one string. 
-- NO SEPARATORS: Never use slashes (/), parentheses (), or commas (,) to combine multiple forms.
-- VISUAL INTERFERENCE: For Japanese decoys, use visually similar kana/kanji (e.g., シ vs ツ, は vs ほ).
-- SEMANTIC INTERFERENCE: For English decoys, use words from the same semantic domain (e.g., if "buy" is a target, use "sell" as a decoy).
-- WRONG ANSWERS: Every decoy must be a plausible confusion, but must NOT form a valid pair with any target.
-- Length limit: ≤20 characters per string.`;
+STRATEGY:
+- Use visual interference for Japanese (e.g., matching radical patterns).
+- Use semantic category interference for English (e.g., if board has "Red", generate "Blue").
+
+RETURN JSON ONLY: { "distractors": string[] }`;
 }

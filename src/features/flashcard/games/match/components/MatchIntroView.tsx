@@ -49,6 +49,7 @@ const MatchIntroView = ({
             startButtonText={prepLoading ? "Preparing…" : "Play"}
             startButtonColor="purple"
             startDisabled={cardCount < requiredPairs || prepLoading}
+            loading={prepLoading}
             onBack={onBack}
             onStart={onStart}
         >

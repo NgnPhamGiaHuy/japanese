@@ -1,9 +1,6 @@
 import { getGenerativeModel } from "firebase/ai";
 
-import {
-    splitAtomicPrimary,
-    validateAtomicCard,
-} from "@/features/flashcard/core/utils/card.validator";
+import { splitAtomicPrimary, validateAtomicCard, } from "@/features/flashcard/core/utils/card.validator";
 import { firebaseAI } from "@/lib/firebase";
 import { getCardGenerationPrompt, getDeckGenerationPrompt } from "./prompt-builder";
 import { AI_CONFIG } from "../config";
@@ -343,20 +340,6 @@ export const generateCardData = async (word: string): Promise<GeneratedCard> => 
     }
 };
 
-const normLabel = (s: string) => s.trim().toLowerCase();
-
-function blocklistFromCards(cards: FlashCard[]): Set<string> {
-    const b = new Set<string>();
-    for (const c of cards) {
-        b.add(normLabel(c.primary));
-        b.add(normLabel(c.meaning));
-        for (const a of c.alternatives || []) {
-            if (a?.trim()) b.add(normLabel(a));
-        }
-    }
-    return b;
-}
-
 /**
  * Decoy tiles: visually/semantically similar to pool content; deduped against targets.
  * Strictly separates Japanese and English to prevent mixed-language tiles.
@@ -365,25 +348,57 @@ export const generateMatchDistractors = async (
     cards: FlashCard[],
     count: number,
 ): Promise<string[]> => {
-    const safeCount = Math.min(Math.max(count, 1), 12); // Slightly higher internal limit
-    const blocklist = blocklistFromCards(cards);
+    const safeCount = Math.min(Math.max(count, 1), 24);
+    const clean = (s: string) => s.split(/[/(,]/)[0].trim();
+    const nl = (s: string) => s.trim().toLowerCase();
 
-    // Separate Japanese and English to teach the AI the "atomic" tile principle
-    const targetJapanese = Array.from(
-        new Set(cards.flatMap((c) => [c.primary, ...(c.alternatives || [])]).filter(Boolean)),
-    ).join(", ");
-    const targetEnglish = Array.from(new Set(cards.map((c) => c.meaning).filter(Boolean))).join(
-        ", ",
+    // 1. Precise board representation (match exactly what is on the grid)
+    const existingTiles = Array.from(
+        new Set(
+            cards.flatMap((c) => [clean(c.primary), clean(c.meaning)]).filter((s) => s.length > 0),
+        ),
     );
 
-    const prompt = getMatchDistractorsPrompt(targetJapanese, targetEnglish, safeCount);
+    // 2. Semantic blocklist for final validation
+    const semanticBlocklist = new Set<string>();
+    cards.forEach((c) => {
+        [c.primary, ...(c.alternatives || []), c.meaning].forEach((val) => {
+            if (!val) return;
+            semanticBlocklist.add(nl(val));
+            semanticBlocklist.add(nl(clean(val)));
+        });
+    });
 
-    const fallbacks = ["シート", "ツール", "ぬいぐるみ", "めがね", "かう", "うる", "あさ", "ばん"];
-    const lessonMeanings = cards
-        .slice(1)
-        .map((c) => c.meaning)
-        .filter((m): m is string => typeof m === "string" && m.trim().length > 0)
-        .map((m) => m.trim());
+    const prompt = getMatchDistractorsPrompt(existingTiles, safeCount);
+
+    const fallbacksJapanese = [
+        "シート",
+        "ツール",
+        "ぬいぐるみ",
+        "めがね",
+        "あさ",
+        "ばん",
+        "みず",
+        "おちゃ",
+        "ほん",
+        "ぺん",
+        "いえ",
+        "くるま",
+    ];
+    const fallbacksEnglish = [
+        "Table",
+        "Chair",
+        "Phone",
+        "Watch",
+        "Tree",
+        "Road",
+        "Sky",
+        "Cloud",
+        "Apple",
+        "Bread",
+        "City",
+        "Home",
+    ];
 
     let rawList: string[] = [];
     try {
@@ -391,35 +406,50 @@ export const generateMatchDistractors = async (
         const raw = JSON.parse(extractJSON(text)) as { distractors?: unknown };
         const list = Array.isArray(raw.distractors) ? raw.distractors : [];
         rawList = list
-            .filter((d): d is string => typeof d === "string" && d.trim().length > 0)
-            .map((d) => d.trim().split(" / ")[0]); // Safety: strip any slashes the AI might have still included
+            .filter((d): d is string => typeof d === "string" && d.length > 0)
+            .map((d) => clean(d));
     } catch {
-        rawList = lessonMeanings.length >= 3 ? lessonMeanings : [];
+        rawList = [];
     }
 
     const out: string[] = [];
-    let fb = 0;
-    const taken = new Set(blocklist);
+    const taken = new Set(semanticBlocklist);
 
-    for (let i = 0; i < safeCount; i++) {
-        const candidate =
-            rawList[i] ??
-            lessonMeanings.find((m) => !taken.has(normLabel(m))) ??
-            fallbacks[fb % fallbacks.length];
-        fb++;
-        let resolved = candidate;
-        let guard = 0;
-        while (guard < 40 && taken.has(normLabel(resolved))) {
-            resolved = `${fallbacks[fb % fallbacks.length]}${guard}`;
-            fb++;
-            guard++;
+    // 3. Post-process AI results with strict semantic filtering
+    const candidatePool = [...rawList, ...fallbacksEnglish, ...fallbacksJapanese];
+
+    for (const candidate of candidatePool) {
+        if (out.length >= safeCount) break;
+        const normalized = nl(candidate);
+
+        // Strict duplication check
+        let isDuplicate = taken.has(normalized);
+        if (!isDuplicate) {
+            // Check for partial collisions (e.g. "Sorry" vs "I'm sorry")
+            for (const blocked of taken) {
+                if (
+                    blocked.length > 3 &&
+                    (blocked.includes(normalized) || normalized.includes(blocked))
+                ) {
+                    isDuplicate = true;
+                    break;
+                }
+            }
         }
-        if (taken.has(normLabel(resolved))) resolved = `·${i + 1}`;
-        taken.add(normLabel(resolved));
-        out.push(resolved);
+
+        if (!isDuplicate) {
+            taken.add(normalized);
+            out.push(candidate);
+        }
     }
 
-    return out.slice(0, safeCount);
+    // 4. Absolute emergency fallback
+    while (out.length < safeCount) {
+        const fallback = `Item ${out.length + 1}`;
+        out.push(fallback);
+    }
+
+    return out;
 };
 
 export const generateDeck = async (
@@ -450,7 +480,7 @@ export const generateDeck = async (
         const rawCards = parseCardArray(JSON.parse(extractJSON(text)));
 
         // 1. Split non-atomic cards
-        let splitCards: GeneratedCard[] = [];
+        const splitCards: GeneratedCard[] = [];
         for (const card of rawCards) {
             const validation = validateAtomicCard(card);
             if (!validation.valid) {
@@ -496,7 +526,7 @@ export const generateDeckFromImages = async (
         );
 
         // 1. Split non-atomic cards
-        let splitCards: GeneratedCard[] = [];
+        const splitCards: GeneratedCard[] = [];
         for (const card of rawCards) {
             const validation = validateAtomicCard(card);
             if (!validation.valid) {

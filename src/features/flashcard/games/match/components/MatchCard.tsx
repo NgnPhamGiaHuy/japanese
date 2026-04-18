@@ -21,6 +21,18 @@ const surfaceRing: Record<MatchCardSurface, string> = {
 };
 
 const MatchCard = ({ label, surface, disabled, onPress, tabIndex }: MatchCardProps) => {
+    // Dynamic font sizing to handle long phrases/complex Japanese (Requirement 7.2)
+    const len = label.length;
+    let fontSizeClass = "text-sm sm:text-base leading-snug"; // Default
+
+    if (len > 30) {
+        fontSizeClass = "text-[9px] sm:text-[10px] leading-[1.1]"; // Extremely long
+    } else if (len > 18) {
+        fontSizeClass = "text-[11px] sm:text-xs leading-tight"; // Long
+    } else if (len > 10) {
+        fontSizeClass = "text-xs sm:text-sm leading-tight"; // Medium
+    }
+
     return (
         <motion.button
             type="button"
@@ -29,14 +41,14 @@ const MatchCard = ({ label, surface, disabled, onPress, tabIndex }: MatchCardPro
             onClick={onPress}
             tabIndex={tabIndex}
             className={[
-                "flex min-h-[76px] w-full cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-b-4 p-2 text-center font-black transition-all duration-150 select-none",
+                "flex min-h-[76px] w-full cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-b-4 p-2.5 text-center font-black transition-all duration-150 select-none sm:min-h-[84px]",
                 surfaceRing[surface],
                 surface === "error" ? "animate-shake" : "",
                 disabled ? "pointer-events-none opacity-40" : "",
             ].join(" ")}
             whileTap={disabled ? undefined : { scale: 0.97 }}
         >
-            <span className="line-clamp-4 text-sm leading-snug wrap-break-word sm:text-base">
+            <span className={`${fontSizeClass} block w-full break-words overflow-hidden`}>
                 {label}
             </span>
         </motion.button>

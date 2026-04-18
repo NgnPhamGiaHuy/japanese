@@ -80,9 +80,9 @@ export const DIFFICULTY_CONFIG: Record<MatchDifficulty, DifficultyConfig> = {
         pairs: 6,
         timeLimit: 120,
         label: "Master",
-        sub: "6 pairs · 14 distractors · mixed prompts · timer",
+        sub: "6 pairs · 18 AI distractors · mixed prompts · timer",
         color: "#ea2b2b",
-        distractorTiles: 14,
+        distractorTiles: 18,
         lives: 5,
         game: {
             pairType: "mixed",
