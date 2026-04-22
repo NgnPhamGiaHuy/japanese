@@ -6,7 +6,43 @@
  * Supports both personal decks and shared decks with a single interface.
  */
 
-import type { FlashCard, Lesson } from "../types";
+/**
+ * @file Flashcard Loader Types
+ *
+ * @remarks
+ * Defines the unified data loading abstraction for flashcard games.
+ * Supports both personal decks and shared decks with a single interface.
+ */
+/**
+ * @file Flashcard Loader Types
+ *
+ * @remarks
+ * Defines the unified data loading abstraction for flashcard games.
+ * Supports both personal decks and shared decks with a single interface.
+ */
+/**
+ * @file Flashcard Loader Types
+ *
+ * @remarks
+ * Defines the unified data loading abstraction for flashcard games.
+ * Supports both personal decks and shared decks with a single interface.
+ */
+/**
+ * @file Flashcard Loader Types
+ *
+ * @remarks
+ * Defines the unified data loading abstraction for flashcard games.
+ * Supports both personal decks and shared decks with a single interface.
+ */
+/**
+ * @file Flashcard Loader Types
+ *
+ * @remarks
+ * Defines the unified data loading abstraction for flashcard games.
+ * Supports both personal decks and shared decks with a single interface.
+ */
+import type { Lesson } from "../types";
+import type { CardWithProgress } from "../../domain/types";
 
 /**
  * Discriminated union for flashcard data sources.
@@ -17,10 +53,17 @@ export type FlashcardSource =
 
 /**
  * Unified flashcard data structure returned by loaders.
+ *
+ * @remarks
+ * cards is CardWithProgress[] — content merged with the current user's SRS state.
+ * All game modes and study sessions consume this merged type.
+ *
+ * For study mode, prefer consuming live cards from useCardsWithProgress directly
+ * so status counts update without a full reload.
  */
 export interface FlashcardData {
-    /** Card collection for the game */
-    cards: FlashCard[];
+    /** Card collection merged with current user's progress (snapshot at load time) */
+    cards: CardWithProgress[];
 
     /** Lesson metadata */
     lesson: Lesson;
@@ -33,6 +76,13 @@ export interface FlashcardData {
 
     /** Source information for analytics/debugging */
     source: FlashcardSource;
+
+    /**
+     * Owner of the card content.
+     * For personal decks: current user's uid.
+     * For shared decks: the deck owner's uid.
+     */
+    ownerId: string;
 }
 
 /**

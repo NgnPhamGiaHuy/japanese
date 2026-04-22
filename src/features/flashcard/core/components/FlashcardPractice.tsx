@@ -13,12 +13,11 @@ import { Check, Lightbulb, RefreshCw, Volume2, X } from "lucide-react";
 import { Button } from "@/shared/components/ui";
 import { hexToThemeColor, playAudio, playSFX, shuffleArray } from "@/shared/utils";
 import { useAppStore } from "@/store";
-import { gradeCard } from "../services/card.service";
-import { getAudioText, resolveCardFaces } from "../utils/displayEngine";
-import { getDailyProgress, incrementDailyReviewCount, reinsertCard } from "../utils/learningEngine";
+import { getDailyProgress, gradeCard } from "../services";
+import { getAudioText, reinsertCard, resolveCardFaces } from "../utils";
 
-import type { Grade } from "../services/card.service";
-import type { FlashCard, Lesson, StudyStats } from "../types";
+import type { Lesson, StudyStats } from "../types";
+import type { CardWithProgress, Grade } from "../../domain";
 
 /**
  * FlashcardPractice — SRS-integrated mixed-modality session.
@@ -37,11 +36,11 @@ interface FlashcardPracticeProps {
     /** The userId of the authenticated user */
     userId: string;
     /** The batch of cards due for review */
-    cards: FlashCard[];
+    cards: CardWithProgress[];
     /** Triggered on manual exit */
     onClose: () => void;
     /** Persistence handler for SRS state updates */
-    onAnswer: (card: FlashCard, grade: Grade) => Promise<void>;
+    onAnswer: (card: CardWithProgress, grade: Grade) => Promise<void>;
     /** Final transition to reward/summary screen */
     onComplete: (stats: StudyStats) => void;
 }
@@ -64,7 +63,7 @@ const FlashcardPractice = ({
     const themeHex = lesson.themeColor || "#1cb0f6";
 
     /** Local queue state — initialized from cards prop, supports Again re-insertion */
-    const [queue, setQueue] = useState<FlashCard[]>(() => [...cards]);
+    const [queue, setQueue] = useState<CardWithProgress[]>(() => [...cards]);
     const [currentIndex, setCurrentIndex] = useState(0);
     const [isFlipped, setIsFlipped] = useState(false);
 
@@ -115,7 +114,6 @@ const FlashcardPractice = ({
         const d = card?.distractors;
         if (!d || d.length < 3) return null;
         return shuffleArray([card.meaning, ...d.slice(0, 3)]);
-        // Re-shuffle only when current index changes to prevent choices jumping on state updates
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [currentIndex]);
 
@@ -150,37 +148,22 @@ const FlashcardPractice = ({
     const headerHint = displayHint && displayHint !== altSubtitle ? displayHint : null;
     const progress = (currentIndex / queue.length) * 100;
 
-    /**
-     * Advancement Orchestrator for flip mode.
-     * Handles grade, re-insertion for Again, daily count increment, and queue advancement.
-     */
-    const handleGrade = async (grade: Grade) => {
+    const handleGrade = (grade: Grade) => {
         const knew = grade === "Good" || grade === "Easy";
         const nextMistakes = knew ? stats.mistakeCardIds : [...stats.mistakeCardIds, card.id];
-        const nextStats: StudyStats = {
+        setStats({
             correct: stats.correct + (knew ? 1 : 0),
             incorrect: stats.incorrect + (!knew ? 1 : 0),
             mistakeCardIds: nextMistakes,
-        };
-        setStats(nextStats);
+        });
         setIsFlipped(false);
         setHintVisible(false);
         setMcSelected(null);
-        if (knew) {
-            playSFX("correct");
-        } else {
-            playSFX("wrong");
-        }
+        playSFX(knew ? "correct" : "wrong");
 
-        await gradeCard(userId, card.id, card, grade);
-        await incrementDailyReviewCount(userId);
-        await onAnswer(card, grade);
-
+        // Advance UI immediately — writes are fire-and-forget
         if (grade === "Again") {
-            // Re-insert 3–5 positions ahead in the queue
-            const newQueue = reinsertCard(queue, currentIndex);
-            setQueue(newQueue);
-            // currentIndex stays the same — the next card is now at the same index
+            setQueue(reinsertCard(queue, currentIndex));
         } else {
             if (currentIndex < queue.length - 1) {
                 setCurrentIndex((i) => i + 1);
@@ -188,6 +171,10 @@ const FlashcardPractice = ({
                 setShowSummary(true);
             }
         }
+
+        // Persist to Firestore in the background — never blocks card advance
+        void gradeCard(userId, card.id, card, grade, card.lessonId, lesson.ownerId).catch(() => {});
+        void onAnswer(card, grade).catch(() => {});
     };
 
     const handleMCSelect = (choice: string) => {
@@ -288,7 +275,7 @@ const FlashcardPractice = ({
                                 </span>
                             )}
                             <div className="flex w-full flex-1 flex-col items-center justify-center px-2 py-2">
-                                <h1 className="w-full text-center text-3xl leading-tight font-black wrap-break-word text-[#3c3c3c] select-none sm:text-4xl md:text-5xl">
+                                <h1 className="w-full text-center text-3xl leading-tight font-black wrap-break-word text-[#3c3c3c] select-text sm:text-4xl md:text-5xl">
                                     {displayFront}
                                 </h1>
                                 {altSubtitle && (
@@ -392,7 +379,7 @@ const FlashcardPractice = ({
                                 )}
                                 <div className="flex w-full flex-1 flex-col items-center justify-center overflow-y-auto px-2 pt-2 pb-8">
                                     <h1
-                                        className={`w-full text-center leading-tight font-black wrap-break-word text-[#3c3c3c] select-none ${card.imageUrl ? "text-2xl sm:text-3xl" : "text-3xl sm:text-4xl md:text-5xl"}`}
+                                        className={`w-full text-center leading-tight font-black wrap-break-word text-[#3c3c3c] select-text ${card.imageUrl ? "text-2xl sm:text-3xl" : "text-3xl sm:text-4xl md:text-5xl"}`}
                                     >
                                         {displayFront}
                                     </h1>

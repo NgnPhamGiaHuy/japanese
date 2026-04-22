@@ -3,7 +3,7 @@
 import { Image as ImageIcon, Sparkles, Trash2 } from "lucide-react";
 
 import { Button, ReorderItem } from "@/shared/components/ui";
-import { splitAlternatives, joinAlternatives } from "../utils/formatting";
+import { joinAlternatives, splitAlternatives } from "../utils/formatting";
 
 import type { EditorCard } from "../types";
 
@@ -42,7 +42,7 @@ const DraggableCard = ({
         <ReorderItem
             value={card}
             disabled={saving}
-            className="group relative rounded-3xl border-2 border-b-8 border-gray-200 bg-white p-4 shadow-sm transition-colors select-none focus-within:border-[var(--theme-color)] sm:rounded-[2rem] sm:p-6"
+            className="group relative rounded-3xl border-2 border-b-8 border-gray-200 bg-white p-4 shadow-sm transition-colors select-text focus-within:border-[var(--theme-color)] sm:rounded-[2rem] sm:p-6"
         >
             {/* Index Badge */}
             <div className="absolute -top-2 -left-2 flex h-8 w-8 -rotate-3 transform items-center justify-center rounded-lg border-b-4 border-black bg-[#3c3c3c] text-sm font-black text-white shadow-sm transition-all group-active:scale-110 sm:-top-3 sm:-left-3 sm:h-10 sm:w-10 sm:rounded-xl sm:text-lg">
@@ -61,7 +61,7 @@ const DraggableCard = ({
                 iconSize={18}
             />
 
-            <div className="mt-4 grid grid-cols-1 gap-5 select-text sm:gap-6 md:grid-cols-2">
+            <div className="mt-4 grid grid-cols-1 gap-5 sm:gap-6 md:grid-cols-2">
                 {/* Primary Word */}
                 <div className="md:col-span-2">
                     <div className="mb-1 flex items-center justify-between">
@@ -83,14 +83,16 @@ const DraggableCard = ({
                         </Button>
                     </div>
                     <input
-                        className={`w-full border-b-2 border-gray-100 bg-transparent pb-1 text-xl font-black text-[#3c3c3c] transition-colors outline-none select-text focus:border-[var(--theme-color)] sm:pb-2 sm:text-3xl ${aiLoading ? "opacity-60" : ""}`}
+                        className={`w-full border-b-2 border-gray-100 bg-transparent pb-1 text-xl font-black text-[#3c3c3c] transition-colors outline-none focus:border-[var(--theme-color)] sm:pb-2 sm:text-3xl ${aiLoading ? "opacity-60" : ""}`}
                         placeholder="食べる / たべる"
                         value={card.primary || ""}
                         onChange={(e) => onUpdate(card.id, "primary", e.target.value)}
                         disabled={saving || aiLoading}
                     />
                     {aiError && (
-                        <p className="mt-1 text-[9px] font-bold text-[#ea2b2b] sm:text-[10px]">{aiError}</p>
+                        <p className="mt-1 text-[9px] font-bold text-[#ea2b2b] sm:text-[10px]">
+                            {aiError}
+                        </p>
                     )}
                 </div>
 
@@ -101,7 +103,7 @@ const DraggableCard = ({
                             Alternative
                         </label>
                         <input
-                            className="w-full border-b-2 border-gray-100 bg-transparent pb-1 text-base font-bold text-[#3c3c3c] transition-colors outline-none select-text focus:border-[var(--theme-color)] sm:pb-2 sm:text-xl"
+                            className="w-full border-b-2 border-gray-100 bg-transparent pb-1 text-base font-bold text-[#3c3c3c] transition-colors outline-none focus:border-[var(--theme-color)] sm:pb-2 sm:text-xl"
                             placeholder="Alternate forms (e.g. 漢字 / かな)"
                             value={joinAlternatives(card.alternatives)}
                             onChange={(e) =>
@@ -118,7 +120,7 @@ const DraggableCard = ({
                         Meaning ✱
                     </label>
                     <input
-                        className="w-full border-b-2 border-gray-100 bg-transparent pb-1 text-base font-bold text-[#3c3c3c] transition-colors outline-none select-text focus:border-[var(--theme-color)] sm:pb-2 sm:text-xl"
+                        className="w-full border-b-2 border-gray-100 bg-transparent pb-1 text-base font-bold text-[#3c3c3c] transition-colors outline-none focus:border-[var(--theme-color)] sm:pb-2 sm:text-xl"
                         placeholder="To eat"
                         value={card.meaning}
                         onChange={(e) => onUpdate(card.id, "meaning", e.target.value)}
@@ -132,7 +134,7 @@ const DraggableCard = ({
                         Example Sentence (Optional)
                     </label>
                     <input
-                        className="w-full border-b-2 border-gray-100 bg-transparent pb-1 text-sm font-bold text-[#3c3c3c] transition-colors outline-none select-text focus:border-[var(--theme-color)] sm:pb-2 sm:text-base"
+                        className="w-full border-b-2 border-gray-100 bg-transparent pb-1 text-sm font-bold text-[#3c3c3c] transition-colors outline-none focus:border-[var(--theme-color)] sm:pb-2 sm:text-base"
                         placeholder="りんごを食べる。"
                         value={card.example}
                         onChange={(e) => onUpdate(card.id, "example", e.target.value)}

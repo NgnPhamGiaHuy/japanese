@@ -22,7 +22,6 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 
 import { generateMatchDistractors } from "@/features/ai";
-import { saveSharedStudyProgress } from "@/features/flashcard/core/services/shared.service";
 import { useGameSession } from "@/features/game/hooks";
 import {
     calcMatchPoints,
@@ -33,9 +32,8 @@ import {
 } from "@/features/game/modes";
 import { recordGameResult } from "@/features/game/services";
 import { allowAudio, playAudio, playSFX, shuffleArray } from "@/shared/utils";
+import { getAudioText, gradeCard } from "../../../core";
 import { useMatchGameStore } from "../../../core/hooks";
-import { gradeCard } from "../../../core/services";
-import { getAudioText } from "../../../core/utils";
 
 import type { MatchDifficulty } from "@/features/game/modes";
 import type { MatchItem } from "../../../core/hooks";
@@ -54,10 +52,6 @@ interface UseMatchModeSessionParams {
     userId?: string;
     displayName?: string | null;
     addXP: (amount: number) => Promise<void>;
-    isSharedContext?: boolean;
-    shareId?: string;
-    sourceUserId?: string;
-    sourceLessonId?: string;
 }
 
 /**
@@ -124,10 +118,6 @@ export function useMatchModeSession({
     userId,
     displayName,
     addXP,
-    isSharedContext,
-    shareId,
-    sourceUserId,
-    sourceLessonId,
 }: UseMatchModeSessionParams) {
     const [phase, setPhase] = useState<MatchPhase>("intro");
     const [difficulty, setDifficulty] = useState<MatchDifficulty>(2);
@@ -145,19 +135,14 @@ export function useMatchModeSession({
         bonus: number;
     } | null>(null);
 
-    // Refs that must not trigger re-renders but need to be current in callbacks.
     const comboIdRef = useRef(0);
     const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
     const savedRef = useRef(false);
     const finalScoreRef = useRef(0);
     const livesModeRef = useRef(false);
-    const isSharedContextRef = useRef(isSharedContext ?? false);
-    const shareIdRef = useRef(shareId);
-    const sourceUserIdRef = useRef(sourceUserId);
-    const sourceLessonIdRef = useRef(sourceLessonId);
 
     // scoreRef mirrors score state so the end-game RAF reads the latest value
-    // without needing score in its dependency array (which would cause re-registration).
+    // without needing score in its dependency array.
     const scoreRef = useRef(0);
 
     const config = DIFFICULTY_CONFIG[difficulty];
@@ -195,10 +180,6 @@ export function useMatchModeSession({
         displayNameRef.current = displayName;
         gameModeRef.current = gameMode;
         scoreRef.current = score;
-        isSharedContextRef.current = isSharedContext ?? false;
-        shareIdRef.current = shareId;
-        sourceUserIdRef.current = sourceUserId;
-        sourceLessonIdRef.current = sourceLessonId;
     });
 
     /**
@@ -289,10 +270,10 @@ export function useMatchModeSession({
                 if (uid && a.pairId) {
                     const card = cards.find((c) => c.id === a.pairId);
                     if (card) {
-                        // Skip SRS grading in shared context — viewer cannot write to owner's cards.
-                        if (!isSharedContextRef.current) {
-                            void gradeCard(uid, a.pairId, card, "Good").catch(() => {});
-                        }
+                        // Write to userProgress — works for both owner and shared users.
+                        void gradeCard(uid, a.pairId, card, "Good", card.lessonId, uid).catch(
+                            () => {},
+                        );
 
                         if (allowAudio("match", "feedback")) {
                             // Delay so the "ting" SFX is heard before pronunciation.
@@ -480,18 +461,6 @@ export function useMatchModeSession({
 
         const finalScore = finalScoreRef.current;
         void addXPRef.current(finalScore);
-
-        if (isSharedContextRef.current) {
-            // Shared context: write to viewer's sharedProgress only, skip leaderboard.
-            const uid = userIdRef.current;
-            const sid = shareIdRef.current;
-            const srcUid = sourceUserIdRef.current;
-            const srcLid = sourceLessonIdRef.current;
-            if (uid && sid && srcUid && srcLid) {
-                void saveSharedStudyProgress(uid, sid, srcUid, srcLid, finalScore).catch(() => {});
-            }
-            return;
-        }
 
         void endSessionRef.current(finalScore);
 

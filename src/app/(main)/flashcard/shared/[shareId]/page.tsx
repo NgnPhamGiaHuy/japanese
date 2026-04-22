@@ -76,7 +76,7 @@ export default function SharedLessonPage({ params }: { params: Promise<{ shareId
                     >
                         Try Again
                     </Button>
-                    <Button onClick={() => router.push("/flashcard")} variant="secondary">
+                    <Button onClick={() => router.back()} variant="secondary">
                         Go Back
                     </Button>
                 </div>
@@ -94,7 +94,7 @@ export default function SharedLessonPage({ params }: { params: Promise<{ shareId
                 <p className="mb-8 font-bold text-[#afafaf]">
                     This deck may be restricted, deleted, or the link is invalid.
                 </p>
-                <Button onClick={() => router.push("/flashcard")} variant="secondary">
+                <Button onClick={() => router.back()} variant="secondary">
                     Go Back
                 </Button>
             </div>
@@ -150,7 +150,7 @@ export default function SharedLessonPage({ params }: { params: Promise<{ shareId
                 cleanCards,
                 true,
             );
-            router.push("/flashcard");
+            router.back();
         } catch (err) {
             console.error("[SharedLessonPage] Duplicate failed:", err);
             showAlert("error", "Failed to duplicate deck. Please try again.");

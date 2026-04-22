@@ -3,19 +3,23 @@ import {
     collection,
     deleteDoc,
     doc,
-    getDocs,
     onSnapshot,
     query,
     setDoc,
     updateDoc,
     where,
-    writeBatch,
 } from "firebase/firestore";
 
 import { APP_ID, db } from "@/lib/firebase";
+import {
+    gradeCardForUser,
+    resetCardProgressForUser,
+    resetLessonProgressForUser,
+} from "./progress.service";
 
 import type { Unsubscribe } from "firebase/firestore";
 import type { FlashCard } from "../types";
+import type { Grade } from "../../domain";
 
 // ─── Firestore path helpers ────────────────────────────────────────────────
 
@@ -93,19 +97,16 @@ function assertCardSchema(userId: string, card: FlashCard): FlashCard {
 // ─── Write operations ─────────────────────────────────────────────────────
 
 /**
- * Creates a new card with initialized SRS metadata.
+ * Creates a new card document with content fields only.
+ *
+ * @remarks
+ * SRS state is no longer stored on card documents — it lives in
+ * userProgress/{userId}/lessons/{lessonId}/cards/{cardId}.
  *
  * @returns The newly generated Firestore document ID.
  */
 export async function createCard(userId: string, card: Omit<FlashCard, "id">): Promise<string> {
-    const initCard = {
-        ...card,
-        easeFactor: card.easeFactor ?? 2.5,
-        interval: card.interval ?? 0,
-        repetitions: card.repetitions ?? 0,
-        nextReviewAt: card.nextReviewAt ?? Date.now(),
-    };
-    const ref = await addDoc(cardsCol(userId), initCard);
+    const ref = await addDoc(cardsCol(userId), card);
     return ref.id;
 }
 
@@ -127,128 +128,58 @@ export async function reorderCard(userId: string, cardId: string, newOrder: numb
 
 // ─── SRS Processing ───────────────────────────────────────────────────────
 
-const SRS_EASE_MIN = 1.3;
-const SRS_EASE_MAX = 2.5;
-const SRS_EASE_DEFAULT = 2.5;
-
 /**
- * Four-button SM-2 grade values.
+ * Grades a card and persists the result to the user's progress namespace.
  *
- * - `Again` (0): Forgot — reset card to beginning.
- * - `Hard`  (1): Recalled with significant difficulty.
- * - `Good`  (2): Recalled correctly with some effort.
- * - `Easy`  (3): Recalled instantly and effortlessly.
- */
-export type Grade = "Again" | "Hard" | "Good" | "Easy";
-
-/**
- * Applies SM-2 four-button grading to a card and persists the updated SRS fields.
+ * @remarks
+ * Delegates entirely to progress.service — no writes to card documents.
+ * Works for both deck owners and shared users without branching.
  *
- * Grade → SM-2 mapping:
- *   Again (0): reset repetitions to 0, interval to 1, easeFactor -= 0.20 (min 1.3)
- *   Hard  (1): keep repetitions, interval = max(1, round(prev × 0.8)), easeFactor -= 0.15 (min 1.3)
- *   Good  (2): increment repetitions, interval = round(prev × easeFactor × 1.0), easeFactor unchanged
- *   Easy  (3): increment repetitions, interval = round(prev × easeFactor × 1.3), easeFactor += 0.15 (max 2.5)
- *
- * First-repetition bootstrapping (repetitions === 0 before grading):
- *   Good/Easy: interval → 1 (first exposure, not formula)
- *   After first Good (repetitions becomes 1): next Good → interval 6
- *   Subsequent (repetitions ≥ 2): standard SM-2 formula applies
- *
- * @param userId - UID of the card owner.
- * @param cardId - Target card ID.
- * @param currentCard - Prior state for differential calculation.
- * @param grade - The user's four-button recall quality rating.
+ * @param userId - UID of the learner
+ * @param cardId - Target card ID
+ * @param currentCard - Current card state (for SRS calculation)
+ * @param grade - Four-button recall quality rating
+ * @param lessonId - Lesson containing the card
+ * @param ownerId - UID of the card content owner
  */
 export async function gradeCard(
     userId: string,
     cardId: string,
     currentCard: FlashCard,
     grade: Grade,
+    lessonId?: string,
+    ownerId?: string,
 ): Promise<void> {
-    let { easeFactor, interval, repetitions } = currentCard;
+    // Resolve ownerId — falls back to userId for personal decks
+    const resolvedOwner = ownerId ?? userId;
+    const resolvedLesson = lessonId ?? currentCard.lessonId;
 
-    switch (grade) {
-        case "Again":
-            repetitions = 0;
-            interval = 1;
-            easeFactor = Math.max(SRS_EASE_MIN, easeFactor - 0.2);
-            break;
-
-        case "Hard":
-            // repetitions unchanged
-            interval = Math.max(1, Math.round(interval * 0.8));
-            easeFactor = Math.max(SRS_EASE_MIN, easeFactor - 0.15);
-            break;
-
-        case "Good":
-            if (repetitions === 0) {
-                interval = 1;
-            } else if (repetitions === 1) {
-                interval = 6;
-            } else {
-                interval = Math.round(interval * easeFactor * 1.0);
-            }
-            repetitions += 1;
-            // easeFactor unchanged
-            break;
-
-        case "Easy":
-            if (repetitions === 0) {
-                interval = 1;
-            } else {
-                interval = Math.round(interval * easeFactor * 1.3);
-            }
-            repetitions += 1;
-            easeFactor = Math.min(SRS_EASE_MAX, easeFactor + 0.15);
-            break;
-    }
-
-    const nextReviewAt = Date.now() + interval * 86400000;
-
-    await updateDoc(cardDoc(userId, cardId), {
-        interval,
-        repetitions,
-        easeFactor,
-        nextReviewAt,
-    });
+    await gradeCardForUser(userId, resolvedLesson, cardId, resolvedOwner, currentCard, grade);
 }
 
 // ─── Reset Progress ───────────────────────────────────────────────────────
 
-const FRESH_SRS_STATE = {
-    repetitions: 0,
-    interval: 0,
-    easeFactor: SRS_EASE_DEFAULT,
-    nextReviewAt: 0,
-};
-
-/** Resets a single card's SRS progress to factory state. */
-export async function resetCardProgress(userId: string, cardId: string): Promise<void> {
-    await updateDoc(cardDoc(userId, cardId), {
-        ...FRESH_SRS_STATE,
-        nextReviewAt: Date.now(),
-    });
+/**
+ * Resets a single card's SRS progress for the given user.
+ *
+ * @param userId - Learner UID
+ * @param cardId - Card to reset
+ * @param lessonId - Lesson containing the card
+ */
+export async function resetCardProgress(
+    userId: string,
+    cardId: string,
+    lessonId: string,
+): Promise<void> {
+    await resetCardProgressForUser(userId, lessonId, cardId);
 }
 
 /**
- * Atomically resets ALL cards in a lesson via a Firestore WriteBatch.
- * Either all cards are reset or none — no partial state.
+ * Resets all card progress for a lesson for the given user.
  *
- * @param userId - Owner UID.
- * @param lessonId - Deck to reset.
+ * @param userId - Learner UID
+ * @param lessonId - Deck to reset
  */
 export async function resetLessonProgress(userId: string, lessonId: string): Promise<void> {
-    const snap = await getDocs(query(cardsCol(userId), where("lessonId", "==", lessonId)));
-
-    if (snap.empty) return;
-
-    const batch = writeBatch(db);
-    const resetPayload = { ...FRESH_SRS_STATE, nextReviewAt: Date.now() };
-
-    for (const docSnap of snap.docs) {
-        batch.update(docSnap.ref, resetPayload);
-    }
-
-    await batch.commit();
+    await resetLessonProgressForUser(userId, lessonId);
 }

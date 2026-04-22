@@ -1,6 +1,6 @@
 import { getGenerativeModel } from "firebase/ai";
 
-import { splitAtomicPrimary, validateAtomicCard, } from "@/features/flashcard/core/utils/card.validator";
+import { splitAtomicPrimary, validateAtomicCard } from "@/features/flashcard/core";
 import { firebaseAI } from "@/lib/firebase";
 import { getCardGenerationPrompt, getDeckGenerationPrompt } from "./prompt-builder";
 import { AI_CONFIG } from "../config";

@@ -7,14 +7,19 @@
  */
 
 import { matchGameMode, speedGameMode } from "@/features/game/modes";
-import { getSharedLesson } from "../services/shared.service";
+import { getSharedLesson } from "../services";
 
 import type { User } from "firebase/auth";
 import type { FlashcardData, FlashcardSource } from "./types";
-import type { FlashCard, Lesson } from "../types";
+import type { Lesson } from "../types";
+import type { CardWithProgress } from "../../domain";
 
 /**
  * Loads flashcard data from the specified source.
+ *
+ * @remarks
+ * Unified loader supporting both personal and shared decks.
+ * For shared decks, loads content from owner + progress from viewer.
  *
  * @param source - Data source (personal or shared)
  * @param lessons - Personal lessons (required for personal source)
@@ -26,7 +31,7 @@ import type { FlashCard, Lesson } from "../types";
 export async function loadFlashcardData(
     source: FlashcardSource,
     lessons?: Lesson[],
-    cards?: FlashCard[],
+    cards?: CardWithProgress[],
     currentUserId?: string,
     currentUser?: User | null,
 ): Promise<FlashcardData | null> {
@@ -44,6 +49,7 @@ export async function loadFlashcardData(
         return {
             cards,
             lesson,
+            ownerId: lesson.ownerId ?? currentUserId ?? "",
             gameMode: (mode: string) => {
                 switch (mode) {
                     case "match":
@@ -61,26 +67,19 @@ export async function loadFlashcardData(
         };
     }
 
-    // Shared deck loading
+    // Shared deck loading — content from owner, progress from viewer
     if (source.type === "shared") {
         try {
-            console.log("[FlashcardLoader] Loading shared deck:", source.shareId);
             const result = await getSharedLesson(source.shareId, currentUserId, currentUser);
 
             if (!result) {
-                console.log("[FlashcardLoader] Shared deck not found:", source.shareId);
                 return null;
             }
-
-            console.log("[FlashcardLoader] Shared deck loaded successfully:", {
-                shareId: source.shareId,
-                lessonTitle: result.lesson.title,
-                cardCount: result.cards.length,
-            });
 
             return {
                 cards: result.cards,
                 lesson: result.lesson,
+                ownerId: result.meta.sourceUserId,
                 gameMode: (mode: string) => {
                     switch (mode) {
                         case "match":

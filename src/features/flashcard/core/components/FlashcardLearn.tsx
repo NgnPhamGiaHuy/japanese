@@ -13,21 +13,18 @@ import { BookOpen, Volume2, X } from "lucide-react";
 import { Button } from "@/shared/components/ui";
 import { hexToThemeColor, playAudio, playSFX } from "@/shared/utils";
 import { useAppStore } from "@/store";
-import { gradeCard } from "../services/card.service";
-import { getAudioText, resolveCardFaces } from "../utils/displayEngine";
-import { reinsertCard } from "../utils/learningEngine";
+import { gradeCard } from "../services";
+import { getAudioText, reinsertCard, resolveCardFaces } from "../utils";
 
-import type { Grade } from "../services/card.service";
-import type { FlashCard, Lesson, StudyStats } from "../types";
+import type { Lesson, StudyStats } from "../types";
+import type { CardWithProgress, Grade } from "../../domain";
 
 interface FlashcardLearnProps {
     lesson: Lesson;
-    /** The userId of the authenticated user, required for gradeCard calls */
     userId: string;
-    cards: FlashCard[];
+    cards: CardWithProgress[];
     onClose: () => void;
-    /** Called after each grade with the card and the Grade value */
-    onAnswer: (card: FlashCard, grade: Grade) => Promise<void>;
+    onAnswer: (card: CardWithProgress, grade: Grade) => Promise<void>;
     onComplete: (stats: StudyStats) => void;
 }
 
@@ -43,7 +40,7 @@ const FlashcardLearn = ({
     const themeHex = lesson.themeColor || "#1cb0f6";
 
     /** Local queue state — initialized from cards prop, supports Again re-insertion */
-    const [queue, setQueue] = useState<FlashCard[]>(() => [...cards]);
+    const [queue, setQueue] = useState<CardWithProgress[]>(() => [...cards]);
     const [currentIndex, setCurrentIndex] = useState(0);
     const [revealed, setRevealed] = useState(false);
     const [stats, setStats] = useState<StudyStats>({
@@ -94,32 +91,20 @@ const FlashcardLearn = ({
         setRevealed(true);
     };
 
-    const handleGrade = async (grade: Grade) => {
+    const handleGrade = (grade: Grade) => {
         const knew = grade === "Good" || grade === "Easy";
         const nextMistakes = knew ? stats.mistakeCardIds : [...stats.mistakeCardIds, card.id];
-        const nextStats: StudyStats = {
+        setStats({
             correct: stats.correct + (knew ? 1 : 0),
             incorrect: stats.incorrect + (!knew ? 1 : 0),
             mistakeCardIds: nextMistakes,
-        };
-        setStats(nextStats);
-        if (knew) {
-            playSFX("correct");
-        } else {
-            playSFX("wrong");
-        }
+        });
+        playSFX(knew ? "correct" : "wrong");
 
-        // Call gradeCard directly for SM-2 precision
-        await gradeCard(userId, card.id, card, grade);
-        // Also notify parent
-        await onAnswer(card, grade);
-
+        // Advance UI immediately — writes are fire-and-forget
         if (grade === "Again") {
-            // Re-insert 3–5 positions ahead in the queue
-            const newQueue = reinsertCard(queue, currentIndex);
-            setQueue(newQueue);
+            setQueue(reinsertCard(queue, currentIndex));
             setRevealed(false);
-            // currentIndex stays the same — the next card is now at the same index
         } else {
             setRevealed(false);
             if (currentIndex < queue.length - 1) {
@@ -128,6 +113,9 @@ const FlashcardLearn = ({
                 setShowSummary(true);
             }
         }
+
+        void gradeCard(userId, card.id, card, grade, card.lessonId, userId).catch(() => {});
+        void onAnswer(card, grade).catch(() => {});
     };
 
     if (showSummary) {
@@ -212,7 +200,7 @@ const FlashcardLearn = ({
 
                     {/* Front face — always visible */}
                     <div className="flex w-full flex-1 flex-col items-center justify-center px-2 py-4">
-                        <h1 className="w-full text-center text-4xl leading-tight font-black wrap-break-word text-[#3c3c3c] select-none sm:text-5xl">
+                        <h1 className="w-full text-center text-4xl leading-tight font-black wrap-break-word text-[#3c3c3c] select-text sm:text-5xl">
                             {displayFront}
                         </h1>
                     </div>

@@ -1,203 +1,172 @@
-/**
- * @file useFlashcardLoader Hook
- *
- * @remarks
- * Unified hook for loading flashcard data from any source.
- * Handles loading states, errors, and provides consistent API.
- */
-
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
+import { matchGameMode, speedGameMode } from "@/features/game/modes";
 import { useAppStore } from "@/store";
 import { loadFlashcardData } from "./flashcard-loader";
-import { useCards, useLessons } from "../hooks";
+import { useCardsWithProgress } from "../hooks/useCardsWithProgress";
+import { useLessons } from "../hooks/useLessons";
 
 import type { FlashcardData, FlashcardLoaderState, FlashcardSource } from "./types";
 
-/**
- * Module-level cache for shared deck data.
- *
- * @remarks
- * Session-scoped (cleared on full page reload). Prevents redundant Firestore
- * reads when navigating between game-mode routes for the same shareId.
- * Keyed by shareId string.
- */
+/** Session-scoped cache for shared deck metadata (cleared on full page reload). */
 const sharedDataCache = new Map<string, FlashcardData>();
 
 /**
- * Loads flashcard data from the specified source.
+ * Loads flashcard data and keeps cards live via real-time subscriptions.
+ *
+ * @remarks
+ * **Personal decks:**
+ * - Lesson metadata resolved once from useLessons
+ * - Cards subscribed live via useCardsWithProgress (content + progress)
+ * - data.cards always reflects current DB state — no stale snapshot
+ * - Status counts (new/due/mistakes) update immediately after grading
+ *
+ * **Shared decks:**
+ * - Full load via getSharedLesson (one-time, cached per session)
+ * - Progress is merged at load time via getSharedLesson
  *
  * @param source - Data source (personal or shared)
- * @returns Loading state with data
- *
- * @example
- * ```tsx
- * // Personal deck
- * const loader = useFlashcardLoader({ type: "personal", lessonId: "abc123" });
- *
- * // Shared deck
- * const loader = useFlashcardLoader({ type: "shared", shareId: "xyz789" });
- *
- * if (loader.isLoading) return <Loading />;
- * if (loader.isNotFound) return <NotFound />;
- * if (loader.isReady) return <Game data={loader.data} />;
- * ```
  */
 export function useFlashcardLoader(source: FlashcardSource): FlashcardLoaderState {
     const { user, isAuthReady } = useAppStore();
-    const [state, setState] = useState<FlashcardLoaderState>({
+
+    // ── Personal deck: live cards ──────────────────────────────────────────
+    const { lessons, loading: lessonsLoading } = useLessons();
+
+    const lessonId = source.type === "personal" ? source.lessonId : "";
+    // ownerId for personal deck = current user; resolved after lessons load
+    const lesson = useMemo(
+        () => (source.type === "personal" ? lessons.find((l) => l.id === lessonId) : undefined),
+        [lessons, lessonId, source.type],
+    );
+    const ownerId = lesson?.ownerId ?? user?.uid ?? "";
+
+    // Live cards — real-time subscription to both content and progress
+    const { cards, loading: cardsLoading } = useCardsWithProgress(lessonId, ownerId);
+
+    // ── Personal deck: stable FlashcardData (metadata only, cards are live) ─
+    const personalData = useMemo<FlashcardData | null>(() => {
+        if (source.type !== "personal") return null;
+        if (!lesson) return null;
+
+        return {
+            cards, // live reference — updates on every progress change
+            lesson,
+            ownerId,
+            gameMode: (mode: string) => {
+                switch (mode) {
+                    case "match":
+                        return matchGameMode(lessonId);
+                    case "speed":
+                        return speedGameMode(lessonId);
+                    case "study":
+                        return `flashcard_study_${lessonId}`;
+                    default:
+                        return `flashcard_${mode}_${lessonId}`;
+                }
+            },
+            returnPath: `/flashcard/${lessonId}`,
+            source,
+        };
+        // cards intentionally excluded — it's a live ref, not a dep that should
+        // rebuild the whole object. The object is stable; cards inside it updates.
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [lesson, ownerId, lessonId, source.type]);
+
+    // ── Shared deck: one-time load with session cache ──────────────────────
+    const [sharedState, setSharedState] = useState<FlashcardLoaderState>({
         data: null,
-        isLoading: true,
+        isLoading: source.type === "shared",
         isReady: false,
         isNotFound: false,
         error: null,
     });
 
-    // For personal decks, we need to load lessons and cards first
-    const { lessons, loading: lessonsLoading } = useLessons();
-    const { cards, loading: cardsLoading } = useCards(
-        source.type === "personal" ? source.lessonId : "",
-    );
+    const shareId = source.type === "shared" ? source.shareId : "";
 
     useEffect(() => {
-        let cancelled = false;
+        if (source.type !== "shared" || !shareId) return;
+        // Wait for auth to resolve — avoids false 404 on slow networks
+        if (!isAuthReady) return;
 
-        // Personal deck: wait for lessons and cards to load
-        if (source.type === "personal") {
-            if (lessonsLoading || cardsLoading) {
-                setState({
-                    data: null,
-                    isLoading: true,
-                    isReady: false,
-                    isNotFound: false,
-                    error: null,
-                });
-                return;
-            }
-
-            loadFlashcardData(source, lessons, cards, user?.uid, user)
-                .then((data) => {
-                    if (cancelled) return;
-
-                    if (!data) {
-                        setState({
-                            data: null,
-                            isLoading: false,
-                            isReady: false,
-                            isNotFound: true,
-                            error: null,
-                        });
-                    } else {
-                        setState({
-                            data,
-                            isLoading: false,
-                            isReady: true,
-                            isNotFound: false,
-                            error: null,
-                        });
-                    }
-                })
-                .catch((error) => {
-                    if (cancelled) return;
-
-                    setState({
-                        data: null,
-                        isLoading: false,
-                        isReady: false,
-                        isNotFound: false,
-                        error: error instanceof Error ? error : new Error(String(error)),
-                    });
-                });
-
-            return;
-        }
-
-        // Shared deck: defer until Firebase auth has resolved to avoid false 404s
-        // on slow networks where the user object arrives after mount.
-        if (source.type === "shared") {
-            if (!isAuthReady) return;
-
-            const { shareId } = source;
-
-            // Serve from cache when available — prevents redundant Firestore reads
-            // when navigating between game-mode routes for the same shareId.
-            const cached = sharedDataCache.get(shareId);
-            if (cached) {
-                setState({
-                    data: cached,
-                    isLoading: false,
-                    isReady: true,
-                    isNotFound: false,
-                    error: null,
-                });
-                return;
-            }
-
-            setState({
-                data: null,
-                isLoading: true,
-                isReady: false,
+        const cached = sharedDataCache.get(shareId);
+        if (cached) {
+            setSharedState({
+                data: cached,
+                isLoading: false,
+                isReady: true,
                 isNotFound: false,
                 error: null,
             });
+            return;
+        }
 
-            loadFlashcardData(source, undefined, undefined, user?.uid, user)
-                .then((data) => {
-                    if (cancelled) return;
+        let cancelled = false;
+        setSharedState({
+            data: null,
+            isLoading: true,
+            isReady: false,
+            isNotFound: false,
+            error: null,
+        });
 
-                    if (!data) {
-                        setState({
-                            data: null,
-                            isLoading: false,
-                            isReady: false,
-                            isNotFound: true,
-                            error: null,
-                        });
-                    } else {
-                        sharedDataCache.set(shareId, data);
-                        setState({
-                            data,
-                            isLoading: false,
-                            isReady: true,
-                            isNotFound: false,
-                            error: null,
-                        });
-                    }
-                })
-                .catch((error) => {
-                    if (cancelled) return;
-
-                    // Preserve typed SharedLoadError instances so callers can
-                    // distinguish network/quota failures from not-found conditions.
-                    setState({
+        loadFlashcardData(source, undefined, undefined, user?.uid, user)
+            .then((data) => {
+                if (cancelled) return;
+                if (!data) {
+                    setSharedState({
                         data: null,
                         isLoading: false,
                         isReady: false,
-                        isNotFound: false,
-                        error: error instanceof Error ? error : new Error(String(error)),
+                        isNotFound: true,
+                        error: null,
                     });
+                } else {
+                    sharedDataCache.set(shareId, data);
+                    setSharedState({
+                        data,
+                        isLoading: false,
+                        isReady: true,
+                        isNotFound: false,
+                        error: null,
+                    });
+                }
+            })
+            .catch((error) => {
+                if (cancelled) return;
+                setSharedState({
+                    data: null,
+                    isLoading: false,
+                    isReady: false,
+                    isNotFound: false,
+                    error: error instanceof Error ? error : new Error(String(error)),
                 });
-        }
+            });
 
         return () => {
             cancelled = true;
         };
-    }, [
-        source.type,
-        source.type === "personal"
-            ? source.lessonId
-            : source.type === "shared"
-              ? source.shareId
-              : "",
-        lessonsLoading,
-        cardsLoading,
-        lessons,
-        cards,
-        user?.uid,
-        isAuthReady,
-    ]);
+        // user object intentionally omitted — uid is the stable identity key
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [shareId, isAuthReady, user?.uid]);
 
-    return state;
+    // ── Return correct state per source type ──────────────────────────────
+    if (source.type === "shared") return sharedState;
+
+    // Personal deck
+    const isLoading = lessonsLoading || cardsLoading || !personalData;
+    if (isLoading) {
+        return { data: null, isLoading: true, isReady: false, isNotFound: false, error: null };
+    }
+    if (!personalData) {
+        return { data: null, isLoading: false, isReady: false, isNotFound: true, error: null };
+    }
+
+    // Inject live cards into the stable data object before returning
+    // This avoids rebuilding the whole object on every card update
+    personalData.cards = cards;
+
+    return { data: personalData, isLoading: false, isReady: true, isNotFound: false, error: null };
 }

@@ -59,7 +59,7 @@ export default function FlashcardDetailPage({ params }: { params: Promise<{ id: 
                 <p className="mb-8 font-bold text-[#afafaf]">
                     This deck doesn&apos;t exist or you don&apos;t have access.
                 </p>
-                <Button onClick={() => router.push("/flashcard")} variant="secondary">
+                <Button onClick={() => router.back()} variant="secondary">
                     Go Back
                 </Button>
             </div>

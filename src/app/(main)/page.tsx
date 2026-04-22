@@ -4,17 +4,25 @@ import Link from "next/link";
 
 import { AlertTriangle, BookOpen, Clock, Flame, Gamepad2, Trophy } from "lucide-react";
 
-import { getDueCards, useCards, useLessons } from "@/features/flashcard";
+import { getDueCards, useCardsWithProgress, useLessons } from "@/features/flashcard/core";
 import { useUserProgress } from "@/features/user";
 import { Button, StatCard } from "@/shared/components/ui";
 import { CARD_INTERACTIVE, SECTION_HEADING, SPACING } from "@/shared/constants";
+import { useAppStore } from "@/store";
 
 export default function HomePage() {
     const { userData } = useUserProgress();
+    const { user } = useAppStore();
     const { lessons } = useLessons();
-    const { cards } = useCards();
+
+    // Load all the user's own cards merged with their progress.
+    // ownerId === user.uid because this is the dashboard for personal decks only.
+    const { cards } = useCardsWithProgress("", user?.uid ?? "");
+
     const recentLessons = [...lessons].sort((a, b) => b.createdAt - a.createdAt).slice(0, 2);
     const dueCards = getDueCards(cards);
+
+    // easeFactor lives on UserCardProgress — safe to read from CardWithProgress
     const weakCards = cards.filter((c) => c.easeFactor < 2.0);
 
     return (

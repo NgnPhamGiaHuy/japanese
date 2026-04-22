@@ -538,10 +538,6 @@ export async function saveLessonWithCards(
             lessonId: targetLessonId,
             order: i * 1000,
             sortOrder: i,
-            easeFactor: rawData.easeFactor ?? 2.5,
-            interval: rawData.interval ?? 0,
-            repetitions: rawData.repetitions ?? 0,
-            nextReviewAt: rawData.nextReviewAt ?? Date.now(),
         });
 
         batch.set(ref, cardData);

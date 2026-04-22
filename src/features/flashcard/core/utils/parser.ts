@@ -1,5 +1,5 @@
-import { splitAlternatives } from "./formatting";
 import { validateAtomicCard } from "./card.validator";
+import { splitAlternatives } from "./formatting";
 import { FlashCard } from "../types";
 
 export interface ParseResult {
@@ -92,7 +92,7 @@ export function parseText(text: string): ParseResult {
             }
         }
 
-        // Filter out the very last part if it's empty (trailing separator artifact), 
+        // Filter out the very last part if it's empty (trailing separator artifact),
         // but keep empty parts in the middle as they represent columns.
         if (parts.length > 1 && parts[parts.length - 1] === "" && !line.endsWith(separator)) {
             parts.pop();

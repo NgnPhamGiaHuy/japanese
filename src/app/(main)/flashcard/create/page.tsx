@@ -25,13 +25,13 @@ export default function FlashcardCreatePage() {
         <LessonBuilder
             onSave={async (lesson, cards, isNew) => {
                 await saveFullLesson(lesson, cards, isNew);
-                router.push("/flashcard");
+                router.back();
             }}
             onDelete={async (id) => {
                 await deleteLesson(id);
-                router.push("/flashcard");
+                router.back();
             }}
-            onClose={() => router.push("/flashcard")}
+            onClose={() => router.back()}
         />
     );
 }

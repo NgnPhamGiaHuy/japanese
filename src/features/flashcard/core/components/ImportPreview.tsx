@@ -6,11 +6,10 @@
 
 import { useState } from "react";
 
-import { AlertCircle, AlertTriangle, CheckCircle2, Scissors, Trash2 } from "lucide-react";
+import { AlertCircle, CheckCircle2, Trash2 } from "lucide-react";
 
 import { Button } from "@/shared/components/ui";
 import { hexToThemeColor } from "@/shared/utils";
-import { splitAtomicPrimary } from "../utils/card.validator";
 
 /**
  * Represents a single row of imported data in the staging area.
@@ -90,27 +89,6 @@ const ImportPreview = ({
 
     const removeRow = (id: string) => {
         setRows((prev) => prev.filter((r) => r.id !== id));
-    };
-
-    /**
-     * Splits a flagged atomic-violation row into multiple atomic rows,
-     * one per detected primary form.
-     */
-    const splitRow = (id: string) => {
-        setRows((prev) => {
-            const idx = prev.findIndex((r) => r.id === id);
-            if (idx === -1) return prev;
-            const row = prev[idx];
-            const atomicPrimaries = splitAtomicPrimary(row.primary);
-            if (atomicPrimaries.length === 0) return prev;
-            const newRows = atomicPrimaries.map((p, i) => ({
-                ...row,
-                id: `split_${Date.now()}_${i}`,
-                primary: p,
-                atomicViolation: false,
-            }));
-            return [...prev.slice(0, idx), ...newRows, ...prev.slice(idx + 1)];
-        });
     };
 
     const validCount = rows.filter((r) => !r.isInvalid).length;

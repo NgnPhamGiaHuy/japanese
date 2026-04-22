@@ -2,13 +2,13 @@
 
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 
-import { getAudioText, saveSharedStudyProgress } from "@/features/flashcard/core";
+import { getAudioText } from "@/features/flashcard/core";
 import { recordGameResult } from "@/features/game/services";
 import { allowAudio, playAudio, playSFX } from "@/shared/utils";
 import { useGameSession } from "./useGameSession";
 import { GameEngine } from "../engine";
 
-import type { FlashCard } from "@/features/flashcard/core/types";
+import type { FlashCard } from "@/features/flashcard/core";
 import type { GameState, ModeStrategy } from "../engine/types";
 
 interface UseGameEngineConfig {
@@ -19,45 +19,44 @@ interface UseGameEngineConfig {
     userId?: string;
     displayName?: string;
     addXP: (amount: number) => Promise<void>;
-    isSharedContext?: boolean;
-    shareId?: string;
-    sourceUserId?: string;
-    sourceLessonId?: string;
 }
 
+/**
+ * React adapter for the GameEngine class.
+ *
+ * @remarks
+ * Bridges the imperative GameEngine with React's declarative model.
+ * Manages engine lifecycle, state polling, and session persistence.
+ *
+ * All users (owner or shared) write to their own userProgress namespace,
+ * so no isSharedContext branching is needed here.
+ */
 export function useGameEngine(config: UseGameEngineConfig) {
     const engineRef = useRef<GameEngine | null>(null);
     const [state, setState] = useState<GameState | null>(null);
 
-    // Stable refs for values that change frequently but must not trigger engine rebuild.
+    // Stable refs prevent engine rebuilds on every render while keeping callbacks current.
     const addXPRef = useRef(config.addXP);
     const bestScoreRef = useRef(config.bestScore);
     const gameModeRef = useRef(config.gameMode);
     const userIdRef = useRef(config.userId);
     const displayNameRef = useRef(config.displayName);
-    const isSharedContextRef = useRef(config.isSharedContext ?? false);
-    const shareIdRef = useRef(config.shareId);
-    const sourceUserIdRef = useRef(config.sourceUserId);
-    const sourceLessonIdRef = useRef(config.sourceLessonId);
 
     const { startSession, syncScore, endSession } = useGameSession({
-        // In shared context, skip creating a public game_sessions document.
-        userId: config.isSharedContext ? null : (config.userId ?? null),
+        userId: config.userId ?? null,
         userName: config.displayName ?? "Player",
-        gameMode: config.isSharedContext ? null : config.gameMode,
+        gameMode: config.gameMode,
     });
 
     const syncScoreRef = useRef(syncScore);
     const endSessionRef = useRef(endSession);
 
     /**
-     * Keeps all callback and config refs current after every render.
+     * Keeps all callback refs current after every render.
      *
      * @remarks
-     * useLayoutEffect runs synchronously after the DOM is updated but before
-     * the browser paints, guaranteeing refs are fresh before any subsequent
-     * effect or event handler reads them. This avoids the react-hooks/refs
-     * lint error that fires when .current is written directly in the render body.
+     * useLayoutEffect runs synchronously before paint, guaranteeing refs are
+     * fresh before any subsequent effect or event handler reads them.
      */
     useLayoutEffect(() => {
         addXPRef.current = config.addXP;
@@ -65,10 +64,6 @@ export function useGameEngine(config: UseGameEngineConfig) {
         gameModeRef.current = config.gameMode;
         userIdRef.current = config.userId;
         displayNameRef.current = config.displayName;
-        isSharedContextRef.current = config.isSharedContext ?? false;
-        shareIdRef.current = config.shareId;
-        sourceUserIdRef.current = config.sourceUserId;
-        sourceLessonIdRef.current = config.sourceLessonId;
         syncScoreRef.current = syncScore;
         endSessionRef.current = endSession;
     });
@@ -79,13 +74,9 @@ export function useGameEngine(config: UseGameEngineConfig) {
      * @remarks
      * Cards arrive asynchronously (Firestore fetch). The engine must be
      * recreated once they are available so CardSelector has a non-empty pool.
-     * Strategy changes (e.g. difficulty switch) also require a fresh engine.
-     *
-     * Callbacks are forwarded through refs so they are always current without
-     * causing unnecessary rebuilds.
      */
     useEffect(() => {
-        // Do not build an engine with an empty deck — wait for cards to load.
+        // Wait for cards to load before building the engine.
         if (config.cards.length === 0) return;
 
         const engine = new GameEngine({
@@ -94,37 +85,9 @@ export function useGameEngine(config: UseGameEngineConfig) {
             userId: userIdRef.current,
             displayName: displayNameRef.current,
             onScoreSync: (score) => {
-                if (isSharedContextRef.current) {
-                    // In shared context, write viewer progress only — never touch public sessions.
-                    const uid = userIdRef.current;
-                    const sid = shareIdRef.current;
-                    const srcUid = sourceUserIdRef.current;
-                    const srcLid = sourceLessonIdRef.current;
-                    if (uid && sid && srcUid && srcLid) {
-                        void saveSharedStudyProgress(uid, sid, srcUid, srcLid, score).catch(
-                            () => {},
-                        );
-                    }
-                    return;
-                }
                 syncScoreRef.current(score);
             },
             onSessionEnd: async (finalScore) => {
-                if (isSharedContextRef.current) {
-                    // Shared context: write to viewer's sharedProgress, skip leaderboard.
-                    const uid = userIdRef.current;
-                    const sid = shareIdRef.current;
-                    const srcUid = sourceUserIdRef.current;
-                    const srcLid = sourceLessonIdRef.current;
-                    if (uid && sid && srcUid && srcLid) {
-                        await saveSharedStudyProgress(uid, sid, srcUid, srcLid, finalScore);
-                        await addXPRef.current(Math.round(finalScore / 10));
-                    }
-                    // Anonymous viewer: no Firestore writes at all.
-                    return;
-                }
-
-                // Personal context: existing path unchanged.
                 await addXPRef.current(Math.round(finalScore / 10));
                 await endSessionRef.current(finalScore);
 
@@ -173,7 +136,6 @@ export function useGameEngine(config: UseGameEngineConfig) {
      * @remarks
      * SFX fires inside the engine via onSFXPlay. This effect handles the
      * delayed pronunciation playback (250ms offset so the SFX is heard first).
-     * Skipped when audio is disabled in user settings.
      */
     useEffect(() => {
         const question = state?.currentQuestion;
@@ -189,10 +151,7 @@ export function useGameEngine(config: UseGameEngineConfig) {
     }, [state?.feedbackStatus, state?.currentQuestion, config.cards, config.strategy.name]);
 
     const startGame = useCallback(async () => {
-        // In shared context, skip creating a Firestore session document.
-        if (!isSharedContextRef.current) {
-            await startSession();
-        }
+        await startSession();
         engineRef.current?.startGame();
     }, [startSession]);
 

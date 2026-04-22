@@ -23,7 +23,7 @@
 
 import { useCallback, useMemo } from "react";
 
-import { SpeedModeStrategy } from "@/features/game/engine/strategies";
+import { SpeedModeStrategy } from "@/features/game/engine";
 import { useGameEngine } from "@/features/game/hooks";
 import { SPEED_GAME_CONFIG, timerColor } from "@/features/game/modes";
 
@@ -40,10 +40,6 @@ interface UseSpeedModeSessionParams {
     userId?: string;
     displayName?: string | null;
     addXP: (amount: number) => Promise<void>;
-    isSharedContext?: boolean;
-    shareId?: string;
-    sourceUserId?: string;
-    sourceLessonId?: string;
 }
 
 /**
@@ -65,10 +61,6 @@ export function useSpeedModeSession({
     userId,
     displayName,
     addXP,
-    isSharedContext,
-    shareId,
-    sourceUserId,
-    sourceLessonId,
 }: UseSpeedModeSessionParams) {
     const strategy = useMemo(() => new SpeedModeStrategy(), []);
 
@@ -85,10 +77,6 @@ export function useSpeedModeSession({
         userId,
         displayName: displayName ?? undefined,
         addXP,
-        isSharedContext,
-        shareId,
-        sourceUserId,
-        sourceLessonId,
     });
 
     /**

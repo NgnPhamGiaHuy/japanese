@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useEffect, useRef } from "react";
 
 import { Clock, Flame, Sword, Trophy, X } from "lucide-react";
@@ -28,6 +28,7 @@ const KanaSurvivalPage = () => {
     const { dataset, alphabet } = useKanaDataset();
     const { user } = useAppStore();
     const { bestScores, saveScore } = useBestScores();
+    const router = useRouter();
 
     const game = useSurvivalGame({
         dataset,
@@ -214,11 +215,13 @@ const KanaSurvivalPage = () => {
                         >
                             Change Mode
                         </Button>
-                        <Link href="/kana">
-                            <Button variant="ghost" className="w-full py-4 text-lg">
-                                Back to Kana
-                            </Button>
-                        </Link>
+                        <Button
+                            variant="ghost"
+                            className="w-full py-4 text-lg"
+                            onClick={() => router.back()}
+                        >
+                            Back to Kana
+                        </Button>
                     </div>
 
                     <Leaderboard

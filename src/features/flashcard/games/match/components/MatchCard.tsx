@@ -9,7 +9,6 @@ interface MatchCardProps {
     surface: MatchCardSurface;
     disabled: boolean;
     onPress: () => void;
-    /** Keyboard navigation support for stimulus tiles (Requirement 7.4) */
     tabIndex?: number;
 }
 
@@ -48,7 +47,7 @@ const MatchCard = ({ label, surface, disabled, onPress, tabIndex }: MatchCardPro
             ].join(" ")}
             whileTap={disabled ? undefined : { scale: 0.97 }}
         >
-            <span className={`${fontSizeClass} block w-full break-words overflow-hidden`}>
+            <span className={`${fontSizeClass} block w-full overflow-hidden break-words`}>
                 {label}
             </span>
         </motion.button>

@@ -1,40 +1,41 @@
-/**
- * StudySession — Feature Root Component
- *
- * @remarks
- * Orchestrates SRS-based study sessions with mode selection.
- * Handles Learn, Practice, and Mistake Review modes.
- * Supports both personal and shared decks via FlashcardData abstraction.
- */
-
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 
-import { FlashcardLearn, FlashcardMistakeReview, FlashcardPractice } from "@/features/flashcard";
-import { useCards } from "@/features/flashcard/core/hooks";
-import { gradeCard } from "@/features/flashcard/core/services/card.service";
-import { buildSession, getDeckStatus, recommendedAction } from "@/features/flashcard/core/utils";
+import {
+    buildSession,
+    FlashcardLearn,
+    FlashcardMistakeReview,
+    FlashcardPractice,
+    getDeckStatus,
+    getMistakeCards,
+    gradeCardForUser,
+    recommendedAction,
+    resetLessonProgressForUser,
+    useCardsWithProgress,
+} from "@/features/flashcard/core";
 import { useUserProgress } from "@/features/user/hooks";
+import { ConfirmModal } from "@/shared/components/ui";
 import { useAppStore } from "@/store";
-import StudyModeSelector from "./StudyModeSelector";
+import { StudyModeSelector } from "./index";
 
-import type { FlashcardData } from "@/features/flashcard/core/loaders";
-import type { Grade } from "@/features/flashcard/core/services/card.service";
-import type { FlashCard, StudyMode, StudyStats } from "@/features/flashcard/core/types";
+import type { FlashcardData, StudyMode, StudyStats } from "@/features/flashcard/core";
+import type { CardWithProgress, Grade } from "@/features/flashcard/domain";
 
 interface StudySessionProps {
     data: FlashcardData;
 }
 
 /**
- * Study Session Feature Root
+ * StudySession — Feature Root Component
  *
  * @remarks
- * Manages mode selection and session lifecycle.
- * Delegates rendering to mode-specific components.
- * Works with both personal and shared decks via unified FlashcardData.
+ * Subscribes to live cards via useCardsWithProgress so status counts
+ * (new/due/mistakes) update immediately after grading — no refresh needed.
+ *
+ * data.cards is only used as the initial snapshot for game modes (Match/Speed).
+ * For study mode, all derived state comes from the live subscription.
  */
 const StudySession = ({ data }: StudySessionProps) => {
     const router = useRouter();
@@ -42,51 +43,88 @@ const StudySession = ({ data }: StudySessionProps) => {
     const { user } = useAppStore();
     const { addXP, completedLesson } = useUserProgress();
 
-    // Only personal decks can reset (shared decks are read-only)
-    const { resetLesson } = useCards(data.source.type === "personal" ? data.source.lessonId : "");
-
     const initialMode = searchParams.get("mode") as StudyMode | null;
     const [mode, setMode] = useState<StudyMode | null>(initialMode);
-    const [mistakeIds, setMistakeIds] = useState<string[]>([]);
+    const [showExitModal, setShowExitModal] = useState(false);
 
+    // Live subscription — updates immediately after every grade.
+    // ownerId comes from data so shared decks load from the correct owner.
+    const lessonId =
+        data.source.type === "personal"
+            ? data.source.lessonId
+            : data.source.type === "shared"
+              ? data.lesson.id
+              : "";
+
+    const { cards: liveCards } = useCardsWithProgress(lessonId, data.ownerId);
+
+    // Use live cards when available, fall back to snapshot during initial load
+    const cards = liveCards.length > 0 ? liveCards : data.cards;
+
+    // Session queue is built once per mode selection from the live cards at that moment.
+    // Rebuilding on every card update would reset the queue mid-session.
     const session = useMemo(() => {
         if (!mode) return null;
-        return buildSession(data.cards, mode, mistakeIds);
+        return buildSession(cards, mode);
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [mode]);
 
-    const status = getDeckStatus(data.cards);
+    // Status always derived from live cards — updates after grading without refresh
+    const status = useMemo(() => getDeckStatus(cards), [cards]);
     const action = recommendedAction(status);
 
-    const handleClose = () => router.push(data.returnPath);
-
-    const handleAnswer = async (card: FlashCard, grade: Grade) => {
-        if (!user || !mode) return;
-        // Only grade cards for personal decks (shared decks are read-only)
-        if (data.source.type === "personal") {
-            await gradeCard(user.uid, card.id, card, grade);
-        }
-    };
-
-    const handleComplete = async (stats: StudyStats, overrideXp?: number) => {
-        const xp = overrideXp ?? stats.correct * 2;
-        addXP(xp);
-        completedLesson();
-
-        if (stats.mistakeCardIds.length > 0) {
-            setMistakeIds(stats.mistakeCardIds);
-            setMode(null);
+    const handleClose = useCallback(() => {
+        if (mode) {
+            setShowExitModal(true);
         } else {
-            router.push("/flashcard");
+            router.back();
         }
-    };
+    }, [mode, router]);
 
-    const handleReset = async () => {
-        if (!user || data.source.type !== "personal") return;
-        await resetLesson(data.source.lessonId);
-        setMistakeIds([]);
+    const handleConfirmExit = useCallback(() => {
+        setShowExitModal(false);
+        router.back();
+    }, [router]);
+
+    const handleCancelExit = useCallback(() => {
+        setShowExitModal(false);
+    }, []);
+
+    const handleAnswer = useCallback(
+        async (card: CardWithProgress, grade: Grade) => {
+            if (!user || !mode) return;
+            await gradeCardForUser(
+                user.uid,
+                card.lessonId,
+                card.id,
+                card.sourceOwnerId,
+                card,
+                grade,
+            );
+        },
+        [user, mode],
+    );
+
+    const handleComplete = useCallback(
+        async (stats: StudyStats, overrideXp?: number) => {
+            addXP(overrideXp ?? stats.correct * 2);
+            completedLesson();
+
+            const hasMistakes = getMistakeCards(cards).length > 0;
+            if (hasMistakes) {
+                setMode("mistake-review");
+            } else {
+                router.back();
+            }
+        },
+        [addXP, completedLesson, cards, router],
+    );
+
+    const handleReset = useCallback(async () => {
+        if (!user) return;
+        await resetLessonProgressForUser(user.uid, lessonId);
         setMode(null);
-    };
+    }, [user, lessonId]);
 
     if (!mode || !session) {
         return (
@@ -94,54 +132,61 @@ const StudySession = ({ data }: StudySessionProps) => {
                 lesson={data.lesson}
                 status={status}
                 action={action}
-                mistakeCount={mistakeIds.length}
+                mistakeCount={status.mistakeCount}
                 onSelectMode={setMode}
                 onClose={handleClose}
-                onReset={data.source.type === "personal" ? handleReset : undefined}
+                onReset={handleReset}
             />
         );
     }
 
-    if (mode === "learn") {
-        return (
-            <FlashcardLearn
-                lesson={data.lesson}
-                userId={user?.uid ?? ""}
-                cards={session.queue}
-                onClose={handleClose}
-                onAnswer={handleAnswer}
-                onComplete={(stats) => void handleComplete(stats)}
+    return (
+        <>
+            <ConfirmModal
+                isOpen={showExitModal}
+                title="Wait, don't go!"
+                message="You've made great progress in this session! If you exit now, your current XP and session history won't be saved."
+                variant="warning"
+                confirmText="End Session"
+                cancelText="Keep Studying"
+                onConfirm={handleConfirmExit}
+                onClose={handleCancelExit}
             />
-        );
-    }
 
-    if (mode === "practice") {
-        return (
-            <FlashcardPractice
-                lesson={data.lesson}
-                userId={user?.uid ?? ""}
-                cards={session.queue}
-                onClose={handleClose}
-                onAnswer={handleAnswer}
-                onComplete={(stats) => void handleComplete(stats)}
-            />
-        );
-    }
+            {mode === "learn" && (
+                <FlashcardLearn
+                    lesson={data.lesson}
+                    userId={user?.uid ?? ""}
+                    cards={session.queue}
+                    onClose={handleClose}
+                    onAnswer={handleAnswer}
+                    onComplete={(stats) => void handleComplete(stats)}
+                />
+            )}
 
-    if (mode === "mistake-review") {
-        return (
-            <FlashcardMistakeReview
-                lesson={data.lesson}
-                userId={user?.uid ?? ""}
-                cards={session.queue}
-                onClose={handleClose}
-                onAnswer={handleAnswer}
-                onComplete={(stats) => void handleComplete(stats)}
-            />
-        );
-    }
+            {mode === "practice" && (
+                <FlashcardPractice
+                    lesson={data.lesson}
+                    userId={user?.uid ?? ""}
+                    cards={session.queue}
+                    onClose={handleClose}
+                    onAnswer={handleAnswer}
+                    onComplete={(stats) => void handleComplete(stats)}
+                />
+            )}
 
-    return null;
+            {mode === "mistake-review" && (
+                <FlashcardMistakeReview
+                    lesson={data.lesson}
+                    userId={user?.uid ?? ""}
+                    cards={session.queue}
+                    onClose={handleClose}
+                    onAnswer={handleAnswer}
+                    onComplete={(stats) => void handleComplete(stats)}
+                />
+            )}
+        </>
+    );
 };
 
 export default StudySession;

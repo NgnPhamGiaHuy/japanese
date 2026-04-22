@@ -42,13 +42,6 @@ const SpeedGame = ({ data }: SpeedGameProps) => {
     const gameMode = data.gameMode("speed");
     const bestScore = useFlashcardGameBestScore(user?.uid, gameMode);
 
-    const isSharedContext = data.source.type === "shared";
-    const shareId = isSharedContext
-        ? (data.source as { type: "shared"; shareId: string }).shareId
-        : undefined;
-    const sourceUserId = isSharedContext ? (data.lesson.ownerId ?? undefined) : undefined;
-    const sourceLessonId = isSharedContext ? data.lesson.id : undefined;
-
     const game = useSpeedModeSession({
         allCards: data.cards,
         lessonExists: true,
@@ -57,10 +50,6 @@ const SpeedGame = ({ data }: SpeedGameProps) => {
         userId: user?.uid,
         displayName: user?.displayName,
         addXP,
-        isSharedContext,
-        shareId,
-        sourceUserId,
-        sourceLessonId,
     });
 
     const tier = scoreToTier(bestScore);
@@ -91,7 +80,7 @@ const SpeedGame = ({ data }: SpeedGameProps) => {
                 gameMode={gameMode}
                 currentUserId={user?.uid}
                 onPlayAgain={game.resetToIntro}
-                onCollectXP={() => router.push(data.returnPath)}
+                onCollectXP={() => router.back()}
             />
         );
     }

@@ -14,12 +14,11 @@ import { useAICard } from "@/features/ai";
 import { Button } from "@/shared/components/ui";
 import { hexToThemeColor, playAudio, playSFX, shuffleArray } from "@/shared/utils";
 import { useAppStore } from "@/store";
-import { gradeCard } from "../services/card.service";
-import { getAudioText, resolveCardFaces } from "../utils/displayEngine";
-import { reinsertCard } from "../utils/learningEngine";
+import { gradeCard } from "../services";
+import { getAudioText, reinsertCard, resolveCardFaces } from "../utils";
 
-import type { Grade } from "../services/card.service";
-import type { FlashCard, Lesson, StudyStats } from "../types";
+import type { Lesson, StudyStats } from "../types";
+import type { CardWithProgress, Grade } from "../../domain";
 
 /**
  * FlashcardMistakeReview — targeted re-exposure with AI-generated explanations.
@@ -37,11 +36,11 @@ interface FlashcardMistakeReviewProps {
     /** The userId of the authenticated user */
     userId: string;
     /** The subset of missed cards */
-    cards: FlashCard[];
+    cards: CardWithProgress[];
     /** Manual exit handler */
     onClose: () => void;
     /** Persistent state updater */
-    onAnswer: (card: FlashCard, grade: Grade) => Promise<void>;
+    onAnswer: (card: CardWithProgress, grade: Grade) => Promise<void>;
     /** Session completion callback */
     onComplete: (stats: StudyStats) => void;
 }
@@ -54,7 +53,7 @@ interface FlashcardMistakeReviewProps {
  * @param card - The target card
  * @param revealed - Reveal flag (trigger)
  */
-const useAIExplanation = (card: FlashCard | undefined, revealed: boolean) => {
+const useAIExplanation = (card: CardWithProgress | undefined, revealed: boolean) => {
     const { generate, status, error } = useAICard();
     const aiLoading = status === "loading";
     const [explanation, setExplanation] = useState<string | null>(null);
@@ -100,7 +99,7 @@ const FlashcardMistakeReview = ({
     const { globalAutoPlay } = useAppStore();
 
     /** Local queue state — initialized from cards prop, supports Again re-insertion */
-    const [queue, setQueue] = useState<FlashCard[]>(() => [...cards]);
+    const [queue, setQueue] = useState<CardWithProgress[]>(() => [...cards]);
     const [currentIndex, setCurrentIndex] = useState(0);
     const [isFlipped, setIsFlipped] = useState(false);
 
@@ -163,36 +162,21 @@ const FlashcardMistakeReview = ({
     const headerHint = displayHint && displayHint !== altSubtitle ? displayHint : null;
     const progress = (currentIndex / queue.length) * 100;
 
-    /**
-     * Session Flow Control
-     * Triggers SRS update and either advances or completes the session.
-     * NOTE: Does NOT call incrementDailyReviewCount — mistake-review cards were already counted.
-     */
-    const handleGrade = async (grade: Grade) => {
+    const handleGrade = (grade: Grade) => {
         const knew = grade === "Good" || grade === "Easy";
         const nextMistakes = knew ? stats.mistakeCardIds : [...stats.mistakeCardIds, card.id];
-        const nextStats: StudyStats = {
+        setStats({
             correct: stats.correct + (knew ? 1 : 0),
             incorrect: stats.incorrect + (!knew ? 1 : 0),
             mistakeCardIds: nextMistakes,
-        };
-        setStats(nextStats);
-        if (knew) {
-            playSFX("correct");
-        } else {
-            playSFX("wrong");
-        }
+        });
+        playSFX(knew ? "correct" : "wrong");
         setIsFlipped(false);
         setMcSelected(null);
 
-        await gradeCard(userId, card.id, card, grade);
-        await onAnswer(card, grade);
-
+        // Advance UI immediately — writes are fire-and-forget
         if (grade === "Again") {
-            // Re-insert 3–5 positions ahead in the queue
-            const newQueue = reinsertCard(queue, currentIndex);
-            setQueue(newQueue);
-            // currentIndex stays the same — the next card is now at the same index
+            setQueue(reinsertCard(queue, currentIndex));
         } else {
             if (currentIndex < queue.length - 1) {
                 setCurrentIndex((i) => i + 1);
@@ -200,6 +184,9 @@ const FlashcardMistakeReview = ({
                 setShowSummary(true);
             }
         }
+
+        void gradeCard(userId, card.id, card, grade, card.lessonId, userId).catch(() => {});
+        void onAnswer(card, grade).catch(() => {});
     };
 
     const handleMCSelect = (choice: string) => {
@@ -290,7 +277,7 @@ const FlashcardMistakeReview = ({
                                 </span>
                             )}
                             <div className="flex w-full flex-1 flex-col items-center justify-center px-2 py-2">
-                                <h1 className="w-full text-center text-3xl leading-tight font-black wrap-break-word text-[#3c3c3c] select-none sm:text-4xl md:text-5xl">
+                                <h1 className="w-full text-center text-3xl leading-tight font-black wrap-break-word text-[#3c3c3c] select-text sm:text-4xl md:text-5xl">
                                     {displayFront}
                                 </h1>
                                 {altSubtitle && (
@@ -377,7 +364,7 @@ const FlashcardMistakeReview = ({
                                     </span>
                                 )}
                                 <div className="flex w-full flex-1 flex-col items-center justify-center px-2 py-4">
-                                    <h1 className="w-full text-center text-3xl leading-tight font-black wrap-break-word text-[#3c3c3c] select-none sm:text-4xl md:text-5xl">
+                                    <h1 className="w-full text-center text-3xl leading-tight font-black wrap-break-word text-[#3c3c3c] select-text sm:text-4xl md:text-5xl">
                                         {displayFront}
                                     </h1>
                                     {altSubtitle && (

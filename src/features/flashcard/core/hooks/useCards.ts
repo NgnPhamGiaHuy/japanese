@@ -98,9 +98,9 @@ export function useCards(lessonId?: string, ownerId?: string) {
     );
 
     const resetCard = useCallback(
-        async (cardId: string): Promise<void> => {
+        async (cardId: string, lessonId: string): Promise<void> => {
             if (!user) return;
-            await CardService.resetCardProgress(user.uid, cardId);
+            await CardService.resetCardProgress(user.uid, cardId, lessonId);
         },
         [user],
     );

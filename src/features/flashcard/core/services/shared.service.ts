@@ -3,24 +3,21 @@
  * Logic layer for public deck sharing and external session resolution.
  */
 
-import { doc, getDoc, getDocs, limit, query, setDoc, startAfter, where } from "firebase/firestore";
+import { doc, getDoc, getDocs, limit, query, startAfter, where } from "firebase/firestore";
 
 import { APP_ID, db } from "@/lib/firebase";
 import { sortByOrder } from "@/shared/utils/reorder";
 import { syncInviteToCollaborator } from "./access.service";
 import { cardsCol } from "./card.service";
 import { normalizeLesson } from "./lesson.service";
+import { getUserLessonProgress } from "./progress.service";
 import { resolveRole } from "../utils/rbac";
+import { FRESH_SRS_STATE } from "../../domain/types";
 
 import type { User } from "firebase/auth";
 import type { DocumentSnapshot } from "firebase/firestore";
-import type {
-    DeckAccessRole,
-    FlashCard,
-    Lesson,
-    SharedCardViewModel,
-    SharedLessonViewModel,
-} from "../types";
+import type { DeckAccessRole, FlashCard, Lesson, SharedLessonViewModel } from "../types";
+import type { CardWithProgress, UserCardProgress } from "../../domain"; // ─── Decode helper ─────────────────────────────────────────────────────────────
 
 // ─── Decode helper ─────────────────────────────────────────────────────────────
 
@@ -101,7 +98,7 @@ export interface SharedSessionMeta {
 
 export interface SharedLessonResult {
     lesson: SharedLessonViewModel;
-    cards: SharedCardViewModel[];
+    cards: CardWithProgress[];
     meta: SharedSessionMeta;
 }
 
@@ -157,6 +154,11 @@ async function fetchAllCards(
  * Resolves a shared lesson and its full card set using a guest share token.
  *
  * @remarks
+ * **Phase 3 Update:**
+ * - Loads card content from owner's collection
+ * - Loads viewer's progress from userProgress
+ * - Merges content + progress → CardWithProgress[]
+ *
  * Returns null for access-denied and not-found conditions so callers render
  * a 404 screen. Throws SharedLoadError for network/quota failures so callers
  * can surface a retry UI.
@@ -185,7 +187,7 @@ export async function getSharedLesson(
             __ownerIdFallback: ownerId,
         });
 
-        // Auto-convert pending email invite → collaborator before the access gate.
+        // Auto-convert pending email invite → collaborator before the access gate
         if (currentUser?.email) {
             const normalizedEmail = currentUser.email.trim().toLowerCase();
             if (lesson.invitedEmails?.[normalizedEmail]) {
@@ -201,7 +203,7 @@ export async function getSharedLesson(
             }
         }
 
-        // RBAC: owner → explicit role → pending invite → public link access.
+        // RBAC: owner → explicit role → pending invite → public link access
         const isOwner = lesson.roles?.[currentUserId ?? ""] === "owner";
         const hasExplicitRole = !!(currentUserId && lesson.roles?.[currentUserId]);
         const hasPendingInvite = !!(
@@ -213,9 +215,37 @@ export async function getSharedLesson(
             return null;
         }
 
-        const cards = sortByOrder(await fetchAllCards(ownerId, lessonId, lesson.cardCount ?? 0));
+        // Load card content from owner
+        const contentCards = sortByOrder(
+            await fetchAllCards(ownerId, lessonId, lesson.cardCount ?? 0),
+        );
 
-        // Resolve role while lesson.roles is still intact — before stripSensitiveFields removes it.
+        // Load viewer's progress (if authenticated)
+        let progressMap = new Map<string, UserCardProgress>();
+        if (currentUserId) {
+            progressMap = await getUserLessonProgress(currentUserId, lessonId);
+        }
+
+        // Merge content + viewer's progress
+        const cardsWithProgress: CardWithProgress[] = contentCards.map((card) => {
+            const progress = progressMap.get(card.id);
+            if (progress) {
+                return { ...card, ...progress } as CardWithProgress;
+            } else {
+                // Never studied — use fresh SRS state
+                return {
+                    ...card,
+                    cardId: card.id,
+                    lessonId: card.lessonId,
+                    sourceOwnerId: ownerId,
+                    ...FRESH_SRS_STATE,
+                    createdAt: Date.now(),
+                    lastReviewedAt: null,
+                } as CardWithProgress;
+            }
+        });
+
+        // Resolve role while lesson.roles is still intact
         const viewerRole = resolveRole({
             lesson,
             userId: currentUserId,
@@ -224,7 +254,7 @@ export async function getSharedLesson(
 
         return {
             lesson: stripSensitiveFields(lesson),
-            cards: cards as SharedCardViewModel[],
+            cards: cardsWithProgress,
             meta: {
                 sourceUserId: ownerId,
                 sourceLessonId: lessonId,
@@ -244,34 +274,4 @@ export async function getSharedLesson(
         }
         throw new SharedLoadError("network-error", "Network error loading shared deck");
     }
-}
-
-// ─── Viewer progress tracking (separate namespace) ───────────────────────────
-
-/** Path: users/{viewerId}/sharedProgress/{shareId} */
-const viewerProgressDoc = (viewerId: string, shareId: string) =>
-    doc(db, "artifacts", APP_ID, "users", viewerId, "sharedProgress", shareId);
-
-/**
- * Saves lightweight study progress for a shared deck viewer.
- * NEVER touches the owner's data.
- */
-export async function saveSharedStudyProgress(
-    viewerId: string,
-    shareId: string,
-    sourceUserId: string,
-    sourceLessonId: string,
-    cardsStudied: number,
-): Promise<void> {
-    await setDoc(
-        viewerProgressDoc(viewerId, shareId),
-        {
-            shareId,
-            sourceUserId,
-            sourceLessonId,
-            cardsStudied,
-            lastStudiedAt: new Date().toISOString(),
-        },
-        { merge: true },
-    );
 }

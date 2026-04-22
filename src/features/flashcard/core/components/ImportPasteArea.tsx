@@ -3,21 +3,14 @@
 import React from "react";
 
 import { Sparkles } from "lucide-react";
-import { Button } from "@/shared/components/ui";
 
 interface ImportPasteAreaProps {
     value: string;
     onChange: (val: string) => void;
-    onPreview?: (val: string) => void;
     themeColor: string;
 }
 
-const ImportPasteArea: React.FC<ImportPasteAreaProps> = ({
-    value,
-    onChange,
-    onPreview,
-    themeColor,
-}) => {
+const ImportPasteArea: React.FC<ImportPasteAreaProps> = ({ value, onChange, themeColor }) => {
     return (
         <div className="space-y-6">
             <div className="relative overflow-hidden rounded-[2.5rem] border-2 border-gray-100 bg-gradient-to-br from-white to-gray-50/50 p-8 shadow-sm">

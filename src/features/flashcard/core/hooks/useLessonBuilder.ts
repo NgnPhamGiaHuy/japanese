@@ -3,8 +3,8 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 
 import useAICard from "@/features/ai/hooks/useAICard";
-import { parseText } from "../utils/parser";
 import { joinAlternatives } from "../utils/formatting";
+import { parseText } from "../utils/parser";
 
 import type { EditorCard, FlashCard, Lesson } from "../types";
 
@@ -77,13 +77,10 @@ export function useLessonBuilder({
                     pool.splice(poolIdx, 1);
                 }
 
-                return existing
-                    ? { ...existing, ...parsed }
-                    : { ...makeCard(idx), ...parsed };
+                return existing ? { ...existing, ...parsed } : { ...makeCard(idx), ...parsed };
             });
         });
     };
-
 
     const handleAIFillCard = async (cardId: string, word: string) => {
         if (!word.trim()) return;

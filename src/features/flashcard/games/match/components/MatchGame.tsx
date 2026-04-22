@@ -16,7 +16,7 @@
 
 import { useRouter } from "next/navigation";
 
-import { useFlashcardGameBestScore } from "@/features/flashcard/core/hooks";
+import { useFlashcardGameBestScore } from "@/features/flashcard/core";
 import { scoreToTier, TIER_INFO } from "@/features/game/logic";
 import { useUserProgress } from "@/features/user/hooks";
 import { useAppStore } from "@/store";
@@ -25,7 +25,7 @@ import MatchPlaying from "./MatchPlaying";
 import MatchResults from "./MatchResults";
 import { useMatchModeSession } from "../hooks";
 
-import type { FlashcardData } from "@/features/flashcard/core/loaders";
+import type { FlashcardData } from "@/features/flashcard/core";
 
 interface MatchGameProps {
     data: FlashcardData;
@@ -46,23 +46,12 @@ const MatchGame = ({ data }: MatchGameProps) => {
     const gameMode = data.gameMode("match");
     const bestScore = useFlashcardGameBestScore(user?.uid, gameMode);
 
-    const isSharedContext = data.source.type === "shared";
-    const shareId = isSharedContext
-        ? (data.source as { type: "shared"; shareId: string }).shareId
-        : undefined;
-    const sourceUserId = isSharedContext ? (data.lesson.ownerId ?? undefined) : undefined;
-    const sourceLessonId = isSharedContext ? data.lesson.id : undefined;
-
     const game = useMatchModeSession({
         cards: data.cards,
         gameMode,
         userId: user?.uid,
         displayName: user?.displayName,
         addXP,
-        isSharedContext,
-        shareId,
-        sourceUserId,
-        sourceLessonId,
     });
 
     const tier = scoreToTier(bestScore);
@@ -101,7 +90,7 @@ const MatchGame = ({ data }: MatchGameProps) => {
                 gameMode={gameMode}
                 currentUserId={user?.uid}
                 onPlayAgain={game.resetToIntro}
-                onCollectXP={() => router.push(data.returnPath)}
+                onCollectXP={() => router.back()}
             />
         );
     }

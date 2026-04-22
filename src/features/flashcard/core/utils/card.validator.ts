@@ -31,10 +31,6 @@ export class CardValidationError extends Error {
     }
 }
 
-// ─── Patterns ─────────────────────────────────────────────────────────────────
-
-const PARENTHETICAL_RE = /\(.+\)/;
-
 // ─── validateAtomicCard ───────────────────────────────────────────────────────
 
 /**

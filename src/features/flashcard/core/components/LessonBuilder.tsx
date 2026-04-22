@@ -100,7 +100,7 @@ const LessonBuilder: React.FC<LessonBuilderProps> = ({
                     onClick={handleSave}
                     disabled={saving}
                     icon={Save}
-                    className="shadow-lg !py-2 !text-xs sm:!py-3 sm:!text-sm"
+                    className="!py-2 !text-xs shadow-lg sm:!py-3 sm:!text-sm"
                 >
                     {saving ? "Saving..." : "Save"}
                 </Button>

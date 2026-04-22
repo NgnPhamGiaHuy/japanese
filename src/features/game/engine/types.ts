@@ -3,8 +3,7 @@
  * These types are shared across all game modes and provide a single source of truth.
  */
 
-import type { FlashCard } from "@/features/flashcard/core/types";
-import type { QuestionType } from "@/features/flashcard/core/utils";
+import type { FlashCard, QuestionType } from "@/features/flashcard/core";
 
 export type GamePhase = "intro" | "playing" | "feedback" | "results";
 export type FeedbackStatus = "idle" | "correct" | "wrong" | "timeout";
@@ -125,6 +124,10 @@ export interface ModeStrategy {
 
 /**
  * Configuration for the game engine.
+ *
+ * @remarks
+ * isSharedContext and sharedProgress fields removed — all users now write
+ * to their own userProgress namespace regardless of deck ownership.
  */
 export interface GameEngineConfig {
     cards: FlashCard[];
@@ -135,14 +138,6 @@ export interface GameEngineConfig {
     onSessionEnd: (finalScore: number) => Promise<void>;
     onAudioPlay?: (text: string) => void;
     onSFXPlay?: (sfx: "correct" | "wrong" | "click") => void;
-    /** When true, overrides score/session callbacks to write to viewer's sharedProgress only. */
-    isSharedContext?: boolean;
-    /** Required when isSharedContext is true — the shareId from the URL token. */
-    shareId?: string;
-    /** UID of the deck owner; used to scope sharedProgress writes. */
-    sourceUserId?: string;
-    /** Lesson ID of the source deck; stored in sharedProgress documents. */
-    sourceLessonId?: string;
 }
 
 /**

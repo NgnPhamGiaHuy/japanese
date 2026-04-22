@@ -124,7 +124,9 @@ const AIBulkPanel = ({ themeColor, onPreview, existingWords = [] }: AIBulkPanelP
                     <Sparkles size={18} style={{ color: themeColor }} className="sm:size-[20px]" />
                 </div>
                 <div>
-                    <h3 className="text-lg font-black text-[#3c3c3c] sm:text-xl">Generate Deck with AI</h3>
+                    <h3 className="text-lg font-black text-[#3c3c3c] sm:text-xl">
+                        Generate Deck with AI
+                    </h3>
                     <p className="text-[9px] font-bold tracking-wide text-[#afafaf] uppercase sm:text-[10px]">
                         Describe a topic · review before saving
                     </p>

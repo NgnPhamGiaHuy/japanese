@@ -62,7 +62,12 @@ const LessonBuilderCardList: React.FC<LessonBuilderCardListProps> = ({
                 </Button>
             </div>
 
-            <Reorder.Group axis="y" values={cards} onReorder={setCards} className="space-y-6 sm:space-y-8">
+            <Reorder.Group
+                axis="y"
+                values={cards}
+                onReorder={setCards}
+                className="space-y-6 sm:space-y-8"
+            >
                 {cards.map((card, index) => (
                     <Reorder.Item
                         key={card.id}
