@@ -1,5 +1,15 @@
 "use client";
 
+/**
+ * Premium toast notification component.
+ *
+ * @remarks
+ * Orchestrates a physics-based, timed entry/exit lifecycle. Features 'Pause on Hover'
+ * functionality to prevent premature dismissal while users are reading high-density messages.
+ *
+ * @example
+ * <Alert type="success" message="File saved!" onClose={handleDismiss} />
+ */
 import { useEffect, useRef, useState } from "react";
 
 import { motion } from "framer-motion";
@@ -20,16 +30,6 @@ interface AlertProps {
     onClose: () => void;
 }
 
-/**
- * Premium toast notification component.
- *
- * @remarks
- * Orchestrates a physics-based, timed entry/exit lifecycle. Features 'Pause on Hover'
- * functionality to prevent premature dismissal while users are reading high-density messages.
- *
- * @example
- * <Alert type="success" message="File saved!" onClose={handleDismiss} />
- */
 const Alert = ({ type, message, onClose }: AlertProps) => {
     const [isPaused, setIsPaused] = useState(false);
     // Persists the remaining duration across re-renders when paused

@@ -17,8 +17,17 @@ interface DecksTableRowProps {
 /**
  * Single Row for the Decks Table.
  *
- * @remarks Presents deck metadata and administrative actions.
+ * @remarks
+ * Presents deck metadata and administrative actions.
  * Following component rules, this is strictly presentational.
+ *
+ * @example
+ * <DecksTableRow
+ *   deck={deckData}
+ *   onView={handleView}
+ *   onDelete={handleDelete}
+ *   isDeleting={false}
+ * />
  */
 const DecksTableRow = ({ deck, onView, onDelete, isDeleting }: DecksTableRowProps) => {
     return (

@@ -1,43 +1,69 @@
 /**
- * SettingsMenu — Dropdown settings panel
+ * Dropdown settings panel for managing application preferences.
  *
  * @remarks
  * Reusable settings menu with sections for preferences and danger zone actions.
+ * Supports toggles for audio/display and confirmation workflows for destructive actions.
+ *
+ * @example
+ * <SettingsMenu
+ *   isOpen={isMenuOpen}
+ *   onToggle={() => setIsMenuOpen(!isMenuOpen)}
+ *   primaryBg="bg-blue-500"
+ *   audioToggle={{ label: "Sound Effects", icon: Volume2, value: true, onChange: handleToggle }}
+ * />
  */
-
-import { Settings, Trash2, Type, Volume2 } from "lucide-react";
+import { Settings, Trash2, Volume2 } from "lucide-react";
 
 import Button from "./Button";
 
+/** Configuration for a toggleable setting. */
 interface SettingToggle {
+    /** Label to display next to the toggle. */
     label: string;
+    /** Icon element to display. */
     icon: typeof Volume2;
+    /** Current state of the toggle. */
     value: boolean;
+    /** Triggered when the toggle is clicked. */
     onChange: () => void;
 }
 
+/** Configuration for a destructive action. */
 interface DangerAction {
+    /** Label for the destructive action button. */
     label: string;
+    /** Triggered when the action is confirmed. */
     onConfirm: () => void;
+    /** Text for the confirmation button. */
     confirmText: string;
+    /** Text for the cancellation button (default: "Cancel"). */
     cancelText?: string;
 }
 
+/** Attributes for rendering a SettingsMenu. */
 interface SettingsMenuProps {
+    /** Whether the menu is currently visible. */
     isOpen: boolean;
+    /** Triggered to open or close the menu. */
     onToggle: () => void;
+    /** Tailwind background color class for active state highlighting. */
     primaryBg: string;
+    /** Optional audio-related setting configuration. */
     audioToggle?: SettingToggle;
+    /** Optional display-related setting configuration. */
     displayToggle?: SettingToggle;
+    /** Optional destructive action configuration with confirmation logic. */
     dangerAction?: DangerAction & {
         showConfirm: boolean;
         onRequestConfirm: () => void;
         onCancelConfirm: () => void;
     };
+    /** Additional CSS classes for the trigger button. */
     buttonClassName?: string;
 }
 
-export function SettingsMenu({
+const SettingsMenu = ({
     isOpen,
     onToggle,
     primaryBg,
@@ -45,7 +71,7 @@ export function SettingsMenu({
     displayToggle,
     dangerAction,
     buttonClassName = "",
-}: SettingsMenuProps) {
+}: SettingsMenuProps) => {
     return (
         <div className="relative">
             <Button
@@ -165,4 +191,6 @@ export function SettingsMenu({
             )}
         </div>
     );
-}
+};
+
+export default SettingsMenu;

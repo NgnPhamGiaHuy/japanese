@@ -8,16 +8,37 @@ import { Calendar as CalendarIcon, ChevronLeft, ChevronRight, X } from "lucide-r
 
 import Button from "./Button";
 
+/** Attributes for rendering a DatePicker component. */
 interface CustomDatePickerProps {
+    /** The currently selected ISO date string (YYYY-MM-DD). */
     value?: string;
+    /** Triggered when a new date is selected or cleared. */
     onChange: (value?: string) => void;
+    /** Text to display when no date is selected. */
     placeholder?: string;
+    /** Optional field label displayed above the input. */
     label?: string;
+    /** Additional CSS classes for the container. */
     className?: string;
+    /** Whether the input is non-interactive. */
     disabled?: boolean;
 }
 
-const CustomDatePicker = ({
+/**
+ * Premium date selection component.
+ *
+ * @remarks
+ * Features a custom calendar dropdown with smooth animations.
+ * Handles timezone-safe ISO date strings and provides clear visual feedback.
+ *
+ * @example
+ * <DatePicker
+ *   label="Birth Date"
+ *   value={birthDate}
+ *   onChange={setBirthDate}
+ * />
+ */
+const DatePicker = ({
     value,
     onChange,
     placeholder = "MM/DD/YYYY",
@@ -181,4 +202,4 @@ const CustomDatePicker = ({
     );
 };
 
-export default CustomDatePicker;
+export default DatePicker;

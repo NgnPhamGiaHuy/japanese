@@ -15,8 +15,8 @@ interface UsersTableBodyProps {
 /**
  * Main Content Body for the Users Table.
  *
- * @remarks Responsible for rendering table rows and their corresponding cells
- * using TanStack Table's flexRender. Handles empty and loading states.
+ * @remarks Renders table rows for the desktop <table> layout.
+ * The mobile card list is handled separately via UserMobileRow.
  */
 const UsersTableBody = ({ table, loading }: UsersTableBodyProps) => {
     const rows = table.getRowModel().rows;

@@ -10,7 +10,9 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { useEffect, useRef } from "react";
 
+import { logSpeedGameCompleted } from "@/features/flashcard/core/actions/activity-log.actions";
 import { useFlashcardGameBestScore } from "@/features/flashcard/core/hooks";
 import { scoreToTier, TIER_INFO } from "@/features/game/logic";
 import { useUserProgress } from "@/features/user/hooks";
@@ -54,6 +56,26 @@ const SpeedGame = ({ data }: SpeedGameProps) => {
 
     const tier = scoreToTier(bestScore);
     const tierInfo = TIER_INFO[tier];
+
+    // Log when the game reaches the results phase (once per session)
+    const loggedRef = useRef(false);
+    useEffect(() => {
+        if (game.phase !== "results" || loggedRef.current || !user) return;
+        loggedRef.current = true;
+        void (async () => {
+            try {
+                const token = await user.getIdToken();
+                const finalTier = scoreToTier(game.score);
+                void logSpeedGameCompleted(token, user.uid, data.lesson.id, data.lesson.title, {
+                    score: game.score,
+                    timeMs: 0,
+                    tier: finalTier,
+                });
+            } catch {
+                // Non-blocking
+            }
+        })();
+    }, [game.phase, game.score, user, data.lesson.id, data.lesson.title]);
 
     if (game.phase === "intro") {
         return (

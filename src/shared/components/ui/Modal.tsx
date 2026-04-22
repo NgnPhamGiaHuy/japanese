@@ -5,11 +5,17 @@ import { X } from "lucide-react";
 
 import Button from "./Button";
 
+/** Attributes for rendering a Modal component. */
 interface ModalProps {
+    /** Whether the modal is currently visible. */
     isOpen: boolean;
+    /** Triggered when the user requests to close the modal. */
     onClose: () => void;
+    /** Primary heading text displayed in the header. */
     title?: string;
+    /** The content to be displayed inside the modal body. */
     children: React.ReactNode;
+    /** Predefined maximum width for the modal container. */
     maxWidth?: "sm" | "md" | "lg" | "xl" | "2xl" | "4xl";
 }
 
@@ -25,8 +31,14 @@ const MAX_WIDTHS = {
 /**
  * Reusable Base Modal Component.
  *
- * @remarks Shared across the entire platform. Handles backdrop,
+ * @remarks
+ * Shared across the entire platform. Handles backdrop,
  * animations, and accessible close behavior.
+ *
+ * @example
+ * <Modal isOpen={isOpen} onClose={close} title="Edit Profile">
+ *   <ProfileForm />
+ * </Modal>
  */
 const Modal = ({ isOpen, onClose, title, children, maxWidth = "md" }: ModalProps) => {
     return (

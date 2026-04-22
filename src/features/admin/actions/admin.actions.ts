@@ -2,8 +2,8 @@
 
 import { cookies } from "next/headers";
 
+import { ActivityAction } from "@/lib/logging/actions.enum";
 import {
-    adminAuth,
     adminDb,
     APP_ID,
     assertAdminAction,
@@ -22,7 +22,7 @@ import {
     getDeckCards,
     getGlobalContentPaginated,
 } from "../services/content.service";
-import { getLogs, recordLog } from "../services/log.service";
+import { getLogs, getLogsDrilldown, logAdminAction } from "../services/log.service";
 import {
     deleteUser,
     getAdminStats,
@@ -48,6 +48,13 @@ function ok<T>(data: T): ActionResult<T> {
 function fail(err: unknown): ActionResult<never> {
     const message = err instanceof Error ? err.message : "An unexpected error occurred";
     return { ok: false, error: message };
+}
+
+async function getAuthToken(): Promise<string> {
+    const cookieStore = await cookies();
+    const token = cookieStore.get("auth-token")?.value;
+    if (!token) throw new Error("UNAUTHORIZED: Session token missing");
+    return token;
 }
 
 export async function fetchUsersAction(
@@ -77,20 +84,15 @@ export async function setAdminRoleAction(
 ): Promise<ActionResult<{ uid: string; isAdmin: boolean }>> {
     try {
         const { uid, role } = await assertAdminAction("canPromoteUsers");
-        // We still verify token for additional security if needed, or we just use the UID from session
-        const cookieStore = await cookies();
-        const token = cookieStore.get("auth-token")?.value!;
-        const decoded = await adminAuth.verifyIdToken(token);
+        const token = await getAuthToken();
         await setAdminRole(targetUid, grant, uid);
-        await recordLog({
-            action: grant ? "Granted admin role" : "Revoked admin role",
-            level: "info",
-            type: "ADMIN_ACTION",
-            userId: uid,
-            userName: typeof decoded.name === "string" && decoded.name ? decoded.name : "Admin",
-            userEmail: typeof decoded.email === "string" ? decoded.email : "—",
-            metadata: { targetUid, grant, role },
-        });
+        void logAdminAction(
+            token,
+            uid,
+            grant ? ActivityAction.ADMIN_ROLE_GRANTED : ActivityAction.ADMIN_ROLE_REVOKED,
+            "ADMIN_ACTION",
+            { targetUid, grant, role },
+        );
         return ok({ uid: targetUid, isAdmin: grant });
     } catch (err) {
         return fail(err);
@@ -100,18 +102,11 @@ export async function setAdminRoleAction(
 export async function deleteUserAction(targetUid: string): Promise<ActionResult<{ uid: string }>> {
     try {
         const { uid, role } = await assertAdminAction("canDeleteUsers");
-        const cookieStore = await cookies();
-        const token = cookieStore.get("auth-token")?.value!;
-        const decoded = await adminAuth.verifyIdToken(token);
+        const token = await getAuthToken();
         await deleteUser(targetUid, uid);
-        await recordLog({
-            action: "Deleted user account",
-            level: "warn",
-            type: "ADMIN_ACTION",
-            userId: uid,
-            userName: typeof decoded.name === "string" && decoded.name ? decoded.name : "Admin",
-            userEmail: typeof decoded.email === "string" ? decoded.email : "—",
-            metadata: { targetUid, role },
+        void logAdminAction(token, uid, ActivityAction.ADMIN_USER_DELETED, "ADMIN_ACTION", {
+            targetUid,
+            role,
         });
         return ok({ uid: targetUid });
     } catch (err) {
@@ -134,7 +129,7 @@ export async function fetchLogsAction(
 ): Promise<ActionResult<PaginatedLogs>> {
     try {
         await assertAdminAction("canViewReports");
-        return ok(await getLogs(filters, 100, startAfterDocId));
+        return ok(await getLogs(filters, 20, startAfterDocId));
     } catch (err) {
         return fail(err);
     }
@@ -143,20 +138,10 @@ export async function fetchLogsAction(
 export async function createTestLogAction() {
     try {
         const { uid, role } = await assertAdminAction("canViewReports");
-        const cookieStore = await cookies();
-        const token = cookieStore.get("auth-token")?.value!;
-        const decoded = await adminAuth.verifyIdToken(token);
-        await recordLog({
-            action: "Manual Test Log Triggered",
-            level: "info",
-            type: "ADMIN_ACTION",
-            userId: uid,
-            userName: typeof decoded.name === "string" && decoded.name ? decoded.name : "Admin",
-            userEmail: typeof decoded.email === "string" ? decoded.email : "—",
-            metadata: {
-                triggeredBy: role,
-                environment: process.env.NODE_ENV,
-            },
+        const token = await getAuthToken();
+        void logAdminAction(token, uid, ActivityAction.ADMIN_TEST_LOG, "ADMIN_ACTION", {
+            triggeredBy: role,
+            environment: process.env.NODE_ENV,
         });
         return ok(true);
     } catch (err) {
@@ -196,21 +181,12 @@ export async function fetchGlobalContentAction(
 export async function deleteGlobalFlashcardAction(path: string): Promise<ActionResult<void>> {
     try {
         const { uid, role } = await assertAdminAction("canManageContent");
-        const cookieStore = await cookies();
-        const token = cookieStore.get("auth-token")?.value!;
-        const decoded = await adminAuth.verifyIdToken(token);
+        const token = await getAuthToken();
         await deleteGlobalFlashcard(path);
-
-        await recordLog({
-            action: "Global Flashcard Deleted",
-            level: "warn",
-            type: "ADMIN_ACTION",
-            userId: uid,
-            userName: typeof decoded.name === "string" && decoded.name ? decoded.name : "Admin",
-            userEmail: typeof decoded.email === "string" ? decoded.email : "—",
-            metadata: { path, role },
+        void logAdminAction(token, uid, ActivityAction.ADMIN_CONTENT_DELETED, "ADMIN_ACTION", {
+            path,
+            role,
         });
-
         return ok(undefined);
     } catch (err) {
         return fail(err);
@@ -259,6 +235,19 @@ export async function fetchDrilldownContentAction(category: string) {
     }
 }
 
+export async function fetchDrilldownLogsAction(filter: {
+    type?: string;
+    level?: string;
+    action?: string;
+}) {
+    try {
+        await assertAdminAction("canViewReports");
+        return ok(await getLogsDrilldown(filter));
+    } catch (err) {
+        return fail(err);
+    }
+}
+
 export async function exportAnalyticsAction(): Promise<ActionResult<any[]>> {
     try {
         await assertAdminAction("canViewAnalytics");
@@ -271,12 +260,9 @@ export async function exportAnalyticsAction(): Promise<ActionResult<any[]>> {
 
         const docs = snapshots.docs.map((d) => d.data());
 
-        // Use authoritative live fallback if daily snapshots haven't been generated yet
         if (docs.length === 0) {
             const stats = await getAdminStats();
             const today = new Date().toISOString().split("T")[0];
-
-            // Return a single live record so the export works immediately
             return ok([
                 {
                     date: today,
@@ -286,11 +272,7 @@ export async function exportAnalyticsAction(): Promise<ActionResult<any[]>> {
                     sessions: stats.totalSessions,
                     errors: Math.round(stats.totalSessions * (stats.errorRate / 100)),
                     flashcardsCreated: stats.totalFlashcards,
-                    featureUsage: {
-                        flashcards: 0,
-                        kana: 0,
-                        matching: 0,
-                    },
+                    featureUsage: { flashcards: 0, kana: 0, matching: 0 },
                 },
             ]);
         }
@@ -301,9 +283,6 @@ export async function exportAnalyticsAction(): Promise<ActionResult<any[]>> {
     }
 }
 
-/**
- * AI TRAINING EXPORT: Raw User Progress Dataset
- */
 export async function exportUsersDatasetAction(): Promise<ActionResult<any[]>> {
     try {
         await assertAdminAction("canViewAnalytics");
@@ -331,9 +310,6 @@ export async function exportUsersDatasetAction(): Promise<ActionResult<any[]>> {
     }
 }
 
-/**
- * AI TRAINING EXPORT: Global Content Metadata Dataset
- */
 export async function exportContentDatasetAction(): Promise<ActionResult<any[]>> {
     try {
         await assertAdminAction("canViewAnalytics");
@@ -360,9 +336,6 @@ export async function exportContentDatasetAction(): Promise<ActionResult<any[]>>
     }
 }
 
-/**
- * AI TRAINING EXPORT: System Log Behavioral Dataset
- */
 export async function exportLogsDatasetAction(): Promise<ActionResult<any[]>> {
     try {
         await assertAdminAction("canViewAnalytics");

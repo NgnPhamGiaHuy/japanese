@@ -15,7 +15,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         <AdminGuard>
             <div className="flex min-h-screen bg-[#F7F7F8]">
                 <AdminSidebar />
-                <main className="flex-1 lg:pl-64">
+                {/* pt-14 on mobile to clear the fixed top bar; no offset needed on lg */}
+                <main className="flex-1 pt-14 lg:pt-0 lg:pl-64">
                     <div className="mx-auto min-h-screen max-w-7xl pb-32">{children}</div>
                 </main>
             </div>

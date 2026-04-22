@@ -3,7 +3,10 @@
 import { motion } from "framer-motion";
 import { Loader2, LucideIcon } from "lucide-react";
 
+/** Supported Japanese alphabet modes for thematic styling. */
 type AlphabetMode = "hiragana" | "katakana" | "both";
+
+/** Predefined theme color names or custom hex strings. */
 type ThemeColor =
     | "blue"
     | "green"
@@ -14,6 +17,8 @@ type ThemeColor =
     | "teal"
     | "pink"
     | (string & {});
+
+/** Visual variants for different action hierarchies. */
 type Variant = "primary" | "secondary" | "outline" | "ghost";
 
 const ALPHABET_MAP: Record<AlphabetMode, ThemeColor> = {
@@ -73,28 +78,60 @@ const THEMES: Record<string, { bg: string; border: string; hover: string; text: 
     },
 };
 
+/** Attributes for rendering a Button component. */
 interface ButtonProps {
+    /** Button content or label. */
     children?: React.ReactNode;
+    /** Triggered when the button is clicked. */
     onClick?: (e: React.MouseEvent<HTMLButtonElement>) => void;
+    /** Visual style variant. */
     variant?: Variant;
+    /** Theme color name or custom hex code. */
     color?: ThemeColor;
+    /** Preset color based on Japanese alphabet mode. */
     alphabet?: AlphabetMode;
+    /** Additional CSS classes for the button container. */
     className?: string;
+    /** Optional icon to display before the label. */
     icon?: LucideIcon;
+    /** Size of the icon in pixels. */
     iconSize?: number;
+    /** Additional CSS classes for the icon element. */
     iconClassName?: string;
+    /** Whether the button is non-interactive. */
     disabled?: boolean;
+    /** Whether to show a loading spinner and disable interaction. */
     loading?: boolean;
+    /** Whether the button is visually active (useful for toggles). */
     active?: boolean;
+    /** HTML button type. */
     type?: "button" | "submit";
+    /** Triggered on mouse enter. */
     onMouseEnter?: (e: React.MouseEvent<HTMLButtonElement>) => void;
+    /** Triggered on mouse leave. */
     onMouseLeave?: (e: React.MouseEvent<HTMLButtonElement>) => void;
+    /** Optional badge content to display after the label. */
     badge?: React.ReactNode;
+    /** HTML id attribute. */
     id?: string;
+    /** HTML title attribute for tooltips. */
     title?: string;
+    /** Inline CSS styles. */
     style?: React.CSSProperties;
 }
 
+/**
+ * Premium interactive button component.
+ *
+ * @remarks
+ * Implements a premium Duolingo-style 3D button with spring animations
+ * and glassmorphism support. Supports multiple themes, variants, and loading states.
+ *
+ * @example
+ * <Button variant="primary" color="green" onClick={() => startLesson()}>
+ *   Start Lesson
+ * </Button>
+ */
 const Button = ({
     children,
     onClick,

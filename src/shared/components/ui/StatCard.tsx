@@ -7,16 +7,39 @@ import { LucideIcon } from "lucide-react";
 
 import type { ReactElement } from "react";
 
+/** Attributes for rendering a StatCard. */
 interface StatCardProps {
+    /** The icon to display, either a Lucide component or a custom React element. */
     icon: LucideIcon | ReactElement;
+    /** Primary label for the statistic. */
     title: string;
+    /** The statistical value to display. */
     value: number | string;
+    /** Optional trend indicator or status tag (e.g., "Live", "+12%"). */
     trend?: string;
+    /** Primary theme color for the icon and accents. */
     color?: string;
+    /** Whether the card is currently fetching data. */
     loading?: boolean;
+    /** Index in a list, used for staggered entrance animations. */
     index?: number;
 }
 
+/**
+ * Visual card for displaying key performance indicators or metrics.
+ *
+ * @remarks
+ * Features smooth entry animations and themed icon containers.
+ * Optimized for dashboard views and summary screens.
+ *
+ * @example
+ * <StatCard
+ *   title="Total XP"
+ *   value={5200}
+ *   icon={Zap}
+ *   color="#ffc107"
+ * />
+ */
 const StatCard = ({
     icon,
     title,

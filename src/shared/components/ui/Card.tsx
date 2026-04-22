@@ -1,19 +1,30 @@
 "use client";
 
 /**
- * Card — Reusable card container component
+ * Reusable card container component.
  *
  * @remarks
  * Base card component with consistent styling across the app.
  * Supports different variants and sizes.
+ *
+ * @example
+ * <Card variant="elevated" padding="lg">
+ *   <h3>Card Content</h3>
+ * </Card>
  */
 import type { ReactNode } from "react";
 
+/** Attributes for rendering a Card component. */
 interface CardProps {
+    /** The content to be displayed inside the card. */
     children: ReactNode;
+    /** Visual theme variant determining borders and shadows. */
     variant?: "default" | "elevated" | "flat" | "dashboard";
+    /** Predefined padding size for the card interior. */
     padding?: "none" | "sm" | "md" | "lg";
+    /** Additional CSS classes. */
     className?: string;
+    /** Optional click handler. If provided, the card renders as a button. */
     onClick?: () => void;
 }
 
@@ -32,13 +43,13 @@ const PADDING_STYLES = {
     lg: "p-8",
 };
 
-export function Card({
+const Card = ({
     children,
     variant = "default",
     padding = "md",
     className = "",
     onClick,
-}: CardProps) {
+}: CardProps) => {
     const Component = onClick ? "button" : "div";
 
     return (
@@ -49,4 +60,6 @@ export function Card({
             {children}
         </Component>
     );
-}
+};
+
+export default Card;

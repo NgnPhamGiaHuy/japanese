@@ -1,8 +1,7 @@
 "use client";
 
-import { ReactNode } from "react";
-
-import { LucideIcon } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
+import type { ReactNode } from "react";
 
 interface AdminPageHeaderProps {
     title: string;
@@ -15,9 +14,8 @@ interface AdminPageHeaderProps {
 /**
  * Admin Page Header.
  *
- * @remarks Standardized header for admin sub-pages. Includes an icon,
- * title, description, and optional action buttons for a consistent layout.
- * Supports a 'Live' mode for real-time monitoring sections.
+ * @remarks Responsive header: stacks vertically on mobile, side-by-side on md+.
+ * Title scales from text-2xl on mobile to text-3xl on md+.
  */
 const AdminPageHeader = ({
     title,
@@ -27,14 +25,14 @@ const AdminPageHeader = ({
     isLive = false,
 }: AdminPageHeaderProps) => {
     return (
-        <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
-            <div>
-                <div className="flex items-center gap-3">
-                    <div className="rounded-2xl bg-[#1cb0f6] p-2.5 shadow-lg shadow-[#1cb0f6]/20">
-                        <Icon className="text-white" size={20} />
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+            <div className="min-w-0">
+                <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+                    <div className="shrink-0 rounded-2xl bg-[#1cb0f6] p-2 shadow-lg shadow-[#1cb0f6]/20 sm:p-2.5">
+                        <Icon className="text-white" size={18} />
                     </div>
-                    <div className="flex items-center gap-3">
-                        <h1 className="text-3xl font-black tracking-tighter text-[#3c3c3c]">
+                    <div className="flex min-w-0 flex-wrap items-center gap-2 sm:gap-3">
+                        <h1 className="text-2xl font-black tracking-tighter text-[#3c3c3c] sm:text-3xl">
                             {title}
                         </h1>
                         {isLive && (
@@ -47,9 +45,9 @@ const AdminPageHeader = ({
                         )}
                     </div>
                 </div>
-                <p className="mt-2 text-sm font-bold text-[#afafaf]">{description}</p>
+                <p className="mt-1.5 text-sm font-bold text-[#afafaf]">{description}</p>
             </div>
-            {actions}
+            {actions && <div className="flex shrink-0 flex-wrap items-center gap-2">{actions}</div>}
         </div>
     );
 };

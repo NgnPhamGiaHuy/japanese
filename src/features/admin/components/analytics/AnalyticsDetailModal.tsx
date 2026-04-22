@@ -86,7 +86,9 @@ const AnalyticsDetailModal = ({
                                                   })
                                                 : "—";
 
-                                            const rowKey = item.id ? `${item.id}` : `row-${idx}`;
+                                            const rowKey = item.id
+                                                ? `${item.id}-${idx}`
+                                                : `row-${idx}`;
 
                                             return (
                                                 <tr

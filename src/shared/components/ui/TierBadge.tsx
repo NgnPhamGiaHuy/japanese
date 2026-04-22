@@ -1,19 +1,24 @@
 /**
- * TierBadge — Visual tier indicator based on score
+ * Visual tier indicator based on game or study performance.
  *
  * @remarks
- * Shows emoji + theme colors (Gold, Platinum, etc) for game achievements.
- * Reusable across all features that display tier/score information.
+ * Shows an emoji and themed background (e.g., Gold, Platinum) based on the provided score.
+ * Reusable across features displaying achievement tiers.
+ *
+ * @example
+ * <TierBadge score={950} />
  */
-
 import { scoreToTier, TIER_INFO } from "@/features/game";
 
+/** Attributes for rendering a TierBadge. */
 export interface TierBadgeProps {
+    /** The numerical score used to determine the tier. */
     score: number;
+    /** Additional CSS classes. */
     className?: string;
 }
 
-export function TierBadge({ score, className = "" }: TierBadgeProps) {
+const TierBadge = ({ score, className = "" }: TierBadgeProps) => {
     const tier = scoreToTier(score);
     const info = TIER_INFO[tier];
     return (
@@ -28,4 +33,6 @@ export function TierBadge({ score, className = "" }: TierBadgeProps) {
             {info.emoji}
         </span>
     );
-}
+};
+
+export default TierBadge;

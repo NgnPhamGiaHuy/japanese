@@ -2,7 +2,8 @@
 
 import { Users as UsersIcon } from "lucide-react";
 
-import { Button } from "@/shared/components/ui";
+import { Button, LoadingSpinner } from "@/shared/components/ui";
+import UserMobileRow from "./UserMobileRow";
 import UsersActionConfirmModal from "./UsersActionConfirmModal";
 import UsersTableBody from "./UsersTableBody";
 import UsersTableHeader from "./UsersTableHeader";
@@ -94,6 +95,21 @@ const UsersTable = (props: UsersTableProps) => {
                             })
                         }
                     />
+                }
+                mobileList={
+                    hasResults ? (
+                        loading ? (
+                            <div className="flex justify-center py-16">
+                                <LoadingSpinner fullScreen={false} label="Loading users..." />
+                            </div>
+                        ) : (
+                            <div className="divide-y divide-gray-100">
+                                {table.getRowModel().rows.map((row) => (
+                                    <UserMobileRow key={row.id} row={row} />
+                                ))}
+                            </div>
+                        )
+                    ) : undefined
                 }
                 pagination={
                     hasResults ? (

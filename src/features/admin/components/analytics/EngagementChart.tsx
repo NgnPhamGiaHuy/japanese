@@ -58,7 +58,7 @@ const EngagementChart = ({ data, onClick }: EngagementChartProps) => {
                     />
                     <Bar
                         dataKey="count"
-                        radius={[0, 12, 12, 0]}
+                        radius={[16, 16, 16, 16]}
                         barSize={32}
                         animationDuration={1500}
                         onClick={(data: any) =>

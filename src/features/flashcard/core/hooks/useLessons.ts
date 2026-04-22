@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 
 import { useAppStore } from "@/store";
+import { logDeckCreated, logDeckDeleted, logDeckUpdated } from "../actions/activity-log.actions";
 import * as LessonService from "../services";
 
 import type { DeckAccessRole, FlashCard, Lesson } from "../types";
@@ -99,9 +100,17 @@ export function useLessons() {
     const deleteLesson = useCallback(
         async (id: string): Promise<void> => {
             if (!user) return;
+            // Capture title before deletion for the audit log
+            const lesson = state.lessons.find((l) => l.id === id);
             await LessonService.deleteLessonWithCards(user.uid, id);
+            try {
+                const token = await user.getIdToken();
+                void logDeckDeleted(token, user.uid, id, lesson?.title ?? "");
+            } catch {
+                // Non-blocking
+            }
         },
-        [user],
+        [user, state.lessons],
     );
 
     /**
@@ -135,6 +144,17 @@ export function useLessons() {
                   };
 
             await LessonService.saveLessonWithCards(ownerId, lessonToSave, cards, isNew);
+
+            try {
+                const token = await user.getIdToken();
+                if (isNew) {
+                    void logDeckCreated(token, user.uid, lesson.id, lesson.title);
+                } else {
+                    void logDeckUpdated(token, user.uid, lesson.id, lesson.title);
+                }
+            } catch {
+                // Non-blocking
+            }
         },
         [user],
     );

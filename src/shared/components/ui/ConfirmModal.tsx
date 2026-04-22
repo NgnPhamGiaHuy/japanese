@@ -5,19 +5,48 @@ import { AlertTriangle, Info, Trash2, X } from "lucide-react";
 
 import Button from "./Button";
 
+/** Supported visual variants for the confirmation modal. */
 export type ConfirmVariant = "danger" | "warning" | "info";
 
+/** Attributes for rendering a ConfirmModal. */
 interface ConfirmModalProps {
+    /** Whether the modal is currently visible. */
     isOpen: boolean;
+    /** Triggered when the user cancels or closes the modal. */
     onClose: () => void;
+    /** Triggered when the user confirms the action. */
     onConfirm: () => void;
+    /** Primary heading text. */
     title: string;
+    /** Secondary descriptive text explaining the action. */
     message: string;
+    /** Text for the confirmation button (default: "Confirm"). */
     confirmText?: string;
+    /** Text for the cancellation button (default: "Cancel"). */
     cancelText?: string;
+    /** Visual theme variant determining colors and icons. */
     variant?: ConfirmVariant;
+    /** Whether to show a loading state on the confirm button. */
     loading?: boolean;
 }
+
+/**
+ * High-stakes confirmation dialog.
+ *
+ * @remarks
+ * Used for dangerous or important actions (e.g., deletions, resets).
+ * Features a central themed icon and clear action hierarchy.
+ *
+ * @example
+ * <ConfirmModal
+ *   isOpen={showDelete}
+ *   onClose={() => setShowDelete(false)}
+ *   onConfirm={handleDelete}
+ *   title="Delete Account?"
+ *   message="This action is irreversible."
+ *   variant="danger"
+ * />
+ */
 
 const VARIANTS = {
     danger: {

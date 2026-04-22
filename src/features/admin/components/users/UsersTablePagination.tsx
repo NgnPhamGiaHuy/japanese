@@ -34,17 +34,17 @@ const UsersTablePagination = ({
     maxDiscoveredPage,
 }: UsersTablePaginationProps) => {
     return (
-        <div className="flex items-center justify-between border-t-2 border-gray-100 px-4 py-3">
+        <div className="flex flex-col gap-2 border-t-2 border-gray-100 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
             <span className="text-xs font-bold text-[#afafaf]">
                 Page {currentPage + 1} of {Math.max(1, totalPages)} · {totalUsers} total
             </span>
-            <div className="flex gap-1">
+            <div className="flex flex-wrap gap-1">
                 <Button
                     variant="secondary"
                     color="gray"
                     onClick={onPrevPage}
                     disabled={!hasPrevPage || loading || !onPrevPage}
-                    className="mr-2 !h-8 !px-3 !py-1 !text-xs"
+                    className="mr-1 !h-8 !px-3 !py-1 !text-xs"
                 >
                     Prev
                 </Button>
@@ -58,7 +58,7 @@ const UsersTablePagination = ({
                         ) {
                             if (pageIdx === 1 || pageIdx === totalPages - 2)
                                 return (
-                                    <span key={pageIdx} className="text-gray-300">
+                                    <span key={pageIdx} className="self-center text-gray-300">
                                         ...
                                     </span>
                                 );
@@ -91,7 +91,7 @@ const UsersTablePagination = ({
                     color="gray"
                     onClick={onNextPage}
                     disabled={!hasNextPage || loading || !onNextPage}
-                    className="ml-2 !h-8 !px-3 !py-1 !text-xs"
+                    className="ml-1 !h-8 !px-3 !py-1 !text-xs"
                 >
                     Next
                 </Button>

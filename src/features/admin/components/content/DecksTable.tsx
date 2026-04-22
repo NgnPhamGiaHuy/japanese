@@ -1,7 +1,4 @@
-import { format } from "date-fns";
-import { Calendar, Eye, Layers, Trash2 } from "lucide-react";
-
-import { Button } from "@/shared/components/ui";
+import DecksMobileList from "./DecksMobileList";
 import DecksTableRow from "./DecksTableRow";
 import { AdminTable } from "../shared";
 
@@ -17,12 +14,30 @@ interface DecksTableProps {
 /**
  * Global Decks Administrative Table.
  *
- * @remarks Displays all platform flashcard sets.
- * Delegates individual row rendering to DecksTableRow for modularity.
+ * @remarks
+ * Displays all platform flashcard sets. Delegates individual row rendering
+ * to DecksTableRow for modularity and performance.
+ *
+ * @example
+ * <DecksTable
+ *   items={decks}
+ *   onDelete={handleDelete}
+ *   onView={handleView}
+ *   isDeleting={false}
+ * />
  */
 const DecksTable = ({ items, onDelete, onView, isDeleting }: DecksTableProps) => {
     return (
-        <AdminTable>
+        <AdminTable
+            mobileList={
+                <DecksMobileList
+                    items={items}
+                    onView={onView}
+                    onDelete={onDelete}
+                    isDeleting={isDeleting}
+                />
+            }
+        >
             <thead>
                 <tr className="border-b-2 border-gray-50 bg-gray-50/30">
                     <th className="px-6 py-4 text-[10px] font-black tracking-widest text-[#afafaf] uppercase">
@@ -45,7 +60,7 @@ const DecksTable = ({ items, onDelete, onView, isDeleting }: DecksTableProps) =>
             <tbody className="divide-y divide-gray-50">
                 {items.map((deck) => (
                     <DecksTableRow
-                        key={deck.id}
+                        key={deck.path}
                         deck={deck}
                         onView={onView}
                         onDelete={onDelete}

@@ -1,39 +1,37 @@
 /**
- * NotFoundScreen Component
+ * Full-screen error screen for missing resources.
  *
  * @remarks
- * Reusable 404/not found screen with customizable message.
- * Used when resources (lessons, decks, etc.) are not found.
- */
-/**
- * NotFoundScreen Component
+ * Reusable 404/not found screen with customizable messaging.
+ * Used when resources like lessons, decks, or user profiles are not found.
  *
- * @remarks
- * Reusable 404/not found screen with customizable message.
- * Used when resources (lessons, decks, etc.) are not found.
+ * @example
+ * <NotFoundScreen
+ *   title="Lesson Not Found"
+ *   description="The lesson you are looking for does not exist or has been removed."
+ *   onBack={() => router.back()}
+ * />
  */
 import Button from "./Button";
 
+/** Attributes for rendering a NotFoundScreen. */
 interface NotFoundScreenProps {
-    /** Title text (default: "Not Found") */
+    /** Primary heading text (default: "Not Found"). */
     title?: string;
-    /** Optional description text */
+    /** Optional secondary descriptive text explaining what is missing. */
     description?: string;
-    /** Button text (default: "Go Back") */
+    /** Text to display on the action button (default: "Go Back"). */
     buttonText?: string;
-    /** Button click handler */
+    /** Triggered when the action button is clicked. */
     onBack: () => void;
 }
 
-/**
- * Full-screen centered not found message
- */
-export function NotFoundScreen({
+const NotFoundScreen = ({
     title = "Not Found",
     description,
     buttonText = "Go Back",
     onBack,
-}: NotFoundScreenProps) {
+}: NotFoundScreenProps) => {
     return (
         <div className="fixed inset-0 flex flex-col items-center justify-center bg-[#F7F7F8] p-6 text-center">
             <h1 className="mb-4 text-2xl font-black text-[#3c3c3c]">{title}</h1>
@@ -47,4 +45,6 @@ export function NotFoundScreen({
             </Button>
         </div>
     );
-}
+};
+
+export default NotFoundScreen;

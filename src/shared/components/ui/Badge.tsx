@@ -1,13 +1,29 @@
+/**
+ * Versatile badge component for status, tags, or counts.
+ *
+ * @remarks
+ * Supports multiple variants, sizes, and optional icons or status dots.
+ *
+ * @example
+ * <Badge variant="success" dot>Active</Badge>
+ */
 import { LucideIcon } from "lucide-react";
 
 import type { ReactNode } from "react";
 
+/** Attributes for rendering a Badge. */
 interface BadgeProps {
+    /** The content to be displayed within the badge. */
     children: ReactNode;
+    /** Visual theme variant. */
     variant?: "default" | "primary" | "success" | "warning" | "danger" | "info";
+    /** Predefined size constraint. */
     size?: "sm" | "md" | "lg";
+    /** Additional CSS classes. */
     className?: string;
+    /** Optional icon to display before children. */
     icon?: LucideIcon;
+    /** Whether to display a status dot. */
     dot?: boolean;
 }
 
@@ -26,14 +42,14 @@ const SIZE_STYLES = {
     lg: "h-6 min-w-6 px-2 text-xs",
 };
 
-export function Badge({
+const Badge = ({
     children,
     variant = "default",
     size = "md",
     className = "",
     icon: Icon,
     dot,
-}: BadgeProps) {
+}: BadgeProps) => {
     return (
         <span
             className={`inline-flex items-center justify-center gap-1 overflow-hidden rounded-full font-black ${VARIANT_STYLES[variant]} ${SIZE_STYLES[size]} ${className}`}
@@ -43,4 +59,6 @@ export function Badge({
             {children}
         </span>
     );
-}
+};
+
+export default Badge;

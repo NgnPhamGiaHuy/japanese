@@ -2,7 +2,7 @@
 
 import { Filter, RotateCcw } from "lucide-react";
 
-import { CustomDatePicker } from "@/shared/components/ui";
+import { DatePicker } from "@/shared/components/ui";
 
 interface AdminDateRangeFilterProps {
     startDate?: string;
@@ -29,13 +29,13 @@ const AdminDateRangeFilter = ({
     return (
         <div className="flex flex-col items-center justify-between gap-4 border-t border-gray-50 pt-4 lg:flex-row">
             <div className="flex flex-wrap items-center gap-3">
-                <CustomDatePicker
+                <DatePicker
                     label="From"
                     placeholder="Start date"
                     value={startDate}
                     onChange={onStartChange}
                 />
-                <CustomDatePicker
+                <DatePicker
                     label="To"
                     placeholder="End date"
                     value={endDate}

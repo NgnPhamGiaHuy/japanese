@@ -8,10 +8,19 @@ import { useAdminToken } from "./useAdminToken";
 import {
     fetchDrilldownContentAction,
     fetchDrilldownFeatureAction,
+    fetchDrilldownLogsAction,
     fetchDrilldownUsersAction,
 } from "../actions/admin.actions";
 
-export type DrilldownType = "user_growth" | "role" | "feature" | "content" | null;
+export type DrilldownType =
+    | "user_growth"
+    | "role"
+    | "feature"
+    | "content"
+    | "log_type"
+    | "log_level"
+    | "log_action"
+    | null;
 
 interface DrilldownSelection {
     type: DrilldownType;
@@ -24,6 +33,7 @@ interface DrilldownSelection {
  *
  * @remarks Handles modal state, data selection, and TanStack Query fetching
  * for detailed analytics records from Firebase.
+ * Supports log-derived drilldowns: log_type, log_level, log_action.
  */
 export const useAnalyticsDrilldown = () => {
     const getAdminIdToken = useAdminToken();
@@ -36,26 +46,41 @@ export const useAnalyticsDrilldown = () => {
             await getAdminIdToken();
 
             switch (selection.type) {
-                case "user_growth":
-                    const resUsersDate = await fetchDrilldownUsersAction({
-                        date: selection.value,
-                    });
-                    if (!resUsersDate.ok) throw new Error(resUsersDate.error);
-                    return resUsersDate.data;
-                case "role":
-                    const resUsersRole = await fetchDrilldownUsersAction({
-                        role: selection.value,
-                    });
-                    if (!resUsersRole.ok) throw new Error(resUsersRole.error);
-                    return resUsersRole.data;
-                case "feature":
-                    const resFeature = await fetchDrilldownFeatureAction(selection.value);
-                    if (!resFeature.ok) throw new Error(resFeature.error);
-                    return resFeature.data;
-                case "content":
-                    const resContent = await fetchDrilldownContentAction(selection.value);
-                    if (!resContent.ok) throw new Error(resContent.error);
-                    return resContent.data;
+                case "user_growth": {
+                    const res = await fetchDrilldownUsersAction({ date: selection.value });
+                    if (!res.ok) throw new Error(res.error);
+                    return res.data;
+                }
+                case "role": {
+                    const res = await fetchDrilldownUsersAction({ role: selection.value });
+                    if (!res.ok) throw new Error(res.error);
+                    return res.data;
+                }
+                case "feature": {
+                    const res = await fetchDrilldownFeatureAction(selection.value);
+                    if (!res.ok) throw new Error(res.error);
+                    return res.data;
+                }
+                case "content": {
+                    const res = await fetchDrilldownContentAction(selection.value);
+                    if (!res.ok) throw new Error(res.error);
+                    return res.data;
+                }
+                case "log_type": {
+                    const res = await fetchDrilldownLogsAction({ type: selection.value });
+                    if (!res.ok) throw new Error(res.error);
+                    return res.data;
+                }
+                case "log_level": {
+                    const res = await fetchDrilldownLogsAction({ level: selection.value });
+                    if (!res.ok) throw new Error(res.error);
+                    return res.data;
+                }
+                case "log_action": {
+                    const res = await fetchDrilldownLogsAction({ action: selection.value });
+                    if (!res.ok) throw new Error(res.error);
+                    return res.data;
+                }
                 default:
                     return null;
             }

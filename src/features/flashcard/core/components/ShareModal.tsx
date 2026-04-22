@@ -2,17 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 
-import {
-    Check,
-    ChevronDown,
-    Copy,
-    Globe2,
-    Lock,
-    Mail,
-    ShieldAlert,
-    Sparkles,
-    X,
-} from "lucide-react";
+import { Check, ChevronDown, Copy, Mail, ShieldAlert, X } from "lucide-react";
 
 import { buildShareId, inviteByEmail, revokeEmailInvite } from "@/features/flashcard/core/services";
 import { ROLE_CONFIG, sanitizePublicRole } from "@/features/flashcard/core/utils/rbac";
@@ -21,8 +11,9 @@ import {
     VISIBILITY_MAPPINGS,
     VisibilityLevel,
 } from "@/features/flashcard/core/utils/visibility";
+import { ActivityAction } from "@/lib/logging/actions.enum";
 import { enqueueClientLog } from "@/lib/logging/browser";
-import { Button, CustomSelect } from "@/shared/components/ui";
+import { Button, Select } from "@/shared/components/ui";
 import { useAlert } from "@/shared/providers";
 import { hexToThemeColor } from "@/shared/utils";
 import { useAppStore } from "@/store";
@@ -120,10 +111,11 @@ const ShareModal = ({ lesson, onShareLink, onUpdateRoles, onClose }: ShareModalP
         if (!user) return;
         enqueueClientLog(() => user.getIdToken(), {
             action,
-            entityType: "lesson",
+            entityType: "share",
             entityId: lesson.id,
             level: "info",
             metadata: {
+                logType: "USER_ACTION",
                 userName: user.displayName ?? undefined,
                 userEmail: user.email ?? undefined,
                 lessonTitle: lesson.title,
@@ -213,7 +205,7 @@ const ShareModal = ({ lesson, onShareLink, onUpdateRoles, onClose }: ShareModalP
             const newAllowLink = mode !== "restricted";
             const newIsPublic = mode === "public";
             await onShareLink(newAllowLink, publicRole, newIsPublic);
-            auditClient("lesson.share.privacy_updated", {
+            auditClient(ActivityAction.SHARE_PRIVACY_UPDATED, {
                 mode,
                 allowLinkAccess: newAllowLink,
                 isPublic: newIsPublic,
@@ -239,7 +231,7 @@ const ShareModal = ({ lesson, onShareLink, onUpdateRoles, onClose }: ShareModalP
         setSaving(true);
         try {
             await onShareLink(allowLinkAccess, role, isPublicMode);
-            auditClient("lesson.share.public_role_updated", { publicRole: role });
+            auditClient(ActivityAction.SHARE_PRIVACY_UPDATED, { publicRole: role });
             showAlert("success", `Default role set to ${role}`);
         } catch (err) {
             console.error("[ShareModal] handleSavePublicRole failed:", err);
@@ -261,7 +253,7 @@ const ShareModal = ({ lesson, onShareLink, onUpdateRoles, onClose }: ShareModalP
         setSaving(true);
         try {
             await onUpdateRoles(newRoles, newCollaborators);
-            auditClient("lesson.share.roles_updated", {
+            auditClient(ActivityAction.SHARE_ROLES_UPDATED, {
                 collaboratorCount: newCollaborators.length,
             });
             showAlert("success", "Collaborator permissions updated");
@@ -381,7 +373,7 @@ const ShareModal = ({ lesson, onShareLink, onUpdateRoles, onClose }: ShareModalP
                                             disabled={saving}
                                         />
                                     </div>
-                                    <CustomSelect
+                                    <Select
                                         value={inviteRole}
                                         options={sharingOptions}
                                         onChange={(r) => setInviteRole(r)}
@@ -471,7 +463,7 @@ const ShareModal = ({ lesson, onShareLink, onUpdateRoles, onClose }: ShareModalP
                                                     </div>
                                                 </div>
 
-                                                <CustomSelect
+                                                <Select
                                                     value={r}
                                                     options={sharingOptions}
                                                     onChange={(newRole) =>
@@ -680,7 +672,7 @@ const ShareModal = ({ lesson, onShareLink, onUpdateRoles, onClose }: ShareModalP
                                         <span className="text-sm font-bold text-gray-400">
                                             Default role
                                         </span>
-                                        <CustomSelect
+                                        <Select
                                             value={publicRole || "viewer"}
                                             options={publicRoleOptions}
                                             onChange={(r) =>

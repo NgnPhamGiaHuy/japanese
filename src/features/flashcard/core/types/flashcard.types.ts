@@ -185,6 +185,8 @@ export interface StudyStats {
     incorrect: number;
     /** List of card IDs the user struggled with (used for Mistake Review loop) */
     mistakeCardIds: string[];
+    /** Total number of cards presented in the session */
+    total?: number;
 }
 
 /**

@@ -1,35 +1,56 @@
 /**
- * ActionCard — Reusable action card with icon and content
+ * Reusable action card with icon and content.
  *
  * @remarks
  * Used for navigation cards with primary/secondary variants.
  * Supports progress bars, badges, and custom styling.
+ *
+ * @example
+ * <ActionCard
+ *   href="/learn"
+ *   icon={<LearnIcon />}
+ *   title="Learn"
+ *   progress={{ value: 50, label: "50% Complete" }}
+ * />
  */
-
 import Link from "next/link";
 
 import type { ReactNode } from "react";
 
+/** Attributes for rendering an ActionCard. */
 interface ActionCardProps {
+    /** Target navigation URL. */
     href: string;
+    /** Whether to use the primary visual style. */
     primary?: boolean;
+    /** Main icon element. */
     icon: ReactNode;
+    /** Primary heading text. */
     title: string;
+    /** Optional secondary descriptive text. */
     subtitle?: string;
+    /** Optional badge element to overlay. */
     badge?: ReactNode;
+    /** Progress bar configuration. */
     progress?: {
         value: number;
         label: string;
     };
+    /** Override for primary background color. */
     primaryBg?: string;
+    /** Override for primary bottom border color. */
     primaryBorderB?: string;
+    /** Override for primary hover state background. */
     primaryHover?: string;
+    /** Override for primary text color. */
     primaryText?: string;
+    /** Override for primary light background variant. */
     primaryBgLight?: string;
+    /** Additional CSS classes. */
     className?: string;
 }
 
-export function ActionCard({
+const ActionCard = ({
     href,
     primary = false,
     icon,
@@ -43,7 +64,7 @@ export function ActionCard({
     primaryText = "text-[#1cb0f6]",
     primaryBgLight = "bg-[#1cb0f6]/10",
     className = "",
-}: ActionCardProps) {
+}: ActionCardProps) => {
     const baseClasses =
         "group flex h-full w-full rounded-3xl p-5 font-extrabold shadow-sm transition-all duration-200 select-none hover:-translate-y-1 hover:shadow-lg active:translate-y-[2px] active:scale-[0.99] md:rounded-4xl md:p-6";
 
@@ -98,4 +119,6 @@ export function ActionCard({
             </div>
         </Link>
     );
-}
+};
+
+export default ActionCard;

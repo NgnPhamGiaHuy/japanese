@@ -3,7 +3,7 @@ export interface AdminStats {
     activeUsersToday: number;
     totalFlashcards: number;
     totalSessions: number;
-    errorRate: number; // percentage
+    errorRate: number;
     activeAdmins: number;
     activeSuperAdmins: number;
 }
@@ -27,13 +27,37 @@ export interface EngagementPoint {
 }
 
 export interface RetentionPoint {
-    day: number; // 0, 1, 7, 30
-    rate: number; // percentage
+    day: number;
+    rate: number;
 }
 
 export interface RolePoint {
     name: string;
     value: number;
+}
+
+/** One bucket in the log-volume-over-time chart (grouped by day). */
+export interface LogVolumePoint {
+    date: string;
+    total: number;
+    AUTH: number;
+    ADMIN_ACTION: number;
+    USER_ACTION: number;
+    CONTENT: number;
+    SYSTEM: number;
+    ERROR: number;
+}
+
+/** One slice in the log-by-level breakdown. */
+export interface LogLevelPoint {
+    level: string;
+    count: number;
+}
+
+/** Top N most frequent actions. */
+export interface TopActionPoint {
+    action: string;
+    count: number;
 }
 
 export interface AnalyticsData {
@@ -45,10 +69,14 @@ export interface AnalyticsData {
     content: RolePoint[];
     errorTrends: { date: string; errors: number }[];
     timeRange: "7d" | "30d" | "90d";
+    /** Log-derived charts — computed from system_logs already fetched */
+    logVolume: LogVolumePoint[];
+    logsByLevel: LogLevelPoint[];
+    topActions: TopActionPoint[];
 }
 
 export interface DailyAnalyticsSnapshot {
-    date: string; // ISO yyyy-mm-dd
+    date: string;
     newUsers: number;
     activeUsers: number;
     sessions: number;

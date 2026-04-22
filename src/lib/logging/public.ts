@@ -66,6 +66,11 @@ const ENTITY_TO_LOG_TYPE: Record<string, LogType> = {
     lesson: "CONTENT",
     flashcard: "CONTENT",
     user: "AUTH",
+    user_action: "USER_ACTION",
+    deck: "USER_ACTION",
+    card: "USER_ACTION",
+    study: "USER_ACTION",
+    share: "USER_ACTION",
 };
 
 export function inferLogTypeFromEntity(entityType: string): LogType {
@@ -85,6 +90,8 @@ export function logTypeToEntityType(type: LogType): string {
             return "error";
         case "CONTENT":
             return "content";
+        case "USER_ACTION":
+            return "user_action";
         default:
             return "system";
     }

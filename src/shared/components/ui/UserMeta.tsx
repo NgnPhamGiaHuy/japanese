@@ -2,11 +2,15 @@
 
 import type { CSSProperties } from "react";
 
-/** Props for the UserMeta component. */
+/** Attributes for rendering a UserMeta component. */
 interface UserMetaProps {
+    /** The full name of the user. */
     name: string;
+    /** Optional URL for the user's avatar image. */
     avatar: string | null;
+    /** Optional descriptive text to display above the name. */
     subtitle?: string;
+    /** Additional CSS classes for the container. */
     className?: string;
 }
 
@@ -20,7 +24,7 @@ interface UserMetaProps {
  * @param name - The full display name of the user.
  * @returns A 1-2 character uppercase string.
  */
-function getInitials(name: string): string {
+const getInitials = (name: string): string => {
     const cleaned = name.trim();
     if (!cleaned) return "??";
 
@@ -29,7 +33,7 @@ function getInitials(name: string): string {
     const first = parts[0]?.[0] ?? cleaned[0];
     const second = parts.length > 1 ? parts[1]?.[0] : cleaned[1];
     return `${first}${second ?? ""}`.toUpperCase();
-}
+};
 
 /**
  * Displays user identity with an avatar and secondary metadata.

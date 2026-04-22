@@ -1,7 +1,14 @@
 import type { AdminLog, AdminLogFilters, LogLevel, LogType } from "../types";
 
 export const LOG_LEVEL_OPTIONS: LogLevel[] = ["info", "warn", "error", "security"];
-export const LOG_TYPE_OPTIONS: LogType[] = ["AUTH", "ADMIN_ACTION", "SYSTEM", "ERROR", "CONTENT"];
+export const LOG_TYPE_OPTIONS: LogType[] = [
+    "AUTH",
+    "ADMIN_ACTION",
+    "USER_ACTION",
+    "CONTENT",
+    "SYSTEM",
+    "ERROR",
+];
 
 /**
  * Shared filtering logic for system logs.
@@ -15,6 +22,15 @@ export function applyLogFilters(logs: AdminLog[], filters: AdminLogFilters): Adm
     }
     if (filters.type) {
         out = out.filter((l) => l.type === filters.type);
+    }
+    if (filters.userId) {
+        const uid = filters.userId.toLowerCase();
+        out = out.filter(
+            (l) =>
+                l.userId?.toLowerCase().includes(uid) ||
+                l.userEmail?.toLowerCase().includes(uid) ||
+                l.userName?.toLowerCase().includes(uid),
+        );
     }
     if (filters.startDate) {
         const start = new Date(filters.startDate).getTime();

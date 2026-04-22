@@ -1,30 +1,44 @@
 /**
- * EmptyState — Reusable empty state component
+ * Reusable empty state component for displaying missing content.
  *
  * @remarks
- * Used to display empty states with icon, title, description, and optional action.
+ * Used to display empty states with icon, title, description, and optional action button.
+ *
+ * @example
+ * <EmptyState
+ *   icon={Search}
+ *   title="No results found"
+ *   description="Try adjusting your search filters."
+ *   action={<Button>Clear Filters</Button>}
+ * />
  */
-
 import type { LucideIcon } from "lucide-react";
 import type { ReactNode } from "react";
 
+/** Attributes for rendering an EmptyState component. */
 interface EmptyStateProps {
+    /** The icon to display as the main visual element. */
     icon: LucideIcon;
+    /** Primary heading text. */
     title: string;
+    /** Secondary descriptive text explaining the empty state. */
     description: string;
+    /** Optional action element (e.g., a Button). */
     action?: ReactNode;
+    /** Tailwind background color class for the icon container. */
     iconBg?: string;
+    /** Tailwind border color class for the icon container. */
     iconBorder?: string;
 }
 
-export function EmptyState({
+const EmptyState = ({
     icon: Icon,
     title,
     description,
     action,
     iconBg = "bg-[#ce82ff]",
     iconBorder = "border-[#b65ce8]",
-}: EmptyStateProps) {
+}: EmptyStateProps) => {
     return (
         <div className="py-20 text-center">
             <div
@@ -37,4 +51,6 @@ export function EmptyState({
             <div className="flex justify-center">{action}</div>
         </div>
     );
-}
+};
+
+export default EmptyState;

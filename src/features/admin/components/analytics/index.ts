@@ -3,4 +3,7 @@ export { default as AnalyticsDetailModal } from "./AnalyticsDetailModal";
 export { default as AnalyticsExportModal } from "./AnalyticsExportModal";
 export { default as EngagementChart } from "./EngagementChart";
 export { default as ErrorTrendChart } from "./ErrorTrendChart";
+export { default as LogLevelChart } from "./LogLevelChart";
+export { default as LogVolumeChart } from "./LogVolumeChart";
 export { default as RetentionChart } from "./RetentionChart";
+export { default as TopActionsChart } from "./TopActionsChart";

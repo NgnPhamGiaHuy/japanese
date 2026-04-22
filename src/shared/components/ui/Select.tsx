@@ -1,5 +1,4 @@
 "use client";
-"use client";
 
 import { useState } from "react";
 
@@ -7,27 +6,57 @@ import { Check, ChevronDown } from "lucide-react";
 
 import Button from "./Button";
 
+/** Attributes for a single option in the select menu. */
 export interface SelectOption<T> {
+    /** The raw value of the option. */
     value: T;
+    /** The human-readable label to display. */
     label: string;
+    /** Optional icon component to display next to the label. */
     icon?: React.ComponentType<{ size?: number; className?: string; style?: React.CSSProperties }>;
+    /** Optional theme color for the icon. */
     color?: string;
 }
 
+/** Attributes for rendering a Select component. */
 interface CustomSelectProps<T> {
+    /** The currently selected value. */
     value: T;
+    /** Array of available options. */
     options: SelectOption<T>[];
+    /** Triggered when a new option is selected. */
     onChange: (value: T) => void;
+    /** Optional triggered when a "remove" or "clear" action is requested. */
     onRemove?: () => void;
+    /** Label for the removal action (default: "Remove"). */
     removeLabel?: string;
+    /** Whether the select is non-interactive. */
     disabled?: boolean;
+    /** Visual theme hex code for active state indicators. */
     themeHex?: string;
+    /** Menu alignment relative to the trigger. */
     align?: "left" | "right";
+    /** Visual density of the select trigger. */
     variant?: "full" | "compact";
+    /** Additional CSS classes for the container. */
     className?: string;
 }
 
-const CustomSelect = <T extends string | number>({
+/**
+ * Premium custom dropdown selection component.
+ *
+ * @remarks
+ * Provides a highly customizable alternative to native select elements.
+ * Supports icons, thematic coloring, and different density variants.
+ *
+ * @example
+ * <Select
+ *   value={theme}
+ *   options={[{ value: 'dark', label: 'Dark Mode', icon: Moon }]}
+ *   onChange={setTheme}
+ * />
+ */
+const Select = <T extends string | number>({
     value,
     options,
     onChange,
@@ -122,4 +151,4 @@ const CustomSelect = <T extends string | number>({
     );
 };
 
-export default CustomSelect;
+export default Select;

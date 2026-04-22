@@ -55,12 +55,18 @@ const AdminOverviewPage = () => {
                 actions={
                     <div className="flex gap-2">
                         <Link href="/admin/users">
-                            <Button variant="secondary" className="!px-4 !py-2 text-sm">
+                            <Button
+                                variant="secondary"
+                                className="!px-3 !py-2 !text-xs sm:!px-4 sm:!py-2 sm:!text-sm"
+                            >
                                 Manage Users
                             </Button>
                         </Link>
                         <Link href="/admin/reports">
-                            <Button variant="primary" className="!px-4 !py-2 text-sm">
+                            <Button
+                                variant="primary"
+                                className="!px-3 !py-2 !text-xs sm:!px-4 sm:!py-2 sm:!text-sm"
+                            >
                                 View Logs
                             </Button>
                         </Link>
@@ -68,7 +74,7 @@ const AdminOverviewPage = () => {
                 }
             />
 
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
                 <AdminStatCard
                     label="Total Users"
                     value={stats.totalUsers}
@@ -90,7 +96,7 @@ const AdminOverviewPage = () => {
                 />
             </div>
 
-            <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+            <div className="grid grid-cols-1 gap-4 sm:gap-6 lg:grid-cols-3">
                 <AdminCard
                     title="Operational Feed"
                     padding="none"
@@ -117,7 +123,7 @@ const AdminOverviewPage = () => {
                     </div>
                 </AdminCard>
 
-                <div className="space-y-6">
+                <div className="space-y-4 sm:space-y-6">
                     <SystemHealthCard
                         errorRate={stats.errorRate}
                         activeAdmins={stats.activeAdmins}

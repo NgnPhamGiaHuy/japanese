@@ -1,3 +1,13 @@
+/**
+ * Log Severity Level Badge.
+ *
+ * @remarks
+ * Maps internal log levels to semantic UI variants (danger, warning, info)
+ * to provide immediate visual feedback on event severity.
+ *
+ * @example
+ * <LogLevelBadge level="error" />
+ */
 "use client";
 
 import { Badge } from "@/shared/components/ui";
@@ -14,12 +24,6 @@ const LEVEL_CONFIG: Record<
     security: { variant: "primary", label: "Security" },
 };
 
-/**
- * Log Severity Level Badge.
- *
- * @remarks Maps internal log levels to semantic UI variants (danger, warning, info)
- * to provide immediate visual feedback on event severity.
- */
 const LogLevelBadge = ({ level }: { level: LogLevel | string }) => {
     const safe = LEVEL_CONFIG[level as LogLevel] ?? {
         variant: "default" as const,

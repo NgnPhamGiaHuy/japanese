@@ -7,6 +7,7 @@ interface AdminChartContainerProps {
     children: React.ReactNode;
     subtitle?: string;
     className?: string;
+    chartHeight?: number;
 }
 
 /**
@@ -20,6 +21,7 @@ const AdminChartContainer = ({
     children,
     subtitle,
     className = "",
+    chartHeight = 280,
 }: AdminChartContainerProps) => {
     return (
         <Card className={`border-gray-100 p-6 ${className}`}>
@@ -33,7 +35,9 @@ const AdminChartContainer = ({
                     </p>
                 )}
             </div>
-            <div className="h-[280px] w-full">{children}</div>
+            <div style={{ height: chartHeight }} className="w-full">
+                {children}
+            </div>
         </Card>
     );
 };

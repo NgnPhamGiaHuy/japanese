@@ -4,6 +4,7 @@ import { Card } from "@/shared/components/ui";
 
 interface AdminTableProps {
     children: React.ReactNode;
+    mobileList?: React.ReactNode;
     toolbar?: React.ReactNode;
     pagination?: React.ReactNode;
     className?: string;
@@ -15,9 +16,12 @@ interface AdminTableProps {
  *
  * @remarks Provides the consistent Card container, border treatments,
  * and overflow handling for all administrative data grids.
+ * Pass `mobileList` to render a card-based list on small screens instead
+ * of the scrollable table.
  */
 const AdminTable = ({
     children,
+    mobileList,
     toolbar,
     pagination,
     className = "",
@@ -29,11 +33,17 @@ const AdminTable = ({
             padding="none"
             className={`overflow-hidden border-2 border-b-8 border-gray-100 bg-white ${className}`}
         >
-            {toolbar && <div className="h-16 border-b-2 border-gray-100">{toolbar}</div>}
+            {toolbar && <div className="border-b-2 border-gray-100">{toolbar}</div>}
 
-            <div className={`overflow-x-auto ${containerClassName}`}>
+            {/* Desktop: scrollable table */}
+            <div
+                className={`overflow-x-auto ${mobileList ? "hidden md:block" : ""} ${containerClassName}`}
+            >
                 <table className="w-full border-collapse text-left">{children}</table>
             </div>
+
+            {/* Mobile: card list */}
+            {mobileList && <div className="md:hidden">{mobileList}</div>}
 
             {pagination && pagination}
         </Card>

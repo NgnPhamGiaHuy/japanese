@@ -1,5 +1,5 @@
 export type LogLevel = "info" | "warn" | "error" | "security";
-export type LogType = "AUTH" | "ADMIN_ACTION" | "SYSTEM" | "ERROR" | "CONTENT";
+export type LogType = "AUTH" | "ADMIN_ACTION" | "SYSTEM" | "ERROR" | "CONTENT" | "USER_ACTION";
 
 export type LogSource = "client" | "server" | "cloud_function";
 
@@ -25,6 +25,7 @@ export interface AdminLogFilters {
     level?: LogLevel;
     type?: LogType;
     search?: string;
+    userId?: string;
     startDate?: string;
     endDate?: string;
 }

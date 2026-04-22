@@ -15,6 +15,10 @@ import {
     resetLessonProgressForUser,
     useCardsWithProgress,
 } from "@/features/flashcard/core";
+import {
+    logStudyProgressReset,
+    logStudySessionCompleted,
+} from "@/features/flashcard/core/actions/activity-log.actions";
 import { useUserProgress } from "@/features/user/hooks";
 import { ConfirmModal } from "@/shared/components/ui";
 import { useAppStore } from "@/store";
@@ -110,6 +114,20 @@ const StudySession = ({ data }: StudySessionProps) => {
             addXP(overrideXp ?? stats.correct * 2);
             completedLesson();
 
+            // Log the completed session (non-blocking)
+            if (user && mode) {
+                try {
+                    const token = await user.getIdToken();
+                    void logStudySessionCompleted(token, user.uid, lessonId, data.lesson.title, {
+                        correct: stats.correct,
+                        total: stats.total ?? cards.length,
+                        mode,
+                    });
+                } catch {
+                    // Non-blocking
+                }
+            }
+
             const hasMistakes = getMistakeCards(cards).length > 0;
             if (hasMistakes) {
                 setMode("mistake-review");
@@ -117,14 +135,21 @@ const StudySession = ({ data }: StudySessionProps) => {
                 router.back();
             }
         },
-        [addXP, completedLesson, cards, router],
+        [addXP, completedLesson, cards, router, user, mode, lessonId, data.lesson.title],
     );
 
     const handleReset = useCallback(async () => {
         if (!user) return;
         await resetLessonProgressForUser(user.uid, lessonId);
+        // Log the reset (non-blocking)
+        try {
+            const token = await user.getIdToken();
+            void logStudyProgressReset(token, user.uid, lessonId, data.lesson.title);
+        } catch {
+            // Non-blocking
+        }
         setMode(null);
-    }, [user, lessonId]);
+    }, [user, lessonId, data.lesson.title]);
 
     if (!mode || !session) {
         return (

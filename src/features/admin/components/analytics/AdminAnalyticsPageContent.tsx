@@ -10,11 +10,14 @@ import AnalyticsExportModal from "./AnalyticsExportModal";
 import ContentDistributionChart from "./ContentDistributionChart";
 import EngagementChart from "./EngagementChart";
 import ErrorTrendChart from "./ErrorTrendChart";
+import LogLevelChart from "./LogLevelChart";
+import LogVolumeChart from "./LogVolumeChart";
 import RetentionChart from "./RetentionChart";
+import TopActionsChart from "./TopActionsChart";
 import GrowthChart from "../dashboard/GrowthChart";
 import RoleChart from "../dashboard/RoleChart";
 import { AdminEmptyState, AdminErrorState, AdminPageHeader, AdminPageLayout } from "../shared";
-import { useAdminToken, useAnalytics, useAnalyticsDrilldown } from "../../hooks";
+import { useAnalytics, useAnalyticsDrilldown } from "../../hooks";
 
 /**
  * Admin Analytics Dashboard Page.
@@ -87,13 +90,16 @@ const AdminAnalyticsPageContent = () => {
                 icon={BarChart3}
                 actions={
                     <div className="flex gap-2">
-                        <Button variant="secondary" className="gap-2 !px-4 !py-2 text-sm">
+                        <Button
+                            variant="secondary"
+                            className="gap-2 !px-3 !py-2 !text-xs sm:!px-4 sm:!py-2 sm:!text-sm"
+                        >
                             <Calendar size={14} />
                             Last 30 Days
                         </Button>
                         <Button
                             variant="primary"
-                            className="gap-2 !px-4 !py-2 text-sm"
+                            className="gap-2 !px-3 !py-2 !text-xs sm:!px-4 sm:!py-2 sm:!text-sm"
                             onClick={() => setIsExportModalOpen(true)}
                         >
                             <Download size={14} />
@@ -103,7 +109,7 @@ const AdminAnalyticsPageContent = () => {
                 }
             />
 
-            <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+            <div className="grid grid-cols-1 gap-4 sm:gap-6 lg:grid-cols-2">
                 <GrowthChart
                     data={data.growth}
                     onClick={(date) => openDrilldown("user_growth", "Registration Growth", date)}
@@ -139,11 +145,42 @@ const AdminAnalyticsPageContent = () => {
                 onClose={() => setIsExportModalOpen(false)}
             />
 
-            <div className="mt-8 rounded-3xl border-2 border-dashed border-gray-200 p-8 text-center">
-                <p className="text-xs font-bold tracking-widest text-[#afafaf] uppercase">
-                    Analytics data is pre-computed daily at 00:00 UTC. Next refresh in ~8 hours.
-                </p>
-            </div>
+            {/* ── Log-derived charts ── */}
+            {(data.logVolume?.length > 0 ||
+                data.logsByLevel?.length > 0 ||
+                data.topActions?.length > 0) && (
+                <>
+                    <div className="flex items-center gap-3 pt-2">
+                        <div className="h-px flex-1 bg-gray-100" />
+                        <span className="text-[10px] font-black tracking-widest text-[#afafaf] uppercase">
+                            System Log Insights
+                        </span>
+                        <div className="h-px flex-1 bg-gray-100" />
+                    </div>
+                    <div className="grid grid-cols-1 gap-4 sm:gap-6 lg:grid-cols-2">
+                        <div className="lg:col-span-2">
+                            <LogVolumeChart
+                                data={data.logVolume ?? []}
+                                onClick={(type) =>
+                                    openDrilldown("log_type", `Log Type: ${type}`, type)
+                                }
+                            />
+                        </div>
+                        <LogLevelChart
+                            data={data.logsByLevel ?? []}
+                            onClick={(level) =>
+                                openDrilldown("log_level", `Severity: ${level}`, level)
+                            }
+                        />
+                        <TopActionsChart
+                            data={data.topActions ?? []}
+                            onClick={(action) =>
+                                openDrilldown("log_action", `Action: ${action}`, action)
+                            }
+                        />
+                    </div>
+                </>
+            )}
         </AdminPageLayout>
     );
 };

@@ -8,20 +8,29 @@ import { createTestLogAction, fetchLogsAction } from "../actions";
 import type { AdminLog, AdminLogFilters } from "../types";
 
 /**
- * High-performance paginated system logs.
- * Filtering is performed server-side; this hook only manages pagination state.
+ * Paginated system logs hook.
+ *
+ * @remarks
+ * - Cursor-based pagination: each page token is stored so back-navigation is O(1).
+ * - Filters reset the cursor stack and re-fetch from page 0.
+ * - `refresh` re-fetches the current page without resetting pagination.
  */
 export function useLogs(filters: AdminLogFilters) {
     const [logs, setLogs] = useState<AdminLog[]>([]);
     const [pageTokens, setPageTokens] = useState<(string | null)[]>([null]);
     const [currentPage, setCurrentPage] = useState(0);
     const [isLoading, setIsLoading] = useState(true);
+    const [isRefreshing, setIsRefreshing] = useState(false);
     const [error, setError] = useState<Error | null>(null);
     const getToken = useAdminToken();
 
     const fetchPage = useCallback(
-        async (cursorId: string | null, pageIdx: number) => {
-            setIsLoading(true);
+        async (cursorId: string | null, pageIdx: number, silent = false) => {
+            if (silent) {
+                setIsRefreshing(true);
+            } else {
+                setIsLoading(true);
+            }
             setError(null);
             try {
                 await getToken();
@@ -31,7 +40,6 @@ export function useLogs(filters: AdminLogFilters) {
                 setLogs(result.data.logs);
                 setCurrentPage(pageIdx);
 
-                // Register next page token if we haven't seen it yet
                 if (result.data.nextPageToken) {
                     setPageTokens((prev) => {
                         if (prev[pageIdx + 1] === result.data.nextPageToken) return prev;
@@ -40,13 +48,13 @@ export function useLogs(filters: AdminLogFilters) {
                         return next;
                     });
                 } else {
-                    // No more pages — trim any stale tokens beyond current
                     setPageTokens((prev) => prev.slice(0, pageIdx + 1));
                 }
             } catch (err) {
                 setError(err instanceof Error ? err : new Error(String(err)));
             } finally {
                 setIsLoading(false);
+                setIsRefreshing(false);
             }
         },
         // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -70,16 +78,22 @@ export function useLogs(filters: AdminLogFilters) {
 
     const goToPreviousPage = useCallback(() => {
         if (currentPage > 0) {
-            fetchPage(pageTokens[currentPage - 1], currentPage - 1);
+            fetchPage(pageTokens[currentPage - 1]!, currentPage - 1);
         }
+    }, [currentPage, pageTokens, fetchPage]);
+
+    /** Re-fetch the current page without resetting pagination state. */
+    const refresh = useCallback(() => {
+        fetchPage(pageTokens[currentPage] ?? null, currentPage, true);
     }, [currentPage, pageTokens, fetchPage]);
 
     const createManualLog = useCallback(async () => {
         await getToken();
         const result = await createTestLogAction();
         if (!result.ok) throw new Error(result.error);
-        if (currentPage === 0) fetchPage(null, 0);
-    }, [getToken, currentPage, fetchPage]);
+        // Refresh current page so the new log appears
+        fetchPage(pageTokens[currentPage] ?? null, currentPage, true);
+    }, [getToken, currentPage, pageTokens, fetchPage]);
 
     const { countsByLevel, countsByType } = useMemo(() => {
         const levelMap: Record<string, number> = {};
@@ -98,12 +112,15 @@ export function useLogs(filters: AdminLogFilters) {
         countsByLevel,
         countsByType,
         isLoading,
+        isRefreshing,
         error,
         currentPage,
+        totalPages: pageTokens.length,
         goToNextPage,
         goToPreviousPage,
         hasNextPage: pageTokens.length > currentPage + 1,
         hasPreviousPage: currentPage > 0,
+        refresh,
         createManualLog,
     };
 }

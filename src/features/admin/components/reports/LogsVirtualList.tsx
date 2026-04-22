@@ -1,9 +1,5 @@
 "use client";
 
-import { useRef } from "react";
-
-import { useVirtualizer } from "@tanstack/react-virtual";
-
 import LogRow from "./LogRow";
 
 import type { AdminLog } from "../../types";
@@ -13,10 +9,14 @@ interface LogsVirtualListProps {
 }
 
 /**
- * Log Virtualization List.
+ * Log list — renders the current page of rows with no scroll container.
  *
- * @remarks Efficiently renders large log datasets using windowing (@tanstack/react-virtual).
- * This ensures smooth scrolling even with thousands of operational entries.
+ * @remarks
+ * Pagination is handled at the page level; this component just renders what it receives.
+ * Optimized for display within a virtualized or paginated parent container.
+ *
+ * @example
+ * <LogsVirtualList logs={adminLogs} />
  */
 const LogsVirtualList = ({ logs }: LogsVirtualListProps) => {
     return (

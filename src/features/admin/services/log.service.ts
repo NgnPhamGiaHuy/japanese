@@ -10,51 +10,61 @@ import { persistSystemLog } from "@/lib/logging/server";
 import { adminAuth, adminDb } from "./admin.service";
 import { applyLogFilters } from "../utils/filters";
 
-import type { AdminLog, AdminLogFilters, PaginatedLogs } from "../types";
+import type { AdminLog, AdminLogFilters, LogType, PaginatedLogs } from "../types";
+
+// ─── Read ─────────────────────────────────────────────────────────────────────
 
 /**
  * Server-side log fetch (dashboard, reports).
+ *
+ * Pagination note: when filters are active we pull a larger pool and filter
+ * in-memory (resilient to missing Firestore composite indexes). The cursor
+ * is always anchored to the last document in the *unfiltered* snapshot so
+ * subsequent pages are stable.
  */
 export async function getLogs(
     filters: AdminLogFilters = {},
-    limit = 50,
+    limit = 20,
     startAfterId?: string | null,
 ): Promise<PaginatedLogs> {
-    const safeLimit = Math.min(Math.max(Math.floor(limit), 1), 200);
+    const safeLimit = Math.min(Math.max(Math.floor(limit), 1), 100);
+    const hasFilters =
+        !!filters.level ||
+        !!filters.type ||
+        !!filters.search ||
+        !!filters.userId ||
+        !!filters.startDate ||
+        !!filters.endDate;
 
     let q = adminDb.collection(SYSTEM_LOGS_COLLECTION).orderBy("timestamp", "desc");
 
-    // 2. Pagination Cursor
     if (startAfterId) {
         const cursor = await adminDb.collection(SYSTEM_LOGS_COLLECTION).doc(startAfterId).get();
-        if (cursor.exists) {
-            q = q.startAfter(cursor);
-        }
+        if (cursor.exists) q = q.startAfter(cursor);
     }
 
-    // 3. Robust In-Memory Filtering Pool
-    const poolSize = filters.level || filters.type || filters.search ? 1000 : safeLimit + 1;
+    // Fetch one extra doc beyond the page size so we can detect whether a next page exists.
+    // When filters are active we pull a larger pool to ensure a full page survives filtering.
+    const poolSize = hasFilters ? Math.max(safeLimit * 10, 200) : safeLimit + 1;
     const snap = await q.limit(poolSize).get();
 
-    let logs = snap.docs.map((d) =>
+    let mapped = snap.docs.map((d) =>
         systemLogToAdminView(
             firestoreDataToSystemRecord(d.id, d.data() as Record<string, unknown>),
         ),
     );
 
-    // 4. In-Memory Filter Execution (Resilient to missing indexes)
-    if (filters.level || filters.type || filters.search) {
-        logs = applyLogFilters(logs, filters);
+    if (hasFilters) {
+        mapped = applyLogFilters(mapped, filters);
     }
 
-    // 5. ENRICHMENT: Link with Users & Content
-    const uids = Array.from(new Set(logs.map((l) => l.userId).filter(Boolean)));
+    // Enrich with Firebase Auth user data
+    const uids = Array.from(new Set(mapped.map((l) => l.userId).filter(Boolean)));
     if (uids.length > 0) {
         try {
             const users = await adminAuth.getUsers(uids.map((uid) => ({ uid: uid! })));
             const userMap = new Map(users.users.map((u) => [u.uid, u]));
-
-            logs.forEach((l) => {
+            mapped.forEach((l) => {
                 const u = l.userId ? userMap.get(l.userId) : null;
                 if (u) {
                     l.userName = u.displayName || u.email?.split("@")[0] || "User";
@@ -66,18 +76,53 @@ export async function getLogs(
         }
     }
 
-    const hasNext = logs.length > safeLimit;
-    const resultLogs = logs.slice(0, safeLimit);
-    const nextPageToken = hasNext ? snap.docs[safeLimit - 1]?.id : null;
+    // The (safeLimit + 1)th item is the sentinel — it tells us a next page exists
+    // but is never returned to the client.
+    const hasNext = mapped.length > safeLimit;
+    const resultLogs = mapped.slice(0, safeLimit);
+
+    // Cursor = the Firestore doc ID of the last item we're actually returning.
+    // On the next call, startAfter(that doc) gives the correct next page.
+    const lastReturnedId = resultLogs[resultLogs.length - 1]?.id ?? null;
+    const nextPageToken = hasNext ? lastReturnedId : null;
 
     return {
         logs: resultLogs,
-        nextPageToken: nextPageToken || null,
+        nextPageToken,
     };
 }
 
 /**
- * Legacy-compatible writer — persists the canonical `system_logs` schema via Admin SDK.
+ * Drilldown fetch for log-derived charts.
+ * Returns rows shaped for AnalyticsDetailModal.
+ */
+export async function getLogsDrilldown(filter: {
+    type?: string;
+    level?: string;
+    action?: string;
+}): Promise<object[]> {
+    const filters: AdminLogFilters = {};
+    if (filter.type) filters.type = filter.type as AdminLogFilters["type"];
+    if (filter.level) filters.level = filter.level as AdminLogFilters["level"];
+    if (filter.action) filters.search = filter.action;
+
+    const { logs } = await getLogs(filters, 50);
+
+    return logs.map((l) => ({
+        id: l.id,
+        displayName: l.userName || "System",
+        userName: l.userName || "System",
+        email: l.userEmail || l.userId || "—",
+        action: l.action,
+        timestamp: l.timestamp,
+        level: l.level,
+        metadata: l.metadata,
+    }));
+}
+
+/**
+ * Low-level writer — persists the canonical `system_logs` schema via Admin SDK.
+ * Accepts the legacy `AdminLog` shape for backward compatibility.
  */
 export async function recordLog(log: Omit<AdminLog, "id" | "timestamp">): Promise<string> {
     if (!log.action || !log.type || !log.level || !log.userId) {
@@ -119,4 +164,31 @@ export async function recordLog(log: Omit<AdminLog, "id" | "timestamp">): Promis
         level: canonicalLevel,
         source: "server",
     });
+}
+
+/**
+ * Convenience writer for admin actions — resolves caller identity from the
+ * idToken so callers don't need to re-decode the token themselves.
+ */
+export async function logAdminAction(
+    idToken: string,
+    callerUid: string,
+    action: string,
+    type: LogType,
+    metadata: Record<string, unknown> = {},
+): Promise<void> {
+    try {
+        const decoded = await adminAuth.verifyIdToken(idToken);
+        await recordLog({
+            action,
+            level: "info",
+            type,
+            userId: callerUid,
+            userName: typeof decoded.name === "string" && decoded.name ? decoded.name : "Admin",
+            userEmail: typeof decoded.email === "string" ? decoded.email : "—",
+            metadata,
+        });
+    } catch {
+        // Logging must never block the primary action
+    }
 }

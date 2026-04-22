@@ -1,17 +1,26 @@
 import { Trophy } from "lucide-react";
 
+/** Attributes for rendering a UserAvatar. */
 interface UserAvatarProps {
+    /** Optional URL for the user's profile image. */
     src?: string | null;
+    /** Whether the user is currently in an active state. */
     active: boolean;
+    /** Tailwind text color class for the active indicator. */
     activeColor?: string;
+    /** Diameter of the avatar in pixels. */
     size?: number;
 }
 
 /**
- * UserAvatar Component
+ * Circular user profile image with activity status.
  *
- * Renders a circular user profile image with an active state.
- * Falls back to a Trophy icon if no image is provided.
+ * @remarks
+ * Renders a high-quality profile image or falls back to a Trophy icon if no image
+ * is available. Features smooth scaling and color transitions for active states.
+ *
+ * @example
+ * <UserAvatar src={user.image} active={user.isOnline} size={40} />
  */
 const UserAvatar = ({
     src,

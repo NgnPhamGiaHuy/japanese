@@ -1,18 +1,33 @@
+/**
+ * Premium loading spinner component.
+ *
+ * @remarks
+ * Features a central spinning icon with a subtle pulse animation.
+ * Can be rendered inline or as a full-screen overlay with optional status labels.
+ *
+ * @example
+ * <LoadingSpinner label="Saving progress..." fullScreen={false} />
+ */
 import { Loader2 } from "lucide-react";
 
+/** Attributes for rendering a LoadingSpinner. */
 interface LoadingSpinnerProps {
+    /** Primary color for the spinner and accent animations. */
     color?: string;
+    /** Diameter of the spinner in pixels. */
     size?: number;
+    /** Whether to occupy the entire viewport with a backdrop. */
     fullScreen?: boolean;
+    /** Optional status message to display below the spinner. */
     label?: string;
 }
 
-export function LoadingSpinner({
+const LoadingSpinner = ({
     color = "#1cb0f6",
     size = 32,
     fullScreen = true,
     label,
-}: LoadingSpinnerProps) {
+}: LoadingSpinnerProps) => {
     const spinner = (
         <div className="flex flex-col items-center justify-center gap-4">
             <div className="relative flex items-center justify-center">
@@ -44,4 +59,6 @@ export function LoadingSpinner({
             {spinner}
         </div>
     );
-}
+};
+
+export default LoadingSpinner;
