@@ -1,20 +1,40 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect } from "react";
 
 import { browserLocalPersistence, onIdTokenChanged, setPersistence } from "firebase/auth";
 
 import { deliverPendingNotifications } from "@/features/notifications";
 import { auth } from "@/lib/firebase";
-import { ActivityAction } from "@/lib/logging/actions.enum";
-import { enqueueClientLog } from "@/lib/logging/browser";
 import { clearAuthCookie, setAuthCookie } from "@/shared/utils";
 import { useAppStore } from "@/store";
+import { logUserLogin } from "@/features/user/services/auth-logging.service";
 
-// Module-level ref so it survives component remounts / page navigations.
-// This prevents duplicate login logs on every hard navigation.
-let _lastLoggedUid: string | null = null;
-
+/**
+ * Firebase Auth integration hook.
+ * 
+ * **Architecture:**
+ * - Uses `onIdTokenChanged` for auth state + cookie management
+ * - Delegates login logging to server-side deduplication service
+ * 
+ * **Why this approach:**
+ * 1. `onIdTokenChanged` handles both sign-in AND token refresh
+ * 2. Server-side deduplication prevents spam from:
+ *    - React remounts (Strict Mode, navigation)
+ *    - Token refresh (~every 1 hour)
+ *    - Page refresh
+ *    - Multiple concurrent requests
+ * 3. Firestore transaction ensures atomic check-and-set
+ * 4. 30-minute session window balances accuracy vs spam prevention
+ * 
+ * **Previous failed approaches:**
+ * - Module-level variables → Reset on navigation
+ * - sessionStorage → Doesn't survive all edge cases
+ * - onAuthStateChanged → Still fires multiple times
+ * - Client-side guards → Race conditions, not reliable
+ * 
+ * **Current solution:** Server-side session tracking with Firestore transactions
+ */
 export function useFirebaseAuth() {
     const { setUser, setAuthReady } = useAppStore();
 
@@ -34,34 +54,25 @@ export function useFirebaseAuth() {
                 }
                 setUser(user);
 
-                // Log login only on first appearance across the entire session,
-                // not on token refresh or component remount.
-                if (user.uid !== _lastLoggedUid) {
-                    _lastLoggedUid = user.uid;
-                    if (token) {
-                        enqueueClientLog(() => Promise.resolve(token!), {
-                            action: ActivityAction.LOGIN,
-                            entityType: "auth",
-                            entityId: user.uid,
-                            level: "info",
-                            metadata: {
-                                logType: "AUTH",
-                                userName: user.displayName ?? undefined,
-                                userEmail: user.email ?? undefined,
-                                provider: user.providerData[0]?.providerId ?? "unknown",
-                            },
-                        });
-                    }
+                // Delegate login logging to server-side with deduplication
+                // This handles session restoration on page load/refresh
+                if (token) {
+                    logUserLogin(token, {
+                        uid: user.uid,
+                        displayName: user.displayName ?? undefined,
+                        email: user.email ?? undefined,
+                        provider: user.providerData[0]?.providerId ?? "unknown",
+                    }).catch(() => {});
+                }
 
-                    // Deliver any pending notifications (email invites) on first login
-                    if (user.email) {
-                        deliverPendingNotifications(user.uid, user.email).catch(() => {});
-                    }
+                // Deliver pending notifications
+                if (user.email) {
+                    deliverPendingNotifications(user.uid, user.email).catch(() => {});
                 }
             } else {
+                // User logged out (handled by signOut() function)
                 clearAuthCookie();
                 setUser(null);
-                _lastLoggedUid = null;
             }
             setAuthReady(true);
         });
