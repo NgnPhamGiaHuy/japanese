@@ -18,10 +18,15 @@ import {
     deleteAllNotifications,
     deleteNotification,
     isUnread,
+    logNotificationDeleted,
+    logNotificationRead,
+    logNotificationsCleared,
+    logNotificationsReadAll,
     markAllNotificationsRead,
     markNotificationRead,
     useNotifications,
 } from "@/features/notifications";
+import { auth } from "@/lib/firebase";
 import { ScreenHeader } from "@/shared/components/layout";
 import { Button } from "@/shared/components/ui";
 import { useAppStore } from "@/store";
@@ -100,6 +105,17 @@ function InviteActions({
     const handleAccept = () => {
         startTransition(async () => {
             await markNotificationRead(userId, notification.id);
+            void auth.currentUser
+                ?.getIdToken()
+                .then((token) =>
+                    logNotificationRead(
+                        token,
+                        userId,
+                        notification.id,
+                        notification.type,
+                        notification.title,
+                    ),
+                );
             onDone();
             router.push(link);
         });
@@ -108,6 +124,17 @@ function InviteActions({
     const handleDecline = () => {
         startTransition(async () => {
             await deleteNotification(userId, notification.id);
+            void auth.currentUser
+                ?.getIdToken()
+                .then((token) =>
+                    logNotificationDeleted(
+                        token,
+                        userId,
+                        notification.id,
+                        notification.type,
+                        notification.title,
+                    ),
+                );
             onDone();
         });
     };
@@ -157,6 +184,17 @@ function NotificationRow({
     const handleContentClick = () => {
         if (unread) {
             void markNotificationRead(userId, notification.id);
+            void auth.currentUser
+                ?.getIdToken()
+                .then((token) =>
+                    logNotificationRead(
+                        token,
+                        userId,
+                        notification.id,
+                        notification.type,
+                        notification.title,
+                    ),
+                );
         }
         router.push(link);
     };
@@ -165,6 +203,17 @@ function NotificationRow({
         e.stopPropagation();
         startDeleteTransition(async () => {
             await deleteNotification(userId, notification.id);
+            void auth.currentUser
+                ?.getIdToken()
+                .then((token) =>
+                    logNotificationDeleted(
+                        token,
+                        userId,
+                        notification.id,
+                        notification.type,
+                        notification.title,
+                    ),
+                );
         });
     };
 
@@ -332,15 +381,23 @@ export default function NotificationsPage() {
 
     const handleMarkAllRead = () => {
         if (!user || unreadCount === 0) return;
+        const count = unreadCount;
         startMarkAll(async () => {
             await markAllNotificationsRead(user.uid);
+            void auth.currentUser
+                ?.getIdToken()
+                .then((token) => logNotificationsReadAll(token, user.uid, count));
         });
     };
 
     const handleClearAll = () => {
         if (!user || notifications.length === 0) return;
+        const count = notifications.length;
         startClearAll(async () => {
             await deleteAllNotifications(user.uid);
+            void auth.currentUser
+                ?.getIdToken()
+                .then((token) => logNotificationsCleared(token, user.uid, count));
         });
     };
 

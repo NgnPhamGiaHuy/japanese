@@ -23,7 +23,8 @@ import {
     writeBatch,
 } from "firebase/firestore";
 
-import { APP_ID, db } from "@/lib/firebase";
+import { APP_ID, auth, db } from "@/lib/firebase";
+import { logNotificationsDelivered } from "./actions";
 
 import type { Unsubscribe } from "firebase/firestore";
 import type { AppNotification, NotificationData, NotificationType } from "./types";
@@ -90,6 +91,12 @@ export async function deliverPendingNotifications(userId: string, email: string)
     const normalizedEmail = email.trim().toLowerCase();
     const snap = await getDocs(pendingNotificationsCol(normalizedEmail));
     if (snap.empty) return;
+
+    // Log the delivery event (fire-and-forget)
+    const count = snap.size;
+    void auth.currentUser?.getIdToken().then((token) => {
+        logNotificationsDelivered(token, userId, count);
+    });
 
     const batch = writeBatch(db);
     for (const d of snap.docs) {

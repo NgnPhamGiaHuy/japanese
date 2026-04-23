@@ -71,6 +71,7 @@ const ENTITY_TO_LOG_TYPE: Record<string, LogType> = {
     card: "USER_ACTION",
     study: "USER_ACTION",
     share: "USER_ACTION",
+    notification: "USER_ACTION",
 };
 
 export function inferLogTypeFromEntity(entityType: string): LogType {

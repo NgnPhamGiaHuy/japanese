@@ -26,6 +26,11 @@ export async function logUserActionServer(idToken: string, input: UserActionInpu
             ...input,
             userId: decoded.uid,
             source: "client",
+            metadata: {
+                ...input.metadata,
+                userName: decoded.name || decoded.display_name || undefined,
+                userEmail: decoded.email || undefined,
+            },
         });
         await persistSystemLog(parsed);
     } catch {
