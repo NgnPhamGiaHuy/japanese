@@ -116,7 +116,7 @@ const LogVolumeChart = ({ data, onClick }: LogVolumeChartProps) => {
             </ResponsiveContainer>
 
             {/* Custom legend — same pattern as RoleChart */}
-            <div className="mt-4 flex flex-wrap justify-center gap-x-4 gap-y-2">
+            <div className="flex flex-wrap justify-center gap-x-4 gap-y-2">
                 {activeTypes.map((type) => (
                     <button
                         key={type}

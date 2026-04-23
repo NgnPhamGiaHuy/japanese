@@ -31,6 +31,11 @@ export const ActivityAction = {
     SHARE_INVITE_REVOKED: "share.invite_revoked",
     SHARE_ROLES_UPDATED: "share.roles_updated",
 
+    // ── Kana game modes ───────────────────────────────────────────────────────
+    KANA_QUIZ_COMPLETED: "kana.quiz_completed",
+    KANA_SURVIVAL_COMPLETED: "kana.survival_completed",
+    KANA_PRACTICE_COMPLETED: "kana.practice_completed",
+
     // ── Admin actions ─────────────────────────────────────────────────────────
     ADMIN_ROLE_GRANTED: "admin.role_granted",
     ADMIN_ROLE_REVOKED: "admin.role_revoked",

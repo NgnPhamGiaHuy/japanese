@@ -8,7 +8,9 @@
 
 import { useState } from "react";
 
+import { auth } from "@/lib/firebase";
 import { checkTypedAnswer } from "@/shared/utils";
+import { logKanaQuizCompleted } from "../../actions";
 
 import type { KanaChar } from "@/features/kana/types";
 import type { QuizMode, QuizPhase } from "../types";
@@ -21,7 +23,7 @@ interface UseQuizStateProps {
     session: any; // KanaQuizSession type
 }
 
-export function useQuizState({ session }: UseQuizStateProps) {
+export function useQuizState({ session, userId, alphabet }: UseQuizStateProps) {
     const [quizMode, setQuizMode] = useState<QuizMode>("choice");
     const [typedInput, setTypedInput] = useState("");
     const [phase, setPhase] = useState<QuizPhase>("setup");
@@ -44,6 +46,15 @@ export function useQuizState({ session }: UseQuizStateProps) {
             if (nextScore >= session.targetScore) {
                 session.finishQuiz(nextScore);
                 setPhase("done");
+                if (userId) {
+                    void auth.currentUser?.getIdToken().then((token) =>
+                        logKanaQuizCompleted(token, userId, alphabet ?? "hiragana", {
+                            score: nextScore,
+                            total: session.targetScore,
+                            mode: quizMode,
+                        }),
+                    );
+                }
             } else {
                 session.generateQuestion(quizMode === "type" ? "type" : "read");
             }
@@ -60,6 +71,15 @@ export function useQuizState({ session }: UseQuizStateProps) {
             if (nextScore >= session.targetScore) {
                 session.finishQuiz(nextScore);
                 setPhase("done");
+                if (userId) {
+                    void auth.currentUser?.getIdToken().then((token) =>
+                        logKanaQuizCompleted(token, userId, alphabet ?? "hiragana", {
+                            score: nextScore,
+                            total: session.targetScore,
+                            mode: quizMode,
+                        }),
+                    );
+                }
             } else {
                 session.generateQuestion("type");
             }

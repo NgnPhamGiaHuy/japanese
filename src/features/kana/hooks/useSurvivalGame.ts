@@ -19,8 +19,10 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 
 import { comboMultiplier, useGameSession } from "@/features/game";
+import { auth } from "@/lib/firebase";
 import { getValidRomaji, playSFX } from "@/shared/utils";
 import { useKanaQuizSession } from "./useKanaQuizSession";
+import { logKanaSurvivalCompleted } from "../actions";
 
 import type { ChallengeMode, DropWord, KanaChar, SurvivalPhase } from "../types";
 
@@ -172,9 +174,17 @@ export const useSurvivalGame = ({
                 activeModeKeyRef.current,
             );
             void endSessionRef.current(finalScore);
+            if (userId) {
+                void auth.currentUser?.getIdToken().then((token) =>
+                    logKanaSurvivalCompleted(token, userId, alphabet, "time", {
+                        score: finalScore,
+                        modeKey: activeModeKeyRef.current,
+                    }),
+                );
+            }
             setPhase("gameover");
         }
-    }, [timeLeft, phase, challengeMode, engine.score]);
+    }, [timeLeft, phase, challengeMode, engine.score, userId, alphabet]);
 
     // ── Live score sync ───────────────────────────────────────────────────────
     useEffect(() => {
@@ -225,6 +235,14 @@ export const useSurvivalGame = ({
                         activeModeKeyRef.current,
                     );
                     void endSessionRef.current(finalScore);
+                    if (userId) {
+                        void auth.currentUser?.getIdToken().then((token) =>
+                            logKanaSurvivalCompleted(token, userId, alphabet, "infinity", {
+                                score: finalScore,
+                                modeKey: activeModeKeyRef.current,
+                            }),
+                        );
+                    }
                     setPhase("gameover");
                     return;
                 }
@@ -234,7 +252,7 @@ export const useSurvivalGame = ({
                 if (!isGameOverRef.current) engine.generateQuestion();
             });
         },
-        [challengeMode, lives, engine],
+        [challengeMode, lives, engine, userId, alphabet],
     );
 
     // ── Drop game state ───────────────────────────────────────────────────────
@@ -336,6 +354,14 @@ export const useSurvivalGame = ({
                             activeModeKeyRef.current,
                         );
                         void endSessionRef.current(finalScore);
+                        if (userId) {
+                            void auth.currentUser?.getIdToken().then((token) =>
+                                logKanaSurvivalCompleted(token, userId, alphabet, "drop", {
+                                    score: finalScore,
+                                    modeKey: activeModeKeyRef.current,
+                                }),
+                            );
+                        }
                         setPhase("gameover");
                     }
                     return n;
