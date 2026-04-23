@@ -3,15 +3,15 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-
-import { BookOpen, Flame, LogOut, Settings, Trophy } from "lucide-react";
+import { motion } from "framer-motion";
+import { BookOpen, Flame, LogOut, Settings, Trophy, ChevronRight, Zap } from "lucide-react";
 
 import { useAdminRole } from "@/features/admin/context/AdminContext";
 import { useLessons } from "@/features/flashcard/core/hooks";
 import { useUserProgress } from "@/features/user/hooks";
 import { signOut } from "@/features/user/services";
 import { SCREEN_HEADER_BACK_BUTTON_CLASS, ScreenHeader } from "@/shared/components/layout";
-import { Button, StatCard } from "@/shared/components/ui";
+import { Badge, Button, Card, StatCard } from "@/shared/components/ui";
 import { SPACING } from "@/shared/constants";
 import { useAppStore } from "@/store";
 
@@ -29,6 +29,10 @@ export default function ProfilePage() {
     const xpInLevel = userData.xp % 500;
     const xpToNext = 500;
 
+    const totalAttempts = Object.values(userData.charStats).reduce((acc, s) => acc + s.attempts, 0);
+    const totalCorrect = Object.values(userData.charStats).reduce((acc, s) => acc + s.correct, 0);
+    const accuracy = totalAttempts > 0 ? Math.round((totalCorrect / totalAttempts) * 100) : null;
+
     const handleSignOut = async () => {
         await signOut();
         router.replace("/login");
@@ -39,117 +43,176 @@ export default function ProfilePage() {
             <ScreenHeader
                 title="Profile"
                 right={
-                    <div className="flex gap-1">
-                        <Link
-                            href="/settings"
-                            className={SCREEN_HEADER_BACK_BUTTON_CLASS}
-                            aria-label="Settings"
-                        >
-                            <Settings size={22} strokeWidth={2.5} />
-                        </Link>
-                    </div>
+                    <Link
+                        href="/settings"
+                        className={SCREEN_HEADER_BACK_BUTTON_CLASS}
+                        aria-label="Settings"
+                    >
+                        <Settings size={22} strokeWidth={2.5} />
+                    </Link>
                 }
             />
-            <div className={`mx-auto max-w-md ${SPACING.pagePadding} pt-6`}>
-                {/* Avatar */}
-                <div className="mb-8 flex flex-col items-center">
-                    <div className="mb-4 -rotate-3 transform overflow-hidden rounded-[3rem] border-b-8 border-[#1899d6] shadow-sm">
-                        {photoURL ? (
-                            <Image
-                                src={photoURL}
-                                alt={displayName}
-                                width={112}
-                                height={112}
-                                className="h-28 w-28 object-cover"
-                            />
-                        ) : (
-                            <div className="flex h-28 w-28 items-center justify-center bg-gradient-to-br from-[#1cb0f6] to-[#ce82ff] text-6xl font-medium text-white">
-                                {displayName.charAt(0).toUpperCase()}
+
+            <main className={`mx-auto max-w-2xl ${SPACING.pagePadding} pt-8 pb-12`}>
+                <div className="space-y-10">
+                    {/* Hero Section */}
+                    <div className="flex flex-col items-center text-center">
+                        <div className="relative mb-6">
+                            <div className="rotate-3 transform overflow-hidden rounded-[3.5rem] border-4 border-white bg-white shadow-xl ring-8 ring-[#1cb0f6]/10">
+                                {photoURL ? (
+                                    <Image
+                                        src={photoURL}
+                                        alt={displayName}
+                                        width={128}
+                                        height={128}
+                                        className="h-32 w-32 object-cover"
+                                    />
+                                ) : (
+                                    <div className="flex h-32 w-32 items-center justify-center bg-gradient-to-br from-[#1cb0f6] to-[#ce82ff] text-6xl font-black text-white">
+                                        {displayName.charAt(0).toUpperCase()}
+                                    </div>
+                                )}
                             </div>
-                        )}
-                    </div>
-
-                    <div className="flex flex-col items-center gap-1">
-                        <h2 className="text-2xl font-black text-[#3c3c3c]">{displayName}</h2>
-                        {role && (
-                            <div className="flex items-center rounded-full border border-[#ea2b2b] bg-[#ea2b2b]/10 px-2.5 py-0.5 text-[10px] font-black tracking-wider text-[#ea2b2b] uppercase">
-                                {role === "superadmin" ? "Super Staff" : "Staff"}
+                            <div className="absolute -right-2 -bottom-2 flex h-10 w-10 items-center justify-center rounded-2xl border-4 border-white bg-[#ff9600] text-sm font-black text-white shadow-lg">
+                                {level}
                             </div>
-                        )}
+                        </div>
+
+                        <div className="space-y-2">
+                            <div className="flex items-center justify-center gap-2">
+                                <h2 className="text-3xl font-black text-[#3c3c3c]">
+                                    {displayName}
+                                </h2>
+                                {role && (
+                                    <Badge variant="danger" size="md" className="tracking-wider">
+                                        {role === "superadmin" ? "Staff+" : "Staff"}
+                                    </Badge>
+                                )}
+                            </div>
+                            <p className="text-base font-bold text-[#afafaf]">
+                                Learning Japanese since {new Date().getFullYear()}
+                            </p>
+                        </div>
+
+                        {/* XP Progress */}
+                        <div className="mt-8 w-full max-w-md">
+                            <div className="mb-2 flex items-end justify-between px-1">
+                                <div className="text-left">
+                                    <p className="text-[10px] font-black tracking-widest text-[#afafaf] uppercase">
+                                        Current Progress
+                                    </p>
+                                    <p className="text-sm font-black text-[#1cb0f6]">
+                                        {xpInLevel} / {xpToNext} XP
+                                    </p>
+                                </div>
+                                <p className="text-xs font-black text-[#ce82ff]">
+                                    {Math.round((xpInLevel / xpToNext) * 100)}%
+                                </p>
+                            </div>
+                            <div className="h-4 overflow-hidden rounded-full border-2 border-white bg-gray-200 shadow-inner">
+                                <motion.div
+                                    initial={{ width: 0 }}
+                                    animate={{ width: `${(xpInLevel / xpToNext) * 100}%` }}
+                                    transition={{ duration: 1, ease: "easeOut" }}
+                                    className="h-full rounded-full bg-gradient-to-r from-[#1cb0f6] via-[#ce82ff] to-[#1cb0f6] bg-[length:200%_100%]"
+                                    style={{
+                                        animation: "gradient-shift 3s linear infinite",
+                                    }}
+                                />
+                            </div>
+                        </div>
                     </div>
 
-                    <div className="mt-2 flex items-center gap-2">
-                        <span className="text-lg font-black text-[#ff9600]">Lv.{level}</span>
-                        <span className="text-base font-bold text-[#afafaf]">·</span>
-                        <span className="text-sm font-bold text-[#afafaf]">
-                            {userData.xp} XP total
-                        </span>
-                    </div>
-                    <div className="mt-4 w-full">
-                        <div className="mb-1 flex justify-between text-xs font-bold text-[#afafaf]">
-                            <span>Level {level}</span>
-                            <span>
-                                {xpInLevel} / {xpToNext} XP
-                            </span>
-                            <span>Level {level + 1}</span>
+                    {/* Stats Grid */}
+                    <section className="space-y-4">
+                        <div className="flex items-center gap-2 px-2">
+                            <Trophy size={14} className="text-[#afafaf]" />
+                            <h3 className="text-[11px] font-black tracking-widest text-[#afafaf] uppercase">
+                                Statistics
+                            </h3>
                         </div>
-                        <div className="h-3 overflow-hidden rounded-full bg-gray-200">
-                            <div
-                                className="h-full rounded-full bg-gradient-to-r from-[#1cb0f6] to-[#ce82ff] transition-all duration-500"
-                                style={{
-                                    width: `${(xpInLevel / xpToNext) * 100}%`,
-                                }}
+                        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3 md:gap-6">
+                            <StatCard
+                                icon={<Flame className="h-7 w-7 text-[#ff9600]" />}
+                                title="Day Streak"
+                                value={userData.streak}
+                                color="#ff9600"
+                                index={1}
+                            />
+                            <StatCard
+                                icon={<Zap className="h-7 w-7 text-[#ce82ff]" />}
+                                title="Total XP"
+                                value={userData.xp}
+                                color="#ce82ff"
+                                index={2}
+                            />
+                            <StatCard
+                                icon={<BookOpen className="h-7 w-7 text-[#1cb0f6]" />}
+                                title="Kana Known"
+                                value={userData.learnedChars?.length || 0}
+                                color="#1cb0f6"
+                                index={3}
                             />
                         </div>
+                    </section>
+
+                    {/* Activity List */}
+                    <section className="space-y-4">
+                        <div className="flex items-center gap-2 px-2">
+                            <Zap size={14} className="text-[#afafaf]" />
+                            <h3 className="text-[11px] font-black tracking-widest text-[#afafaf] uppercase">
+                                Recent Activity
+                            </h3>
+                        </div>
+                        <Card padding="none" className="overflow-hidden border-b-8">
+                            <div className="divide-y-2 divide-gray-100">
+                                <ActivityRow
+                                    label="Learning Decks"
+                                    value={lessons.length}
+                                    sub="Custom collections created"
+                                />
+                                <ActivityRow
+                                    label="Lessons Finished"
+                                    value={userData.lessonsCompleted}
+                                    sub="Successful study sessions"
+                                />
+                                <ActivityRow
+                                    label="Perfect Matches"
+                                    value={accuracy !== null ? `${accuracy}%` : "—"}
+                                    sub="Overall accuracy rate"
+                                />
+                            </div>
+                        </Card>
+                    </section>
+
+                    {/* Danger Zone */}
+                    <div className="pt-4">
+                        <Button
+                            variant="secondary"
+                            color="red"
+                            icon={LogOut}
+                            onClick={handleSignOut}
+                            className="w-full !rounded-[2rem] border-b-8 py-5 text-lg"
+                        >
+                            Sign Out
+                        </Button>
                     </div>
                 </div>
+            </main>
+        </div>
+    );
+}
 
-                {/* Stats grid */}
-                <div className="mb-8 grid grid-cols-3 gap-3">
-                    <StatCard
-                        icon={<Flame className="h-7 w-7 text-[#ff9600]" />}
-                        title="Day Streak"
-                        value={userData.streak}
-                    />
-                    <StatCard
-                        icon={<Trophy className="h-7 w-7 text-[#ce82ff]" />}
-                        title="Total XP"
-                        value={userData.xp}
-                    />
-                    <StatCard
-                        icon={<BookOpen className="h-7 w-7 text-[#1cb0f6]" />}
-                        title="Kana Known"
-                        value={userData.learnedChars?.length || 0}
-                    />
-                </div>
-
-                {/* Activity */}
-                <div className="mb-10 rounded-[2rem] border-2 border-b-4 border-gray-200 bg-white p-6 shadow-sm">
-                    <h3 className="mb-4 text-lg font-black text-[#3c3c3c]">Activity</h3>
-                    <div className="space-y-3">
-                        <div className="flex items-center justify-between border-b border-gray-100 py-2 last:border-0">
-                            <span className="font-bold text-[#afafaf]">Decks created</span>
-                            <span className="font-black text-[#3c3c3c]">{lessons.length}</span>
-                        </div>
-                        <div className="flex items-center justify-between border-b border-gray-100 py-2 last:border-0">
-                            <span className="font-bold text-[#afafaf]">Lessons completed</span>
-                            <span className="font-black text-[#3c3c3c]">
-                                {userData.lessonsCompleted}
-                            </span>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Log Out Button */}
-                <Button
-                    variant="secondary"
-                    color="red"
-                    icon={LogOut}
-                    onClick={handleSignOut}
-                    className="w-full py-5 text-lg"
-                >
-                    Sign Out
-                </Button>
+function ActivityRow({ label, value, sub }: { label: string; value: string | number; sub: string }) {
+    return (
+        <div className="flex items-center justify-between px-6 py-6 transition-colors hover:bg-gray-50/50">
+            <div className="min-w-0 flex-1 pr-6">
+                <div className="truncate text-lg font-black text-[#3c3c3c]">{label}</div>
+                <div className="truncate text-sm font-bold text-[#afafaf]">{sub}</div>
+            </div>
+            <div className="flex items-center gap-3">
+                <div className="text-xl font-black text-[#1cb0f6]">{value}</div>
+                <ChevronRight size={20} className="shrink-0 opacity-20 text-[#3c3c3c]" />
             </div>
         </div>
     );

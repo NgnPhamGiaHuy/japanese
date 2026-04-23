@@ -1,18 +1,23 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { motion } from "framer-motion";
+import { Monitor, Music, ShieldAlert, LogOut, Info, ChevronRight } from "lucide-react";
 
 import { useUserProgress } from "@/features/user/hooks";
 import { signOut } from "@/features/user/services";
 import { ScreenHeader } from "@/shared/components/layout";
-import { Button } from "@/shared/components/ui";
+import { Button, Card, ConfirmModal, UserMeta } from "@/shared/components/ui";
 import { SPACING } from "@/shared/constants";
 import { useAppStore } from "@/store";
 
 export default function SettingsPage() {
-    const { useHandwriting, globalAutoPlay, toggleHandwriting, toggleAutoPlay } = useAppStore();
+    const { user, useHandwriting, globalAutoPlay, toggleHandwriting, toggleAutoPlay } =
+        useAppStore();
     const { resetProgress } = useUserProgress();
     const router = useRouter();
+    const [showResetConfirm, setShowResetConfirm] = useState(false);
 
     const handleSignOut = async () => {
         await signOut();
@@ -22,99 +27,119 @@ export default function SettingsPage() {
     return (
         <div className="min-h-[100dvh] bg-[#F7F7F8] pb-28">
             <ScreenHeader title="Settings" backHref="/profile" />
-            <div className={`mx-auto max-w-md ${SPACING.pagePadding} pt-6`}>
-                <div className="space-y-4">
-                    {/* Appearance */}
-                    <div className="divide-y-2 divide-gray-100 overflow-hidden rounded-[2rem] border-2 border-b-4 border-gray-200 bg-white shadow-sm">
-                        <div className="bg-gray-50 px-6 py-4">
-                            <h3 className="text-[10px] font-black tracking-widest text-[#afafaf] uppercase">
-                                Appearance
-                            </h3>
-                        </div>
-                        <ToggleRow
+
+            <main className={`mx-auto max-w-2xl ${SPACING.pagePadding} pt-6 pb-12`}>
+                <div className="mb-10 flex flex-col items-center justify-center gap-4 text-center sm:mb-12">
+                    <UserMeta
+                        name={user?.displayName || "Guest"}
+                        avatar={user?.photoURL || null}
+                        subtitle="Current Session"
+                        className="scale-125"
+                    />
+                </div>
+
+                <div className="space-y-10">
+                    {/* Appearance & Audio */}
+                    <SettingsSection title="Appearance" icon={Monitor}>
+                        <SettingsToggle
                             label="Handwriting Font"
                             sub="Use brush-style kana font"
                             value={useHandwriting}
                             onToggle={toggleHandwriting}
                             color="purple"
                         />
-                        <ToggleRow
+                        <SettingsToggle
                             label="Auto-Play Audio"
                             sub="Read kana aloud automatically"
                             value={globalAutoPlay}
                             onToggle={toggleAutoPlay}
                             color="blue"
                         />
-                    </div>
+                    </SettingsSection>
+
+                    {/* Account */}
+                    <SettingsSection title="Account & Security" icon={LogOut}>
+                        <SettingsAction
+                            label="Sign Out"
+                            sub="Log out of your account"
+                            onClick={handleSignOut}
+                            variant="danger"
+                        />
+                    </SettingsSection>
 
                     {/* Data */}
-                    <div className="divide-y-2 divide-gray-100 overflow-hidden rounded-[2rem] border-2 border-b-4 border-gray-200 bg-white shadow-sm">
-                        <div className="bg-gray-50 px-6 py-4">
-                            <h3 className="text-[10px] font-black tracking-widest text-[#afafaf] uppercase">
-                                Data
-                            </h3>
-                        </div>
-                        <DangerRow
+                    <SettingsSection title="Data & Privacy" icon={ShieldAlert}>
+                        <SettingsAction
                             label="Reset Progress Data"
                             sub="Clear learned characters and accuracy stats"
-                            onClick={() => {
-                                if (
-                                    confirm(
-                                        "Reset all Japanese learning progress and character stats?",
-                                    )
-                                ) {
-                                    resetProgress();
-                                }
-                            }}
+                            onClick={() => setShowResetConfirm(true)}
+                            variant="danger"
                         />
-                    </div>
+                    </SettingsSection>
 
                     {/* About */}
-                    <div className="overflow-hidden rounded-[2rem] border-2 border-b-4 border-gray-200 bg-white shadow-sm">
-                        <div className="bg-gray-50 px-6 py-4">
-                            <h3 className="text-[10px] font-black tracking-widest text-[#afafaf] uppercase">
-                                About
-                            </h3>
-                        </div>
-                        <div className="space-y-1 px-6 py-4">
-                            <p className="font-black text-[#3c3c3c]">Kana &amp; Nihongo Master</p>
+                    <SettingsSection title="About" icon={Info}>
+                        <div className="px-6 py-6">
+                            <p className="text-xl font-black text-[#3c3c3c]">
+                                Kana &amp; Nihongo Master
+                            </p>
                             <p className="text-sm font-bold text-[#afafaf]">
                                 Unified Japanese learning app · v2.0
                             </p>
-                            <p className="mt-2 text-xs font-bold text-[#afafaf]">
-                                Kana data from KanjiVG · Powered by Firebase
-                            </p>
-                        </div>
-                    </div>
-
-                    {/* Account */}
-                    <div className="overflow-hidden rounded-[2rem] border-2 border-b-4 border-gray-200 bg-white shadow-sm">
-                        <div className="bg-gray-50 px-6 py-4">
-                            <h3 className="text-[10px] font-black tracking-widest text-[#afafaf] uppercase">
-                                Account
-                            </h3>
-                        </div>
-                        <Button
-                            variant="ghost"
-                            onClick={handleSignOut}
-                            className="!flex !w-full !items-center !justify-between !rounded-none !px-6 !py-4 !text-left shadow-none hover:!bg-[#ffdfe0] hover:shadow-none active:translate-y-0"
-                        >
-                            <div>
-                                <div className="font-black text-[#ea2b2b]">Sign Out</div>
-                                <div className="text-sm font-bold text-[#afafaf]">
-                                    Log out of your Google account
-                                </div>
+                            <div className="mt-6 space-y-1 border-t-2 border-gray-100 pt-6">
+                                <p className="text-xs font-bold text-[#afafaf]">
+                                    Kana data from KanjiVG
+                                </p>
+                                <p className="text-xs font-bold text-[#afafaf]">
+                                    Powered by Firebase
+                                </p>
                             </div>
-                            <span className="text-lg font-black text-[#ea2b2b] opacity-50">›</span>
-                        </Button>
-                    </div>
+                        </div>
+                    </SettingsSection>
                 </div>
-            </div>
+            </main>
+
+            <ConfirmModal
+                isOpen={showResetConfirm}
+                onClose={() => setShowResetConfirm(false)}
+                onConfirm={() => {
+                    resetProgress();
+                    setShowResetConfirm(false);
+                }}
+                title="Reset Progress?"
+                message="This will permanently clear all your learned characters and accuracy stats. This action cannot be undone."
+                variant="danger"
+                confirmText="Reset Everything"
+            />
         </div>
     );
 }
 
-function ToggleRow({
+// ─── Local Components ─────────────────────────────────────────────────────────
+
+interface SettingsSectionProps {
+    title: string;
+    icon: any;
+    children: React.ReactNode;
+}
+
+function SettingsSection({ title, icon: Icon, children }: SettingsSectionProps) {
+    return (
+        <section className="space-y-4">
+            <div className="flex items-center gap-2 px-3">
+                <Icon size={14} className="text-[#afafaf]" />
+                <h3 className="text-[11px] font-black tracking-widest text-[#afafaf] uppercase">
+                    {title}
+                </h3>
+            </div>
+            <Card padding="none" className="overflow-hidden border-b-8">
+                <div className="divide-y-2 divide-gray-100">{children}</div>
+            </Card>
+        </section>
+    );
+}
+
+function SettingsToggle({
     label,
     sub,
     value,
@@ -125,46 +150,73 @@ function ToggleRow({
     sub: string;
     value: boolean;
     onToggle: () => void;
-    color: string;
+    color: "blue" | "green" | "purple" | "orange";
 }) {
-    const colors: Record<string, string> = {
-        blue: "!bg-[#1cb0f6] hover:!bg-[#1cb0f6] !border-[#1899d6]",
-        green: "!bg-[#58cc02] hover:!bg-[#58cc02] !border-[#58a700]",
-        purple: "!bg-[#ce82ff] hover:!bg-[#ce82ff] !border-[#b65ce8]",
-        orange: "!bg-[#ff9600] hover:!bg-[#ff9600] !border-[#cc7800]",
+    const colors = {
+        blue: "!bg-[#1cb0f6] !border-[#1899d6]",
+        green: "!bg-[#58cc02] !border-[#58a700]",
+        purple: "!bg-[#ce82ff] !border-[#b65ce8]",
+        orange: "!bg-[#ff9600] !border-[#cc7800]",
     };
+
     return (
-        <div className="flex items-center justify-between px-6 py-4">
-            <div>
-                <div className="font-black text-[#3c3c3c]">{label}</div>
+        <div className="flex items-center justify-between px-6 py-6 transition-colors hover:bg-gray-50/50">
+            <div className="min-w-0 flex-1 pr-6">
+                <div className="text-lg font-black text-[#3c3c3c]">{label}</div>
                 <div className="text-sm font-bold text-[#afafaf]">{sub}</div>
             </div>
             <Button
                 variant="ghost"
                 onClick={onToggle}
-                className={`!relative !h-8 !w-14 !rounded-full !border-2 !border-b-4 !p-0 shadow-none transition-all duration-200 hover:shadow-none active:translate-y-[2px] ${value ? `${colors[color]}` : "!border-gray-300 !bg-gray-200 hover:!bg-gray-200"}`}
+                className={`!relative !h-8 !w-14 !shrink-0 !rounded-full !border-2 !border-b-4 !p-0 shadow-none transition-all duration-200 hover:shadow-none active:translate-y-[2px] ${
+                    value
+                        ? colors[color]
+                        : "!border-gray-300 !bg-gray-200 hover:!bg-gray-200 active:!bg-gray-200"
+                }`}
             >
-                <div
-                    className={`absolute h-5 w-5 rounded-full bg-white shadow-sm transition-all duration-300 ${value ? "left-7" : "left-1"}`}
-                    style={{ top: "2px" }}
+                <motion.div
+                    animate={{ x: value ? 24 : 0 }}
+                    transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                    className="absolute top-0.5 left-0.5 h-5 w-5 rounded-full bg-white shadow-sm"
                 />
             </Button>
         </div>
     );
 }
 
-function DangerRow({ label, sub, onClick }: { label: string; sub: string; onClick: () => void }) {
+function SettingsAction({
+    label,
+    sub,
+    onClick,
+    variant = "default",
+}: {
+    label: string;
+    sub: string;
+    onClick: () => void;
+    variant?: "default" | "danger";
+}) {
+    const isDanger = variant === "danger";
+
     return (
         <Button
             variant="ghost"
-            className="!flex !w-full !items-center !justify-between !rounded-none !px-6 !py-4 !text-left shadow-none hover:!bg-[#ffdfe0] hover:shadow-none active:translate-y-0"
             onClick={onClick}
+            className={`!flex !w-full !items-center !justify-between !rounded-none !px-6 !py-6 !text-left shadow-none transition-colors hover:shadow-none active:translate-y-0 ${
+                isDanger ? "hover:!bg-red-50" : "hover:!bg-gray-50"
+            }`}
         >
-            <div>
-                <div className="font-black text-[#ea2b2b]">{label}</div>
+            <div className="min-w-0 flex-1 pr-6">
+                <div
+                    className={`text-lg font-black ${isDanger ? "text-[#ea2b2b]" : "text-[#3c3c3c]"}`}
+                >
+                    {label}
+                </div>
                 <div className="text-sm font-bold text-[#afafaf]">{sub}</div>
             </div>
-            <span className="text-lg font-black text-[#ea2b2b] opacity-50">›</span>
+            <ChevronRight
+                size={24}
+                className={`!shrink-0 opacity-30 ${isDanger ? "text-[#ea2b2b]" : "text-[#3c3c3c]"}`}
+            />
         </Button>
     );
 }
