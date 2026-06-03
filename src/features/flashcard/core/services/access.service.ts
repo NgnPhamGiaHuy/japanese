@@ -10,7 +10,7 @@
 
 import { deleteField, setDoc } from "firebase/firestore";
 
-import { notifyInvite } from "@/features/notifications";
+import { notifyInvite } from "@/features/notifications/notification.service";
 import { buildShareId, lessonDoc } from "./lesson.service";
 import { resolveRole } from "../utils/rbac";
 

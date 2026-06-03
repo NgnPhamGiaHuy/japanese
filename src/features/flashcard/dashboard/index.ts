@@ -1,3 +1,2 @@
-export * from "./components";
-export * from "./hooks";
-export * from "./types";
+export { default as FlashcardDashboard } from "./components/FlashcardDashboard";
+export type * from "./types";

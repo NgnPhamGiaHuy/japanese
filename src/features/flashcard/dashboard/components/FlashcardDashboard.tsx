@@ -14,7 +14,7 @@ import { useRouter } from "next/navigation";
 
 import { Plus } from "lucide-react";
 
-import { ShareModal } from "@/features/flashcard";
+import ShareModal from "@/features/flashcard/core/components/ShareModal";
 import { useLessons } from "@/features/flashcard/core/hooks";
 import { buildShareId } from "@/features/flashcard/core/services";
 import { ScreenHeader } from "@/shared/components/layout";

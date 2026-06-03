@@ -3,7 +3,7 @@
  */
 
 import type { Lesson } from "@/features/flashcard/core/types";
-import type { GameStatEntry } from "@/features/game";
+import type { GameStatEntry } from "@/features/game/services";
 
 export interface DashboardTab {
     id: "personal" | "shared" | "discover";

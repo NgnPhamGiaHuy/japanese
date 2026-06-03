@@ -10,7 +10,7 @@
 
 import { Volume2 } from "lucide-react";
 
-import { KanaStrokeAnimation } from "@/features/kana";
+import { KanaStrokeAnimation } from "@/features/kana/components";
 import { Button } from "@/shared/components/ui";
 import { playAudio } from "@/shared/utils";
 

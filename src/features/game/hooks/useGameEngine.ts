@@ -2,13 +2,13 @@
 
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 
-import { getAudioText } from "@/features/flashcard/core";
+import { getAudioText } from "@/features/flashcard/core/utils/displayEngine";
 import { recordGameResult } from "@/features/game/services";
 import { allowAudio, playAudio, playSFX } from "@/shared/utils";
 import { useGameSession } from "./useGameSession";
-import { GameEngine } from "../engine";
+import { GameEngine } from "../engine/core/GameEngine";
 
-import type { FlashCard } from "@/features/flashcard/core";
+import type { FlashCard } from "@/features/flashcard/core/types";
 import type { GameState, ModeStrategy } from "../engine/types";
 
 interface UseGameEngineConfig {

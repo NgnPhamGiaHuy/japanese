@@ -15,17 +15,19 @@ import {
 } from "lucide-react";
 
 import {
-    deleteAllNotifications,
-    deleteNotification,
-    isUnread,
     logNotificationDeleted,
     logNotificationRead,
     logNotificationsCleared,
     logNotificationsReadAll,
+} from "@/features/notifications/actions/activity-log.actions";
+import { useNotifications } from "@/features/notifications/NotificationsContext";
+import {
+    deleteAllNotifications,
+    deleteNotification,
     markAllNotificationsRead,
     markNotificationRead,
-    useNotifications,
-} from "@/features/notifications";
+} from "@/features/notifications/notification.service";
+import { isUnread } from "@/features/notifications/types";
 import { auth } from "@/lib/firebase";
 import { ScreenHeader } from "@/shared/components/layout";
 import { Button } from "@/shared/components/ui";
@@ -35,7 +37,7 @@ import type {
     AppNotification,
     NotificationGroup,
     NotificationType,
-} from "@/features/notifications";
+} from "@/features/notifications/types";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 

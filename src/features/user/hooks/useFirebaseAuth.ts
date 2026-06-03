@@ -4,7 +4,7 @@ import { useEffect } from "react";
 
 import { browserLocalPersistence, onIdTokenChanged, setPersistence } from "firebase/auth";
 
-import { deliverPendingNotifications } from "@/features/notifications";
+import { deliverPendingNotifications } from "@/features/notifications/notification.service";
 import { auth } from "@/lib/firebase";
 import { clearAuthCookie, setAuthCookie } from "@/shared/utils";
 import { useAppStore } from "@/store";

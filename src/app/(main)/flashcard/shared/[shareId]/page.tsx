@@ -11,7 +11,7 @@ import { use, useState } from "react";
 
 import { RefreshCw } from "lucide-react";
 
-import { ShareModal } from "@/features/flashcard/core/components";
+import ShareModal from "@/features/flashcard/core/components/ShareModal";
 import { useLessons, useSharedLesson } from "@/features/flashcard/core/hooks";
 import { FlashcardDetailLayout } from "@/features/flashcard/detail";
 import { Button } from "@/shared/components/ui";

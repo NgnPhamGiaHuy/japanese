@@ -24,8 +24,8 @@ import Link from "next/link";
 
 import { BookOpen, Edit2, Gamepad2, Trash2, Zap } from "lucide-react";
 
-import { buildShareId } from "@/features/flashcard";
-import { useVisibility, VisibilityLevel } from "@/features/flashcard/core";
+import { buildShareId } from "@/features/flashcard/core/services";
+import { useVisibility, VisibilityLevel } from "@/features/flashcard/core/hooks/useVisibility";
 import { resolveRole, ROLE_CONFIG } from "@/features/flashcard/core/utils/rbac";
 import { Button, TierBadge, UserMeta } from "@/shared/components/ui";
 import { CARD_BASE, SPACING } from "@/shared/constants";

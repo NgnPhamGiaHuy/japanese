@@ -21,7 +21,7 @@
 
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 
-import { generateMatchDistractors } from "@/features/ai";
+import { generateMatchDistractors } from "@/features/ai/services/gemini.service";
 import { useGameSession } from "@/features/game/hooks";
 import {
     calcMatchPoints,
@@ -32,7 +32,8 @@ import {
 } from "@/features/game/modes";
 import { recordGameResult } from "@/features/game/services";
 import { allowAudio, playAudio, playSFX, shuffleArray } from "@/shared/utils";
-import { getAudioText, gradeCard } from "../../../core";
+import { gradeCard } from "../../../core/services/card.service";
+import { getAudioText } from "../../../core/utils/displayEngine";
 import { useMatchGameStore } from "../../../core/hooks";
 
 import type { MatchDifficulty } from "@/features/game/modes";

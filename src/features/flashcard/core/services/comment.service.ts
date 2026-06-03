@@ -22,7 +22,7 @@ import {
     updateDoc,
 } from "firebase/firestore";
 
-import { notifyComment, notifyReply } from "@/features/notifications";
+import { notifyComment, notifyReply } from "@/features/notifications/notification.service";
 import { APP_ID, db } from "@/lib/firebase";
 
 import type { CollectionReference, DocumentReference, Unsubscribe } from "firebase/firestore";

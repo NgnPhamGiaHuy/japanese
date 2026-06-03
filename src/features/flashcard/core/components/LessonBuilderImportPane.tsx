@@ -4,7 +4,8 @@ import React, { useState } from "react";
 
 import { FileUp, Sparkles } from "lucide-react";
 
-import { AIBulkPanel, useAIImageDeck } from "@/features/ai";
+import AIBulkPanel from "@/features/ai/components/AIBulkPanel";
+import { useAIImageDeck } from "@/features/ai/hooks/useAIImageDeck";
 import { Button, LoadingSpinner } from "@/shared/components/ui";
 import ImportDropzone from "./ImportDropzone";
 import ImportPasteArea from "./ImportPasteArea";

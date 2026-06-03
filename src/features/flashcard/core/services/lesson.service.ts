@@ -42,7 +42,7 @@ import {
 import { APP_ID, db } from "@/lib/firebase";
 import { cardDoc, cardsCol } from "./card.service";
 import { deleteCardImage } from "./image.service";
-import { CardValidationError, validateAtomicCard } from "../utils";
+import { CardValidationError, validateAtomicCard } from "../utils/card.validator";
 
 import type { Unsubscribe } from "firebase/firestore";
 import type { DeckAccessRole, FlashCard, Lesson } from "../types";

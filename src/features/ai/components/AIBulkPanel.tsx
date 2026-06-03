@@ -6,7 +6,7 @@ import { AlertCircle, Settings2, Sparkles, Zap } from "lucide-react";
 
 import { Button } from "@/shared/components/ui";
 import { hexToThemeColor } from "@/shared/utils";
-import { useAIDeck } from "../hooks";
+import useAIDeck from "../hooks/useAIDeck";
 
 import type { ImportRow } from "@/features/flashcard/core/components/ImportPreview";
 import type { AIGenerateMode, JLPTLevel } from "../types";

@@ -3,7 +3,8 @@
  * These types are shared across all game modes and provide a single source of truth.
  */
 
-import type { FlashCard, QuestionType } from "@/features/flashcard/core";
+import type { FlashCard } from "@/features/flashcard/core/types";
+import type { QuestionType } from "@/features/flashcard/core/utils/displayEngine";
 
 export type GamePhase = "intro" | "playing" | "feedback" | "results";
 export type FeedbackStatus = "idle" | "correct" | "wrong" | "timeout";

@@ -2,5 +2,5 @@
  * Kana Learn Feature — Public API
  */
 
-export { KanaLearn } from "./components";
+export { KanaLearn } from "./components/KanaLearn";
 export type { LearnCardProps, LearnControlsProps, LearnProgressProps } from "./types";

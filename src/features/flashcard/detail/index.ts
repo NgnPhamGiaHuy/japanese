@@ -1,2 +1,2 @@
-export * from "./components";
+export { default as FlashcardDetailLayout } from "./components/FlashcardDetailLayout";
 export type * from "./types";

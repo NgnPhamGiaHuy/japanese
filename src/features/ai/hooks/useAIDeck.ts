@@ -2,7 +2,7 @@
 
 import { useCallback, useState, useTransition } from "react";
 
-import { AIServiceError, generateDeck } from "../services";
+import { AIServiceError, generateDeck } from "../services/gemini.service";
 
 import type { AIStatus, GeneratedCard, JLPTLevel } from "../types";
 

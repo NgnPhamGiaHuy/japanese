@@ -6,7 +6,7 @@ import { usePathname } from "next/navigation";
 import { Bell, BookOpen, Gamepad2, Shield } from "lucide-react";
 
 import { useAdminRole } from "@/features/admin/context/AdminContext";
-import { useNotifications } from "@/features/notifications";
+import { useNotifications } from "@/features/notifications/NotificationsContext";
 import { UserAvatar } from "@/shared/components/ui";
 import { useAppStore } from "@/store";
 

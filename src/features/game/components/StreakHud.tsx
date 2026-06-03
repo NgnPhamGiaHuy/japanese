@@ -4,7 +4,7 @@ import { useEffect, useRef } from "react";
 
 import { motion, useAnimation } from "framer-motion";
 
-import { comboMultiplier } from "@/features/game";
+import { comboMultiplier } from "@/features/game/logic";
 
 import type { ReactNode } from "react";
 

@@ -17,7 +17,7 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useRef } from "react";
 
-import { useFlashcardGameBestScore } from "@/features/flashcard/core";
+import { useFlashcardGameBestScore } from "@/features/flashcard/core/hooks/useFlashcardGameBestScore";
 import { logMatchGameCompleted } from "@/features/flashcard/core/actions/activity-log.actions";
 import { scoreToTier, TIER_INFO } from "@/features/game/logic";
 import { useUserProgress } from "@/features/user/hooks";
@@ -27,7 +27,7 @@ import MatchPlaying from "./MatchPlaying";
 import MatchResults from "./MatchResults";
 import { useMatchModeSession } from "../hooks";
 
-import type { FlashcardData } from "@/features/flashcard/core";
+import type { FlashcardData } from "@/features/flashcard/core/loaders";
 
 interface MatchGameProps {
     data: FlashcardData;

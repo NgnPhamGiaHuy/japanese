@@ -10,7 +10,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 
 import { AlertCircle, Brain, Check, Lightbulb, Loader2, Volume2, X } from "lucide-react";
 
-import { useAICard } from "@/features/ai";
+import useAICard from "@/features/ai/hooks/useAICard";
 import { Button } from "@/shared/components/ui";
 import { hexToThemeColor, playAudio, playSFX, shuffleArray } from "@/shared/utils";
 import { useAppStore } from "@/store";

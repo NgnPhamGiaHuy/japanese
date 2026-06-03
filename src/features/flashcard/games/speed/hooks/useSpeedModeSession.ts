@@ -23,7 +23,7 @@
 
 import { useCallback, useMemo } from "react";
 
-import { SpeedModeStrategy } from "@/features/game/engine";
+import { SpeedModeStrategy } from "@/features/game/engine/strategies/SpeedModeStrategy";
 import { useGameEngine } from "@/features/game/hooks";
 import { SPEED_GAME_CONFIG, timerColor } from "@/features/game/modes";
 

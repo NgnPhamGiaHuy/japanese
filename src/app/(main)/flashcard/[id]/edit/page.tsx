@@ -11,8 +11,9 @@ import { use, useEffect, useState } from "react";
 
 import { getDoc } from "firebase/firestore";
 
-import { LessonBuilder, useLessons } from "@/features/flashcard";
+import LessonBuilder from "@/features/flashcard/core/components/LessonBuilder";
 import { useCards } from "@/features/flashcard/core/hooks";
+import { useLessons } from "@/features/flashcard/core/hooks/useLessons";
 import { lessonDoc, normalizeLesson } from "@/features/flashcard/core/services";
 import { useAlert } from "@/shared/providers";
 import { sortByOrder } from "@/shared/utils";

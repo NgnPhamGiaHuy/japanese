@@ -6,4 +6,5 @@
  * Enforces encapsulation — only exports what's needed externally.
  */
 
-export { SpeedGame, SpeedConstraintError } from "./components";
+export { default as SpeedConstraintError } from "./components/SpeedConstraintError";
+export { default as SpeedGame } from "./components/SpeedGame";

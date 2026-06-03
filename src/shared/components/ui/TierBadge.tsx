@@ -8,7 +8,7 @@
  * @example
  * <TierBadge score={950} />
  */
-import { scoreToTier, TIER_INFO } from "@/features/game";
+import { scoreToTier, TIER_INFO } from "@/features/game/logic";
 
 /** Attributes for rendering a TierBadge. */
 export interface TierBadgeProps {

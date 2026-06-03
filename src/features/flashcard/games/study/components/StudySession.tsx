@@ -5,16 +5,18 @@ import { useCallback, useMemo, useState } from "react";
 
 import {
     buildSession,
-    FlashcardLearn,
-    FlashcardMistakeReview,
-    FlashcardPractice,
     getDeckStatus,
     getMistakeCards,
-    gradeCardForUser,
     recommendedAction,
+} from "@/features/flashcard/core/utils/learningEngine";
+import FlashcardLearn from "@/features/flashcard/core/components/FlashcardLearn";
+import FlashcardMistakeReview from "@/features/flashcard/core/components/FlashcardMistakeReview";
+import FlashcardPractice from "@/features/flashcard/core/components/FlashcardPractice";
+import { useCardsWithProgress } from "@/features/flashcard/core/hooks/useCardsWithProgress";
+import {
+    gradeCardForUser,
     resetLessonProgressForUser,
-    useCardsWithProgress,
-} from "@/features/flashcard/core";
+} from "@/features/flashcard/core/services/progress.service";
 import {
     logStudyProgressReset,
     logStudySessionCompleted,
@@ -22,9 +24,10 @@ import {
 import { useUserProgress } from "@/features/user/hooks";
 import { ConfirmModal } from "@/shared/components/ui";
 import { useAppStore } from "@/store";
-import { StudyModeSelector } from "./index";
+import StudyModeSelector from "./StudyModeSelector";
 
-import type { FlashcardData, StudyMode, StudyStats } from "@/features/flashcard/core";
+import type { FlashcardData } from "@/features/flashcard/core/loaders";
+import type { StudyMode, StudyStats } from "@/features/flashcard/core/types";
 import type { CardWithProgress, Grade } from "@/features/flashcard/domain";
 
 interface StudySessionProps {

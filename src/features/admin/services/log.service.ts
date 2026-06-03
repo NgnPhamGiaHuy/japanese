@@ -5,7 +5,7 @@ import {
     logTypeToEntityType,
     SYSTEM_LOGS_COLLECTION,
     systemLogToAdminView,
-} from "@/lib/logging";
+} from "@/lib/logging/public";
 import { persistSystemLog } from "@/lib/logging/server";
 import { adminAuth, adminDb } from "./admin.service";
 import { applyLogFilters } from "../utils/filters";

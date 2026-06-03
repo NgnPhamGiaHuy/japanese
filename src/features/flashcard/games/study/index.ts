@@ -6,4 +6,4 @@
  * Enforces encapsulation — only exports what's needed externally.
  */
 
-export { StudySession } from "./components";
+export { default as StudySession } from "./components/StudySession";

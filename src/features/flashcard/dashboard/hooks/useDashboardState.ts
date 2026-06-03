@@ -10,14 +10,15 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
 import { useLessons, usePublicLessons } from "@/features/flashcard/core/hooks";
-import { matchGameMode, speedGameMode, subscribeGameStats } from "@/features/game";
+import { matchGameMode, speedGameMode } from "@/features/game/modes";
+import { subscribeGameStats } from "@/features/game/services";
 import { useAlert } from "@/shared/providers";
 import { reorderWithFractionalIndex } from "@/shared/utils";
 import { useAppStore } from "@/store";
 import { DASHBOARD_TABS, DEFAULT_TAB_ID } from "../constants";
 
 import type { Lesson } from "@/features/flashcard/core/types";
-import type { GameStatEntry } from "@/features/game";
+import type { GameStatEntry } from "@/features/game/services";
 
 type ActiveTab = "personal" | "shared" | "discover";
 

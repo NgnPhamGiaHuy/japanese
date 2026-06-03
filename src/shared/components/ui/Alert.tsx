@@ -15,7 +15,7 @@ import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import { AlertCircle, CheckCircle, Info, X, XCircle } from "lucide-react";
 
-import { Button } from "@/shared/components/ui";
+import Button from "./Button";
 
 /** Categorization of the notification severity and visual intent. */
 export type AlertType = "info" | "success" | "warning" | "error";

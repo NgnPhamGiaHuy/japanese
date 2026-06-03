@@ -9,7 +9,7 @@
 import { useRouter } from "next/navigation";
 import { use, useState } from "react";
 
-import { ShareModal } from "@/features/flashcard/core/components";
+import ShareModal from "@/features/flashcard/core/components/ShareModal";
 import { useCards, useLessons } from "@/features/flashcard/core/hooks";
 import { buildShareId } from "@/features/flashcard/core/services";
 import { FlashcardDetailLayout } from "@/features/flashcard/detail";

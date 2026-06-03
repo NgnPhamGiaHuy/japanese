@@ -13,7 +13,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useRef } from "react";
 
 import { logSpeedGameCompleted } from "@/features/flashcard/core/actions/activity-log.actions";
-import { useFlashcardGameBestScore } from "@/features/flashcard/core/hooks";
+import { useFlashcardGameBestScore } from "@/features/flashcard/core/hooks/useFlashcardGameBestScore";
 import { scoreToTier, TIER_INFO } from "@/features/game/logic";
 import { useUserProgress } from "@/features/user/hooks";
 import { useAppStore } from "@/store";

@@ -1,1 +1,0 @@
-export { SpeedModeStrategy } from "./SpeedModeStrategy";

@@ -11,7 +11,7 @@
  * 3. **Mistake Recovery**: Per-session memory management for immediate feedback loops.
  */
 import { shuffleArray } from "@/shared/utils";
-import { redistributeOverdueCards } from "../services";
+import { redistributeOverdueCards } from "../services/progress.service";
 
 import type { StudyMode } from "../types";
 import type { CardWithProgress } from "../../domain";
