@@ -56,7 +56,7 @@ pids
 # Package management
 
 .npm
-package-lock.json
+# package-lock.json is committed on purpose: reproducible installs + CI `npm ci`.
 yarn.lock
 .yarn-integrity
 .yarn/cache
