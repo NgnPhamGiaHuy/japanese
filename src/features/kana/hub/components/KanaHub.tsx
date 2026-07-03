@@ -37,7 +37,7 @@ export default function KanaHub() {
         handleResetProgress,
     } = useKanaHubState();
 
-    const { primaryBg, primaryBorderB, primaryHover, primaryText, primaryBgLight } = themeColors;
+    const { primaryBg, primaryBorderB, primaryText } = themeColors;
 
     return (
         <div className="min-h-dvh bg-[#F7F7F8]">

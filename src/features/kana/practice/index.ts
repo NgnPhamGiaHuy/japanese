@@ -8,5 +8,4 @@ export type {
     PracticeModeConfig,
     PracticeHeaderProps,
     PracticeCanvasAreaProps,
-    PracticeControlsProps,
 } from "./types";

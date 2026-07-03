@@ -4,7 +4,7 @@ import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react
 
 import { getAudioText } from "@/features/flashcard/core/utils/displayEngine";
 import { recordGameResult } from "@/features/game/services";
-import { allowAudio, playAudio, playSFX } from "@/shared/utils";
+import { allowAudio, playPronunciationFeedback, playSFX } from "@/shared/utils";
 import { useGameSession } from "./useGameSession";
 import { GameEngine } from "../engine/core/GameEngine";
 
@@ -145,8 +145,7 @@ export function useGameEngine(config: UseGameEngineConfig) {
         if (!card) return;
 
         if (allowAudio(config.strategy.name, "feedback")) {
-            const t = setTimeout(() => playAudio(getAudioText(card)), 250);
-            return () => clearTimeout(t);
+            playPronunciationFeedback(getAudioText(card), 250);
         }
     }, [state?.feedbackStatus, state?.currentQuestion, config.cards, config.strategy.name]);
 

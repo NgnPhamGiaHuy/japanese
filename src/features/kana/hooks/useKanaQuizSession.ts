@@ -19,10 +19,10 @@
 
 import { useCallback, useLayoutEffect, useRef, useState } from "react";
 
-import { comboMultiplier } from "@/features/game/logic";
 import { useGameSession } from "@/features/game/hooks";
+import { comboMultiplier } from "@/features/game/logic";
 import { useUserProgress } from "@/features/user/hooks";
-import { allowAudio, playAudio, playSFX, shuffleArray } from "@/shared/utils";
+import { allowAudio, playPronunciationFeedback, playSFX, shuffleArray } from "@/shared/utils";
 import { VISUAL_GROUPS } from "../data";
 
 import type { KanaChar, QuestionType } from "../types";
@@ -30,6 +30,8 @@ import type { KanaChar, QuestionType } from "../types";
 export type KanaAnswerStatus = "idle" | "correct" | "wrong";
 
 const TARGET_SCORE = 20;
+const CORRECT_FEEDBACK_ADVANCE_MS = 1250;
+const WRONG_FEEDBACK_ADVANCE_MS = 1550;
 
 interface UseKanaQuizSessionParams {
     dataset: KanaChar[];
@@ -88,7 +90,6 @@ function buildDistractors(target: KanaChar, dataset: KanaChar[]): KanaChar[] {
 export function useKanaQuizSession({
     dataset,
     gameMode,
-    bestScore = 0,
     userId,
     displayName,
     onCorrectCombo,
@@ -228,10 +229,13 @@ export function useKanaQuizSession({
             }
 
             if (question && allowAudio(questionType, "feedback")) {
-                playAudio(question.char);
+                playPronunciationFeedback(question.char);
             }
 
-            setTimeout(onAdvance, isCorrect ? 800 : 1500);
+            setTimeout(
+                onAdvance,
+                isCorrect ? CORRECT_FEEDBACK_ADVANCE_MS : WRONG_FEEDBACK_ADVANCE_MS,
+            );
         },
         [question, questionType, recordCharStat],
     );

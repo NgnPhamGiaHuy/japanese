@@ -8,25 +8,35 @@
 
 "use client";
 
-import { useKanaDataset } from "@/features/kana/hooks";
+import { useRef } from "react";
+
+import { ChevronRight } from "lucide-react";
+
+import { useKanaDataset, useKanaPlayDeck } from "@/features/kana/hooks";
 import { useUserProgress } from "@/features/user/hooks";
 import { ScreenHeader } from "@/shared/components/layout";
+import { Button } from "@/shared/components/ui";
 import { useAppStore } from "@/store";
 import { LearnCard } from "./LearnCard";
-import { LearnControls } from "./LearnControls";
 import { LearnProgress } from "./LearnProgress";
-import { useLearnNavigation } from "../hooks";
 
 export function KanaLearn() {
     const { dataset, alphabet, themeColor } = useKanaDataset();
     const { markLearned } = useUserProgress();
     const { globalAutoPlay } = useAppStore();
+    const markedThisSession = useRef(new Set<string>());
 
-    const { currentIndex, isRandom, char, next, prev, toggleRandom } = useLearnNavigation(
-        dataset,
-        alphabet,
-        globalAutoPlay,
-        markLearned,
+    const { char, currentIndex, isRandom, next, prev, playCurrent, toggleRandom } = useKanaPlayDeck(
+        {
+            dataset,
+            alphabet,
+            speakOnNavigate: globalAutoPlay,
+            onVisit: (visitedChar) => {
+                if (markedThisSession.current.has(visitedChar.char)) return;
+                markedThisSession.current.add(visitedChar.char);
+                void markLearned(visitedChar.char);
+            },
+        },
     );
 
     if (!char) return null;
@@ -44,10 +54,25 @@ export function KanaLearn() {
                 />
 
                 <div className="flex flex-col items-center py-6">
-                    <LearnCard char={char} themeColor={themeColor} />
+                    <LearnCard char={char} themeColor={themeColor} onPlay={playCurrent} />
                 </div>
 
-                <LearnControls alphabet={alphabet} onPrev={prev} onNext={next} />
+                <div className="mt-2 flex justify-between gap-3">
+                    <Button
+                        variant="outline"
+                        onClick={prev}
+                        className="flex-1 py-3.5 text-base md:py-5 md:text-xl"
+                    >
+                        Prev
+                    </Button>
+                    <Button
+                        alphabet={alphabet}
+                        onClick={next}
+                        className="flex-1 py-3.5 text-base md:py-5 md:text-xl"
+                    >
+                        Next <ChevronRight size={24} strokeWidth={3} />
+                    </Button>
+                </div>
             </div>
         </div>
     );

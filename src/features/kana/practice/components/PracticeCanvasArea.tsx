@@ -12,12 +12,11 @@ import { Volume2 } from "lucide-react";
 
 import { DrawingCanvas, KanaStrokeAnimation } from "@/features/kana/components";
 import { Button } from "@/shared/components/ui";
-import { playAudio } from "@/shared/utils";
 import { getModeConfig } from "../utils/getModeConfig";
 
 import type { PracticeCanvasAreaProps } from "../types";
 
-export function PracticeCanvasArea({ char, mode, themeColor }: PracticeCanvasAreaProps) {
+export function PracticeCanvasArea({ char, mode, themeColor, onPlay }: PracticeCanvasAreaProps) {
     const config = getModeConfig(mode);
 
     return (
@@ -43,7 +42,8 @@ export function PracticeCanvasArea({ char, mode, themeColor }: PracticeCanvasAre
                     )}
                     <Button
                         variant="ghost"
-                        onClick={() => playAudio(char.char)}
+                        onClick={onPlay}
+                        title={`Play ${char.char}`}
                         className="ml-auto! rounded-full! border-2! border-gray-100! bg-white! p-2! shadow-none transition-transform hover:scale-105 hover:bg-gray-50! hover:shadow-none active:translate-y-0 active:scale-95 md:ml-0! md:p-3!"
                         icon={Volume2}
                         iconSize={18}

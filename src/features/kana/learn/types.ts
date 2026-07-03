@@ -10,12 +10,7 @@ export interface LearnCardProps {
         primary: string;
         text: string;
     };
-}
-
-export interface LearnControlsProps {
-    alphabet: "hiragana" | "katakana" | "both";
-    onPrev: () => void;
-    onNext: () => void;
+    onPlay: () => void;
 }
 
 export interface LearnProgressProps {

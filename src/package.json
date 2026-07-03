@@ -5,6 +5,7 @@
     "scripts": {
         "dev": "next dev",
         "build": "next build",
+        "test": "vitest run",
         "start": "next start",
         "lint": "eslint",
         "prepare": "cd .. && husky src/.husky"
@@ -59,6 +60,7 @@
         "lint-staged": "^16.4.0",
         "prettier-plugin-tailwindcss": "^0.6.11",
         "tailwindcss": "^4",
-        "typescript": "^5"
+        "typescript": "^5",
+        "vitest": "^4.1.8"
     }
 }

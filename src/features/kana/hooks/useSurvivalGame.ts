@@ -21,7 +21,7 @@ import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react
 import { useGameSession } from "@/features/game/hooks";
 import { comboMultiplier } from "@/features/game/logic";
 import { auth } from "@/lib/firebase";
-import { getValidRomaji, playSFX } from "@/shared/utils";
+import { getValidRomaji, playAudio, playSFX } from "@/shared/utils";
 import { useKanaQuizSession } from "./useKanaQuizSession";
 import { logKanaSurvivalCompleted } from "../actions";
 
@@ -374,7 +374,7 @@ export const useSurvivalGame = ({
             setDropTick((t) => t + 1);
             if (!isGameOverRef.current) rafRef.current = requestAnimationFrame(updateDropGame);
         },
-        [dataset],
+        [alphabet, dataset, userId],
     );
 
     useEffect(() => {
@@ -422,6 +422,7 @@ export const useSurvivalGame = ({
                             state.activeId = null;
                             dropStreak.current += 1;
                             playSFX("correct");
+                            playAudio(target.char);
                             const pts = comboMultiplier(dropStreak.current);
                             dropScore.current += pts;
                             setLastPoints(pts);
@@ -449,6 +450,7 @@ export const useSurvivalGame = ({
                         state.activeId = null;
                         dropStreak.current += 1;
                         playSFX("correct");
+                        playAudio(target.char);
                         const pts = comboMultiplier(dropStreak.current);
                         dropScore.current += pts;
                         setLastPoints(pts);

@@ -10,7 +10,7 @@
 
 import { useEffect, useRef } from "react";
 
-import { ArrowLeft, X } from "lucide-react";
+import { ArrowLeft, Volume2, X } from "lucide-react";
 
 import {
     AnswerFeedback,
@@ -19,6 +19,7 @@ import {
 } from "@/features/game/components";
 import { ScreenHeaderBackButton, ScreenHeaderRow } from "@/shared/components/layout";
 import { Button } from "@/shared/components/ui";
+import { playAudio } from "@/shared/utils";
 
 import type { KanaChar, QuestionType } from "@/features/kana/types";
 import type { QuizMode } from "../types";
@@ -97,8 +98,17 @@ export function QuizPlaying({
             {question && (
                 <div className="hide-scrollbar mx-auto flex min-h-0 w-full max-w-md flex-1 flex-col items-center justify-center overflow-y-auto p-4">
                     <div
-                        className={`mb-4 flex h-[200px] w-full flex-col items-center justify-center rounded-[3rem] border-2 border-b-8 border-gray-200 bg-white px-4 py-8 shadow-sm sm:h-[240px] ${status === "wrong" ? "animate-shake" : ""}`}
+                        className={`relative mb-4 flex h-[200px] w-full flex-col items-center justify-center rounded-[3rem] border-2 border-b-8 border-gray-200 bg-white px-4 py-8 shadow-sm sm:h-[240px] ${status === "wrong" ? "animate-shake" : ""}`}
                     >
+                        <Button
+                            variant="ghost"
+                            onClick={() => playAudio(question.char)}
+                            title={`Play ${question.char}`}
+                            className="absolute top-4 right-4 rounded-full! border-2! border-gray-100! bg-gray-50! p-2! shadow-none transition-transform hover:bg-gray-100! hover:shadow-none active:translate-y-0"
+                            icon={Volume2}
+                            iconSize={18}
+                            iconClassName={themeColor.text}
+                        />
                         <span className="text-[7rem] leading-none font-medium text-[#3c3c3c] select-none sm:text-[8rem]">
                             {question.char}
                         </span>
@@ -158,6 +168,7 @@ export function QuizPlaying({
                         question={question}
                         questionType={questionType}
                         primaryBg={themeColor.bg}
+                        onReplayAudio={() => playAudio(question.char)}
                     />
                 </div>
             )}

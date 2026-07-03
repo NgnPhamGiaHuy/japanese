@@ -1,15 +1,39 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
-import { signInWithGoogle } from "@/features/user/services";
+import {
+    completeGoogleRedirectSignIn,
+    signInWithGoogle,
+    signInWithGoogleRedirect,
+} from "@/features/user/services";
 import { Button } from "@/shared/components/ui";
 
 export default function LoginPage() {
     const router = useRouter();
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+
+    useEffect(() => {
+        let active = true;
+
+        completeGoogleRedirectSignIn()
+            .then((user) => {
+                if (active && user) router.replace("/");
+            })
+            .catch((err: unknown) => {
+                const { code, message } = err as { code?: string; message?: string };
+                if (process.env.NODE_ENV === "development") {
+                    console.error("[Login] Google redirect sign-in failed:", { code, message });
+                }
+                if (active) setError(getSignInErrorMessage(code));
+            });
+
+        return () => {
+            active = false;
+        };
+    }, [router]);
 
     const handleGoogleSignIn = async () => {
         setLoading(true);
@@ -18,9 +42,23 @@ export default function LoginPage() {
             await signInWithGoogle();
             router.replace("/");
         } catch (err: unknown) {
-            const code = (err as { code?: string }).code;
+            const { code, message } = err as { code?: string; message?: string };
+            if (process.env.NODE_ENV === "development") {
+                console.error("[Login] Google sign-in failed:", { code, message });
+            }
+            if (shouldUseRedirectSignIn(code)) {
+                try {
+                    await signInWithGoogleRedirect();
+                    return;
+                } catch (redirectErr: unknown) {
+                    const redirectCode = (redirectErr as { code?: string }).code;
+                    setError(getSignInErrorMessage(redirectCode));
+                    setLoading(false);
+                    return;
+                }
+            }
             if (code !== "auth/popup-closed-by-user" && code !== "auth/cancelled-popup-request") {
-                setError("Sign-in failed. Please try again.");
+                setError(getSignInErrorMessage(code));
             }
             setLoading(false);
         }
@@ -63,6 +101,26 @@ export default function LoginPage() {
             </div>
         </div>
     );
+}
+
+function shouldUseRedirectSignIn(code?: string) {
+    return (
+        code === "auth/popup-blocked" || code === "auth/operation-not-supported-in-this-environment"
+    );
+}
+
+function getSignInErrorMessage(code?: string) {
+    switch (code) {
+        case "auth/popup-blocked":
+        case "auth/operation-not-supported-in-this-environment":
+            return "This browser blocks popup sign-in, so Google sign-in will continue with a redirect.";
+        case "auth/unauthorized-domain":
+            return "This domain is not authorized for Firebase sign-in.";
+        case "auth/operation-not-allowed":
+            return "Google sign-in is not enabled for this Firebase project.";
+        default:
+            return "Sign-in failed. Please try again.";
+    }
 }
 
 function GoogleIcon() {

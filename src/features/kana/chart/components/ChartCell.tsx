@@ -36,6 +36,7 @@ export function ChartCell({ item, showRomaji, learned, isHiragana }: ChartCellPr
             <Button
                 variant="secondary"
                 onClick={() => playAudio(item.char)}
+                title={`Play ${item.char}`}
                 className={`flex! h-full! w-full! flex-col! items-center! justify-center! p-0! shadow-none transition-all! duration-200 ${
                     learned ? learnedBg : "hover:bg-gray-50!"
                 }`}

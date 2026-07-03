@@ -12,11 +12,10 @@ import { Volume2 } from "lucide-react";
 
 import { KanaStrokeAnimation } from "@/features/kana/components";
 import { Button } from "@/shared/components/ui";
-import { playAudio } from "@/shared/utils";
 
 import type { LearnCardProps } from "../types";
 
-export function LearnCard({ char, themeColor }: LearnCardProps) {
+export function LearnCard({ char, themeColor, onPlay }: LearnCardProps) {
     const isMulti = char.char.length > 1;
 
     return (
@@ -26,7 +25,8 @@ export function LearnCard({ char, themeColor }: LearnCardProps) {
             </span>
             <Button
                 variant="ghost"
-                onClick={() => playAudio(char.char)}
+                onClick={onPlay}
+                title={`Play ${char.char}`}
                 className={`absolute top-4 right-4 rounded-full! border-2! border-gray-100! bg-gray-50! p-2! shadow-none transition-transform hover:bg-gray-100! hover:shadow-none active:translate-y-0 ${themeColor.text}`}
                 icon={Volume2}
                 iconSize={20}

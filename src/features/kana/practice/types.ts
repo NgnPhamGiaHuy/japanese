@@ -34,10 +34,5 @@ export interface PracticeCanvasAreaProps {
         primary: string;
         text: string;
     };
-}
-
-export interface PracticeControlsProps {
-    alphabet: "hiragana" | "katakana" | "both";
-    onPrev: () => void;
-    onNext: () => void;
+    onPlay: () => void;
 }

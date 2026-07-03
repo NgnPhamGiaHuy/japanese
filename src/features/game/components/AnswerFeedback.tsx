@@ -12,9 +12,16 @@ interface AnswerFeedbackProps {
     question: KanaChar | null;
     questionType?: QuestionType;
     primaryBg: string;
+    onReplayAudio?: () => void;
 }
 
-const AnswerFeedback = ({ status, question, questionType, primaryBg }: AnswerFeedbackProps) => {
+const AnswerFeedback = ({
+    status,
+    question,
+    questionType,
+    primaryBg,
+    onReplayAudio,
+}: AnswerFeedbackProps) => {
     if (status === "idle") return <div className="mt-4 h-12 md:mt-6 md:h-16" />;
 
     // Show a "play again" button only for listen-type questions in the feedback stage
@@ -38,7 +45,7 @@ const AnswerFeedback = ({ status, question, questionType, primaryBg }: AnswerFee
                     {canReplayAudio && (
                         <Button
                             variant="ghost"
-                            onClick={() => playAudio(question.char)}
+                            onClick={onReplayAudio ?? (() => playAudio(question.char))}
                             className="!ml-1 !shrink-0 !rounded-lg !bg-black/10 !p-1.5 text-white shadow-none transition-colors hover:!bg-black/20 hover:shadow-none active:translate-y-0"
                             aria-label="Replay audio"
                             icon={Volume2}
@@ -61,7 +68,7 @@ const AnswerFeedback = ({ status, question, questionType, primaryBg }: AnswerFee
                     {canReplayAudio && (
                         <Button
                             variant="ghost"
-                            onClick={() => playAudio(question.char)}
+                            onClick={onReplayAudio ?? (() => playAudio(question.char))}
                             className="!ml-1 !shrink-0 !rounded-lg !bg-[#ea2b2b]/10 !p-1.5 text-white shadow-none transition-colors hover:!bg-[#ea2b2b]/20 hover:shadow-none active:translate-y-0"
                             aria-label="Replay audio"
                             icon={Volume2}

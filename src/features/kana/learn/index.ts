@@ -3,4 +3,4 @@
  */
 
 export { KanaLearn } from "./components/KanaLearn";
-export type { LearnCardProps, LearnControlsProps, LearnProgressProps } from "./types";
+export type { LearnCardProps, LearnProgressProps } from "./types";
