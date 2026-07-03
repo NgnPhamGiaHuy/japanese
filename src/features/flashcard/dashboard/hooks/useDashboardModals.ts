@@ -7,10 +7,10 @@
 
 import { useState } from "react";
 
-import { useLessons } from "@/features/flashcard/core/hooks";
+import { useLessons } from "@/features/flashcard/hooks";
 import { useAlert } from "@/shared/providers";
 
-import type { Lesson } from "@/features/flashcard/core/types";
+import type { Lesson } from "@/features/flashcard/types";
 
 export function useDashboardModals() {
     const { deleteLesson, shareLesson, updateLessonRoles } = useLessons();

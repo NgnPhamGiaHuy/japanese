@@ -8,7 +8,7 @@
 
 "use client";
 
-import { CommentPanel } from "@/features/flashcard/core/components";
+import { CommentPanel } from "@/features/flashcard/components";
 
 import type { DetailCommentsPanelProps } from "../types";
 

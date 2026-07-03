@@ -1,6 +1,13 @@
-export { default as AnswerFeedback } from "./AnswerFeedback";
 export { default as Leaderboard } from "./Leaderboard";
 export { default as LivesDisplay } from "./LivesDisplay";
 export { default as MiniLeaderboard } from "./MiniLeaderboard";
 export { GameStreakScoreStack, StreakComboBadge, gameQuizStreakColumnClassName } from "./StreakHud";
 export type { StreakHudVariant } from "./StreakHud";
+export { default as TierBadge } from "./TierBadge";
+export type { TierBadgeProps } from "./TierBadge";
+export { GameIntroScreen } from "./GameIntroScreen";
+export type { GameIntroScreenProps } from "./GameIntroScreen";
+export { GameResultsScreen } from "./GameResultsScreen";
+export type { GameResultsScreenProps } from "./GameResultsScreen";
+export { StatGrid } from "./StatGrid";
+export type { StatGridProps, StatItem } from "./StatGrid";

@@ -19,8 +19,8 @@
 
 import { useCallback, useLayoutEffect, useRef, useState } from "react";
 
+import { comboMultiplier } from "@/features/game/domain";
 import { useGameSession } from "@/features/game/hooks";
-import { comboMultiplier } from "@/features/game/logic";
 import { useUserProgress } from "@/features/user/hooks";
 import { allowAudio, playPronunciationFeedback, playSFX, shuffleArray } from "@/shared/utils";
 import { VISUAL_GROUPS } from "../data";

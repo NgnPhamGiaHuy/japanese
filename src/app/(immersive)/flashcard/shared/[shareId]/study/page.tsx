@@ -16,8 +16,8 @@
 import { useRouter } from "next/navigation";
 import { use } from "react";
 
-import { useFlashcardLoader } from "@/features/flashcard/core/loaders";
 import { StudySession } from "@/features/flashcard/games/study";
+import { useFlashcardLoader } from "@/features/flashcard/loaders";
 import { LoadingSpinner, NotFoundScreen } from "@/shared/components/ui";
 
 export default function SharedStudyPage({ params }: { params: Promise<{ shareId: string }> }) {

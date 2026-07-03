@@ -4,8 +4,8 @@ import { useEffect, useState } from "react";
 
 import { ShieldAlert } from "lucide-react";
 
+import { useAppStore } from "@/lib/app-store";
 import { EmptyState, LoadingSpinner } from "@/shared/components/ui";
-import { useAppStore } from "@/store";
 import { fetchAdminRoleAction } from "../../actions";
 import { useAdminToken } from "../../hooks";
 

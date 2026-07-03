@@ -15,11 +15,11 @@ import {
     where,
 } from "firebase/firestore";
 
-import { scoreToTier } from "@/features/game/logic";
+import { scoreToTier } from "@/features/game/domain";
 import { APP_ID, db } from "@/lib/firebase";
 
 import type { Unsubscribe } from "firebase/firestore";
-import type { Tier } from "@/features/game/logic";
+import type { Tier } from "@/features/game/domain";
 
 // ─── Collection helpers ───────────────────────────────────────────────────────
 

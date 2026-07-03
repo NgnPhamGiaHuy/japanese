@@ -16,8 +16,8 @@
 import { notFound } from "next/navigation";
 import { use } from "react";
 
-import { useFlashcardLoader } from "@/features/flashcard/core/loaders";
 import { MatchGame } from "@/features/flashcard/games/match";
+import { useFlashcardLoader } from "@/features/flashcard/loaders";
 
 export default function MatchModePage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = use(params);

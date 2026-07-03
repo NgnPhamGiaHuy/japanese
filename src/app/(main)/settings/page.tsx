@@ -2,15 +2,16 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+
 import { motion } from "framer-motion";
-import { Monitor, Music, ShieldAlert, LogOut, Info, ChevronRight } from "lucide-react";
+import { ChevronRight, Info, LogOut, Monitor, Music, ShieldAlert } from "lucide-react";
 
 import { useUserProgress } from "@/features/user/hooks";
 import { signOut } from "@/features/user/services";
+import { useAppStore } from "@/lib/app-store";
 import { ScreenHeader } from "@/shared/components/layout";
 import { Button, Card, ConfirmModal, UserMeta } from "@/shared/components/ui";
 import { SPACING } from "@/shared/constants";
-import { useAppStore } from "@/store";
 
 export default function SettingsPage() {
     const { user, useHandwriting, globalAutoPlay, toggleHandwriting, toggleAutoPlay } =

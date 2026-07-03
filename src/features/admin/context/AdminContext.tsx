@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useEffect, useState } from "react";
 
-import { useAppStore } from "@/store";
+import { useAppStore } from "@/lib/app-store";
 import { fetchAdminRoleAction } from "../actions";
 import { useAdminToken } from "../hooks";
 

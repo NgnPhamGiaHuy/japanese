@@ -18,8 +18,8 @@ import { use } from "react";
 
 import { Zap } from "lucide-react";
 
-import { useFlashcardLoader } from "@/features/flashcard/core/loaders";
 import { SpeedGame } from "@/features/flashcard/games/speed";
+import { useFlashcardLoader } from "@/features/flashcard/loaders";
 import { Button, LoadingSpinner, NotFoundScreen } from "@/shared/components/ui";
 
 export default function SharedSpeedPage({ params }: { params: Promise<{ shareId: string }> }) {

@@ -12,11 +12,8 @@ import { useEffect, useRef } from "react";
 
 import { ArrowLeft, Volume2, X } from "lucide-react";
 
-import {
-    AnswerFeedback,
-    gameQuizStreakColumnClassName,
-    StreakComboBadge,
-} from "@/features/game/components";
+import { gameQuizStreakColumnClassName, StreakComboBadge } from "@/features/game/components";
+import { AnswerFeedback } from "@/features/kana/components";
 import { ScreenHeaderBackButton, ScreenHeaderRow } from "@/shared/components/layout";
 import { Button } from "@/shared/components/ui";
 import { playAudio } from "@/shared/utils";

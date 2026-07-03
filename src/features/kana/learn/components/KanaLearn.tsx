@@ -14,9 +14,9 @@ import { ChevronRight } from "lucide-react";
 
 import { useKanaDataset, useKanaPlayDeck } from "@/features/kana/hooks";
 import { useUserProgress } from "@/features/user/hooks";
+import { useAppStore } from "@/lib/app-store";
 import { ScreenHeader } from "@/shared/components/layout";
 import { Button } from "@/shared/components/ui";
-import { useAppStore } from "@/store";
 import { LearnCard } from "./LearnCard";
 import { LearnProgress } from "./LearnProgress";
 

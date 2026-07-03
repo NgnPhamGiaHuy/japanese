@@ -14,12 +14,10 @@ export { default as SettingsMenu } from "./SettingsMenu";
 export { default as Badge } from "./Badge";
 export { default as Card } from "./Card";
 export { default as EmptyState } from "./EmptyState";
-export { default as TierBadge } from "./TierBadge";
 export { default as ModeSelectionCard } from "./ModeSelectionCard";
 export { default as LoadingSpinner } from "./LoadingSpinner";
 export { default as Modal } from "./Modal";
 export { default as NotFoundScreen } from "./NotFoundScreen";
 
 export type { SelectOption } from "./Select";
-export type { TierBadgeProps } from "./TierBadge";
 export type { ModeSelectionCardProps } from "./ModeSelectionCard";

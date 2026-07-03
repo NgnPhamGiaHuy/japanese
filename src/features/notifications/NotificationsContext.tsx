@@ -22,7 +22,7 @@
  */
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
 
-import { useAppStore } from "@/store";
+import { useAppStore } from "@/lib/app-store";
 import { subscribeNotifications } from "./notification.service";
 import { groupNotificationsByTime, isUnread } from "./types";
 

@@ -7,12 +7,12 @@
 
 import { CheckCircle2, Gamepad2 } from "lucide-react";
 
-import { DIFFICULTY_CONFIG } from "@/features/game/modes";
-import { GameIntroScreen } from "@/shared/components/game";
+import { DIFFICULTY_CONFIG } from "@/features/flashcard/games/match/config";
+import { GameIntroScreen } from "@/features/game/components";
 import { Button } from "@/shared/components/ui";
 
-import type { TierInfo } from "@/features/game/logic";
-import type { MatchDifficulty } from "@/features/game/modes";
+import type { MatchDifficulty } from "@/features/flashcard/games/match/config";
+import type { TierInfo } from "@/features/game/domain";
 
 interface MatchIntroViewProps {
     bestScore: number;

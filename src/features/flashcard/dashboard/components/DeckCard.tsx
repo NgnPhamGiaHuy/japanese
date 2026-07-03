@@ -5,32 +5,18 @@
  * Displays deck metadata (title, tags, count) and high score badges.
  * Provides entry points to Study, Speed Quiz, and Match game.
  */
-
-/**
- * DeckCard — Individual deck entry on dashboard
- *
- * @remarks
- * Displays deck metadata (title, tags, count) and high score badges.
- * Provides entry points to Study, Speed Quiz, and Match game.
- */
-/**
- * DeckCard — Individual deck entry on dashboard
- *
- * @remarks
- * Displays deck metadata (title, tags, count) and high score badges.
- * Provides entry points to Study, Speed Quiz, and Match game.
- */
 import Link from "next/link";
 
 import { BookOpen, Edit2, Gamepad2, Trash2, Zap } from "lucide-react";
 
-import { buildShareId } from "@/features/flashcard/core/services";
-import { useVisibility, VisibilityLevel } from "@/features/flashcard/core/hooks/useVisibility";
-import { resolveRole, ROLE_CONFIG } from "@/features/flashcard/core/utils/rbac";
-import { Button, TierBadge, UserMeta } from "@/shared/components/ui";
+import { useVisibility, VisibilityLevel } from "@/features/flashcard/hooks/useVisibility";
+import { buildShareId } from "@/features/flashcard/services";
+import { resolveRole, ROLE_CONFIG } from "@/features/flashcard/utils/rbac";
+import { TierBadge } from "@/features/game/components";
+import { useAppStore } from "@/lib/app-store";
+import { Button, UserMeta } from "@/shared/components/ui";
 import { CARD_BASE, SPACING } from "@/shared/constants";
 import { hexToThemeColor } from "@/shared/utils";
-import { useAppStore } from "@/store";
 
 import type { DeckCardProps } from "../types";
 

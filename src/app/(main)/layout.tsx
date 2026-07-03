@@ -1,4 +1,4 @@
-import { BottomNav } from "@/shared/components/layout";
+import { BottomNav } from "./_components/BottomNav";
 
 export default function MainLayout({ children }: { children: React.ReactNode }) {
     return (

@@ -14,9 +14,9 @@ import { useRouter } from "next/navigation";
 
 import { Plus } from "lucide-react";
 
-import ShareModal from "@/features/flashcard/core/components/ShareModal";
-import { useLessons } from "@/features/flashcard/core/hooks";
-import { buildShareId } from "@/features/flashcard/core/services";
+import ShareModal from "@/features/flashcard/components/ShareModal";
+import { useLessons } from "@/features/flashcard/hooks";
+import { buildShareId } from "@/features/flashcard/services";
 import { ScreenHeader } from "@/shared/components/layout";
 import { Button, ConfirmModal, ReorderList } from "@/shared/components/ui";
 import { SPACING } from "@/shared/constants";
@@ -27,7 +27,7 @@ import DashboardTabs from "./DashboardTabs";
 import SortableDeckCard from "./SortableDeckCard";
 import { useDashboardModals, useDashboardState } from "../hooks";
 
-import type { Lesson } from "@/features/flashcard/core/types";
+import type { Lesson } from "@/features/flashcard/types";
 
 const FlashcardDashboard = () => {
     const router = useRouter();

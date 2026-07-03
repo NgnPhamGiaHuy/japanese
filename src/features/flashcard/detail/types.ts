@@ -6,7 +6,7 @@
  * Supports both personal and shared deck scenarios.
  */
 
-import type { FlashCard, Lesson } from "@/features/flashcard/core/types";
+import type { FlashCard, Lesson } from "@/features/flashcard/types";
 
 /** Roles determining capabilities within a collaborative deck */
 export type DeckRole = "owner" | "editor" | "commenter" | "viewer";

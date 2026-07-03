@@ -5,18 +5,18 @@ import { useEffect } from "react";
 import { browserLocalPersistence, onIdTokenChanged, setPersistence } from "firebase/auth";
 
 import { deliverPendingNotifications } from "@/features/notifications/notification.service";
+import { logUserLogin } from "@/features/user/services/auth-logging.service";
+import { useAppStore } from "@/lib/app-store";
 import { auth } from "@/lib/firebase";
 import { clearAuthCookie, setAuthCookie } from "@/shared/utils";
-import { useAppStore } from "@/store";
-import { logUserLogin } from "@/features/user/services/auth-logging.service";
 
 /**
  * Firebase Auth integration hook.
- * 
+ *
  * **Architecture:**
  * - Uses `onIdTokenChanged` for auth state + cookie management
  * - Delegates login logging to server-side deduplication service
- * 
+ *
  * **Why this approach:**
  * 1. `onIdTokenChanged` handles both sign-in AND token refresh
  * 2. Server-side deduplication prevents spam from:
@@ -26,13 +26,13 @@ import { logUserLogin } from "@/features/user/services/auth-logging.service";
  *    - Multiple concurrent requests
  * 3. Firestore transaction ensures atomic check-and-set
  * 4. 30-minute session window balances accuracy vs spam prevention
- * 
+ *
  * **Previous failed approaches:**
  * - Module-level variables → Reset on navigation
  * - sessionStorage → Doesn't survive all edge cases
  * - onAuthStateChanged → Still fires multiple times
  * - Client-side guards → Race conditions, not reliable
- * 
+ *
  * **Current solution:** Server-side session tracking with Firestore transactions
  */
 export function useFirebaseAuth() {

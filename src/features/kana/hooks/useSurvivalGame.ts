@@ -18,8 +18,8 @@
 
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 
+import { comboMultiplier } from "@/features/game/domain";
 import { useGameSession } from "@/features/game/hooks";
-import { comboMultiplier } from "@/features/game/logic";
 import { auth } from "@/lib/firebase";
 import { getValidRomaji, playAudio, playSFX } from "@/shared/utils";
 import { useKanaQuizSession } from "./useKanaQuizSession";

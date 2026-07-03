@@ -8,13 +8,13 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { X } from "lucide-react";
 
+import { SPEED_GAME_CONFIG } from "@/features/flashcard/games/speed/config";
 import { MiniLeaderboard } from "@/features/game/components";
-import { SPEED_GAME_CONFIG } from "@/features/game/modes";
 import { ScreenHeaderBackButton, ScreenHeaderRow } from "@/shared/components/layout";
 import { Button } from "@/shared/components/ui";
 
-import type { FlashCard } from "../../../core/types";
-import type { QuestionType } from "../../../core/utils";
+import type { FlashCard } from "../../../types";
+import type { QuestionType } from "../../../utils";
 
 interface SpeedPlayingViewProps {
     gameMode: string;

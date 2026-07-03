@@ -3,7 +3,7 @@
 import { useMemo } from "react";
 
 import { HIRAGANA_DATA, KATAKANA_DATA } from "@/features/kana/data";
-import { useKanaStore } from "@/store";
+import { useKanaStore } from "@/features/kana/store";
 
 import type { KanaChar } from "../types";
 

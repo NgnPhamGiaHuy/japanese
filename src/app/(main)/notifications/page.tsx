@@ -20,18 +20,18 @@ import {
     logNotificationsCleared,
     logNotificationsReadAll,
 } from "@/features/notifications/actions/activity-log.actions";
-import { useNotifications } from "@/features/notifications/NotificationsContext";
 import {
     deleteAllNotifications,
     deleteNotification,
     markAllNotificationsRead,
     markNotificationRead,
 } from "@/features/notifications/notification.service";
+import { useNotifications } from "@/features/notifications/NotificationsContext";
 import { isUnread } from "@/features/notifications/types";
+import { useAppStore } from "@/lib/app-store";
 import { auth } from "@/lib/firebase";
 import { ScreenHeader } from "@/shared/components/layout";
 import { Button } from "@/shared/components/ui";
-import { useAppStore } from "@/store";
 
 import type {
     AppNotification,

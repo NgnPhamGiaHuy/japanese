@@ -4,31 +4,31 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useMemo, useState } from "react";
 
 import {
+    logStudyProgressReset,
+    logStudySessionCompleted,
+} from "@/features/flashcard/actions/activity-log.actions";
+import FlashcardLearn from "@/features/flashcard/components/FlashcardLearn";
+import FlashcardMistakeReview from "@/features/flashcard/components/FlashcardMistakeReview";
+import FlashcardPractice from "@/features/flashcard/components/FlashcardPractice";
+import { useCardsWithProgress } from "@/features/flashcard/hooks/useCardsWithProgress";
+import {
+    gradeCardForUser,
+    resetLessonProgressForUser,
+} from "@/features/flashcard/services/progress.service";
+import {
     buildSession,
     getDeckStatus,
     getMistakeCards,
     recommendedAction,
-} from "@/features/flashcard/core/utils/learningEngine";
-import FlashcardLearn from "@/features/flashcard/core/components/FlashcardLearn";
-import FlashcardMistakeReview from "@/features/flashcard/core/components/FlashcardMistakeReview";
-import FlashcardPractice from "@/features/flashcard/core/components/FlashcardPractice";
-import { useCardsWithProgress } from "@/features/flashcard/core/hooks/useCardsWithProgress";
-import {
-    gradeCardForUser,
-    resetLessonProgressForUser,
-} from "@/features/flashcard/core/services/progress.service";
-import {
-    logStudyProgressReset,
-    logStudySessionCompleted,
-} from "@/features/flashcard/core/actions/activity-log.actions";
+} from "@/features/flashcard/utils/learningEngine";
 import { useUserProgress } from "@/features/user/hooks";
+import { useAppStore } from "@/lib/app-store";
 import { ConfirmModal } from "@/shared/components/ui";
-import { useAppStore } from "@/store";
 import StudyModeSelector from "./StudyModeSelector";
 
-import type { FlashcardData } from "@/features/flashcard/core/loaders";
-import type { StudyMode, StudyStats } from "@/features/flashcard/core/types";
 import type { CardWithProgress, Grade } from "@/features/flashcard/domain";
+import type { FlashcardData } from "@/features/flashcard/loaders";
+import type { StudyMode, StudyStats } from "@/features/flashcard/types";
 
 interface StudySessionProps {
     data: FlashcardData;

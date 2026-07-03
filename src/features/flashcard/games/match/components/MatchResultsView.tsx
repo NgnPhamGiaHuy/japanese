@@ -7,9 +7,9 @@
 
 import { Trophy } from "lucide-react";
 
-import { GameResultsScreen } from "@/shared/components/game";
+import { GameResultsScreen } from "@/features/game/components";
 
-import type { TierInfo } from "@/features/game/logic";
+import type { TierInfo } from "@/features/game/domain";
 
 interface MatchResultsViewProps {
     score: number;

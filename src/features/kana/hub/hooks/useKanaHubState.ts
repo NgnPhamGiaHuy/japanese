@@ -9,7 +9,7 @@ import { useState } from "react";
 
 import { useKanaDataset } from "@/features/kana/hooks";
 import { useBestScores, useUserProgress } from "@/features/user/hooks";
-import { useAppStore } from "@/store";
+import { useAppStore } from "@/lib/app-store";
 
 export function useKanaHubState() {
     const { dataset, alphabet, setAlphabet } = useKanaDataset();

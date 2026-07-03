@@ -10,7 +10,7 @@
 
 import { MessageCircle } from "lucide-react";
 
-import { useCommentCount } from "@/features/flashcard/core/hooks";
+import { useCommentCount } from "@/features/flashcard/hooks";
 
 import type { CardCommentBadgeProps } from "../types";
 

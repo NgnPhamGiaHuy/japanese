@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 
-import { useAppStore } from "@/store";
+import { useAppStore } from "@/lib/app-store";
 import { subscribeUserProgress, updateUserProgress } from "../services";
 import { INITIAL_USER_DATA } from "../types";
 

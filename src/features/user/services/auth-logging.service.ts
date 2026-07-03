@@ -16,13 +16,10 @@ interface LoginMetadata {
 
 /**
  * Server-side logout logging.
- * 
+ *
  * Logs user logout and clears the session tracking.
  */
-export async function logUserLogout(
-    idToken: string,
-    uid: string,
-): Promise<{ logged: boolean }> {
+export async function logUserLogout(idToken: string, uid: string): Promise<{ logged: boolean }> {
     try {
         // Verify token
         const decoded = await adminAuth.verifyIdToken(idToken);
@@ -31,10 +28,8 @@ export async function logUserLogout(
         }
 
         // Clear session
-        const sessionRef = adminDb
-            .collection(LOGIN_SESSION_COLLECTION)
-            .doc(uid);
-        
+        const sessionRef = adminDb.collection(LOGIN_SESSION_COLLECTION).doc(uid);
+
         await sessionRef.delete();
 
         // Log logout
@@ -59,25 +54,25 @@ export async function logUserLogout(
 
 /**
  * Server-side login logging with deduplication.
- * 
+ *
  * **Problem:** Firebase auth listeners fire on:
  * - Initial sign-in ✓ (should log)
  * - Token refresh (~every 1 hour) ✗ (should NOT log)
  * - React Strict Mode remounts ✗ (should NOT log)
  * - Navigation/page refresh ✗ (should NOT log)
  * - Multiple tabs ✓ (each tab = separate session, should log)
- * 
+ *
  * **Solution:** Server-side session tracking with Firestore transactions
  * - Tracks last login timestamp per user in Firestore
  * - Uses transaction to prevent race conditions
  * - Only logs if >30 minutes since last login
  * - Atomic check-and-set prevents duplicates even with concurrent requests
- * 
+ *
  * **Why server-side?**
  * - Client-side guards (module vars, sessionStorage) fail on navigation/remounts
  * - Server-side is the single source of truth
  * - Firestore transactions guarantee atomicity
- * 
+ *
  * @param idToken - Firebase ID token for authentication
  * @param metadata - User metadata for logging
  * @returns Promise with logged status
@@ -93,9 +88,7 @@ export async function logUserLogin(
             return { logged: false };
         }
 
-        const sessionRef = adminDb
-            .collection(LOGIN_SESSION_COLLECTION)
-            .doc(metadata.uid);
+        const sessionRef = adminDb.collection(LOGIN_SESSION_COLLECTION).doc(metadata.uid);
 
         // Use transaction to prevent race conditions
         const result = await adminDb.runTransaction(async (transaction) => {

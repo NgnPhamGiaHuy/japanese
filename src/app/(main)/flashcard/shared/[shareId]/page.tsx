@@ -11,15 +11,15 @@ import { use, useState } from "react";
 
 import { RefreshCw } from "lucide-react";
 
-import ShareModal from "@/features/flashcard/core/components/ShareModal";
-import { useLessons, useSharedLesson } from "@/features/flashcard/core/hooks";
+import ShareModal from "@/features/flashcard/components/ShareModal";
 import { FlashcardDetailLayout } from "@/features/flashcard/detail";
+import { useLessons, useSharedLesson } from "@/features/flashcard/hooks";
+import { useAppStore } from "@/lib/app-store";
 import { Button } from "@/shared/components/ui";
 import { useAlert } from "@/shared/providers";
-import { useAppStore } from "@/store";
 
-import type { FlashCard } from "@/features/flashcard/core/types";
 import type { DeckContext } from "@/features/flashcard/detail";
+import type { FlashCard } from "@/features/flashcard/types";
 
 /**
  * Shared Deck View
@@ -109,8 +109,8 @@ export default function SharedLessonPage({ params }: { params: Promise<{ shareId
     ) as import("@/features/flashcard/detail").DeckRole;
 
     const ctx: DeckContext = {
-        lesson: lesson as unknown as import("@/features/flashcard/core/types").Lesson,
-        cards: cards as import("@/features/flashcard/core/types").FlashCard[],
+        lesson: lesson as unknown as import("@/features/flashcard/types").Lesson,
+        cards: cards as import("@/features/flashcard/types").FlashCard[],
         ownerId: meta.sourceUserId,
         lessonId: meta.sourceLessonId,
         role,
@@ -146,7 +146,7 @@ export default function SharedLessonPage({ params }: { params: Promise<{ shareId
                 nextReviewAt: 0,
             }));
             await saveFullLesson(
-                cleanLesson as unknown as import("@/features/flashcard/core/types").Lesson,
+                cleanLesson as unknown as import("@/features/flashcard/types").Lesson,
                 cleanCards,
                 true,
             );

@@ -22,23 +22,23 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 
 import { generateMatchDistractors } from "@/features/ai/services/gemini.service";
-import { useGameSession } from "@/features/game/hooks";
 import {
     calcMatchPoints,
     calcTimeBonus,
     comboLabel,
     DIFFICULTY_CONFIG,
     WRONG_PENALTY,
-} from "@/features/game/modes";
+} from "@/features/flashcard/games/match/config";
+import { useGameSession } from "@/features/game/hooks";
 import { recordGameResult } from "@/features/game/services";
 import { allowAudio, playAudio, playSFX, shuffleArray } from "@/shared/utils";
-import { gradeCard } from "../../../core/services/card.service";
-import { getAudioText } from "../../../core/utils/displayEngine";
-import { useMatchGameStore } from "../../../core/hooks";
+import { useMatchGameStore } from "../../../hooks";
+import { gradeCard } from "../../../services/card.service";
+import { getAudioText } from "../../../utils/displayEngine";
 
-import type { MatchDifficulty } from "@/features/game/modes";
-import type { MatchItem } from "../../../core/hooks";
-import type { FlashCard } from "../../../core/types";
+import type { MatchDifficulty } from "@/features/flashcard/games/match/config";
+import type { MatchItem } from "../../../hooks";
+import type { FlashCard } from "../../../types";
 
 type MatchPhase = "intro" | "playing" | "results";
 

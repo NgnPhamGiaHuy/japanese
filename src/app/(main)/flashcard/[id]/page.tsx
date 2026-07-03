@@ -9,13 +9,13 @@
 import { useRouter } from "next/navigation";
 import { use, useState } from "react";
 
-import ShareModal from "@/features/flashcard/core/components/ShareModal";
-import { useCards, useLessons } from "@/features/flashcard/core/hooks";
-import { buildShareId } from "@/features/flashcard/core/services";
+import ShareModal from "@/features/flashcard/components/ShareModal";
 import { FlashcardDetailLayout } from "@/features/flashcard/detail";
+import { useCards, useLessons } from "@/features/flashcard/hooks";
+import { buildShareId } from "@/features/flashcard/services";
+import { useAppStore } from "@/lib/app-store";
 import { Button } from "@/shared/components/ui";
 import { useAlert } from "@/shared/providers";
-import { useAppStore } from "@/store";
 
 import type { DeckContext } from "@/features/flashcard/detail";
 

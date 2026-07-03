@@ -11,7 +11,7 @@
  */
 import { useEffect } from "react";
 
-import { useAppStore } from "@/store";
+import { useAppStore } from "@/lib/app-store";
 
 export function FontSyncer() {
     const useHandwriting = useAppStore((s) => s.useHandwriting);

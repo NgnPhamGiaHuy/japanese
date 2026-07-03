@@ -8,8 +8,8 @@
 
 import { useRouter } from "next/navigation";
 
-import LessonBuilder from "@/features/flashcard/core/components/LessonBuilder";
-import { useLessons } from "@/features/flashcard/core/hooks/useLessons";
+import LessonBuilder from "@/features/flashcard/components/LessonBuilder";
+import { useLessons } from "@/features/flashcard/hooks/useLessons";
 
 /**
  * Flashcard Creation View

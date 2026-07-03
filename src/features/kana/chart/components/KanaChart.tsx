@@ -13,10 +13,10 @@ import { useState } from "react";
 import { Eye, EyeOff } from "lucide-react";
 
 import { useKanaDataset } from "@/features/kana/hooks";
+import { useKanaStore } from "@/features/kana/store";
 import { useUserProgress } from "@/features/user/hooks";
 import { ScreenHeader } from "@/shared/components/layout";
 import { Button } from "@/shared/components/ui";
-import { useKanaStore } from "@/store";
 import { ChartBlockGrid } from "./ChartBlockGrid";
 import { ChartSection } from "./ChartSection";
 import { useChartData } from "../hooks";

@@ -23,11 +23,11 @@
 
 import { useCallback, useMemo } from "react";
 
-import { SpeedModeStrategy } from "@/features/game/engine/strategies/SpeedModeStrategy";
-import { useGameEngine } from "@/features/game/hooks";
-import { SPEED_GAME_CONFIG, timerColor } from "@/features/game/modes";
+import { SPEED_GAME_CONFIG, timerColor } from "@/features/flashcard/games/speed/config";
+import { useGameEngine } from "./useGameEngine";
+import { SpeedModeStrategy } from "../engine/strategies/SpeedModeStrategy";
 
-import type { FlashCard } from "../../../core/types";
+import type { FlashCard } from "../../../types";
 
 type SpeedPhase = "intro" | "playing" | "results";
 type AnswerStatus = "idle" | "correct" | "wrong";

@@ -12,17 +12,17 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useRef } from "react";
 
-import { logSpeedGameCompleted } from "@/features/flashcard/core/actions/activity-log.actions";
-import { useFlashcardGameBestScore } from "@/features/flashcard/core/hooks/useFlashcardGameBestScore";
-import { scoreToTier, TIER_INFO } from "@/features/game/logic";
+import { logSpeedGameCompleted } from "@/features/flashcard/actions/activity-log.actions";
+import { useFlashcardGameBestScore } from "@/features/flashcard/hooks/useFlashcardGameBestScore";
+import { scoreToTier, TIER_INFO } from "@/features/game/domain";
 import { useUserProgress } from "@/features/user/hooks";
-import { useAppStore } from "@/store";
+import { useAppStore } from "@/lib/app-store";
 import SpeedIntro from "./SpeedIntro";
 import SpeedPlaying from "./SpeedPlaying";
 import SpeedResults from "./SpeedResults";
 import { useSpeedModeSession } from "../hooks";
 
-import type { FlashcardData } from "@/features/flashcard/core/loaders";
+import type { FlashcardData } from "@/features/flashcard/loaders";
 
 interface SpeedGameProps {
     data: FlashcardData;

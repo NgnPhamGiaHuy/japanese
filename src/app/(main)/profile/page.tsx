@@ -3,17 +3,18 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+
 import { motion } from "framer-motion";
-import { BookOpen, Flame, LogOut, Settings, Trophy, ChevronRight, Zap } from "lucide-react";
+import { BookOpen, ChevronRight, Flame, LogOut, Settings, Trophy, Zap } from "lucide-react";
 
 import { useAdminRole } from "@/features/admin/context/AdminContext";
-import { useLessons } from "@/features/flashcard/core/hooks";
+import { useLessons } from "@/features/flashcard/hooks";
 import { useUserProgress } from "@/features/user/hooks";
 import { signOut } from "@/features/user/services";
+import { useAppStore } from "@/lib/app-store";
 import { SCREEN_HEADER_BACK_BUTTON_CLASS, ScreenHeader } from "@/shared/components/layout";
 import { Badge, Button, Card, StatCard } from "@/shared/components/ui";
 import { SPACING } from "@/shared/constants";
-import { useAppStore } from "@/store";
 
 export default function ProfilePage() {
     const { userData } = useUserProgress();
@@ -203,7 +204,15 @@ export default function ProfilePage() {
     );
 }
 
-function ActivityRow({ label, value, sub }: { label: string; value: string | number; sub: string }) {
+function ActivityRow({
+    label,
+    value,
+    sub,
+}: {
+    label: string;
+    value: string | number;
+    sub: string;
+}) {
     return (
         <div className="flex items-center justify-between px-6 py-6 transition-colors hover:bg-gray-50/50">
             <div className="min-w-0 flex-1 pr-6">
@@ -212,7 +221,7 @@ function ActivityRow({ label, value, sub }: { label: string; value: string | num
             </div>
             <div className="flex items-center gap-3">
                 <div className="text-xl font-black text-[#1cb0f6]">{value}</div>
-                <ChevronRight size={20} className="shrink-0 opacity-20 text-[#3c3c3c]" />
+                <ChevronRight size={20} className="shrink-0 text-[#3c3c3c] opacity-20" />
             </div>
         </div>
     );

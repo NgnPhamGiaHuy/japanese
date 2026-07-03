@@ -6,12 +6,12 @@ import { useEffect, useRef } from "react";
 import { Clock, Flame, Sword, Trophy, X } from "lucide-react";
 
 import {
-    AnswerFeedback,
     GameStreakScoreStack,
     Leaderboard,
     LivesDisplay,
     MiniLeaderboard,
 } from "@/features/game/components";
+import { AnswerFeedback } from "@/features/kana/components";
 import {
     TIME_ATTACK_MAX_STREAK_BONUS_SEC,
     TIME_ATTACK_WRONG_PENALTY_SEC,
@@ -19,10 +19,10 @@ import {
     useSurvivalGame,
 } from "@/features/kana/hooks";
 import { useBestScores } from "@/features/user/hooks";
+import { useAppStore } from "@/lib/app-store";
 import { ScreenHeader, ScreenHeaderBackButton, ScreenHeaderRow } from "@/shared/components/layout";
 import { Button } from "@/shared/components/ui";
 import { formatTime } from "@/shared/utils";
-import { useAppStore } from "@/store";
 
 const KanaSurvivalPage = () => {
     const { dataset, alphabet } = useKanaDataset();

@@ -1,7 +1,7 @@
 import { usePathname } from "next/navigation";
 import { useEffect, useRef } from "react";
 
-import { useAppStore } from "@/store";
+import { useAppStore } from "@/lib/app-store";
 import { updateLastSeen } from "../services/user.service";
 
 const THROTTLE_MS = 5 * 60 * 1000; // 5 minutes

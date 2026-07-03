@@ -7,10 +7,10 @@
 
 import { Zap } from "lucide-react";
 
-import { SPEED_GAME_CONFIG } from "@/features/game/modes";
-import { GameIntroScreen } from "@/shared/components/game";
+import { SPEED_GAME_CONFIG } from "@/features/flashcard/games/speed/config";
+import { GameIntroScreen } from "@/features/game/components";
 
-import type { TierInfo } from "@/features/game/logic";
+import type { TierInfo } from "@/features/game/domain";
 
 interface SpeedIntroViewProps {
     bestScore: number;

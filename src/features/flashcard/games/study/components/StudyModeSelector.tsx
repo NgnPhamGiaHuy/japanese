@@ -15,8 +15,8 @@ import { AlertCircle, BookOpen, RefreshCw, RotateCcw } from "lucide-react";
 import { Button, ConfirmModal } from "@/shared/components/ui";
 import ModeButton from "./ModeButton";
 
-import type { Lesson, StudyMode } from "@/features/flashcard/core/types";
-import type { DeckAction, DeckStatus } from "@/features/flashcard/core/utils";
+import type { Lesson, StudyMode } from "@/features/flashcard/types";
+import type { DeckAction, DeckStatus } from "@/features/flashcard/utils";
 
 interface StudyModeSelectorProps {
     lesson: Lesson;

@@ -2,7 +2,7 @@
  * Type definitions for Flashcard Dashboard feature
  */
 
-import type { Lesson } from "@/features/flashcard/core/types";
+import type { Lesson } from "@/features/flashcard/types";
 import type { GameStatEntry } from "@/features/game/services";
 
 export interface DashboardTab {

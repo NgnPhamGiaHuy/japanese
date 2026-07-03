@@ -10,7 +10,7 @@ import { Clock, X } from "lucide-react";
 import { LivesDisplay, MiniLeaderboard } from "@/features/game/components";
 import { ScreenHeaderBackButton, ScreenHeaderRow } from "@/shared/components/layout";
 import MatchGrid from "./MatchGrid";
-import { useMatchGameStore } from "../../../core/hooks/useMatchGameStore";
+import { useMatchGameStore } from "../../../hooks/useMatchGameStore";
 
 interface MatchPlayingViewProps {
     gameMode: string;

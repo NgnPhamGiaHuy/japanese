@@ -9,7 +9,7 @@
 "use client";
 
 import { useKanaDataset, useKanaQuizSession } from "@/features/kana/hooks";
-import { useAppStore } from "@/store";
+import { useAppStore } from "@/lib/app-store";
 import { QuizPlaying } from "./QuizPlaying";
 import { QuizResults } from "./QuizResults";
 import { QuizSetup } from "./QuizSetup";
