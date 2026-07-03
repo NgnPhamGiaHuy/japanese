@@ -1,5 +1,7 @@
 "use client";
 
+import { useState } from "react";
+
 import type { AdminUser } from "../../types";
 
 interface UserCellProps {
@@ -16,14 +18,19 @@ const UserCell = ({ user }: UserCellProps) => {
     const lastSeen = user.lastSeenAt ? new Date(user.lastSeenAt).getTime() : 0;
     const isOnline = Date.now() - lastSeen < 5 * 60 * 1000;
 
+    // Fall back to the initials avatar when a remote photoURL is broken/expired,
+    // instead of rendering a broken-image icon.
+    const [imgFailed, setImgFailed] = useState(false);
+
     return (
         <div className="flex items-center gap-4 pl-4 text-left">
             <div className="relative flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-gray-100 ring-2 ring-white transition-transform hover:scale-105">
-                {user.photoURL ? (
+                {user.photoURL && !imgFailed ? (
                     <img
                         src={user.photoURL}
                         alt={user.displayName ?? "User Avatar"}
                         className="h-full w-full object-cover"
+                        onError={() => setImgFailed(true)}
                     />
                 ) : (
                     <span className="text-sm font-black text-gray-400">
