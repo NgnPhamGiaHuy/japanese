@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-import { Box, Database, Filter, Layers, Trash2 } from "lucide-react";
+import { Database, Filter } from "lucide-react";
 
 import { Button, LoadingSpinner } from "@/shared/components/ui";
 import { ContentOverviewStats } from "./ContentOverviewStats";
@@ -15,7 +15,6 @@ import {
     AdminPageHeader,
     AdminPageLayout,
     AdminSearchInput,
-    AdminStatCard,
 } from "../shared";
 import { useGlobalContent } from "../../hooks";
 

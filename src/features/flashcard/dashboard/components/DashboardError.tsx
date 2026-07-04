@@ -12,12 +12,12 @@ interface DashboardErrorProps {
 
 const DashboardError = ({ error }: DashboardErrorProps) => {
     return (
-        <div className="mb-6 flex items-center justify-between rounded-2xl border-2 border-[#ea2b2b]/30 bg-[#ffdfe0] px-5 py-4">
-            <p className="text-sm font-bold text-[#ea2b2b]">{error}</p>
+        <div className="mb-6 flex items-center justify-between rounded-2xl border-2 border-danger/30 bg-danger-bg px-5 py-4">
+            <p className="text-sm font-bold text-danger">{error}</p>
             <Button
                 variant="ghost"
                 onClick={() => window.location.reload()}
-                className="!ml-4 !flex !items-center !gap-1 !text-xs !font-black !text-[#ea2b2b] shadow-none hover:underline hover:shadow-none active:translate-y-0"
+                className="!ml-4 !flex !items-center !gap-1 !text-xs !font-black !text-danger shadow-none hover:underline hover:shadow-none active:translate-y-0"
                 icon={RefreshCw}
                 iconSize={14}
             >

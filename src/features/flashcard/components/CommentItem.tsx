@@ -54,7 +54,7 @@ const renderMarkdown = (raw: string): string => {
         )
         .replace(
             /(https?:\/\/[^\s<]+)/g,
-            '<a href="$1" target="_blank" rel="noopener noreferrer" class="text-[#1cb0f6] underline">$1</a>',
+            '<a href="$1" target="_blank" rel="noopener noreferrer" class="text-katakana underline">$1</a>',
         )
         .replace(/\n/g, "<br>");
 };
@@ -137,7 +137,7 @@ const CommentItem = ({
                 <div className="min-w-0 flex-1">
                     {/* Header row */}
                     <div className="mb-1 flex flex-wrap items-baseline gap-x-1.5 gap-y-0.5">
-                        <span className="text-[13px] font-black text-[#3c3c3c]">{displayName}</span>
+                        <span className="text-[13px] font-black text-text">{displayName}</span>
                         {authorRole && (
                             <span
                                 className={`rounded-full px-1.5 py-px text-xs font-black capitalize ${ROLE_COLORS[authorRole] ?? ROLE_COLORS.viewer}`}
@@ -171,7 +171,7 @@ const CommentItem = ({
                         </div>
                     ) : (
                         <p
-                            className="mb-1.5 text-[13px] leading-relaxed text-[#3c3c3c]"
+                            className="mb-1.5 text-[13px] leading-relaxed text-text"
                             dangerouslySetInnerHTML={{ __html: renderMarkdown(comment.content) }}
                         />
                     )}

@@ -85,14 +85,14 @@ const AdminOverviewPage = () => {
                     label="Active Today"
                     value={stats.activeUsersToday}
                     icon={Activity}
-                    color="text-[#58cc02]"
+                    color="text-hiragana"
                 />
                 <AdminStatCard label="Flashcards" value={stats.totalFlashcards} icon={Database} />
                 <AdminStatCard
                     label="Total Sessions"
                     value={stats.totalSessions}
                     icon={BookOpen}
-                    color="text-[#ce82ff]"
+                    color="text-both"
                 />
             </div>
 
@@ -104,7 +104,7 @@ const AdminOverviewPage = () => {
                     actions={
                         <Link
                             href="/admin/reports"
-                            className="text-xs font-black tracking-widest text-[#1cb0f6] uppercase hover:underline"
+                            className="text-xs font-black tracking-widest text-katakana uppercase hover:underline"
                         >
                             Full Audit Trail
                         </Link>

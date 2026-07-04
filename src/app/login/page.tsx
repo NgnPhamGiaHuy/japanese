@@ -65,15 +65,15 @@ export default function LoginPage() {
     };
 
     return (
-        <div className="fixed inset-0 flex flex-col items-center justify-center bg-[#F7F7F8] px-6">
+        <div className="fixed inset-0 flex flex-col items-center justify-center bg-bg px-6">
             {/* Logo mark */}
             <div className="animate-in fade-in slide-in-from-bottom-4 mb-10 flex flex-col items-center gap-4 duration-500">
-                <div className="flex h-24 w-24 -rotate-6 items-center justify-center rounded-[2.5rem] border-b-8 border-[#1899d6] bg-gradient-to-br from-[#1cb0f6] to-[#ce82ff] text-5xl font-medium text-white shadow-sm">
+                <div className="rounded-5xl flex h-24 w-24 -rotate-6 items-center justify-center border-b-8 border-katakana-strong bg-gradient-to-br from-katakana to-both text-5xl font-medium text-white shadow-sm">
                     あ
                 </div>
                 <div className="text-center">
-                    <h1 className="text-3xl font-black text-[#3c3c3c]">Kana Master</h1>
-                    <p className="mt-1 text-base font-bold text-[#afafaf]">
+                    <h1 className="text-3xl font-black text-text">Kana Master</h1>
+                    <p className="mt-1 text-base font-bold text-muted">
                         Learn Japanese with confidence
                     </p>
                 </div>
@@ -85,17 +85,17 @@ export default function LoginPage() {
                     onClick={handleGoogleSignIn}
                     loading={loading}
                     variant="secondary"
-                    className="w-full !py-4 !text-[#3c3c3c] !shadow-sm transition-all duration-200"
+                    className="w-full !py-4 !text-text !shadow-sm transition-all duration-200"
                 >
                     {!loading && <GoogleIcon />}
                     {loading ? "Signing in…" : "Continue with Google"}
                 </Button>
 
                 {error && (
-                    <p className="mt-4 text-center text-sm font-bold text-[#ea2b2b]">{error}</p>
+                    <p className="mt-4 text-center text-sm font-bold text-danger">{error}</p>
                 )}
 
-                <p className="mt-6 text-center text-xs font-bold text-[#afafaf]">
+                <p className="mt-6 text-center text-xs font-bold text-muted">
                     Your progress is saved to your Google account
                 </p>
             </div>

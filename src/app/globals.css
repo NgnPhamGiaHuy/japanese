@@ -19,6 +19,24 @@
     --color-teal: #00d1e0;
     --color-pink: #ff66bb;
 
+    /* Per-hue border/hover companion shades (hand-picked, not a uniform
+       darken — color-mix() can't reproduce them, so they're literal). */
+    --color-hiragana-strong: #58a700;
+    --color-hiragana-hover: #46a302;
+    --color-katakana-strong: #1899d6;
+    --color-katakana-hover: #149fdf;
+    --color-both-strong: #b65ce8;
+    --color-survival-strong: #cc7800;
+    --color-survival-hover: #e68700;
+    --color-danger-strong: #b82222;
+    --color-danger-hover: #d92626;
+    --color-muted-strong: #8f8f8f;
+    --color-muted-hover: #9f9f9f;
+    --color-teal-strong: #00a8b5;
+    --color-teal-hover: #00b8ca;
+    --color-pink-strong: #e056a4;
+    --color-pink-hover: #ff88cc;
+
     --radius-5xl: 2.5rem;
     --radius-6xl: 3rem;
 

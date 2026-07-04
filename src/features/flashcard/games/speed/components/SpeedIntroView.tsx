@@ -25,8 +25,8 @@ const SpeedIntroView = ({ bestScore, tierInfo, onBack, onStart }: SpeedIntroView
             title="Speed Mode"
             description={`${SPEED_GAME_CONFIG.TOTAL_QUESTIONS} questions · answer fast for bonus points`}
             icon={Zap}
-            iconBg="bg-[#ff9600]"
-            iconBorder="#cc7800"
+            iconBg="bg-survival"
+            iconBorder="var(--color-survival-strong)"
             bestScore={bestScore}
             tierInfo={tierInfo}
             startButtonText="Start"
@@ -35,7 +35,7 @@ const SpeedIntroView = ({ bestScore, tierInfo, onBack, onStart }: SpeedIntroView
             onStart={onStart}
         >
             <div className="mb-8 w-full max-w-sm rounded-2xl border-2 border-gray-200 bg-white p-4">
-                <p className="mb-3 text-xs font-black tracking-widest text-[#afafaf] uppercase">
+                <p className="mb-3 text-xs font-black tracking-widest text-muted uppercase">
                     Difficulty Escalation
                 </p>
                 {([1, 2, 3] as const).map((level) => {
@@ -51,15 +51,15 @@ const SpeedIntroView = ({ bestScore, tierInfo, onBack, onStart }: SpeedIntroView
                                     className="h-2.5 w-2.5 rounded-full"
                                     style={{ backgroundColor: config.color }}
                                 />
-                                <span className="text-sm font-bold text-[#3c3c3c]">
+                                <span className="text-sm font-bold text-text">
                                     {config.label}
                                 </span>
-                                <span className="text-xs text-[#afafaf]">{range}</span>
+                                <span className="text-xs text-muted">{range}</span>
                             </div>
-                            <div className="flex items-center gap-3 text-xs font-bold text-[#afafaf]">
+                            <div className="flex items-center gap-3 text-xs font-bold text-muted">
                                 <span>{config.timeLimit}s per Q</span>
                                 {!config.showHint && (
-                                    <span className="rounded-lg bg-[#ffdfe0] px-1.5 py-0.5 text-[#ea2b2b]">
+                                    <span className="rounded-lg bg-danger-bg px-1.5 py-0.5 text-danger">
                                         Reduced hints
                                     </span>
                                 )}

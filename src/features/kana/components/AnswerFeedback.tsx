@@ -55,10 +55,10 @@ const AnswerFeedback = ({
                 </div>
             )}
             {status === "wrong" && (
-                <div className="animate-in zoom-in flex h-full w-full items-center justify-center gap-1.5 rounded-xl bg-[#ffdfe0] px-2 text-[#ea2b2b] md:gap-2">
+                <div className="animate-in zoom-in flex h-full w-full items-center justify-center gap-1.5 rounded-xl bg-danger-bg px-2 text-danger md:gap-2">
                     <X size={20} strokeWidth={3} className="shrink-0 md:h-6 md:w-6" />
                     <span className="truncate">Answer:</span>
-                    <span className="ml-1 flex shrink-0 items-center gap-1 rounded-lg bg-[#ea2b2b]/10 px-2 py-0.5 text-xs font-bold text-[#ea2b2b] md:text-sm">
+                    <span className="ml-1 flex shrink-0 items-center gap-1 rounded-lg bg-danger/10 px-2 py-0.5 text-xs font-bold text-danger md:text-sm">
                         <span className="mt-0.5 text-base leading-none font-medium md:text-lg">
                             {question?.char}
                         </span>
@@ -69,11 +69,11 @@ const AnswerFeedback = ({
                         <Button
                             variant="ghost"
                             onClick={onReplayAudio ?? (() => playAudio(question.char))}
-                            className="!ml-1 !shrink-0 !rounded-lg !bg-[#ea2b2b]/10 !p-1.5 text-white shadow-none transition-colors hover:!bg-[#ea2b2b]/20 hover:shadow-none active:translate-y-0"
+                            className="!ml-1 !shrink-0 !rounded-lg !bg-danger/10 !p-1.5 text-white shadow-none transition-colors hover:!bg-danger/20 hover:shadow-none active:translate-y-0"
                             aria-label="Replay audio"
                             icon={Volume2}
                             iconSize={14}
-                            iconClassName="text-[#ea2b2b]"
+                            iconClassName="text-danger"
                         />
                     )}
                 </div>

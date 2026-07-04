@@ -25,7 +25,7 @@ interface ActivityChartProps {
 const ActivityChart = ({ data }: ActivityChartProps) => {
     return (
         <>
-            <h3 className="mb-6 text-sm font-black tracking-[0.2em] text-gray-400 uppercase">
+            <h3 className="mb-6 text-sm font-black tracking-widest text-gray-400 uppercase">
                 Active Trends (DAU vs WAU)
             </h3>
             <div className="h-[280px] w-full">

@@ -87,12 +87,19 @@ const LessonBuilder: React.FC<LessonBuilderProps> = ({
 
     return (
         <div
-            className="fixed inset-0 z-50 flex flex-col overflow-y-auto bg-[#F7F7F8]"
+            className="fixed inset-0 z-50 flex flex-col overflow-y-auto bg-bg"
             style={{ "--theme-color": builder.themeHex } as React.CSSProperties}
         >
             <header className="sticky top-0 z-50 flex items-center justify-between border-b-2 border-gray-200 bg-white px-4 py-3 sm:px-6 sm:py-4">
-                <Button variant="ghost" onClick={onClose} icon={X} disabled={saving} />
-                <h2 className="text-lg font-black text-[#3c3c3c] sm:text-xl">
+                <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={onClose}
+                    icon={X}
+                    disabled={saving}
+                    aria-label="Close"
+                />
+                <h2 className="text-lg font-black text-text sm:text-xl">
                     {editingLesson ? "Edit Deck" : "New Deck"}
                 </h2>
                 <Button

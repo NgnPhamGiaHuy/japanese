@@ -17,6 +17,9 @@ import {
     X,
 } from "lucide-react";
 
+import { Button } from "@/shared/components/ui";
+import { useDialogA11y } from "@/shared/hooks";
+
 const navItems = [
     { label: "Dashboard", href: "/admin", icon: LayoutDashboard },
     { label: "Users", href: "/admin/users", icon: Users },
@@ -28,11 +31,11 @@ const navItems = [
 
 const Logo = () => (
     <div className="flex items-center gap-3">
-        <div className="flex h-10 w-10 -rotate-6 items-center justify-center rounded-xl border-b-4 border-[#1899d6] bg-gradient-to-br from-[#1cb0f6] to-[#ce82ff] text-2xl text-white shadow-sm ring-2 ring-white">
+        <div className="flex h-10 w-10 -rotate-6 items-center justify-center rounded-xl border-b-4 border-katakana-strong bg-gradient-to-br from-katakana to-both text-2xl text-white shadow-sm ring-2 ring-white">
             あ
         </div>
-        <span className="text-lg font-black tracking-tighter text-[#3c3c3c]">
-            ADMIN <span className="text-[#1cb0f6]">PRO</span>
+        <span className="text-lg font-black tracking-tighter text-text">
+            ADMIN <span className="text-katakana">PRO</span>
         </span>
     </div>
 );
@@ -53,23 +56,23 @@ const NavLinks = ({ onNavigate }: { onNavigate?: () => void }) => {
                         className={clsx(
                             "group relative flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-black transition-all",
                             isActive
-                                ? "bg-[#1cb0f6]/10 text-[#1cb0f6]"
-                                : "text-[#afafaf] hover:bg-gray-50 hover:text-[#3c3c3c]",
+                                ? "bg-katakana/10 text-katakana"
+                                : "text-muted hover:bg-gray-50 hover:text-text",
                         )}
                     >
                         <Icon
                             size={20}
                             className={
                                 isActive
-                                    ? "text-[#1cb0f6]"
-                                    : "text-gray-400 group-hover:text-[#3c3c3c]"
+                                    ? "text-katakana"
+                                    : "text-gray-400 group-hover:text-text"
                             }
                         />
                         {item.label}
                         {isActive && (
                             <motion.div
                                 layoutId="active-sidebar"
-                                className="absolute left-[-12px] h-8 w-1.5 rounded-r-full bg-[#1cb0f6]"
+                                className="absolute -left-3 h-8 w-1.5 rounded-r-full bg-katakana"
                                 initial={{ opacity: 0 }}
                                 animate={{ opacity: 1 }}
                                 transition={{ duration: 0.2 }}
@@ -85,10 +88,10 @@ const NavLinks = ({ onNavigate }: { onNavigate?: () => void }) => {
 const Footer = () => (
     <div className="p-4">
         <div className="rounded-2xl border-2 border-dashed border-gray-100 p-4">
-            <p className="text-xs font-black tracking-widest text-[#afafaf] uppercase">
+            <p className="text-xs font-black tracking-widest text-muted uppercase">
                 Superadmin
             </p>
-            <p className="mt-1 truncate text-xs font-bold text-[#3c3c3c]">Console Managed</p>
+            <p className="mt-1 truncate text-xs font-bold text-text">Console Managed</p>
         </div>
     </div>
 );
@@ -101,6 +104,7 @@ const Footer = () => (
  */
 const AdminSidebar = () => {
     const [drawerOpen, setDrawerOpen] = useState(false);
+    const drawerRef = useDialogA11y<HTMLDivElement>(drawerOpen, () => setDrawerOpen(false));
 
     return (
         <>
@@ -116,13 +120,15 @@ const AdminSidebar = () => {
             {/* ── Mobile top bar ── */}
             <header className="fixed top-0 right-0 left-0 z-40 flex h-14 items-center justify-between border-b-2 border-gray-100 bg-white/90 px-4 backdrop-blur-xl lg:hidden">
                 <Logo />
-                <button
+                <Button
+                    variant="ghost"
+                    size="icon-sm"
                     onClick={() => setDrawerOpen(true)}
-                    className="flex h-9 w-9 items-center justify-center rounded-xl text-[#afafaf] transition-colors hover:bg-gray-100 hover:text-[#3c3c3c]"
                     aria-label="Open navigation"
-                >
-                    <Menu size={20} />
-                </button>
+                    className="rounded-xl"
+                    icon={Menu}
+                    iconSize={20}
+                />
             </header>
 
             {/* ── Mobile drawer ── */}
@@ -141,6 +147,10 @@ const AdminSidebar = () => {
                         />
                         {/* Drawer panel */}
                         <motion.div
+                            ref={drawerRef}
+                            role="dialog"
+                            aria-modal="true"
+                            aria-label="Navigation"
                             key="drawer"
                             initial={{ x: "-100%" }}
                             animate={{ x: 0 }}
@@ -150,13 +160,15 @@ const AdminSidebar = () => {
                         >
                             <div className="flex h-14 items-center justify-between px-4">
                                 <Logo />
-                                <button
+                                <Button
+                                    variant="ghost"
+                                    size="icon-sm"
                                     onClick={() => setDrawerOpen(false)}
-                                    className="flex h-9 w-9 items-center justify-center rounded-xl text-[#afafaf] transition-colors hover:bg-gray-100 hover:text-[#3c3c3c]"
                                     aria-label="Close navigation"
-                                >
-                                    <X size={20} />
-                                </button>
+                                    className="rounded-xl"
+                                    icon={X}
+                                    iconSize={20}
+                                />
                             </div>
                             <NavLinks onNavigate={() => setDrawerOpen(false)} />
                             <Footer />

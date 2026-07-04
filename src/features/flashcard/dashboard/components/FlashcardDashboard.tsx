@@ -64,7 +64,7 @@ const FlashcardDashboard = () => {
         lesson.shareId || (lesson.ownerId ? buildShareId(lesson.ownerId, lesson.id) : "");
 
     return (
-        <div className="min-h-[100dvh] bg-[#F7F7F8] pb-28">
+        <div className="min-h-dvh bg-bg pb-28">
             <ScreenHeader
                 title="Flashcards"
                 backHref="/"
@@ -72,10 +72,12 @@ const FlashcardDashboard = () => {
                     <Button
                         variant="primary"
                         color="purple"
+                        size="icon"
                         onClick={() => router.push("/flashcard/create")}
-                        className="-mr-2 !p-2 shadow-none"
+                        className="-mr-2 shadow-none"
                         icon={Plus}
                         iconSize={20}
+                        aria-label="Create deck"
                     />
                 }
             />

@@ -9,7 +9,7 @@ import { comboMultiplier } from "@/features/game/domain";
 import type { ReactNode } from "react";
 
 /** Flat survival orange — no gradient or shadow. */
-const STREAK_PILL = "rounded-xl bg-[#ff9600]";
+const STREAK_PILL = "rounded-xl bg-survival";
 
 export type StreakHudVariant = "compact" | "default";
 
@@ -119,7 +119,7 @@ interface GameStreakScoreStackProps {
 }
 
 const DEFAULT_SCORE_CLASS =
-    "text-2xl font-black tabular-nums leading-none tracking-tight text-[#ff9600] md:text-4xl lg:text-5xl";
+    "text-2xl font-black tabular-nums leading-none tracking-tight text-survival md:text-4xl lg:text-5xl";
 
 /**
  * Top bar right group: [ Timer | Streak | Score ]. Fixed slots; bonus line always reserves height.

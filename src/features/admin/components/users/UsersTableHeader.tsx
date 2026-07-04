@@ -33,12 +33,12 @@ const UsersTableHeader = ({ table }: UsersTableHeaderProps) => {
                             <th
                                 key={header.id}
                                 style={{ width: header.getSize() }}
-                                className="h-12 px-4 text-xs font-black tracking-wider text-[#afafaf] uppercase"
+                                className="h-12 px-4 text-xs font-black tracking-wider text-muted uppercase"
                             >
                                 <button
                                     className={`flex w-full items-center gap-1.5 ${alignment} ${
                                         header.column.getCanSort()
-                                            ? "cursor-pointer hover:text-[#3c3c3c]"
+                                            ? "cursor-pointer hover:text-text"
                                             : ""
                                     }`}
                                     onClick={header.column.getToggleSortingHandler()}
@@ -52,7 +52,7 @@ const UsersTableHeader = ({ table }: UsersTableHeaderProps) => {
                                             size={10}
                                             className={
                                                 header.column.getIsSorted()
-                                                    ? "text-[#1cb0f6]"
+                                                    ? "text-katakana"
                                                     : "opacity-40"
                                             }
                                         />

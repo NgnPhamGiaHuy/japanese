@@ -29,11 +29,11 @@ interface BadgeProps {
 
 const VARIANT_STYLES = {
     default: "bg-gray-100 text-gray-600",
-    primary: "bg-[#ce82ff] text-white",
-    success: "bg-[#58cc02] text-white",
+    primary: "bg-both text-white",
+    success: "bg-hiragana text-white",
     warning: "bg-amber-100 text-amber-600",
-    danger: "bg-[#ffdfe0] text-[#ea2b2b]",
-    info: "bg-[#1cb0f6]/10 text-[#1cb0f6]",
+    danger: "bg-danger-bg text-danger",
+    info: "bg-katakana/10 text-katakana",
 };
 
 const SIZE_STYLES = {

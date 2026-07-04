@@ -34,7 +34,7 @@ export function LearnCard({ char, themeColor, onPlay }: LearnCardProps) {
 
             <div className="mt-10 mb-6 flex min-h-[140px] w-full items-center justify-center md:min-h-[220px]">
                 {isMulti ? (
-                    <span className="text-[5rem] leading-none font-medium text-[#3c3c3c] drop-shadow-sm select-none md:text-[8rem]">
+                    <span className="text-[5rem] leading-none font-medium text-text drop-shadow-sm select-none md:text-9xl">
                         {char.char}
                     </span>
                 ) : (
@@ -48,10 +48,10 @@ export function LearnCard({ char, themeColor, onPlay }: LearnCardProps) {
                 )}
             </div>
             <div className="w-full border-t-2 border-gray-100 pt-4 text-center">
-                <p className="mb-1 text-xs font-bold tracking-[0.2em] text-[#afafaf] uppercase">
+                <p className="mb-1 text-xs font-bold tracking-widest text-muted uppercase">
                     Romaji
                 </p>
-                <p className="text-4xl font-black tracking-wider text-[#3c3c3c] uppercase md:text-6xl">
+                <p className="text-4xl font-black tracking-wider text-text uppercase md:text-6xl">
                     {char.romaji}
                 </p>
             </div>

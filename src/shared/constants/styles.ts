@@ -5,4 +5,4 @@ export const SPACING = {
     cardGap: "gap-4",
 } as const;
 
-export const SECTION_HEADING = "text-xl font-black text-[#3c3c3c]";
+export const SECTION_HEADING = "text-xl font-black text-text";

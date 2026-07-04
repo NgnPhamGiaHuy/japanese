@@ -58,15 +58,15 @@ const ActionCard = ({
     subtitle,
     badge,
     progress,
-    primaryBg = "bg-[#1cb0f6]",
-    primaryBorderB = "border-[#1899d6]",
-    primaryHover = "hover:bg-[#149fdf]",
-    primaryText = "text-[#1cb0f6]",
-    primaryBgLight = "bg-[#1cb0f6]/10",
+    primaryBg = "bg-katakana",
+    primaryBorderB = "border-katakana-strong",
+    primaryHover = "hover:bg-katakana-hover",
+    primaryText = "text-katakana",
+    primaryBgLight = "bg-katakana/10",
     className = "",
 }: ActionCardProps) => {
     const baseClasses =
-        "group flex h-full w-full rounded-3xl p-5 font-extrabold shadow-sm transition-all duration-200 select-none hover:-translate-y-1 hover:shadow-lg active:translate-y-[2px] active:scale-[0.99] md:rounded-4xl md:p-6";
+        "group flex h-full w-full rounded-3xl p-5 font-extrabold shadow-sm transition-all duration-200 select-none hover:-translate-y-1 hover:shadow-lg active:translate-y-[2px] active:scale-[0.99] focus:outline-none focus-visible:ring-2 focus-visible:ring-katakana focus-visible:ring-offset-2 md:rounded-4xl md:p-6";
 
     const variantClasses = primary
         ? `${primaryBg} border-b-4 text-white ${primaryBorderB} ${primaryHover} active:border-b-0`
@@ -91,7 +91,7 @@ const ActionCard = ({
                 className={`flex ${progress ? "flex-1" : ""} flex-col justify-center ${progress ? "text-left" : ""}`}
             >
                 <div
-                    className={`text-xl md:text-2xl ${primary ? "text-white" : "text-[#3c3c3c] group-hover:text-black"}`}
+                    className={`text-xl md:text-2xl ${primary ? "text-white" : "text-text group-hover:text-black"}`}
                     style={primary && !progress ? { color: "white" } : undefined}
                 >
                     {title}

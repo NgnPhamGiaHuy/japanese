@@ -92,8 +92,10 @@ const DrawingCanvas = ({
             />
             <Button
                 variant="ghost"
+                size="icon"
                 onClick={clear}
-                className="absolute right-2 bottom-2 z-20 !rounded-lg border border-gray-100 bg-white !p-2 text-gray-500 shadow-md shadow-none hover:shadow-none active:translate-y-0 md:right-3 md:bottom-3 md:!rounded-xl"
+                aria-label="Clear drawing"
+                className="absolute right-2 bottom-2 z-20 rounded-lg border border-gray-100 bg-white text-gray-500 shadow-md shadow-none hover:shadow-none active:translate-y-0 md:right-3 md:bottom-3 md:rounded-xl"
                 icon={RotateCcw}
                 iconSize={16}
                 iconClassName="md:h-5 md:w-5"

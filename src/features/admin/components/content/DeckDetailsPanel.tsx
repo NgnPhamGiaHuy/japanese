@@ -1,9 +1,12 @@
 "use client";
 
-import { AnimatePresence, motion } from "framer-motion";
-import { Book, Image as ImageIcon, MessageSquare, X } from "lucide-react";
+import { useId } from "react";
 
-import { Badge, Card, LoadingSpinner } from "@/shared/components/ui";
+import { AnimatePresence, motion } from "framer-motion";
+import { Book, X } from "lucide-react";
+
+import { useDialogA11y } from "@/shared/hooks";
+import { Button, LoadingSpinner } from "@/shared/components/ui";
 import { DeckCardItem } from "./DeckCardItem";
 
 interface DeckDetailsPanelProps {
@@ -27,6 +30,9 @@ const DeckDetailsPanel = ({
     cards,
     isLoading,
 }: DeckDetailsPanelProps) => {
+    const titleId = useId();
+    const dialogRef = useDialogA11y<HTMLDivElement>(isOpen, onClose);
+
     return (
         <AnimatePresence>
             {isOpen && (
@@ -42,6 +48,10 @@ const DeckDetailsPanel = ({
 
                     {/* Panel */}
                     <motion.div
+                        ref={dialogRef}
+                        role="dialog"
+                        aria-modal="true"
+                        aria-labelledby={titleId}
                         initial={{ x: "100%" }}
                         animate={{ x: 0 }}
                         exit={{ x: "100%" }}
@@ -52,19 +62,22 @@ const DeckDetailsPanel = ({
                             {/* Header */}
                             <div className="flex items-center justify-between border-b-2 border-gray-50 p-6">
                                 <div>
-                                    <h3 className="text-xl font-black text-[#3c3c3c]">
+                                    <h3 id={titleId} className="text-xl font-black text-text">
                                         {deckTitle}
                                     </h3>
-                                    <p className="text-sm font-bold text-[#afafaf]">
+                                    <p className="text-sm font-bold text-muted">
                                         Global Content Preview
                                     </p>
                                 </div>
-                                <button
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
                                     onClick={onClose}
-                                    className="flex h-10 w-10 items-center justify-center rounded-2xl bg-gray-50 text-[#afafaf] transition-all hover:bg-gray-100 hover:text-[#3c3c3c]"
-                                >
-                                    <X size={20} />
-                                </button>
+                                    aria-label="Close"
+                                    className="bg-gray-50 text-muted hover:bg-gray-100 hover:text-text"
+                                    icon={X}
+                                    iconSize={20}
+                                />
                             </div>
 
                             {/* Content */}
@@ -72,7 +85,7 @@ const DeckDetailsPanel = ({
                                 {isLoading ? (
                                     <div className="flex h-64 flex-col items-center justify-center">
                                         <LoadingSpinner fullScreen={false} />
-                                        <p className="mt-4 text-xs font-black tracking-widest text-[#afafaf] uppercase">
+                                        <p className="mt-4 text-xs font-black tracking-widest text-muted uppercase">
                                             Gathering words...
                                         </p>
                                     </div>
@@ -88,7 +101,7 @@ const DeckDetailsPanel = ({
                                                     size={48}
                                                     className="mx-auto mb-4 text-gray-100"
                                                 />
-                                                <p className="text-sm font-bold text-[#afafaf]">
+                                                <p className="text-sm font-bold text-muted">
                                                     This deck is currently empty.
                                                 </p>
                                             </div>
@@ -99,7 +112,7 @@ const DeckDetailsPanel = ({
 
                             {/* Footer */}
                             <div className="border-t-2 border-gray-50 bg-gray-50/30 p-6">
-                                <div className="flex items-center justify-between text-xs font-black tracking-widest text-[#afafaf] uppercase">
+                                <div className="flex items-center justify-between text-xs font-black tracking-widest text-muted uppercase">
                                     <span>{cards?.length || 0} vocabulary items total</span>
                                     <span>Read-only Administrative View</span>
                                 </div>

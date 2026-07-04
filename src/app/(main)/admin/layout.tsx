@@ -1,10 +1,11 @@
 import { AdminGuard, AdminSidebar } from "@/features/admin/components";
-import AdminProvider from "@/features/admin/context/AdminContext";
 
 /**
  * Layout component for the Admin dashboard section.
  *
- * @remarks Wraps admin routes with authentication guards, sidebar navigation, and global admin context.
+ * @remarks Wraps admin routes with authentication guards and sidebar navigation.
+ * Global admin role context (`AdminProvider`) is mounted once, app-wide, in the
+ * parent `(main)/layout.tsx` — this section only needs the route-level guard.
  * @example
  * <AdminLayout>
  *   <AdminPage />
@@ -13,7 +14,7 @@ import AdminProvider from "@/features/admin/context/AdminContext";
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
     return (
         <AdminGuard>
-            <div className="flex min-h-screen bg-[#F7F7F8]">
+            <div className="flex min-h-screen bg-bg">
                 <AdminSidebar />
                 {/* pt-14 on mobile to clear the fixed top bar; no offset needed on lg */}
                 <main className="flex-1 pt-14 lg:pt-0 lg:pl-64">

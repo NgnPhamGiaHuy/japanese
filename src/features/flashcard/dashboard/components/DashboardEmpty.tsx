@@ -14,11 +14,11 @@ const DashboardEmpty = ({ activeTab }: DashboardEmptyProps) => {
     if (activeTab === "discover") {
         return (
             <div className="py-20 text-center">
-                <div className="mx-auto mb-6 flex h-24 w-24 -rotate-6 items-center justify-center rounded-4xl border-b-8 border-[#46a302] bg-[#58cc02] text-white shadow-sm">
+                <div className="mx-auto mb-6 flex h-24 w-24 -rotate-6 items-center justify-center rounded-4xl border-b-8 border-hiragana-hover bg-hiragana text-white shadow-sm">
                     <Sparkles size={48} strokeWidth={3} />
                 </div>
-                <h2 className="mb-2 text-2xl font-black text-[#3c3c3c]">No public decks yet</h2>
-                <p className="font-bold text-[#afafaf]">
+                <h2 className="mb-2 text-2xl font-black text-text">No public decks yet</h2>
+                <p className="font-bold text-muted">
                     Public decks from other learners will appear here.
                 </p>
             </div>
@@ -27,13 +27,13 @@ const DashboardEmpty = ({ activeTab }: DashboardEmptyProps) => {
 
     return (
         <div className="py-20 text-center">
-            <div className="mx-auto mb-6 flex h-24 w-24 -rotate-6 items-center justify-center rounded-4xl border-b-8 border-[#b65ce8] bg-[#ce82ff] text-white shadow-sm">
+            <div className="mx-auto mb-6 flex h-24 w-24 -rotate-6 items-center justify-center rounded-4xl border-b-8 border-both-strong bg-both text-white shadow-sm">
                 <BookOpen size={48} strokeWidth={3} />
             </div>
-            <h2 className="mb-2 text-2xl font-black text-[#3c3c3c]">
+            <h2 className="mb-2 text-2xl font-black text-text">
                 {activeTab === "personal" ? "No decks yet" : "No shared decks"}
             </h2>
-            <p className="mb-8 font-bold text-[#afafaf]">
+            <p className="mb-8 font-bold text-muted">
                 {activeTab === "personal"
                     ? "Create your first vocabulary deck to get started!"
                     : "Shared decks from other students will appear here."}

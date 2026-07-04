@@ -33,13 +33,13 @@ const NotFoundScreen = ({
     onBack,
 }: NotFoundScreenProps) => {
     return (
-        <div className="fixed inset-0 flex flex-col items-center justify-center bg-[#F7F7F8] p-6 text-center">
-            <h1 className="mb-4 text-2xl font-black text-[#3c3c3c]">{title}</h1>
-            {description && <p className="mb-6 font-bold text-[#afafaf]">{description}</p>}
+        <div className="fixed inset-0 flex flex-col items-center justify-center bg-bg p-6 text-center">
+            <h1 className="mb-4 text-2xl font-black text-text">{title}</h1>
+            {description && <p className="mb-6 font-bold text-muted">{description}</p>}
             <Button
                 variant="ghost"
                 onClick={onBack}
-                className="font-bold! text-[#1cb0f6]! shadow-none hover:shadow-none active:translate-y-0"
+                className="font-bold! text-katakana! shadow-none hover:shadow-none active:translate-y-0"
             >
                 {buttonText}
             </Button>

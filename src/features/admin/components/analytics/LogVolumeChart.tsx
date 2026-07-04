@@ -121,13 +121,13 @@ const LogVolumeChart = ({ data, onClick }: LogVolumeChartProps) => {
                     <button
                         key={type}
                         onClick={() => onClick?.(type)}
-                        className={`flex items-center gap-1.5 ${onClick ? "cursor-pointer transition-opacity hover:opacity-70" : "cursor-default"}`}
+                        className={`flex items-center gap-1.5 rounded-md focus:outline-none focus-visible:ring-2 focus-visible:ring-katakana focus-visible:ring-offset-2 ${onClick ? "cursor-pointer transition-opacity hover:opacity-70" : "cursor-default"}`}
                     >
                         <div
                             className="h-2 w-2 rounded-full"
                             style={{ backgroundColor: TYPE_COLORS[type] }}
                         />
-                        <span className="text-xs font-black tracking-tighter text-[#3c3c3c] uppercase">
+                        <span className="text-xs font-black tracking-tighter text-text uppercase">
                             {TYPE_LABELS[type]}
                         </span>
                     </button>

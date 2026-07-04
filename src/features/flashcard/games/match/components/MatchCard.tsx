@@ -13,10 +13,10 @@ interface MatchCardProps {
 }
 
 const surfaceRing: Record<MatchCardSurface, string> = {
-    default: "border-gray-200 text-[#3c3c3c] bg-white",
-    selected: "border-[#ce82ff] text-[#ce82ff] bg-[#f8f0ff] shadow-md",
-    matched: "border-[#58cc02] text-[#58cc02] bg-[#f2fbf0]",
-    error: "border-[#ea2b2b] text-[#ea2b2b] bg-[#ffdfe0]",
+    default: "border-gray-200 text-text bg-white",
+    selected: "border-[#ce82ff] text-both bg-[#f8f0ff] shadow-md",
+    matched: "border-[#58cc02] text-hiragana bg-[#f2fbf0]",
+    error: "border-danger text-danger bg-danger-bg",
 };
 
 const MatchCard = ({ label, surface, disabled, onPress, tabIndex }: MatchCardProps) => {

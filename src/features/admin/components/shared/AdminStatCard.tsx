@@ -19,18 +19,18 @@ interface AdminStatCardProps {
  * Used primarily on the overview dashboard for quick-glance metrics.
  */
 const AdminStatCard = ({ label, value, icon: Icon, color, trend }: AdminStatCardProps) => {
-    const accent = color ?? "text-[#1cb0f6]";
+    const accent = color ?? "text-katakana";
     return (
         <Card className="border-gray-100">
             <div className="flex items-center justify-between">
                 <div>
-                    <p className="text-xs font-black tracking-widest text-[#afafaf] uppercase">
+                    <p className="text-xs font-black tracking-widest text-muted uppercase">
                         {label}
                     </p>
-                    <p className="mt-2 text-3xl font-black text-[#3c3c3c]">{value}</p>
+                    <p className="mt-2 text-3xl font-black text-text">{value}</p>
                     {trend ? (
                         <p
-                            className={`mt-1 text-xs font-black ${trend.isPositive ? "text-[#58cc02]" : "text-[#ea2b2b]"}`}
+                            className={`mt-1 text-xs font-black ${trend.isPositive ? "text-hiragana" : "text-danger"}`}
                         >
                             {trend.isPositive ? "↑" : "↓"} {trend.value}%
                         </p>

@@ -43,6 +43,32 @@ interface ImportPreviewProps {
     themeColor?: string;
 }
 
+interface ImportCellInputProps {
+    value: string;
+    onChange: (value: string) => void;
+    placeholder: string;
+    themeColor: string;
+    /** Dims the field for secondary/optional data (Alternatives, Example). */
+    muted?: boolean;
+}
+
+/** Dense, borderless text field for a single ImportPreview table cell. */
+const ImportCellInput = ({
+    value,
+    onChange,
+    placeholder,
+    themeColor,
+    muted = false,
+}: ImportCellInputProps) => (
+    <input
+        className={`w-full rounded-lg border-2 border-transparent bg-transparent p-1.5 text-xs outline-none focus:border-[var(--theme-color)] focus:bg-white sm:p-2 sm:text-sm ${muted ? "font-medium text-muted" : ""}`}
+        style={{ "--theme-color": themeColor } as React.CSSProperties}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder={placeholder}
+    />
+);
+
 /**
  * ImportPreview Component
  *
@@ -99,8 +125,8 @@ const ImportPreview = ({
             {/* Header Summary & Actions */}
             <div className="flex items-center justify-between rounded-xl border-2 border-gray-200 bg-white p-4 shadow-sm">
                 <div>
-                    <h3 className="text-lg font-black text-[#3c3c3c]">Preview Cards</h3>
-                    <p className="text-sm font-bold text-[#afafaf]">
+                    <h3 className="text-lg font-black text-text">Preview Cards</h3>
+                    <p className="text-sm font-bold text-muted">
                         {validCount} valid, {invalidCount} invalid
                     </p>
                 </div>
@@ -121,8 +147,8 @@ const ImportPreview = ({
 
             {/* Validation Table */}
             <div className="overflow-hidden rounded-2xl border-2 border-gray-200 bg-white shadow-sm sm:overflow-x-auto">
-                <table className="w-full table-fixed text-left font-bold text-[#3c3c3c]">
-                    <thead className="border-b-2 border-gray-200 bg-gray-50 text-xs tracking-widest text-[#afafaf] uppercase sm:text-xs">
+                <table className="w-full table-fixed text-left font-bold text-text">
+                    <thead className="border-b-2 border-gray-200 bg-gray-50 text-xs tracking-widest text-muted uppercase sm:text-xs">
                         <tr>
                             <th className="w-[22%] p-2 sm:p-4">Primary</th>
                             <th className="w-[20%] p-2 sm:p-4">Alternatives</th>
@@ -139,30 +165,23 @@ const ImportPreview = ({
                                 className={`transition-colors ${row.isInvalid ? "bg-red-50/50" : "hover:bg-gray-50"}`}
                             >
                                 <td className="p-1 sm:p-2">
-                                    <input
-                                        className="w-full rounded-lg border-2 border-transparent bg-transparent p-1.5 text-xs outline-none focus:border-[var(--theme-color)] focus:bg-white sm:p-2 sm:text-sm"
-                                        style={
-                                            { "--theme-color": themeColor } as React.CSSProperties
-                                        }
+                                    <ImportCellInput
+                                        themeColor={themeColor}
                                         value={row.primary}
-                                        onChange={(e) =>
-                                            updateRow(row.id, "primary", e.target.value)
-                                        }
+                                        onChange={(v) => updateRow(row.id, "primary", v)}
                                         placeholder="Primary"
                                     />
                                 </td>
                                 <td className="p-1 sm:p-2">
-                                    <input
-                                        className="w-full rounded-lg border-2 border-transparent bg-transparent p-1.5 text-xs font-medium text-[#afafaf] outline-none focus:border-[var(--theme-color)] focus:bg-white sm:p-2 sm:text-sm"
-                                        style={
-                                            { "--theme-color": themeColor } as React.CSSProperties
-                                        }
+                                    <ImportCellInput
+                                        themeColor={themeColor}
+                                        muted
                                         value={(row.alternatives || []).join(" / ")}
-                                        onChange={(e) =>
+                                        onChange={(v) =>
                                             updateRow(
                                                 row.id,
                                                 "alternatives",
-                                                e.target.value
+                                                v
                                                     .split(/[,/]/)
                                                     .map((s) => s.trim())
                                                     .filter(Boolean),
@@ -172,28 +191,19 @@ const ImportPreview = ({
                                     />
                                 </td>
                                 <td className="p-1 sm:p-2">
-                                    <input
-                                        className="w-full rounded-lg border-2 border-transparent bg-transparent p-1.5 text-xs outline-none focus:border-[var(--theme-color)] focus:bg-white sm:p-2 sm:text-sm"
-                                        style={
-                                            { "--theme-color": themeColor } as React.CSSProperties
-                                        }
+                                    <ImportCellInput
+                                        themeColor={themeColor}
                                         value={row.meaning}
-                                        onChange={(e) =>
-                                            updateRow(row.id, "meaning", e.target.value)
-                                        }
+                                        onChange={(v) => updateRow(row.id, "meaning", v)}
                                         placeholder="Meaning"
                                     />
                                 </td>
                                 <td className="p-1 sm:p-2">
-                                    <input
-                                        className="w-full rounded-lg border-2 border-transparent bg-transparent p-1.5 text-xs font-medium text-[#afafaf] outline-none focus:border-[var(--theme-color)] focus:bg-white sm:p-2 sm:text-xs"
-                                        style={
-                                            { "--theme-color": themeColor } as React.CSSProperties
-                                        }
+                                    <ImportCellInput
+                                        themeColor={themeColor}
+                                        muted
                                         value={row.example}
-                                        onChange={(e) =>
-                                            updateRow(row.id, "example", e.target.value)
-                                        }
+                                        onChange={(v) => updateRow(row.id, "example", v)}
                                         placeholder="Optional example"
                                     />
                                 </td>
@@ -203,11 +213,11 @@ const ImportPreview = ({
                                             className="flex items-center justify-center text-red-500"
                                             title={row.errorMsg || row.originalText}
                                         >
-                                            <AlertCircle size={14} className="sm:size-[18px]" />
+                                            <AlertCircle size={14} className="sm:size-5" />
                                         </div>
                                     ) : (
                                         <div className="flex items-center justify-center text-green-500">
-                                            <CheckCircle2 size={14} className="sm:size-[18px]" />
+                                            <CheckCircle2 size={14} className="sm:size-5" />
                                         </div>
                                     )}
                                 </td>
@@ -225,7 +235,7 @@ const ImportPreview = ({
                         ))}
                         {rows.length === 0 && (
                             <tr>
-                                <td colSpan={6} className="p-8 text-center text-[#afafaf]">
+                                <td colSpan={6} className="p-8 text-center text-muted">
                                     No rows parsed. Try a different format.
                                 </td>
                             </tr>

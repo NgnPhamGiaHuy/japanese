@@ -39,7 +39,7 @@ const LessonBuilderCardList: React.FC<LessonBuilderCardListProps> = ({
     return (
         <div className="space-y-6">
             <div className="flex items-center justify-between px-2">
-                <h3 className="text-xl font-black text-[#3c3c3c] sm:text-2xl">
+                <h3 className="text-xl font-black text-text sm:text-2xl">
                     Cards <span className="text-gray-300">({cards.length})</span>
                 </h3>
                 <Button
@@ -111,9 +111,9 @@ const LessonBuilderCardList: React.FC<LessonBuilderCardListProps> = ({
                         };
                         setCards([...cards, newCard]);
                     }}
-                    className="flex w-full items-center justify-center gap-3 rounded-3xl p-6 text-xs font-black tracking-widest text-gray-400 uppercase transition-all group-hover:text-[var(--theme-color)] sm:rounded-4xl sm:p-8 sm:text-sm"
+                    className="flex w-full items-center justify-center gap-3 rounded-3xl p-6 text-xs font-black tracking-widest text-gray-400 uppercase transition-all group-hover:text-[var(--theme-color)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-color)] focus-visible:ring-offset-2 sm:rounded-4xl sm:p-8 sm:text-sm"
                 >
-                    <Plus size={18} className="sm:size-[20px]" />
+                    <Plus size={18} className="sm:size-5" />
                     Add New Flashcard
                 </button>
             </motion.div>

@@ -29,7 +29,7 @@ export function StatGrid({ stats }: StatGridProps) {
                     <div className="text-2xl font-black" style={{ color }}>
                         {value}
                     </div>
-                    <div className="mt-1 text-xs font-black tracking-widest text-[#afafaf] uppercase">
+                    <div className="mt-1 text-xs font-black tracking-widest text-muted uppercase">
                         {label}
                     </div>
                 </div>

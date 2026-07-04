@@ -55,7 +55,7 @@ const ContentDistributionChart = ({ data, onClick }: ContentDistributionChartPro
                             className="h-2 w-2 rounded-full"
                             style={{ backgroundColor: COLORS[index % COLORS.length] }}
                         />
-                        <span className="text-xs font-black tracking-tighter text-[#3c3c3c] uppercase">
+                        <span className="text-xs font-black tracking-tighter text-text uppercase">
                             {item.name}: {item.value}
                         </span>
                     </div>

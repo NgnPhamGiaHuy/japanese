@@ -42,20 +42,20 @@ const SpeedResultsView = ({
         <GameResultsScreen
             title="Speed Done!"
             icon={Zap}
-            iconBg="bg-[#ff9600]"
-            iconBorder="#cc7800"
+            iconBg="bg-survival"
+            iconBorder="var(--color-survival-strong)"
             score={score}
             bestScore={bestScore}
             tierInfo={tierInfo}
             stats={[
-                { value: correctCount, label: "Correct", color: "#58cc02" },
+                { value: correctCount, label: "Correct", color: "var(--color-hiragana)" },
                 {
                     value: Math.max(0, totalQuestions - correctCount),
                     label: "Wrong",
-                    color: "#ea2b2b",
+                    color: "var(--color-danger)",
                 },
-                { value: maxStreak, label: "Streak", color: "#ff9600" },
-                { value: `${accuracy}%`, label: "Accuracy", color: "#1cb0f6" },
+                { value: maxStreak, label: "Streak", color: "var(--color-survival)" },
+                { value: `${accuracy}%`, label: "Accuracy", color: "var(--color-katakana)" },
             ]}
             gameMode={gameMode}
             currentUserId={currentUserId}

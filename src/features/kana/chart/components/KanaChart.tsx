@@ -31,7 +31,7 @@ export function KanaChart() {
     const { isBoth, singleBlocks, combinedSections, headingColorSingle } = useChartData(alphabet);
 
     return (
-        <div className="min-h-dvh bg-[#F7F7F8]">
+        <div className="min-h-dvh bg-bg">
             <ScreenHeader
                 title="Character Chart"
                 backHref="/kana"
@@ -42,7 +42,7 @@ export function KanaChart() {
                         onClick={() => setShowRomaji((v) => !v)}
                         className={`flex! items-center! gap-1.5! rounded-xl! border-2! px-3! py-1.5! text-xs! font-bold! shadow-none transition-all hover:shadow-none active:translate-y-0 md:text-xs! ${
                             !showRomaji
-                                ? "border-[#ea2b2b]! bg-[#ffdfe0]! text-[#ea2b2b]!"
+                                ? "border-danger! bg-danger-bg! text-danger!"
                                 : `${themeColor.primaryLightBg} ${themeColor.text} ${themeColor.primaryBorder}`
                         }`}
                         icon={showRomaji ? Eye : EyeOff}
@@ -55,7 +55,7 @@ export function KanaChart() {
 
             <div className="animate-in fade-in mx-auto w-full max-w-2xl px-3 pt-6 pb-28 duration-300 sm:px-4">
                 {isBoth && (
-                    <p className="mx-auto mb-4 max-w-sm text-center text-xs font-bold text-[#afafaf] md:text-xs">
+                    <p className="mx-auto mb-4 max-w-sm text-center text-xs font-bold text-muted md:text-xs">
                         Hiragana and katakana for the same sounds are grouped by section. Extended
                         loanword katakana appears only under Katakana.
                     </p>

@@ -25,7 +25,7 @@ const UsersTableBody = ({ table, loading }: UsersTableBodyProps) => {
         return (
             <tbody>
                 <tr>
-                    <td colSpan={6} className="py-16 text-center text-sm font-bold text-[#afafaf]">
+                    <td colSpan={6} className="py-16 text-center text-sm font-bold text-muted">
                         <LoadingSpinner fullScreen={false} label="Loading users..." />
                     </td>
                 </tr>
@@ -39,7 +39,7 @@ const UsersTableBody = ({ table, loading }: UsersTableBodyProps) => {
                 <tr
                     key={row.id}
                     className={`border-t border-gray-100 transition-colors hover:bg-gray-50/50 ${
-                        row.getIsSelected() ? "bg-[#1cb0f6]/5" : ""
+                        row.getIsSelected() ? "bg-katakana/5" : ""
                     }`}
                 >
                     {row.getVisibleCells().map((cell) => (

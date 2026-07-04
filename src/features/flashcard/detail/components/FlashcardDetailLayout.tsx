@@ -52,7 +52,7 @@ const FlashcardDetailLayout = ({
     );
 
     return (
-        <div className="min-h-screen bg-[#F7F7F8]">
+        <div className="min-h-screen bg-bg">
             <DetailHeader ctx={ctx} onEdit={onEdit} />
 
             <div className="mx-auto mt-4 max-w-7xl px-6 pb-24">

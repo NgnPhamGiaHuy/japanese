@@ -30,15 +30,15 @@ export function useKanaHubState() {
     const isBoth = alphabet === "both";
 
     const themeColors = {
-        primaryBg: isBoth ? "bg-[#ce82ff]" : isH ? "bg-[#58cc02]" : "bg-[#1cb0f6]",
-        primaryBorderB: isBoth ? "border-[#b65ce8]" : isH ? "border-[#58a700]" : "border-[#1899d6]",
+        primaryBg: isBoth ? "bg-both" : isH ? "bg-hiragana" : "bg-katakana",
+        primaryBorderB: isBoth ? "border-both-strong" : isH ? "border-hiragana-strong" : "border-katakana-strong",
         primaryHover: isBoth
-            ? "hover:bg-[#b65ce8]"
+            ? "hover:bg-both-strong"
             : isH
-              ? "hover:bg-[#46a302]"
-              : "hover:bg-[#149fdf]",
-        primaryText: isBoth ? "text-[#ce82ff]" : isH ? "text-[#58cc02]" : "text-[#1cb0f6]",
-        primaryBgLight: isBoth ? "bg-[#ce82ff]/10" : isH ? "bg-[#58cc02]/10" : "bg-[#1cb0f6]/10",
+              ? "hover:bg-hiragana-hover"
+              : "hover:bg-katakana-hover",
+        primaryText: isBoth ? "text-both" : isH ? "text-hiragana" : "text-katakana",
+        primaryBgLight: isBoth ? "bg-both/10" : isH ? "bg-hiragana/10" : "bg-katakana/10",
     };
 
     const bestInfinity = bestScores[`infinity_${alphabet}`] ?? 0;

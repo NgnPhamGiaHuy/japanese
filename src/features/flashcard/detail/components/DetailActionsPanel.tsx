@@ -52,8 +52,8 @@ const DetailActionsPanel = ({
                             <Edit2 size={22} />
                         </div>
                         <div className="text-left">
-                            <div className="text-lg font-black text-[#3c3c3c]">Edit Deck</div>
-                            <div className="text-sm font-bold text-[#afafaf]">
+                            <div className="text-lg font-black text-text">Edit Deck</div>
+                            <div className="text-sm font-bold text-muted">
                                 Add, remove, or update cards
                             </div>
                         </div>
@@ -70,7 +70,7 @@ const DetailActionsPanel = ({
                         <div
                             className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl ${
                                 isShared
-                                    ? "bg-[#ebf8e6] text-[#58cc02]"
+                                    ? "bg-[#ebf8e6] text-hiragana"
                                     : "bg-blue-50 text-blue-500"
                             }`}
                         >
@@ -78,16 +78,16 @@ const DetailActionsPanel = ({
                         </div>
                         <div className="text-left">
                             <div className="flex items-center gap-2">
-                                <span className="text-lg font-black text-[#3c3c3c]">
+                                <span className="text-lg font-black text-text">
                                     {isShared ? "Manage Access" : "Share Deck"}
                                 </span>
                                 {isShared && (
-                                    <span className="rounded-lg bg-[#ebf8e6] px-2 py-0.5 text-xs font-black tracking-wider text-[#58cc02] uppercase">
+                                    <span className="rounded-lg bg-[#ebf8e6] px-2 py-0.5 text-xs font-black tracking-wider text-hiragana uppercase">
                                         Public
                                     </span>
                                 )}
                             </div>
-                            <div className="text-sm font-bold text-[#afafaf]">
+                            <div className="text-sm font-bold text-muted">
                                 {isShared
                                     ? "Control who can view or comment"
                                     : "Enable link sharing for this deck"}
@@ -107,10 +107,10 @@ const DetailActionsPanel = ({
                             <Copy size={22} />
                         </div>
                         <div className="text-left">
-                            <div className="text-lg font-black text-[#3c3c3c]">
+                            <div className="text-lg font-black text-text">
                                 {linkCopied ? "Link Copied!" : "Copy Share Link"}
                             </div>
-                            <div className="text-sm font-bold text-[#afafaf]">
+                            <div className="text-sm font-bold text-muted">
                                 Share this deck with others
                             </div>
                         </div>
@@ -143,7 +143,7 @@ const DetailActionsPanel = ({
                     >
                         Your Role
                     </p>
-                    <p className="font-black text-[#3c3c3c] capitalize">{role}</p>
+                    <p className="font-black text-text capitalize">{role}</p>
                 </div>
             </div>
 
@@ -161,14 +161,14 @@ const DetailActionsPanel = ({
                         )}
                     </div>
                     <div>
-                        <p className="font-black text-[#3c3c3c]">
+                        <p className="font-black text-text">
                             {role === "editor"
                                 ? "Editor Access"
                                 : role === "commenter"
                                   ? "Commenter Access"
                                   : "Viewer Access"}
                         </p>
-                        <p className="mt-0.5 text-xs font-bold text-[#afafaf]">
+                        <p className="mt-0.5 text-xs font-bold text-muted">
                             {canEdit
                                 ? "You have edit rights to this deck."
                                 : role === "commenter"
@@ -178,7 +178,7 @@ const DetailActionsPanel = ({
                     </div>
                 </div>
                 <div className="flex items-start gap-3 bg-gray-50 p-4">
-                    <Info size={16} className="mt-0.5 shrink-0 text-[#ff9600]" />
+                    <Info size={16} className="mt-0.5 shrink-0 text-survival" />
                     <p className="text-xs font-bold text-gray-500">
                         Your game progress and learning data is strictly separate from the
                         owner&apos;s original metrics.
@@ -204,10 +204,10 @@ const DetailActionsPanel = ({
                             <Edit2 size={22} />
                         </div>
                         <div className="text-left">
-                            <div className="text-lg font-black text-[#3c3c3c]">
+                            <div className="text-lg font-black text-text">
                                 Edit Deck Content
                             </div>
-                            <div className="text-sm font-bold text-[#afafaf]">
+                            <div className="text-sm font-bold text-muted">
                                 Modify for all users
                             </div>
                         </div>
@@ -228,10 +228,10 @@ const DetailActionsPanel = ({
                             )}
                         </div>
                         <div className="text-left">
-                            <div className="text-lg font-black text-[#3c3c3c]">
+                            <div className="text-lg font-black text-text">
                                 {saving ? "Duplicating..." : "Duplicate Deck"}
                             </div>
-                            <div className="text-sm font-bold text-[#afafaf]">
+                            <div className="text-sm font-bold text-muted">
                                 Save a copy to your collection
                             </div>
                         </div>
@@ -246,10 +246,10 @@ const DetailActionsPanel = ({
                                 <CopyPlus size={22} />
                             </div>
                             <div className="text-left">
-                                <div className="text-lg font-black text-[#3c3c3c]">
+                                <div className="text-lg font-black text-text">
                                     Log in to Duplicate
                                 </div>
-                                <div className="text-sm font-bold text-[#afafaf]">
+                                <div className="text-sm font-bold text-muted">
                                     Sign in to save this deck
                                 </div>
                             </div>
@@ -266,10 +266,10 @@ const DetailActionsPanel = ({
                             <Copy size={22} />
                         </div>
                         <div className="text-left">
-                            <div className="text-lg font-black text-[#3c3c3c]">
+                            <div className="text-lg font-black text-text">
                                 {linkCopied ? "Link Copied!" : "Copy Share Link"}
                             </div>
-                            <div className="text-sm font-bold text-[#afafaf]">
+                            <div className="text-sm font-bold text-muted">
                                 Share this deck with others
                             </div>
                         </div>

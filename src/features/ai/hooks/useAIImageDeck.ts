@@ -8,7 +8,10 @@ export function useAIImageDeck() {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
-    const generate = async (files: File[], existingWords: string[] = []) => {
+    const generate = async (
+        files: File[],
+        existingWords: string[] = [],
+    ): Promise<{ title: string; description: string; cards: GeneratedCard[] } | null> => {
         setLoading(true);
         setError(null);
         try {

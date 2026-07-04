@@ -98,7 +98,7 @@ const CommentInput = ({
                     placeholder={placeholder}
                     disabled={isSubmitting}
                     rows={compact ? 2 : 3}
-                    className="w-full resize-none rounded-xl bg-transparent px-3 py-2.5 text-sm font-medium text-[#3c3c3c] outline-none placeholder:text-gray-400 disabled:opacity-50"
+                    className="w-full resize-none rounded-xl bg-transparent px-3 py-2.5 text-sm font-medium text-text outline-none placeholder:text-gray-400 disabled:opacity-50"
                     style={{ minHeight: compact ? 56 : 72, maxHeight: 160 }}
                 />
 

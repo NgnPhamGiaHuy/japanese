@@ -2,7 +2,6 @@ import {
     addDoc,
     collection,
     doc,
-    getDoc,
     increment,
     limit,
     onSnapshot,
@@ -82,7 +81,6 @@ async function persistBestScore(
     score: number,
 ): Promise<void> {
     if (score <= 0) {
-        console.log(`[persistBestScore] Invalid score ${score}, skipping`);
         return;
     }
 
@@ -99,9 +97,6 @@ async function persistBestScore(
 
             // Guard: Only proceed if new score is higher
             if (score <= currentBest) {
-                console.log(
-                    `[persistBestScore] Score ${score} <= current best ${currentBest} for ${gameMode}, skipping`,
-                );
                 return; // Transaction aborts, no writes
             }
 
@@ -122,10 +117,6 @@ async function persistBestScore(
                     lastUpdated: now,
                 },
                 { merge: true },
-            );
-
-            console.log(
-                `[persistBestScore] ✅ New best for ${gameMode}: ${score} (previous: ${currentBest})`,
             );
         });
     } catch (error) {

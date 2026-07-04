@@ -36,7 +36,7 @@ export class ProgressionTracker {
         const recent = this.getRecentHistory(count);
         if (recent.length === 0) return 0;
 
-        const correct = recent.filter((e) => e.correct).length;
+        const correct = recent.filter((answer) => answer.correct).length;
         return correct / recent.length;
     }
 
@@ -47,7 +47,7 @@ export class ProgressionTracker {
         const recent = this.getRecentHistory(count);
         if (recent.length === 0) return 0;
 
-        const total = recent.reduce((sum, e) => sum + e.responseMs, 0);
+        const total = recent.reduce((sum, answer) => sum + answer.responseMs, 0);
         return total / recent.length;
     }
 
@@ -69,7 +69,7 @@ export class ProgressionTracker {
      * Returns total number of correct answers.
      */
     getTotalCorrect(): number {
-        return this.history.filter((e) => e.correct).length;
+        return this.history.filter((answer) => answer.correct).length;
     }
 
     /**

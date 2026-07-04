@@ -23,10 +23,10 @@ const ImportPasteArea: React.FC<ImportPasteAreaProps> = ({ value, onChange, them
                             <Sparkles size={12} />
                             Real-time Engine
                         </span>
-                        <h3 className="text-xl font-black text-[#3c3c3c]">
+                        <h3 className="text-xl font-black text-text">
                             Dynamic Synchronization
                         </h3>
-                        <p className="max-w-md text-sm leading-relaxed font-bold text-[#afafaf]">
+                        <p className="max-w-md text-sm leading-relaxed font-bold text-muted">
                             Each line is instantly parsed into a flashcard. Commas, tabs, and
                             hyphens are detected automatically for flawless mapping.
                         </p>
@@ -49,7 +49,7 @@ const ImportPasteArea: React.FC<ImportPasteAreaProps> = ({ value, onChange, them
                                 >
                                     {item.label}
                                 </span>
-                                <span className="text-[7px] font-black text-[#afafaf] uppercase">
+                                <span className="text-xs font-black text-muted uppercase">
                                     {item.hint}
                                 </span>
                             </div>
@@ -65,13 +65,13 @@ const ImportPasteArea: React.FC<ImportPasteAreaProps> = ({ value, onChange, them
 
             <div className="group relative">
                 <textarea
-                    className="h-80 w-full rounded-4xl border-2 border-gray-100 bg-white p-8 font-bold text-[#3c3c3c] shadow-inner transition-all outline-none focus:border-[var(--theme-color)] focus:ring-4 focus:ring-[var(--theme-color)]/5 sm:text-lg"
+                    className="h-80 w-full rounded-4xl border-2 border-gray-100 bg-white p-8 font-bold text-text shadow-inner transition-all outline-none focus:border-[var(--theme-color)] focus:ring-4 focus:ring-[var(--theme-color)]/5 sm:text-lg"
                     style={{ "--theme-color": themeColor } as React.CSSProperties}
                     placeholder={`[ {"primary": "食べる", "meaning": "to eat"} ]\n\nOR\n\n食べる, taberu, to eat, example`}
                     value={value}
                     onChange={(e) => onChange(e.target.value)}
                 />
-                <div className="pointer-events-none absolute right-4 bottom-4 flex items-center gap-2 rounded-2xl bg-gray-50/80 px-4 py-2 text-xs font-black tracking-widest text-[#afafaf] uppercase shadow-sm outline outline-1 outline-gray-200/50 sm:right-6 sm:bottom-6">
+                <div className="pointer-events-none absolute right-4 bottom-4 flex items-center gap-2 rounded-2xl bg-gray-50/80 px-4 py-2 text-xs font-black tracking-widest text-muted uppercase shadow-sm outline outline-1 outline-gray-200/50 sm:right-6 sm:bottom-6">
                     <div
                         className="h-2 w-2 animate-pulse rounded-full"
                         style={{ backgroundColor: themeColor }}

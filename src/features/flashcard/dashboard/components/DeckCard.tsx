@@ -73,7 +73,7 @@ const DeckCard = ({
             <div className="mb-4 flex items-start justify-between">
                 <div className="flex-1 pr-4">
                     <div className="flex items-center gap-2">
-                        <h3 className="text-xl font-black text-[#3c3c3c]">{lesson.title}</h3>
+                        <h3 className="text-xl font-black text-text">{lesson.title}</h3>
                         {isShared && (
                             <span
                                 style={{
@@ -101,7 +101,7 @@ const DeckCard = ({
                         )}
                     </div>
                     {lesson.description && (
-                        <p className="mt-1 line-clamp-2 text-sm font-bold text-[#afafaf]">
+                        <p className="mt-1 line-clamp-2 text-sm font-bold text-muted">
                             {lesson.description}
                         </p>
                     )}
@@ -149,13 +149,16 @@ const DeckCard = ({
                             {lesson.cardCount}
                         </span>
                     </div>
-                    <span className="text-xs font-black text-[#afafaf] uppercase">cards</span>
+                    <span className="text-xs font-black text-muted uppercase">cards</span>
                 </div>
             </div>
 
             <div className="mt-2 flex flex-col gap-3 sm:mt-0 sm:flex-row sm:gap-2">
                 <div className="flex flex-1 gap-2">
-                    <Link href={viewPath} className="flex-1">
+                    <Link
+                        href={viewPath}
+                        className="flex-1 rounded-2xl focus:outline-none focus-visible:ring-2 focus-visible:ring-katakana focus-visible:ring-offset-2"
+                    >
                         <Button
                             variant="primary"
                             color={hexToThemeColor(themeColor)}
@@ -173,7 +176,10 @@ const DeckCard = ({
                                 className="absolute -top-2 left-1/2 z-10 -translate-x-1/2"
                             />
                         )}
-                        <Link href={speedPath} className="block">
+                        <Link
+                            href={speedPath}
+                            className="block rounded-2xl focus:outline-none focus-visible:ring-2 focus-visible:ring-katakana focus-visible:ring-offset-2"
+                        >
                             <Button
                                 variant="secondary"
                                 color="orange"
@@ -192,7 +198,10 @@ const DeckCard = ({
                                 className="absolute -top-2 left-1/2 z-10 -translate-x-1/2"
                             />
                         )}
-                        <Link href={matchPath} className="block">
+                        <Link
+                            href={matchPath}
+                            className="block rounded-2xl focus:outline-none focus-visible:ring-2 focus-visible:ring-katakana focus-visible:ring-offset-2"
+                        >
                             <Button
                                 variant="secondary"
                                 color="purple"
@@ -253,7 +262,7 @@ const DeckCard = ({
                         <Button
                             variant="ghost"
                             onClick={() => onDelete?.()}
-                            className="!flex !h-11 !w-11 !items-center !justify-center !rounded-xl !p-0 !text-gray-300 shadow-none transition-colors hover:!bg-[#ffdfe0] hover:!text-[#ea2b2b] hover:shadow-none active:translate-y-0"
+                            className="!flex !h-11 !w-11 !items-center !justify-center !rounded-xl !p-0 !text-gray-300 shadow-none transition-colors hover:!bg-danger-bg hover:!text-danger hover:shadow-none active:translate-y-0"
                             title="Delete deck"
                             icon={Trash2}
                             iconSize={20}

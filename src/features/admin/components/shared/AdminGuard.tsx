@@ -65,8 +65,8 @@ const AdminGuard = ({ children }: AdminGuardProps) => {
                     icon={ShieldAlert}
                     title="Access Denied"
                     description="You do not have permission to view the admin dashboard."
-                    iconBg="bg-[#ea2b2b]"
-                    iconBorder="border-[#b82222]"
+                    iconBg="bg-danger"
+                    iconBorder="border-danger-strong"
                 />
             </div>
         );

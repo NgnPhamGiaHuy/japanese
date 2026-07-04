@@ -30,7 +30,7 @@ import { useNotifications } from "@/features/notifications/NotificationsContext"
 import { isUnread } from "@/features/notifications/types";
 import { useAppStore } from "@/lib/app-store";
 import { auth } from "@/lib/firebase";
-import { ScreenHeader } from "@/shared/components/layout";
+import { ScreenHeader, SCREEN_HEADER_HEIGHT_CLASS } from "@/shared/components/layout";
 import { Button } from "@/shared/components/ui";
 
 import type {
@@ -227,7 +227,7 @@ function NotificationRow({
         >
             {/* Unread dot */}
             {unread && (
-                <span className="absolute top-4 left-1.5 h-2 w-2 rounded-full bg-[#1cb0f6]" />
+                <span className="absolute top-4 left-1.5 h-2 w-2 rounded-full bg-katakana" />
             )}
 
             {/* Top row: icon + text content + delete button */}
@@ -243,14 +243,14 @@ function NotificationRow({
                     tabIndex={0}
                     onClick={handleContentClick}
                     onKeyDown={(e) => e.key === "Enter" && handleContentClick()}
-                    className="min-w-0 flex-1 cursor-pointer"
+                    className="min-w-0 flex-1 cursor-pointer rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-katakana focus-visible:ring-offset-2"
                 >
                     <div className="flex items-start justify-between gap-2">
                         <p
                             className={`text-sm leading-snug ${
                                 unread
-                                    ? "font-black text-[#3c3c3c]"
-                                    : "font-semibold text-[#3c3c3c]"
+                                    ? "font-black text-text"
+                                    : "font-semibold text-text"
                             }`}
                         >
                             {notification.title}
@@ -269,7 +269,7 @@ function NotificationRow({
                     variant="ghost"
                     onClick={handleDelete}
                     aria-label="Dismiss notification"
-                    className="!mt-0.5 !shrink-0 !rounded-lg !p-1.5 !text-gray-300 opacity-0 shadow-none transition-all group-hover:opacity-100 hover:!bg-red-50 hover:!text-[#ea2b2b] hover:shadow-none focus:opacity-100 active:translate-y-0"
+                    className="!mt-0.5 !shrink-0 !rounded-lg !p-1.5 !text-gray-300 opacity-0 shadow-none transition-all group-hover:opacity-100 hover:!bg-red-50 hover:!text-danger hover:shadow-none focus:opacity-100 active:translate-y-0"
                     icon={Trash2}
                     iconSize={15}
                 />
@@ -277,7 +277,7 @@ function NotificationRow({
 
             {/* Invite action buttons — rendered OUTSIDE the text div, never nested in it */}
             {notification.type === "invite" && unread && (
-                <div className="mt-1 pl-[52px]">
+                <div className="mt-1 pl-13">
                     <InviteActions notification={notification} userId={userId} onDone={onRefresh} />
                 </div>
             )}
@@ -298,8 +298,8 @@ function NotificationGroupSection({
 }) {
     return (
         <div>
-            <div className="sticky top-[57px] z-10 bg-[#F7F7F8] px-4 py-2">
-                <span className="text-xs font-black tracking-widest text-[#afafaf] uppercase">
+            <div className={`sticky ${SCREEN_HEADER_HEIGHT_CLASS} z-10 bg-bg px-4 py-2`}>
+                <span className="text-xs font-black tracking-widest text-muted uppercase">
                     {group.label}
                 </span>
             </div>
@@ -350,10 +350,10 @@ function EmptyState({ filter }: { filter: "all" | "unread" }) {
                     <BellOff size={36} className="text-gray-300" />
                 )}
             </div>
-            <h2 className="mb-1 text-xl font-black text-[#3c3c3c]">
+            <h2 className="mb-1 text-xl font-black text-text">
                 {filter === "unread" ? "You're all caught up! 🎉" : "No notifications yet"}
             </h2>
-            <p className="max-w-xs font-bold text-[#afafaf]">
+            <p className="max-w-xs font-bold text-muted">
                 {filter === "unread"
                     ? "No unread notifications right now."
                     : "Invites, comments, and replies will appear here."}
@@ -408,7 +408,7 @@ export default function NotificationsPage() {
     const noop = () => {};
 
     return (
-        <div className="min-h-[100dvh] bg-[#F7F7F8] pb-28">
+        <div className="min-h-dvh bg-bg pb-28">
             <ScreenHeader
                 title="Notifications"
                 backHref="/"
@@ -419,7 +419,7 @@ export default function NotificationsPage() {
                                 variant="ghost"
                                 onClick={handleMarkAllRead}
                                 loading={isMarkingAll}
-                                className="!flex !items-center !gap-1 !rounded-xl !px-2.5 !py-2 !text-xs !font-black !text-[#1cb0f6] shadow-none transition-colors hover:!bg-blue-50 hover:shadow-none active:translate-y-0"
+                                className="!flex !items-center !gap-1 !rounded-xl !px-2.5 !py-2 !text-xs !font-black !text-katakana shadow-none transition-colors hover:!bg-blue-50 hover:shadow-none active:translate-y-0"
                                 title="Mark all as read"
                                 icon={CheckCheck}
                                 iconSize={15}
@@ -432,7 +432,7 @@ export default function NotificationsPage() {
                                 variant="ghost"
                                 onClick={handleClearAll}
                                 loading={isClearingAll}
-                                className="!flex !items-center !gap-1 !rounded-xl !px-2.5 !py-2 !text-xs !font-black !text-gray-400 shadow-none transition-colors hover:!bg-red-50 hover:!text-[#ea2b2b] hover:shadow-none active:translate-y-0"
+                                className="!flex !items-center !gap-1 !rounded-xl !px-2.5 !py-2 !text-xs !font-black !text-gray-400 shadow-none transition-colors hover:!bg-red-50 hover:!text-danger hover:shadow-none active:translate-y-0"
                                 title="Clear all notifications"
                                 icon={Trash2}
                                 iconSize={15}

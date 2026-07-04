@@ -29,7 +29,7 @@ const UserMobileRow = ({ row }: UserMobileRowProps) => {
     return (
         <div
             className={`flex items-start gap-3 px-4 py-3 transition-colors ${
-                row.getIsSelected() ? "bg-[#1cb0f6]/5" : "hover:bg-gray-50/50"
+                row.getIsSelected() ? "bg-katakana/5" : "hover:bg-gray-50/50"
             }`}
         >
             {/* Checkbox */}
@@ -58,30 +58,30 @@ const UserMobileRow = ({ row }: UserMobileRowProps) => {
                     </span>
                 )}
                 {isOnline && (
-                    <div className="absolute right-0 bottom-0 h-2.5 w-2.5 rounded-full border-2 border-white bg-[#58cc02]" />
+                    <div className="absolute right-0 bottom-0 h-2.5 w-2.5 rounded-full border-2 border-white bg-hiragana" />
                 )}
             </div>
 
             {/* Info + actions */}
             <div className="min-w-0 flex-1">
                 <div className="flex flex-wrap items-center gap-1.5">
-                    <p className="text-sm font-black text-[#3c3c3c]">
+                    <p className="text-sm font-black text-text">
                         {user.displayName || "Anonymous User"}
                     </p>
                     {isOnline && (
-                        <span className="flex h-4 items-center rounded-full bg-[#58cc02] px-1.5 text-[8px] font-black tracking-widest text-white uppercase">
+                        <span className="flex h-4 items-center rounded-full bg-hiragana px-1.5 text-[8px] font-black tracking-widest text-white uppercase">
                             Live
                         </span>
                     )}
                 </div>
-                <p className="truncate text-xs font-bold text-[#afafaf]">
+                <p className="truncate text-xs font-bold text-muted">
                     {user.email ?? "No email"}
                 </p>
 
                 <div className="mt-2 flex flex-wrap items-center gap-2">
                     <RoleCell user={user} />
                     {user.lastSeenAt && (
-                        <span className="text-xs font-bold text-[#1cb0f6]">
+                        <span className="text-xs font-bold text-katakana">
                             Active{" "}
                             {new Date(user.lastSeenAt).toLocaleDateString(undefined, {
                                 month: "short",

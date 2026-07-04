@@ -26,10 +26,10 @@ const SpeedConstraintError = () => {
     const router = useRouter();
 
     return (
-        <div className="fixed inset-0 flex flex-col items-center justify-center bg-[#F7F7F8] p-6 text-center">
-            <Zap size={48} className="mb-4 text-[#ff9600]" strokeWidth={3} />
-            <h2 className="mb-2 text-2xl font-black text-[#3c3c3c]">Need more cards</h2>
-            <p className="mb-8 font-bold text-[#afafaf]">
+        <div className="fixed inset-0 flex flex-col items-center justify-center bg-bg p-6 text-center">
+            <Zap size={48} className="mb-4 text-survival" strokeWidth={3} />
+            <h2 className="mb-2 text-2xl font-black text-text">Need more cards</h2>
+            <p className="mb-8 font-bold text-muted">
                 Speed mode needs at least 4 cards to generate answer choices.
             </p>
             <Button onClick={() => router.back()} variant="secondary">

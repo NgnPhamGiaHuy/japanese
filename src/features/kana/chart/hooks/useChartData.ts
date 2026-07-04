@@ -46,6 +46,6 @@ export function useChartData(alphabet: "hiragana" | "katakana" | "both") {
         isBoth,
         singleBlocks,
         combinedSections,
-        headingColorSingle: alphabet === "katakana" ? "text-[#1cb0f6]" : "text-[#58cc02]",
+        headingColorSingle: alphabet === "katakana" ? "text-katakana" : "text-hiragana",
     };
 }

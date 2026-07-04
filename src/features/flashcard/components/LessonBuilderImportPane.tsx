@@ -105,7 +105,7 @@ const LessonBuilderImportPane: React.FC<LessonBuilderImportPaneProps> = ({
                             setInputMode(mode);
                             setPreviewRows(null);
                         }}
-                        className={`flex-1 !rounded-none !p-2.5 !text-[8px] !font-black uppercase sm:!p-4 sm:!text-xs ${inputMode === mode ? "!text-white" : "!text-gray-400 hover:bg-gray-50"}`}
+                        className={`flex-1 !rounded-none !p-2.5 !text-xs !font-black uppercase sm:!p-4 sm:!text-xs ${inputMode === mode ? "!text-white" : "!text-gray-400 hover:bg-gray-50"}`}
                         style={inputMode === mode ? { backgroundColor: themeHex } : {}}
                         icon={mode === "ai" ? Sparkles : mode === "uploads" ? FileUp : undefined}
                     >
@@ -127,13 +127,13 @@ const LessonBuilderImportPane: React.FC<LessonBuilderImportPaneProps> = ({
                                     className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-black tracking-widest uppercase sm:px-3 sm:text-xs"
                                     style={{ backgroundColor: `${themeHex}1a`, color: themeHex }}
                                 >
-                                    <Sparkles size={10} className="sm:size-[12px]" />
+                                    <Sparkles size={10} className="sm:size-3" />
                                     Advanced Processing
                                 </span>
-                                <h3 className="text-lg font-black text-[#3c3c3c] sm:text-xl">
+                                <h3 className="text-lg font-black text-text sm:text-xl">
                                     Multi-modal Ingestion
                                 </h3>
-                                <p className="max-w-md text-xs leading-relaxed font-bold text-[#afafaf] sm:text-sm">
+                                <p className="max-w-md text-xs leading-relaxed font-bold text-muted sm:text-sm">
                                     Our vision engine automatically extracts vocabulary from images
                                     while handling raw flat-files for instant synchronization.
                                 </p>
@@ -143,10 +143,10 @@ const LessonBuilderImportPane: React.FC<LessonBuilderImportPaneProps> = ({
                                     className="group flex h-12 w-12 items-center justify-center rounded-xl text-white shadow-lg transition-transform hover:scale-105 active:scale-95 sm:h-14 sm:w-14 sm:rounded-2xl"
                                     style={{ backgroundColor: themeHex }}
                                 >
-                                    <Sparkles size={20} className="sm:size-[24px]" />
+                                    <Sparkles size={20} className="sm:size-6" />
                                 </div>
-                                <div className="group flex h-12 w-12 items-center justify-center rounded-xl bg-[#58cc02] text-white shadow-lg transition-transform hover:scale-105 active:scale-95 sm:h-14 sm:w-14 sm:rounded-2xl">
-                                    <FileUp size={20} className="sm:size-[24px]" />
+                                <div className="group flex h-12 w-12 items-center justify-center rounded-xl bg-hiragana text-white shadow-lg transition-transform hover:scale-105 active:scale-95 sm:h-14 sm:w-14 sm:rounded-2xl">
+                                    <FileUp size={20} className="sm:size-6" />
                                 </div>
                             </div>
                         </div>
@@ -156,7 +156,7 @@ const LessonBuilderImportPane: React.FC<LessonBuilderImportPaneProps> = ({
                             className="pointer-events-none absolute -right-4 -bottom-4 h-24 w-24 rounded-full opacity-20 blur-2xl sm:h-32 sm:w-32 sm:blur-3xl"
                             style={{ backgroundColor: themeHex }}
                         />
-                        <div className="pointer-events-none absolute -top-4 -left-4 h-24 w-24 rounded-full bg-[#58cc02]/5 blur-2xl sm:h-32 sm:w-32 sm:blur-3xl" />
+                        <div className="pointer-events-none absolute -top-4 -left-4 h-24 w-24 rounded-full bg-hiragana/5 blur-2xl sm:h-32 sm:w-32 sm:blur-3xl" />
                     </div>
 
                     <ImportDropzone

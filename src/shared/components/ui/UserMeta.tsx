@@ -78,7 +78,7 @@ const UserMeta = ({ name, avatar, subtitle, className }: UserMetaProps) => {
                         {subtitle}
                     </div>
                 )}
-                <div className="truncate text-sm font-black text-[#3c3c3c]">{name}</div>
+                <div className="truncate text-sm font-black text-text">{name}</div>
             </div>
         </div>
     );

@@ -56,7 +56,7 @@ const MatchPlayingView = ({
     const shakeCellIds = useMatchGameStore((s) => s.shakeCellIds);
 
     return (
-        <div className="fixed inset-0 z-50 flex flex-col bg-[#F7F7F8]">
+        <div className="fixed inset-0 z-50 flex flex-col bg-bg">
             <ScreenHeaderRow className="shrink-0" symmetricSidebars>
                 <ScreenHeaderBackButton
                     onClick={onBack}
@@ -69,7 +69,7 @@ const MatchPlayingView = ({
                     {showLives ? <LivesDisplay lives={livesLeft} total={livesTotal} /> : null}
                     <div
                         className={`flex items-center gap-1.5 text-xl font-black transition-colors ${
-                            isUrgent ? "animate-pulse text-[#ea2b2b]" : "text-[#3c3c3c]"
+                            isUrgent ? "animate-pulse text-danger" : "text-text"
                         }`}
                     >
                         <Clock size={20} strokeWidth={3} />
@@ -85,11 +85,11 @@ const MatchPlayingView = ({
                 </div>
 
                 <div className="flex flex-col items-end gap-1">
-                    <span className="text-2xl font-black text-[#3c3c3c] tabular-nums md:text-3xl">
+                    <span className="text-2xl font-black text-text tabular-nums md:text-3xl">
                         {score}
                     </span>
                     {streak >= 3 ? (
-                        <span className="text-xs font-black whitespace-nowrap text-[#ff9600]">
+                        <span className="text-xs font-black whitespace-nowrap text-survival">
                             🔥 {streak}×
                         </span>
                     ) : (
@@ -115,7 +115,7 @@ const MatchPlayingView = ({
                         animate={{ opacity: 1, y: 0, scale: 1 }}
                         exit={{ opacity: 0, y: -24, scale: 1.1 }}
                         transition={{ duration: 0.25 }}
-                        className="pointer-events-none fixed top-28 left-1/2 z-50 -translate-x-1/2 rounded-2xl bg-[#ff9600] px-6 py-3 text-center shadow-xl"
+                        className="pointer-events-none fixed top-28 left-1/2 z-50 -translate-x-1/2 rounded-2xl bg-survival px-6 py-3 text-center shadow-xl"
                     >
                         <div className="text-base font-black text-white">{comboPopup.text}</div>
                         {comboPopup.bonus > 0 ? (
@@ -134,7 +134,7 @@ const MatchPlayingView = ({
                 currentScore={score}
             />
 
-            <p className="mx-auto mt-2 max-w-sm shrink-0 px-4 text-center text-xs font-black tracking-widest text-[#afafaf] uppercase">
+            <p className="mx-auto mt-2 max-w-sm shrink-0 px-4 text-center text-xs font-black tracking-widest text-muted uppercase">
                 Tap two tiles that belong together
             </p>
 

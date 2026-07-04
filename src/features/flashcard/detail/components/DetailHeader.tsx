@@ -47,7 +47,8 @@ const DetailHeader = ({ ctx, onEdit }: DetailHeaderProps) => {
                 >
                     <Button
                         variant="ghost"
-                        className="!rounded-xl !p-2 !text-[#3c3c3c] shadow-none transition-all hover:!bg-black/5 hover:shadow-none active:translate-y-0"
+                        size="icon"
+                        className="!text-text shadow-none hover:!bg-black/5 hover:shadow-none active:translate-y-0"
                         title="Back to Decks"
                         icon={ArrowLeft}
                         iconSize={24}
@@ -75,12 +76,12 @@ const DetailHeader = ({ ctx, onEdit }: DetailHeaderProps) => {
                         </span>
                     </div>
 
-                    <h1 className="text-3xl font-black text-[#3c3c3c] md:text-5xl">
+                    <h1 className="text-3xl font-black text-text md:text-5xl">
                         {lesson.title}
                     </h1>
 
                     {lesson.description && (
-                        <p className="mt-3 max-w-2xl text-base font-bold text-[#afafaf] md:text-lg">
+                        <p className="mt-3 max-w-2xl text-base font-bold text-muted md:text-lg">
                             {lesson.description}
                         </p>
                     )}

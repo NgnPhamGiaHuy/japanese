@@ -55,7 +55,7 @@ const VARIANTS = {
     danger: {
         icon: Trash2,
         color: "red",
-        accent: "bg-[#ffdfe0] text-[#ea2b2b]",
+        accent: "bg-danger-bg text-danger",
         btnVariant: "primary" as const,
     },
     warning: {
@@ -135,10 +135,10 @@ const ConfirmModal = ({
 
                             {/* Text Header */}
                             <div className="text-center">
-                                <h3 id={titleId} className="mb-2 text-xl font-black text-[#3c3c3c]">
+                                <h3 id={titleId} className="mb-2 text-xl font-black text-text">
                                     {title}
                                 </h3>
-                                <p className="text-base leading-relaxed font-bold text-[#afafaf]">
+                                <p className="text-base leading-relaxed font-bold text-muted">
                                     {message}
                                 </p>
                             </div>
@@ -158,7 +158,7 @@ const ConfirmModal = ({
                                     variant="ghost"
                                     onClick={onClose}
                                     disabled={loading}
-                                    className="w-full !py-4 !text-base !font-black !text-[#afafaf] hover:!bg-gray-50 active:translate-y-0"
+                                    className="w-full !py-4 !text-base !font-black !text-muted hover:!bg-gray-50 active:translate-y-0"
                                 >
                                     {cancelText}
                                 </Button>

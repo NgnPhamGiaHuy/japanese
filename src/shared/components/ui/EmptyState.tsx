@@ -36,8 +36,8 @@ const EmptyState = ({
     title,
     description,
     action,
-    iconBg = "bg-[#ce82ff]",
-    iconBorder = "border-[#b65ce8]",
+    iconBg = "bg-both",
+    iconBorder = "border-both-strong",
 }: EmptyStateProps) => {
     return (
         <div className="py-20 text-center">
@@ -46,8 +46,8 @@ const EmptyState = ({
             >
                 <Icon size={48} strokeWidth={3} />
             </div>
-            <h2 className="mb-2 text-2xl font-black text-[#3c3c3c]">{title}</h2>
-            <p className="mb-8 font-bold text-[#afafaf]">{description}</p>
+            <h2 className="mb-2 text-2xl font-black text-text">{title}</h2>
+            <p className="mb-8 font-bold text-muted">{description}</p>
             <div className="flex justify-center">{action}</div>
         </div>
     );

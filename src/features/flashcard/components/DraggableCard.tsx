@@ -2,7 +2,7 @@
 
 import { Image as ImageIcon, Sparkles, Trash2 } from "lucide-react";
 
-import { Button, ReorderItem } from "@/shared/components/ui";
+import { Button, Input, ReorderItem } from "@/shared/components/ui";
 import { joinAlternatives, splitAlternatives } from "../utils/formatting";
 
 import type { EditorCard } from "../types";
@@ -65,7 +65,7 @@ const DraggableCard = ({
                 {/* Primary Word */}
                 <div className="md:col-span-2">
                     <div className="mb-1 flex items-center justify-between">
-                        <label className="text-xs font-black tracking-widest text-[#afafaf] uppercase sm:text-xs">
+                        <label className="text-xs font-black tracking-widest text-muted uppercase sm:text-xs">
                             Primary ✱
                         </label>
                         <Button
@@ -82,15 +82,16 @@ const DraggableCard = ({
                             {aiLoading ? "Filling…" : "AI Fill"}
                         </Button>
                     </div>
-                    <input
-                        className={`w-full border-b-2 border-gray-100 bg-transparent pb-1 text-xl font-black text-[#3c3c3c] transition-colors outline-none focus:border-[var(--theme-color)] sm:pb-2 sm:text-3xl ${aiLoading ? "opacity-60" : ""}`}
+                    <Input
+                        variant="underline"
+                        className={`border-gray-100 pb-1 text-xl sm:pb-2 sm:text-3xl ${aiLoading ? "opacity-60" : ""}`}
                         placeholder="食べる / たべる"
                         value={card.primary || ""}
                         onChange={(e) => onUpdate(card.id, "primary", e.target.value)}
                         disabled={saving || aiLoading}
                     />
                     {aiError && (
-                        <p className="mt-1 text-xs font-bold text-[#ea2b2b] sm:text-xs">
+                        <p className="mt-1 text-xs font-bold text-danger sm:text-xs">
                             {aiError}
                         </p>
                     )}
@@ -99,11 +100,12 @@ const DraggableCard = ({
                 {/* Alternative Form */}
                 {(["alternative"] as const).map((repKey) => (
                     <div key={repKey}>
-                        <label className="mb-1 block text-xs font-black tracking-widest text-[#afafaf] uppercase sm:text-xs">
+                        <label className="mb-1 block text-xs font-black tracking-widest text-muted uppercase sm:text-xs">
                             Alternative
                         </label>
-                        <input
-                            className="w-full border-b-2 border-gray-100 bg-transparent pb-1 text-base font-bold text-[#3c3c3c] transition-colors outline-none focus:border-[var(--theme-color)] sm:pb-2 sm:text-xl"
+                        <Input
+                            variant="underline"
+                            className="border-gray-100 pb-1 text-base font-bold sm:pb-2 sm:text-xl"
                             placeholder="Alternate forms (e.g. 漢字 / かな)"
                             value={joinAlternatives(card.alternatives)}
                             onChange={(e) =>
@@ -116,11 +118,12 @@ const DraggableCard = ({
 
                 {/* Meaning */}
                 <div className="md:col-span-2">
-                    <label className="mb-1 block text-xs font-black tracking-widest text-[#afafaf] uppercase sm:text-xs">
+                    <label className="mb-1 block text-xs font-black tracking-widest text-muted uppercase sm:text-xs">
                         Meaning ✱
                     </label>
-                    <input
-                        className="w-full border-b-2 border-gray-100 bg-transparent pb-1 text-base font-bold text-[#3c3c3c] transition-colors outline-none focus:border-[var(--theme-color)] sm:pb-2 sm:text-xl"
+                    <Input
+                        variant="underline"
+                        className="border-gray-100 pb-1 text-base font-bold sm:pb-2 sm:text-xl"
                         placeholder="To eat"
                         value={card.meaning}
                         onChange={(e) => onUpdate(card.id, "meaning", e.target.value)}
@@ -130,11 +133,12 @@ const DraggableCard = ({
 
                 {/* Example Sentence */}
                 <div className="md:col-span-2">
-                    <label className="mb-1 block text-xs font-black tracking-widest text-[#afafaf] uppercase sm:text-xs">
+                    <label className="mb-1 block text-xs font-black tracking-widest text-muted uppercase sm:text-xs">
                         Example Sentence (Optional)
                     </label>
-                    <input
-                        className="w-full border-b-2 border-gray-100 bg-transparent pb-1 text-sm font-bold text-[#3c3c3c] transition-colors outline-none focus:border-[var(--theme-color)] sm:pb-2 sm:text-base"
+                    <Input
+                        variant="underline"
+                        className="border-gray-100 pb-1 text-sm font-bold sm:pb-2 sm:text-base"
                         placeholder="りんごを食べる。"
                         value={card.example}
                         onChange={(e) => onUpdate(card.id, "example", e.target.value)}
@@ -144,7 +148,7 @@ const DraggableCard = ({
 
                 {/* Image Section */}
                 <div className="md:col-span-2">
-                    <label className="mb-1 block text-xs font-black tracking-widest text-[#afafaf] uppercase">
+                    <label className="mb-1 block text-xs font-black tracking-widest text-muted uppercase">
                         Card Image (Optional)
                     </label>
                     <div className="mt-2 flex items-center gap-4">
@@ -196,7 +200,7 @@ const DraggableCard = ({
                                 onClick={() => {
                                     document.getElementById(`img-upload-${card.id}`)?.click();
                                 }}
-                                className="!rounded-xl !border-2 !border-gray-200 !bg-white !px-4 !py-2 !text-sm !font-bold !text-[#3c3c3c] shadow-sm hover:!bg-gray-50 active:translate-y-0"
+                                className="!rounded-xl !border-2 !border-gray-200 !bg-white !px-4 !py-2 !text-sm !font-bold !text-text shadow-sm hover:!bg-gray-50 active:translate-y-0"
                             >
                                 {card.previewUrl || card.imageUrl ? "Change Image" : "Upload Image"}
                             </Button>

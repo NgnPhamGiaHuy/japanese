@@ -17,23 +17,23 @@ const QuickActionsCard = () => {
             <div className="grid grid-cols-1 gap-2">
                 <Button
                     variant="ghost"
-                    className="!justify-start gap-3 !px-3 !py-2 !text-xs !text-[#3c3c3c]"
+                    className="!justify-start gap-3 !px-3 !py-2 !text-xs !text-text"
                 >
-                    <Settings size={14} className="text-[#afafaf]" />
+                    <Settings size={14} className="text-muted" />
                     Global Settings
                 </Button>
                 <Button
                     variant="ghost"
-                    className="!justify-start gap-3 !px-3 !py-2 !text-xs !text-[#3c3c3c]"
+                    className="!justify-start gap-3 !px-3 !py-2 !text-xs !text-text"
                 >
-                    <FileText size={14} className="text-[#afafaf]" />
+                    <FileText size={14} className="text-muted" />
                     Content Audit
                 </Button>
                 <Button
                     variant="ghost"
-                    className="!justify-start gap-3 !px-3 !py-2 !text-xs !text-[#3c3c3c]"
+                    className="!justify-start gap-3 !px-3 !py-2 !text-xs !text-text"
                 >
-                    <Shield size={14} className="text-[#afafaf]" />
+                    <Shield size={14} className="text-muted" />
                     Security Review
                 </Button>
             </div>

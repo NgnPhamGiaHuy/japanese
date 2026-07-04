@@ -23,7 +23,7 @@ import {
     Zap,
 } from "lucide-react";
 
-import { Card, Select } from "@/shared/components/ui";
+import { Card, Input, Select } from "@/shared/components/ui";
 import { AdminDateRangeFilter, AdminSearchInput } from "../shared";
 import { LOG_LEVEL_OPTIONS, LOG_TYPE_OPTIONS } from "../../utils/filters";
 
@@ -117,20 +117,14 @@ const LogsFilters = ({ filters, onChange, activeFilterCount = 0 }: LogsFiltersPr
             </div>
 
             {/* Row 3: user filter */}
-            <div className="relative">
-                <User
-                    size={14}
-                    className="absolute top-1/2 left-3.5 -translate-y-1/2 text-[#afafaf]"
-                    aria-hidden
-                />
-                <input
-                    type="text"
-                    value={filters.userId ?? ""}
-                    onChange={(e) => onChange({ ...filters, userId: e.target.value || undefined })}
-                    placeholder="Filter by user ID, name, or email…"
-                    className="h-10 w-full rounded-2xl border-2 border-gray-100 bg-gray-50 pr-4 pl-9 text-sm font-bold text-[#3c3c3c] transition-colors outline-none placeholder:font-normal placeholder:text-[#afafaf] focus:border-[#1cb0f6] focus:bg-white sm:h-11"
-                />
-            </div>
+            <Input
+                type="text"
+                icon={User}
+                iconSize={14}
+                value={filters.userId ?? ""}
+                onChange={(e) => onChange({ ...filters, userId: e.target.value || undefined })}
+                placeholder="Filter by user ID, name, or email…"
+            />
 
             {/* Row 4: date range */}
             <AdminDateRangeFilter

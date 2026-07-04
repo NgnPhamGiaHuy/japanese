@@ -74,7 +74,7 @@ const ReorderItem = <T,>({
                     onPointerDown={(e) => dragControls.start(e)}
                     className={
                         handleClassName ??
-                        `${handlePositionClassName} cursor-pointer opacity-0 transition-all group-hover:opacity-100 hover:scale-110 active:cursor-grabbing`
+                        `${handlePositionClassName} cursor-pointer opacity-0 transition-all group-hover:opacity-100 hover:scale-110 active:cursor-grabbing focus:outline-none focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-katakana focus-visible:ring-offset-2`
                     }
                     aria-label="Reorder item"
                 >

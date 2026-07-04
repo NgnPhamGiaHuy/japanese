@@ -25,7 +25,7 @@ interface UserAvatarProps {
 const UserAvatar = ({
     src,
     active,
-    activeColor = "text-[#1cb0f6]",
+    activeColor = "text-katakana",
     size = 26,
 }: UserAvatarProps) => {
     const avatarSize = size - 2;
@@ -35,7 +35,7 @@ const UserAvatar = ({
             <Trophy
                 size={size}
                 strokeWidth={active ? 2.5 : 2}
-                className={active ? activeColor : "text-[#afafaf]"}
+                className={active ? activeColor : "text-muted"}
             />
         );
     }

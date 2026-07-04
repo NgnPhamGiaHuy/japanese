@@ -40,17 +40,17 @@ interface LogsSummaryHeaderProps {
 const LEVEL_ORDER: LogLevel[] = ["error", "warn", "security", "info"];
 
 const LEVEL_STYLES: Record<LogLevel, { text: string; bg: string; dot: string }> = {
-    error: { text: "text-[#ea2b2b]", bg: "bg-[#ffdfe0] hover:bg-[#ffc8c9]", dot: "bg-[#ea2b2b]" },
+    error: { text: "text-danger", bg: "bg-danger-bg hover:bg-[#ffc8c9]", dot: "bg-danger" },
     warn: { text: "text-orange-500", bg: "bg-orange-50 hover:bg-orange-100", dot: "bg-orange-400" },
     security: {
-        text: "text-[#ce82ff]",
-        bg: "bg-[#ce82ff]/10 hover:bg-[#ce82ff]/20",
-        dot: "bg-[#ce82ff]",
+        text: "text-both",
+        bg: "bg-both/10 hover:bg-both/20",
+        dot: "bg-both",
     },
     info: {
-        text: "text-[#1cb0f6]",
-        bg: "bg-[#1cb0f6]/10 hover:bg-[#1cb0f6]/20",
-        dot: "bg-[#1cb0f6]",
+        text: "text-katakana",
+        bg: "bg-katakana/10 hover:bg-katakana/20",
+        dot: "bg-katakana",
     },
 };
 
@@ -58,27 +58,27 @@ const TYPE_STYLES: Record<LogType, { label: string; bg: string; text: string; ac
     {
         AUTH: {
             label: "Auth",
-            bg: "bg-[#1cb0f6]/10 hover:bg-[#1cb0f6]/20",
-            text: "text-[#1cb0f6]",
-            activeBg: "bg-[#1cb0f6] text-white",
+            bg: "bg-katakana/10 hover:bg-katakana/20",
+            text: "text-katakana",
+            activeBg: "bg-katakana text-white",
         },
         ADMIN_ACTION: {
             label: "Admin",
-            bg: "bg-[#ce82ff]/10 hover:bg-[#ce82ff]/20",
+            bg: "bg-both/10 hover:bg-both/20",
             text: "text-[#7c3aed]",
-            activeBg: "bg-[#ce82ff] text-white",
+            activeBg: "bg-both text-white",
         },
         USER_ACTION: {
             label: "User",
-            bg: "bg-[#ff9600]/10 hover:bg-[#ff9600]/20",
+            bg: "bg-survival/10 hover:bg-survival/20",
             text: "text-[#b86800]",
-            activeBg: "bg-[#ff9600] text-white",
+            activeBg: "bg-survival text-white",
         },
         CONTENT: {
             label: "Content",
-            bg: "bg-[#58cc02]/10 hover:bg-[#58cc02]/20",
+            bg: "bg-hiragana/10 hover:bg-hiragana/20",
             text: "text-[#3d8f00]",
-            activeBg: "bg-[#58cc02] text-white",
+            activeBg: "bg-hiragana text-white",
         },
         SYSTEM: {
             label: "System",
@@ -88,9 +88,9 @@ const TYPE_STYLES: Record<LogType, { label: string; bg: string; text: string; ac
         },
         ERROR: {
             label: "Error",
-            bg: "bg-[#ffdfe0] hover:bg-[#ffc8c9]",
-            text: "text-[#b82222]",
-            activeBg: "bg-[#ea2b2b] text-white",
+            bg: "bg-danger-bg hover:bg-[#ffc8c9]",
+            text: "text-danger-strong",
+            activeBg: "bg-danger text-white",
         },
     };
 
@@ -110,12 +110,12 @@ const LogsSummaryHeader = ({
             {/* Total + level chips — wrap on mobile */}
             <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:gap-3">
                 <div className="flex flex-col">
-                    <span className="text-xs font-black tracking-widest text-[#afafaf] uppercase">
+                    <span className="text-xs font-black tracking-widest text-muted uppercase">
                         This Page
                     </span>
-                    <span className="text-xl font-black text-[#3c3c3c] sm:text-2xl">
+                    <span className="text-xl font-black text-text sm:text-2xl">
                         {totalLoaded}
-                        <span className="ml-1 text-xs font-bold text-[#afafaf]">entries</span>
+                        <span className="ml-1 text-xs font-bold text-muted">entries</span>
                     </span>
                 </div>
 
@@ -131,7 +131,7 @@ const LogsSummaryHeader = ({
                                 onClick={() => onLevelClick?.(l)}
                                 title={`Filter by ${l}`}
                                 className={clsx(
-                                    "flex items-center gap-1 rounded-full px-2 py-1 text-xs font-black tracking-wider uppercase transition-all sm:gap-1.5 sm:px-2.5 sm:py-1 sm:text-xs",
+                                    "flex items-center gap-1 rounded-full px-2 py-1 text-xs font-black tracking-wider uppercase transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-katakana focus-visible:ring-offset-1 sm:gap-1.5 sm:px-2.5 sm:py-1 sm:text-xs",
                                     isActive
                                         ? `${s.dot} text-white shadow-sm`
                                         : `${s.bg} ${s.text}`,
@@ -191,7 +191,7 @@ const LogsSummaryHeader = ({
                                     onClick={() => onTypeClick?.(t)}
                                     title={`Filter by ${t}`}
                                     className={clsx(
-                                        "flex items-center gap-1 rounded-full px-2 py-1 text-xs font-black tracking-wider uppercase transition-all sm:gap-1.5 sm:px-2.5 sm:py-1 sm:text-xs",
+                                        "flex items-center gap-1 rounded-full px-2 py-1 text-xs font-black tracking-wider uppercase transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-katakana focus-visible:ring-offset-1 sm:gap-1.5 sm:px-2.5 sm:py-1 sm:text-xs",
                                         isActive ? s.activeBg : `${s.bg} ${s.text}`,
                                         onTypeClick ? "cursor-pointer" : "cursor-default",
                                     )}

@@ -57,7 +57,7 @@ const StudyModeSelector = ({
 
     return (
         <>
-            <div className="fixed inset-0 flex flex-col items-center justify-center bg-[#F7F7F8] p-6">
+            <div className="fixed inset-0 flex flex-col items-center justify-center bg-bg p-6">
                 <div className="mb-8 flex flex-col items-center text-center">
                     <div
                         className="mb-4 flex h-20 w-20 -rotate-3 items-center justify-center rounded-[1.75rem] border-b-6 text-white shadow-sm"
@@ -73,19 +73,19 @@ const StudyModeSelector = ({
 
                 <div className="mb-8 flex gap-3">
                     <div className="rounded-xl border-2 border-gray-200 bg-white px-4 py-2 text-center shadow-sm">
-                        <div className="text-xl font-black text-[#1cb0f6]">{status.newCount}</div>
+                        <div className="text-xl font-black text-katakana">{status.newCount}</div>
                         <div className="text-xs font-black tracking-widest text-slate-400 uppercase">
                             New
                         </div>
                     </div>
                     <div className="rounded-xl border-2 border-gray-200 bg-white px-4 py-2 text-center shadow-sm">
-                        <div className="text-xl font-black text-[#ff9600]">{status.dueCount}</div>
+                        <div className="text-xl font-black text-survival">{status.dueCount}</div>
                         <div className="text-xs font-black tracking-widest text-slate-400 uppercase">
                             Due
                         </div>
                     </div>
                     <div className="rounded-xl border-2 border-gray-200 bg-white px-4 py-2 text-center shadow-sm">
-                        <div className="text-xl font-black text-[#58cc02]">
+                        <div className="text-xl font-black text-hiragana">
                             {status.totalCount - status.newCount}
                         </div>
                         <div className="text-xs font-black tracking-widest text-slate-400 uppercase">
@@ -117,7 +117,7 @@ const StudyModeSelector = ({
                     )}
                     {action === "idle" && (
                         <div className="rounded-2xl border-2 border-[#e2f6e2] bg-[#f0faf0] p-4 text-center">
-                            <p className="text-sm font-bold text-[#58cc02]">
+                            <p className="text-sm font-bold text-hiragana">
                                 🎉 All caught up! Come back later for more reviews.
                             </p>
                         </div>

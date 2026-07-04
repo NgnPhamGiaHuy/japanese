@@ -26,11 +26,11 @@ const AdminChartContainer = ({
     return (
         <Card className={`border-gray-100 p-6 ${className}`}>
             <div className="mb-6 flex flex-col gap-1">
-                <h3 className="text-xs font-black tracking-[0.2em] text-[#afafaf] uppercase">
+                <h3 className="text-xs font-black tracking-widest text-muted uppercase">
                     {title}
                 </h3>
                 {subtitle && (
-                    <p className="text-xs leading-none font-bold text-[#afafaf] uppercase">
+                    <p className="text-xs leading-none font-bold text-muted uppercase">
                         {subtitle}
                     </p>
                 )}

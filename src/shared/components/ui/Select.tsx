@@ -80,7 +80,7 @@ const Select = <T extends string | number>({
                 className={
                     isCompact
                         ? "!flex !items-center !gap-1 !rounded-lg !px-2 !py-1 !text-sm !font-bold !text-gray-500 shadow-none transition-colors hover:bg-gray-200 hover:shadow-none"
-                        : "!flex !h-12 !items-center !gap-2 !rounded-xl border-2 border-gray-200 bg-gray-50 !px-4 !text-sm !font-bold !text-[#3c3c3c] shadow-none transition-colors hover:bg-gray-100 hover:shadow-none"
+                        : "!flex !h-12 !items-center !gap-2 !rounded-xl border-2 border-gray-200 bg-gray-50 !px-4 !text-sm !font-bold !text-text shadow-none transition-colors hover:bg-gray-100 hover:shadow-none"
                 }
                 onClick={() => setIsOpen(!isOpen)}
                 disabled={disabled}
@@ -109,7 +109,7 @@ const Select = <T extends string | number>({
                             <Button
                                 key={opt.value}
                                 variant="ghost"
-                                className={`!flex !w-full !items-center !justify-between !gap-4 ${isCompact ? "!p-3 !text-sm" : "!p-4"} !text-left !font-bold !text-[#3c3c3c] capitalize shadow-none hover:bg-gray-50 hover:shadow-none active:translate-y-0`}
+                                className={`!flex !w-full !items-center !justify-between !gap-4 ${isCompact ? "!p-3 !text-sm" : "!p-4"} !text-left !font-bold !text-text capitalize shadow-none hover:bg-gray-50 hover:shadow-none active:translate-y-0`}
                                 onClick={() => {
                                     onChange(opt.value);
                                     setIsOpen(false);

@@ -49,21 +49,17 @@ const MiniLeaderboard = ({
     if (!gameMode || entries.length === 0) return null;
 
     const topN = entries.slice(0, 3);
-    const userInTopN = topN.some((e) => e.isCurrentUser);
+    const userInTopN = topN.some((entry) => entry.isCurrentUser);
+    const currentUserEntry = entries.find((entry) => entry.isCurrentUser);
 
     const displayEntries = userInTopN
         ? topN
-        : [
-              ...topN,
-              ...(entries.find((e) => e.isCurrentUser)
-                  ? [entries.find((e) => e.isCurrentUser)!]
-                  : []),
-          ];
+        : [...topN, ...(currentUserEntry ? [currentUserEntry] : [])];
 
     return (
         <div className="fixed top-32 right-4 z-40 hidden w-48 flex-col gap-1 rounded-xl border border-gray-100 bg-white/90 p-3 shadow-md backdrop-blur-sm md:flex">
             <div className="mb-1 flex items-center gap-2 border-b border-gray-100 pb-1">
-                <Trophy size={14} className="text-[#ff9600]" />
+                <Trophy size={14} className="text-survival" />
                 <span className="text-xs font-bold tracking-wider text-gray-400 uppercase">
                     Live Rank
                 </span>
@@ -79,7 +75,7 @@ const MiniLeaderboard = ({
                         exit={{ opacity: 0, scale: 0.9 }}
                         className={`flex items-center justify-between rounded px-1 py-0.5 text-sm ${
                             entry.isCurrentUser
-                                ? "bg-[#ff9600]/10 font-black text-[#cc7800]"
+                                ? "bg-survival/10 font-black text-survival-strong"
                                 : "font-medium text-gray-600"
                         }`}
                     >

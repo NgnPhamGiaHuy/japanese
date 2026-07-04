@@ -19,32 +19,32 @@ export function useKanaDataset() {
     const themeColor = useMemo(() => {
         if (alphabet === "both")
             return {
-                primary: "#ce82ff",
-                border: "#b65ce8",
+                primary: "var(--color-both)",
+                border: "var(--color-both-strong)",
                 light: "#faeaff",
-                text: "text-[#ce82ff]",
-                bg: "bg-[#ce82ff]",
+                text: "text-both",
+                bg: "bg-both",
                 primaryLightBg: "bg-[#faeaff]",
-                primaryBorder: "border-[#ce82ff]",
+                primaryBorder: "border-both",
             };
         if (alphabet === "hiragana")
             return {
-                primary: "#58cc02",
-                border: "#58a700",
+                primary: "var(--color-hiragana)",
+                border: "var(--color-hiragana-strong)",
                 light: "#e5f7d8",
-                text: "text-[#58cc02]",
-                bg: "bg-[#58cc02]",
+                text: "text-hiragana",
+                bg: "bg-hiragana",
                 primaryLightBg: "bg-[#e5f7d8]",
-                primaryBorder: "border-[#58cc02]",
+                primaryBorder: "border-hiragana",
             };
         return {
-            primary: "#1cb0f6",
-            border: "#1899d6",
+            primary: "var(--color-katakana)",
+            border: "var(--color-katakana-strong)",
             light: "#e5f5ff",
-            text: "text-[#1cb0f6]",
-            bg: "bg-[#1cb0f6]",
+            text: "text-katakana",
+            bg: "bg-katakana",
             primaryLightBg: "bg-[#e5f5ff]",
-            primaryBorder: "border-[#1cb0f6]",
+            primaryBorder: "border-katakana",
         };
     }, [alphabet]);
 

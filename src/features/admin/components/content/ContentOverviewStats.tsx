@@ -22,19 +22,19 @@ export const ContentOverviewStats = ({ totalDecks, filteredCount }: ContentOverv
                 label="Global Decks"
                 value={totalDecks}
                 icon={Layers}
-                color="text-[#ce82ff]"
+                color="text-both"
             />
             <AdminStatCard
                 label="Ghost Decks"
                 value={filteredCount - 2 > 0 ? filteredCount - 2 : 0}
                 icon={Trash2}
-                color="text-[#ea2b2b]"
+                color="text-danger"
             />
             <AdminStatCard
                 label="Platform Utilization"
                 value="98%"
                 icon={Box}
-                color="text-[#58cc02]"
+                color="text-hiragana"
             />
         </div>
     );

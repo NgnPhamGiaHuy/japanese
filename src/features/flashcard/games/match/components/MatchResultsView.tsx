@@ -44,16 +44,16 @@ const MatchResultsView = ({
         <GameResultsScreen
             title={matchedCount === totalCount ? "Perfect Match!" : "Time's Up!"}
             icon={Trophy}
-            iconBg="bg-[#ce82ff]"
-            iconBorder="#b65ce8"
+            iconBg="bg-both"
+            iconBorder="var(--color-both-strong)"
             score={score}
             bestScore={bestScore}
             tierInfo={tierInfo}
             stats={[
-                { value: matchedCount, label: "Matched", color: "#58cc02" },
-                { value: wrongAttempts, label: "Wrong", color: "#ea2b2b" },
-                { value: maxStreak, label: "Streak", color: "#ff9600" },
-                { value: `${accuracy}%`, label: "Accuracy", color: "#1cb0f6" },
+                { value: matchedCount, label: "Matched", color: "var(--color-hiragana)" },
+                { value: wrongAttempts, label: "Wrong", color: "var(--color-danger)" },
+                { value: maxStreak, label: "Streak", color: "var(--color-survival)" },
+                { value: `${accuracy}%`, label: "Accuracy", color: "var(--color-katakana)" },
             ]}
             gameMode={gameMode}
             currentUserId={currentUserId}

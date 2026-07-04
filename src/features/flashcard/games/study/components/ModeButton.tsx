@@ -37,7 +37,7 @@ const ModeButton = ({
                 disabled
                     ? "!cursor-not-allowed !opacity-40"
                     : "hover:!-translate-y-0.5 hover:!shadow-md"
-            } ${primary ? "!text-white shadow-sm" : "!bg-white !text-[#3c3c3c]"}`}
+            } ${primary ? "!text-white shadow-sm" : "!bg-white !text-text"}`}
             style={
                 primary
                     ? { backgroundColor: color, borderColor: `${color}BB` }
@@ -56,12 +56,12 @@ const ModeButton = ({
             </div>
             <div className="flex flex-1 flex-col">
                 <div
-                    className={`text-base font-black ${primary ? "text-white" : "text-[#3c3c3c]"}`}
+                    className={`text-base font-black ${primary ? "text-white" : "text-text"}`}
                 >
                     {label}
                 </div>
                 <div
-                    className={`text-xs font-bold ${primary ? "text-white/70" : "text-[#afafaf]"}`}
+                    className={`text-xs font-bold ${primary ? "text-white/70" : "text-muted"}`}
                 >
                     {sub}
                 </div>

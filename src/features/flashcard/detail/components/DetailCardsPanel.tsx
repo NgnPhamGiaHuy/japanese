@@ -79,7 +79,7 @@ const DetailCardsPanel = ({
 
     return (
         <main className="flex flex-col">
-            <h2 className="mb-4 border-b-2 border-gray-200 pb-2 text-xl font-black text-[#3c3c3c]">
+            <h2 className="mb-4 border-b-2 border-gray-200 pb-2 text-xl font-black text-text">
                 Preview ({orderedCards.length} Cards)
             </h2>
             <div className="grid gap-4 sm:grid-cols-2">

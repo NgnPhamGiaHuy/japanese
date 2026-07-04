@@ -70,7 +70,7 @@ const SpeedPlayingView = ({
     onAnswer,
 }: SpeedPlayingViewProps) => {
     return (
-        <div className="fixed inset-0 z-50 flex flex-col bg-[#F7F7F8]">
+        <div className="fixed inset-0 z-50 flex flex-col bg-bg">
             <ScreenHeaderRow className="shrink-0" symmetricSidebars>
                 <ScreenHeaderBackButton
                     onClick={onBack}
@@ -80,7 +80,7 @@ const SpeedPlayingView = ({
                 />
 
                 <div className="flex flex-col items-center">
-                    <span className="text-sm font-black text-[#3c3c3c]">
+                    <span className="text-sm font-black text-text">
                         Q{ui.questionNumber} / {ui.totalQuestions}
                     </span>
                     <span className="text-xs font-black" style={{ color: difficultyConfig.color }}>
@@ -89,11 +89,11 @@ const SpeedPlayingView = ({
                 </div>
 
                 <div className="flex flex-col items-end gap-1">
-                    <span className="text-2xl font-black text-[#3c3c3c] tabular-nums md:text-3xl">
+                    <span className="text-2xl font-black text-text tabular-nums md:text-3xl">
                         {score}
                     </span>
                     {ui.multiplier > 1 ? (
-                        <span className="text-xs font-black whitespace-nowrap text-[#ff9600]">
+                        <span className="text-xs font-black whitespace-nowrap text-survival">
                             🔥 {ui.multiplier}× combo
                         </span>
                     ) : (
@@ -117,7 +117,7 @@ const SpeedPlayingView = ({
 
             <div className="mx-4 mt-1 text-right">
                 <span
-                    className={`text-xs font-black tabular-nums ${ui.isUrgent ? "text-[#ea2b2b]" : "text-[#afafaf]"}`}
+                    className={`text-xs font-black tabular-nums ${ui.isUrgent ? "text-danger" : "text-muted"}`}
                 >
                     {ui.secondsLeft}s
                 </span>
@@ -150,7 +150,7 @@ const SpeedPlayingView = ({
 
                         return (
                             <h1
-                                className={`${sizeClass} leading-[1.1] font-black tracking-tight text-[#3c3c3c] drop-shadow-sm transition-all duration-300`}
+                                className={`${sizeClass} leading-[1.1] font-black tracking-tight text-text drop-shadow-sm transition-all duration-300`}
                             >
                                 {text}
                             </h1>
@@ -164,7 +164,7 @@ const SpeedPlayingView = ({
                                 initial={{ opacity: 0 }}
                                 animate={{ opacity: 1 }}
                                 exit={{ opacity: 0 }}
-                                className="mt-2 text-xs font-black text-[#ff9600]"
+                                className="mt-2 text-xs font-black text-survival"
                             >
                                 ⚠ Hints reduced from here
                             </motion.p>
@@ -175,7 +175,7 @@ const SpeedPlayingView = ({
                                 initial={{ opacity: 0 }}
                                 animate={{ opacity: 1 }}
                                 exit={{ opacity: 0 }}
-                                className="mt-2 text-xs font-black text-[#ea2b2b]"
+                                className="mt-2 text-xs font-black text-danger"
                             >
                                 ⚡ Speed increases — {SPEED_GAME_CONFIG.LEVELS[3].timeLimit} s per
                                 question!
@@ -192,13 +192,13 @@ const SpeedPlayingView = ({
 
                         if (answerStatus === "idle") {
                             className +=
-                                " border-gray-200 bg-white text-[#3c3c3c] hover:-translate-y-0.5 hover:border-gray-300 hover:bg-gray-50 hover:shadow-md";
+                                " border-gray-200 bg-white text-text hover:-translate-y-0.5 hover:border-gray-300 hover:bg-gray-50 hover:shadow-md";
                         } else if (isCorrect) {
                             className +=
-                                " z-10 translate-y-[2px] border-b-2 border-[#58a700] bg-[#58cc02] text-white";
+                                " z-10 translate-y-[2px] border-b-2 border-hiragana-strong bg-hiragana text-white";
                         } else if (option === selectedOption && answerStatus === "wrong") {
                             className +=
-                                " translate-y-[2px] border-b-2 border-[#ea2b2b] bg-[#ffdfe0] text-[#ea2b2b]";
+                                " translate-y-[2px] border-b-2 border-danger bg-danger-bg text-danger";
                         } else {
                             className += " border-gray-200 bg-white text-gray-300 opacity-50";
                         }
@@ -230,10 +230,10 @@ const SpeedPlayingView = ({
                             transition={{ duration: 0.2 }}
                             className="w-full rounded-2xl border border-gray-200 bg-white px-5 py-3 text-center"
                         >
-                            <p className="text-xs font-black tracking-widest text-[#afafaf] uppercase">
+                            <p className="text-xs font-black tracking-widest text-muted uppercase">
                                 Meaning
                             </p>
-                            <p className="mt-1 text-base font-bold text-[#3c3c3c]">
+                            <p className="mt-1 text-base font-bold text-text">
                                 {currentCard.meaning}
                             </p>
                         </motion.div>

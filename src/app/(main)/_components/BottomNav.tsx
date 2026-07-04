@@ -34,7 +34,7 @@ function buildRoutes(
             label: "Home",
             icon: <BookOpen size={NAV_ICON_SIZE} strokeWidth={NAV_ICON_STROKE_IDLE} />,
             activeIcon: <BookOpen size={NAV_ICON_SIZE} strokeWidth={NAV_ICON_STROKE_ACTIVE} />,
-            activeColor: "text-[#1cb0f6]",
+            activeColor: "text-katakana",
         },
         {
             href: "/kana",
@@ -55,21 +55,21 @@ function buildRoutes(
                     あ
                 </span>
             ),
-            activeColor: "text-[#58cc02]",
+            activeColor: "text-hiragana",
         },
         {
             href: "/flashcard",
             label: "Decks",
             icon: <Gamepad2 size={NAV_ICON_SIZE} strokeWidth={NAV_ICON_STROKE_IDLE} />,
             activeIcon: <Gamepad2 size={NAV_ICON_SIZE} strokeWidth={NAV_ICON_STROKE_ACTIVE} />,
-            activeColor: "text-[#ce82ff]",
+            activeColor: "text-both",
         },
         {
             href: "/notifications",
             label: "Alerts",
             icon: <Bell size={NAV_ICON_SIZE} strokeWidth={NAV_ICON_STROKE_IDLE} />,
             activeIcon: <Bell size={NAV_ICON_SIZE} strokeWidth={NAV_ICON_STROKE_ACTIVE} />,
-            activeColor: "text-[#1cb0f6]",
+            activeColor: "text-katakana",
             badge: unreadCount,
         },
     ];
@@ -80,16 +80,16 @@ function buildRoutes(
             label: "Admin",
             icon: <Shield size={NAV_ICON_SIZE} strokeWidth={NAV_ICON_STROKE_IDLE} />,
             activeIcon: <Shield size={NAV_ICON_SIZE} strokeWidth={NAV_ICON_STROKE_ACTIVE} />,
-            activeColor: "text-[#ea2b2b]",
+            activeColor: "text-danger",
         });
     }
 
     routes.push({
         href: "/profile",
         label: "Profile",
-        icon: <UserAvatar src={userPhoto} active={false} activeColor="text-[#ff9600]" />,
-        activeIcon: <UserAvatar src={userPhoto} active={true} activeColor="text-[#ff9600]" />,
-        activeColor: "text-[#ff9600]",
+        icon: <UserAvatar src={userPhoto} active={false} activeColor="text-survival" />,
+        activeIcon: <UserAvatar src={userPhoto} active={true} activeColor="text-survival" />,
+        activeColor: "text-survival",
     });
 
     return routes;
@@ -121,13 +121,13 @@ export const BottomNav = () => {
                         key={route.href}
                         href={route.href}
                         className={`relative flex min-w-[52px] flex-col items-center justify-center gap-1 rounded-xl py-1 transition-colors duration-150 ${
-                            active ? route.activeColor : "text-[#afafaf] hover:text-[#3c3c3c]"
+                            active ? route.activeColor : "text-muted hover:text-text"
                         }`}
                         aria-current={active ? "page" : undefined}
                     >
                         {/* Premium Glow for Active Admin Tab */}
                         {active && route.label === "Admin" && (
-                            <div className="absolute inset-0 z-[-1] animate-pulse rounded-full bg-[#ea2b2b]/10 blur-md" />
+                            <div className="absolute inset-0 z-[-1] animate-pulse rounded-full bg-danger/10 blur-md" />
                         )}
 
                         <div className="relative">
@@ -135,14 +135,14 @@ export const BottomNav = () => {
 
                             {/* Unread badge for Alerts */}
                             {route.badge != null && route.badge > 0 && (
-                                <span className="absolute -top-1.5 -right-1.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-[#ea2b2b] px-1 text-xs font-black text-white">
+                                <span className="absolute -top-1.5 -right-1.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-danger px-1 text-xs font-black text-white">
                                     {route.badge > 99 ? "99+" : route.badge}
                                 </span>
                             )}
 
                             {/* Admin Indicator Badge for Profile */}
                             {route.label === "Profile" && role && (
-                                <div className="absolute -top-1 -right-1 flex h-3.5 w-3.5 items-center justify-center rounded-full border-2 border-white bg-[#ea2b2b] shadow-sm">
+                                <div className="absolute -top-1 -right-1 flex h-3.5 w-3.5 items-center justify-center rounded-full border-2 border-white bg-danger shadow-sm">
                                     <Shield size={6} className="text-white" fill="currentColor" />
                                 </div>
                             )}

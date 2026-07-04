@@ -18,7 +18,7 @@ export function QuizSetup({ alphabet, themeColor, onStartQuiz }: QuizSetupProps)
     const displayChar = alphabet === "both" ? "あ" : alphabet === "hiragana" ? "あ" : "ア";
 
     return (
-        <div className="fixed inset-0 z-50 flex flex-col overflow-y-auto bg-[#F7F7F8]">
+        <div className="fixed inset-0 z-50 flex flex-col overflow-y-auto bg-bg">
             <ScreenHeader title="Recall Quiz" backHref="/kana" />
             <div className="flex flex-1 flex-col items-center justify-start px-4 py-6">
                 <div className="w-full max-w-md">
@@ -28,7 +28,7 @@ export function QuizSetup({ alphabet, themeColor, onStartQuiz }: QuizSetupProps)
                     >
                         {displayChar}
                     </div>
-                    <p className="mb-8 text-lg font-bold text-[#afafaf]">
+                    <p className="mb-8 text-lg font-bold text-muted">
                         How well do you know your kana?
                     </p>
                     <div className="space-y-3">
@@ -36,7 +36,7 @@ export function QuizSetup({ alphabet, themeColor, onStartQuiz }: QuizSetupProps)
                             id="quiz-mode-choice"
                             icon={Eye}
                             iconBgColor="bg-[#faeaff]"
-                            iconColor="text-[#ce82ff]"
+                            iconColor="text-both"
                             title="Multiple Choice"
                             description="Choose from 4 options"
                             onClick={() => onStartQuiz("choice")}
@@ -45,7 +45,7 @@ export function QuizSetup({ alphabet, themeColor, onStartQuiz }: QuizSetupProps)
                             id="quiz-mode-type"
                             icon={Keyboard}
                             iconBgColor="bg-[#e5f5ff]"
-                            iconColor="text-[#1cb0f6]"
+                            iconColor="text-katakana"
                             title="Type the Romaji"
                             description="Type the romanization"
                             onClick={() => onStartQuiz("type")}
@@ -54,7 +54,7 @@ export function QuizSetup({ alphabet, themeColor, onStartQuiz }: QuizSetupProps)
                             id="quiz-mode-smart"
                             icon={Shuffle}
                             iconBgColor="bg-[#fff5e6]"
-                            iconColor="text-[#ff9600]"
+                            iconColor="text-survival"
                             title="Smart Review"
                             description="Focus on your weakest characters"
                             onClick={() => onStartQuiz("smart")}

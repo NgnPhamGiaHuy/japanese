@@ -67,7 +67,7 @@ export function QuizPlaying({
     }, [question, status, quizMode]);
 
     return (
-        <div className="fixed inset-0 z-50 flex flex-col bg-[#F7F7F8]">
+        <div className="fixed inset-0 z-50 flex flex-col bg-bg">
             <ScreenHeaderRow className="shrink-0">
                 <ScreenHeaderBackButton
                     onClick={onBack}
@@ -106,7 +106,7 @@ export function QuizPlaying({
                             iconSize={18}
                             iconClassName={themeColor.text}
                         />
-                        <span className="text-[7rem] leading-none font-medium text-[#3c3c3c] select-none sm:text-[8rem]">
+                        <span className="text-[7rem] leading-none font-medium text-text select-none sm:text-9xl">
                             {question.char}
                         </span>
                     </div>
@@ -117,7 +117,7 @@ export function QuizPlaying({
                                 ref={inputRef}
                                 autoCapitalize="none"
                                 autoComplete="off"
-                                className="w-full rounded-2xl border-2 border-b-4 border-gray-200 bg-white px-6 py-4 text-2xl font-black text-[#3c3c3c] transition-colors outline-none focus:border-[#1cb0f6]"
+                                className="w-full rounded-2xl border-2 border-b-4 border-gray-200 bg-white px-6 py-4 text-2xl font-black text-text transition-colors outline-none focus:border-[#1cb0f6]"
                                 placeholder="Type romaji"
                                 value={typedInput}
                                 onChange={(e) => onTypedInputChange(e.target.value)}
@@ -137,11 +137,11 @@ export function QuizPlaying({
                         <div className="grid w-full grid-cols-2 gap-3">
                             {options.map((opt, i) => {
                                 let state =
-                                    "bg-white text-[#3c3c3c] border-gray-200 hover:bg-gray-50 hover:-translate-y-1 hover:shadow-md hover:border-gray-300";
+                                    "bg-white text-text border-gray-200 hover:bg-gray-50 hover:-translate-y-1 hover:shadow-md hover:border-gray-300";
                                 if (status !== "idle") {
                                     if (opt.romaji === question.romaji)
                                         state =
-                                            "bg-[#58cc02] text-white border-[#58a700] translate-y-[2px] border-b-2";
+                                            "bg-hiragana text-white border-hiragana-strong translate-y-[2px] border-b-2";
                                     else
                                         state = "bg-white border-gray-200 text-gray-300 opacity-50";
                                 }

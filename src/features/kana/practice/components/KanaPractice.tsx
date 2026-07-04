@@ -37,7 +37,7 @@ export function KanaPractice() {
     if (!char) return null;
 
     return (
-        <div className="fixed inset-0 z-50 flex flex-col bg-[#F7F7F8]">
+        <div className="fixed inset-0 z-50 flex flex-col bg-bg">
             <PracticeHeader
                 mode={practiceMode}
                 char={char}

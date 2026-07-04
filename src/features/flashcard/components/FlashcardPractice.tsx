@@ -122,12 +122,12 @@ const FlashcardPractice = ({
 
     if (cards.length === 0) {
         return (
-            <div className="flex h-screen flex-col items-center justify-center bg-[#F7F7F8] p-6 text-center">
+            <div className="flex h-screen flex-col items-center justify-center bg-bg p-6 text-center">
                 <div className="mb-6 flex h-24 w-24 items-center justify-center rounded-4xl border-b-8 border-gray-200 bg-white text-gray-400 shadow-sm">
                     <Check size={48} strokeWidth={3} />
                 </div>
-                <h2 className="mb-2 text-2xl font-black text-[#3c3c3c]">All caught up!</h2>
-                <p className="mb-8 font-bold text-[#afafaf]">
+                <h2 className="mb-2 text-2xl font-black text-text">All caught up!</h2>
+                <p className="mb-8 font-bold text-muted">
                     No cards are due for practice right now.
                 </p>
                 <Button onClick={onClose} variant="secondary" className="px-8 py-3">
@@ -194,27 +194,27 @@ const FlashcardPractice = ({
                 ? Math.round((stats.correct / (stats.correct + stats.incorrect)) * 100)
                 : 0;
         return (
-            <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-[#F7F7F8] p-6 text-center">
+            <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-bg p-6 text-center">
                 <div
                     className="mb-6 flex h-24 w-24 -rotate-6 items-center justify-center rounded-4xl border-b-8 shadow-sm"
                     style={{ backgroundColor: themeHex, borderColor: `${themeHex}AA` }}
                 >
                     <RefreshCw size={48} className="text-white" strokeWidth={3} />
                 </div>
-                <h2 className="mb-1 text-4xl font-black text-[#3c3c3c]">Practice Done!</h2>
-                <p className="mb-8 text-lg font-bold text-[#afafaf]">
-                    Accuracy: <span className="font-black text-[#3c3c3c]">{accuracy}%</span>
+                <h2 className="mb-1 text-4xl font-black text-text">Practice Done!</h2>
+                <p className="mb-8 text-lg font-bold text-muted">
+                    Accuracy: <span className="font-black text-text">{accuracy}%</span>
                 </p>
                 <div className="mb-10 flex w-full max-w-sm gap-4">
                     <div className="flex-1 rounded-3xl border-2 border-b-8 border-gray-200 bg-white p-6 text-center shadow-sm">
-                        <div className="text-5xl font-black text-[#58cc02]">{stats.correct}</div>
-                        <div className="mt-2 text-xs font-black tracking-widest text-[#afafaf] uppercase">
+                        <div className="text-5xl font-black text-hiragana">{stats.correct}</div>
+                        <div className="mt-2 text-xs font-black tracking-widest text-muted uppercase">
                             Correct
                         </div>
                     </div>
                     <div className="flex-1 rounded-3xl border-2 border-b-8 border-gray-200 bg-white p-6 text-center shadow-sm">
-                        <div className="text-5xl font-black text-[#ff9600]">{stats.incorrect}</div>
-                        <div className="mt-2 text-xs font-black tracking-widest text-[#afafaf] uppercase">
+                        <div className="text-5xl font-black text-survival">{stats.incorrect}</div>
+                        <div className="mt-2 text-xs font-black tracking-widest text-muted uppercase">
                             Review
                         </div>
                     </div>
@@ -233,9 +233,9 @@ const FlashcardPractice = ({
 
     // ── Session UI ───────────────────────────────────────────────────────────
     return (
-        <div className="fixed inset-0 z-50 flex flex-col bg-[#F7F7F8]">
+        <div className="fixed inset-0 z-50 flex flex-col bg-bg">
             <header className="flex items-center justify-between p-4">
-                <Button variant="ghost" onClick={onClose} icon={X} className="px-3 py-2" />
+                <Button variant="ghost" size="icon" onClick={onClose} icon={X} aria-label="Close" />
                 <div className="mx-4 flex-1">
                     <div className="h-4 overflow-hidden rounded-full bg-gray-200">
                         <div
@@ -244,7 +244,7 @@ const FlashcardPractice = ({
                         />
                     </div>
                 </div>
-                <span className="w-12 text-right text-sm font-black text-[#afafaf]">
+                <span className="w-12 text-right text-sm font-black text-muted">
                     {currentIndex + 1}/{queue.length}
                 </span>
             </header>
@@ -264,22 +264,22 @@ const FlashcardPractice = ({
                                     className="absolute top-4 left-4 !rounded-xl border-2 border-gray-100 bg-gray-50 !p-2 shadow-none transition-colors hover:bg-gray-100 hover:shadow-none"
                                     title="Show hint"
                                     icon={Lightbulb}
-                                    iconClassName={hintVisible ? "" : "text-[#afafaf]"}
+                                    iconClassName={hintVisible ? "" : "text-muted"}
                                     style={hintVisible ? { color: themeHex } : {}}
                                 />
                             )}
 
                             {headerHint && (
-                                <span className="mb-2 text-lg font-bold tracking-widest text-[#afafaf]">
+                                <span className="mb-2 text-lg font-bold tracking-widest text-muted">
                                     {headerHint}
                                 </span>
                             )}
                             <div className="flex w-full flex-1 flex-col items-center justify-center px-2 py-2">
-                                <h1 className="w-full text-center text-3xl leading-tight font-black wrap-break-word text-[#3c3c3c] select-text sm:text-4xl md:text-5xl">
+                                <h1 className="w-full text-center text-3xl leading-tight font-black wrap-break-word text-text select-text sm:text-4xl md:text-5xl">
                                     {displayFront}
                                 </h1>
                                 {altSubtitle && (
-                                    <p className="mt-2 text-lg font-bold text-[#afafaf]">
+                                    <p className="mt-2 text-lg font-bold text-muted">
                                         {altSubtitle}
                                     </p>
                                 )}
@@ -303,26 +303,26 @@ const FlashcardPractice = ({
                                 const isCorrect = choice === card.meaning;
                                 let style: React.CSSProperties = {
                                     backgroundColor: "white",
-                                    borderBottomColor: "#e5e7eb",
+                                    borderBottomColor: "var(--color-border)",
                                 };
                                 let v: "primary" | "secondary" = "secondary";
                                 if (mcSelected !== null) {
                                     if (isCorrect) {
                                         v = "primary";
                                         style = {
-                                            backgroundColor: "#58cc02",
-                                            borderBottomColor: "#58a700",
+                                            backgroundColor: "var(--color-hiragana)",
+                                            borderBottomColor: "var(--color-hiragana-strong)",
                                         };
                                     } else if (isSelected) {
                                         v = "primary";
                                         style = {
                                             backgroundColor: "#ff4b4b",
-                                            borderBottomColor: "#ea2b2b",
+                                            borderBottomColor: "var(--color-danger)",
                                         };
                                     } else {
                                         style = {
                                             backgroundColor: "white",
-                                            borderBottomColor: "#e5e7eb",
+                                            borderBottomColor: "var(--color-border)",
                                             opacity: 0.5,
                                         };
                                     }
@@ -362,7 +362,7 @@ const FlashcardPractice = ({
                             {/* Front Side */}
                             <div className="rounded-5xl absolute inset-0 flex flex-col items-center justify-center border-2 border-b-8 border-gray-200 bg-white p-6 text-center shadow-sm backface-hidden hover:-translate-y-1 hover:shadow-md">
                                 {headerHint && (
-                                    <span className="mb-2 shrink-0 text-xl font-bold tracking-widest text-[#afafaf]">
+                                    <span className="mb-2 shrink-0 text-xl font-bold tracking-widest text-muted">
                                         {headerHint}
                                     </span>
                                 )}
@@ -379,12 +379,12 @@ const FlashcardPractice = ({
                                 )}
                                 <div className="flex w-full flex-1 flex-col items-center justify-center overflow-y-auto px-2 pt-2 pb-8">
                                     <h1
-                                        className={`w-full text-center leading-tight font-black wrap-break-word text-[#3c3c3c] select-text ${card.imageUrl ? "text-2xl sm:text-3xl" : "text-3xl sm:text-4xl md:text-5xl"}`}
+                                        className={`w-full text-center leading-tight font-black wrap-break-word text-text select-text ${card.imageUrl ? "text-2xl sm:text-3xl" : "text-3xl sm:text-4xl md:text-5xl"}`}
                                     >
                                         {displayFront}
                                     </h1>
                                     {altSubtitle && (
-                                        <p className="mt-2 text-lg font-bold text-[#afafaf]">
+                                        <p className="mt-2 text-lg font-bold text-muted">
                                             {altSubtitle}
                                         </p>
                                     )}
@@ -443,17 +443,17 @@ const FlashcardPractice = ({
                                     </h2>
                                     {back.example && (
                                         <div className="mt-2 w-full shrink-0 rounded-2xl border-2 border-gray-100 bg-gray-50 p-4 text-left sm:mt-4 sm:p-5">
-                                            <p className="text-sm font-bold wrap-break-word text-[#3c3c3c] sm:text-base md:text-lg">
+                                            <p className="text-sm font-bold wrap-break-word text-text sm:text-base md:text-lg">
                                                 {back.example}
                                             </p>
                                         </div>
                                     )}
                                     {back.usageNote && (
                                         <div className="mt-3 flex items-center gap-1.5 rounded-xl border border-gray-200 bg-gray-50 px-3 py-1.5">
-                                            <span className="text-xs font-black tracking-wide text-[#afafaf] uppercase">
+                                            <span className="text-xs font-black tracking-wide text-muted uppercase">
                                                 Usage
                                             </span>
-                                            <span className="text-xs font-bold text-[#3c3c3c]">
+                                            <span className="text-xs font-bold text-text">
                                                 {back.usageNote}
                                             </span>
                                         </div>
@@ -470,21 +470,21 @@ const FlashcardPractice = ({
                             <button
                                 aria-label="Again — card will repeat soon"
                                 onClick={() => void handleGrade("Again")}
-                                className="rounded-[1.25rem] border-2 border-b-8 border-[#ea2b2b]/60 bg-[#ff4b4b] py-4 text-base font-black text-white shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-[#ff4b4b] focus-visible:ring-offset-2 active:translate-y-0 active:border-b-2"
+                                className="rounded-[1.25rem] border-2 border-b-8 border-danger/60 bg-[#ff4b4b] py-4 text-base font-black text-white shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-[#ff4b4b] focus-visible:ring-offset-2 active:translate-y-0 active:border-b-2"
                             >
                                 Again
                             </button>
                             <button
                                 aria-label="Hard — interval shortened"
                                 onClick={() => void handleGrade("Hard")}
-                                className="rounded-[1.25rem] border-2 border-b-8 border-[#e07000]/60 bg-[#ff9600] py-4 text-base font-black text-white shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-[#ff9600] focus-visible:ring-offset-2 active:translate-y-0 active:border-b-2"
+                                className="rounded-[1.25rem] border-2 border-b-8 border-[#e07000]/60 bg-survival py-4 text-base font-black text-white shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-[#ff9600] focus-visible:ring-offset-2 active:translate-y-0 active:border-b-2"
                             >
                                 Hard
                             </button>
                             <button
                                 aria-label="Good — normal interval"
                                 onClick={() => void handleGrade("Good")}
-                                className="rounded-[1.25rem] border-2 border-b-8 border-[#58a700]/60 bg-[#58cc02] py-4 text-base font-black text-white shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-[#58cc02] focus-visible:ring-offset-2 active:translate-y-0 active:border-b-2"
+                                className="rounded-[1.25rem] border-2 border-b-8 border-hiragana-strong/60 bg-hiragana py-4 text-base font-black text-white shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-hiragana focus-visible:ring-offset-2 active:translate-y-0 active:border-b-2"
                             >
                                 Good
                             </button>

@@ -42,8 +42,8 @@ const MatchIntroView = ({
             title="Match Mode"
             description="One visible grid: match real pairs; AI distractors on higher tiers add interference — timers, mixed prompts, and lives on harder settings."
             icon={Gamepad2}
-            iconBg="bg-[#ce82ff]"
-            iconBorder="#b65ce8"
+            iconBg="bg-both"
+            iconBorder="var(--color-both-strong)"
             bestScore={bestScore}
             tierInfo={tierInfo}
             startButtonText={prepLoading ? "Preparing…" : "Play"}
@@ -54,7 +54,7 @@ const MatchIntroView = ({
             onStart={onStart}
         >
             <div className="mb-6 w-full max-w-sm">
-                <p className="mb-3 text-center text-xs font-black tracking-widest text-[#afafaf] uppercase">
+                <p className="mb-3 text-center text-xs font-black tracking-widest text-muted uppercase">
                     Select Difficulty
                 </p>
                 <div className="flex flex-col gap-2">
@@ -84,12 +84,12 @@ const MatchIntroView = ({
                                 <div className="flex w-full items-center justify-between">
                                     <div className="text-left">
                                         <div
-                                            className={`font-black ${active ? "text-white" : "text-[#3c3c3c]"}`}
+                                            className={`font-black ${active ? "text-white" : "text-text"}`}
                                         >
                                             {config.label}
                                         </div>
                                         <div
-                                            className={`text-xs font-bold ${active ? "text-white/70" : "text-[#afafaf]"}`}
+                                            className={`text-xs font-bold ${active ? "text-white/70" : "text-muted"}`}
                                         >
                                             {config.sub}
                                             {disabled ? " (need more cards)" : ""}

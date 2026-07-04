@@ -23,8 +23,8 @@ type ThemeColor =
 /** Visual variants for different action hierarchies. */
 type Variant = "primary" | "secondary" | "outline" | "ghost";
 
-/** Button footprint: "md" for labeled buttons, "icon" for a square icon-only button. */
-type Size = "md" | "icon";
+/** Button footprint: "md" for labeled buttons, "icon" for a square icon-only button, "icon-sm" for a denser icon-only button (compact table rows/nav bars). */
+type Size = "md" | "icon" | "icon-sm";
 
 const ALPHABET_MAP: Record<AlphabetMode, ThemeColor> = {
     hiragana: "green",
@@ -34,52 +34,52 @@ const ALPHABET_MAP: Record<AlphabetMode, ThemeColor> = {
 
 const THEMES: Record<string, { bg: string; border: string; hover: string; text: string }> = {
     blue: {
-        bg: "bg-[#1cb0f6]",
-        border: "border-[#1899d6]",
-        hover: "hover:bg-[#149fdf]",
-        text: "text-[#1cb0f6]",
+        bg: "bg-katakana",
+        border: "border-katakana-strong",
+        hover: "hover:bg-katakana-hover",
+        text: "text-katakana",
     },
     green: {
-        bg: "bg-[#58cc02]",
-        border: "border-[#58a700]",
-        hover: "hover:bg-[#46a302]",
-        text: "text-[#58cc02]",
+        bg: "bg-hiragana",
+        border: "border-hiragana-strong",
+        hover: "hover:bg-hiragana-hover",
+        text: "text-hiragana",
     },
     purple: {
-        bg: "bg-[#ce82ff]",
-        border: "border-[#b65ce8]",
-        hover: "hover:bg-[#b65ce8]",
-        text: "text-[#ce82ff]",
+        bg: "bg-both",
+        border: "border-both-strong",
+        hover: "hover:bg-both-strong",
+        text: "text-both",
     },
     orange: {
-        bg: "bg-[#ff9600]",
-        border: "border-[#cc7800]",
-        hover: "hover:bg-[#e68700]",
-        text: "text-[#ff9600]",
+        bg: "bg-survival",
+        border: "border-survival-strong",
+        hover: "hover:bg-survival-hover",
+        text: "text-survival",
     },
     red: {
-        bg: "bg-[#ea2b2b]",
-        border: "border-[#b82222]",
-        hover: "hover:bg-[#d92626]",
-        text: "text-[#ea2b2b]",
+        bg: "bg-danger",
+        border: "border-danger-strong",
+        hover: "hover:bg-danger-hover",
+        text: "text-danger",
     },
     gray: {
-        bg: "bg-[#afafaf]",
-        border: "border-[#8f8f8f]",
-        hover: "hover:bg-[#9f9f9f]",
-        text: "text-[#afafaf]",
+        bg: "bg-muted",
+        border: "border-muted-strong",
+        hover: "hover:bg-muted-hover",
+        text: "text-muted",
     },
     teal: {
-        bg: "bg-[#00d1e0]",
-        border: "border-[#00a8b5]",
-        hover: "hover:bg-[#00b8ca]",
-        text: "text-[#00d1e0]",
+        bg: "bg-teal",
+        border: "border-teal-strong",
+        hover: "hover:bg-teal-hover",
+        text: "text-teal",
     },
     pink: {
-        bg: "bg-[#ff66bb]",
-        border: "border-[#e056a4]",
-        hover: "hover:bg-[#ff88cc]",
-        text: "text-[#ff66bb]",
+        bg: "bg-pink",
+        border: "border-pink-strong",
+        hover: "hover:bg-pink-hover",
+        text: "text-pink",
     },
 };
 
@@ -123,6 +123,8 @@ interface ButtonProps {
     id?: string;
     /** HTML title attribute for tooltips. */
     title?: string;
+    /** Accessible name for icon-only buttons with no visible text label. */
+    "aria-label"?: string;
     /** Inline CSS styles. */
     style?: React.CSSProperties;
 }
@@ -158,6 +160,7 @@ const Button = ({
     type = "button",
     id,
     title,
+    "aria-label": ariaLabel,
     style,
     badge,
 }: ButtonProps) => {
@@ -171,13 +174,14 @@ const Button = ({
     const sizes: Record<Size, string> = {
         md: "px-4 py-3 md:px-6 md:py-4",
         icon: "h-10 w-10 p-0",
+        "icon-sm": "h-9 w-9 p-0",
     };
 
     const variants: Record<Variant, string> = {
         primary: `${isStandardTheme ? t.bg : ""} text-white border-b-4 ${isStandardTheme ? t.border : ""} ${isStandardTheme ? t.hover : ""} hover:-translate-y-1 hover:shadow-lg active:border-b-0 active:translate-y-[4px]`,
         secondary: `bg-white ${isStandardTheme ? t.text : ""} border-2 border-b-4 border-gray-200 hover:bg-gray-50 hover:border-gray-300 hover:-translate-y-1 hover:shadow-md active:border-b-2 active:translate-y-[2px]`,
         outline: `bg-transparent text-gray-500 border-2 border-b-4 border-gray-200 hover:bg-gray-50 hover:border-gray-300 hover:-translate-y-1 active:border-b-2 active:translate-y-[2px]`,
-        ghost: `text-gray-500 hover:text-[#3c3c3c] hover:bg-gray-100 active:bg-gray-200 rounded-xl`,
+        ghost: `text-gray-500 hover:text-text hover:bg-gray-100 active:bg-gray-200 rounded-xl`,
     };
 
     // Forced active state for toggle buttons or tabs
@@ -201,6 +205,7 @@ const Button = ({
             transition={{ type: "spring", stiffness: 400, damping: 17 }}
             id={id}
             title={title}
+            aria-label={ariaLabel}
             type={type}
             onClick={(e: any) => !loading && onClick?.(e)}
             onMouseEnter={onMouseEnter}

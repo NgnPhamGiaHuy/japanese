@@ -40,7 +40,7 @@ export default function ProfilePage() {
     };
 
     return (
-        <div className="min-h-[100dvh] bg-[#F7F7F8] pb-28">
+        <div className="min-h-dvh bg-bg pb-28">
             <ScreenHeader
                 title="Profile"
                 right={
@@ -69,19 +69,19 @@ export default function ProfilePage() {
                                         className="h-32 w-32 object-cover"
                                     />
                                 ) : (
-                                    <div className="flex h-32 w-32 items-center justify-center bg-gradient-to-br from-[#1cb0f6] to-[#ce82ff] text-6xl font-black text-white">
+                                    <div className="flex h-32 w-32 items-center justify-center bg-gradient-to-br from-katakana to-both text-6xl font-black text-white">
                                         {displayName.charAt(0).toUpperCase()}
                                     </div>
                                 )}
                             </div>
-                            <div className="absolute -right-2 -bottom-2 flex h-10 w-10 items-center justify-center rounded-2xl border-4 border-white bg-[#ff9600] text-sm font-black text-white shadow-lg">
+                            <div className="absolute -right-2 -bottom-2 flex h-10 w-10 items-center justify-center rounded-2xl border-4 border-white bg-survival text-sm font-black text-white shadow-lg">
                                 {level}
                             </div>
                         </div>
 
                         <div className="space-y-2">
                             <div className="flex items-center justify-center gap-2">
-                                <h2 className="text-3xl font-black text-[#3c3c3c]">
+                                <h2 className="text-3xl font-black text-text">
                                     {displayName}
                                 </h2>
                                 {role && (
@@ -90,7 +90,7 @@ export default function ProfilePage() {
                                     </Badge>
                                 )}
                             </div>
-                            <p className="text-base font-bold text-[#afafaf]">
+                            <p className="text-base font-bold text-muted">
                                 Learning Japanese since {new Date().getFullYear()}
                             </p>
                         </div>
@@ -99,14 +99,14 @@ export default function ProfilePage() {
                         <div className="mt-8 w-full max-w-md">
                             <div className="mb-2 flex items-end justify-between px-1">
                                 <div className="text-left">
-                                    <p className="text-xs font-black tracking-widest text-[#afafaf] uppercase">
+                                    <p className="text-xs font-black tracking-widest text-muted uppercase">
                                         Current Progress
                                     </p>
-                                    <p className="text-sm font-black text-[#1cb0f6]">
+                                    <p className="text-sm font-black text-katakana">
                                         {xpInLevel} / {xpToNext} XP
                                     </p>
                                 </div>
-                                <p className="text-xs font-black text-[#ce82ff]">
+                                <p className="text-xs font-black text-both">
                                     {Math.round((xpInLevel / xpToNext) * 100)}%
                                 </p>
                             </div>
@@ -115,7 +115,7 @@ export default function ProfilePage() {
                                     initial={{ width: 0 }}
                                     animate={{ width: `${(xpInLevel / xpToNext) * 100}%` }}
                                     transition={{ duration: 1, ease: "easeOut" }}
-                                    className="h-full rounded-full bg-gradient-to-r from-[#1cb0f6] via-[#ce82ff] to-[#1cb0f6] bg-[length:200%_100%]"
+                                    className="h-full rounded-full bg-gradient-to-r from-katakana via-[#ce82ff] to-[#1cb0f6] bg-[length:200%_100%]"
                                     style={{
                                         animation: "gradient-shift 3s linear infinite",
                                     }}
@@ -127,28 +127,28 @@ export default function ProfilePage() {
                     {/* Stats Grid */}
                     <section className="space-y-4">
                         <div className="flex items-center gap-2 px-2">
-                            <Trophy size={14} className="text-[#afafaf]" />
-                            <h3 className="text-xs font-black tracking-widest text-[#afafaf] uppercase">
+                            <Trophy size={14} className="text-muted" />
+                            <h3 className="text-xs font-black tracking-widest text-muted uppercase">
                                 Statistics
                             </h3>
                         </div>
                         <div className="grid grid-cols-1 gap-4 sm:grid-cols-3 md:gap-6">
                             <StatCard
-                                icon={<Flame className="h-7 w-7 text-[#ff9600]" />}
+                                icon={<Flame className="h-7 w-7 text-survival" />}
                                 title="Day Streak"
                                 value={userData.streak}
                                 color="#ff9600"
                                 index={1}
                             />
                             <StatCard
-                                icon={<Zap className="h-7 w-7 text-[#ce82ff]" />}
+                                icon={<Zap className="h-7 w-7 text-both" />}
                                 title="Total XP"
                                 value={userData.xp}
                                 color="#ce82ff"
                                 index={2}
                             />
                             <StatCard
-                                icon={<BookOpen className="h-7 w-7 text-[#1cb0f6]" />}
+                                icon={<BookOpen className="h-7 w-7 text-katakana" />}
                                 title="Kana Known"
                                 value={userData.learnedChars?.length || 0}
                                 color="#1cb0f6"
@@ -160,8 +160,8 @@ export default function ProfilePage() {
                     {/* Activity List */}
                     <section className="space-y-4">
                         <div className="flex items-center gap-2 px-2">
-                            <Zap size={14} className="text-[#afafaf]" />
-                            <h3 className="text-xs font-black tracking-widest text-[#afafaf] uppercase">
+                            <Zap size={14} className="text-muted" />
+                            <h3 className="text-xs font-black tracking-widest text-muted uppercase">
                                 Recent Activity
                             </h3>
                         </div>
@@ -216,12 +216,12 @@ function ActivityRow({
     return (
         <div className="flex items-center justify-between px-6 py-6 transition-colors hover:bg-gray-50/50">
             <div className="min-w-0 flex-1 pr-6">
-                <div className="truncate text-lg font-black text-[#3c3c3c]">{label}</div>
-                <div className="truncate text-sm font-bold text-[#afafaf]">{sub}</div>
+                <div className="truncate text-lg font-black text-text">{label}</div>
+                <div className="truncate text-sm font-bold text-muted">{sub}</div>
             </div>
             <div className="flex items-center gap-3">
-                <div className="text-xl font-black text-[#1cb0f6]">{value}</div>
-                <ChevronRight size={20} className="shrink-0 text-[#3c3c3c] opacity-20" />
+                <div className="text-xl font-black text-katakana">{value}</div>
+                <ChevronRight size={20} className="shrink-0 text-text opacity-20" />
             </div>
         </div>
     );

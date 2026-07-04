@@ -152,7 +152,7 @@ const AdminAnalyticsPageContent = () => {
                 <>
                     <div className="flex items-center gap-3 pt-2">
                         <div className="h-px flex-1 bg-gray-100" />
-                        <span className="text-xs font-black tracking-widest text-[#afafaf] uppercase">
+                        <span className="text-xs font-black tracking-widest text-muted uppercase">
                             System Log Insights
                         </span>
                         <div className="h-px flex-1 bg-gray-100" />

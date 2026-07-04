@@ -21,11 +21,11 @@ export function ChartCell({ item, showRomaji, learned, isHiragana }: ChartCellPr
     }
 
     const isMulti = item.char.length > 1;
-    const learnedText = isHiragana ? "text-[#46a302]" : "text-[#149fdf]";
-    const learnedRomaji = isHiragana ? "text-[#58a700]" : "text-[#1899d6]";
+    const learnedText = isHiragana ? "text-hiragana-hover" : "text-katakana-hover";
+    const learnedRomaji = isHiragana ? "text-hiragana-strong" : "text-katakana-strong";
     const learnedBg = isHiragana
-        ? "border-[#58cc02]/30! bg-[#58cc02]/10! hover:bg-[#58cc02]/20!"
-        : "border-[#1cb0f6]/30! bg-[#1cb0f6]/10! hover:bg-[#1cb0f6]/20!";
+        ? "border-[#58cc02]/30! bg-hiragana/10! hover:bg-hiragana/20!"
+        : "border-[#1cb0f6]/30! bg-katakana/10! hover:bg-katakana/20!";
 
     return (
         <motion.div
@@ -48,7 +48,7 @@ export function ChartCell({ item, showRomaji, learned, isHiragana }: ChartCellPr
                             : "clamp(0.9rem, 4.5cqi, 1.75rem)",
                         lineHeight: 1,
                     }}
-                    className={`font-medium ${learned ? learnedText : "text-[#3c3c3c]"}`}
+                    className={`font-medium ${learned ? learnedText : "text-text"}`}
                 >
                     {item.char}
                 </span>
@@ -57,7 +57,7 @@ export function ChartCell({ item, showRomaji, learned, isHiragana }: ChartCellPr
                     <span
                         style={{ fontSize: "clamp(0.45rem, 1.8cqi, 0.625rem)" }}
                         className={`mt-0.5 w-full truncate text-center font-bold ${
-                            learned ? learnedRomaji : "text-[#afafaf]"
+                            learned ? learnedRomaji : "text-muted"
                         }`}
                     >
                         {item.romaji}

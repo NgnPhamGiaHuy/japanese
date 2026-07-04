@@ -46,10 +46,10 @@ const MetadataViewer = ({ meta }: { meta: Record<string, unknown> }) => {
         <div className="mt-2 grid grid-cols-1 gap-1 sm:grid-cols-2">
             {entries.map(([k, v]) => (
                 <div key={k} className="flex min-w-0 gap-1.5 rounded-lg bg-gray-100/80 px-2 py-1">
-                    <span className="shrink-0 text-xs font-black tracking-wider text-[#afafaf] uppercase">
+                    <span className="shrink-0 text-xs font-black tracking-wider text-muted uppercase">
                         {k}
                     </span>
-                    <span className="min-w-0 truncate font-mono text-xs text-[#3c3c3c]">
+                    <span className="min-w-0 truncate font-mono text-xs text-text">
                         {typeof v === "object" ? JSON.stringify(v) : String(v ?? "—")}
                     </span>
                 </div>
@@ -83,8 +83,8 @@ const CopyButton = ({ text, title }: { text: string; title?: string }) => {
             title={title ?? "Copy"}
             icon={copied ? Check : Copy}
             iconSize={12}
-            iconClassName={copied ? "text-[#58cc02]" : "text-[#afafaf]"}
-            className="h-6 w-6 !p-0 transition-colors hover:!bg-transparent hover:text-[#3c3c3c]"
+            iconClassName={copied ? "text-hiragana" : "text-muted"}
+            className="h-6 w-6 !p-0 transition-colors hover:!bg-transparent hover:text-text"
         />
     );
 };
@@ -102,7 +102,7 @@ const SourceBadge = ({ source }: { source?: string }) => {
             variant="default"
             size="sm"
             icon={isClient ? Smartphone : Server}
-            className="border-gray-100 bg-gray-50 tracking-wider text-[#afafaf] uppercase"
+            className="border-gray-100 bg-gray-50 tracking-wider text-muted uppercase"
         >
             {source.replace("_", " ")}
         </Badge>
@@ -135,7 +135,7 @@ const LogRow = ({ log }: LogRowProps) => {
 
     const borderByLevel =
         level === "error"
-            ? "border-l-[#ea2b2b]"
+            ? "border-l-danger"
             : level === "warn"
               ? "border-l-amber-400"
               : level === "security"
@@ -148,9 +148,17 @@ const LogRow = ({ log }: LogRowProps) => {
         >
             {/* ── Main row ── */}
             <div
-                className="flex w-full cursor-pointer flex-col gap-3 px-4 py-3 sm:flex-row sm:gap-3"
+                className="flex w-full cursor-pointer flex-col gap-3 px-4 py-3 focus:outline-none focus-visible:ring-2 focus-visible:ring-katakana focus-visible:ring-inset sm:flex-row sm:gap-3"
                 onClick={() => hasDetail && setExpanded((v) => !v)}
+                onKeyDown={(e) => {
+                    if (!hasDetail) return;
+                    if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        setExpanded((v) => !v);
+                    }
+                }}
                 role={hasDetail ? "button" : undefined}
+                tabIndex={hasDetail ? 0 : undefined}
                 aria-expanded={hasDetail ? expanded : undefined}
             >
                 {/* Left: badges + action + user */}
@@ -160,18 +168,18 @@ const LogRow = ({ log }: LogRowProps) => {
                         <LogTypeBadge type={type} />
                         <SourceBadge source={log.source} />
                         {log.ip && (
-                            <span className="text-xs font-black tracking-wider text-[#afafaf] uppercase">
+                            <span className="text-xs font-black tracking-wider text-muted uppercase">
                                 IP {log.ip}
                             </span>
                         )}
                     </div>
 
-                    <h3 className="text-sm leading-snug font-black text-[#3c3c3c] sm:text-sm">
+                    <h3 className="text-sm leading-snug font-bold text-text">
                         {log.action ?? "(no action)"}
                     </h3>
 
-                    <p className="flex flex-wrap items-center gap-x-1.5 gap-y-0.5 text-xs font-bold text-[#afafaf] sm:text-xs">
-                        <span className="text-[#3c3c3c]">{log.userName || "—"}</span>
+                    <p className="flex flex-wrap items-center gap-x-1.5 gap-y-0.5 text-xs font-bold text-muted sm:text-xs">
+                        <span className="text-text">{log.userName || "—"}</span>
                         <span>·</span>
                         <span>{log.userEmail || "—"}</span>
                         {log.userId && (
@@ -195,12 +203,12 @@ const LogRow = ({ log }: LogRowProps) => {
                 <div className="flex shrink-0 flex-col items-end justify-between gap-1 text-right sm:flex-col">
                     <div>
                         <time
-                            className="block text-xs font-black tracking-wider text-[#58cc02] uppercase"
+                            className="block text-xs font-black tracking-wider text-hiragana uppercase"
                             title={absolute}
                         >
                             {relative}
                         </time>
-                        <span className="block text-xs font-bold text-[#afafaf]">{absolute}</span>
+                        <span className="block text-xs font-bold text-muted">{absolute}</span>
                     </div>
                     {hasDetail && (
                         <ChevronDown
@@ -219,13 +227,13 @@ const LogRow = ({ log }: LogRowProps) => {
                     <div className="mb-3 flex flex-wrap items-center gap-3">
                         {log.entityType && (
                             <div className="flex items-center gap-1.5 text-xs">
-                                <span className="font-black tracking-wider text-[#afafaf] uppercase">
+                                <span className="font-black tracking-wider text-muted uppercase">
                                     Entity
                                 </span>
                                 <Badge
                                     variant="default"
                                     size="sm"
-                                    className="border-gray-200 bg-white font-mono text-[#3c3c3c]"
+                                    className="border-gray-200 bg-white font-mono text-text"
                                 >
                                     {log.entityType}
                                     {log.entityId ? ` · ${log.entityId.slice(0, 12)}…` : ""}
@@ -236,13 +244,13 @@ const LogRow = ({ log }: LogRowProps) => {
                             </div>
                         )}
                         <div className="flex items-center gap-1.5 text-xs">
-                            <span className="font-black tracking-wider text-[#afafaf] uppercase">
+                            <span className="font-black tracking-wider text-muted uppercase">
                                 Log ID
                             </span>
                             <Badge
                                 variant="default"
                                 size="sm"
-                                className="border-gray-200 bg-white font-mono text-[#3c3c3c]"
+                                className="border-gray-200 bg-white font-mono text-text"
                             >
                                 {log.id.slice(0, 12)}…
                             </Badge>
@@ -253,7 +261,7 @@ const LogRow = ({ log }: LogRowProps) => {
                     {/* User agent */}
                     {log.userAgent && (
                         <div className="mb-2 rounded-lg border border-gray-200 bg-white px-3 py-2">
-                            <span className="mb-1 block text-xs font-black tracking-wider text-[#afafaf] uppercase">
+                            <span className="mb-1 block text-xs font-black tracking-wider text-muted uppercase">
                                 User Agent
                             </span>
                             <p className="font-mono text-xs break-all text-gray-500">

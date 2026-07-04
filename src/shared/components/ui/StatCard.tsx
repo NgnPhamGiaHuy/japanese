@@ -73,7 +73,7 @@ const StatCard = ({
                     {trend && (
                         <span
                             className={`text-xs font-black tracking-widest uppercase ${
-                                trend === "Live" ? "animate-pulse text-[#58cc02]" : "text-gray-400"
+                                trend === "Live" ? "animate-pulse text-hiragana" : "text-gray-400"
                             }`}
                         >
                             {trend}
@@ -85,7 +85,7 @@ const StatCard = ({
                     <p className="text-xs font-black tracking-widest text-gray-400 uppercase">
                         {title}
                     </p>
-                    <h2 className="mt-1 text-3xl font-black tracking-tighter text-[#3c3c3c]">
+                    <h2 className="mt-1 text-3xl font-black tracking-tighter text-text">
                         {loading ? "…" : value}
                     </h2>
                 </div>

@@ -4,7 +4,7 @@ import { useState } from "react";
 
 import { AlertCircle, Settings2, Sparkles, Zap } from "lucide-react";
 
-import { Button } from "@/shared/components/ui";
+import { Button, Input } from "@/shared/components/ui";
 import { hexToThemeColor } from "@/shared/utils";
 import useAIDeck from "../hooks/useAIDeck";
 
@@ -68,7 +68,7 @@ const ModeChip = ({ active, icon, label, sub, onClick, color }: ModeChipProps) =
                 <span className="shrink-0">{icon}</span>
                 <div className="flex flex-col">
                     <div
-                        className={`text-sm font-black ${active ? "text-white" : "text-[#3c3c3c]"}`}
+                        className={`text-sm font-black ${active ? "text-white" : "text-text"}`}
                     >
                         {label}
                     </div>
@@ -121,13 +121,13 @@ const AIBulkPanel = ({ themeColor, onPreview, existingWords = [] }: AIBulkPanelP
                     className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl"
                     style={{ backgroundColor: `${themeColor}18` }}
                 >
-                    <Sparkles size={18} style={{ color: themeColor }} className="sm:size-[20px]" />
+                    <Sparkles size={18} style={{ color: themeColor }} className="sm:size-5" />
                 </div>
                 <div>
-                    <h3 className="text-lg font-black text-[#3c3c3c] sm:text-xl">
+                    <h3 className="text-lg font-black text-text sm:text-xl">
                         Generate Deck with AI
                     </h3>
-                    <p className="text-xs font-bold tracking-wide text-[#afafaf] uppercase sm:text-xs">
+                    <p className="text-xs font-bold tracking-wide text-muted uppercase sm:text-xs">
                         Describe a topic · review before saving
                     </p>
                 </div>
@@ -136,7 +136,7 @@ const AIBulkPanel = ({ themeColor, onPreview, existingWords = [] }: AIBulkPanelP
             <div className="flex flex-col gap-2.5 sm:flex-row sm:gap-3">
                 <ModeChip
                     active={mode === "quick"}
-                    icon={<Zap size={14} className="sm:size-[16px]" />}
+                    icon={<Zap size={14} className="sm:size-4" />}
                     label="Quick"
                     sub={`${QUICK_DEFAULT_COUNT} cards · ${QUICK_DEFAULT_LEVEL}`}
                     onClick={() => setMode("quick")}
@@ -144,7 +144,7 @@ const AIBulkPanel = ({ themeColor, onPreview, existingWords = [] }: AIBulkPanelP
                 />
                 <ModeChip
                     active={mode === "guided"}
-                    icon={<Settings2 size={14} className="sm:size-[16px]" />}
+                    icon={<Settings2 size={14} className="sm:size-4" />}
                     label="Guided"
                     sub="Custom count & level"
                     onClick={() => setMode("guided")}
@@ -153,18 +153,18 @@ const AIBulkPanel = ({ themeColor, onPreview, existingWords = [] }: AIBulkPanelP
             </div>
 
             <div>
-                <label className="mb-2 block text-xs font-black tracking-widest text-[#afafaf] uppercase">
+                <label className="mb-2 block text-xs font-black tracking-widest text-muted uppercase">
                     Topic or Theme
                 </label>
-                <input
+                <Input
                     type="text"
-                    className="w-full rounded-2xl border-2 border-b-4 border-gray-200 bg-white px-4 py-3.5 text-base font-bold text-[#3c3c3c] placeholder-gray-300 transition-colors outline-none sm:px-5 sm:py-4 sm:text-lg"
+                    variant="default"
+                    className="h-auto rounded-2xl border-b-4 px-4 py-3.5 text-base sm:px-5 sm:py-4 sm:text-lg"
+                    style={{ "--theme-color": themeColor } as React.CSSProperties}
                     placeholder="e.g. N5 food vocabulary"
                     value={topic}
                     onChange={(e) => setTopic(e.target.value)}
                     disabled={isLoading}
-                    onFocus={(e) => (e.currentTarget.style.borderColor = themeColor)}
-                    onBlur={(e) => (e.currentTarget.style.borderColor = "")}
                     onKeyDown={(e) =>
                         e.key === "Enter" && !isLoading && topic.trim() && handleGenerate()
                     }
@@ -178,7 +178,7 @@ const AIBulkPanel = ({ themeColor, onPreview, existingWords = [] }: AIBulkPanelP
                             variant="ghost"
                             onClick={() => setTopic(s)}
                             disabled={isLoading}
-                            className="border-2 border-gray-200 bg-white !px-2.5 !py-1 !text-xs !font-black tracking-wide !text-[#afafaf] uppercase shadow-none hover:border-gray-300 hover:text-[#3c3c3c] hover:shadow-none sm:!px-3 sm:!py-1.5 sm:!text-xs"
+                            className="border-2 border-gray-200 bg-white !px-2.5 !py-1 !text-xs !font-black tracking-wide !text-muted uppercase shadow-none hover:border-gray-300 hover:text-text hover:shadow-none sm:!px-3 sm:!py-1.5 sm:!text-xs"
                         >
                             {s}
                         </Button>
@@ -189,7 +189,7 @@ const AIBulkPanel = ({ themeColor, onPreview, existingWords = [] }: AIBulkPanelP
             {mode === "guided" && (
                 <div className="space-y-4 rounded-2xl border-2 border-dashed border-gray-100 bg-gray-50/50 p-4">
                     <div>
-                        <label className="mb-2 block text-xs font-black tracking-widest text-[#afafaf] uppercase">
+                        <label className="mb-2 block text-xs font-black tracking-widest text-muted uppercase">
                             Number of Cards
                         </label>
                         <div className="grid grid-cols-4 gap-2">
@@ -219,7 +219,7 @@ const AIBulkPanel = ({ themeColor, onPreview, existingWords = [] }: AIBulkPanelP
                     </div>
 
                     <div>
-                        <label className="mb-2 block text-xs font-black tracking-widest text-[#afafaf] uppercase">
+                        <label className="mb-2 block text-xs font-black tracking-widest text-muted uppercase">
                             JLPT Level
                         </label>
                         <div className="grid grid-cols-3 gap-2 sm:grid-cols-5 sm:gap-1.5">
@@ -262,8 +262,8 @@ const AIBulkPanel = ({ themeColor, onPreview, existingWords = [] }: AIBulkPanelP
 
             {error && (
                 <div className="flex items-start gap-3 rounded-2xl border-2 border-[#ffdfe0] bg-[#fff5f5] px-4 py-3">
-                    <AlertCircle size={16} className="mt-0.5 shrink-0 text-[#ea2b2b]" />
-                    <p className="text-sm font-bold text-[#ea2b2b]">{error}</p>
+                    <AlertCircle size={16} className="mt-0.5 shrink-0 text-danger" />
+                    <p className="text-sm font-bold text-danger">{error}</p>
                 </div>
             )}
 
@@ -283,7 +283,7 @@ const AIBulkPanel = ({ themeColor, onPreview, existingWords = [] }: AIBulkPanelP
 
             {isLoading ? (
                 <div className="space-y-2 text-center">
-                    <p className="text-sm font-bold text-[#afafaf]">
+                    <p className="text-sm font-bold text-muted">
                         Gemini is crafting your flashcards…
                     </p>
                     <div className="mx-auto h-1 w-48 overflow-hidden rounded-full bg-gray-200">
@@ -294,7 +294,7 @@ const AIBulkPanel = ({ themeColor, onPreview, existingWords = [] }: AIBulkPanelP
                     </div>
                 </div>
             ) : (
-                <p className="text-center text-xs font-bold text-[#afafaf]">
+                <p className="text-center text-xs font-bold text-muted">
                     AI generates cards with hints &amp; quiz answers → you review &amp; edit → then
                     save
                 </p>

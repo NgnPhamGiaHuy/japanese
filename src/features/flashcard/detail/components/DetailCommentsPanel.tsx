@@ -29,8 +29,8 @@ const DetailCommentsPanel = ({
         return (
             <aside className="hidden lg:sticky lg:top-4 lg:block lg:h-[calc(100vh-6rem)]">
                 <div className="rounded-2xl border-2 border-gray-200 bg-white p-6 shadow-sm">
-                    <h3 className="mb-2 text-lg font-black text-[#3c3c3c]">Comments</h3>
-                    <p className="text-sm font-bold text-[#afafaf]">
+                    <h3 className="mb-2 text-lg font-black text-text">Comments</h3>
+                    <p className="text-sm font-bold text-muted">
                         Sign in to view and add comments.
                     </p>
                 </div>
@@ -42,8 +42,8 @@ const DetailCommentsPanel = ({
         return (
             <aside className="hidden lg:sticky lg:top-4 lg:block lg:h-[calc(100vh-6rem)]">
                 <div className="rounded-2xl border-2 border-gray-200 bg-white p-6 shadow-sm">
-                    <h3 className="mb-2 text-lg font-black text-[#3c3c3c]">Comments</h3>
-                    <p className="text-sm font-bold text-[#afafaf]">
+                    <h3 className="mb-2 text-lg font-black text-text">Comments</h3>
+                    <p className="text-sm font-bold text-muted">
                         Select a card to view its comments.
                     </p>
                 </div>

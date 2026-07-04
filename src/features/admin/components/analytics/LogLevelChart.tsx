@@ -83,13 +83,13 @@ const LogLevelChart = ({ data, onClick }: LogLevelChartProps) => {
                     <button
                         key={item.level}
                         onClick={() => onClick?.(item.level)}
-                        className={`flex items-center gap-2 ${onClick ? "cursor-pointer transition-opacity hover:opacity-70" : "cursor-default"}`}
+                        className={`flex items-center gap-2 rounded-md focus:outline-none focus-visible:ring-2 focus-visible:ring-katakana focus-visible:ring-offset-2 ${onClick ? "cursor-pointer transition-opacity hover:opacity-70" : "cursor-default"}`}
                     >
                         <div
                             className="h-2 w-2 rounded-full"
                             style={{ backgroundColor: LEVEL_COLORS[item.level] ?? "#afafaf" }}
                         />
-                        <span className="text-xs font-black tracking-tighter text-[#3c3c3c] uppercase">
+                        <span className="text-xs font-black tracking-tighter text-text uppercase">
                             {LEVEL_LABELS[item.level] ?? item.level}: {item.count}
                         </span>
                     </button>

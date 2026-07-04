@@ -55,14 +55,14 @@ const KanaSurvivalPage = () => {
     // ---- SETUP SCREEN ----
     if (game.phase === "setup") {
         return (
-            <div className="fixed inset-0 z-50 flex flex-col overflow-y-auto bg-[#F7F7F8]">
+            <div className="fixed inset-0 z-50 flex flex-col overflow-y-auto bg-bg">
                 <ScreenHeader title="Survival Mode" backHref="/kana" />
                 <div className="flex flex-1 flex-col items-center justify-start px-4 py-6">
                     <div className="w-full max-w-md">
-                        <div className="mb-6 flex h-20 w-20 items-center justify-center rounded-3xl border-b-8 border-[#cc7800] bg-[#ff9600] text-4xl font-medium text-white shadow-sm">
+                        <div className="mb-6 flex h-20 w-20 items-center justify-center rounded-3xl border-b-8 border-survival-strong bg-survival text-4xl font-medium text-white shadow-sm">
                             <Flame size={40} />
                         </div>
-                        <p className="mb-8 text-lg font-bold text-[#afafaf]">
+                        <p className="mb-8 text-lg font-bold text-muted">
                             How long can you last?
                         </p>
 
@@ -80,7 +80,7 @@ const KanaSurvivalPage = () => {
                                         key={mode}
                                         variant="ghost"
                                         onClick={() => game.setChallengeMode(mode)}
-                                        className={`!flex !w-full !items-center !rounded-2xl !border-2 !border-b-4 !p-5 !text-left shadow-none transition-all hover:!-translate-y-0.5 hover:shadow-md hover:shadow-none active:translate-y-0 ${game.challengeMode === mode ? "!border-[#cc7800] !bg-[#ff9600] !text-white" : "!border-gray-200 !bg-white !text-[#3c3c3c]"}`}
+                                        className={`!flex !w-full !items-center !rounded-2xl !border-2 !border-b-4 !p-5 !text-left shadow-none transition-all hover:!-translate-y-0.5 hover:shadow-md hover:shadow-none active:translate-y-0 ${game.challengeMode === mode ? "!border-survival-strong !bg-survival !text-white" : "!border-gray-200 !bg-white !text-text"}`}
                                     >
                                         <Icon size={28} className="mr-4 shrink-0" />
                                         <div className="flex-1">
@@ -92,7 +92,7 @@ const KanaSurvivalPage = () => {
                                                       : "Drop Mode"}
                                             </div>
                                             <div
-                                                className={`text-sm font-bold ${game.challengeMode === mode ? "!text-white/70" : "!text-[#afafaf]"}`}
+                                                className={`text-sm font-bold ${game.challengeMode === mode ? "!text-white/70" : "!text-muted"}`}
                                             >
                                                 {mode === "infinity"
                                                     ? "Survive as long as possible"
@@ -113,7 +113,7 @@ const KanaSurvivalPage = () => {
 
                         {game.challengeMode === "time" && (
                             <div className="mb-8 rounded-2xl border-2 border-b-4 border-gray-200 bg-white p-5">
-                                <p className="mb-3 text-sm font-black tracking-widest text-[#afafaf] uppercase">
+                                <p className="mb-3 text-sm font-black tracking-widest text-muted uppercase">
                                     Timer Duration
                                 </p>
                                 <div className="flex gap-2">
@@ -122,20 +122,20 @@ const KanaSurvivalPage = () => {
                                             key={m}
                                             variant="ghost"
                                             onClick={() => game.setTimeMinutes(m)}
-                                            className={`!flex-1 !rounded-xl !border-2 !border-b-4 !py-3 !font-black shadow-none transition-all hover:shadow-none active:translate-y-0 ${game.timeMinutes === m ? "!border-[#cc7800] !bg-[#ff9600] !text-white" : "!border-gray-200 !bg-white !text-[#3c3c3c]"}`}
+                                            className={`!flex-1 !rounded-xl !border-2 !border-b-4 !py-3 !font-black shadow-none transition-all hover:shadow-none active:translate-y-0 ${game.timeMinutes === m ? "!border-survival-strong !bg-survival !text-white" : "!border-gray-200 !bg-white !text-text"}`}
                                         >
                                             {m}min
                                         </Button>
                                     ))}
                                 </div>
 
-                                <p className="mt-4 text-center text-xs leading-relaxed font-bold text-[#afafaf]">
+                                <p className="mt-4 text-center text-xs leading-relaxed font-bold text-muted">
                                     Streaks add up to{" "}
-                                    <span className="text-[#3c3c3c]">
+                                    <span className="text-text">
                                         +{TIME_ATTACK_MAX_STREAK_BONUS_SEC}s
                                     </span>{" "}
                                     per correct — always less than a wrong answer (
-                                    <span className="text-[#3c3c3c]">
+                                    <span className="text-text">
                                         −{TIME_ATTACK_WRONG_PENALTY_SEC}s
                                     </span>
                                     ), so the clock eventually runs out.
@@ -144,13 +144,13 @@ const KanaSurvivalPage = () => {
                         )}
 
                         <div className="mb-8">
-                            <p className="mb-2 text-sm font-black font-bold tracking-widest text-[#afafaf] uppercase">
+                            <p className="mb-2 text-sm font-black font-bold tracking-widest text-muted uppercase">
                                 Your Name (Leaderboard)
                             </p>
                             <input
                                 type="text"
                                 maxLength={10}
-                                className="w-full rounded-2xl border-2 border-b-4 border-gray-200 bg-white px-5 py-4 text-xl font-black text-[#3c3c3c] transition-colors outline-none focus:border-[#ff9600]"
+                                className="w-full rounded-2xl border-2 border-b-4 border-gray-200 bg-white px-5 py-4 text-xl font-black text-text transition-colors outline-none focus:border-[#ff9600]"
                                 placeholder="Anonymous"
                                 value={game.localName}
                                 onChange={(e) => game.setLocalName(e.target.value)}
@@ -183,19 +183,19 @@ const KanaSurvivalPage = () => {
         const finalScore =
             game.challengeMode === "drop" ? game.dropScore.current : game.engine.score;
         return (
-            <div className="fixed inset-0 z-50 flex flex-col overflow-y-auto bg-[#F7F7F8]">
+            <div className="fixed inset-0 z-50 flex flex-col overflow-y-auto bg-bg">
                 <div className="mx-auto flex w-full max-w-md flex-col items-center px-4 py-8">
-                    <div className="mb-4 flex h-20 w-20 -rotate-6 items-center justify-center rounded-[1.75rem] border-b-8 border-[#cc7800] bg-[#ff9600] text-white shadow-sm">
+                    <div className="mb-4 flex h-20 w-20 -rotate-6 items-center justify-center rounded-[1.75rem] border-b-8 border-survival-strong bg-survival text-white shadow-sm">
                         <Trophy size={48} strokeWidth={3} />
                     </div>
-                    <h2 className="mb-1 text-4xl font-black text-[#3c3c3c]">Game Over!</h2>
-                    <p className="mb-1 text-xl font-bold text-[#afafaf]">
+                    <h2 className="mb-1 text-4xl font-black text-text">Game Over!</h2>
+                    <p className="mb-1 text-xl font-bold text-muted">
                         Final Score:{" "}
-                        <span className="mx-1 text-3xl font-black text-[#ff9600]">
+                        <span className="mx-1 text-3xl font-black text-survival">
                             {finalScore}
                         </span>
                     </p>
-                    <p className="mb-6 text-sm font-bold text-[#afafaf]">
+                    <p className="mb-6 text-sm font-bold text-muted">
                         Best: {bestScores[game.activeModeKey] ?? 0}
                     </p>
 
@@ -238,7 +238,7 @@ const KanaSurvivalPage = () => {
     if (game.challengeMode !== "drop") {
         const { question, questionType, options, status } = game.engine;
         return (
-            <div className="fixed inset-0 z-50 flex flex-col bg-[#F7F7F8]">
+            <div className="fixed inset-0 z-50 flex flex-col bg-bg">
                 <MiniLeaderboard
                     gameMode={game.activeModeKey}
                     currentUserId={user?.uid}
@@ -262,13 +262,13 @@ const KanaSurvivalPage = () => {
                                 aria-label="Time remaining"
                             >
                                 <div
-                                    className={`h-full rounded-full transition-[width] duration-1000 ease-linear ${game.timeLeft <= 10 ? "bg-[#ea2b2b]" : "bg-[#ff9600]"}`}
+                                    className={`h-full rounded-full transition-[width] duration-1000 ease-linear ${game.timeLeft <= 10 ? "bg-danger" : "bg-survival"}`}
                                     style={{
                                         width: `${Math.min(100, (game.timeLeft / Math.max(game.timeAttackPeak, 1)) * 100)}%`,
                                     }}
                                 />
                             </div>
-                            <p className="text-xs font-bold tracking-wide text-[#afafaf] uppercase md:text-xs">
+                            <p className="text-xs font-bold tracking-wide text-muted uppercase md:text-xs">
                                 Streak adds time
                             </p>
                         </div>
@@ -279,7 +279,7 @@ const KanaSurvivalPage = () => {
                         startSlot={
                             game.challengeMode === "time" ? (
                                 <span
-                                    className={`block w-full text-right text-sm font-semibold tracking-tight tabular-nums md:text-lg lg:text-xl ${game.timeLeft <= 5 ? "animate-pulse text-[#ea2b2b]" : "text-[#ff9600]"}`}
+                                    className={`block w-full text-right text-sm font-semibold tracking-tight tabular-nums md:text-lg lg:text-xl ${game.timeLeft <= 5 ? "animate-pulse text-danger" : "text-survival"}`}
                                 >
                                     {formatTime(game.timeLeft)}
                                 </span>
@@ -298,18 +298,18 @@ const KanaSurvivalPage = () => {
                             <div
                                 className={`rounded-6xl mb-4 flex h-[180px] w-full items-center justify-center border-2 border-b-8 border-gray-200 bg-white shadow-sm sm:h-[220px] ${status === "wrong" ? "animate-shake" : ""}`}
                             >
-                                <span className="text-[7rem] leading-none font-medium text-[#3c3c3c] select-none sm:text-[8rem]">
+                                <span className="text-[7rem] leading-none font-medium text-text select-none sm:text-9xl">
                                     {question.char}
                                 </span>
                             </div>
                             <div className="grid w-full grid-cols-2 gap-3">
                                 {options.map((opt, i) => {
                                     let state =
-                                        "bg-white text-[#3c3c3c] border-gray-200 hover:bg-gray-50 hover:-translate-y-1 hover:shadow-md hover:border-gray-300";
+                                        "bg-white text-text border-gray-200 hover:bg-gray-50 hover:-translate-y-1 hover:shadow-md hover:border-gray-300";
                                     if (status !== "idle") {
                                         if (opt.romaji === question.romaji)
                                             state =
-                                                "bg-[#58cc02] text-white border-[#58a700] translate-y-[2px] border-b-2";
+                                                "bg-hiragana text-white border-hiragana-strong translate-y-[2px] border-b-2";
                                         else
                                             state =
                                                 "bg-white border-gray-200 text-gray-300 opacity-50";
@@ -333,7 +333,7 @@ const KanaSurvivalPage = () => {
                                 status={status}
                                 question={question}
                                 questionType={questionType}
-                                primaryBg="bg-[#ff9600]"
+                                primaryBg="bg-survival"
                             />
                         </>
                     )}
@@ -349,7 +349,7 @@ const KanaSurvivalPage = () => {
 
     return (
         <div
-            className={`fixed inset-0 z-50 flex flex-col overflow-hidden bg-[#F7F7F8] outline-none ${game.errorFlash ? "ring-2 ring-red-500/50 ring-inset" : ""}`}
+            className={`fixed inset-0 z-50 flex flex-col overflow-hidden bg-bg outline-none ${game.errorFlash ? "ring-2 ring-red-500/50 ring-inset" : ""}`}
             onKeyDown={(e) => game.handleDropTyping(e.key.toLowerCase())}
             tabIndex={0}
             ref={inputRef}
@@ -365,7 +365,7 @@ const KanaSurvivalPage = () => {
                     onClick={() => game.setPhase("setup")}
                     icon={X}
                     aria-label="Back to survival menu"
-                    className="text-[#afafaf] hover:bg-gray-100 hover:text-[#3c3c3c]"
+                    className="text-muted hover:bg-gray-100 hover:text-text"
                 />
                 <LivesDisplay lives={game.lives} />
                 <GameStreakScoreStack
@@ -386,12 +386,12 @@ const KanaSurvivalPage = () => {
                             style={{ left: `${word.x}%`, top: `${word.y}%` }}
                         >
                             <div
-                                className={`text-4xl font-medium drop-shadow-sm ${isActive ? "text-[#ff9600]" : "text-[#3c3c3c]"}`}
+                                className={`text-4xl font-medium drop-shadow-sm ${isActive ? "text-survival" : "text-text"}`}
                             >
                                 {word.char}
                             </div>
                             {isActive && (
-                                <div className="text-sm font-bold tracking-wider text-[#ff9600]">
+                                <div className="text-sm font-bold tracking-wider text-survival">
                                     {word.typed}
                                 </div>
                             )}
@@ -399,11 +399,11 @@ const KanaSurvivalPage = () => {
                     );
                 })}
             </div>
-            <div className="z-10 p-4 text-center text-sm font-bold text-[#afafaf]">
+            <div className="z-10 p-4 text-center text-sm font-bold text-muted">
                 {activeWord ? (
                     <>
                         Typing:{" "}
-                        <span className="font-black text-[#ff9600]">{activeWord.typed}</span>
+                        <span className="font-black text-survival">{activeWord.typed}</span>
                     </>
                 ) : (
                     "Start typing to match falling characters"

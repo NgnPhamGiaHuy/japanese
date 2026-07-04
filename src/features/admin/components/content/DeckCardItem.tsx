@@ -24,14 +24,14 @@ export const DeckCardItem = ({ card }: DeckCardItemProps) => {
             <div className="flex items-start justify-between">
                 <div className="flex-1">
                     <div className="mb-1 flex items-center gap-2">
-                        <span className="text-lg font-black text-[#3c3c3c]">{card.primary}</span>
-                        {card.imageUrl && <ImageIcon size={14} className="text-[#58cc02]" />}
+                        <span className="text-lg font-black text-text">{card.primary}</span>
+                        {card.imageUrl && <ImageIcon size={14} className="text-hiragana" />}
                     </div>
                     <p className="text-sm font-bold text-gray-500">{card.meaning}</p>
                 </div>
                 <Badge
                     variant="default"
-                    className="!bg-[#1cb0f6]/10 !text-xs !font-black tracking-wider !text-[#1cb0f6] uppercase"
+                    className="!bg-katakana/10 !text-xs !font-black tracking-wider !text-katakana uppercase"
                 >
                     {card.interval > 0 ? `${card.interval}d` : "New"}
                 </Badge>

@@ -61,7 +61,7 @@ const UsersTableToolbar = ({
                 {canDelete && (
                     <Button
                         variant="ghost"
-                        className="!h-9 !px-4 !py-0 !text-xs !text-[#ea2b2b]"
+                        className="!h-9 !px-4 !py-0 !text-xs !text-danger"
                         icon={Trash2}
                         iconSize={14}
                         onClick={onDelete}

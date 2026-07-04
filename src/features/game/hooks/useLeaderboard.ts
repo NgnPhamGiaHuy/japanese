@@ -55,7 +55,9 @@ export function useLeaderboard(
         let allEntries = [...entries];
 
         if (currentUser && currentScore > 0) {
-            const existingIdx = allEntries.findIndex((e) => e.userId === currentUser.userId);
+            const existingIdx = allEntries.findIndex(
+                (entry) => entry.userId === currentUser.userId,
+            );
             if (existingIdx !== -1) {
                 if (currentScore > allEntries[existingIdx].score) {
                     allEntries[existingIdx] = { ...allEntries[existingIdx], score: currentScore };
@@ -73,14 +75,18 @@ export function useLeaderboard(
 
         allEntries.sort((a, b) => b.score - a.score);
 
-        const computed: ComputedLeaderboardEntry[] = allEntries.map((e, i) => ({
-            ...e,
-            rank: i + 1,
-            isCurrentUser: currentUser?.userId === e.userId,
+        const computed: ComputedLeaderboardEntry[] = allEntries.map((entry, index) => ({
+            ...entry,
+            rank: index + 1,
+            isCurrentUser: currentUser?.userId === entry.userId,
         }));
 
-        const rank = currentUser ? computed.find((e) => e.isCurrentUser)?.rank || null : null;
-        const nearby = rank ? computed.filter((e) => Math.abs(e.rank - rank) <= 1) : [];
+        const rank = currentUser
+            ? (computed.find((entry) => entry.isCurrentUser)?.rank ?? null)
+            : null;
+        const nearby = rank
+            ? computed.filter((entry) => Math.abs(entry.rank - rank) <= 1)
+            : [];
 
         return {
             leaderboard: computed.slice(0, topN),

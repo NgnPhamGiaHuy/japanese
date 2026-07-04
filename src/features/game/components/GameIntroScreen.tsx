@@ -23,7 +23,7 @@ export interface GameIntroScreenProps {
     description: string;
     /** Icon component to display */
     icon: LucideIcon;
-    /** Icon background color (e.g., "bg-[#ce82ff]") */
+    /** Icon background color (e.g., "bg-both") */
     iconBg: string;
     /** Icon border color (e.g., "#b65ce8") */
     iconBorder: string;
@@ -62,11 +62,13 @@ export function GameIntroScreen({
     onStart,
 }: GameIntroScreenProps) {
     return (
-        <div className="fixed inset-0 flex flex-col items-center justify-center bg-[#F7F7F8] p-6">
+        <div className="fixed inset-0 flex flex-col items-center justify-center bg-bg p-6">
             <Button
                 variant="ghost"
+                size="icon"
                 onClick={onBack}
-                className="absolute top-4 left-4 p-2!"
+                aria-label="Back"
+                className="absolute top-4 left-4"
                 icon={X}
             />
 
@@ -79,8 +81,8 @@ export function GameIntroScreen({
                 <Icon size={44} strokeWidth={2.5} />
             </motion.div>
 
-            <h1 className="mb-1 text-3xl font-black text-[#3c3c3c]">{title}</h1>
-            <p className="mb-2 max-w-sm text-center text-sm font-bold text-[#afafaf]">
+            <h1 className="mb-1 text-3xl font-black text-text">{title}</h1>
+            <p className="mb-2 max-w-sm text-center text-sm font-bold text-muted">
                 {description}
             </p>
 
@@ -93,8 +95,8 @@ export function GameIntroScreen({
                     <span className="text-sm font-black" style={{ color: tierInfo.color }}>
                         {tierInfo.label}
                     </span>
-                    <span className="text-sm font-bold text-[#afafaf]">·</span>
-                    <span className="text-sm font-black text-[#3c3c3c]">Best: {bestScore}</span>
+                    <span className="text-sm font-bold text-muted">·</span>
+                    <span className="text-sm font-black text-text">Best: {bestScore}</span>
                 </div>
             )}
 

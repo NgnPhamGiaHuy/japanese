@@ -16,8 +16,8 @@ interface DashboardTabsProps {
 const tabClass = (active: boolean) =>
     `!flex-1 !rounded-xl !py-2 !text-sm !font-black shadow-none !transition-all hover:shadow-none active:translate-y-0 ${
         active
-            ? "!bg-white !text-[#3c3c3c] shadow-sm"
-            : "!text-[#afafaf] hover:!bg-transparent hover:!text-[#3c3c3c]"
+            ? "!bg-white !text-text shadow-sm"
+            : "!text-muted hover:!bg-transparent hover:!text-text"
     }`;
 
 const DashboardTabs = ({
@@ -30,16 +30,16 @@ const DashboardTabs = ({
     const sortedTabs = [...DASHBOARD_TABS].sort((a, b) => a.priority - b.priority);
 
     const tabConfig: Record<string, { count: number; color: string }> = {
-        personal: { count: personalCount, color: "bg-[#1cb0f6]" },
-        shared: { count: sharedCount, color: "bg-[#ce82ff]" },
-        discover: { count: publicCount, color: "bg-[#58cc02]" },
+        personal: { count: personalCount, color: "bg-katakana" },
+        shared: { count: sharedCount, color: "bg-both" },
+        discover: { count: publicCount, color: "bg-hiragana" },
     };
 
     return (
         <div className="mb-6 flex gap-2 rounded-2xl bg-gray-100 p-1">
             {sortedTabs.map((tab) => {
                 const isActive = activeTab === tab.id;
-                const { count, color } = tabConfig[tab.id] || { count: 0, color: "bg-[#afafaf]" };
+                const { count, color } = tabConfig[tab.id] || { count: 0, color: "bg-muted" };
 
                 return (
                     <Button

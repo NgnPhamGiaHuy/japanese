@@ -22,8 +22,8 @@ const AdminErrorState = ({ message, onRetry }: AdminErrorStateProps) => {
                 icon={AlertTriangle}
                 title="Unable to load admin data"
                 description={message}
-                iconBg="bg-[#ea2b2b]"
-                iconBorder="border-[#b82222]"
+                iconBg="bg-danger"
+                iconBorder="border-danger-strong"
             />
             {onRetry && (
                 <div className="flex justify-center">

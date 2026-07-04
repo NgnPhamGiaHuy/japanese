@@ -33,7 +33,7 @@ const AnalyticsDetailModal = ({
     return (
         <Modal isOpen={isOpen} onClose={onClose} title={title} maxWidth="4xl">
             <div className="space-y-6">
-                <p className="text-sm font-bold text-[#afafaf]">{description}</p>
+                <p className="text-sm font-bold text-muted">{description}</p>
 
                 {isLoading ? (
                     <LoadingSpinner fullScreen={false} label="Fetching detailed records..." />
@@ -60,16 +60,16 @@ const AnalyticsDetailModal = ({
                             <table className="w-full text-left">
                                 <thead className="border-b border-gray-100 bg-gray-50/50">
                                     <tr>
-                                        <th className="px-5 py-4 text-xs font-black tracking-widest text-[#afafaf] uppercase">
+                                        <th className="px-5 py-4 text-xs font-black tracking-widest text-muted uppercase">
                                             Subject
                                         </th>
-                                        <th className="px-5 py-4 text-xs font-black tracking-widest text-[#afafaf] uppercase">
+                                        <th className="px-5 py-4 text-xs font-black tracking-widest text-muted uppercase">
                                             Activity
                                         </th>
-                                        <th className="px-5 py-4 text-xs font-black tracking-widest text-[#afafaf] uppercase">
+                                        <th className="px-5 py-4 text-xs font-black tracking-widest text-muted uppercase">
                                             Occurred
                                         </th>
-                                        <th className="px-5 py-4 text-right text-xs font-black tracking-widest text-[#afafaf] uppercase">
+                                        <th className="px-5 py-4 text-right text-xs font-black tracking-widest text-muted uppercase">
                                             Insight
                                         </th>
                                     </tr>
@@ -96,12 +96,12 @@ const AnalyticsDetailModal = ({
                                                     className="transition-all hover:bg-gray-50/80"
                                                 >
                                                     <td className="px-5 py-4">
-                                                        <div className="text-sm font-black text-[#3c3c3c]">
+                                                        <div className="text-sm font-black text-text">
                                                             {item.displayName ||
                                                                 item.userName ||
                                                                 "System"}
                                                         </div>
-                                                        <div className="max-w-[120px] truncate text-xs font-bold text-[#afafaf]">
+                                                        <div className="max-w-[120px] truncate text-xs font-bold text-muted">
                                                             {item.email || item.uid || item.id}
                                                         </div>
                                                     </td>
@@ -112,11 +112,11 @@ const AnalyticsDetailModal = ({
                                                                 "Unknown Action"}
                                                         </span>
                                                     </td>
-                                                    <td className="px-5 py-4 text-xs font-bold text-[#afafaf]">
+                                                    <td className="px-5 py-4 text-xs font-bold text-muted">
                                                         {displayDate}
                                                     </td>
                                                     <td className="px-5 py-4 text-right">
-                                                        <span className="text-xs font-black text-[#1cb0f6]">
+                                                        <span className="text-xs font-black text-katakana">
                                                             {item.metadata?.score !== undefined
                                                                 ? `Score: ${item.metadata.score}`
                                                                 : item.level
@@ -131,7 +131,7 @@ const AnalyticsDetailModal = ({
                                         <tr>
                                             <td
                                                 colSpan={4}
-                                                className="px-5 py-12 text-center text-sm font-bold text-[#afafaf]"
+                                                className="px-5 py-12 text-center text-sm font-bold text-muted"
                                             >
                                                 No detailed records found for this selection.
                                             </td>

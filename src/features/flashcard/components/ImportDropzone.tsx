@@ -3,7 +3,7 @@
 import React, { useCallback } from "react";
 import { useDropzone } from "react-dropzone";
 
-import { FileUp, ImageIcon, Loader2, Sparkles, X } from "lucide-react";
+import { FileUp } from "lucide-react";
 
 import { Button } from "@/shared/components/ui";
 
@@ -59,14 +59,14 @@ const ImportDropzone: React.FC<ImportDropzoneProps> = ({
                                         <div className="mb-2 rounded-xl bg-white p-2 text-[var(--theme-color)] shadow-sm">
                                             <FileUp size={20} />
                                         </div>
-                                        <p className="w-full truncate px-2 text-xs font-black tracking-widest text-[#afafaf] uppercase">
+                                        <p className="w-full truncate px-2 text-xs font-black tracking-widest text-muted uppercase">
                                             {file.name.split(".").pop()}
                                         </p>
                                     </div>
                                 )}
                             </div>
                             <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 transition-opacity group-hover:opacity-100">
-                                <p className="px-2 text-center text-[8px] font-black text-white uppercase">
+                                <p className="px-2 text-center text-xs font-black text-white uppercase">
                                     {file.name}
                                 </p>
                             </div>
@@ -115,8 +115,8 @@ const ImportDropzone: React.FC<ImportDropzoneProps> = ({
             </div>
 
             <div className="space-y-1.5">
-                <p className="text-xl font-black text-[#3c3c3c]">Drop anything here</p>
-                <p className="max-w-[200px] text-xs leading-relaxed font-bold text-[#afafaf]">
+                <p className="text-xl font-black text-text">Drop anything here</p>
+                <p className="max-w-[200px] text-xs leading-relaxed font-bold text-muted">
                     Images (Vision OCR) or CSV/TXT files (Instant Sync)
                 </p>
             </div>
