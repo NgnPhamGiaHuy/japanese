@@ -122,12 +122,12 @@ const FlashcardPractice = ({
 
     if (cards.length === 0) {
         return (
-            <div className="flex h-screen flex-col items-center justify-center bg-bg p-6 text-center">
+            <div className="bg-bg flex h-screen flex-col items-center justify-center p-6 text-center">
                 <div className="mb-6 flex h-24 w-24 items-center justify-center rounded-4xl border-b-8 border-gray-200 bg-white text-gray-400 shadow-sm">
                     <Check size={48} strokeWidth={3} />
                 </div>
-                <h2 className="mb-2 text-2xl font-black text-text">All caught up!</h2>
-                <p className="mb-8 font-bold text-muted">
+                <h2 className="text-text mb-2 text-2xl font-black">All caught up!</h2>
+                <p className="text-muted mb-8 font-bold">
                     No cards are due for practice right now.
                 </p>
                 <Button onClick={onClose} variant="secondary" className="px-8 py-3">
@@ -194,27 +194,27 @@ const FlashcardPractice = ({
                 ? Math.round((stats.correct / (stats.correct + stats.incorrect)) * 100)
                 : 0;
         return (
-            <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-bg p-6 text-center">
+            <div className="bg-bg fixed inset-0 z-50 flex flex-col items-center justify-center p-6 text-center">
                 <div
                     className="mb-6 flex h-24 w-24 -rotate-6 items-center justify-center rounded-4xl border-b-8 shadow-sm"
                     style={{ backgroundColor: themeHex, borderColor: `${themeHex}AA` }}
                 >
                     <RefreshCw size={48} className="text-white" strokeWidth={3} />
                 </div>
-                <h2 className="mb-1 text-4xl font-black text-text">Practice Done!</h2>
-                <p className="mb-8 text-lg font-bold text-muted">
-                    Accuracy: <span className="font-black text-text">{accuracy}%</span>
+                <h2 className="text-text mb-1 text-4xl font-black">Practice Done!</h2>
+                <p className="text-muted mb-8 text-lg font-bold">
+                    Accuracy: <span className="text-text font-black">{accuracy}%</span>
                 </p>
                 <div className="mb-10 flex w-full max-w-sm gap-4">
                     <div className="flex-1 rounded-3xl border-2 border-b-8 border-gray-200 bg-white p-6 text-center shadow-sm">
-                        <div className="text-5xl font-black text-hiragana">{stats.correct}</div>
-                        <div className="mt-2 text-xs font-black tracking-widest text-muted uppercase">
+                        <div className="text-hiragana text-5xl font-black">{stats.correct}</div>
+                        <div className="text-muted mt-2 text-xs font-black tracking-widest uppercase">
                             Correct
                         </div>
                     </div>
                     <div className="flex-1 rounded-3xl border-2 border-b-8 border-gray-200 bg-white p-6 text-center shadow-sm">
-                        <div className="text-5xl font-black text-survival">{stats.incorrect}</div>
-                        <div className="mt-2 text-xs font-black tracking-widest text-muted uppercase">
+                        <div className="text-survival text-5xl font-black">{stats.incorrect}</div>
+                        <div className="text-muted mt-2 text-xs font-black tracking-widest uppercase">
                             Review
                         </div>
                     </div>
@@ -233,7 +233,7 @@ const FlashcardPractice = ({
 
     // ── Session UI ───────────────────────────────────────────────────────────
     return (
-        <div className="fixed inset-0 z-50 flex flex-col bg-bg">
+        <div className="bg-bg fixed inset-0 z-50 flex flex-col">
             <header className="flex items-center justify-between p-4">
                 <Button variant="ghost" size="icon" onClick={onClose} icon={X} aria-label="Close" />
                 <div className="mx-4 flex-1">
@@ -244,7 +244,7 @@ const FlashcardPractice = ({
                         />
                     </div>
                 </div>
-                <span className="w-12 text-right text-sm font-black text-muted">
+                <span className="text-muted w-12 text-right text-sm font-black">
                     {currentIndex + 1}/{queue.length}
                 </span>
             </header>
@@ -270,16 +270,16 @@ const FlashcardPractice = ({
                             )}
 
                             {headerHint && (
-                                <span className="mb-2 text-lg font-bold tracking-widest text-muted">
+                                <span className="text-muted mb-2 text-lg font-bold tracking-widest">
                                     {headerHint}
                                 </span>
                             )}
                             <div className="flex w-full flex-1 flex-col items-center justify-center px-2 py-2">
-                                <h1 className="w-full text-center text-3xl leading-tight font-black wrap-break-word text-text select-text sm:text-4xl md:text-5xl">
+                                <h1 className="text-text w-full text-center text-3xl leading-tight font-black wrap-break-word select-text sm:text-4xl md:text-5xl">
                                     {displayFront}
                                 </h1>
                                 {altSubtitle && (
-                                    <p className="mt-2 text-lg font-bold text-muted">
+                                    <p className="text-muted mt-2 text-lg font-bold">
                                         {altSubtitle}
                                     </p>
                                 )}
@@ -362,7 +362,7 @@ const FlashcardPractice = ({
                             {/* Front Side */}
                             <div className="rounded-5xl absolute inset-0 flex flex-col items-center justify-center border-2 border-b-8 border-gray-200 bg-white p-6 text-center shadow-sm backface-hidden hover:-translate-y-1 hover:shadow-md">
                                 {headerHint && (
-                                    <span className="mb-2 shrink-0 text-xl font-bold tracking-widest text-muted">
+                                    <span className="text-muted mb-2 shrink-0 text-xl font-bold tracking-widest">
                                         {headerHint}
                                     </span>
                                 )}
@@ -379,12 +379,12 @@ const FlashcardPractice = ({
                                 )}
                                 <div className="flex w-full flex-1 flex-col items-center justify-center overflow-y-auto px-2 pt-2 pb-8">
                                     <h1
-                                        className={`w-full text-center leading-tight font-black wrap-break-word text-text select-text ${card.imageUrl ? "text-2xl sm:text-3xl" : "text-3xl sm:text-4xl md:text-5xl"}`}
+                                        className={`text-text w-full text-center leading-tight font-black wrap-break-word select-text ${card.imageUrl ? "text-2xl sm:text-3xl" : "text-3xl sm:text-4xl md:text-5xl"}`}
                                     >
                                         {displayFront}
                                     </h1>
                                     {altSubtitle && (
-                                        <p className="mt-2 text-lg font-bold text-muted">
+                                        <p className="text-muted mt-2 text-lg font-bold">
                                             {altSubtitle}
                                         </p>
                                     )}
@@ -443,17 +443,17 @@ const FlashcardPractice = ({
                                     </h2>
                                     {back.example && (
                                         <div className="mt-2 w-full shrink-0 rounded-2xl border-2 border-gray-100 bg-gray-50 p-4 text-left sm:mt-4 sm:p-5">
-                                            <p className="text-sm font-bold wrap-break-word text-text sm:text-base md:text-lg">
+                                            <p className="text-text text-sm font-bold wrap-break-word sm:text-base md:text-lg">
                                                 {back.example}
                                             </p>
                                         </div>
                                     )}
                                     {back.usageNote && (
                                         <div className="mt-3 flex items-center gap-1.5 rounded-xl border border-gray-200 bg-gray-50 px-3 py-1.5">
-                                            <span className="text-xs font-black tracking-wide text-muted uppercase">
+                                            <span className="text-muted text-xs font-black tracking-wide uppercase">
                                                 Usage
                                             </span>
-                                            <span className="text-xs font-bold text-text">
+                                            <span className="text-text text-xs font-bold">
                                                 {back.usageNote}
                                             </span>
                                         </div>
@@ -470,21 +470,21 @@ const FlashcardPractice = ({
                             <button
                                 aria-label="Again — card will repeat soon"
                                 onClick={() => void handleGrade("Again")}
-                                className="rounded-[1.25rem] border-2 border-b-8 border-danger/60 bg-[#ff4b4b] py-4 text-base font-black text-white shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-[#ff4b4b] focus-visible:ring-offset-2 active:translate-y-0 active:border-b-2"
+                                className="border-danger/60 rounded-[1.25rem] border-2 border-b-8 bg-[#ff4b4b] py-4 text-base font-black text-white shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-[#ff4b4b] focus-visible:ring-offset-2 active:translate-y-0 active:border-b-2"
                             >
                                 Again
                             </button>
                             <button
                                 aria-label="Hard — interval shortened"
                                 onClick={() => void handleGrade("Hard")}
-                                className="rounded-[1.25rem] border-2 border-b-8 border-[#e07000]/60 bg-survival py-4 text-base font-black text-white shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-[#ff9600] focus-visible:ring-offset-2 active:translate-y-0 active:border-b-2"
+                                className="bg-survival rounded-[1.25rem] border-2 border-b-8 border-[#e07000]/60 py-4 text-base font-black text-white shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-[#ff9600] focus-visible:ring-offset-2 active:translate-y-0 active:border-b-2"
                             >
                                 Hard
                             </button>
                             <button
                                 aria-label="Good — normal interval"
                                 onClick={() => void handleGrade("Good")}
-                                className="rounded-[1.25rem] border-2 border-b-8 border-hiragana-strong/60 bg-hiragana py-4 text-base font-black text-white shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-hiragana focus-visible:ring-offset-2 active:translate-y-0 active:border-b-2"
+                                className="border-hiragana-strong/60 bg-hiragana focus-visible:ring-hiragana rounded-[1.25rem] border-2 border-b-8 py-4 text-base font-black text-white shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 active:translate-y-0 active:border-b-2"
                             >
                                 Good
                             </button>

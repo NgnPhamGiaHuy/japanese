@@ -129,7 +129,7 @@ export const ScreenHeader = ({
             className={`${SCREEN_HEADER_BAR_CLASS} flex items-center justify-between gap-2 px-4 py-3`}
         >
             {BackButton}
-            <h1 className="min-w-0 flex-1 truncate px-2 text-center text-lg font-black text-text">
+            <h1 className="text-text min-w-0 flex-1 truncate px-2 text-center text-lg font-black">
                 {title}
             </h1>
             <div className={rightWrapperClassName}>{right ?? null}</div>

@@ -65,7 +65,7 @@ const DraggableCard = ({
                 {/* Primary Word */}
                 <div className="md:col-span-2">
                     <div className="mb-1 flex items-center justify-between">
-                        <label className="text-xs font-black tracking-widest text-muted uppercase sm:text-xs">
+                        <label className="text-muted text-xs font-black tracking-widest uppercase sm:text-xs">
                             Primary ✱
                         </label>
                         <Button
@@ -91,16 +91,14 @@ const DraggableCard = ({
                         disabled={saving || aiLoading}
                     />
                     {aiError && (
-                        <p className="mt-1 text-xs font-bold text-danger sm:text-xs">
-                            {aiError}
-                        </p>
+                        <p className="text-danger mt-1 text-xs font-bold sm:text-xs">{aiError}</p>
                     )}
                 </div>
 
                 {/* Alternative Form */}
                 {(["alternative"] as const).map((repKey) => (
                     <div key={repKey}>
-                        <label className="mb-1 block text-xs font-black tracking-widest text-muted uppercase sm:text-xs">
+                        <label className="text-muted mb-1 block text-xs font-black tracking-widest uppercase sm:text-xs">
                             Alternative
                         </label>
                         <Input
@@ -118,7 +116,7 @@ const DraggableCard = ({
 
                 {/* Meaning */}
                 <div className="md:col-span-2">
-                    <label className="mb-1 block text-xs font-black tracking-widest text-muted uppercase sm:text-xs">
+                    <label className="text-muted mb-1 block text-xs font-black tracking-widest uppercase sm:text-xs">
                         Meaning ✱
                     </label>
                     <Input
@@ -133,7 +131,7 @@ const DraggableCard = ({
 
                 {/* Example Sentence */}
                 <div className="md:col-span-2">
-                    <label className="mb-1 block text-xs font-black tracking-widest text-muted uppercase sm:text-xs">
+                    <label className="text-muted mb-1 block text-xs font-black tracking-widest uppercase sm:text-xs">
                         Example Sentence (Optional)
                     </label>
                     <Input
@@ -148,7 +146,7 @@ const DraggableCard = ({
 
                 {/* Image Section */}
                 <div className="md:col-span-2">
-                    <label className="mb-1 block text-xs font-black tracking-widest text-muted uppercase">
+                    <label className="text-muted mb-1 block text-xs font-black tracking-widest uppercase">
                         Card Image (Optional)
                     </label>
                     <div className="mt-2 flex items-center gap-4">
@@ -200,7 +198,7 @@ const DraggableCard = ({
                                 onClick={() => {
                                     document.getElementById(`img-upload-${card.id}`)?.click();
                                 }}
-                                className="!rounded-xl !border-2 !border-gray-200 !bg-white !px-4 !py-2 !text-sm !font-bold !text-text shadow-sm hover:!bg-gray-50 active:translate-y-0"
+                                className="!text-text !rounded-xl !border-2 !border-gray-200 !bg-white !px-4 !py-2 !text-sm !font-bold shadow-sm hover:!bg-gray-50 active:translate-y-0"
                             >
                                 {card.previewUrl || card.imageUrl ? "Change Image" : "Upload Image"}
                             </Button>

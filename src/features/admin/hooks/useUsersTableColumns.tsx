@@ -88,9 +88,9 @@ export const useUsersTableColumns = ({
                 return (
                     <div className="text-center">
                         {!raw ? (
-                            <span className="text-xs text-muted">Never</span>
+                            <span className="text-muted text-xs">Never</span>
                         ) : (
-                            <span className="text-xs font-bold text-muted">
+                            <span className="text-muted text-xs font-bold">
                                 {new Date(raw).toLocaleDateString(undefined, {
                                     year: "numeric",
                                     month: "short",
@@ -115,9 +115,9 @@ export const useUsersTableColumns = ({
                 return (
                     <div className="text-center">
                         {!raw ? (
-                            <span className="text-xs text-muted">Unknown</span>
+                            <span className="text-muted text-xs">Unknown</span>
                         ) : (
-                            <span className="text-xs font-bold text-katakana">
+                            <span className="text-katakana text-xs font-bold">
                                 {new Date(raw).toLocaleDateString(undefined, {
                                     year: "numeric",
                                     month: "short",

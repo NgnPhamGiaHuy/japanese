@@ -64,7 +64,7 @@ const FlashcardDashboard = () => {
         lesson.shareId || (lesson.ownerId ? buildShareId(lesson.ownerId, lesson.id) : "");
 
     return (
-        <div className="min-h-dvh bg-bg pb-28">
+        <div className="bg-bg min-h-dvh pb-28">
             <ScreenHeader
                 title="Flashcards"
                 backHref="/"

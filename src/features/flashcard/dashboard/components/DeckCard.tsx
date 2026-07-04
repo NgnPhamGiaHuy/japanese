@@ -73,7 +73,7 @@ const DeckCard = ({
             <div className="mb-4 flex items-start justify-between">
                 <div className="flex-1 pr-4">
                     <div className="flex items-center gap-2">
-                        <h3 className="text-xl font-black text-text">{lesson.title}</h3>
+                        <h3 className="text-text text-xl font-black">{lesson.title}</h3>
                         {isShared && (
                             <span
                                 style={{
@@ -101,7 +101,7 @@ const DeckCard = ({
                         )}
                     </div>
                     {lesson.description && (
-                        <p className="mt-1 line-clamp-2 text-sm font-bold text-muted">
+                        <p className="text-muted mt-1 line-clamp-2 text-sm font-bold">
                             {lesson.description}
                         </p>
                     )}
@@ -149,7 +149,7 @@ const DeckCard = ({
                             {lesson.cardCount}
                         </span>
                     </div>
-                    <span className="text-xs font-black text-muted uppercase">cards</span>
+                    <span className="text-muted text-xs font-black uppercase">cards</span>
                 </div>
             </div>
 
@@ -157,7 +157,7 @@ const DeckCard = ({
                 <div className="flex flex-1 gap-2">
                     <Link
                         href={viewPath}
-                        className="flex-1 rounded-2xl focus:outline-none focus-visible:ring-2 focus-visible:ring-katakana focus-visible:ring-offset-2"
+                        className="focus-visible:ring-katakana flex-1 rounded-2xl focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
                     >
                         <Button
                             variant="primary"
@@ -178,7 +178,7 @@ const DeckCard = ({
                         )}
                         <Link
                             href={speedPath}
-                            className="block rounded-2xl focus:outline-none focus-visible:ring-2 focus-visible:ring-katakana focus-visible:ring-offset-2"
+                            className="focus-visible:ring-katakana block rounded-2xl focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
                         >
                             <Button
                                 variant="secondary"
@@ -200,7 +200,7 @@ const DeckCard = ({
                         )}
                         <Link
                             href={matchPath}
-                            className="block rounded-2xl focus:outline-none focus-visible:ring-2 focus-visible:ring-katakana focus-visible:ring-offset-2"
+                            className="focus-visible:ring-katakana block rounded-2xl focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
                         >
                             <Button
                                 variant="secondary"
@@ -262,7 +262,7 @@ const DeckCard = ({
                         <Button
                             variant="ghost"
                             onClick={() => onDelete?.()}
-                            className="!flex !h-11 !w-11 !items-center !justify-center !rounded-xl !p-0 !text-gray-300 shadow-none transition-colors hover:!bg-danger-bg hover:!text-danger hover:shadow-none active:translate-y-0"
+                            className="hover:!bg-danger-bg hover:!text-danger !flex !h-11 !w-11 !items-center !justify-center !rounded-xl !p-0 !text-gray-300 shadow-none transition-colors hover:shadow-none active:translate-y-0"
                             title="Delete deck"
                             icon={Trash2}
                             iconSize={20}

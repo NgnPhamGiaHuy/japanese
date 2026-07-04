@@ -38,21 +38,21 @@ const UserCell = ({ user }: UserCellProps) => {
                     </span>
                 )}
                 {isOnline && (
-                    <div className="absolute right-0 bottom-0 h-3 w-3 rounded-full border-2 border-white bg-hiragana shadow-[0_0_10px_#58cc02]" />
+                    <div className="bg-hiragana absolute right-0 bottom-0 h-3 w-3 rounded-full border-2 border-white shadow-[0_0_10px_#58cc02]" />
                 )}
             </div>
             <div className="min-w-0">
                 <div className="flex items-center gap-1.5">
-                    <p className="truncate text-[15px] font-black text-text">
+                    <p className="text-text truncate text-[15px] font-black">
                         {user.displayName || "Anonymous User"}
                     </p>
                     {isOnline && (
-                        <span className="flex h-4 animate-pulse items-center rounded-full bg-hiragana px-1.5 text-[8px] font-black tracking-widest text-white uppercase shadow-sm shadow-[#58cc02]/20">
+                        <span className="bg-hiragana flex h-4 animate-pulse items-center rounded-full px-1.5 text-[8px] font-black tracking-widest text-white uppercase shadow-sm shadow-[#58cc02]/20">
                             Live
                         </span>
                     )}
                 </div>
-                <p className="truncate text-xs leading-none font-bold text-muted">
+                <p className="text-muted truncate text-xs leading-none font-bold">
                     {user.email ?? "No email linked"}
                 </p>
             </div>

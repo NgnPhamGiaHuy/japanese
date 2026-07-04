@@ -75,7 +75,7 @@ const Modal = ({ isOpen, onClose, title, children, maxWidth = "md" }: ModalProps
                         {/* Header */}
                         <div className="flex items-center justify-between border-b border-gray-100 p-6">
                             {title && (
-                                <h3 id={titleId} className="text-xl font-black text-text">
+                                <h3 id={titleId} className="text-text text-xl font-black">
                                     {title}
                                 </h3>
                             )}

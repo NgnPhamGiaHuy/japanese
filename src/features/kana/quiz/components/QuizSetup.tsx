@@ -18,7 +18,7 @@ export function QuizSetup({ alphabet, themeColor, onStartQuiz }: QuizSetupProps)
     const displayChar = alphabet === "both" ? "あ" : alphabet === "hiragana" ? "あ" : "ア";
 
     return (
-        <div className="fixed inset-0 z-50 flex flex-col overflow-y-auto bg-bg">
+        <div className="bg-bg fixed inset-0 z-50 flex flex-col overflow-y-auto">
             <ScreenHeader title="Recall Quiz" backHref="/kana" />
             <div className="flex flex-1 flex-col items-center justify-start px-4 py-6">
                 <div className="w-full max-w-md">
@@ -28,7 +28,7 @@ export function QuizSetup({ alphabet, themeColor, onStartQuiz }: QuizSetupProps)
                     >
                         {displayChar}
                     </div>
-                    <p className="mb-8 text-lg font-bold text-muted">
+                    <p className="text-muted mb-8 text-lg font-bold">
                         How well do you know your kana?
                     </p>
                     <div className="space-y-3">

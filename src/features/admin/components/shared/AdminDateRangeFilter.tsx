@@ -47,7 +47,7 @@ const AdminDateRangeFilter = ({
                 <button
                     type="button"
                     onClick={onReset}
-                    className="flex items-center gap-2 text-xs font-black tracking-widest text-muted uppercase transition-all hover:text-danger"
+                    className="text-muted hover:text-danger flex items-center gap-2 text-xs font-black tracking-widest uppercase transition-all"
                 >
                     <RotateCcw size={12} />
                     Reset
@@ -58,13 +58,13 @@ const AdminDateRangeFilter = ({
                         className={`flex h-6 items-center gap-2 rounded-full px-3 transition-all ${
                             hasActiveFilters
                                 ? "bg-katakana/10 text-katakana"
-                                : "bg-gray-50 text-muted"
+                                : "text-muted bg-gray-50"
                         }`}
                     >
                         <Filter size={10} className={hasActiveFilters ? "animate-pulse" : ""} />
                         <span>Active Filters</span>
                         {hasActiveFilters && (
-                            <div className="h-2 w-2 rounded-full bg-katakana shadow-sm shadow-[#1cb0f6]/50" />
+                            <div className="bg-katakana h-2 w-2 rounded-full shadow-sm shadow-[#1cb0f6]/50" />
                         )}
                     </div>
                 </div>

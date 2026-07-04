@@ -241,7 +241,7 @@ const CommentPanel = ({
             <div className="flex shrink-0 items-center justify-between border-b border-gray-100 px-4 py-3">
                 <div className="flex items-center gap-2">
                     <MessageSquare size={15} style={{ color: themeColor }} />
-                    <span className="text-[13px] font-black text-text">Comments</span>
+                    <span className="text-text text-[13px] font-black">Comments</span>
                     {comments.length > 0 && (
                         <span className="rounded-full bg-gray-100 px-1.5 py-px text-xs font-black text-gray-500">
                             {sorted.length}

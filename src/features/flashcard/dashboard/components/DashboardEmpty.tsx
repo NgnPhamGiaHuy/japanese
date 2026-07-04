@@ -14,11 +14,11 @@ const DashboardEmpty = ({ activeTab }: DashboardEmptyProps) => {
     if (activeTab === "discover") {
         return (
             <div className="py-20 text-center">
-                <div className="mx-auto mb-6 flex h-24 w-24 -rotate-6 items-center justify-center rounded-4xl border-b-8 border-hiragana-hover bg-hiragana text-white shadow-sm">
+                <div className="border-hiragana-hover bg-hiragana mx-auto mb-6 flex h-24 w-24 -rotate-6 items-center justify-center rounded-4xl border-b-8 text-white shadow-sm">
                     <Sparkles size={48} strokeWidth={3} />
                 </div>
-                <h2 className="mb-2 text-2xl font-black text-text">No public decks yet</h2>
-                <p className="font-bold text-muted">
+                <h2 className="text-text mb-2 text-2xl font-black">No public decks yet</h2>
+                <p className="text-muted font-bold">
                     Public decks from other learners will appear here.
                 </p>
             </div>
@@ -27,13 +27,13 @@ const DashboardEmpty = ({ activeTab }: DashboardEmptyProps) => {
 
     return (
         <div className="py-20 text-center">
-            <div className="mx-auto mb-6 flex h-24 w-24 -rotate-6 items-center justify-center rounded-4xl border-b-8 border-both-strong bg-both text-white shadow-sm">
+            <div className="border-both-strong bg-both mx-auto mb-6 flex h-24 w-24 -rotate-6 items-center justify-center rounded-4xl border-b-8 text-white shadow-sm">
                 <BookOpen size={48} strokeWidth={3} />
             </div>
-            <h2 className="mb-2 text-2xl font-black text-text">
+            <h2 className="text-text mb-2 text-2xl font-black">
                 {activeTab === "personal" ? "No decks yet" : "No shared decks"}
             </h2>
-            <p className="mb-8 font-bold text-muted">
+            <p className="text-muted mb-8 font-bold">
                 {activeTab === "personal"
                     ? "Create your first vocabulary deck to get started!"
                     : "Shared decks from other students will appear here."}

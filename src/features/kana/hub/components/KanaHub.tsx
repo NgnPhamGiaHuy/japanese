@@ -40,7 +40,7 @@ export default function KanaHub() {
     const { primaryBg, primaryBorderB, primaryText } = themeColors;
 
     return (
-        <div className="min-h-dvh bg-bg">
+        <div className="bg-bg min-h-dvh">
             <div className="animate-in fade-in slide-in-from-bottom-4 mx-auto max-w-2xl px-4 pt-6 pb-28 duration-500">
                 <AlphabetSwitcher value={alphabet} onChange={setAlphabet} />
 
@@ -52,10 +52,10 @@ export default function KanaHub() {
                             {isBoth ? "あ/ア" : alphabet === "hiragana" ? "あ" : "ア"}
                         </div>
                         <div>
-                            <h1 className="text-lg leading-tight font-black text-text md:text-3xl">
+                            <h1 className="text-text text-lg leading-tight font-black md:text-3xl">
                                 Kana Master
                             </h1>
-                            <p className="text-xs font-bold text-muted md:text-sm">
+                            <p className="text-muted text-xs font-bold md:text-sm">
                                 Level:{" "}
                                 <span className={primaryText}>
                                     {isBeginner ? "Novice" : "Scholar"}
@@ -200,7 +200,7 @@ export default function KanaHub() {
                         <div className="grid grid-cols-2 gap-4 md:grid-cols-3 md:gap-5">
                             <Link
                                 href="/kana/practice"
-                                className="group flex h-full w-full flex-col items-center justify-center rounded-3xl border-2 border-b-4 border-gray-200 bg-white p-5 font-extrabold text-[#00d1e0] shadow-sm transition-all duration-200 select-none hover:-translate-y-1 hover:border-gray-300 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-katakana focus-visible:ring-offset-2 active:translate-y-[2px] active:border-b-2 md:rounded-4xl md:p-6"
+                                className="group focus-visible:ring-katakana flex h-full w-full flex-col items-center justify-center rounded-3xl border-2 border-b-4 border-gray-200 bg-white p-5 font-extrabold text-[#00d1e0] shadow-sm transition-all duration-200 select-none hover:-translate-y-1 hover:border-gray-300 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 active:translate-y-[2px] active:border-b-2 md:rounded-4xl md:p-6"
                             >
                                 <div className="mb-3 flex items-center justify-center rounded-xl bg-[#00d1e0]/10 p-3 transition-transform group-hover:scale-110 md:mb-4 md:rounded-2xl md:p-4">
                                     <PenTool
@@ -209,23 +209,23 @@ export default function KanaHub() {
                                         className="md:h-8 md:w-8"
                                     />
                                 </div>
-                                <span className="text-sm text-text group-hover:text-black md:text-lg">
+                                <span className="text-text text-sm group-hover:text-black md:text-lg">
                                     Writing
                                 </span>
                             </Link>
 
                             <Link
                                 href="/kana/survival"
-                                className="group relative flex h-full w-full flex-col items-center justify-center rounded-3xl border-2 border-b-4 border-gray-200 bg-white p-5 font-extrabold text-survival shadow-sm transition-all duration-200 select-none hover:-translate-y-1 hover:border-gray-300 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-katakana focus-visible:ring-offset-2 active:translate-y-[2px] active:border-b-2 md:rounded-4xl md:p-6"
+                                className="group text-survival focus-visible:ring-katakana relative flex h-full w-full flex-col items-center justify-center rounded-3xl border-2 border-b-4 border-gray-200 bg-white p-5 font-extrabold shadow-sm transition-all duration-200 select-none hover:-translate-y-1 hover:border-gray-300 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 active:translate-y-[2px] active:border-b-2 md:rounded-4xl md:p-6"
                             >
-                                <div className="mb-3 flex items-center justify-center rounded-xl bg-survival/10 p-3 transition-transform group-hover:scale-110 md:mb-4 md:rounded-2xl md:p-4">
+                                <div className="bg-survival/10 mb-3 flex items-center justify-center rounded-xl p-3 transition-transform group-hover:scale-110 md:mb-4 md:rounded-2xl md:p-4">
                                     <Flame size={28} strokeWidth={2.5} className="md:h-8 md:w-8" />
                                 </div>
-                                <span className="text-sm text-text group-hover:text-black md:text-lg">
+                                <span className="text-text text-sm group-hover:text-black md:text-lg">
                                     Survival
                                 </span>
                                 {bestInfinity > 0 && (
-                                    <span className="absolute top-3 right-3 rounded-full bg-survival px-2 py-0.5 text-xs font-black text-white shadow-sm md:text-xs">
+                                    <span className="bg-survival absolute top-3 right-3 rounded-full px-2 py-0.5 text-xs font-black text-white shadow-sm md:text-xs">
                                         Inf: {bestInfinity}
                                     </span>
                                 )}
@@ -233,7 +233,7 @@ export default function KanaHub() {
 
                             <Link
                                 href="/kana/chart"
-                                className="group col-span-2 flex h-full w-full flex-col items-center justify-center rounded-3xl border-2 border-b-4 border-gray-200 bg-white p-5 font-extrabold text-slate-500 shadow-sm transition-all duration-200 select-none hover:-translate-y-1 hover:border-gray-300 hover:text-slate-700 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-katakana focus-visible:ring-offset-2 active:translate-y-[2px] active:border-b-2 md:col-span-1 md:rounded-4xl md:p-6"
+                                className="group focus-visible:ring-katakana col-span-2 flex h-full w-full flex-col items-center justify-center rounded-3xl border-2 border-b-4 border-gray-200 bg-white p-5 font-extrabold text-slate-500 shadow-sm transition-all duration-200 select-none hover:-translate-y-1 hover:border-gray-300 hover:text-slate-700 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 active:translate-y-[2px] active:border-b-2 md:col-span-1 md:rounded-4xl md:p-6"
                             >
                                 <div className="mb-3 flex items-center justify-center rounded-xl bg-slate-100 p-3 text-slate-500 transition-transform group-hover:scale-110 group-hover:text-slate-700 md:mb-4 md:rounded-2xl md:p-4">
                                     <BarChart2
@@ -242,7 +242,7 @@ export default function KanaHub() {
                                         className="md:h-8 md:w-8"
                                     />
                                 </div>
-                                <span className="text-sm text-text group-hover:text-black md:text-lg">
+                                <span className="text-text text-sm group-hover:text-black md:text-lg">
                                     Reference Chart
                                 </span>
                             </Link>

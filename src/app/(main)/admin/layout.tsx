@@ -14,7 +14,7 @@ import { AdminGuard, AdminSidebar } from "@/features/admin/components";
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
     return (
         <AdminGuard>
-            <div className="flex min-h-screen bg-bg">
+            <div className="bg-bg flex min-h-screen">
                 <AdminSidebar />
                 {/* pt-14 on mobile to clear the fixed top bar; no offset needed on lg */}
                 <main className="flex-1 pt-14 lg:pt-0 lg:pl-64">

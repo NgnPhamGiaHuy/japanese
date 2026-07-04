@@ -45,7 +45,7 @@ const Leaderboard = ({ gameMode, currentUserId, accentColor = "#ff9600" }: Leade
             </div>
 
             {error && (
-                <p className="rounded-2xl bg-white px-4 py-3 text-center text-sm font-bold text-muted">
+                <p className="text-muted rounded-2xl bg-white px-4 py-3 text-center text-sm font-bold">
                     Could not load leaderboard.
                 </p>
             )}
@@ -54,7 +54,7 @@ const Leaderboard = ({ gameMode, currentUserId, accentColor = "#ff9600" }: Leade
 
             {!loading && !error && entries.length === 0 && (
                 <div className="rounded-2xl bg-white px-4 py-6 text-center">
-                    <p className="text-sm font-bold text-muted">No scores yet.</p>
+                    <p className="text-muted text-sm font-bold">No scores yet.</p>
                     <p className="mt-0.5 text-xs font-bold text-[#c8c8c8]">
                         Be the first on the board!
                     </p>
@@ -76,7 +76,7 @@ const Leaderboard = ({ gameMode, currentUserId, accentColor = "#ff9600" }: Leade
                             >
                                 <span className="w-6 shrink-0 text-center text-base">
                                     {medal ?? (
-                                        <span className="text-xs font-black text-muted">
+                                        <span className="text-muted text-xs font-black">
                                             #{i + 1}
                                         </span>
                                     )}
@@ -90,7 +90,7 @@ const Leaderboard = ({ gameMode, currentUserId, accentColor = "#ff9600" }: Leade
                                         {entry.displayName.charAt(0).toUpperCase()}
                                     </div>
                                     <span
-                                        className={`truncate text-sm ${isMe ? "font-black text-text" : "font-bold text-text"}`}
+                                        className={`truncate text-sm ${isMe ? "text-text font-black" : "text-text font-bold"}`}
                                     >
                                         {entry.displayName}
                                         {isMe && (
@@ -115,7 +115,7 @@ const Leaderboard = ({ gameMode, currentUserId, accentColor = "#ff9600" }: Leade
                                         );
                                     })()}
                                     <span
-                                        className={`text-base ${isMe ? "font-black" : "font-bold text-text"}`}
+                                        className={`text-base ${isMe ? "font-black" : "text-text font-bold"}`}
                                         style={isMe ? { color: accentColor } : undefined}
                                     >
                                         {entry.score}

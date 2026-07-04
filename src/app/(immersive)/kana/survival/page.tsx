@@ -55,16 +55,14 @@ const KanaSurvivalPage = () => {
     // ---- SETUP SCREEN ----
     if (game.phase === "setup") {
         return (
-            <div className="fixed inset-0 z-50 flex flex-col overflow-y-auto bg-bg">
+            <div className="bg-bg fixed inset-0 z-50 flex flex-col overflow-y-auto">
                 <ScreenHeader title="Survival Mode" backHref="/kana" />
                 <div className="flex flex-1 flex-col items-center justify-start px-4 py-6">
                     <div className="w-full max-w-md">
-                        <div className="mb-6 flex h-20 w-20 items-center justify-center rounded-3xl border-b-8 border-survival-strong bg-survival text-4xl font-medium text-white shadow-sm">
+                        <div className="border-survival-strong bg-survival mb-6 flex h-20 w-20 items-center justify-center rounded-3xl border-b-8 text-4xl font-medium text-white shadow-sm">
                             <Flame size={40} />
                         </div>
-                        <p className="mb-8 text-lg font-bold text-muted">
-                            How long can you last?
-                        </p>
+                        <p className="text-muted mb-8 text-lg font-bold">How long can you last?</p>
 
                         <div className="mb-8 space-y-3">
                             {(["infinity", "time", "drop"] as const).map((mode) => {
@@ -80,7 +78,7 @@ const KanaSurvivalPage = () => {
                                         key={mode}
                                         variant="ghost"
                                         onClick={() => game.setChallengeMode(mode)}
-                                        className={`!flex !w-full !items-center !rounded-2xl !border-2 !border-b-4 !p-5 !text-left shadow-none transition-all hover:!-translate-y-0.5 hover:shadow-md hover:shadow-none active:translate-y-0 ${game.challengeMode === mode ? "!border-survival-strong !bg-survival !text-white" : "!border-gray-200 !bg-white !text-text"}`}
+                                        className={`!flex !w-full !items-center !rounded-2xl !border-2 !border-b-4 !p-5 !text-left shadow-none transition-all hover:!-translate-y-0.5 hover:shadow-md hover:shadow-none active:translate-y-0 ${game.challengeMode === mode ? "!border-survival-strong !bg-survival !text-white" : "!text-text !border-gray-200 !bg-white"}`}
                                     >
                                         <Icon size={28} className="mr-4 shrink-0" />
                                         <div className="flex-1">
@@ -113,7 +111,7 @@ const KanaSurvivalPage = () => {
 
                         {game.challengeMode === "time" && (
                             <div className="mb-8 rounded-2xl border-2 border-b-4 border-gray-200 bg-white p-5">
-                                <p className="mb-3 text-sm font-black tracking-widest text-muted uppercase">
+                                <p className="text-muted mb-3 text-sm font-black tracking-widest uppercase">
                                     Timer Duration
                                 </p>
                                 <div className="flex gap-2">
@@ -122,14 +120,14 @@ const KanaSurvivalPage = () => {
                                             key={m}
                                             variant="ghost"
                                             onClick={() => game.setTimeMinutes(m)}
-                                            className={`!flex-1 !rounded-xl !border-2 !border-b-4 !py-3 !font-black shadow-none transition-all hover:shadow-none active:translate-y-0 ${game.timeMinutes === m ? "!border-survival-strong !bg-survival !text-white" : "!border-gray-200 !bg-white !text-text"}`}
+                                            className={`!flex-1 !rounded-xl !border-2 !border-b-4 !py-3 !font-black shadow-none transition-all hover:shadow-none active:translate-y-0 ${game.timeMinutes === m ? "!border-survival-strong !bg-survival !text-white" : "!text-text !border-gray-200 !bg-white"}`}
                                         >
                                             {m}min
                                         </Button>
                                     ))}
                                 </div>
 
-                                <p className="mt-4 text-center text-xs leading-relaxed font-bold text-muted">
+                                <p className="text-muted mt-4 text-center text-xs leading-relaxed font-bold">
                                     Streaks add up to{" "}
                                     <span className="text-text">
                                         +{TIME_ATTACK_MAX_STREAK_BONUS_SEC}s
@@ -144,13 +142,13 @@ const KanaSurvivalPage = () => {
                         )}
 
                         <div className="mb-8">
-                            <p className="mb-2 text-sm font-black font-bold tracking-widest text-muted uppercase">
+                            <p className="text-muted mb-2 text-sm font-black font-bold tracking-widest uppercase">
                                 Your Name (Leaderboard)
                             </p>
                             <input
                                 type="text"
                                 maxLength={10}
-                                className="w-full rounded-2xl border-2 border-b-4 border-gray-200 bg-white px-5 py-4 text-xl font-black text-text transition-colors outline-none focus:border-[#ff9600]"
+                                className="text-text w-full rounded-2xl border-2 border-b-4 border-gray-200 bg-white px-5 py-4 text-xl font-black transition-colors outline-none focus:border-[#ff9600]"
                                 placeholder="Anonymous"
                                 value={game.localName}
                                 onChange={(e) => game.setLocalName(e.target.value)}
@@ -183,19 +181,17 @@ const KanaSurvivalPage = () => {
         const finalScore =
             game.challengeMode === "drop" ? game.dropScore.current : game.engine.score;
         return (
-            <div className="fixed inset-0 z-50 flex flex-col overflow-y-auto bg-bg">
+            <div className="bg-bg fixed inset-0 z-50 flex flex-col overflow-y-auto">
                 <div className="mx-auto flex w-full max-w-md flex-col items-center px-4 py-8">
-                    <div className="mb-4 flex h-20 w-20 -rotate-6 items-center justify-center rounded-[1.75rem] border-b-8 border-survival-strong bg-survival text-white shadow-sm">
+                    <div className="border-survival-strong bg-survival mb-4 flex h-20 w-20 -rotate-6 items-center justify-center rounded-[1.75rem] border-b-8 text-white shadow-sm">
                         <Trophy size={48} strokeWidth={3} />
                     </div>
-                    <h2 className="mb-1 text-4xl font-black text-text">Game Over!</h2>
-                    <p className="mb-1 text-xl font-bold text-muted">
+                    <h2 className="text-text mb-1 text-4xl font-black">Game Over!</h2>
+                    <p className="text-muted mb-1 text-xl font-bold">
                         Final Score:{" "}
-                        <span className="mx-1 text-3xl font-black text-survival">
-                            {finalScore}
-                        </span>
+                        <span className="text-survival mx-1 text-3xl font-black">{finalScore}</span>
                     </p>
-                    <p className="mb-6 text-sm font-bold text-muted">
+                    <p className="text-muted mb-6 text-sm font-bold">
                         Best: {bestScores[game.activeModeKey] ?? 0}
                     </p>
 
@@ -238,7 +234,7 @@ const KanaSurvivalPage = () => {
     if (game.challengeMode !== "drop") {
         const { question, questionType, options, status } = game.engine;
         return (
-            <div className="fixed inset-0 z-50 flex flex-col bg-bg">
+            <div className="bg-bg fixed inset-0 z-50 flex flex-col">
                 <MiniLeaderboard
                     gameMode={game.activeModeKey}
                     currentUserId={user?.uid}
@@ -268,7 +264,7 @@ const KanaSurvivalPage = () => {
                                     }}
                                 />
                             </div>
-                            <p className="text-xs font-bold tracking-wide text-muted uppercase md:text-xs">
+                            <p className="text-muted text-xs font-bold tracking-wide uppercase md:text-xs">
                                 Streak adds time
                             </p>
                         </div>
@@ -279,7 +275,7 @@ const KanaSurvivalPage = () => {
                         startSlot={
                             game.challengeMode === "time" ? (
                                 <span
-                                    className={`block w-full text-right text-sm font-semibold tracking-tight tabular-nums md:text-lg lg:text-xl ${game.timeLeft <= 5 ? "animate-pulse text-danger" : "text-survival"}`}
+                                    className={`block w-full text-right text-sm font-semibold tracking-tight tabular-nums md:text-lg lg:text-xl ${game.timeLeft <= 5 ? "text-danger animate-pulse" : "text-survival"}`}
                                 >
                                     {formatTime(game.timeLeft)}
                                 </span>
@@ -298,7 +294,7 @@ const KanaSurvivalPage = () => {
                             <div
                                 className={`rounded-6xl mb-4 flex h-[180px] w-full items-center justify-center border-2 border-b-8 border-gray-200 bg-white shadow-sm sm:h-[220px] ${status === "wrong" ? "animate-shake" : ""}`}
                             >
-                                <span className="text-[7rem] leading-none font-medium text-text select-none sm:text-9xl">
+                                <span className="text-text text-[7rem] leading-none font-medium select-none sm:text-9xl">
                                     {question.char}
                                 </span>
                             </div>
@@ -349,7 +345,7 @@ const KanaSurvivalPage = () => {
 
     return (
         <div
-            className={`fixed inset-0 z-50 flex flex-col overflow-hidden bg-bg outline-none ${game.errorFlash ? "ring-2 ring-red-500/50 ring-inset" : ""}`}
+            className={`bg-bg fixed inset-0 z-50 flex flex-col overflow-hidden outline-none ${game.errorFlash ? "ring-2 ring-red-500/50 ring-inset" : ""}`}
             onKeyDown={(e) => game.handleDropTyping(e.key.toLowerCase())}
             tabIndex={0}
             ref={inputRef}
@@ -365,7 +361,7 @@ const KanaSurvivalPage = () => {
                     onClick={() => game.setPhase("setup")}
                     icon={X}
                     aria-label="Back to survival menu"
-                    className="text-muted hover:bg-gray-100 hover:text-text"
+                    className="text-muted hover:text-text hover:bg-gray-100"
                 />
                 <LivesDisplay lives={game.lives} />
                 <GameStreakScoreStack
@@ -391,7 +387,7 @@ const KanaSurvivalPage = () => {
                                 {word.char}
                             </div>
                             {isActive && (
-                                <div className="text-sm font-bold tracking-wider text-survival">
+                                <div className="text-survival text-sm font-bold tracking-wider">
                                     {word.typed}
                                 </div>
                             )}
@@ -399,11 +395,10 @@ const KanaSurvivalPage = () => {
                     );
                 })}
             </div>
-            <div className="z-10 p-4 text-center text-sm font-bold text-muted">
+            <div className="text-muted z-10 p-4 text-center text-sm font-bold">
                 {activeWord ? (
                     <>
-                        Typing:{" "}
-                        <span className="font-black text-survival">{activeWord.typed}</span>
+                        Typing: <span className="text-survival font-black">{activeWord.typed}</span>
                     </>
                 ) : (
                     "Start typing to match falling characters"

@@ -75,7 +75,7 @@ export function GameResultsScreen({
         typeof window !== "undefined" ? window : { innerWidth: 500, innerHeight: 900 };
 
     return (
-        <div className="fixed inset-0 z-50 flex flex-col items-center overflow-y-auto bg-bg">
+        <div className="bg-bg fixed inset-0 z-50 flex flex-col items-center overflow-y-auto">
             {isNewBest && (
                 <Confetti
                     width={width}
@@ -101,16 +101,16 @@ export function GameResultsScreen({
                     <motion.div
                         initial={{ opacity: 0, y: 8 }}
                         animate={{ opacity: 1, y: 0 }}
-                        className="mb-3 rounded-xl bg-[#fff8e8] px-4 py-1.5 text-xs font-black tracking-wide text-survival uppercase"
+                        className="text-survival mb-3 rounded-xl bg-[#fff8e8] px-4 py-1.5 text-xs font-black tracking-wide uppercase"
                     >
                         🎉 New Best Score!
                     </motion.div>
                 )}
 
-                <h2 className="mb-1 text-4xl font-black text-text">{title}</h2>
+                <h2 className="text-text mb-1 text-4xl font-black">{title}</h2>
 
                 <div className="mt-4 mb-6 flex flex-col items-center gap-2">
-                    <div className="text-6xl font-black text-text">{score}</div>
+                    <div className="text-text text-6xl font-black">{score}</div>
                     <div
                         className="flex items-center gap-2 rounded-2xl border-2 px-4 py-1.5"
                         style={{
@@ -123,7 +123,7 @@ export function GameResultsScreen({
                             {tierInfo.label}
                         </span>
                         {tierInfo.nextThreshold && (
-                            <span className="text-xs font-bold text-muted">
+                            <span className="text-muted text-xs font-bold">
                                 · {tierInfo.nextThreshold - score} to next
                             </span>
                         )}

@@ -75,7 +75,7 @@ const MiniLeaderboard = ({
                         exit={{ opacity: 0, scale: 0.9 }}
                         className={`flex items-center justify-between rounded px-1 py-0.5 text-sm ${
                             entry.isCurrentUser
-                                ? "bg-survival/10 font-black text-survival-strong"
+                                ? "bg-survival/10 text-survival-strong font-black"
                                 : "font-medium text-gray-600"
                         }`}
                     >

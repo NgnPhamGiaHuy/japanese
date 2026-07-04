@@ -76,12 +76,10 @@ const DetailHeader = ({ ctx, onEdit }: DetailHeaderProps) => {
                         </span>
                     </div>
 
-                    <h1 className="text-3xl font-black text-text md:text-5xl">
-                        {lesson.title}
-                    </h1>
+                    <h1 className="text-text text-3xl font-black md:text-5xl">{lesson.title}</h1>
 
                     {lesson.description && (
-                        <p className="mt-3 max-w-2xl text-base font-bold text-muted md:text-lg">
+                        <p className="text-muted mt-3 max-w-2xl text-base font-bold md:text-lg">
                             {lesson.description}
                         </p>
                     )}

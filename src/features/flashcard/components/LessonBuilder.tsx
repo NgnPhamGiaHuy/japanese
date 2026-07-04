@@ -87,7 +87,7 @@ const LessonBuilder: React.FC<LessonBuilderProps> = ({
 
     return (
         <div
-            className="fixed inset-0 z-50 flex flex-col overflow-y-auto bg-bg"
+            className="bg-bg fixed inset-0 z-50 flex flex-col overflow-y-auto"
             style={{ "--theme-color": builder.themeHex } as React.CSSProperties}
         >
             <header className="sticky top-0 z-50 flex items-center justify-between border-b-2 border-gray-200 bg-white px-4 py-3 sm:px-6 sm:py-4">
@@ -99,7 +99,7 @@ const LessonBuilder: React.FC<LessonBuilderProps> = ({
                     disabled={saving}
                     aria-label="Close"
                 />
-                <h2 className="text-lg font-black text-text sm:text-xl">
+                <h2 className="text-text text-lg font-black sm:text-xl">
                     {editingLesson ? "Edit Deck" : "New Deck"}
                 </h2>
                 <Button

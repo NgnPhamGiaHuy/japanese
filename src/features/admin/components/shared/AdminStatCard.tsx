@@ -24,10 +24,10 @@ const AdminStatCard = ({ label, value, icon: Icon, color, trend }: AdminStatCard
         <Card className="border-gray-100">
             <div className="flex items-center justify-between">
                 <div>
-                    <p className="text-xs font-black tracking-widest text-muted uppercase">
+                    <p className="text-muted text-xs font-black tracking-widest uppercase">
                         {label}
                     </p>
-                    <p className="mt-2 text-3xl font-black text-text">{value}</p>
+                    <p className="text-text mt-2 text-3xl font-black">{value}</p>
                     {trend ? (
                         <p
                             className={`mt-1 text-xs font-black ${trend.isPositive ? "text-hiragana" : "text-danger"}`}

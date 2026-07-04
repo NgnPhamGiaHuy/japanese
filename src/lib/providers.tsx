@@ -16,13 +16,13 @@ function AuthGate({ children }: { children: React.ReactNode }) {
 
     if (!isAuthReady) {
         return (
-            <div className="fixed inset-0 flex items-center justify-center bg-bg">
+            <div className="bg-bg fixed inset-0 flex items-center justify-center">
                 <div className="flex flex-col items-center gap-4">
-                    <div className="flex h-16 w-16 -rotate-6 items-center justify-center rounded-3xl border-b-4 border-katakana-strong bg-gradient-to-br from-katakana to-both text-3xl text-white shadow-sm">
+                    <div className="border-katakana-strong from-katakana to-both flex h-16 w-16 -rotate-6 items-center justify-center rounded-3xl border-b-4 bg-gradient-to-br text-3xl text-white shadow-sm">
                         あ
                     </div>
                     <div className="h-1.5 w-24 overflow-hidden rounded-full bg-gray-200">
-                        <div className="h-full w-1/2 animate-[slide_1s_ease-in-out_infinite] rounded-full bg-gradient-to-r from-katakana to-both" />
+                        <div className="from-katakana to-both h-full w-1/2 animate-[slide_1s_ease-in-out_infinite] rounded-full bg-gradient-to-r" />
                     </div>
                 </div>
             </div>

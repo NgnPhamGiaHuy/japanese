@@ -42,7 +42,7 @@ export function KanaLearn() {
     if (!char) return null;
 
     return (
-        <div className="min-h-dvh bg-bg pb-28">
+        <div className="bg-bg min-h-dvh pb-28">
             <ScreenHeader title="Learn" backHref="/kana" />
             <div className="animate-in fade-in mx-auto max-w-2xl px-4 pt-4 duration-300">
                 <LearnProgress

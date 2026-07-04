@@ -22,12 +22,7 @@ interface UserAvatarProps {
  * @example
  * <UserAvatar src={user.image} active={user.isOnline} size={40} />
  */
-const UserAvatar = ({
-    src,
-    active,
-    activeColor = "text-katakana",
-    size = 26,
-}: UserAvatarProps) => {
+const UserAvatar = ({ src, active, activeColor = "text-katakana", size = 26 }: UserAvatarProps) => {
     const avatarSize = size - 2;
 
     if (!src) {

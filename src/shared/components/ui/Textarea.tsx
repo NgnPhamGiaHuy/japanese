@@ -25,7 +25,7 @@ const Textarea = ({ variant = "default", className = "", ...props }: TextareaPro
             <textarea
                 {...props}
                 className={cn(
-                    "w-full resize-none border-b-2 border-transparent bg-transparent font-bold text-muted transition-colors outline-none placeholder:text-gray-300",
+                    "text-muted w-full resize-none border-b-2 border-transparent bg-transparent font-bold transition-colors outline-none placeholder:text-gray-300",
                     "focus:border-[var(--theme-color,var(--color-katakana))]",
                     className,
                 )}
@@ -37,7 +37,7 @@ const Textarea = ({ variant = "default", className = "", ...props }: TextareaPro
         <textarea
             {...props}
             className={cn(
-                "placeholder:text-muted w-full rounded-2xl border-2 border-gray-100 bg-white px-4 py-3 text-sm font-black text-text transition-all outline-none placeholder:font-bold",
+                "placeholder:text-muted text-text w-full rounded-2xl border-2 border-gray-100 bg-white px-4 py-3 text-sm font-black transition-all outline-none placeholder:font-bold",
                 "focus:ring-katakana/5 focus:border-[var(--theme-color,var(--color-katakana))] focus:ring-4",
                 className,
             )}

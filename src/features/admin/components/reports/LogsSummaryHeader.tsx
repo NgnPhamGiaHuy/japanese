@@ -110,12 +110,12 @@ const LogsSummaryHeader = ({
             {/* Total + level chips — wrap on mobile */}
             <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:gap-3">
                 <div className="flex flex-col">
-                    <span className="text-xs font-black tracking-widest text-muted uppercase">
+                    <span className="text-muted text-xs font-black tracking-widest uppercase">
                         This Page
                     </span>
-                    <span className="text-xl font-black text-text sm:text-2xl">
+                    <span className="text-text text-xl font-black sm:text-2xl">
                         {totalLoaded}
-                        <span className="ml-1 text-xs font-bold text-muted">entries</span>
+                        <span className="text-muted ml-1 text-xs font-bold">entries</span>
                     </span>
                 </div>
 
@@ -131,7 +131,7 @@ const LogsSummaryHeader = ({
                                 onClick={() => onLevelClick?.(l)}
                                 title={`Filter by ${l}`}
                                 className={clsx(
-                                    "flex items-center gap-1 rounded-full px-2 py-1 text-xs font-black tracking-wider uppercase transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-katakana focus-visible:ring-offset-1 sm:gap-1.5 sm:px-2.5 sm:py-1 sm:text-xs",
+                                    "focus-visible:ring-katakana flex items-center gap-1 rounded-full px-2 py-1 text-xs font-black tracking-wider uppercase transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-1 sm:gap-1.5 sm:px-2.5 sm:py-1 sm:text-xs",
                                     isActive
                                         ? `${s.dot} text-white shadow-sm`
                                         : `${s.bg} ${s.text}`,
@@ -191,7 +191,7 @@ const LogsSummaryHeader = ({
                                     onClick={() => onTypeClick?.(t)}
                                     title={`Filter by ${t}`}
                                     className={clsx(
-                                        "flex items-center gap-1 rounded-full px-2 py-1 text-xs font-black tracking-wider uppercase transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-katakana focus-visible:ring-offset-1 sm:gap-1.5 sm:px-2.5 sm:py-1 sm:text-xs",
+                                        "focus-visible:ring-katakana flex items-center gap-1 rounded-full px-2 py-1 text-xs font-black tracking-wider uppercase transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-1 sm:gap-1.5 sm:px-2.5 sm:py-1 sm:text-xs",
                                         isActive ? s.activeBg : `${s.bg} ${s.text}`,
                                         onTypeClick ? "cursor-pointer" : "cursor-default",
                                     )}

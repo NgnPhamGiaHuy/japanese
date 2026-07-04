@@ -84,9 +84,7 @@ export function useLeaderboard(
         const rank = currentUser
             ? (computed.find((entry) => entry.isCurrentUser)?.rank ?? null)
             : null;
-        const nearby = rank
-            ? computed.filter((entry) => Math.abs(entry.rank - rank) <= 1)
-            : [];
+        const nearby = rank ? computed.filter((entry) => Math.abs(entry.rank - rank) <= 1) : [];
 
         return {
             leaderboard: computed.slice(0, topN),

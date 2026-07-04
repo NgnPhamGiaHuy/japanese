@@ -31,7 +31,11 @@ export function useKanaHubState() {
 
     const themeColors = {
         primaryBg: isBoth ? "bg-both" : isH ? "bg-hiragana" : "bg-katakana",
-        primaryBorderB: isBoth ? "border-both-strong" : isH ? "border-hiragana-strong" : "border-katakana-strong",
+        primaryBorderB: isBoth
+            ? "border-both-strong"
+            : isH
+              ? "border-hiragana-strong"
+              : "border-katakana-strong",
         primaryHover: isBoth
             ? "hover:bg-both-strong"
             : isH

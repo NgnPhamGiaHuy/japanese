@@ -40,7 +40,7 @@ export default function ProfilePage() {
     };
 
     return (
-        <div className="min-h-dvh bg-bg pb-28">
+        <div className="bg-bg min-h-dvh pb-28">
             <ScreenHeader
                 title="Profile"
                 right={
@@ -69,28 +69,26 @@ export default function ProfilePage() {
                                         className="h-32 w-32 object-cover"
                                     />
                                 ) : (
-                                    <div className="flex h-32 w-32 items-center justify-center bg-gradient-to-br from-katakana to-both text-6xl font-black text-white">
+                                    <div className="from-katakana to-both flex h-32 w-32 items-center justify-center bg-gradient-to-br text-6xl font-black text-white">
                                         {displayName.charAt(0).toUpperCase()}
                                     </div>
                                 )}
                             </div>
-                            <div className="absolute -right-2 -bottom-2 flex h-10 w-10 items-center justify-center rounded-2xl border-4 border-white bg-survival text-sm font-black text-white shadow-lg">
+                            <div className="bg-survival absolute -right-2 -bottom-2 flex h-10 w-10 items-center justify-center rounded-2xl border-4 border-white text-sm font-black text-white shadow-lg">
                                 {level}
                             </div>
                         </div>
 
                         <div className="space-y-2">
                             <div className="flex items-center justify-center gap-2">
-                                <h2 className="text-3xl font-black text-text">
-                                    {displayName}
-                                </h2>
+                                <h2 className="text-text text-3xl font-black">{displayName}</h2>
                                 {role && (
                                     <Badge variant="danger" size="md" className="tracking-wider">
                                         {role === "superadmin" ? "Staff+" : "Staff"}
                                     </Badge>
                                 )}
                             </div>
-                            <p className="text-base font-bold text-muted">
+                            <p className="text-muted text-base font-bold">
                                 Learning Japanese since {new Date().getFullYear()}
                             </p>
                         </div>
@@ -99,14 +97,14 @@ export default function ProfilePage() {
                         <div className="mt-8 w-full max-w-md">
                             <div className="mb-2 flex items-end justify-between px-1">
                                 <div className="text-left">
-                                    <p className="text-xs font-black tracking-widest text-muted uppercase">
+                                    <p className="text-muted text-xs font-black tracking-widest uppercase">
                                         Current Progress
                                     </p>
-                                    <p className="text-sm font-black text-katakana">
+                                    <p className="text-katakana text-sm font-black">
                                         {xpInLevel} / {xpToNext} XP
                                     </p>
                                 </div>
-                                <p className="text-xs font-black text-both">
+                                <p className="text-both text-xs font-black">
                                     {Math.round((xpInLevel / xpToNext) * 100)}%
                                 </p>
                             </div>
@@ -115,7 +113,7 @@ export default function ProfilePage() {
                                     initial={{ width: 0 }}
                                     animate={{ width: `${(xpInLevel / xpToNext) * 100}%` }}
                                     transition={{ duration: 1, ease: "easeOut" }}
-                                    className="h-full rounded-full bg-gradient-to-r from-katakana via-[#ce82ff] to-[#1cb0f6] bg-[length:200%_100%]"
+                                    className="from-katakana h-full rounded-full bg-gradient-to-r via-[#ce82ff] to-[#1cb0f6] bg-[length:200%_100%]"
                                     style={{
                                         animation: "gradient-shift 3s linear infinite",
                                     }}
@@ -128,27 +126,27 @@ export default function ProfilePage() {
                     <section className="space-y-4">
                         <div className="flex items-center gap-2 px-2">
                             <Trophy size={14} className="text-muted" />
-                            <h3 className="text-xs font-black tracking-widest text-muted uppercase">
+                            <h3 className="text-muted text-xs font-black tracking-widest uppercase">
                                 Statistics
                             </h3>
                         </div>
                         <div className="grid grid-cols-1 gap-4 sm:grid-cols-3 md:gap-6">
                             <StatCard
-                                icon={<Flame className="h-7 w-7 text-survival" />}
+                                icon={<Flame className="text-survival h-7 w-7" />}
                                 title="Day Streak"
                                 value={userData.streak}
                                 color="#ff9600"
                                 index={1}
                             />
                             <StatCard
-                                icon={<Zap className="h-7 w-7 text-both" />}
+                                icon={<Zap className="text-both h-7 w-7" />}
                                 title="Total XP"
                                 value={userData.xp}
                                 color="#ce82ff"
                                 index={2}
                             />
                             <StatCard
-                                icon={<BookOpen className="h-7 w-7 text-katakana" />}
+                                icon={<BookOpen className="text-katakana h-7 w-7" />}
                                 title="Kana Known"
                                 value={userData.learnedChars?.length || 0}
                                 color="#1cb0f6"
@@ -161,7 +159,7 @@ export default function ProfilePage() {
                     <section className="space-y-4">
                         <div className="flex items-center gap-2 px-2">
                             <Zap size={14} className="text-muted" />
-                            <h3 className="text-xs font-black tracking-widest text-muted uppercase">
+                            <h3 className="text-muted text-xs font-black tracking-widest uppercase">
                                 Recent Activity
                             </h3>
                         </div>
@@ -216,12 +214,12 @@ function ActivityRow({
     return (
         <div className="flex items-center justify-between px-6 py-6 transition-colors hover:bg-gray-50/50">
             <div className="min-w-0 flex-1 pr-6">
-                <div className="truncate text-lg font-black text-text">{label}</div>
-                <div className="truncate text-sm font-bold text-muted">{sub}</div>
+                <div className="text-text truncate text-lg font-black">{label}</div>
+                <div className="text-muted truncate text-sm font-bold">{sub}</div>
             </div>
             <div className="flex items-center gap-3">
-                <div className="text-xl font-black text-katakana">{value}</div>
-                <ChevronRight size={20} className="shrink-0 text-text opacity-20" />
+                <div className="text-katakana text-xl font-black">{value}</div>
+                <ChevronRight size={20} className="text-text shrink-0 opacity-20" />
             </div>
         </div>
     );

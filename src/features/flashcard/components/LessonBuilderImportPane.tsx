@@ -130,10 +130,10 @@ const LessonBuilderImportPane: React.FC<LessonBuilderImportPaneProps> = ({
                                     <Sparkles size={10} className="sm:size-3" />
                                     Advanced Processing
                                 </span>
-                                <h3 className="text-lg font-black text-text sm:text-xl">
+                                <h3 className="text-text text-lg font-black sm:text-xl">
                                     Multi-modal Ingestion
                                 </h3>
-                                <p className="max-w-md text-xs leading-relaxed font-bold text-muted sm:text-sm">
+                                <p className="text-muted max-w-md text-xs leading-relaxed font-bold sm:text-sm">
                                     Our vision engine automatically extracts vocabulary from images
                                     while handling raw flat-files for instant synchronization.
                                 </p>
@@ -145,7 +145,7 @@ const LessonBuilderImportPane: React.FC<LessonBuilderImportPaneProps> = ({
                                 >
                                     <Sparkles size={20} className="sm:size-6" />
                                 </div>
-                                <div className="group flex h-12 w-12 items-center justify-center rounded-xl bg-hiragana text-white shadow-lg transition-transform hover:scale-105 active:scale-95 sm:h-14 sm:w-14 sm:rounded-2xl">
+                                <div className="group bg-hiragana flex h-12 w-12 items-center justify-center rounded-xl text-white shadow-lg transition-transform hover:scale-105 active:scale-95 sm:h-14 sm:w-14 sm:rounded-2xl">
                                     <FileUp size={20} className="sm:size-6" />
                                 </div>
                             </div>
@@ -156,7 +156,7 @@ const LessonBuilderImportPane: React.FC<LessonBuilderImportPaneProps> = ({
                             className="pointer-events-none absolute -right-4 -bottom-4 h-24 w-24 rounded-full opacity-20 blur-2xl sm:h-32 sm:w-32 sm:blur-3xl"
                             style={{ backgroundColor: themeHex }}
                         />
-                        <div className="pointer-events-none absolute -top-4 -left-4 h-24 w-24 rounded-full bg-hiragana/5 blur-2xl sm:h-32 sm:w-32 sm:blur-3xl" />
+                        <div className="bg-hiragana/5 pointer-events-none absolute -top-4 -left-4 h-24 w-24 rounded-full blur-2xl sm:h-32 sm:w-32 sm:blur-3xl" />
                     </div>
 
                     <ImportDropzone

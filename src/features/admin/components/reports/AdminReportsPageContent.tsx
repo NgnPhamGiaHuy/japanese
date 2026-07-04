@@ -109,11 +109,11 @@ const AdminReportsPageContent = () => {
                     >
                         {/* Table header */}
                         <div className="flex items-center justify-between border-b-2 border-gray-50 bg-gray-50/40 px-6 py-3">
-                            <h2 className="text-xs font-black tracking-widest text-text uppercase">
+                            <h2 className="text-text text-xs font-black tracking-widest uppercase">
                                 Audit Trail
                             </h2>
                             {isRefreshing && (
-                                <span className="flex items-center gap-1.5 text-xs font-black tracking-wider text-katakana uppercase">
+                                <span className="text-katakana flex items-center gap-1.5 text-xs font-black tracking-wider uppercase">
                                     <RefreshCw size={10} className="animate-spin" />
                                     Refreshing…
                                 </span>
@@ -125,14 +125,14 @@ const AdminReportsPageContent = () => {
                         {/* Pagination footer */}
                         <div className="flex flex-col gap-3 border-t-2 border-gray-50 bg-gray-50/20 px-4 py-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between sm:gap-2 sm:px-6">
                             <div className="flex items-center gap-3">
-                                <span className="text-xs font-black tracking-widest text-muted uppercase">
+                                <span className="text-muted text-xs font-black tracking-widest uppercase">
                                     Page {currentPage + 1}
                                     {totalPages > 1 ? ` of ${totalPages}` : ""}
                                 </span>
                                 {activeFilterCount > 0 && (
                                     <button
                                         onClick={() => setFilters({})}
-                                        className="rounded-md text-xs font-black tracking-wider text-danger uppercase transition-opacity hover:opacity-70 focus:outline-none focus-visible:ring-2 focus-visible:ring-katakana focus-visible:ring-offset-2"
+                                        className="text-danger focus-visible:ring-katakana rounded-md text-xs font-black tracking-wider uppercase transition-opacity hover:opacity-70 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
                                     >
                                         Clear {activeFilterCount} filter
                                         {activeFilterCount > 1 ? "s" : ""}

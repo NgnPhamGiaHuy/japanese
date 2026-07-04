@@ -31,7 +31,7 @@ const AdminCard = ({
         >
             {title && (
                 <div className="flex items-center justify-between border-b-2 border-gray-50 bg-gray-50/30 px-6 py-4">
-                    <h2 className="text-xs font-black tracking-widest text-text uppercase">
+                    <h2 className="text-text text-xs font-black tracking-widest uppercase">
                         {title}
                     </h2>
                     {actions && <div className="flex items-center gap-2">{actions}</div>}

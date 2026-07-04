@@ -52,7 +52,7 @@ const SortableCardItem = ({
                     type="button"
                     {...attributes}
                     {...listeners}
-                    className="absolute top-3 right-3 z-10 flex h-9 w-9 cursor-pointer items-center justify-center rounded-full bg-gray-100 text-gray-400 transition-colors hover:bg-gray-200 hover:text-gray-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-katakana focus-visible:ring-offset-2 active:cursor-grabbing"
+                    className="focus-visible:ring-katakana absolute top-3 right-3 z-10 flex h-9 w-9 cursor-pointer items-center justify-center rounded-full bg-gray-100 text-gray-400 transition-colors hover:bg-gray-200 hover:text-gray-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 active:cursor-grabbing"
                     aria-label="Reorder card"
                     onClick={(e) => e.stopPropagation()}
                 >
@@ -82,11 +82,11 @@ const SortableCardItem = ({
                         e.stopPropagation();
                     }
                 }}
-                className="flex flex-1 cursor-pointer flex-col focus:outline-none focus-visible:ring-2 focus-visible:ring-katakana focus-visible:ring-offset-2 rounded-2xl"
+                className="focus-visible:ring-katakana flex flex-1 cursor-pointer flex-col rounded-2xl focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
             >
                 <div className="flex-1">
                     <div className="mb-2 flex items-start justify-between gap-4">
-                        <span className="cursor-text text-3xl font-black tracking-tight text-text select-text">
+                        <span className="text-text cursor-text text-3xl font-black tracking-tight select-text">
                             {card.primary}
                         </span>
                         <div className="shrink-0 pt-1">
@@ -99,7 +99,7 @@ const SortableCardItem = ({
                     </div>
 
                     {card.alternatives.length > 0 && (
-                        <div className="mb-4 cursor-text text-sm font-bold text-muted select-text">
+                        <div className="text-muted mb-4 cursor-text text-sm font-bold select-text">
                             {card.alternatives[0]}
                         </div>
                     )}

@@ -35,7 +35,7 @@ const UsersTablePagination = ({
 }: UsersTablePaginationProps) => {
     return (
         <div className="flex flex-col gap-2 border-t-2 border-gray-100 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
-            <span className="text-xs font-bold text-muted">
+            <span className="text-muted text-xs font-bold">
                 Page {currentPage + 1} of {Math.max(1, totalPages)} · {totalUsers} total
             </span>
             <div className="flex flex-wrap gap-1">
@@ -73,11 +73,11 @@ const UsersTablePagination = ({
                             key={pageIdx}
                             onClick={() => onGoToPage?.(pageIdx)}
                             disabled={loading || isActive || !isDiscovered}
-                            className={`flex h-8 w-8 items-center justify-center rounded-lg text-xs font-black transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-katakana focus-visible:ring-offset-2 ${
+                            className={`focus-visible:ring-katakana flex h-8 w-8 items-center justify-center rounded-lg text-xs font-black transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 ${
                                 isActive
                                     ? "bg-katakana text-white shadow-md shadow-[#1cb0f6]/20"
                                     : isDiscovered
-                                      ? "text-muted hover:bg-gray-50 hover:text-text"
+                                      ? "text-muted hover:text-text hover:bg-gray-50"
                                       : "cursor-not-allowed text-gray-200"
                             }`}
                         >

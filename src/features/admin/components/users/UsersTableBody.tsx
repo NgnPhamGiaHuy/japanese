@@ -25,7 +25,7 @@ const UsersTableBody = ({ table, loading }: UsersTableBodyProps) => {
         return (
             <tbody>
                 <tr>
-                    <td colSpan={6} className="py-16 text-center text-sm font-bold text-muted">
+                    <td colSpan={6} className="text-muted py-16 text-center text-sm font-bold">
                         <LoadingSpinner fullScreen={false} label="Loading users..." />
                     </td>
                 </tr>

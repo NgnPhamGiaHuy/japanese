@@ -36,8 +36,8 @@ const DecksMobileList = ({ items, onView, onDelete, isDeleting }: DecksMobileLis
 
                     {/* Main info */}
                     <div className="min-w-0 flex-1">
-                        <p className="text-sm font-black text-text">{deck.title}</p>
-                        <p className="mt-0.5 line-clamp-1 text-xs font-bold text-muted">
+                        <p className="text-text text-sm font-black">{deck.title}</p>
+                        <p className="text-muted mt-0.5 line-clamp-1 text-xs font-bold">
                             {deck.description || "No description provided."}
                         </p>
 
@@ -61,7 +61,7 @@ const DecksMobileList = ({ items, onView, onDelete, isDeleting }: DecksMobileLis
                         </div>
 
                         {/* Meta row */}
-                        <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs font-bold text-muted">
+                        <div className="text-muted mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs font-bold">
                             {/* Owner */}
                             <div className="flex items-center gap-1.5">
                                 <div className="flex h-5 w-5 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-gray-100">
@@ -72,7 +72,7 @@ const DecksMobileList = ({ items, onView, onDelete, isDeleting }: DecksMobileLis
                                             className="h-full w-full object-cover"
                                         />
                                     ) : (
-                                        <span className="text-[8px] font-black text-muted">
+                                        <span className="text-muted text-[8px] font-black">
                                             {(deck.ownerName ||
                                                 deck.ownerEmail ||
                                                 "?")[0]?.toUpperCase()}
@@ -85,7 +85,7 @@ const DecksMobileList = ({ items, onView, onDelete, isDeleting }: DecksMobileLis
                             {/* Card count */}
                             <div className="flex items-center gap-1">
                                 <Layers size={10} className="text-both" />
-                                <span className="font-black text-text">{deck.cardCount}</span>
+                                <span className="text-text font-black">{deck.cardCount}</span>
                                 <span className="tracking-widest uppercase">words</span>
                             </div>
 
@@ -104,7 +104,7 @@ const DecksMobileList = ({ items, onView, onDelete, isDeleting }: DecksMobileLis
                         <Button
                             variant="ghost"
                             onClick={() => onView(deck.path, deck.title)}
-                            className="h-8 w-8 !p-0 hover:bg-katakana/10 hover:text-katakana"
+                            className="hover:bg-katakana/10 hover:text-katakana h-8 w-8 !p-0"
                             title="View cards"
                         >
                             <Eye size={15} />
@@ -113,7 +113,7 @@ const DecksMobileList = ({ items, onView, onDelete, isDeleting }: DecksMobileLis
                             variant="ghost"
                             onClick={() => onDelete(deck.path)}
                             disabled={isDeleting}
-                            className="h-8 w-8 !p-0 hover:bg-red-50 hover:text-danger"
+                            className="hover:text-danger h-8 w-8 !p-0 hover:bg-red-50"
                             title="Delete deck"
                         >
                             <Trash2 size={15} />

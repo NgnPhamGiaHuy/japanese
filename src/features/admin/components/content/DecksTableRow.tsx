@@ -34,8 +34,8 @@ const DecksTableRow = ({ deck, onView, onDelete, isDeleting }: DecksTableRowProp
         <tr className="group transition-colors hover:bg-gray-50/50">
             <td className="px-6 py-4">
                 <div className="flex flex-col gap-0.5">
-                    <span className="text-sm font-black text-text">{deck.title}</span>
-                    <span className="line-clamp-1 max-w-md text-xs font-bold text-muted">
+                    <span className="text-text text-sm font-black">{deck.title}</span>
+                    <span className="text-muted line-clamp-1 max-w-md text-xs font-bold">
                         {deck.description || "No description provided."}
                     </span>
                     <div className="mt-2 flex flex-wrap gap-1.5">
@@ -67,38 +67,38 @@ const DecksTableRow = ({ deck, onView, onDelete, isDeleting }: DecksTableRowProp
                                 className="h-full w-full object-cover"
                             />
                         ) : (
-                            <span className="text-xs font-black text-muted">
+                            <span className="text-muted text-xs font-black">
                                 {(deck.ownerName || deck.ownerEmail || "?")[0]?.toUpperCase()}
                             </span>
                         )}
                     </div>
                     <div className="flex flex-col">
-                        <span className="text-xs font-black text-text">
+                        <span className="text-text text-xs font-black">
                             {deck.ownerName || "Unknown User"}
                         </span>
-                        <span className="text-xs font-bold text-muted">
+                        <span className="text-muted text-xs font-bold">
                             {deck.ownerEmail || deck.ownerId}
                         </span>
                     </div>
                 </div>
             </td>
             <td className="px-6 py-4">
-                <div className="flex items-center gap-1.5 text-sm font-black text-text">
+                <div className="text-text flex items-center gap-1.5 text-sm font-black">
                     <Layers size={14} className="text-both" />
                     {deck.cardCount}
-                    <span className="ml-1 text-xs font-bold tracking-widest text-muted uppercase">
+                    <span className="text-muted ml-1 text-xs font-bold tracking-widest uppercase">
                         Words
                     </span>
                 </div>
             </td>
             <td className="px-6 py-4">
-                <div className="flex items-center gap-2 text-xs font-bold text-muted">
+                <div className="text-muted flex items-center gap-2 text-xs font-bold">
                     <Calendar size={12} />
                     {deck.createdAt ? format(new Date(deck.createdAt), "MMM d, yyyy") : "—"}
                 </div>
             </td>
             <td className="px-6 py-4 text-right">
-                <div className="flex justify-end gap-2 text-muted">
+                <div className="text-muted flex justify-end gap-2">
                     <Button
                         variant="ghost"
                         size="icon-sm"
@@ -115,7 +115,7 @@ const DecksTableRow = ({ deck, onView, onDelete, isDeleting }: DecksTableRowProp
                         iconSize={16}
                         onClick={() => onDelete(deck.path)}
                         disabled={isDeleting}
-                        className="hover:bg-red-50 hover:text-danger"
+                        className="hover:text-danger hover:bg-red-50"
                         aria-label={`Delete ${deck.title}`}
                     />
                 </div>

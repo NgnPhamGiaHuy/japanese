@@ -21,13 +21,13 @@ export function ChartSection({
 }: ChartSectionProps) {
     return (
         <div className="rounded-2xl border-2 border-b-4 border-gray-200 bg-white p-4 shadow-sm sm:rounded-3xl sm:p-5 md:p-6">
-            <h2 className="mb-3 border-b-2 border-gray-100 pb-2.5 text-base font-black tracking-widest text-both uppercase sm:text-lg md:text-xl">
+            <h2 className="text-both mb-3 border-b-2 border-gray-100 pb-2.5 text-base font-black tracking-widest uppercase sm:text-lg md:text-xl">
                 {title}
             </h2>
             <div className="flex flex-col gap-4 md:gap-6">
                 {hiragana && (
                     <div>
-                        <h3 className="mb-2 text-xs font-black tracking-widest text-hiragana uppercase md:text-xs">
+                        <h3 className="text-hiragana mb-2 text-xs font-black tracking-widest uppercase md:text-xs">
                             Hiragana
                         </h3>
                         <ChartBlockGrid
@@ -41,7 +41,7 @@ export function ChartSection({
                 )}
                 {katakana && (
                     <div>
-                        <h3 className="mb-2 text-xs font-black tracking-widest text-katakana uppercase md:text-xs">
+                        <h3 className="text-katakana mb-2 text-xs font-black tracking-widest uppercase md:text-xs">
                             Katakana
                         </h3>
                         <ChartBlockGrid

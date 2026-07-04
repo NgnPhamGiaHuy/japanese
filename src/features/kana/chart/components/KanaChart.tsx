@@ -31,7 +31,7 @@ export function KanaChart() {
     const { isBoth, singleBlocks, combinedSections, headingColorSingle } = useChartData(alphabet);
 
     return (
-        <div className="min-h-dvh bg-bg">
+        <div className="bg-bg min-h-dvh">
             <ScreenHeader
                 title="Character Chart"
                 backHref="/kana"
@@ -55,7 +55,7 @@ export function KanaChart() {
 
             <div className="animate-in fade-in mx-auto w-full max-w-2xl px-3 pt-6 pb-28 duration-300 sm:px-4">
                 {isBoth && (
-                    <p className="mx-auto mb-4 max-w-sm text-center text-xs font-bold text-muted md:text-xs">
+                    <p className="text-muted mx-auto mb-4 max-w-sm text-center text-xs font-bold md:text-xs">
                         Hiragana and katakana for the same sounds are grouped by section. Extended
                         loanword katakana appears only under Katakana.
                     </p>

@@ -98,7 +98,7 @@ const SettingsMenu = ({
                             <Button
                                 variant="ghost"
                                 onClick={audioToggle.onChange}
-                                className="flex w-full items-center justify-between rounded-xl px-3 py-3 text-left text-sm font-bold text-text shadow-none transition-colors hover:bg-gray-50 hover:shadow-none active:translate-y-0"
+                                className="text-text flex w-full items-center justify-between rounded-xl px-3 py-3 text-left text-sm font-bold shadow-none transition-colors hover:bg-gray-50 hover:shadow-none active:translate-y-0"
                             >
                                 <span className="flex items-center gap-2">
                                     <audioToggle.icon size={16} className="text-gray-500" />{" "}
@@ -123,7 +123,7 @@ const SettingsMenu = ({
                             <Button
                                 variant="ghost"
                                 onClick={displayToggle.onChange}
-                                className="flex w-full items-center justify-between rounded-xl px-3 py-3 text-left text-sm font-bold text-text shadow-none transition-colors hover:bg-gray-50 hover:shadow-none active:translate-y-0"
+                                className="text-text flex w-full items-center justify-between rounded-xl px-3 py-3 text-left text-sm font-bold shadow-none transition-colors hover:bg-gray-50 hover:shadow-none active:translate-y-0"
                             >
                                 <span className="flex items-center gap-2">
                                     <displayToggle.icon size={16} className="text-gray-500" />{" "}

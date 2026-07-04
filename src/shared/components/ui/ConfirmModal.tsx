@@ -135,10 +135,10 @@ const ConfirmModal = ({
 
                             {/* Text Header */}
                             <div className="text-center">
-                                <h3 id={titleId} className="mb-2 text-xl font-black text-text">
+                                <h3 id={titleId} className="text-text mb-2 text-xl font-black">
                                     {title}
                                 </h3>
-                                <p className="text-base leading-relaxed font-bold text-muted">
+                                <p className="text-muted text-base leading-relaxed font-bold">
                                     {message}
                                 </p>
                             </div>
@@ -158,7 +158,7 @@ const ConfirmModal = ({
                                     variant="ghost"
                                     onClick={onClose}
                                     disabled={loading}
-                                    className="w-full !py-4 !text-base !font-black !text-muted hover:!bg-gray-50 active:translate-y-0"
+                                    className="!text-muted w-full !py-4 !text-base !font-black hover:!bg-gray-50 active:translate-y-0"
                                 >
                                     {cancelText}
                                 </Button>

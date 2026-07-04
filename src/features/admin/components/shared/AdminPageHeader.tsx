@@ -28,24 +28,24 @@ const AdminPageHeader = ({
         <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
             <div className="min-w-0">
                 <div className="flex flex-wrap items-center gap-2 sm:gap-3">
-                    <div className="shrink-0 rounded-2xl bg-katakana p-2 shadow-lg shadow-[#1cb0f6]/20 sm:p-2.5">
+                    <div className="bg-katakana shrink-0 rounded-2xl p-2 shadow-lg shadow-[#1cb0f6]/20 sm:p-2.5">
                         <Icon className="text-white" size={18} />
                     </div>
                     <div className="flex min-w-0 flex-wrap items-center gap-2 sm:gap-3">
-                        <h1 className="text-2xl font-black tracking-tighter text-text sm:text-3xl">
+                        <h1 className="text-text text-2xl font-black tracking-tighter sm:text-3xl">
                             {title}
                         </h1>
                         {isLive && (
-                            <div className="flex items-center gap-1.5 rounded-full bg-hiragana/10 px-2.5 py-1">
-                                <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-hiragana" />
-                                <span className="text-xs font-black tracking-widest text-hiragana uppercase">
+                            <div className="bg-hiragana/10 flex items-center gap-1.5 rounded-full px-2.5 py-1">
+                                <span className="bg-hiragana h-1.5 w-1.5 animate-pulse rounded-full" />
+                                <span className="text-hiragana text-xs font-black tracking-widest uppercase">
                                     Live
                                 </span>
                             </div>
                         )}
                     </div>
                 </div>
-                <p className="mt-1.5 text-sm font-bold text-muted">{description}</p>
+                <p className="text-muted mt-1.5 text-sm font-bold">{description}</p>
             </div>
             {actions && <div className="flex shrink-0 flex-wrap items-center gap-2">{actions}</div>}
         </div>

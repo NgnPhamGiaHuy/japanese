@@ -26,7 +26,7 @@ export default function SettingsPage() {
     };
 
     return (
-        <div className="min-h-dvh bg-bg pb-28">
+        <div className="bg-bg min-h-dvh pb-28">
             <ScreenHeader title="Settings" backHref="/profile" />
 
             <main className={`mx-auto max-w-2xl ${SPACING.pagePadding} pt-6 pb-12`}>
@@ -81,19 +81,17 @@ export default function SettingsPage() {
                     {/* About */}
                     <SettingsSection title="About" icon={Info}>
                         <div className="px-6 py-6">
-                            <p className="text-xl font-black text-text">
+                            <p className="text-text text-xl font-black">
                                 Kana &amp; Nihongo Master
                             </p>
-                            <p className="text-sm font-bold text-muted">
+                            <p className="text-muted text-sm font-bold">
                                 Unified Japanese learning app · v2.0
                             </p>
                             <div className="mt-6 space-y-1 border-t-2 border-gray-100 pt-6">
-                                <p className="text-xs font-bold text-muted">
+                                <p className="text-muted text-xs font-bold">
                                     Kana data from KanjiVG
                                 </p>
-                                <p className="text-xs font-bold text-muted">
-                                    Powered by Firebase
-                                </p>
+                                <p className="text-muted text-xs font-bold">Powered by Firebase</p>
                             </div>
                         </div>
                     </SettingsSection>
@@ -129,9 +127,7 @@ function SettingsSection({ title, icon: Icon, children }: SettingsSectionProps) 
         <section className="space-y-4">
             <div className="flex items-center gap-2 px-3">
                 <Icon size={14} className="text-muted" />
-                <h3 className="text-xs font-black tracking-widest text-muted uppercase">
-                    {title}
-                </h3>
+                <h3 className="text-muted text-xs font-black tracking-widest uppercase">{title}</h3>
             </div>
             <Card padding="none" className="overflow-hidden border-b-8">
                 <div className="divide-y-2 divide-gray-100">{children}</div>
@@ -163,8 +159,8 @@ function SettingsToggle({
     return (
         <div className="flex items-center justify-between px-6 py-6 transition-colors hover:bg-gray-50/50">
             <div className="min-w-0 flex-1 pr-6">
-                <div className="text-lg font-black text-text">{label}</div>
-                <div className="text-sm font-bold text-muted">{sub}</div>
+                <div className="text-text text-lg font-black">{label}</div>
+                <div className="text-muted text-sm font-bold">{sub}</div>
             </div>
             <Button
                 variant="ghost"
@@ -207,12 +203,10 @@ function SettingsAction({
             }`}
         >
             <div className="min-w-0 flex-1 pr-6">
-                <div
-                    className={`text-lg font-black ${isDanger ? "text-danger" : "text-text"}`}
-                >
+                <div className={`text-lg font-black ${isDanger ? "text-danger" : "text-text"}`}>
                     {label}
                 </div>
-                <div className="text-sm font-bold text-muted">{sub}</div>
+                <div className="text-muted text-sm font-bold">{sub}</div>
             </div>
             <ChevronRight
                 size={24}

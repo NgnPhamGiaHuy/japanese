@@ -355,7 +355,7 @@ const ShareModal = ({ lesson, onShareLink, onUpdateRoles, onClose }: ShareModalP
             >
                 {/* Header */}
                 <div className="flex shrink-0 items-center justify-between border-b-2 border-gray-100 p-6">
-                    <h2 id={titleId} className="text-2xl font-black text-text">
+                    <h2 id={titleId} className="text-text text-2xl font-black">
                         Share Deck
                     </h2>
                     <Button
@@ -417,7 +417,7 @@ const ShareModal = ({ lesson, onShareLink, onUpdateRoles, onClose }: ShareModalP
 
                             {/* Collaborators List */}
                             <div className="mb-6">
-                                <h3 className="mb-3 text-xs font-black tracking-widest text-text uppercase">
+                                <h3 className="text-text mb-3 text-xs font-black tracking-widest uppercase">
                                     People with access
                                 </h3>
                                 <div className="flex flex-col gap-2">
@@ -469,7 +469,7 @@ const ShareModal = ({ lesson, onShareLink, onUpdateRoles, onClose }: ShareModalP
                                                         </div>
                                                     </div>
                                                     <div>
-                                                        <div className="font-black text-text">
+                                                        <div className="text-text font-black">
                                                             {displayName}
                                                         </div>
                                                         {displayEmail && (
@@ -520,7 +520,7 @@ const ShareModal = ({ lesson, onShareLink, onUpdateRoles, onClose }: ShareModalP
                                                                     <Mail size={18} />
                                                                 </div>
                                                                 <div>
-                                                                    <div className="font-black text-text">
+                                                                    <div className="text-text font-black">
                                                                         {email}
                                                                     </div>
                                                                     <div className="text-xs font-bold text-amber-500">
@@ -549,7 +549,7 @@ const ShareModal = ({ lesson, onShareLink, onUpdateRoles, onClose }: ShareModalP
                                     )}
                             </div>
 
-                            <h3 className="mb-4 border-t-2 border-gray-100 pt-6 text-xs font-black tracking-wider text-text uppercase">
+                            <h3 className="text-text mb-4 border-t-2 border-gray-100 pt-6 text-xs font-black tracking-wider uppercase">
                                 General access
                             </h3>
 
@@ -581,7 +581,7 @@ const ShareModal = ({ lesson, onShareLink, onUpdateRoles, onClose }: ShareModalP
                                         {/* Privacy picker */}
                                         <Button
                                             variant="ghost"
-                                            className="flex w-fit items-center gap-2 !py-1 !pr-2 !text-lg !font-black text-text hover:bg-gray-100"
+                                            className="text-text flex w-fit items-center gap-2 !py-1 !pr-2 !text-lg !font-black hover:bg-gray-100"
                                             onClick={() => setOpenPrivacyMenu((v) => !v)}
                                             disabled={saving}
                                         >
@@ -643,7 +643,7 @@ const ShareModal = ({ lesson, onShareLink, onUpdateRoles, onClose }: ShareModalP
                                                                     size={20}
                                                                 />
                                                                 <div className="flex-1 text-left">
-                                                                    <div className="font-black text-text">
+                                                                    <div className="text-text font-black">
                                                                         {v.label}
                                                                     </div>
                                                                     <div className="text-xs font-bold text-gray-400">
@@ -669,7 +669,7 @@ const ShareModal = ({ lesson, onShareLink, onUpdateRoles, onClose }: ShareModalP
                                             </>
                                         )}
 
-                                        <p className="mt-1 text-sm font-bold text-muted">
+                                        <p className="text-muted mt-1 text-sm font-bold">
                                             {
                                                 VISIBILITY_MAPPINGS[
                                                     privacyMode === "public"
@@ -716,10 +716,10 @@ const ShareModal = ({ lesson, onShareLink, onUpdateRoles, onClose }: ShareModalP
                                     <ShieldAlert style={{ color: themeHex }} size={20} />
                                 </div>
                                 <div>
-                                    <p className="font-black text-text capitalize">
+                                    <p className="text-text font-black capitalize">
                                         {currentRole || "Viewer"} Access
                                     </p>
-                                    <p className="text-sm font-bold text-muted">
+                                    <p className="text-muted text-sm font-bold">
                                         {currentRole === "editor"
                                             ? "You can edit this deck's content, but only the owner can modify sharing settings."
                                             : currentRole === "commenter"
@@ -731,7 +731,7 @@ const ShareModal = ({ lesson, onShareLink, onUpdateRoles, onClose }: ShareModalP
 
                             {/* Collaborator overview for non-owners */}
                             <div className="rounded-2xl border-2 border-gray-100 p-4">
-                                <h4 className="mb-2 text-xs font-black tracking-widest text-muted uppercase">
+                                <h4 className="text-muted mb-2 text-xs font-black tracking-widest uppercase">
                                     Collaborators
                                 </h4>
                                 <div className="flex -space-x-2">
@@ -765,8 +765,8 @@ const ShareModal = ({ lesson, onShareLink, onUpdateRoles, onClose }: ShareModalP
                             onClick={handleCopy}
                             className={`h-12 rounded-2xl border-2 px-6 text-sm font-bold transition-colors ${
                                 copied
-                                    ? "border-[#58cc02] bg-[#f2fbf0] text-hiragana"
-                                    : "border-gray-200 text-text hover:bg-gray-50"
+                                    ? "text-hiragana border-[#58cc02] bg-[#f2fbf0]"
+                                    : "text-text border-gray-200 hover:bg-gray-50"
                             }`}
                             disabled={saving}
                         >

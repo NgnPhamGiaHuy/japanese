@@ -113,8 +113,8 @@ const AnalyticsExportModal = ({ isOpen, onClose }: AnalyticsExportModalProps) =>
     return (
         <Modal isOpen={isOpen} onClose={onClose} title="Advanced Data Export" maxWidth="xl">
             <div className="space-y-6">
-                <div className="rounded-2xl bg-katakana/5 p-4">
-                    <p className="text-sm font-bold text-katakana">
+                <div className="bg-katakana/5 rounded-2xl p-4">
+                    <p className="text-katakana text-sm font-bold">
                         Pro Tip: For training AI models, choose high-granularity datasets like 'User
                         Progress' or 'Behavioral Logs' to provide the model with record-level
                         evidence.
@@ -127,17 +127,17 @@ const AnalyticsExportModal = ({ isOpen, onClose }: AnalyticsExportModalProps) =>
                             fullScreen={false}
                             label={`Compiling ${selectedDataset.label} Dataset...`}
                         />
-                        <p className="mt-4 animate-pulse text-center text-xs font-black tracking-widest text-katakana uppercase">
+                        <p className="text-katakana mt-4 animate-pulse text-center text-xs font-black tracking-widest uppercase">
                             Establishing authoritative connection to Firebase...
                         </p>
                     </div>
                 ) : status === "success" ? (
                     <div className="animate-in fade-in zoom-in flex flex-col items-center justify-center py-12 text-center duration-300">
-                        <div className="mb-4 rounded-full bg-hiragana/10 p-5">
+                        <div className="bg-hiragana/10 mb-4 rounded-full p-5">
                             <CheckCircle2 size={56} className="text-hiragana" />
                         </div>
-                        <h3 className="text-xl font-black text-text">Dataset Generated</h3>
-                        <p className="max-w-xs text-sm font-bold text-muted">
+                        <h3 className="text-text text-xl font-black">Dataset Generated</h3>
+                        <p className="text-muted max-w-xs text-sm font-bold">
                             Your authoritative report for {selectedDataset.label} is being handed to
                             your browser.
                         </p>
@@ -145,7 +145,7 @@ const AnalyticsExportModal = ({ isOpen, onClose }: AnalyticsExportModalProps) =>
                 ) : (
                     <>
                         <div className="space-y-4">
-                            <label className="text-xs font-black tracking-widest text-muted uppercase">
+                            <label className="text-muted text-xs font-black tracking-widest uppercase">
                                 Select AI-Ready Dataset
                             </label>
                             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
@@ -156,14 +156,14 @@ const AnalyticsExportModal = ({ isOpen, onClose }: AnalyticsExportModalProps) =>
                                         <button
                                             key={dataset.id}
                                             onClick={() => setSelectedDataset(dataset)}
-                                            className={`flex flex-col items-start gap-2 rounded-3xl border-2 p-5 text-left transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-katakana focus-visible:ring-offset-2 ${
+                                            className={`focus-visible:ring-katakana flex flex-col items-start gap-2 rounded-3xl border-2 p-5 text-left transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 ${
                                                 active
-                                                    ? "border-[#1cb0f6] bg-katakana/5 ring-2 ring-[#1cb0f6]/10"
+                                                    ? "bg-katakana/5 border-[#1cb0f6] ring-2 ring-[#1cb0f6]/10"
                                                     : "border-gray-100 hover:border-gray-200"
                                             }`}
                                         >
                                             <div
-                                                className={`rounded-xl p-2.5 ${active ? "bg-katakana text-white shadow-md" : "bg-gray-100 text-muted"}`}
+                                                className={`rounded-xl p-2.5 ${active ? "bg-katakana text-white shadow-md" : "text-muted bg-gray-100"}`}
                                             >
                                                 <Icon size={20} />
                                             </div>
@@ -173,7 +173,7 @@ const AnalyticsExportModal = ({ isOpen, onClose }: AnalyticsExportModalProps) =>
                                                 >
                                                     {dataset.label}
                                                 </div>
-                                                <div className="mt-1 text-xs leading-tight font-bold text-muted">
+                                                <div className="text-muted mt-1 text-xs leading-tight font-bold">
                                                     {dataset.description}
                                                 </div>
                                             </div>

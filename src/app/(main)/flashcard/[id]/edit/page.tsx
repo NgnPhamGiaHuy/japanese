@@ -102,7 +102,7 @@ export default function FlashcardEditPage({ params }: { params: Promise<{ id: st
 
     if (loading) {
         return (
-            <div className="fixed inset-0 flex items-center justify-center bg-bg">
+            <div className="bg-bg fixed inset-0 flex items-center justify-center">
                 <div className="h-8 w-8 animate-spin rounded-full border-4 border-gray-200 border-t-[#1cb0f6]" />
             </div>
         );
@@ -110,7 +110,7 @@ export default function FlashcardEditPage({ params }: { params: Promise<{ id: st
 
     if (!lesson) {
         return (
-            <div className="fixed inset-0 flex items-center justify-center bg-bg">
+            <div className="bg-bg fixed inset-0 flex items-center justify-center">
                 <p className="font-bold text-gray-400">Deck not found.</p>
             </div>
         );

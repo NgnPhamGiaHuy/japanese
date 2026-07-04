@@ -35,7 +35,7 @@ const SpeedIntroView = ({ bestScore, tierInfo, onBack, onStart }: SpeedIntroView
             onStart={onStart}
         >
             <div className="mb-8 w-full max-w-sm rounded-2xl border-2 border-gray-200 bg-white p-4">
-                <p className="mb-3 text-xs font-black tracking-widest text-muted uppercase">
+                <p className="text-muted mb-3 text-xs font-black tracking-widest uppercase">
                     Difficulty Escalation
                 </p>
                 {([1, 2, 3] as const).map((level) => {
@@ -51,15 +51,13 @@ const SpeedIntroView = ({ bestScore, tierInfo, onBack, onStart }: SpeedIntroView
                                     className="h-2.5 w-2.5 rounded-full"
                                     style={{ backgroundColor: config.color }}
                                 />
-                                <span className="text-sm font-bold text-text">
-                                    {config.label}
-                                </span>
-                                <span className="text-xs text-muted">{range}</span>
+                                <span className="text-text text-sm font-bold">{config.label}</span>
+                                <span className="text-muted text-xs">{range}</span>
                             </div>
-                            <div className="flex items-center gap-3 text-xs font-bold text-muted">
+                            <div className="text-muted flex items-center gap-3 text-xs font-bold">
                                 <span>{config.timeLimit}s per Q</span>
                                 {!config.showHint && (
-                                    <span className="rounded-lg bg-danger-bg px-1.5 py-0.5 text-danger">
+                                    <span className="bg-danger-bg text-danger rounded-lg px-1.5 py-0.5">
                                         Reduced hints
                                     </span>
                                 )}

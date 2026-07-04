@@ -62,8 +62,8 @@ const ModeSelectionCard = ({
                 <Icon size={24} className={iconColor} />
             </div>
             <div className="flex flex-1 flex-col">
-                <div className="text-lg font-black text-text">{title}</div>
-                <div className="text-sm font-bold text-muted">{description}</div>
+                <div className="text-text text-lg font-black">{title}</div>
+                <div className="text-muted text-sm font-bold">{description}</div>
             </div>
             {bestScore !== undefined && (
                 <span className="ml-2 text-xs font-black opacity-70">Best: {bestScore}</span>

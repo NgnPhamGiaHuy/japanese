@@ -62,7 +62,7 @@ export function GameIntroScreen({
     onStart,
 }: GameIntroScreenProps) {
     return (
-        <div className="fixed inset-0 flex flex-col items-center justify-center bg-bg p-6">
+        <div className="bg-bg fixed inset-0 flex flex-col items-center justify-center p-6">
             <Button
                 variant="ghost"
                 size="icon"
@@ -81,10 +81,8 @@ export function GameIntroScreen({
                 <Icon size={44} strokeWidth={2.5} />
             </motion.div>
 
-            <h1 className="mb-1 text-3xl font-black text-text">{title}</h1>
-            <p className="mb-2 max-w-sm text-center text-sm font-bold text-muted">
-                {description}
-            </p>
+            <h1 className="text-text mb-1 text-3xl font-black">{title}</h1>
+            <p className="text-muted mb-2 max-w-sm text-center text-sm font-bold">{description}</p>
 
             {bestScore > 0 && (
                 <div
@@ -95,8 +93,8 @@ export function GameIntroScreen({
                     <span className="text-sm font-black" style={{ color: tierInfo.color }}>
                         {tierInfo.label}
                     </span>
-                    <span className="text-sm font-bold text-muted">·</span>
-                    <span className="text-sm font-black text-text">Best: {bestScore}</span>
+                    <span className="text-muted text-sm font-bold">·</span>
+                    <span className="text-text text-sm font-black">Best: {bestScore}</span>
                 </div>
             )}
 

@@ -59,7 +59,7 @@ const ImportDropzone: React.FC<ImportDropzoneProps> = ({
                                         <div className="mb-2 rounded-xl bg-white p-2 text-[var(--theme-color)] shadow-sm">
                                             <FileUp size={20} />
                                         </div>
-                                        <p className="w-full truncate px-2 text-xs font-black tracking-widest text-muted uppercase">
+                                        <p className="text-muted w-full truncate px-2 text-xs font-black tracking-widest uppercase">
                                             {file.name.split(".").pop()}
                                         </p>
                                     </div>
@@ -115,8 +115,8 @@ const ImportDropzone: React.FC<ImportDropzoneProps> = ({
             </div>
 
             <div className="space-y-1.5">
-                <p className="text-xl font-black text-text">Drop anything here</p>
-                <p className="max-w-[200px] text-xs leading-relaxed font-bold text-muted">
+                <p className="text-text text-xl font-black">Drop anything here</p>
+                <p className="text-muted max-w-[200px] text-xs leading-relaxed font-bold">
                     Images (Vision OCR) or CSV/TXT files (Instant Sync)
                 </p>
             </div>

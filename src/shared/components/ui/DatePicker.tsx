@@ -89,7 +89,7 @@ const DatePicker = ({
     return (
         <div className={`relative flex flex-col gap-1.5 ${className}`}>
             {label && (
-                <span className="pl-1 text-xs font-black tracking-widest text-muted uppercase">
+                <span className="text-muted pl-1 text-xs font-black tracking-widest uppercase">
                     {label}
                 </span>
             )}
@@ -98,7 +98,7 @@ const DatePicker = ({
                     variant="ghost"
                     onClick={() => setIsOpen(!isOpen)}
                     disabled={disabled}
-                    className="!flex !h-12 !w-full !items-center !justify-start !gap-4 !rounded-2xl border-2 border-gray-100 bg-gray-50/50 !px-4 !text-sm !font-black !text-text shadow-none transition-all hover:border-gray-200 hover:bg-white"
+                    className="!text-text !flex !h-12 !w-full !items-center !justify-start !gap-4 !rounded-2xl border-2 border-gray-100 bg-gray-50/50 !px-4 !text-sm !font-black shadow-none transition-all hover:border-gray-200 hover:bg-white"
                 >
                     <CalendarIcon
                         className={clsx(
@@ -107,9 +107,7 @@ const DatePicker = ({
                         )}
                         size={16}
                     />
-                    <span className={clsx(!value && "font-bold text-muted")}>
-                        {displayValue}
-                    </span>
+                    <span className={clsx(!value && "text-muted font-bold")}>{displayValue}</span>
                 </Button>
 
                 {value && !disabled && (
@@ -119,7 +117,7 @@ const DatePicker = ({
                             e.stopPropagation();
                             onChange(undefined);
                         }}
-                        className="absolute top-1/2 right-3 z-10 flex h-6 w-6 -translate-y-1/2 items-center justify-center rounded-lg text-gray-400 transition-all hover:bg-red-50 hover:text-danger focus:outline-none focus-visible:ring-2 focus-visible:ring-katakana focus-visible:ring-offset-2"
+                        className="hover:text-danger focus-visible:ring-katakana absolute top-1/2 right-3 z-10 flex h-6 w-6 -translate-y-1/2 items-center justify-center rounded-lg text-gray-400 transition-all hover:bg-red-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
                         title="Clear date"
                     >
                         <X size={14} />
@@ -138,7 +136,7 @@ const DatePicker = ({
                             className="absolute top-full right-0 z-50 mt-2 w-72 overflow-hidden rounded-4xl border-2 border-gray-100 bg-white p-4 shadow-2xl"
                         >
                             <div className="mb-4 flex items-center justify-between">
-                                <span className="text-sm font-black text-text">
+                                <span className="text-text text-sm font-black">
                                     {viewDate.toLocaleDateString(undefined, {
                                         month: "long",
                                         year: "numeric",
@@ -147,13 +145,13 @@ const DatePicker = ({
                                 <div className="flex gap-1">
                                     <button
                                         onClick={() => handleMonthChange(-1)}
-                                        className="flex h-8 w-8 items-center justify-center rounded-xl text-gray-400 hover:bg-gray-100 hover:text-katakana focus:outline-none focus-visible:ring-2 focus-visible:ring-katakana focus-visible:ring-offset-2"
+                                        className="hover:text-katakana focus-visible:ring-katakana flex h-8 w-8 items-center justify-center rounded-xl text-gray-400 hover:bg-gray-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
                                     >
                                         <ChevronLeft size={18} />
                                     </button>
                                     <button
                                         onClick={() => handleMonthChange(1)}
-                                        className="flex h-8 w-8 items-center justify-center rounded-xl text-gray-400 hover:bg-gray-100 hover:text-katakana focus:outline-none focus-visible:ring-2 focus-visible:ring-katakana focus-visible:ring-offset-2"
+                                        className="hover:text-katakana focus-visible:ring-katakana flex h-8 w-8 items-center justify-center rounded-xl text-gray-400 hover:bg-gray-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
                                     >
                                         <ChevronRight size={18} />
                                     </button>
@@ -164,7 +162,7 @@ const DatePicker = ({
                                 {["S", "M", "T", "W", "T", "F", "S"].map((d, i) => (
                                     <span
                                         key={i}
-                                        className="text-center text-xs font-black tracking-widest text-muted uppercase"
+                                        className="text-muted text-center text-xs font-black tracking-widest uppercase"
                                     >
                                         {d}
                                     </span>
@@ -181,12 +179,12 @@ const DatePicker = ({
                                             key={i}
                                             onClick={() => handleDateSelect(date)}
                                             className={clsx(
-                                                "flex h-8 w-8 items-center justify-center rounded-xl text-xs font-black transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-katakana focus-visible:ring-offset-2",
+                                                "focus-visible:ring-katakana flex h-8 w-8 items-center justify-center rounded-xl text-xs font-black transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2",
                                                 isSelected
                                                     ? "bg-katakana text-white shadow-lg shadow-[#1cb0f6]/20"
                                                     : isToday
-                                                      ? "bg-gray-100 text-katakana"
-                                                      : "text-text hover:bg-gray-50 hover:text-katakana",
+                                                      ? "text-katakana bg-gray-100"
+                                                      : "text-text hover:text-katakana hover:bg-gray-50",
                                             )}
                                         >
                                             {date.getDate()}

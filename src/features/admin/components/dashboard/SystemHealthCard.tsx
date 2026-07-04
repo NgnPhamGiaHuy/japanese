@@ -23,12 +23,10 @@ const SystemHealthCard = ({
         <AdminCard title="System Health">
             <div className="space-y-4">
                 <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold text-muted">Error Rate</span>
+                    <span className="text-muted text-xs font-bold">Error Rate</span>
                     <span
                         className={
-                            errorRate > 2
-                                ? "font-black text-danger"
-                                : "font-black text-hiragana"
+                            errorRate > 2 ? "text-danger font-black" : "text-hiragana font-black"
                         }
                     >
                         {errorRate}%
@@ -36,13 +34,13 @@ const SystemHealthCard = ({
                 </div>
                 <div className="h-2 w-full overflow-hidden rounded-full bg-gray-100">
                     <div
-                        className="h-full bg-danger transition-all"
+                        className="bg-danger h-full transition-all"
                         style={{ width: `${Math.min(errorRate * 10, 100)}%` }}
                     />
                 </div>
                 <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold text-muted">Active Team</span>
-                    <span className="font-black text-text">
+                    <span className="text-muted text-xs font-bold">Active Team</span>
+                    <span className="text-text font-black">
                         {activeAdmins}A / {activeSuperAdmins}S
                     </span>
                 </div>

@@ -40,19 +40,19 @@ const DecksTable = ({ items, onDelete, onView, isDeleting }: DecksTableProps) =>
         >
             <thead>
                 <tr className="border-b-2 border-gray-50 bg-gray-50/30">
-                    <th className="px-6 py-4 text-xs font-black tracking-widest text-muted uppercase">
+                    <th className="text-muted px-6 py-4 text-xs font-black tracking-widest uppercase">
                         Flashcard Set (Deck)
                     </th>
-                    <th className="px-6 py-4 text-xs font-black tracking-widest text-muted uppercase">
+                    <th className="text-muted px-6 py-4 text-xs font-black tracking-widest uppercase">
                         Owner
                     </th>
-                    <th className="px-6 py-4 text-xs font-black tracking-widest text-muted uppercase">
+                    <th className="text-muted px-6 py-4 text-xs font-black tracking-widest uppercase">
                         Size
                     </th>
-                    <th className="px-6 py-4 text-xs font-black tracking-widest text-muted uppercase">
+                    <th className="text-muted px-6 py-4 text-xs font-black tracking-widest uppercase">
                         Created
                     </th>
-                    <th className="px-6 py-4 text-right text-xs font-black tracking-widest text-muted uppercase">
+                    <th className="text-muted px-6 py-4 text-right text-xs font-black tracking-widest uppercase">
                         Actions
                     </th>
                 </tr>

@@ -46,8 +46,8 @@ const EmptyState = ({
             >
                 <Icon size={48} strokeWidth={3} />
             </div>
-            <h2 className="mb-2 text-2xl font-black text-text">{title}</h2>
-            <p className="mb-8 font-bold text-muted">{description}</p>
+            <h2 className="text-text mb-2 text-2xl font-black">{title}</h2>
+            <p className="text-muted mb-8 font-bold">{description}</p>
             <div className="flex justify-center">{action}</div>
         </div>
     );

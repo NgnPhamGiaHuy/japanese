@@ -137,7 +137,7 @@ const CommentItem = ({
                 <div className="min-w-0 flex-1">
                     {/* Header row */}
                     <div className="mb-1 flex flex-wrap items-baseline gap-x-1.5 gap-y-0.5">
-                        <span className="text-[13px] font-black text-text">{displayName}</span>
+                        <span className="text-text text-[13px] font-black">{displayName}</span>
                         {authorRole && (
                             <span
                                 className={`rounded-full px-1.5 py-px text-xs font-black capitalize ${ROLE_COLORS[authorRole] ?? ROLE_COLORS.viewer}`}
@@ -171,7 +171,7 @@ const CommentItem = ({
                         </div>
                     ) : (
                         <p
-                            className="mb-1.5 text-[13px] leading-relaxed text-text"
+                            className="text-text mb-1.5 text-[13px] leading-relaxed"
                             dangerouslySetInnerHTML={{ __html: renderMarkdown(comment.content) }}
                         />
                     )}

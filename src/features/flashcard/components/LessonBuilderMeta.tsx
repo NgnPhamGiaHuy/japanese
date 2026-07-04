@@ -100,7 +100,7 @@ const LessonBuilderMeta: React.FC<LessonBuilderMetaProps> = ({
                                         saving || lesson.categories?.includes(sug.toLowerCase())
                                     }
                                     onClick={() => addTag(sug)}
-                                    className="rounded-lg border-b-2 border-gray-200 bg-white px-2.5 py-1 text-xs font-black tracking-widest text-gray-500 uppercase transition-all hover:-translate-y-0.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-katakana focus-visible:ring-offset-2 disabled:opacity-30 sm:rounded-xl sm:px-3 sm:py-1.5 sm:text-xs"
+                                    className="focus-visible:ring-katakana rounded-lg border-b-2 border-gray-200 bg-white px-2.5 py-1 text-xs font-black tracking-widest text-gray-500 uppercase transition-all hover:-translate-y-0.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:opacity-30 sm:rounded-xl sm:px-3 sm:py-1.5 sm:text-xs"
                                 >
                                     {sug}
                                 </button>
@@ -113,7 +113,7 @@ const LessonBuilderMeta: React.FC<LessonBuilderMetaProps> = ({
                             type="text"
                             placeholder='Type "Kanji" or custom tags...'
                             value={tagInput}
-                            className="w-full rounded-xl border-2 border-b-4 border-gray-100 bg-gray-50/50 px-4 py-3 text-sm font-bold text-text placeholder-gray-300 transition-all outline-none focus:border-[var(--theme-color)] focus:bg-white focus:ring-4 focus:ring-[var(--theme-color)]/5 sm:rounded-2xl sm:px-5 sm:py-3.5"
+                            className="text-text w-full rounded-xl border-2 border-b-4 border-gray-100 bg-gray-50/50 px-4 py-3 text-sm font-bold placeholder-gray-300 transition-all outline-none focus:border-[var(--theme-color)] focus:bg-white focus:ring-4 focus:ring-[var(--theme-color)]/5 sm:rounded-2xl sm:px-5 sm:py-3.5"
                             onChange={(e) => setTagInput(e.target.value)}
                             onKeyDown={(e) => e.key === "Enter" && addTag(tagInput)}
                             disabled={saving}
@@ -136,7 +136,7 @@ const LessonBuilderMeta: React.FC<LessonBuilderMetaProps> = ({
                                     key={color}
                                     type="button"
                                     onClick={() => setLesson({ ...lesson, themeColor: color })}
-                                    className={`h-9 w-9 rounded-full border-2 transition-all hover:scale-110 focus:outline-none focus-visible:ring-2 focus-visible:ring-katakana focus-visible:ring-offset-2 sm:h-10 sm:w-10 ${
+                                    className={`focus-visible:ring-katakana h-9 w-9 rounded-full border-2 transition-all hover:scale-110 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 sm:h-10 sm:w-10 ${
                                         (lesson.themeColor || "#1cb0f6") === color
                                             ? "border-black"
                                             : "border-transparent"

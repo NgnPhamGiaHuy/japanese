@@ -70,7 +70,7 @@ const SpeedPlayingView = ({
     onAnswer,
 }: SpeedPlayingViewProps) => {
     return (
-        <div className="fixed inset-0 z-50 flex flex-col bg-bg">
+        <div className="bg-bg fixed inset-0 z-50 flex flex-col">
             <ScreenHeaderRow className="shrink-0" symmetricSidebars>
                 <ScreenHeaderBackButton
                     onClick={onBack}
@@ -80,7 +80,7 @@ const SpeedPlayingView = ({
                 />
 
                 <div className="flex flex-col items-center">
-                    <span className="text-sm font-black text-text">
+                    <span className="text-text text-sm font-black">
                         Q{ui.questionNumber} / {ui.totalQuestions}
                     </span>
                     <span className="text-xs font-black" style={{ color: difficultyConfig.color }}>
@@ -89,11 +89,11 @@ const SpeedPlayingView = ({
                 </div>
 
                 <div className="flex flex-col items-end gap-1">
-                    <span className="text-2xl font-black text-text tabular-nums md:text-3xl">
+                    <span className="text-text text-2xl font-black tabular-nums md:text-3xl">
                         {score}
                     </span>
                     {ui.multiplier > 1 ? (
-                        <span className="text-xs font-black whitespace-nowrap text-survival">
+                        <span className="text-survival text-xs font-black whitespace-nowrap">
                             🔥 {ui.multiplier}× combo
                         </span>
                     ) : (
@@ -150,7 +150,7 @@ const SpeedPlayingView = ({
 
                         return (
                             <h1
-                                className={`${sizeClass} leading-[1.1] font-black tracking-tight text-text drop-shadow-sm transition-all duration-300`}
+                                className={`${sizeClass} text-text leading-[1.1] font-black tracking-tight drop-shadow-sm transition-all duration-300`}
                             >
                                 {text}
                             </h1>
@@ -164,7 +164,7 @@ const SpeedPlayingView = ({
                                 initial={{ opacity: 0 }}
                                 animate={{ opacity: 1 }}
                                 exit={{ opacity: 0 }}
-                                className="mt-2 text-xs font-black text-survival"
+                                className="text-survival mt-2 text-xs font-black"
                             >
                                 ⚠ Hints reduced from here
                             </motion.p>
@@ -175,7 +175,7 @@ const SpeedPlayingView = ({
                                 initial={{ opacity: 0 }}
                                 animate={{ opacity: 1 }}
                                 exit={{ opacity: 0 }}
-                                className="mt-2 text-xs font-black text-danger"
+                                className="text-danger mt-2 text-xs font-black"
                             >
                                 ⚡ Speed increases — {SPEED_GAME_CONFIG.LEVELS[3].timeLimit} s per
                                 question!
@@ -230,10 +230,10 @@ const SpeedPlayingView = ({
                             transition={{ duration: 0.2 }}
                             className="w-full rounded-2xl border border-gray-200 bg-white px-5 py-3 text-center"
                         >
-                            <p className="text-xs font-black tracking-widest text-muted uppercase">
+                            <p className="text-muted text-xs font-black tracking-widest uppercase">
                                 Meaning
                             </p>
-                            <p className="mt-1 text-base font-bold text-text">
+                            <p className="text-text mt-1 text-base font-bold">
                                 {currentCard.meaning}
                             </p>
                         </motion.div>

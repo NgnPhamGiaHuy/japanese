@@ -58,30 +58,28 @@ const UserMobileRow = ({ row }: UserMobileRowProps) => {
                     </span>
                 )}
                 {isOnline && (
-                    <div className="absolute right-0 bottom-0 h-2.5 w-2.5 rounded-full border-2 border-white bg-hiragana" />
+                    <div className="bg-hiragana absolute right-0 bottom-0 h-2.5 w-2.5 rounded-full border-2 border-white" />
                 )}
             </div>
 
             {/* Info + actions */}
             <div className="min-w-0 flex-1">
                 <div className="flex flex-wrap items-center gap-1.5">
-                    <p className="text-sm font-black text-text">
+                    <p className="text-text text-sm font-black">
                         {user.displayName || "Anonymous User"}
                     </p>
                     {isOnline && (
-                        <span className="flex h-4 items-center rounded-full bg-hiragana px-1.5 text-[8px] font-black tracking-widest text-white uppercase">
+                        <span className="bg-hiragana flex h-4 items-center rounded-full px-1.5 text-[8px] font-black tracking-widest text-white uppercase">
                             Live
                         </span>
                     )}
                 </div>
-                <p className="truncate text-xs font-bold text-muted">
-                    {user.email ?? "No email"}
-                </p>
+                <p className="text-muted truncate text-xs font-bold">{user.email ?? "No email"}</p>
 
                 <div className="mt-2 flex flex-wrap items-center gap-2">
                     <RoleCell user={user} />
                     {user.lastSeenAt && (
-                        <span className="text-xs font-bold text-katakana">
+                        <span className="text-katakana text-xs font-bold">
                             Active{" "}
                             {new Date(user.lastSeenAt).toLocaleDateString(undefined, {
                                 month: "short",

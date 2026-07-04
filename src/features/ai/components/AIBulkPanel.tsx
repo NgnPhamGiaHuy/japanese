@@ -67,9 +67,7 @@ const ModeChip = ({ active, icon, label, sub, onClick, color }: ModeChipProps) =
             <div className="flex items-center gap-3">
                 <span className="shrink-0">{icon}</span>
                 <div className="flex flex-col">
-                    <div
-                        className={`text-sm font-black ${active ? "text-white" : "text-text"}`}
-                    >
+                    <div className={`text-sm font-black ${active ? "text-white" : "text-text"}`}>
                         {label}
                     </div>
                     <div
@@ -124,10 +122,10 @@ const AIBulkPanel = ({ themeColor, onPreview, existingWords = [] }: AIBulkPanelP
                     <Sparkles size={18} style={{ color: themeColor }} className="sm:size-5" />
                 </div>
                 <div>
-                    <h3 className="text-lg font-black text-text sm:text-xl">
+                    <h3 className="text-text text-lg font-black sm:text-xl">
                         Generate Deck with AI
                     </h3>
-                    <p className="text-xs font-bold tracking-wide text-muted uppercase sm:text-xs">
+                    <p className="text-muted text-xs font-bold tracking-wide uppercase sm:text-xs">
                         Describe a topic · review before saving
                     </p>
                 </div>
@@ -153,7 +151,7 @@ const AIBulkPanel = ({ themeColor, onPreview, existingWords = [] }: AIBulkPanelP
             </div>
 
             <div>
-                <label className="mb-2 block text-xs font-black tracking-widest text-muted uppercase">
+                <label className="text-muted mb-2 block text-xs font-black tracking-widest uppercase">
                     Topic or Theme
                 </label>
                 <Input
@@ -178,7 +176,7 @@ const AIBulkPanel = ({ themeColor, onPreview, existingWords = [] }: AIBulkPanelP
                             variant="ghost"
                             onClick={() => setTopic(s)}
                             disabled={isLoading}
-                            className="border-2 border-gray-200 bg-white !px-2.5 !py-1 !text-xs !font-black tracking-wide !text-muted uppercase shadow-none hover:border-gray-300 hover:text-text hover:shadow-none sm:!px-3 sm:!py-1.5 sm:!text-xs"
+                            className="!text-muted hover:text-text border-2 border-gray-200 bg-white !px-2.5 !py-1 !text-xs !font-black tracking-wide uppercase shadow-none hover:border-gray-300 hover:shadow-none sm:!px-3 sm:!py-1.5 sm:!text-xs"
                         >
                             {s}
                         </Button>
@@ -189,7 +187,7 @@ const AIBulkPanel = ({ themeColor, onPreview, existingWords = [] }: AIBulkPanelP
             {mode === "guided" && (
                 <div className="space-y-4 rounded-2xl border-2 border-dashed border-gray-100 bg-gray-50/50 p-4">
                     <div>
-                        <label className="mb-2 block text-xs font-black tracking-widest text-muted uppercase">
+                        <label className="text-muted mb-2 block text-xs font-black tracking-widest uppercase">
                             Number of Cards
                         </label>
                         <div className="grid grid-cols-4 gap-2">
@@ -219,7 +217,7 @@ const AIBulkPanel = ({ themeColor, onPreview, existingWords = [] }: AIBulkPanelP
                     </div>
 
                     <div>
-                        <label className="mb-2 block text-xs font-black tracking-widest text-muted uppercase">
+                        <label className="text-muted mb-2 block text-xs font-black tracking-widest uppercase">
                             JLPT Level
                         </label>
                         <div className="grid grid-cols-3 gap-2 sm:grid-cols-5 sm:gap-1.5">
@@ -262,8 +260,8 @@ const AIBulkPanel = ({ themeColor, onPreview, existingWords = [] }: AIBulkPanelP
 
             {error && (
                 <div className="flex items-start gap-3 rounded-2xl border-2 border-[#ffdfe0] bg-[#fff5f5] px-4 py-3">
-                    <AlertCircle size={16} className="mt-0.5 shrink-0 text-danger" />
-                    <p className="text-sm font-bold text-danger">{error}</p>
+                    <AlertCircle size={16} className="text-danger mt-0.5 shrink-0" />
+                    <p className="text-danger text-sm font-bold">{error}</p>
                 </div>
             )}
 
@@ -283,7 +281,7 @@ const AIBulkPanel = ({ themeColor, onPreview, existingWords = [] }: AIBulkPanelP
 
             {isLoading ? (
                 <div className="space-y-2 text-center">
-                    <p className="text-sm font-bold text-muted">
+                    <p className="text-muted text-sm font-bold">
                         Gemini is crafting your flashcards…
                     </p>
                     <div className="mx-auto h-1 w-48 overflow-hidden rounded-full bg-gray-200">
@@ -294,7 +292,7 @@ const AIBulkPanel = ({ themeColor, onPreview, existingWords = [] }: AIBulkPanelP
                     </div>
                 </div>
             ) : (
-                <p className="text-center text-xs font-bold text-muted">
+                <p className="text-muted text-center text-xs font-bold">
                     AI generates cards with hints &amp; quiz answers → you review &amp; edit → then
                     save
                 </p>

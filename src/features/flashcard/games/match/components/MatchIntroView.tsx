@@ -54,7 +54,7 @@ const MatchIntroView = ({
             onStart={onStart}
         >
             <div className="mb-6 w-full max-w-sm">
-                <p className="mb-3 text-center text-xs font-black tracking-widest text-muted uppercase">
+                <p className="text-muted mb-3 text-center text-xs font-black tracking-widest uppercase">
                     Select Difficulty
                 </p>
                 <div className="flex flex-col gap-2">

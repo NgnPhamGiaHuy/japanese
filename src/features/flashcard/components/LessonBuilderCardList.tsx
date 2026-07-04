@@ -39,7 +39,7 @@ const LessonBuilderCardList: React.FC<LessonBuilderCardListProps> = ({
     return (
         <div className="space-y-6">
             <div className="flex items-center justify-between px-2">
-                <h3 className="text-xl font-black text-text sm:text-2xl">
+                <h3 className="text-text text-xl font-black sm:text-2xl">
                     Cards <span className="text-gray-300">({cards.length})</span>
                 </h3>
                 <Button

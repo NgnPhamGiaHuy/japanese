@@ -67,7 +67,7 @@ export function QuizPlaying({
     }, [question, status, quizMode]);
 
     return (
-        <div className="fixed inset-0 z-50 flex flex-col bg-bg">
+        <div className="bg-bg fixed inset-0 z-50 flex flex-col">
             <ScreenHeaderRow className="shrink-0">
                 <ScreenHeaderBackButton
                     onClick={onBack}
@@ -106,7 +106,7 @@ export function QuizPlaying({
                             iconSize={18}
                             iconClassName={themeColor.text}
                         />
-                        <span className="text-[7rem] leading-none font-medium text-text select-none sm:text-9xl">
+                        <span className="text-text text-[7rem] leading-none font-medium select-none sm:text-9xl">
                             {question.char}
                         </span>
                     </div>
@@ -117,7 +117,7 @@ export function QuizPlaying({
                                 ref={inputRef}
                                 autoCapitalize="none"
                                 autoComplete="off"
-                                className="w-full rounded-2xl border-2 border-b-4 border-gray-200 bg-white px-6 py-4 text-2xl font-black text-text transition-colors outline-none focus:border-[#1cb0f6]"
+                                className="text-text w-full rounded-2xl border-2 border-b-4 border-gray-200 bg-white px-6 py-4 text-2xl font-black transition-colors outline-none focus:border-[#1cb0f6]"
                                 placeholder="Type romaji"
                                 value={typedInput}
                                 onChange={(e) => onTypedInputChange(e.target.value)}

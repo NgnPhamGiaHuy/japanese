@@ -61,7 +61,7 @@ const ImportCellInput = ({
     muted = false,
 }: ImportCellInputProps) => (
     <input
-        className={`w-full rounded-lg border-2 border-transparent bg-transparent p-1.5 text-xs outline-none focus:border-[var(--theme-color)] focus:bg-white sm:p-2 sm:text-sm ${muted ? "font-medium text-muted" : ""}`}
+        className={`w-full rounded-lg border-2 border-transparent bg-transparent p-1.5 text-xs outline-none focus:border-[var(--theme-color)] focus:bg-white sm:p-2 sm:text-sm ${muted ? "text-muted font-medium" : ""}`}
         style={{ "--theme-color": themeColor } as React.CSSProperties}
         value={value}
         onChange={(e) => onChange(e.target.value)}
@@ -125,8 +125,8 @@ const ImportPreview = ({
             {/* Header Summary & Actions */}
             <div className="flex items-center justify-between rounded-xl border-2 border-gray-200 bg-white p-4 shadow-sm">
                 <div>
-                    <h3 className="text-lg font-black text-text">Preview Cards</h3>
-                    <p className="text-sm font-bold text-muted">
+                    <h3 className="text-text text-lg font-black">Preview Cards</h3>
+                    <p className="text-muted text-sm font-bold">
                         {validCount} valid, {invalidCount} invalid
                     </p>
                 </div>
@@ -147,8 +147,8 @@ const ImportPreview = ({
 
             {/* Validation Table */}
             <div className="overflow-hidden rounded-2xl border-2 border-gray-200 bg-white shadow-sm sm:overflow-x-auto">
-                <table className="w-full table-fixed text-left font-bold text-text">
-                    <thead className="border-b-2 border-gray-200 bg-gray-50 text-xs tracking-widest text-muted uppercase sm:text-xs">
+                <table className="text-text w-full table-fixed text-left font-bold">
+                    <thead className="text-muted border-b-2 border-gray-200 bg-gray-50 text-xs tracking-widest uppercase sm:text-xs">
                         <tr>
                             <th className="w-[22%] p-2 sm:p-4">Primary</th>
                             <th className="w-[20%] p-2 sm:p-4">Alternatives</th>
@@ -235,7 +235,7 @@ const ImportPreview = ({
                         ))}
                         {rows.length === 0 && (
                             <tr>
-                                <td colSpan={6} className="p-8 text-center text-muted">
+                                <td colSpan={6} className="text-muted p-8 text-center">
                                     No rows parsed. Try a different format.
                                 </td>
                             </tr>

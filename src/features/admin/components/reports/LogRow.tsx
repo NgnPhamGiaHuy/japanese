@@ -46,10 +46,10 @@ const MetadataViewer = ({ meta }: { meta: Record<string, unknown> }) => {
         <div className="mt-2 grid grid-cols-1 gap-1 sm:grid-cols-2">
             {entries.map(([k, v]) => (
                 <div key={k} className="flex min-w-0 gap-1.5 rounded-lg bg-gray-100/80 px-2 py-1">
-                    <span className="shrink-0 text-xs font-black tracking-wider text-muted uppercase">
+                    <span className="text-muted shrink-0 text-xs font-black tracking-wider uppercase">
                         {k}
                     </span>
-                    <span className="min-w-0 truncate font-mono text-xs text-text">
+                    <span className="text-text min-w-0 truncate font-mono text-xs">
                         {typeof v === "object" ? JSON.stringify(v) : String(v ?? "—")}
                     </span>
                 </div>
@@ -84,7 +84,7 @@ const CopyButton = ({ text, title }: { text: string; title?: string }) => {
             icon={copied ? Check : Copy}
             iconSize={12}
             iconClassName={copied ? "text-hiragana" : "text-muted"}
-            className="h-6 w-6 !p-0 transition-colors hover:!bg-transparent hover:text-text"
+            className="hover:text-text h-6 w-6 !p-0 transition-colors hover:!bg-transparent"
         />
     );
 };
@@ -102,7 +102,7 @@ const SourceBadge = ({ source }: { source?: string }) => {
             variant="default"
             size="sm"
             icon={isClient ? Smartphone : Server}
-            className="border-gray-100 bg-gray-50 tracking-wider text-muted uppercase"
+            className="text-muted border-gray-100 bg-gray-50 tracking-wider uppercase"
         >
             {source.replace("_", " ")}
         </Badge>
@@ -148,7 +148,7 @@ const LogRow = ({ log }: LogRowProps) => {
         >
             {/* ── Main row ── */}
             <div
-                className="flex w-full cursor-pointer flex-col gap-3 px-4 py-3 focus:outline-none focus-visible:ring-2 focus-visible:ring-katakana focus-visible:ring-inset sm:flex-row sm:gap-3"
+                className="focus-visible:ring-katakana flex w-full cursor-pointer flex-col gap-3 px-4 py-3 focus:outline-none focus-visible:ring-2 focus-visible:ring-inset sm:flex-row sm:gap-3"
                 onClick={() => hasDetail && setExpanded((v) => !v)}
                 onKeyDown={(e) => {
                     if (!hasDetail) return;
@@ -168,17 +168,17 @@ const LogRow = ({ log }: LogRowProps) => {
                         <LogTypeBadge type={type} />
                         <SourceBadge source={log.source} />
                         {log.ip && (
-                            <span className="text-xs font-black tracking-wider text-muted uppercase">
+                            <span className="text-muted text-xs font-black tracking-wider uppercase">
                                 IP {log.ip}
                             </span>
                         )}
                     </div>
 
-                    <h3 className="text-sm leading-snug font-bold text-text">
+                    <h3 className="text-text text-sm leading-snug font-bold">
                         {log.action ?? "(no action)"}
                     </h3>
 
-                    <p className="flex flex-wrap items-center gap-x-1.5 gap-y-0.5 text-xs font-bold text-muted sm:text-xs">
+                    <p className="text-muted flex flex-wrap items-center gap-x-1.5 gap-y-0.5 text-xs font-bold sm:text-xs">
                         <span className="text-text">{log.userName || "—"}</span>
                         <span>·</span>
                         <span>{log.userEmail || "—"}</span>
@@ -203,12 +203,12 @@ const LogRow = ({ log }: LogRowProps) => {
                 <div className="flex shrink-0 flex-col items-end justify-between gap-1 text-right sm:flex-col">
                     <div>
                         <time
-                            className="block text-xs font-black tracking-wider text-hiragana uppercase"
+                            className="text-hiragana block text-xs font-black tracking-wider uppercase"
                             title={absolute}
                         >
                             {relative}
                         </time>
-                        <span className="block text-xs font-bold text-muted">{absolute}</span>
+                        <span className="text-muted block text-xs font-bold">{absolute}</span>
                     </div>
                     {hasDetail && (
                         <ChevronDown
@@ -227,13 +227,13 @@ const LogRow = ({ log }: LogRowProps) => {
                     <div className="mb-3 flex flex-wrap items-center gap-3">
                         {log.entityType && (
                             <div className="flex items-center gap-1.5 text-xs">
-                                <span className="font-black tracking-wider text-muted uppercase">
+                                <span className="text-muted font-black tracking-wider uppercase">
                                     Entity
                                 </span>
                                 <Badge
                                     variant="default"
                                     size="sm"
-                                    className="border-gray-200 bg-white font-mono text-text"
+                                    className="text-text border-gray-200 bg-white font-mono"
                                 >
                                     {log.entityType}
                                     {log.entityId ? ` · ${log.entityId.slice(0, 12)}…` : ""}
@@ -244,13 +244,13 @@ const LogRow = ({ log }: LogRowProps) => {
                             </div>
                         )}
                         <div className="flex items-center gap-1.5 text-xs">
-                            <span className="font-black tracking-wider text-muted uppercase">
+                            <span className="text-muted font-black tracking-wider uppercase">
                                 Log ID
                             </span>
                             <Badge
                                 variant="default"
                                 size="sm"
-                                className="border-gray-200 bg-white font-mono text-text"
+                                className="text-text border-gray-200 bg-white font-mono"
                             >
                                 {log.id.slice(0, 12)}…
                             </Badge>
@@ -261,7 +261,7 @@ const LogRow = ({ log }: LogRowProps) => {
                     {/* User agent */}
                     {log.userAgent && (
                         <div className="mb-2 rounded-lg border border-gray-200 bg-white px-3 py-2">
-                            <span className="mb-1 block text-xs font-black tracking-wider text-muted uppercase">
+                            <span className="text-muted mb-1 block text-xs font-black tracking-wider uppercase">
                                 User Agent
                             </span>
                             <p className="font-mono text-xs break-all text-gray-500">

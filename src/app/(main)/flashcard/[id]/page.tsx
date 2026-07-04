@@ -40,7 +40,7 @@ export default function FlashcardDetailPage({ params }: { params: Promise<{ id: 
 
     if (lessonsLoading || cardsLoading) {
         return (
-            <div className="fixed inset-0 flex items-center justify-center bg-bg">
+            <div className="bg-bg fixed inset-0 flex items-center justify-center">
                 <div className="h-8 w-8 animate-spin rounded-full border-4 border-gray-200 border-t-[#1cb0f6]" />
             </div>
         );
@@ -51,12 +51,12 @@ export default function FlashcardDetailPage({ params }: { params: Promise<{ id: 
     /** Error Boundary / Guard: Ensure deck exists and user is authenticated */
     if (!lesson || !user) {
         return (
-            <div className="flex min-h-screen flex-col items-center justify-center bg-bg p-6 text-center">
+            <div className="bg-bg flex min-h-screen flex-col items-center justify-center p-6 text-center">
                 <div className="mb-6 flex h-24 w-24 items-center justify-center rounded-3xl border-b-8 border-gray-200 bg-white shadow-sm">
                     <span className="text-4xl">🔒</span>
                 </div>
-                <h1 className="mb-2 text-2xl font-black text-text">Deck Not Found</h1>
-                <p className="mb-8 font-bold text-muted">
+                <h1 className="text-text mb-2 text-2xl font-black">Deck Not Found</h1>
+                <p className="text-muted mb-8 font-bold">
                     This deck doesn&apos;t exist or you don&apos;t have access.
                 </p>
                 <Button onClick={() => router.back()} variant="secondary">

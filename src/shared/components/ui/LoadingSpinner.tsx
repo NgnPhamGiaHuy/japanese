@@ -39,8 +39,8 @@ const LoadingSpinner = ({
             </div>
             {label && (
                 <div className="flex flex-col items-center gap-1">
-                    <p className="text-lg font-black tracking-tight text-text">{label}</p>
-                    <p className="text-xs font-bold tracking-widest text-muted uppercase">
+                    <p className="text-text text-lg font-black tracking-tight">{label}</p>
+                    <p className="text-muted text-xs font-bold tracking-widest uppercase">
                         Crunching latest platform data
                     </p>
                 </div>
@@ -55,7 +55,7 @@ const LoadingSpinner = ({
     }
 
     return (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-bg/80 backdrop-blur-sm">
+        <div className="bg-bg/80 fixed inset-0 z-[100] flex items-center justify-center backdrop-blur-sm">
             {spinner}
         </div>
     );

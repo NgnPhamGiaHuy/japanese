@@ -31,10 +31,10 @@ const navItems = [
 
 const Logo = () => (
     <div className="flex items-center gap-3">
-        <div className="flex h-10 w-10 -rotate-6 items-center justify-center rounded-xl border-b-4 border-katakana-strong bg-gradient-to-br from-katakana to-both text-2xl text-white shadow-sm ring-2 ring-white">
+        <div className="border-katakana-strong from-katakana to-both flex h-10 w-10 -rotate-6 items-center justify-center rounded-xl border-b-4 bg-gradient-to-br text-2xl text-white shadow-sm ring-2 ring-white">
             あ
         </div>
-        <span className="text-lg font-black tracking-tighter text-text">
+        <span className="text-text text-lg font-black tracking-tighter">
             ADMIN <span className="text-katakana">PRO</span>
         </span>
     </div>
@@ -57,22 +57,20 @@ const NavLinks = ({ onNavigate }: { onNavigate?: () => void }) => {
                             "group relative flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-black transition-all",
                             isActive
                                 ? "bg-katakana/10 text-katakana"
-                                : "text-muted hover:bg-gray-50 hover:text-text",
+                                : "text-muted hover:text-text hover:bg-gray-50",
                         )}
                     >
                         <Icon
                             size={20}
                             className={
-                                isActive
-                                    ? "text-katakana"
-                                    : "text-gray-400 group-hover:text-text"
+                                isActive ? "text-katakana" : "group-hover:text-text text-gray-400"
                             }
                         />
                         {item.label}
                         {isActive && (
                             <motion.div
                                 layoutId="active-sidebar"
-                                className="absolute -left-3 h-8 w-1.5 rounded-r-full bg-katakana"
+                                className="bg-katakana absolute -left-3 h-8 w-1.5 rounded-r-full"
                                 initial={{ opacity: 0 }}
                                 animate={{ opacity: 1 }}
                                 transition={{ duration: 0.2 }}
@@ -88,10 +86,8 @@ const NavLinks = ({ onNavigate }: { onNavigate?: () => void }) => {
 const Footer = () => (
     <div className="p-4">
         <div className="rounded-2xl border-2 border-dashed border-gray-100 p-4">
-            <p className="text-xs font-black tracking-widest text-muted uppercase">
-                Superadmin
-            </p>
-            <p className="mt-1 truncate text-xs font-bold text-text">Console Managed</p>
+            <p className="text-muted text-xs font-black tracking-widest uppercase">Superadmin</p>
+            <p className="text-text mt-1 truncate text-xs font-bold">Console Managed</p>
         </div>
     </div>
 );

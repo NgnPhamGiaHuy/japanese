@@ -138,12 +138,12 @@ const FlashcardMistakeReview = ({
 
     if (cards.length === 0) {
         return (
-            <div className="flex h-screen flex-col items-center justify-center bg-bg p-6 text-center">
-                <div className="mb-6 flex h-24 w-24 items-center justify-center rounded-4xl border-b-8 border-gray-200 bg-white text-hiragana shadow-sm">
+            <div className="bg-bg flex h-screen flex-col items-center justify-center p-6 text-center">
+                <div className="text-hiragana mb-6 flex h-24 w-24 items-center justify-center rounded-4xl border-b-8 border-gray-200 bg-white shadow-sm">
                     <Check size={48} strokeWidth={3} />
                 </div>
-                <h2 className="mb-2 text-2xl font-black text-text">No mistakes to review!</h2>
-                <p className="mb-8 font-bold text-muted">You nailed everything. Keep it up!</p>
+                <h2 className="text-text mb-2 text-2xl font-black">No mistakes to review!</h2>
+                <p className="text-muted mb-8 font-bold">You nailed everything. Keep it up!</p>
                 <Button onClick={onClose} variant="secondary" className="px-8 py-3">
                     Go Back
                 </Button>
@@ -204,27 +204,27 @@ const FlashcardMistakeReview = ({
     if (showSummary) {
         const xpEarned = stats.correct * 3;
         return (
-            <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-bg p-6 text-center">
+            <div className="bg-bg fixed inset-0 z-50 flex flex-col items-center justify-center p-6 text-center">
                 <div
                     className="mb-6 flex h-24 w-24 -rotate-6 items-center justify-center rounded-4xl border-b-8 shadow-sm"
                     style={{ backgroundColor: themeHex, borderColor: `${themeHex}AA` }}
                 >
                     <Brain size={48} className="text-white" strokeWidth={2.5} />
                 </div>
-                <h2 className="mb-1 text-4xl font-black text-text">Review Done!</h2>
-                <p className="mb-8 text-lg font-bold text-muted">
+                <h2 className="text-text mb-1 text-4xl font-black">Review Done!</h2>
+                <p className="text-muted mb-8 text-lg font-bold">
                     You revisited {cards.length} difficult card{cards.length !== 1 ? "s" : ""}.
                 </p>
                 <div className="mb-10 flex w-full max-w-sm gap-4">
                     <div className="flex-1 rounded-3xl border-2 border-b-8 border-gray-200 bg-white p-6 text-center shadow-sm">
-                        <div className="text-5xl font-black text-hiragana">{stats.correct}</div>
-                        <div className="mt-2 text-xs font-black tracking-widest text-muted uppercase">
+                        <div className="text-hiragana text-5xl font-black">{stats.correct}</div>
+                        <div className="text-muted mt-2 text-xs font-black tracking-widest uppercase">
                             Fixed
                         </div>
                     </div>
                     <div className="flex-1 rounded-3xl border-2 border-b-8 border-gray-200 bg-white p-6 text-center shadow-sm">
-                        <div className="text-5xl font-black text-survival">{stats.incorrect}</div>
-                        <div className="mt-2 text-xs font-black tracking-widest text-muted uppercase">
+                        <div className="text-survival text-5xl font-black">{stats.incorrect}</div>
+                        <div className="text-muted mt-2 text-xs font-black tracking-widest uppercase">
                             Still hard
                         </div>
                     </div>
@@ -243,7 +243,7 @@ const FlashcardMistakeReview = ({
 
     // ── Player UI ────────────────────────────────────────────────────────────
     return (
-        <div className="fixed inset-0 z-50 flex flex-col bg-bg">
+        <div className="bg-bg fixed inset-0 z-50 flex flex-col">
             {/* Header: Error-themed progress bar */}
             <header className="flex items-center justify-between p-4">
                 <Button variant="ghost" size="icon" onClick={onClose} icon={X} aria-label="Close" />
@@ -251,17 +251,20 @@ const FlashcardMistakeReview = ({
                     <div className="h-4 overflow-hidden rounded-full bg-gray-200">
                         <div
                             className="h-full transition-all duration-300"
-                            style={{ width: `${progress}%`, backgroundColor: "var(--color-danger)" }}
+                            style={{
+                                width: `${progress}%`,
+                                backgroundColor: "var(--color-danger)",
+                            }}
                         />
                     </div>
                 </div>
-                <span className="w-12 text-right text-sm font-black text-muted">
+                <span className="text-muted w-12 text-right text-sm font-black">
                     {currentIndex + 1}/{queue.length}
                 </span>
             </header>
 
             {/* Visual Guard: Mistake Mode Badge */}
-            <div className="mx-auto flex items-center gap-2 rounded-xl border border-danger-bg bg-danger-bg px-4 py-1.5 text-xs font-black text-danger uppercase">
+            <div className="border-danger-bg bg-danger-bg text-danger mx-auto flex items-center gap-2 rounded-xl border px-4 py-1.5 text-xs font-black uppercase">
                 <AlertCircle size={12} />
                 Reviewing your mistakes
             </div>
@@ -270,18 +273,18 @@ const FlashcardMistakeReview = ({
                 {mcChoices && mcChoices.length === 4 ? (
                     /* Recognition Mode: Select the meaning you missed previously */
                     <div className="flex w-full flex-col gap-5">
-                        <div className="rounded-5xl flex w-full flex-col items-center justify-center border-2 border-b-8 border-danger/20 bg-white px-6 py-8 text-center shadow-sm">
+                        <div className="rounded-5xl border-danger/20 flex w-full flex-col items-center justify-center border-2 border-b-8 bg-white px-6 py-8 text-center shadow-sm">
                             {headerHint && (
-                                <span className="mb-2 text-lg font-bold tracking-widest text-muted">
+                                <span className="text-muted mb-2 text-lg font-bold tracking-widest">
                                     {headerHint}
                                 </span>
                             )}
                             <div className="flex w-full flex-1 flex-col items-center justify-center px-2 py-2">
-                                <h1 className="w-full text-center text-3xl leading-tight font-black wrap-break-word text-text select-text sm:text-4xl md:text-5xl">
+                                <h1 className="text-text w-full text-center text-3xl leading-tight font-black wrap-break-word select-text sm:text-4xl md:text-5xl">
                                     {displayFront}
                                 </h1>
                                 {altSubtitle && (
-                                    <p className="mt-2 text-lg font-bold text-muted">
+                                    <p className="text-muted mt-2 text-lg font-bold">
                                         {altSubtitle}
                                     </p>
                                 )}
@@ -357,18 +360,18 @@ const FlashcardMistakeReview = ({
                             }}
                         >
                             {/* Front (Recall Trigger) */}
-                            <div className="rounded-5xl absolute inset-0 flex flex-col items-center justify-center border-2 border-b-8 border-danger/20 bg-white p-6 text-center shadow-sm backface-hidden hover:-translate-y-1 hover:shadow-md">
+                            <div className="rounded-5xl border-danger/20 absolute inset-0 flex flex-col items-center justify-center border-2 border-b-8 bg-white p-6 text-center shadow-sm backface-hidden hover:-translate-y-1 hover:shadow-md">
                                 {headerHint && (
-                                    <span className="mb-2 shrink-0 text-xl font-bold tracking-widest text-muted">
+                                    <span className="text-muted mb-2 shrink-0 text-xl font-bold tracking-widest">
                                         {headerHint}
                                     </span>
                                 )}
                                 <div className="flex w-full flex-1 flex-col items-center justify-center px-2 py-4">
-                                    <h1 className="w-full text-center text-3xl leading-tight font-black wrap-break-word text-text select-text sm:text-4xl md:text-5xl">
+                                    <h1 className="text-text w-full text-center text-3xl leading-tight font-black wrap-break-word select-text sm:text-4xl md:text-5xl">
                                         {displayFront}
                                     </h1>
                                     {altSubtitle && (
-                                        <p className="mt-2 text-lg font-bold text-muted">
+                                        <p className="text-muted mt-2 text-lg font-bold">
                                             {altSubtitle}
                                         </p>
                                     )}
@@ -379,7 +382,7 @@ const FlashcardMistakeReview = ({
                             </div>
 
                             {/* Back (Memory Encoding with AI Aid) */}
-                            <div className="rounded-5xl absolute inset-0 flex rotate-y-180 flex-col items-center justify-center border-2 border-b-8 border-danger/20 bg-white p-6 text-center shadow-sm backface-hidden sm:p-8">
+                            <div className="rounded-5xl border-danger/20 absolute inset-0 flex rotate-y-180 flex-col items-center justify-center border-2 border-b-8 bg-white p-6 text-center shadow-sm backface-hidden sm:p-8">
                                 <Button
                                     onClick={(e) => {
                                         e.stopPropagation();
@@ -400,7 +403,7 @@ const FlashcardMistakeReview = ({
                                     </h2>
                                     {back.example && (
                                         <div className="mt-2 w-full rounded-2xl border-2 border-gray-100 bg-gray-50 p-4 text-left">
-                                            <p className="text-sm font-bold text-text sm:text-base">
+                                            <p className="text-text text-sm font-bold sm:text-base">
                                                 {back.example}
                                             </p>
                                         </div>
@@ -408,23 +411,21 @@ const FlashcardMistakeReview = ({
 
                                     {/* Mnemonic Generation Area */}
                                     <div className="mt-4 w-full rounded-2xl border-2 border-[#ffe5c7] bg-[#fff8f0] p-4 text-left">
-                                        <div className="mb-2 flex items-center gap-2 text-xs font-black tracking-widest text-survival uppercase">
+                                        <div className="text-survival mb-2 flex items-center gap-2 text-xs font-black tracking-widest uppercase">
                                             <Lightbulb size={12} />
                                             Memory Tip
                                         </div>
                                         {aiLoading ? (
-                                            <div className="flex items-center gap-2 text-sm text-muted">
+                                            <div className="text-muted flex items-center gap-2 text-sm">
                                                 <Loader2 size={14} className="animate-spin" />
                                                 Generating tip…
                                             </div>
                                         ) : explanation ? (
-                                            <p className="text-sm font-bold text-text">
+                                            <p className="text-text text-sm font-bold">
                                                 {explanation}
                                             </p>
                                         ) : (
-                                            <p className="text-sm text-muted">
-                                                No tip available.
-                                            </p>
+                                            <p className="text-muted text-sm">No tip available.</p>
                                         )}
                                     </div>
                                 </div>
@@ -439,21 +440,21 @@ const FlashcardMistakeReview = ({
                             <button
                                 aria-label="Again — card will repeat soon"
                                 onClick={() => void handleGrade("Again")}
-                                className="rounded-[1.25rem] border-2 border-b-8 border-danger/60 bg-[#ff4b4b] py-4 text-base font-black text-white shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-[#ff4b4b] focus-visible:ring-offset-2 active:translate-y-0 active:border-b-2"
+                                className="border-danger/60 rounded-[1.25rem] border-2 border-b-8 bg-[#ff4b4b] py-4 text-base font-black text-white shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-[#ff4b4b] focus-visible:ring-offset-2 active:translate-y-0 active:border-b-2"
                             >
                                 Again
                             </button>
                             <button
                                 aria-label="Hard — interval shortened"
                                 onClick={() => void handleGrade("Hard")}
-                                className="rounded-[1.25rem] border-2 border-b-8 border-[#e07000]/60 bg-survival py-4 text-base font-black text-white shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-[#ff9600] focus-visible:ring-offset-2 active:translate-y-0 active:border-b-2"
+                                className="bg-survival rounded-[1.25rem] border-2 border-b-8 border-[#e07000]/60 py-4 text-base font-black text-white shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-[#ff9600] focus-visible:ring-offset-2 active:translate-y-0 active:border-b-2"
                             >
                                 Hard
                             </button>
                             <button
                                 aria-label="Good — normal interval"
                                 onClick={() => void handleGrade("Good")}
-                                className="rounded-[1.25rem] border-2 border-b-8 border-hiragana-strong/60 bg-hiragana py-4 text-base font-black text-white shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-hiragana focus-visible:ring-offset-2 active:translate-y-0 active:border-b-2"
+                                className="border-hiragana-strong/60 bg-hiragana focus-visible:ring-hiragana rounded-[1.25rem] border-2 border-b-8 py-4 text-base font-black text-white shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 active:translate-y-0 active:border-b-2"
                             >
                                 Good
                             </button>

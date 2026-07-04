@@ -22,7 +22,7 @@ export function QuizResults({
     const isPerfect = score >= targetScore;
 
     return (
-        <div className="fixed inset-0 z-50 flex flex-col overflow-y-auto bg-bg">
+        <div className="bg-bg fixed inset-0 z-50 flex flex-col overflow-y-auto">
             <div className="mx-auto flex w-full max-w-md flex-col items-center px-4 py-8">
                 <div
                     className={`mb-4 flex h-20 w-20 -rotate-6 items-center justify-center rounded-[1.75rem] border-b-8 text-4xl font-medium text-white shadow-sm ${themeColor.bg}`}
@@ -30,15 +30,15 @@ export function QuizResults({
                 >
                     {isPerfect ? "🏆" : "✓"}
                 </div>
-                <h2 className="mb-1 text-4xl font-black text-text">
+                <h2 className="text-text mb-1 text-4xl font-black">
                     {isPerfect ? "Perfect!" : "Done!"}
                 </h2>
-                <p className="mb-1 text-xl font-bold text-muted">
+                <p className="text-muted mb-1 text-xl font-bold">
                     Score:{" "}
                     <span className={`mx-1 text-3xl font-black ${themeColor.text}`}>{score}</span>
-                    <span className="text-base text-muted">/ {targetScore}</span>
+                    <span className="text-muted text-base">/ {targetScore}</span>
                 </p>
-                <p className="mb-6 text-sm font-bold text-muted">
+                <p className="text-muted mb-6 text-sm font-bold">
                     {isPerfect ? "You answered all questions correctly!" : "Keep practising!"}
                 </p>
 
