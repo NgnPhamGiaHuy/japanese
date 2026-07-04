@@ -46,10 +46,10 @@ const MetadataViewer = ({ meta }: { meta: Record<string, unknown> }) => {
         <div className="mt-2 grid grid-cols-1 gap-1 sm:grid-cols-2">
             {entries.map(([k, v]) => (
                 <div key={k} className="flex min-w-0 gap-1.5 rounded-lg bg-gray-100/80 px-2 py-1">
-                    <span className="shrink-0 text-[9px] font-black tracking-wider text-[#afafaf] uppercase">
+                    <span className="shrink-0 text-xs font-black tracking-wider text-[#afafaf] uppercase">
                         {k}
                     </span>
-                    <span className="min-w-0 truncate font-mono text-[10px] text-[#3c3c3c]">
+                    <span className="min-w-0 truncate font-mono text-xs text-[#3c3c3c]">
                         {typeof v === "object" ? JSON.stringify(v) : String(v ?? "—")}
                     </span>
                 </div>
@@ -160,7 +160,7 @@ const LogRow = ({ log }: LogRowProps) => {
                         <LogTypeBadge type={type} />
                         <SourceBadge source={log.source} />
                         {log.ip && (
-                            <span className="text-[9px] font-black tracking-wider text-[#afafaf] uppercase">
+                            <span className="text-xs font-black tracking-wider text-[#afafaf] uppercase">
                                 IP {log.ip}
                             </span>
                         )}
@@ -170,7 +170,7 @@ const LogRow = ({ log }: LogRowProps) => {
                         {log.action ?? "(no action)"}
                     </h3>
 
-                    <p className="flex flex-wrap items-center gap-x-1.5 gap-y-0.5 text-[10px] font-bold text-[#afafaf] sm:text-[11px]">
+                    <p className="flex flex-wrap items-center gap-x-1.5 gap-y-0.5 text-xs font-bold text-[#afafaf] sm:text-xs">
                         <span className="text-[#3c3c3c]">{log.userName || "—"}</span>
                         <span>·</span>
                         <span>{log.userEmail || "—"}</span>
@@ -178,7 +178,7 @@ const LogRow = ({ log }: LogRowProps) => {
                             <>
                                 <span>·</span>
                                 <span
-                                    className="flex items-center gap-1 font-mono text-[9px] text-gray-400 sm:text-[10px]"
+                                    className="flex items-center gap-1 font-mono text-xs text-gray-400 sm:text-xs"
                                     title={log.userId}
                                 >
                                     <Hash size={8} className="sm:size-2.5" />
@@ -195,12 +195,12 @@ const LogRow = ({ log }: LogRowProps) => {
                 <div className="flex shrink-0 flex-col items-end justify-between gap-1 text-right sm:flex-col">
                     <div>
                         <time
-                            className="block text-[10px] font-black tracking-wider text-[#58cc02] uppercase"
+                            className="block text-xs font-black tracking-wider text-[#58cc02] uppercase"
                             title={absolute}
                         >
                             {relative}
                         </time>
-                        <span className="block text-[9px] font-bold text-[#afafaf]">
+                        <span className="block text-xs font-bold text-[#afafaf]">
                             {absolute}
                         </span>
                     </div>
@@ -220,7 +220,7 @@ const LogRow = ({ log }: LogRowProps) => {
                     {/* Entity + Log ID row */}
                     <div className="mb-3 flex flex-wrap items-center gap-3">
                         {log.entityType && (
-                            <div className="flex items-center gap-1.5 text-[10px]">
+                            <div className="flex items-center gap-1.5 text-xs">
                                 <span className="font-black tracking-wider text-[#afafaf] uppercase">
                                     Entity
                                 </span>
@@ -237,7 +237,7 @@ const LogRow = ({ log }: LogRowProps) => {
                                 )}
                             </div>
                         )}
-                        <div className="flex items-center gap-1.5 text-[10px]">
+                        <div className="flex items-center gap-1.5 text-xs">
                             <span className="font-black tracking-wider text-[#afafaf] uppercase">
                                 Log ID
                             </span>
@@ -255,10 +255,10 @@ const LogRow = ({ log }: LogRowProps) => {
                     {/* User agent */}
                     {log.userAgent && (
                         <div className="mb-2 rounded-lg border border-gray-200 bg-white px-3 py-2">
-                            <span className="mb-1 block text-[9px] font-black tracking-wider text-[#afafaf] uppercase">
+                            <span className="mb-1 block text-xs font-black tracking-wider text-[#afafaf] uppercase">
                                 User Agent
                             </span>
-                            <p className="font-mono text-[10px] break-all text-gray-500">
+                            <p className="font-mono text-xs break-all text-gray-500">
                                 {log.userAgent}
                             </p>
                         </div>

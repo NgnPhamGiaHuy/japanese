@@ -56,7 +56,7 @@ const LessonBuilderCardList: React.FC<LessonBuilderCardListProps> = ({
                         };
                         setCards([...cards, newCard]);
                     }}
-                    className="!text-[10px] !font-black tracking-widest !text-[var(--theme-color)] !uppercase hover:bg-[var(--theme-color)]/5 sm:!text-xs"
+                    className="!text-xs !font-black tracking-widest !text-[var(--theme-color)] !uppercase hover:bg-[var(--theme-color)]/5 sm:!text-xs"
                 >
                     Add Card
                 </Button>
@@ -98,7 +98,7 @@ const LessonBuilderCardList: React.FC<LessonBuilderCardListProps> = ({
                 whileTap={{ scale: 0.98 }}
                 className="group relative"
             >
-                <div className="absolute inset-0 -z-10 rounded-3xl border-2 border-b-8 border-dashed border-gray-200 sm:rounded-[2rem]" />
+                <div className="absolute inset-0 -z-10 rounded-3xl border-2 border-b-8 border-dashed border-gray-200 sm:rounded-4xl" />
                 <button
                     onClick={() => {
                         const newCard: EditorCard = {
@@ -111,7 +111,7 @@ const LessonBuilderCardList: React.FC<LessonBuilderCardListProps> = ({
                         };
                         setCards([...cards, newCard]);
                     }}
-                    className="flex w-full items-center justify-center gap-3 rounded-3xl p-6 text-[11px] font-black tracking-widest text-gray-400 uppercase transition-all group-hover:text-[var(--theme-color)] sm:rounded-[2rem] sm:p-8 sm:text-sm"
+                    className="flex w-full items-center justify-center gap-3 rounded-3xl p-6 text-xs font-black tracking-widest text-gray-400 uppercase transition-all group-hover:text-[var(--theme-color)] sm:rounded-4xl sm:p-8 sm:text-sm"
                 >
                     <Plus size={18} className="sm:size-[20px]" />
                     Add New Flashcard

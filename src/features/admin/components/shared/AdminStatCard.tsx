@@ -24,7 +24,7 @@ const AdminStatCard = ({ label, value, icon: Icon, color, trend }: AdminStatCard
         <Card className="border-gray-100">
             <div className="flex items-center justify-between">
                 <div>
-                    <p className="text-[11px] font-black tracking-widest text-[#afafaf] uppercase">
+                    <p className="text-xs font-black tracking-widest text-[#afafaf] uppercase">
                         {label}
                     </p>
                     <p className="mt-2 text-3xl font-black text-[#3c3c3c]">{value}</p>

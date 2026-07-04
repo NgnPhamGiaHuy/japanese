@@ -19,7 +19,7 @@ const CardCommentBadge = ({ ownerId, lessonId, cardId }: CardCommentBadgeProps) 
     if (totalComments === 0) return null;
     return (
         <span
-            className={`flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-black ${
+            className={`flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-black ${
                 unresolvedCount > 0 ? "bg-amber-100 text-amber-600" : "bg-gray-100 text-gray-400"
             }`}
         >

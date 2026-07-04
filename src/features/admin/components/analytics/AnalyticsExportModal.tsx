@@ -153,7 +153,7 @@ const AnalyticsExportModal = ({ isOpen, onClose }: AnalyticsExportModalProps) =>
                 ) : (
                     <>
                         <div className="space-y-4">
-                            <label className="text-[10px] font-black tracking-widest text-[#afafaf] uppercase">
+                            <label className="text-xs font-black tracking-widest text-[#afafaf] uppercase">
                                 Select AI-Ready Dataset
                             </label>
                             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
@@ -181,7 +181,7 @@ const AnalyticsExportModal = ({ isOpen, onClose }: AnalyticsExportModalProps) =>
                                                 >
                                                     {dataset.label}
                                                 </div>
-                                                <div className="mt-1 text-[10px] leading-tight font-bold text-[#afafaf]">
+                                                <div className="mt-1 text-xs leading-tight font-bold text-[#afafaf]">
                                                     {dataset.description}
                                                 </div>
                                             </div>

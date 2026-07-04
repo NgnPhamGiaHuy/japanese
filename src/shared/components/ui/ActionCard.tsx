@@ -105,14 +105,14 @@ const ActionCard = ({
                             />
                         </div>
                         <div
-                            className={`text-[10px] font-bold md:text-xs ${primary ? "text-white/80" : "text-gray-500"}`}
+                            className={`text-xs font-bold md:text-xs ${primary ? "text-white/80" : "text-gray-500"}`}
                         >
                             {progress.label}
                         </div>
                     </>
                 )}
                 {subtitle && (
-                    <div className="mt-1 text-[10px] font-bold text-white/80 md:mt-2 md:text-xs">
+                    <div className="mt-1 text-xs font-bold text-white/80 md:mt-2 md:text-xs">
                         {subtitle}
                     </div>
                 )}

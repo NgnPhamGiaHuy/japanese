@@ -14,8 +14,7 @@ import { buildShareId } from "@/features/flashcard/services";
 import { resolveRole, ROLE_CONFIG } from "@/features/flashcard/utils/rbac";
 import { TierBadge } from "@/features/game/components";
 import { useAppStore } from "@/lib/app-store";
-import { Button, UserMeta } from "@/shared/components/ui";
-import { CARD_BASE, SPACING } from "@/shared/constants";
+import { Button, Card, UserMeta } from "@/shared/components/ui";
 import { hexToThemeColor } from "@/shared/utils";
 
 import type { DeckCardProps } from "../types";
@@ -67,8 +66,9 @@ const DeckCard = ({
     const roleInfo = ROLE_CONFIG[resolvedRole];
 
     return (
-        <div
-            className={`group relative ${CARD_BASE} transition-all hover:-translate-y-0.5 hover:shadow-md ${SPACING.cardPadding} hover:z-10`}
+        <Card
+            padding="compact"
+            className="relative hover:z-10 hover:-translate-y-0.5 hover:shadow-md"
         >
             <div className="mb-4 flex items-start justify-between">
                 <div className="flex-1 pr-4">
@@ -80,7 +80,7 @@ const DeckCard = ({
                                     color: roleInfo.color,
                                     backgroundColor: `${roleInfo.color}15`,
                                 }}
-                                className="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-[9px] font-black tracking-tight uppercase"
+                                className="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-black tracking-tight uppercase"
                                 title={`You have ${roleInfo.label} permissions`}
                             >
                                 <roleInfo.icon size={10} />
@@ -93,7 +93,7 @@ const DeckCard = ({
                                     color: visibility.effectiveColor,
                                     backgroundColor: `${visibility.effectiveColor}15`,
                                 }}
-                                className="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-[9px] font-black tracking-tight uppercase"
+                                className="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-black tracking-tight uppercase"
                             >
                                 <visibility.icon size={10} />
                                 {visibility.label}
@@ -133,7 +133,7 @@ const DeckCard = ({
                                     color: themeColor,
                                     backgroundColor: `${themeColor}20`,
                                 }}
-                                className="rounded-lg px-2 py-1 text-[10px] font-black tracking-wider uppercase"
+                                className="rounded-lg px-2 py-1 text-xs font-black tracking-wider uppercase"
                             >
                                 {cat}
                             </span>
@@ -149,7 +149,7 @@ const DeckCard = ({
                             {lesson.cardCount}
                         </span>
                     </div>
-                    <span className="text-[9px] font-black text-[#afafaf] uppercase">cards</span>
+                    <span className="text-xs font-black text-[#afafaf] uppercase">cards</span>
                 </div>
             </div>
 
@@ -160,7 +160,7 @@ const DeckCard = ({
                             variant="primary"
                             color={hexToThemeColor(themeColor)}
                             icon={BookOpen}
-                            className="w-full flex-col gap-1 px-1 py-2 text-[10px] md:flex-row md:gap-2 md:px-2 md:py-3 md:text-sm"
+                            className="w-full flex-col gap-1 px-1 py-2 text-xs md:flex-row md:gap-2 md:px-2 md:py-3 md:text-sm"
                         >
                             <span className="truncate">View</span>
                         </Button>
@@ -178,7 +178,7 @@ const DeckCard = ({
                                 variant="secondary"
                                 color="orange"
                                 icon={Zap}
-                                className="w-full flex-col gap-1 px-1 py-2 text-[10px] md:flex-row md:gap-2 md:px-2 md:py-3 md:text-sm"
+                                className="w-full flex-col gap-1 px-1 py-2 text-xs md:flex-row md:gap-2 md:px-2 md:py-3 md:text-sm"
                             >
                                 <span className="truncate">Speed</span>
                             </Button>
@@ -197,7 +197,7 @@ const DeckCard = ({
                                 variant="secondary"
                                 color="purple"
                                 icon={Gamepad2}
-                                className="w-full flex-col gap-1 px-1 py-2 text-[10px] md:flex-row md:gap-2 md:px-2 md:py-3 md:text-sm"
+                                className="w-full flex-col gap-1 px-1 py-2 text-xs md:flex-row md:gap-2 md:px-2 md:py-3 md:text-sm"
                             >
                                 <span className="truncate">Match</span>
                             </Button>
@@ -261,7 +261,7 @@ const DeckCard = ({
                     )}
                 </div>
             </div>
-        </div>
+        </Card>
     );
 };
 

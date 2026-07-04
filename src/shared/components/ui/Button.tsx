@@ -3,6 +3,8 @@
 import { motion } from "framer-motion";
 import { Loader2, LucideIcon } from "lucide-react";
 
+import { cn } from "@/shared/utils";
+
 /** Supported Japanese alphabet modes for thematic styling. */
 type AlphabetMode = "hiragana" | "katakana" | "both";
 
@@ -20,6 +22,9 @@ type ThemeColor =
 
 /** Visual variants for different action hierarchies. */
 type Variant = "primary" | "secondary" | "outline" | "ghost";
+
+/** Button footprint: "md" for labeled buttons, "icon" for a square icon-only button. */
+type Size = "md" | "icon";
 
 const ALPHABET_MAP: Record<AlphabetMode, ThemeColor> = {
     hiragana: "green",
@@ -86,6 +91,8 @@ interface ButtonProps {
     onClick?: (e: React.MouseEvent<HTMLButtonElement>) => void;
     /** Visual style variant. */
     variant?: Variant;
+    /** Button footprint. Use "icon" for a square icon-only button instead of ad hoc padding overrides. */
+    size?: Size;
     /** Theme color name or custom hex code. */
     color?: ThemeColor;
     /** Preset color based on Japanese alphabet mode. */
@@ -138,6 +145,7 @@ const Button = ({
     onMouseEnter,
     onMouseLeave,
     variant = "primary",
+    size = "md",
     color = "blue",
     alphabet,
     className = "",
@@ -158,7 +166,12 @@ const Button = ({
     const t = isStandardTheme ? THEMES[resolvedColor as string] : THEMES.blue;
 
     const base =
-        "flex items-center justify-center gap-2 px-4 py-3 md:px-6 md:py-4 rounded-[1rem] md:rounded-2xl font-extrabold transition-all duration-200 select-none cursor-pointer disabled:opacity-50 disabled:pointer-events-none";
+        "flex items-center justify-center gap-2 rounded-2xl font-extrabold transition-all duration-200 select-none cursor-pointer disabled:opacity-50 disabled:pointer-events-none focus:outline-none focus-visible:ring-2 focus-visible:ring-katakana focus-visible:ring-offset-2";
+
+    const sizes: Record<Size, string> = {
+        md: "px-4 py-3 md:px-6 md:py-4",
+        icon: "h-10 w-10 p-0",
+    };
 
     const variants: Record<Variant, string> = {
         primary: `${isStandardTheme ? t.bg : ""} text-white border-b-4 ${isStandardTheme ? t.border : ""} ${isStandardTheme ? t.hover : ""} hover:-translate-y-1 hover:shadow-lg active:border-b-0 active:translate-y-[4px]`,
@@ -193,7 +206,7 @@ const Button = ({
             onMouseEnter={onMouseEnter}
             onMouseLeave={onMouseLeave}
             disabled={disabled || loading}
-            className={`${base} ${variants[variant]} ${activeClass} ${className}`}
+            className={cn(base, sizes[size], variants[variant], activeClass, className)}
             style={customStyle}
         >
             {loading ? (

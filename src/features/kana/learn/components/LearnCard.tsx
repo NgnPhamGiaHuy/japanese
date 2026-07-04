@@ -19,8 +19,8 @@ export function LearnCard({ char, themeColor, onPlay }: LearnCardProps) {
     const isMulti = char.char.length > 1;
 
     return (
-        <div className="relative flex w-full flex-col items-center rounded-4xl border-2 border-b-8 border-gray-200 bg-white p-6 shadow-sm md:rounded-[3rem] md:p-10">
-            <span className="absolute top-4 left-4 text-[10px] font-black tracking-widest text-gray-400 uppercase">
+        <div className="relative flex w-full flex-col items-center rounded-4xl border-2 border-b-8 border-gray-200 bg-white p-6 shadow-sm md:rounded-6xl md:p-10">
+            <span className="absolute top-4 left-4 text-xs font-black tracking-widest text-gray-400 uppercase">
                 {char.group}
             </span>
             <Button
@@ -48,7 +48,7 @@ export function LearnCard({ char, themeColor, onPlay }: LearnCardProps) {
                 )}
             </div>
             <div className="w-full border-t-2 border-gray-100 pt-4 text-center">
-                <p className="mb-1 text-[10px] font-bold tracking-[0.2em] text-[#afafaf] uppercase">
+                <p className="mb-1 text-xs font-bold tracking-[0.2em] text-[#afafaf] uppercase">
                     Romaji
                 </p>
                 <p className="text-4xl font-black tracking-wider text-[#3c3c3c] uppercase md:text-6xl">

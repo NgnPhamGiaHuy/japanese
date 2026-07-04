@@ -135,13 +135,13 @@ const FlashcardLearn = ({
                 <div className="mb-10 flex w-full max-w-sm gap-4">
                     <div className="flex-1 rounded-3xl border-2 border-b-8 border-gray-200 bg-white p-6 text-center shadow-sm">
                         <div className="text-5xl font-black text-[#58cc02]">{stats.correct}</div>
-                        <div className="mt-2 text-[10px] font-black tracking-widest text-[#afafaf] uppercase">
+                        <div className="mt-2 text-xs font-black tracking-widest text-[#afafaf] uppercase">
                             Got It
                         </div>
                     </div>
                     <div className="flex-1 rounded-3xl border-2 border-b-8 border-gray-200 bg-white p-6 text-center shadow-sm">
                         <div className="text-5xl font-black text-[#ff9600]">{stats.incorrect}</div>
-                        <div className="mt-2 text-[10px] font-black tracking-widest text-[#afafaf] uppercase">
+                        <div className="mt-2 text-xs font-black tracking-widest text-[#afafaf] uppercase">
                             Study More
                         </div>
                     </div>
@@ -177,7 +177,7 @@ const FlashcardLearn = ({
 
             <div className="mx-auto flex w-full max-w-md flex-1 flex-col items-center justify-center gap-6 p-4 sm:p-6">
                 {/* Card face */}
-                <div className="relative flex w-full flex-col items-center justify-center rounded-[2.5rem] border-2 border-b-8 border-gray-200 bg-white p-8 text-center shadow-sm">
+                <div className="relative flex w-full flex-col items-center justify-center rounded-5xl border-2 border-b-8 border-gray-200 bg-white p-8 text-center shadow-sm">
                     <Button
                         variant="ghost"
                         onClick={() => playAudio(getAudioText(card))}
@@ -227,7 +227,7 @@ const FlashcardLearn = ({
 
                             {back.usageNote && (
                                 <div className="mt-3 flex items-center gap-1.5 rounded-xl border border-gray-200 bg-gray-50 px-3 py-1.5">
-                                    <span className="text-[10px] font-black tracking-wide text-[#afafaf] uppercase">
+                                    <span className="text-xs font-black tracking-wide text-[#afafaf] uppercase">
                                         Usage
                                     </span>
                                     <span className="text-xs font-bold text-[#3c3c3c]">
@@ -252,7 +252,7 @@ const FlashcardLearn = ({
                     <button
                         ref={showAnswerRef}
                         onClick={handleShowAnswer}
-                        className="w-full rounded-[1.5rem] border-2 border-b-8 border-gray-200 bg-white py-4 text-lg font-black text-[#3c3c3c] shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 active:translate-y-0 active:border-b-2"
+                        className="w-full rounded-3xl border-2 border-b-8 border-gray-200 bg-white py-4 text-lg font-black text-[#3c3c3c] shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 active:translate-y-0 active:border-b-2"
                         style={{ "--tw-ring-color": themeHex } as React.CSSProperties}
                     >
                         Show Answer

@@ -42,7 +42,7 @@ const DraggableCard = ({
         <ReorderItem
             value={card}
             disabled={saving}
-            className="group relative rounded-3xl border-2 border-b-8 border-gray-200 bg-white p-4 shadow-sm transition-colors select-text focus-within:border-[var(--theme-color)] sm:rounded-[2rem] sm:p-6"
+            className="group relative rounded-3xl border-2 border-b-8 border-gray-200 bg-white p-4 shadow-sm transition-colors select-text focus-within:border-[var(--theme-color)] sm:rounded-4xl sm:p-6"
         >
             {/* Index Badge */}
             <div className="absolute -top-2 -left-2 flex h-8 w-8 -rotate-3 transform items-center justify-center rounded-lg border-b-4 border-black bg-[#3c3c3c] text-sm font-black text-white shadow-sm transition-all group-active:scale-110 sm:-top-3 sm:-left-3 sm:h-10 sm:w-10 sm:rounded-xl sm:text-lg">
@@ -65,7 +65,7 @@ const DraggableCard = ({
                 {/* Primary Word */}
                 <div className="md:col-span-2">
                     <div className="mb-1 flex items-center justify-between">
-                        <label className="text-[9px] font-black tracking-widest text-[#afafaf] uppercase sm:text-[10px]">
+                        <label className="text-xs font-black tracking-widest text-[#afafaf] uppercase sm:text-xs">
                             Primary ✱
                         </label>
                         <Button
@@ -74,7 +74,7 @@ const DraggableCard = ({
                             loading={aiLoading}
                             disabled={saving || !card.primary?.trim()}
                             onClick={() => onAIFill(card.id, card.primary || "")}
-                            className="!flex !h-auto !items-center !gap-1 !px-2 !py-0.5 !text-[8.5px] !font-black uppercase shadow-none hover:shadow-none sm:!text-[9px]"
+                            className="!flex !h-auto !items-center !gap-1 !px-2 !py-0.5 !text-[8.5px] !font-black uppercase shadow-none hover:shadow-none sm:!text-xs"
                             color={themeHex}
                             icon={Sparkles}
                             iconSize={10}
@@ -90,7 +90,7 @@ const DraggableCard = ({
                         disabled={saving || aiLoading}
                     />
                     {aiError && (
-                        <p className="mt-1 text-[9px] font-bold text-[#ea2b2b] sm:text-[10px]">
+                        <p className="mt-1 text-xs font-bold text-[#ea2b2b] sm:text-xs">
                             {aiError}
                         </p>
                     )}
@@ -99,7 +99,7 @@ const DraggableCard = ({
                 {/* Alternative Form */}
                 {(["alternative"] as const).map((repKey) => (
                     <div key={repKey}>
-                        <label className="mb-1 block text-[9px] font-black tracking-widest text-[#afafaf] uppercase sm:text-[10px]">
+                        <label className="mb-1 block text-xs font-black tracking-widest text-[#afafaf] uppercase sm:text-xs">
                             Alternative
                         </label>
                         <input
@@ -116,7 +116,7 @@ const DraggableCard = ({
 
                 {/* Meaning */}
                 <div className="md:col-span-2">
-                    <label className="mb-1 block text-[9px] font-black tracking-widest text-[#afafaf] uppercase sm:text-[10px]">
+                    <label className="mb-1 block text-xs font-black tracking-widest text-[#afafaf] uppercase sm:text-xs">
                         Meaning ✱
                     </label>
                     <input
@@ -130,7 +130,7 @@ const DraggableCard = ({
 
                 {/* Example Sentence */}
                 <div className="md:col-span-2">
-                    <label className="mb-1 block text-[9px] font-black tracking-widest text-[#afafaf] uppercase sm:text-[10px]">
+                    <label className="mb-1 block text-xs font-black tracking-widest text-[#afafaf] uppercase sm:text-xs">
                         Example Sentence (Optional)
                     </label>
                     <input
@@ -144,7 +144,7 @@ const DraggableCard = ({
 
                 {/* Image Section */}
                 <div className="md:col-span-2">
-                    <label className="mb-1 block text-[10px] font-black tracking-widest text-[#afafaf] uppercase">
+                    <label className="mb-1 block text-xs font-black tracking-widest text-[#afafaf] uppercase">
                         Card Image (Optional)
                     </label>
                     <div className="mt-2 flex items-center gap-4">

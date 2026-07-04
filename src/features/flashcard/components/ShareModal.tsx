@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useId, useMemo, useState } from "react";
 
 import { Check, ChevronDown, Copy, Mail, ShieldAlert, X } from "lucide-react";
 
@@ -15,6 +15,7 @@ import { useAppStore } from "@/lib/app-store";
 import { ActivityAction } from "@/lib/logging/actions.enum";
 import { enqueueClientLog } from "@/lib/logging/browser";
 import { Button, Select } from "@/shared/components/ui";
+import { useDialogA11y } from "@/shared/hooks";
 import { useAlert } from "@/shared/providers";
 import { hexToThemeColor } from "@/shared/utils";
 
@@ -185,6 +186,14 @@ const ShareModal = ({ lesson, onShareLink, onUpdateRoles, onClose }: ShareModalP
     const [copied, setCopied] = useState(false);
     const [saving, setSaving] = useState(false);
 
+    const titleId = useId();
+    // Escape closes the privacy dropdown first if it's open, otherwise the whole modal —
+    // this component has no isOpen prop, it's only ever mounted while it should be open.
+    const dialogRef = useDialogA11y<HTMLDivElement>(true, () => {
+        if (openPrivacyMenu) setOpenPrivacyMenu(false);
+        else onClose();
+    });
+
     const themeHex = lesson.themeColor || "#1cb0f6";
     const themeColorStr = hexToThemeColor(themeHex);
 
@@ -336,11 +345,19 @@ const ShareModal = ({ lesson, onShareLink, onUpdateRoles, onClose }: ShareModalP
     };
 
     return (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center overflow-y-auto bg-black/40 p-4 backdrop-blur-sm">
-            <div className="my-auto flex w-full max-w-lg flex-col rounded-[2rem] border-2 border-b-8 border-gray-200 bg-white shadow-xl">
+        <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black/40 p-4 backdrop-blur-sm">
+            <div
+                ref={dialogRef}
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby={titleId}
+                className="my-auto flex w-full max-w-lg flex-col rounded-4xl border-2 border-b-8 border-gray-200 bg-white shadow-xl"
+            >
                 {/* Header */}
                 <div className="flex shrink-0 items-center justify-between border-b-2 border-gray-100 p-6">
-                    <h2 className="text-2xl font-black text-[#3c3c3c]">Share Deck</h2>
+                    <h2 id={titleId} className="text-2xl font-black text-[#3c3c3c]">
+                        Share Deck
+                    </h2>
                     <Button
                         variant="ghost"
                         onClick={onClose}

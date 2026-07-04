@@ -45,7 +45,7 @@ const DecksTableRow = ({ deck, onView, onDelete, isDeleting }: DecksTableRowProp
                         ).map((cat) => (
                             <span
                                 key={cat}
-                                className="rounded-md px-1.5 py-0.5 text-[9px] font-black tracking-tight uppercase"
+                                className="rounded-md px-1.5 py-0.5 text-xs font-black tracking-tight uppercase"
                                 style={{
                                     backgroundColor: `${deck.themeColor || "#1cb0f6"}15`,
                                     color: deck.themeColor || "#1cb0f6",
@@ -67,7 +67,7 @@ const DecksTableRow = ({ deck, onView, onDelete, isDeleting }: DecksTableRowProp
                                 className="h-full w-full object-cover"
                             />
                         ) : (
-                            <span className="text-[10px] font-black text-[#afafaf]">
+                            <span className="text-xs font-black text-[#afafaf]">
                                 {(deck.ownerName || deck.ownerEmail || "?")[0]?.toUpperCase()}
                             </span>
                         )}
@@ -76,7 +76,7 @@ const DecksTableRow = ({ deck, onView, onDelete, isDeleting }: DecksTableRowProp
                         <span className="text-xs font-black text-[#3c3c3c]">
                             {deck.ownerName || "Unknown User"}
                         </span>
-                        <span className="text-[10px] font-bold text-[#afafaf]">
+                        <span className="text-xs font-bold text-[#afafaf]">
                             {deck.ownerEmail || deck.ownerId}
                         </span>
                     </div>
@@ -86,7 +86,7 @@ const DecksTableRow = ({ deck, onView, onDelete, isDeleting }: DecksTableRowProp
                 <div className="flex items-center gap-1.5 text-sm font-black text-[#3c3c3c]">
                     <Layers size={14} className="text-[#ce82ff]" />
                     {deck.cardCount}
-                    <span className="ml-1 text-[10px] font-bold tracking-widest text-[#afafaf] uppercase">
+                    <span className="ml-1 text-xs font-bold tracking-widest text-[#afafaf] uppercase">
                         Words
                     </span>
                 </div>

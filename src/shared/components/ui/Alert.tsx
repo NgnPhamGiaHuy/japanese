@@ -115,7 +115,7 @@ const Alert = ({ type, message, onClose }: AlertProps) => {
                 stiffness: 300,
                 damping: 25,
             }}
-            className={`group pointer-events-auto flex items-center gap-4 rounded-[1.5rem] border-2 p-5 shadow-xl transition-colors sm:max-w-md sm:min-w-[360px] ${bg} ${border} ${text}`}
+            className={`group pointer-events-auto flex items-center gap-4 rounded-3xl border-2 p-5 shadow-xl transition-colors sm:max-w-md sm:min-w-[360px] ${bg} ${border} ${text}`}
         >
             <div
                 className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white/50 ${iconColor} shadow-sm`}

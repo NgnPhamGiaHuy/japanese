@@ -99,7 +99,7 @@ export default function ProfilePage() {
                         <div className="mt-8 w-full max-w-md">
                             <div className="mb-2 flex items-end justify-between px-1">
                                 <div className="text-left">
-                                    <p className="text-[10px] font-black tracking-widest text-[#afafaf] uppercase">
+                                    <p className="text-xs font-black tracking-widest text-[#afafaf] uppercase">
                                         Current Progress
                                     </p>
                                     <p className="text-sm font-black text-[#1cb0f6]">
@@ -128,7 +128,7 @@ export default function ProfilePage() {
                     <section className="space-y-4">
                         <div className="flex items-center gap-2 px-2">
                             <Trophy size={14} className="text-[#afafaf]" />
-                            <h3 className="text-[11px] font-black tracking-widest text-[#afafaf] uppercase">
+                            <h3 className="text-xs font-black tracking-widest text-[#afafaf] uppercase">
                                 Statistics
                             </h3>
                         </div>
@@ -161,7 +161,7 @@ export default function ProfilePage() {
                     <section className="space-y-4">
                         <div className="flex items-center gap-2 px-2">
                             <Zap size={14} className="text-[#afafaf]" />
-                            <h3 className="text-[11px] font-black tracking-widest text-[#afafaf] uppercase">
+                            <h3 className="text-xs font-black tracking-widest text-[#afafaf] uppercase">
                                 Recent Activity
                             </h3>
                         </div>
@@ -193,7 +193,7 @@ export default function ProfilePage() {
                             color="red"
                             icon={LogOut}
                             onClick={handleSignOut}
-                            className="w-full !rounded-[2rem] border-b-8 py-5 text-lg"
+                            className="w-full !rounded-4xl border-b-8 py-5 text-lg"
                         >
                             Sign Out
                         </Button>

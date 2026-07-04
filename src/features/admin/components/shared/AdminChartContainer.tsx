@@ -30,7 +30,7 @@ const AdminChartContainer = ({
                     {title}
                 </h3>
                 {subtitle && (
-                    <p className="text-[10px] leading-none font-bold text-[#afafaf] uppercase">
+                    <p className="text-xs leading-none font-bold text-[#afafaf] uppercase">
                         {subtitle}
                     </p>
                 )}

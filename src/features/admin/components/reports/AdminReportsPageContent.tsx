@@ -103,14 +103,14 @@ const AdminReportsPageContent = () => {
                         activeLevel={filters.level}
                     />
 
-                    <Card className="overflow-hidden border-b-8 p-0">
+                    <Card padding="none" className="overflow-hidden border-2 border-b-8 border-gray-100 bg-white">
                         {/* Table header */}
                         <div className="flex items-center justify-between border-b-2 border-gray-50 bg-gray-50/40 px-6 py-3">
                             <h2 className="text-xs font-black tracking-widest text-[#3c3c3c] uppercase">
                                 Audit Trail
                             </h2>
                             {isRefreshing && (
-                                <span className="flex items-center gap-1.5 text-[10px] font-black tracking-wider text-[#1cb0f6] uppercase">
+                                <span className="flex items-center gap-1.5 text-xs font-black tracking-wider text-[#1cb0f6] uppercase">
                                     <RefreshCw size={10} className="animate-spin" />
                                     Refreshing…
                                 </span>
@@ -122,14 +122,14 @@ const AdminReportsPageContent = () => {
                         {/* Pagination footer */}
                         <div className="flex flex-col gap-3 border-t-2 border-gray-50 bg-gray-50/20 px-4 py-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between sm:gap-2 sm:px-6">
                             <div className="flex items-center gap-3">
-                                <span className="text-[10px] font-black tracking-widest text-[#afafaf] uppercase">
+                                <span className="text-xs font-black tracking-widest text-[#afafaf] uppercase">
                                     Page {currentPage + 1}
                                     {totalPages > 1 ? ` of ${totalPages}` : ""}
                                 </span>
                                 {activeFilterCount > 0 && (
                                     <button
                                         onClick={() => setFilters({})}
-                                        className="text-[10px] font-black tracking-wider text-[#ea2b2b] uppercase transition-opacity hover:opacity-70"
+                                        className="text-xs font-black tracking-wider text-[#ea2b2b] uppercase transition-opacity hover:opacity-70"
                                     >
                                         Clear {activeFilterCount} filter
                                         {activeFilterCount > 1 ? "s" : ""}

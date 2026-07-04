@@ -84,7 +84,7 @@ const Leaderboard = ({ gameMode, currentUserId, accentColor = "#ff9600" }: Leade
 
                                 <div className="flex min-w-0 flex-1 items-center gap-2">
                                     <div
-                                        className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-[10px] font-black text-white"
+                                        className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-black text-white"
                                         style={{ backgroundColor: isMe ? accentColor : "#c8c8c8" }}
                                     >
                                         {entry.displayName.charAt(0).toUpperCase()}
@@ -94,7 +94,7 @@ const Leaderboard = ({ gameMode, currentUserId, accentColor = "#ff9600" }: Leade
                                     >
                                         {entry.displayName}
                                         {isMe && (
-                                            <span className="ml-1 text-[10px] font-bold opacity-50">
+                                            <span className="ml-1 text-xs font-bold opacity-50">
                                                 (you)
                                             </span>
                                         )}
@@ -107,7 +107,7 @@ const Leaderboard = ({ gameMode, currentUserId, accentColor = "#ff9600" }: Leade
                                         const ti = TIER_INFO[t];
                                         return (
                                             <span
-                                                className="rounded-lg px-1.5 py-0.5 text-[10px] font-black"
+                                                className="rounded-lg px-1.5 py-0.5 text-xs font-black"
                                                 style={{ color: ti.color, backgroundColor: ti.bg }}
                                             >
                                                 {ti.emoji}

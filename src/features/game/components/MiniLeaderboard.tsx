@@ -98,7 +98,7 @@ const MiniLeaderboard = ({
                                     initial={{ opacity: 0, y: 5 }}
                                     animate={{ opacity: 1, y: 0 }}
                                     exit={{ opacity: 0 }}
-                                    className="text-[10px] text-green-500"
+                                    className="text-xs text-green-500"
                                 >
                                     +1
                                 </motion.span>

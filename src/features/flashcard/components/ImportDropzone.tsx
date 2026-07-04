@@ -45,10 +45,10 @@ const ImportDropzone: React.FC<ImportDropzoneProps> = ({
                     {selectedFiles.map((file, i) => (
                         <div
                             key={i}
-                            className="group relative aspect-square overflow-hidden rounded-[2rem] border-2 border-gray-100 bg-white p-1 shadow-sm transition-all hover:border-[var(--theme-color)]/30 hover:shadow-md"
+                            className="group relative aspect-square overflow-hidden rounded-4xl border-2 border-gray-100 bg-white p-1 shadow-sm transition-all hover:border-[var(--theme-color)]/30 hover:shadow-md"
                             style={{ "--theme-color": themeColor } as React.CSSProperties}
                         >
-                            <div className="h-full w-full overflow-hidden rounded-[1.5rem] bg-gray-50">
+                            <div className="h-full w-full overflow-hidden rounded-3xl bg-gray-50">
                                 {file.type.startsWith("image/") ? (
                                     <img
                                         src={URL.createObjectURL(file)}
@@ -59,7 +59,7 @@ const ImportDropzone: React.FC<ImportDropzoneProps> = ({
                                         <div className="mb-2 rounded-xl bg-white p-2 text-[var(--theme-color)] shadow-sm">
                                             <FileUp size={20} />
                                         </div>
-                                        <p className="w-full truncate px-2 text-[10px] font-black tracking-widest text-[#afafaf] uppercase">
+                                        <p className="w-full truncate px-2 text-xs font-black tracking-widest text-[#afafaf] uppercase">
                                             {file.name.split(".").pop()}
                                         </p>
                                     </div>
@@ -90,7 +90,7 @@ const ImportDropzone: React.FC<ImportDropzoneProps> = ({
     return (
         <div
             {...getRootProps()}
-            className={`group relative flex cursor-pointer flex-col items-center justify-center space-y-4 rounded-[2.5rem] border-4 border-dashed p-16 text-center transition-all ${
+            className={`group relative flex cursor-pointer flex-col items-center justify-center space-y-4 rounded-5xl border-4 border-dashed p-16 text-center transition-all ${
                 isDragActive
                     ? "scale-[1.01] border-[var(--theme-color)] bg-[var(--theme-color)]/5 ring-4 ring-[var(--theme-color)]/10"
                     : "border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50/50"
@@ -100,7 +100,7 @@ const ImportDropzone: React.FC<ImportDropzoneProps> = ({
             <input {...getInputProps()} />
 
             <div
-                className={`flex h-20 w-20 items-center justify-center rounded-[2rem] shadow-xl transition-all duration-500 group-hover:rotate-6 ${
+                className={`flex h-20 w-20 items-center justify-center rounded-4xl shadow-xl transition-all duration-500 group-hover:rotate-6 ${
                     isDragActive
                         ? "scale-110 bg-[var(--theme-color)] text-white"
                         : "border border-gray-100 bg-white text-[var(--theme-color)]"
@@ -123,7 +123,7 @@ const ImportDropzone: React.FC<ImportDropzoneProps> = ({
 
             {/* Premium Glow Effect during drag */}
             {isDragActive && (
-                <div className="pointer-events-none absolute inset-0 -z-10 animate-pulse rounded-[2.5rem] bg-[var(--theme-color)]/5 blur-xl" />
+                <div className="pointer-events-none absolute inset-0 -z-10 animate-pulse rounded-5xl bg-[var(--theme-color)]/5 blur-xl" />
             )}
         </div>
     );

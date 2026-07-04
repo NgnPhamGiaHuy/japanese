@@ -35,7 +35,7 @@ const SpeedIntroView = ({ bestScore, tierInfo, onBack, onStart }: SpeedIntroView
             onStart={onStart}
         >
             <div className="mb-8 w-full max-w-sm rounded-2xl border-2 border-gray-200 bg-white p-4">
-                <p className="mb-3 text-[10px] font-black tracking-widest text-[#afafaf] uppercase">
+                <p className="mb-3 text-xs font-black tracking-widest text-[#afafaf] uppercase">
                     Difficulty Escalation
                 </p>
                 {([1, 2, 3] as const).map((level) => {

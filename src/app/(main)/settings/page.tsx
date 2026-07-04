@@ -129,7 +129,7 @@ function SettingsSection({ title, icon: Icon, children }: SettingsSectionProps) 
         <section className="space-y-4">
             <div className="flex items-center gap-2 px-3">
                 <Icon size={14} className="text-[#afafaf]" />
-                <h3 className="text-[11px] font-black tracking-widest text-[#afafaf] uppercase">
+                <h3 className="text-xs font-black tracking-widest text-[#afafaf] uppercase">
                     {title}
                 </h3>
             </div>

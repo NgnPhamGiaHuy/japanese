@@ -1,6 +1,8 @@
 export { default as Alert } from "./Alert";
 export type { AlertType } from "./Alert";
 export { default as Button } from "./Button";
+export { default as Input } from "./Input";
+export { default as Textarea } from "./Textarea";
 export { default as ConfirmModal } from "./ConfirmModal";
 export { default as DatePicker } from "./DatePicker";
 export { default as Select } from "./Select";

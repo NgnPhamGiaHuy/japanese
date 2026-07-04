@@ -13,11 +13,11 @@ interface ImportPasteAreaProps {
 const ImportPasteArea: React.FC<ImportPasteAreaProps> = ({ value, onChange, themeColor }) => {
     return (
         <div className="space-y-6">
-            <div className="relative overflow-hidden rounded-[2.5rem] border-2 border-gray-100 bg-gradient-to-br from-white to-gray-50/50 p-8 shadow-sm">
+            <div className="relative overflow-hidden rounded-5xl border-2 border-gray-100 bg-gradient-to-br from-white to-gray-50/50 p-8 shadow-sm">
                 <div className="relative z-10 flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
                     <div className="space-y-2">
                         <span
-                            className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[10px] font-black tracking-widest uppercase"
+                            className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-black tracking-widest uppercase"
                             style={{ backgroundColor: `${themeColor}1a`, color: themeColor }}
                         >
                             <Sparkles size={12} />
@@ -44,7 +44,7 @@ const ImportPasteArea: React.FC<ImportPasteAreaProps> = ({ value, onChange, them
                                 className="flex min-w-[90px] flex-col items-center gap-0.5 rounded-xl border border-gray-200/50 bg-white px-3 py-2 shadow-sm"
                             >
                                 <span
-                                    className="text-[9px] font-black tracking-widest uppercase"
+                                    className="text-xs font-black tracking-widest uppercase"
                                     style={{ color: themeColor }}
                                 >
                                     {item.label}
@@ -65,13 +65,13 @@ const ImportPasteArea: React.FC<ImportPasteAreaProps> = ({ value, onChange, them
 
             <div className="group relative">
                 <textarea
-                    className="h-80 w-full rounded-[2rem] border-2 border-gray-100 bg-white p-8 font-bold text-[#3c3c3c] shadow-inner transition-all outline-none focus:border-[var(--theme-color)] focus:ring-4 focus:ring-[var(--theme-color)]/5 sm:text-lg"
+                    className="h-80 w-full rounded-4xl border-2 border-gray-100 bg-white p-8 font-bold text-[#3c3c3c] shadow-inner transition-all outline-none focus:border-[var(--theme-color)] focus:ring-4 focus:ring-[var(--theme-color)]/5 sm:text-lg"
                     style={{ "--theme-color": themeColor } as React.CSSProperties}
                     placeholder={`[ {"primary": "食べる", "meaning": "to eat"} ]\n\nOR\n\n食べる, taberu, to eat, example`}
                     value={value}
                     onChange={(e) => onChange(e.target.value)}
                 />
-                <div className="pointer-events-none absolute right-4 bottom-4 flex items-center gap-2 rounded-2xl bg-gray-50/80 px-4 py-2 text-[10px] font-black tracking-widest text-[#afafaf] uppercase shadow-sm outline outline-1 outline-gray-200/50 sm:right-6 sm:bottom-6">
+                <div className="pointer-events-none absolute right-4 bottom-4 flex items-center gap-2 rounded-2xl bg-gray-50/80 px-4 py-2 text-xs font-black tracking-widest text-[#afafaf] uppercase shadow-sm outline outline-1 outline-gray-200/50 sm:right-6 sm:bottom-6">
                     <div
                         className="h-2 w-2 animate-pulse rounded-full"
                         style={{ backgroundColor: themeColor }}

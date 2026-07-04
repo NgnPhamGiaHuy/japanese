@@ -110,7 +110,7 @@ const LogsSummaryHeader = ({
             {/* Total + level chips — wrap on mobile */}
             <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:gap-3">
                 <div className="flex flex-col">
-                    <span className="text-[10px] font-black tracking-widest text-[#afafaf] uppercase">
+                    <span className="text-xs font-black tracking-widest text-[#afafaf] uppercase">
                         This Page
                     </span>
                     <span className="text-xl font-black text-[#3c3c3c] sm:text-2xl">
@@ -131,7 +131,7 @@ const LogsSummaryHeader = ({
                                 onClick={() => onLevelClick?.(l)}
                                 title={`Filter by ${l}`}
                                 className={clsx(
-                                    "flex items-center gap-1 rounded-full px-2 py-1 text-[9px] font-black tracking-wider uppercase transition-all sm:gap-1.5 sm:px-2.5 sm:py-1 sm:text-[10px]",
+                                    "flex items-center gap-1 rounded-full px-2 py-1 text-xs font-black tracking-wider uppercase transition-all sm:gap-1.5 sm:px-2.5 sm:py-1 sm:text-xs",
                                     isActive
                                         ? `${s.dot} text-white shadow-sm`
                                         : `${s.bg} ${s.text}`,
@@ -191,7 +191,7 @@ const LogsSummaryHeader = ({
                                     onClick={() => onTypeClick?.(t)}
                                     title={`Filter by ${t}`}
                                     className={clsx(
-                                        "flex items-center gap-1 rounded-full px-2 py-1 text-[9px] font-black tracking-wider uppercase transition-all sm:gap-1.5 sm:px-2.5 sm:py-1 sm:text-[10px]",
+                                        "flex items-center gap-1 rounded-full px-2 py-1 text-xs font-black tracking-wider uppercase transition-all sm:gap-1.5 sm:px-2.5 sm:py-1 sm:text-xs",
                                         isActive ? s.activeBg : `${s.bg} ${s.text}`,
                                         onTypeClick ? "cursor-pointer" : "cursor-default",
                                     )}

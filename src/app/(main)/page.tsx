@@ -8,8 +8,8 @@ import { useCardsWithProgress, useLessons } from "@/features/flashcard/hooks";
 import { getDueCards } from "@/features/flashcard/utils/learningEngine";
 import { useUserProgress } from "@/features/user/hooks";
 import { useAppStore } from "@/lib/app-store";
-import { Button, StatCard } from "@/shared/components/ui";
-import { CARD_INTERACTIVE, SECTION_HEADING, SPACING } from "@/shared/constants";
+import { Button, Card, StatCard } from "@/shared/components/ui";
+import { SECTION_HEADING, SPACING } from "@/shared/constants";
 
 export default function HomePage() {
     const { userData } = useUserProgress();
@@ -63,7 +63,7 @@ export default function HomePage() {
 
                 {/* Deck Learning System Overview */}
                 <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                    <div className="flex flex-col justify-between rounded-[2rem] border-2 border-b-8 border-[#1899d6] bg-[#1cb0f6] p-6 text-white shadow-sm">
+                    <div className="flex flex-col justify-between rounded-4xl border-2 border-b-8 border-[#1899d6] bg-[#1cb0f6] p-6 text-white shadow-sm">
                         <div>
                             <Clock size={32} className="mb-2 opacity-80" />
                             <div className="text-4xl font-black">{dueCards.length}</div>
@@ -77,7 +77,7 @@ export default function HomePage() {
                             Review Now
                         </Button>
                     </div>
-                    <div className="flex flex-col justify-between rounded-[2rem] border-2 border-b-8 border-[#ea2b2b] bg-[#ff4b4b] p-6 text-white shadow-sm">
+                    <div className="flex flex-col justify-between rounded-4xl border-2 border-b-8 border-[#ea2b2b] bg-[#ff4b4b] p-6 text-white shadow-sm">
                         <div>
                             <AlertTriangle size={32} className="mb-2 opacity-80" />
                             <div className="text-4xl font-black">{weakCards.length}</div>
@@ -98,7 +98,7 @@ export default function HomePage() {
                     <h2 className={`${SECTION_HEADING} mb-4`}>Kana Practice</h2>
                     <Link
                         href="/kana"
-                        className="block rounded-[2rem] border-2 border-b-8 border-[#46a302] bg-gradient-to-br from-[#58cc02] to-[#1cb0f6] p-6 text-white shadow-sm transition-all hover:-translate-y-1 hover:shadow-lg active:translate-y-[2px] active:border-b-4"
+                        className="block rounded-4xl border-2 border-b-8 border-[#46a302] bg-gradient-to-br from-[#58cc02] to-[#1cb0f6] p-6 text-white shadow-sm transition-all hover:-translate-y-1 hover:shadow-lg active:translate-y-[2px] active:border-b-4"
                     >
                         <div className="mb-2 text-4xl font-medium">あ → ア</div>
                         <p className="text-xl font-black">Master Hiragana &amp; Katakana</p>
@@ -122,8 +122,10 @@ export default function HomePage() {
                     <div className={`flex flex-col ${SPACING.cardGap}`}>
                         {recentLessons.map((lesson) => (
                             <Link key={lesson.id} href={`/flashcard/${lesson.id}`}>
-                                <div
-                                    className={`${CARD_INTERACTIVE} ${SPACING.cardPadding} group flex items-center justify-between`}
+                                <Card
+                                    interactive
+                                    padding="compact"
+                                    className="group flex items-center justify-between"
                                 >
                                     <div>
                                         <h3 className="text-lg font-black text-[#3c3c3c] group-hover:text-black">
@@ -136,7 +138,7 @@ export default function HomePage() {
                                     <div className="rounded-2xl border-b-4 border-[#1899d6] bg-[#1cb0f6] p-4 text-white transition-colors group-hover:bg-[#149fdf]">
                                         <Gamepad2 fill="currentColor" size={24} />
                                     </div>
-                                </div>
+                                </Card>
                             </Link>
                         ))}
                     </div>

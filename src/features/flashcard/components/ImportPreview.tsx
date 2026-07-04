@@ -122,7 +122,7 @@ const ImportPreview = ({
             {/* Validation Table */}
             <div className="overflow-hidden rounded-2xl border-2 border-gray-200 bg-white shadow-sm sm:overflow-x-auto">
                 <table className="w-full table-fixed text-left font-bold text-[#3c3c3c]">
-                    <thead className="border-b-2 border-gray-200 bg-gray-50 text-[10px] tracking-widest text-[#afafaf] uppercase sm:text-xs">
+                    <thead className="border-b-2 border-gray-200 bg-gray-50 text-xs tracking-widest text-[#afafaf] uppercase sm:text-xs">
                         <tr>
                             <th className="w-[22%] p-2 sm:p-4">Primary</th>
                             <th className="w-[20%] p-2 sm:p-4">Alternatives</th>
@@ -186,7 +186,7 @@ const ImportPreview = ({
                                 </td>
                                 <td className="p-1 sm:p-2">
                                     <input
-                                        className="w-full rounded-lg border-2 border-transparent bg-transparent p-1.5 text-[10px] font-medium text-[#afafaf] outline-none focus:border-[var(--theme-color)] focus:bg-white sm:p-2 sm:text-xs"
+                                        className="w-full rounded-lg border-2 border-transparent bg-transparent p-1.5 text-xs font-medium text-[#afafaf] outline-none focus:border-[var(--theme-color)] focus:bg-white sm:p-2 sm:text-xs"
                                         style={
                                             { "--theme-color": themeColor } as React.CSSProperties
                                         }

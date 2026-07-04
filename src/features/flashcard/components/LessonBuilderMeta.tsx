@@ -5,7 +5,7 @@ import React from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { X } from "lucide-react";
 
-import { Button } from "@/shared/components/ui";
+import { Button, Input } from "@/shared/components/ui";
 
 interface LessonBuilderMetaProps {
     lesson: any;
@@ -32,12 +32,13 @@ const LessonBuilderMeta: React.FC<LessonBuilderMetaProps> = ({
         <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="space-y-4 rounded-3xl border-2 border-b-8 border-gray-200 bg-white p-4 shadow-sm sm:rounded-[2rem] sm:p-6"
+            className="space-y-4 rounded-3xl border-2 border-b-8 border-gray-200 bg-white p-4 shadow-sm sm:rounded-4xl sm:p-6"
         >
-            <input
+            <Input
+                variant="underline"
                 type="text"
                 placeholder="Deck Title ✱ (e.g. JLPT N5 Verbs)"
-                className="w-full border-b-2 border-transparent bg-transparent pb-2 text-2xl font-black text-[#3c3c3c] placeholder-gray-300 transition-colors outline-none focus:border-[var(--theme-color)] sm:text-3xl"
+                className="text-2xl sm:text-3xl"
                 value={lesson.title}
                 onChange={(e) => setLesson({ ...lesson, title: e.target.value })}
                 disabled={saving}
@@ -63,7 +64,7 @@ const LessonBuilderMeta: React.FC<LessonBuilderMetaProps> = ({
                                     setTagInput(cat);
                                     removeCategory(cat);
                                 }}
-                                className="group flex cursor-pointer items-center gap-2 rounded-xl border-b-4 border-black/10 px-3 py-1.5 text-[9px] font-black tracking-widest text-white shadow-sm transition-all hover:-translate-y-0.5 sm:rounded-2xl sm:px-3.5 sm:py-2 sm:text-[10px]"
+                                className="group flex cursor-pointer items-center gap-2 rounded-xl border-b-4 border-black/10 px-3 py-1.5 text-xs font-black tracking-widest text-white shadow-sm transition-all hover:-translate-y-0.5 sm:rounded-2xl sm:px-3.5 sm:py-2 sm:text-xs"
                                 style={{ backgroundColor: themeHex }}
                             >
                                 <span className="opacity-60">TYPE:</span>
@@ -86,7 +87,7 @@ const LessonBuilderMeta: React.FC<LessonBuilderMetaProps> = ({
 
                 <div className="space-y-4">
                     <div className="flex flex-col gap-2 px-1 sm:flex-row sm:items-center">
-                        <span className="text-[9px] font-black tracking-widest text-gray-300 uppercase sm:text-[10px]">
+                        <span className="text-xs font-black tracking-widest text-gray-300 uppercase sm:text-xs">
                             Suggestions:
                         </span>
                         <div className="flex flex-wrap gap-1.5">
@@ -98,7 +99,7 @@ const LessonBuilderMeta: React.FC<LessonBuilderMetaProps> = ({
                                         saving || lesson.categories?.includes(sug.toLowerCase())
                                     }
                                     onClick={() => addTag(sug)}
-                                    className="rounded-lg border-b-2 border-gray-200 bg-white px-2.5 py-1 text-[9px] font-black tracking-widest text-gray-500 uppercase transition-all hover:-translate-y-0.5 disabled:opacity-30 sm:rounded-xl sm:px-3 sm:py-1.5 sm:text-[10px]"
+                                    className="rounded-lg border-b-2 border-gray-200 bg-white px-2.5 py-1 text-xs font-black tracking-widest text-gray-500 uppercase transition-all hover:-translate-y-0.5 disabled:opacity-30 sm:rounded-xl sm:px-3 sm:py-1.5 sm:text-xs"
                                 >
                                     {sug}
                                 </button>
@@ -116,7 +117,7 @@ const LessonBuilderMeta: React.FC<LessonBuilderMetaProps> = ({
                             onKeyDown={(e) => e.key === "Enter" && addTag(tagInput)}
                             disabled={saving}
                         />
-                        <div className="absolute top-1/2 right-4 -translate-y-1/2 text-[8px] font-black tracking-widest text-gray-400 uppercase sm:right-5 sm:text-[9px]">
+                        <div className="absolute top-1/2 right-4 -translate-y-1/2 text-[8px] font-black tracking-widest text-gray-400 uppercase sm:right-5 sm:text-xs">
                             ENTER TO ADD
                         </div>
                     </div>
@@ -124,7 +125,7 @@ const LessonBuilderMeta: React.FC<LessonBuilderMetaProps> = ({
 
                 {/* Theme Picker */}
                 <div className="mt-6 border-t-2 border-gray-100 pt-6">
-                    <label className="mb-3 block text-[10px] font-black tracking-wider text-gray-400 uppercase sm:text-xs">
+                    <label className="mb-3 block text-xs font-black tracking-wider text-gray-400 uppercase sm:text-xs">
                         Theme Color
                     </label>
                     <div className="flex flex-wrap gap-2.5 sm:gap-3">

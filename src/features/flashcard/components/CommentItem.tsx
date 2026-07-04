@@ -127,7 +127,7 @@ const CommentItem = ({
             <div className="flex gap-2.5">
                 {/* Avatar */}
                 <div
-                    className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-[11px] font-black text-white"
+                    className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-black text-white"
                     style={{ backgroundColor: themeColor }}
                 >
                     {initial}
@@ -140,19 +140,19 @@ const CommentItem = ({
                         <span className="text-[13px] font-black text-[#3c3c3c]">{displayName}</span>
                         {authorRole && (
                             <span
-                                className={`rounded-full px-1.5 py-px text-[10px] font-black capitalize ${ROLE_COLORS[authorRole] ?? ROLE_COLORS.viewer}`}
+                                className={`rounded-full px-1.5 py-px text-xs font-black capitalize ${ROLE_COLORS[authorRole] ?? ROLE_COLORS.viewer}`}
                             >
                                 {authorRole}
                             </span>
                         )}
-                        <span className="text-[11px] text-gray-400">
+                        <span className="text-xs text-gray-400">
                             {relativeTime(comment.createdAt)}
                         </span>
                         {isEdited && (
-                            <span className="text-[11px] text-gray-400 italic">(edited)</span>
+                            <span className="text-xs text-gray-400 italic">(edited)</span>
                         )}
                         {resolved && (
-                            <span className="flex items-center gap-0.5 text-[11px] font-bold text-emerald-600">
+                            <span className="flex items-center gap-0.5 text-xs font-bold text-emerald-600">
                                 <CheckCircle size={11} />
                                 resolved
                             </span>
@@ -250,7 +250,7 @@ const ActionBtn = ({
         <Button
             variant="ghost"
             onClick={onClick}
-            className={`!flex !h-auto !items-center !gap-1 !p-0 !text-[11px] !font-bold shadow-none transition-colors hover:shadow-none active:translate-y-0 ${color || "!text-gray-400 hover:!text-gray-600"}`}
+            className={`!flex !h-auto !items-center !gap-1 !p-0 !text-xs !font-bold shadow-none transition-colors hover:shadow-none active:translate-y-0 ${color || "!text-gray-400 hover:!text-gray-600"}`}
         >
             {IconComp}
             {label}

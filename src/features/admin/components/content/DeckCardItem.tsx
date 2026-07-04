@@ -31,7 +31,7 @@ export const DeckCardItem = ({ card }: DeckCardItemProps) => {
                 </div>
                 <Badge
                     variant="default"
-                    className="!bg-[#1cb0f6]/10 !text-[10px] !font-black tracking-wider !text-[#1cb0f6] uppercase"
+                    className="!bg-[#1cb0f6]/10 !text-xs !font-black tracking-wider !text-[#1cb0f6] uppercase"
                 >
                     {card.interval > 0 ? `${card.interval}d` : "New"}
                 </Badge>

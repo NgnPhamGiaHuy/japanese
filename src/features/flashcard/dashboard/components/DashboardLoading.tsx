@@ -8,7 +8,7 @@ const DashboardLoading = () => {
             {[1, 2, 3].map((i) => (
                 <div
                     key={i}
-                    className="animate-pulse rounded-[2rem] border-2 border-b-4 border-gray-200 bg-white p-6 shadow-sm"
+                    className="animate-pulse rounded-4xl border-2 border-b-4 border-gray-200 bg-white p-6 shadow-sm"
                 >
                     <div className="mb-4 flex items-start justify-between">
                         <div className="flex-1 space-y-2 pr-4">

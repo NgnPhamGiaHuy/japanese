@@ -82,7 +82,7 @@ const DetailActionsPanel = ({
                                     {isShared ? "Manage Access" : "Share Deck"}
                                 </span>
                                 {isShared && (
-                                    <span className="rounded-lg bg-[#ebf8e6] px-2 py-0.5 text-[10px] font-black tracking-wider text-[#58cc02] uppercase">
+                                    <span className="rounded-lg bg-[#ebf8e6] px-2 py-0.5 text-xs font-black tracking-wider text-[#58cc02] uppercase">
                                         Public
                                     </span>
                                 )}
@@ -138,7 +138,7 @@ const DetailActionsPanel = ({
                 </div>
                 <div>
                     <p
-                        className="text-[11px] font-black tracking-widest uppercase"
+                        className="text-xs font-black tracking-widest uppercase"
                         style={{ color: themeHex }}
                     >
                         Your Role

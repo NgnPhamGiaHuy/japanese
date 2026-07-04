@@ -27,7 +27,7 @@ export function ChartSection({
             <div className="flex flex-col gap-4 md:gap-6">
                 {hiragana && (
                     <div>
-                        <h3 className="mb-2 text-[10px] font-black tracking-widest text-[#58cc02] uppercase md:text-xs">
+                        <h3 className="mb-2 text-xs font-black tracking-widest text-[#58cc02] uppercase md:text-xs">
                             Hiragana
                         </h3>
                         <ChartBlockGrid
@@ -41,7 +41,7 @@ export function ChartSection({
                 )}
                 {katakana && (
                     <div>
-                        <h3 className="mb-2 text-[10px] font-black tracking-widest text-[#1cb0f6] uppercase md:text-xs">
+                        <h3 className="mb-2 text-xs font-black tracking-widest text-[#1cb0f6] uppercase md:text-xs">
                             Katakana
                         </h3>
                         <ChartBlockGrid

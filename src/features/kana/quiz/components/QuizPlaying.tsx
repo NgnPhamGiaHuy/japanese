@@ -85,7 +85,7 @@ export function QuizPlaying({
                 <div className={gameQuizStreakColumnClassName}>
                     <StreakComboBadge streak={streak} variant="compact" showMultiplier={false} />
                     <span
-                        className={`text-[10px] font-black tabular-nums md:text-sm ${themeColor.text}`}
+                        className={`text-xs font-black tabular-nums md:text-sm ${themeColor.text}`}
                     >
                         {score}/{targetScore}
                     </span>
@@ -95,7 +95,7 @@ export function QuizPlaying({
             {question && (
                 <div className="hide-scrollbar mx-auto flex min-h-0 w-full max-w-md flex-1 flex-col items-center justify-center overflow-y-auto p-4">
                     <div
-                        className={`relative mb-4 flex h-[200px] w-full flex-col items-center justify-center rounded-[3rem] border-2 border-b-8 border-gray-200 bg-white px-4 py-8 shadow-sm sm:h-[240px] ${status === "wrong" ? "animate-shake" : ""}`}
+                        className={`relative mb-4 flex h-[200px] w-full flex-col items-center justify-center rounded-6xl border-2 border-b-8 border-gray-200 bg-white px-4 py-8 shadow-sm sm:h-[240px] ${status === "wrong" ? "animate-shake" : ""}`}
                     >
                         <Button
                             variant="ghost"

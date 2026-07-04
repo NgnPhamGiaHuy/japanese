@@ -107,7 +107,7 @@ const DetailHeader = ({ ctx, onEdit }: DetailHeaderProps) => {
                         ).map((cat) => (
                             <span
                                 key={cat}
-                                className="rounded-lg px-2 py-1 text-[10px] font-black tracking-wider uppercase"
+                                className="rounded-lg px-2 py-1 text-xs font-black tracking-wider uppercase"
                                 style={{
                                     color: themeHex,
                                     backgroundColor: `${themeHex}20`,

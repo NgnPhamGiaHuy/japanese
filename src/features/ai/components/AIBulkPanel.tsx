@@ -73,7 +73,7 @@ const ModeChip = ({ active, icon, label, sub, onClick, color }: ModeChipProps) =
                         {label}
                     </div>
                     <div
-                        className="text-[10px] font-bold"
+                        className="text-xs font-bold"
                         style={{ color: active ? "rgba(255,255,255,0.75)" : "#afafaf" }}
                     >
                         {sub}
@@ -127,7 +127,7 @@ const AIBulkPanel = ({ themeColor, onPreview, existingWords = [] }: AIBulkPanelP
                     <h3 className="text-lg font-black text-[#3c3c3c] sm:text-xl">
                         Generate Deck with AI
                     </h3>
-                    <p className="text-[9px] font-bold tracking-wide text-[#afafaf] uppercase sm:text-[10px]">
+                    <p className="text-xs font-bold tracking-wide text-[#afafaf] uppercase sm:text-xs">
                         Describe a topic · review before saving
                     </p>
                 </div>
@@ -153,7 +153,7 @@ const AIBulkPanel = ({ themeColor, onPreview, existingWords = [] }: AIBulkPanelP
             </div>
 
             <div>
-                <label className="mb-2 block text-[10px] font-black tracking-widest text-[#afafaf] uppercase">
+                <label className="mb-2 block text-xs font-black tracking-widest text-[#afafaf] uppercase">
                     Topic or Theme
                 </label>
                 <input
@@ -178,7 +178,7 @@ const AIBulkPanel = ({ themeColor, onPreview, existingWords = [] }: AIBulkPanelP
                             variant="ghost"
                             onClick={() => setTopic(s)}
                             disabled={isLoading}
-                            className="border-2 border-gray-200 bg-white !px-2.5 !py-1 !text-[9px] !font-black tracking-wide !text-[#afafaf] uppercase shadow-none hover:border-gray-300 hover:text-[#3c3c3c] hover:shadow-none sm:!px-3 sm:!py-1.5 sm:!text-[10px]"
+                            className="border-2 border-gray-200 bg-white !px-2.5 !py-1 !text-xs !font-black tracking-wide !text-[#afafaf] uppercase shadow-none hover:border-gray-300 hover:text-[#3c3c3c] hover:shadow-none sm:!px-3 sm:!py-1.5 sm:!text-xs"
                         >
                             {s}
                         </Button>
@@ -189,7 +189,7 @@ const AIBulkPanel = ({ themeColor, onPreview, existingWords = [] }: AIBulkPanelP
             {mode === "guided" && (
                 <div className="space-y-4 rounded-2xl border-2 border-dashed border-gray-100 bg-gray-50/50 p-4">
                     <div>
-                        <label className="mb-2 block text-[10px] font-black tracking-widest text-[#afafaf] uppercase">
+                        <label className="mb-2 block text-xs font-black tracking-widest text-[#afafaf] uppercase">
                             Number of Cards
                         </label>
                         <div className="grid grid-cols-4 gap-2">
@@ -219,7 +219,7 @@ const AIBulkPanel = ({ themeColor, onPreview, existingWords = [] }: AIBulkPanelP
                     </div>
 
                     <div>
-                        <label className="mb-2 block text-[10px] font-black tracking-widest text-[#afafaf] uppercase">
+                        <label className="mb-2 block text-xs font-black tracking-widest text-[#afafaf] uppercase">
                             JLPT Level
                         </label>
                         <div className="grid grid-cols-3 gap-2 sm:grid-cols-5 sm:gap-1.5">
@@ -242,7 +242,7 @@ const AIBulkPanel = ({ themeColor, onPreview, existingWords = [] }: AIBulkPanelP
                                               }
                                     }
                                 >
-                                    <div className="text-[10px] font-black">{opt.label}</div>
+                                    <div className="text-xs font-black">{opt.label}</div>
                                     <div
                                         className="text-[8px] font-bold opacity-70"
                                         style={

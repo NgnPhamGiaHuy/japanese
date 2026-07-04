@@ -37,8 +37,8 @@ const VARIANT_STYLES = {
 };
 
 const SIZE_STYLES = {
-    sm: "h-4 min-w-4 px-1 text-[9px]",
-    md: "h-5 min-w-5 px-1.5 text-[10px]",
+    sm: "h-4 min-w-4 px-1 text-xs",
+    md: "h-5 min-w-5 px-1.5 text-xs",
     lg: "h-6 min-w-6 px-2 text-xs",
 };
 

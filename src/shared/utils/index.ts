@@ -1,5 +1,6 @@
 export * from "./array";
 export * from "./audio";
+export * from "./cn";
 export * from "./colors";
 export * from "./cookie";
 export * from "./reorder";

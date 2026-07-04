@@ -218,13 +218,13 @@ const FlashcardMistakeReview = ({
                 <div className="mb-10 flex w-full max-w-sm gap-4">
                     <div className="flex-1 rounded-3xl border-2 border-b-8 border-gray-200 bg-white p-6 text-center shadow-sm">
                         <div className="text-5xl font-black text-[#58cc02]">{stats.correct}</div>
-                        <div className="mt-2 text-[10px] font-black tracking-widest text-[#afafaf] uppercase">
+                        <div className="mt-2 text-xs font-black tracking-widest text-[#afafaf] uppercase">
                             Fixed
                         </div>
                     </div>
                     <div className="flex-1 rounded-3xl border-2 border-b-8 border-gray-200 bg-white p-6 text-center shadow-sm">
                         <div className="text-5xl font-black text-[#ff9600]">{stats.incorrect}</div>
-                        <div className="mt-2 text-[10px] font-black tracking-widest text-[#afafaf] uppercase">
+                        <div className="mt-2 text-xs font-black tracking-widest text-[#afafaf] uppercase">
                             Still hard
                         </div>
                     </div>
@@ -270,7 +270,7 @@ const FlashcardMistakeReview = ({
                 {mcChoices && mcChoices.length === 4 ? (
                     /* Recognition Mode: Select the meaning you missed previously */
                     <div className="flex w-full flex-col gap-5">
-                        <div className="flex w-full flex-col items-center justify-center rounded-[2.5rem] border-2 border-b-8 border-[#ea2b2b]/20 bg-white px-6 py-8 text-center shadow-sm">
+                        <div className="flex w-full flex-col items-center justify-center rounded-5xl border-2 border-b-8 border-[#ea2b2b]/20 bg-white px-6 py-8 text-center shadow-sm">
                             {headerHint && (
                                 <span className="mb-2 text-lg font-bold tracking-widest text-[#afafaf]">
                                     {headerHint}
@@ -286,7 +286,7 @@ const FlashcardMistakeReview = ({
                                     </p>
                                 )}
                             </div>
-                            <p className="mt-3 text-[10px] font-black tracking-widest text-gray-300 uppercase">
+                            <p className="mt-3 text-xs font-black tracking-widest text-gray-300 uppercase">
                                 Choose the correct meaning
                             </p>
                         </div>
@@ -357,7 +357,7 @@ const FlashcardMistakeReview = ({
                             }}
                         >
                             {/* Front (Recall Trigger) */}
-                            <div className="absolute inset-0 flex flex-col items-center justify-center rounded-[2.5rem] border-2 border-b-8 border-[#ea2b2b]/20 bg-white p-6 text-center shadow-sm backface-hidden hover:-translate-y-1 hover:shadow-md">
+                            <div className="absolute inset-0 flex flex-col items-center justify-center rounded-5xl border-2 border-b-8 border-[#ea2b2b]/20 bg-white p-6 text-center shadow-sm backface-hidden hover:-translate-y-1 hover:shadow-md">
                                 {headerHint && (
                                     <span className="mb-2 shrink-0 text-xl font-bold tracking-widest text-[#afafaf]">
                                         {headerHint}
@@ -379,7 +379,7 @@ const FlashcardMistakeReview = ({
                             </div>
 
                             {/* Back (Memory Encoding with AI Aid) */}
-                            <div className="absolute inset-0 flex rotate-y-180 flex-col items-center justify-center rounded-[2.5rem] border-2 border-b-8 border-[#ea2b2b]/20 bg-white p-6 text-center shadow-sm backface-hidden sm:p-8">
+                            <div className="absolute inset-0 flex rotate-y-180 flex-col items-center justify-center rounded-5xl border-2 border-b-8 border-[#ea2b2b]/20 bg-white p-6 text-center shadow-sm backface-hidden sm:p-8">
                                 <Button
                                     onClick={(e) => {
                                         e.stopPropagation();
@@ -408,7 +408,7 @@ const FlashcardMistakeReview = ({
 
                                     {/* Mnemonic Generation Area */}
                                     <div className="mt-4 w-full rounded-2xl border-2 border-[#ffe5c7] bg-[#fff8f0] p-4 text-left">
-                                        <div className="mb-2 flex items-center gap-2 text-[10px] font-black tracking-widest text-[#ff9600] uppercase">
+                                        <div className="mb-2 flex items-center gap-2 text-xs font-black tracking-widest text-[#ff9600] uppercase">
                                             <Lightbulb size={12} />
                                             Memory Tip
                                         </div>

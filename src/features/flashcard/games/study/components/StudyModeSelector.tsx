@@ -74,13 +74,13 @@ const StudyModeSelector = ({
                 <div className="mb-8 flex gap-3">
                     <div className="rounded-xl border-2 border-gray-200 bg-white px-4 py-2 text-center shadow-sm">
                         <div className="text-xl font-black text-[#1cb0f6]">{status.newCount}</div>
-                        <div className="text-[9px] font-black tracking-widest text-slate-400 uppercase">
+                        <div className="text-xs font-black tracking-widest text-slate-400 uppercase">
                             New
                         </div>
                     </div>
                     <div className="rounded-xl border-2 border-gray-200 bg-white px-4 py-2 text-center shadow-sm">
                         <div className="text-xl font-black text-[#ff9600]">{status.dueCount}</div>
-                        <div className="text-[9px] font-black tracking-widest text-slate-400 uppercase">
+                        <div className="text-xs font-black tracking-widest text-slate-400 uppercase">
                             Due
                         </div>
                     </div>
@@ -88,7 +88,7 @@ const StudyModeSelector = ({
                         <div className="text-xl font-black text-[#58cc02]">
                             {status.totalCount - status.newCount}
                         </div>
-                        <div className="text-[9px] font-black tracking-widest text-slate-400 uppercase">
+                        <div className="text-xs font-black tracking-widest text-slate-400 uppercase">
                             Learned
                         </div>
                     </div>

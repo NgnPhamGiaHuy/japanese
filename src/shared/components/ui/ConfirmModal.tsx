@@ -1,7 +1,11 @@
 "use client";
 
+import { useId } from "react";
+
 import { AnimatePresence, motion } from "framer-motion";
 import { AlertTriangle, Info, Trash2, X } from "lucide-react";
+
+import { useDialogA11y } from "@/shared/hooks";
 
 import Button from "./Button";
 
@@ -82,11 +86,13 @@ const ConfirmModal = ({
 }: ConfirmModalProps) => {
     const v = VARIANTS[variant];
     const Icon = v.icon;
+    const titleId = useId();
+    const dialogRef = useDialogA11y<HTMLDivElement>(isOpen, onClose);
 
     return (
         <AnimatePresence>
             {isOpen && (
-                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6">
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
                     {/* Backdrop */}
                     <motion.div
                         initial={{ opacity: 0 }}
@@ -98,17 +104,22 @@ const ConfirmModal = ({
 
                     {/* Modal Content */}
                     <motion.div
+                        ref={dialogRef}
+                        role="dialog"
+                        aria-modal="true"
+                        aria-labelledby={titleId}
                         initial={{ opacity: 0, scale: 0.9, y: 20 }}
                         animate={{ opacity: 1, scale: 1, y: 0 }}
                         exit={{ opacity: 0, scale: 0.9, y: 20 }}
-                        className="relative w-full max-w-sm overflow-hidden rounded-[2.5rem] border-2 border-b-8 border-gray-200 bg-white shadow-2xl"
+                        className="relative w-full max-w-sm overflow-hidden rounded-5xl border-2 border-b-8 border-gray-200 bg-white shadow-2xl"
                     >
                         {/* Close button */}
                         <div className="absolute top-4 right-4 z-10">
                             <Button
                                 variant="ghost"
+                                size="icon"
                                 onClick={onClose}
-                                className="!h-10 !w-10 !rounded-full !p-0 shadow-none hover:!bg-black/5"
+                                className="rounded-full shadow-none hover:bg-black/5"
                                 icon={X}
                                 iconSize={20}
                                 disabled={loading}
@@ -118,14 +129,19 @@ const ConfirmModal = ({
                         <div className="p-8 pt-10">
                             {/* Icon Circle */}
                             <div
-                                className={`mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-[2rem] border-b-4 border-black/10 ${v.accent}`}
+                                className={`mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-4xl border-b-4 border-black/10 ${v.accent}`}
                             >
                                 <Icon size={40} strokeWidth={2.5} />
                             </div>
 
                             {/* Text Header */}
                             <div className="text-center">
-                                <h3 className="mb-2 text-2xl font-black text-[#3c3c3c]">{title}</h3>
+                                <h3
+                                    id={titleId}
+                                    className="mb-2 text-xl font-black text-[#3c3c3c]"
+                                >
+                                    {title}
+                                </h3>
                                 <p className="text-base leading-relaxed font-bold text-[#afafaf]">
                                     {message}
                                 </p>

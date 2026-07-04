@@ -60,16 +60,16 @@ const AnalyticsDetailModal = ({
                             <table className="w-full text-left">
                                 <thead className="border-b border-gray-100 bg-gray-50/50">
                                     <tr>
-                                        <th className="px-5 py-4 text-[10px] font-black tracking-widest text-[#afafaf] uppercase">
+                                        <th className="px-5 py-4 text-xs font-black tracking-widest text-[#afafaf] uppercase">
                                             Subject
                                         </th>
-                                        <th className="px-5 py-4 text-[10px] font-black tracking-widest text-[#afafaf] uppercase">
+                                        <th className="px-5 py-4 text-xs font-black tracking-widest text-[#afafaf] uppercase">
                                             Activity
                                         </th>
-                                        <th className="px-5 py-4 text-[10px] font-black tracking-widest text-[#afafaf] uppercase">
+                                        <th className="px-5 py-4 text-xs font-black tracking-widest text-[#afafaf] uppercase">
                                             Occurred
                                         </th>
-                                        <th className="px-5 py-4 text-right text-[10px] font-black tracking-widest text-[#afafaf] uppercase">
+                                        <th className="px-5 py-4 text-right text-xs font-black tracking-widest text-[#afafaf] uppercase">
                                             Insight
                                         </th>
                                     </tr>
@@ -101,7 +101,7 @@ const AnalyticsDetailModal = ({
                                                                 item.userName ||
                                                                 "System"}
                                                         </div>
-                                                        <div className="max-w-[120px] truncate text-[10px] font-bold text-[#afafaf]">
+                                                        <div className="max-w-[120px] truncate text-xs font-bold text-[#afafaf]">
                                                             {item.email || item.uid || item.id}
                                                         </div>
                                                     </td>

@@ -59,7 +59,7 @@ const KanaSurvivalPage = () => {
                 <ScreenHeader title="Survival Mode" backHref="/kana" />
                 <div className="flex flex-1 flex-col items-center justify-start px-4 py-6">
                     <div className="w-full max-w-md">
-                        <div className="mb-6 flex h-20 w-20 items-center justify-center rounded-[1.5rem] border-b-8 border-[#cc7800] bg-[#ff9600] text-4xl font-medium text-white shadow-sm">
+                        <div className="mb-6 flex h-20 w-20 items-center justify-center rounded-3xl border-b-8 border-[#cc7800] bg-[#ff9600] text-4xl font-medium text-white shadow-sm">
                             <Flame size={40} />
                         </div>
                         <p className="mb-8 text-lg font-bold text-[#afafaf]">
@@ -268,7 +268,7 @@ const KanaSurvivalPage = () => {
                                     }}
                                 />
                             </div>
-                            <p className="text-[10px] font-bold tracking-wide text-[#afafaf] uppercase md:text-xs">
+                            <p className="text-xs font-bold tracking-wide text-[#afafaf] uppercase md:text-xs">
                                 Streak adds time
                             </p>
                         </div>
@@ -296,7 +296,7 @@ const KanaSurvivalPage = () => {
                     {question && (
                         <>
                             <div
-                                className={`mb-4 flex h-[180px] w-full items-center justify-center rounded-[3rem] border-2 border-b-8 border-gray-200 bg-white shadow-sm sm:h-[220px] ${status === "wrong" ? "animate-shake" : ""}`}
+                                className={`mb-4 flex h-[180px] w-full items-center justify-center rounded-6xl border-2 border-b-8 border-gray-200 bg-white shadow-sm sm:h-[220px] ${status === "wrong" ? "animate-shake" : ""}`}
                             >
                                 <span className="text-[7rem] leading-none font-medium text-[#3c3c3c] select-none sm:text-[8rem]">
                                     {question.char}

@@ -208,13 +208,13 @@ const FlashcardPractice = ({
                 <div className="mb-10 flex w-full max-w-sm gap-4">
                     <div className="flex-1 rounded-3xl border-2 border-b-8 border-gray-200 bg-white p-6 text-center shadow-sm">
                         <div className="text-5xl font-black text-[#58cc02]">{stats.correct}</div>
-                        <div className="mt-2 text-[10px] font-black tracking-widest text-[#afafaf] uppercase">
+                        <div className="mt-2 text-xs font-black tracking-widest text-[#afafaf] uppercase">
                             Correct
                         </div>
                     </div>
                     <div className="flex-1 rounded-3xl border-2 border-b-8 border-gray-200 bg-white p-6 text-center shadow-sm">
                         <div className="text-5xl font-black text-[#ff9600]">{stats.incorrect}</div>
-                        <div className="mt-2 text-[10px] font-black tracking-widest text-[#afafaf] uppercase">
+                        <div className="mt-2 text-xs font-black tracking-widest text-[#afafaf] uppercase">
                             Review
                         </div>
                     </div>
@@ -253,7 +253,7 @@ const FlashcardPractice = ({
                 {/* ── Multiple-choice (Recognition Mode) ── */}
                 {isMCMode ? (
                     <div className="flex w-full flex-col gap-5">
-                        <div className="relative flex w-full flex-col items-center justify-center rounded-[2.5rem] border-2 border-b-8 border-gray-200 bg-white px-6 py-8 text-center shadow-sm sm:rounded-[3rem]">
+                        <div className="relative flex w-full flex-col items-center justify-center rounded-5xl border-2 border-b-8 border-gray-200 bg-white px-6 py-8 text-center shadow-sm sm:rounded-6xl">
                             {card.hint && (
                                 <Button
                                     variant="ghost"
@@ -292,7 +292,7 @@ const FlashcardPractice = ({
                                     💡 {card.hint}
                                 </div>
                             )}
-                            <p className="mt-3 text-[10px] font-black tracking-widest text-gray-300 uppercase">
+                            <p className="mt-3 text-xs font-black tracking-widest text-gray-300 uppercase">
                                 Choose the correct meaning
                             </p>
                         </div>
@@ -360,7 +360,7 @@ const FlashcardPractice = ({
                             }}
                         >
                             {/* Front Side */}
-                            <div className="absolute inset-0 flex flex-col items-center justify-center rounded-[2.5rem] border-2 border-b-8 border-gray-200 bg-white p-6 text-center shadow-sm backface-hidden hover:-translate-y-1 hover:shadow-md">
+                            <div className="absolute inset-0 flex flex-col items-center justify-center rounded-5xl border-2 border-b-8 border-gray-200 bg-white p-6 text-center shadow-sm backface-hidden hover:-translate-y-1 hover:shadow-md">
                                 {headerHint && (
                                     <span className="mb-2 shrink-0 text-xl font-bold tracking-widest text-[#afafaf]">
                                         {headerHint}
@@ -398,7 +398,7 @@ const FlashcardPractice = ({
                                             playSFX("click");
                                             setHintVisible((v) => !v);
                                         }}
-                                        className="absolute bottom-6 left-6 !flex !items-center !gap-1.5 !rounded-xl border-2 border-gray-100 bg-gray-50 !px-3 !py-1.5 !text-[10px] !font-black tracking-wide uppercase shadow-none hover:shadow-none"
+                                        className="absolute bottom-6 left-6 !flex !items-center !gap-1.5 !rounded-xl border-2 border-gray-100 bg-gray-50 !px-3 !py-1.5 !text-xs !font-black tracking-wide uppercase shadow-none hover:shadow-none"
                                         color={hintVisible ? themeHex : "#afafaf"}
                                         icon={Lightbulb}
                                     >
@@ -422,7 +422,7 @@ const FlashcardPractice = ({
                             </div>
 
                             {/* Back Side */}
-                            <div className="absolute inset-0 flex rotate-y-180 flex-col items-center justify-center rounded-[2.5rem] border-2 border-b-8 border-gray-200 bg-white p-6 text-center shadow-sm backface-hidden sm:rounded-[3rem] sm:p-8">
+                            <div className="absolute inset-0 flex rotate-y-180 flex-col items-center justify-center rounded-5xl border-2 border-b-8 border-gray-200 bg-white p-6 text-center shadow-sm backface-hidden sm:rounded-6xl sm:p-8">
                                 <Button
                                     variant="ghost"
                                     onClick={(e) => {
@@ -450,7 +450,7 @@ const FlashcardPractice = ({
                                     )}
                                     {back.usageNote && (
                                         <div className="mt-3 flex items-center gap-1.5 rounded-xl border border-gray-200 bg-gray-50 px-3 py-1.5">
-                                            <span className="text-[10px] font-black tracking-wide text-[#afafaf] uppercase">
+                                            <span className="text-xs font-black tracking-wide text-[#afafaf] uppercase">
                                                 Usage
                                             </span>
                                             <span className="text-xs font-bold text-[#3c3c3c]">

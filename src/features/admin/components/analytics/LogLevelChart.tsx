@@ -89,7 +89,7 @@ const LogLevelChart = ({ data, onClick }: LogLevelChartProps) => {
                             className="h-2 w-2 rounded-full"
                             style={{ backgroundColor: LEVEL_COLORS[item.level] ?? "#afafaf" }}
                         />
-                        <span className="text-[10px] font-black tracking-tighter text-[#3c3c3c] uppercase">
+                        <span className="text-xs font-black tracking-tighter text-[#3c3c3c] uppercase">
                             {LEVEL_LABELS[item.level] ?? item.level}: {item.count}
                         </span>
                     </button>

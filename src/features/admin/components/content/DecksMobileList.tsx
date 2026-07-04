@@ -49,7 +49,7 @@ const DecksMobileList = ({ items, onView, onDelete, isDeleting }: DecksMobileLis
                             ).map((cat) => (
                                 <span
                                     key={cat}
-                                    className="rounded-md px-1.5 py-0.5 text-[9px] font-black tracking-tight uppercase"
+                                    className="rounded-md px-1.5 py-0.5 text-xs font-black tracking-tight uppercase"
                                     style={{
                                         backgroundColor: `${deck.themeColor || "#1cb0f6"}15`,
                                         color: deck.themeColor || "#1cb0f6",
@@ -61,7 +61,7 @@ const DecksMobileList = ({ items, onView, onDelete, isDeleting }: DecksMobileLis
                         </div>
 
                         {/* Meta row */}
-                        <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-[10px] font-bold text-[#afafaf]">
+                        <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs font-bold text-[#afafaf]">
                             {/* Owner */}
                             <div className="flex items-center gap-1.5">
                                 <div className="flex h-5 w-5 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-gray-100">

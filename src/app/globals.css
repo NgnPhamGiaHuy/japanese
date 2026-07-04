@@ -4,7 +4,7 @@
 /* =========================================================
    DESIGN TOKENS
    ========================================================= */
-:root {
+@theme {
     --color-hiragana: #58cc02;
     --color-katakana: #1cb0f6;
     --color-both: #ce82ff;
@@ -13,6 +13,19 @@
     --color-bg: #f7f7f8;
     --color-text: #3c3c3c;
     --color-muted: #afafaf;
+    --color-surface: #ffffff;
+    --color-border: #e5e7eb;
+    --color-danger-bg: #ffdfe0;
+    --color-teal: #00d1e0;
+    --color-pink: #ff66bb;
+
+    --radius-5xl: 2.5rem;
+    --radius-6xl: 3rem;
+
+    --container-8xl: 100rem;
+}
+
+:root {
     --font-ui: "Nunito", "Segoe UI", system-ui, sans-serif;
 
     /* DIGITAL FONT (Gothic/Sans-serif)

@@ -96,7 +96,7 @@ const AdminUsersPageContent = () => {
                 onDemote={demoteUser}
                 onDelete={removeUser}
             />
-            <p className="px-1 text-[10px] font-bold tracking-widest text-[#afafaf] uppercase">
+            <p className="px-1 text-xs font-bold tracking-widest text-[#afafaf] uppercase">
                 Role controls are server-enforced
             </p>
         </AdminPageLayout>

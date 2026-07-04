@@ -10,7 +10,7 @@ import { Button } from "@/shared/components/ui";
 import type { LucideIcon } from "lucide-react";
 
 export const SCREEN_HEADER_BAR_CLASS =
-    "sticky top-0 bg-white/90 backdrop-blur-md z-20 border-b-2 border-gray-200";
+    "sticky top-0 bg-white/90 backdrop-blur-md z-40 border-b-2 border-gray-200";
 
 export const SCREEN_HEADER_BACK_BUTTON_CLASS =
     "flex items-center justify-center w-10 h-10 shrink-0 rounded-xl text-[#afafaf] hover:text-[#3c3c3c] hover:bg-gray-100 transition-colors";
@@ -64,7 +64,7 @@ export const ScreenHeaderRow = ({
 }) => {
     const bar =
         variant === "dark"
-            ? "sticky top-0 z-20 border-b border-white/10 bg-[#0a0a1a]/90 backdrop-blur-md"
+            ? "sticky top-0 z-40 border-b border-white/10 bg-[#0a0a1a]/90 backdrop-blur-md"
             : SCREEN_HEADER_BAR_CLASS;
 
     const slots = Children.toArray(children);

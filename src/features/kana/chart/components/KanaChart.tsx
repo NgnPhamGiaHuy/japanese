@@ -40,7 +40,7 @@ export function KanaChart() {
                     <Button
                         variant="ghost"
                         onClick={() => setShowRomaji((v) => !v)}
-                        className={`flex! items-center! gap-1.5! rounded-xl! border-2! px-3! py-1.5! text-[10px]! font-bold! shadow-none transition-all hover:shadow-none active:translate-y-0 md:text-xs! ${
+                        className={`flex! items-center! gap-1.5! rounded-xl! border-2! px-3! py-1.5! text-xs! font-bold! shadow-none transition-all hover:shadow-none active:translate-y-0 md:text-xs! ${
                             !showRomaji
                                 ? "border-[#ea2b2b]! bg-[#ffdfe0]! text-[#ea2b2b]!"
                                 : `${themeColor.primaryLightBg} ${themeColor.text} ${themeColor.primaryBorder}`
@@ -55,7 +55,7 @@ export function KanaChart() {
 
             <div className="animate-in fade-in mx-auto w-full max-w-2xl px-3 pt-6 pb-28 duration-300 sm:px-4">
                 {isBoth && (
-                    <p className="mx-auto mb-4 max-w-sm text-center text-[10px] font-bold text-[#afafaf] md:text-xs">
+                    <p className="mx-auto mb-4 max-w-sm text-center text-xs font-bold text-[#afafaf] md:text-xs">
                         Hiragana and katakana for the same sounds are grouped by section. Extended
                         loanword katakana appears only under Katakana.
                     </p>

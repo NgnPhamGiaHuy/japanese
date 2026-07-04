@@ -55,7 +55,7 @@ const RoleChart = ({ data, onClick }: RoleChartProps) => {
                             className="h-2 w-2 rounded-full"
                             style={{ backgroundColor: COLORS[index % COLORS.length] }}
                         />
-                        <span className="text-[10px] font-black tracking-tighter text-[#3c3c3c] uppercase">
+                        <span className="text-xs font-black tracking-tighter text-[#3c3c3c] uppercase">
                             {item.name}: {item.value}
                         </span>
                     </div>

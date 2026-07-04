@@ -74,7 +74,7 @@ const UserMeta = ({ name, avatar, subtitle, className }: UserMetaProps) => {
 
             <div className="min-w-0">
                 {subtitle && (
-                    <div className="truncate text-[11px] font-black tracking-widest text-gray-400 uppercase">
+                    <div className="truncate text-xs font-black tracking-widest text-gray-400 uppercase">
                         {subtitle}
                     </div>
                 )}

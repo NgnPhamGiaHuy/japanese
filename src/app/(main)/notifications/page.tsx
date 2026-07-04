@@ -255,7 +255,7 @@ function NotificationRow({
                         >
                             {notification.title}
                         </p>
-                        <span className="shrink-0 text-[11px] text-gray-400">
+                        <span className="shrink-0 text-xs text-gray-400">
                             {relativeTime(notification.createdAt)}
                         </span>
                     </div>
@@ -299,7 +299,7 @@ function NotificationGroupSection({
     return (
         <div>
             <div className="sticky top-[57px] z-10 bg-[#F7F7F8] px-4 py-2">
-                <span className="text-[10px] font-black tracking-widest text-[#afafaf] uppercase">
+                <span className="text-xs font-black tracking-widest text-[#afafaf] uppercase">
                     {group.label}
                 </span>
             </div>
@@ -343,7 +343,7 @@ function SkeletonRows() {
 function EmptyState({ filter }: { filter: "all" | "unread" }) {
     return (
         <div className="flex flex-col items-center justify-center py-20 text-center">
-            <div className="mb-4 flex h-20 w-20 items-center justify-center rounded-[2rem] bg-gray-100">
+            <div className="mb-4 flex h-20 w-20 items-center justify-center rounded-4xl bg-gray-100">
                 {filter === "unread" ? (
                     <Check size={36} className="text-gray-300" />
                 ) : (
@@ -462,7 +462,7 @@ export default function NotificationsPage() {
                                 {f}
                                 {f === "unread" && unreadCount > 0 && (
                                     <span
-                                        className={`ml-1.5 rounded-full px-1.5 py-px text-[10px] ${
+                                        className={`ml-1.5 rounded-full px-1.5 py-px text-xs ${
                                             isActive ? "bg-white/30" : "bg-gray-100"
                                         }`}
                                     >

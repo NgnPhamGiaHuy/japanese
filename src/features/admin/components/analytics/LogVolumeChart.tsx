@@ -127,7 +127,7 @@ const LogVolumeChart = ({ data, onClick }: LogVolumeChartProps) => {
                             className="h-2 w-2 rounded-full"
                             style={{ backgroundColor: TYPE_COLORS[type] }}
                         />
-                        <span className="text-[10px] font-black tracking-tighter text-[#3c3c3c] uppercase">
+                        <span className="text-xs font-black tracking-tighter text-[#3c3c3c] uppercase">
                             {TYPE_LABELS[type]}
                         </span>
                     </button>

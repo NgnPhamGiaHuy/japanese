@@ -21,9 +21,9 @@ export function PracticeCanvasArea({ char, mode, themeColor, onPlay }: PracticeC
 
     return (
         <div className="my-auto flex w-full flex-1 flex-col items-center justify-center px-2">
-            <div className="flex w-full max-w-sm shrink-0 flex-col items-center justify-center gap-3 rounded-[1.5rem] border-2 border-b-8 border-gray-200 bg-white p-3 shadow-sm md:max-w-3xl md:flex-row md:gap-8 md:rounded-[2.5rem] md:p-8">
+            <div className="flex w-full max-w-sm shrink-0 flex-col items-center justify-center gap-3 rounded-3xl border-2 border-b-8 border-gray-200 bg-white p-3 shadow-sm md:max-w-3xl md:flex-row md:gap-8 md:rounded-5xl md:p-8">
                 {/* Reference Panel */}
-                <div className="relative flex w-full shrink-0 flex-row items-center gap-3 rounded-xl bg-gray-50 p-2 md:h-[260px] md:w-auto md:flex-col md:justify-center md:rounded-[1.5rem] md:p-4">
+                <div className="relative flex w-full shrink-0 flex-row items-center gap-3 rounded-xl bg-gray-50 p-2 md:h-[260px] md:w-auto md:flex-col md:justify-center md:rounded-3xl md:p-4">
                     <span className="hidden text-xs font-bold text-[#afafaf] md:block">
                         Reference
                     </span>

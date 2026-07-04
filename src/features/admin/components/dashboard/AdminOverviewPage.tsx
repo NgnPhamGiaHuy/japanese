@@ -104,7 +104,7 @@ const AdminOverviewPage = () => {
                     actions={
                         <Link
                             href="/admin/reports"
-                            className="text-[10px] font-black tracking-widest text-[#1cb0f6] uppercase hover:underline"
+                            className="text-xs font-black tracking-widest text-[#1cb0f6] uppercase hover:underline"
                         >
                             Full Audit Trail
                         </Link>

@@ -89,7 +89,7 @@ const DatePicker = ({
     return (
         <div className={`relative flex flex-col gap-1.5 ${className}`}>
             {label && (
-                <span className="pl-1 text-[10px] font-black tracking-widest text-[#afafaf] uppercase">
+                <span className="pl-1 text-xs font-black tracking-widest text-[#afafaf] uppercase">
                     {label}
                 </span>
             )}
@@ -135,7 +135,7 @@ const DatePicker = ({
                             initial={{ opacity: 0, scale: 0.95, y: 10 }}
                             animate={{ opacity: 1, scale: 1, y: 0 }}
                             exit={{ opacity: 0, scale: 0.95, y: 10 }}
-                            className="absolute top-full right-0 z-50 mt-2 w-72 overflow-hidden rounded-[2rem] border-2 border-gray-100 bg-white p-4 shadow-2xl"
+                            className="absolute top-full right-0 z-50 mt-2 w-72 overflow-hidden rounded-4xl border-2 border-gray-100 bg-white p-4 shadow-2xl"
                         >
                             <div className="mb-4 flex items-center justify-between">
                                 <span className="text-sm font-black text-[#3c3c3c]">
@@ -164,7 +164,7 @@ const DatePicker = ({
                                 {["S", "M", "T", "W", "T", "F", "S"].map((d, i) => (
                                     <span
                                         key={i}
-                                        className="text-center text-[10px] font-black tracking-widest text-[#afafaf] uppercase"
+                                        className="text-center text-xs font-black tracking-widest text-[#afafaf] uppercase"
                                     >
                                         {d}
                                     </span>

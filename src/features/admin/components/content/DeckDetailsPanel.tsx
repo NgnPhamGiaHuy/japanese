@@ -37,7 +37,7 @@ const DeckDetailsPanel = ({
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
                         onClick={onClose}
-                        className="fixed inset-0 z-[60] bg-[#3c3c3c]/30 backdrop-blur-sm"
+                        className="fixed inset-0 z-50 bg-[#3c3c3c]/30 backdrop-blur-sm"
                     />
 
                     {/* Panel */}
@@ -46,7 +46,7 @@ const DeckDetailsPanel = ({
                         animate={{ x: 0 }}
                         exit={{ x: "100%" }}
                         transition={{ type: "spring", damping: 25, stiffness: 200 }}
-                        className="fixed top-0 right-0 z-[70] h-full w-full max-w-xl bg-white shadow-2xl ring-1 ring-gray-100"
+                        className="fixed top-0 right-0 z-50 h-full w-full max-w-xl bg-white shadow-2xl ring-1 ring-gray-100"
                     >
                         <div className="flex h-full flex-col">
                             {/* Header */}
@@ -99,7 +99,7 @@ const DeckDetailsPanel = ({
 
                             {/* Footer */}
                             <div className="border-t-2 border-gray-50 bg-gray-50/30 p-6">
-                                <div className="flex items-center justify-between text-[10px] font-black tracking-widest text-[#afafaf] uppercase">
+                                <div className="flex items-center justify-between text-xs font-black tracking-widest text-[#afafaf] uppercase">
                                     <span>{cards?.length || 0} vocabulary items total</span>
                                     <span>Read-only Administrative View</span>
                                 </div>

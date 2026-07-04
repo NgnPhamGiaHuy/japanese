@@ -134,7 +134,7 @@ const MatchPlayingView = ({
                 currentScore={score}
             />
 
-            <p className="mx-auto mt-2 max-w-sm shrink-0 px-4 text-center text-[10px] font-black tracking-widest text-[#afafaf] uppercase">
+            <p className="mx-auto mt-2 max-w-sm shrink-0 px-4 text-center text-xs font-black tracking-widest text-[#afafaf] uppercase">
                 Tap two tiles that belong together
             </p>
 

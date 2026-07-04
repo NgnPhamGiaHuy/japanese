@@ -34,7 +34,7 @@ export function ChartBlockGrid({
             {block.headers.map((h) => (
                 <div
                     key={h}
-                    className="pb-1 text-center text-[9px] font-black tracking-wide text-gray-400 uppercase sm:text-[10px] md:text-xs"
+                    className="pb-1 text-center text-xs font-black tracking-wide text-gray-400 uppercase sm:text-xs md:text-xs"
                 >
                     {h}
                 </div>
@@ -42,7 +42,7 @@ export function ChartBlockGrid({
 
             {block.rows.map((row, ri) => (
                 <Fragment key={`${blockKeyPrefix}-${ri}-${row.label}`}>
-                    <div className="flex items-center justify-end text-[9px] font-black text-gray-400 tabular-nums sm:text-[10px] md:text-xs">
+                    <div className="flex items-center justify-end text-xs font-black text-gray-400 tabular-nums sm:text-xs md:text-xs">
                         {row.label}
                     </div>
 

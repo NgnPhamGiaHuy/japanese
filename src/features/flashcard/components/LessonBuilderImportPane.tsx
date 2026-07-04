@@ -105,7 +105,7 @@ const LessonBuilderImportPane: React.FC<LessonBuilderImportPaneProps> = ({
                             setInputMode(mode);
                             setPreviewRows(null);
                         }}
-                        className={`flex-1 !rounded-none !p-2.5 !text-[8px] !font-black uppercase sm:!p-4 sm:!text-[10px] ${inputMode === mode ? "!text-white" : "!text-gray-400 hover:bg-gray-50"}`}
+                        className={`flex-1 !rounded-none !p-2.5 !text-[8px] !font-black uppercase sm:!p-4 sm:!text-xs ${inputMode === mode ? "!text-white" : "!text-gray-400 hover:bg-gray-50"}`}
                         style={inputMode === mode ? { backgroundColor: themeHex } : {}}
                         icon={mode === "ai" ? Sparkles : mode === "uploads" ? FileUp : undefined}
                     >
@@ -120,11 +120,11 @@ const LessonBuilderImportPane: React.FC<LessonBuilderImportPaneProps> = ({
 
             {inputMode === "uploads" && (
                 <div className="space-y-6">
-                    <div className="relative overflow-hidden rounded-3xl border-2 border-gray-100 bg-gradient-to-br from-white to-gray-50/50 p-6 shadow-sm sm:rounded-[2.5rem] sm:p-8">
+                    <div className="relative overflow-hidden rounded-3xl border-2 border-gray-100 bg-gradient-to-br from-white to-gray-50/50 p-6 shadow-sm sm:rounded-5xl sm:p-8">
                         <div className="relative z-10 flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
                             <div className="space-y-2">
                                 <span
-                                    className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[9px] font-black tracking-widest uppercase sm:px-3 sm:text-[10px]"
+                                    className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-black tracking-widest uppercase sm:px-3 sm:text-xs"
                                     style={{ backgroundColor: `${themeHex}1a`, color: themeHex }}
                                 >
                                     <Sparkles size={10} className="sm:size-[12px]" />

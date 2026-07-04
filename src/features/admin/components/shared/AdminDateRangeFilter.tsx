@@ -47,13 +47,13 @@ const AdminDateRangeFilter = ({
                 <button
                     type="button"
                     onClick={onReset}
-                    className="flex items-center gap-2 text-[10px] font-black tracking-widest text-[#afafaf] uppercase transition-all hover:text-[#ea2b2b]"
+                    className="flex items-center gap-2 text-xs font-black tracking-widest text-[#afafaf] uppercase transition-all hover:text-[#ea2b2b]"
                 >
                     <RotateCcw size={12} />
                     Reset
                 </button>
                 <div className="h-6 w-px bg-gray-100" />
-                <div className="flex items-center gap-2 px-2 text-[10px] font-black tracking-widest uppercase">
+                <div className="flex items-center gap-2 px-2 text-xs font-black tracking-widest uppercase">
                     <div
                         className={`flex h-6 items-center gap-2 rounded-full px-3 transition-all ${
                             hasActiveFilters

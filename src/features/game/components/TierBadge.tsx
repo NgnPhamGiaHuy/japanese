@@ -23,7 +23,7 @@ const TierBadge = ({ score, className = "" }: TierBadgeProps) => {
     const info = TIER_INFO[tier];
     return (
         <span
-            className={`inline-flex items-center rounded-full px-1.5 py-0.5 text-[9px] font-black shadow-sm ${className}`}
+            className={`inline-flex items-center rounded-full px-1.5 py-0.5 text-xs font-black shadow-sm ${className}`}
             style={{
                 backgroundColor: info.bg,
                 color: info.color,

@@ -243,7 +243,7 @@ const CommentPanel = ({
                     <MessageSquare size={15} style={{ color: themeColor }} />
                     <span className="text-[13px] font-black text-[#3c3c3c]">Comments</span>
                     {comments.length > 0 && (
-                        <span className="rounded-full bg-gray-100 px-1.5 py-px text-[11px] font-black text-gray-500">
+                        <span className="rounded-full bg-gray-100 px-1.5 py-px text-xs font-black text-gray-500">
                             {sorted.length}
                         </span>
                     )}
@@ -253,7 +253,7 @@ const CommentPanel = ({
                     <Button
                         variant="ghost"
                         onClick={() => setShowResolved((v) => !v)}
-                        className={`!flex !items-center !gap-1 !rounded-lg !px-2 !py-1 !text-[11px] !font-bold shadow-none transition-colors hover:shadow-none active:translate-y-0 ${
+                        className={`!flex !items-center !gap-1 !rounded-lg !px-2 !py-1 !text-xs !font-bold shadow-none transition-colors hover:shadow-none active:translate-y-0 ${
                             showResolved
                                 ? "!bg-gray-100 !text-gray-700"
                                 : "!text-gray-400 hover:!text-gray-600"
@@ -285,7 +285,7 @@ const CommentPanel = ({
                         <p className="text-[13px] font-bold text-gray-400">
                             {showResolved ? "No comments yet" : "No open comments"}
                         </p>
-                        <p className="text-[11px] text-gray-300">
+                        <p className="text-xs text-gray-300">
                             {showResolved
                                 ? "Be the first to start a discussion"
                                 : "All threads are resolved"}

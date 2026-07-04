@@ -105,7 +105,7 @@ const CommentInput = ({
                 {/* Bottom bar inside textarea container */}
                 <div className="flex items-center justify-between border-t border-gray-100 px-3 py-1.5">
                     <span
-                        className={`text-[11px] font-bold tabular-nums ${
+                        className={`text-xs font-bold tabular-nums ${
                             isOver ? "text-[#ff4b4b]" : isWarn ? "text-[#ffc800]" : "text-gray-300"
                         }`}
                     >
@@ -126,7 +126,7 @@ const CommentInput = ({
                             variant="primary"
                             onClick={handleSubmit}
                             disabled={isEmpty || isOver || isSubmitting}
-                            className="!h-7 !px-2.5 !text-[11px] shadow-none hover:shadow-none active:translate-y-0"
+                            className="!h-7 !px-2.5 !text-xs shadow-none hover:shadow-none active:translate-y-0"
                             style={{
                                 backgroundColor: isEmpty || isOver ? "#d1d5db" : themeColor,
                                 borderBottomColor: isEmpty || isOver ? "#9ca3af" : themeColor,

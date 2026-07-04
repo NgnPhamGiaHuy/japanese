@@ -92,14 +92,14 @@ const CommentThread = ({
                                     setShowDeleteConfirm(false);
                                     await onDelete(comment.id);
                                 }}
-                                className="!rounded-lg !px-3 !py-1 !text-[11px] !font-black shadow-none hover:shadow-none active:translate-y-0"
+                                className="!rounded-lg !px-3 !py-1 !text-xs !font-black shadow-none hover:shadow-none active:translate-y-0"
                             >
                                 Delete
                             </Button>
                             <Button
                                 variant="ghost"
                                 onClick={() => setShowDeleteConfirm(false)}
-                                className="!rounded-lg border border-gray-200 bg-white !px-3 !py-1 !text-[11px] !font-black !text-gray-600 shadow-none hover:!bg-gray-50 hover:shadow-none active:translate-y-0"
+                                className="!rounded-lg border border-gray-200 bg-white !px-3 !py-1 !text-xs !font-black !text-gray-600 shadow-none hover:!bg-gray-50 hover:shadow-none active:translate-y-0"
                             >
                                 Cancel
                             </Button>

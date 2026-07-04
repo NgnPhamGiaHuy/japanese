@@ -135,7 +135,7 @@ export const BottomNav = () => {
 
                             {/* Unread badge for Alerts */}
                             {route.badge != null && route.badge > 0 && (
-                                <span className="absolute -top-1.5 -right-1.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-[#ea2b2b] px-1 text-[9px] font-black text-white">
+                                <span className="absolute -top-1.5 -right-1.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-[#ea2b2b] px-1 text-xs font-black text-white">
                                     {route.badge > 99 ? "99+" : route.badge}
                                 </span>
                             )}
@@ -147,7 +147,7 @@ export const BottomNav = () => {
                                 </div>
                             )}
                         </div>
-                        <span className="text-[9px] font-black tracking-wider uppercase">
+                        <span className="text-xs font-black tracking-wider uppercase">
                             {route.label}
                         </span>
                     </Link>

@@ -33,7 +33,7 @@ const UsersTableHeader = ({ table }: UsersTableHeaderProps) => {
                             <th
                                 key={header.id}
                                 style={{ width: header.getSize() }}
-                                className="h-12 px-4 text-[10px] font-black tracking-wider text-[#afafaf] uppercase"
+                                className="h-12 px-4 text-xs font-black tracking-wider text-[#afafaf] uppercase"
                             >
                                 <button
                                     className={`flex w-full items-center gap-1.5 ${alignment} ${

@@ -49,6 +49,7 @@ const NavLinks = ({ onNavigate }: { onNavigate?: () => void }) => {
                         key={item.href}
                         href={item.href}
                         onClick={onNavigate}
+                        aria-current={isActive ? "page" : undefined}
                         className={clsx(
                             "group relative flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-black transition-all",
                             isActive
@@ -84,7 +85,7 @@ const NavLinks = ({ onNavigate }: { onNavigate?: () => void }) => {
 const Footer = () => (
     <div className="p-4">
         <div className="rounded-2xl border-2 border-dashed border-gray-100 p-4">
-            <p className="text-[10px] font-black tracking-widest text-[#afafaf] uppercase">
+            <p className="text-xs font-black tracking-widest text-[#afafaf] uppercase">
                 Superadmin
             </p>
             <p className="mt-1 truncate text-xs font-bold text-[#3c3c3c]">Console Managed</p>

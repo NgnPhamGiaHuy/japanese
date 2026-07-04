@@ -1,7 +1,11 @@
 "use client";
 
+import { useId } from "react";
+
 import { AnimatePresence, motion } from "framer-motion";
 import { X } from "lucide-react";
+
+import { useDialogA11y } from "@/shared/hooks";
 
 import Button from "./Button";
 
@@ -41,10 +45,13 @@ const MAX_WIDTHS = {
  * </Modal>
  */
 const Modal = ({ isOpen, onClose, title, children, maxWidth = "md" }: ModalProps) => {
+    const titleId = useId();
+    const dialogRef = useDialogA11y<HTMLDivElement>(isOpen, onClose);
+
     return (
         <AnimatePresence>
             {isOpen && (
-                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6">
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
                     {/* Backdrop */}
                     <motion.div
                         initial={{ opacity: 0 }}
@@ -56,20 +63,28 @@ const Modal = ({ isOpen, onClose, title, children, maxWidth = "md" }: ModalProps
 
                     {/* Modal Content */}
                     <motion.div
+                        ref={dialogRef}
+                        role="dialog"
+                        aria-modal="true"
+                        aria-labelledby={title ? titleId : undefined}
+                        aria-label={title ? undefined : "Dialog"}
                         initial={{ opacity: 0, scale: 0.9, y: 20 }}
                         animate={{ opacity: 1, scale: 1, y: 0 }}
                         exit={{ opacity: 0, scale: 0.9, y: 20 }}
-                        className={`relative w-full ${MAX_WIDTHS[maxWidth]} flex max-h-[90vh] flex-col overflow-hidden rounded-[2.5rem] border-2 border-b-8 border-gray-200 bg-white shadow-2xl`}
+                        className={`relative w-full ${MAX_WIDTHS[maxWidth]} flex max-h-[90vh] flex-col overflow-hidden rounded-5xl border-2 border-b-8 border-gray-200 bg-white shadow-2xl`}
                     >
                         {/* Header */}
                         <div className="flex items-center justify-between border-b border-gray-100 p-6">
                             {title && (
-                                <h3 className="text-xl font-black text-[#3c3c3c]">{title}</h3>
+                                <h3 id={titleId} className="text-xl font-black text-[#3c3c3c]">
+                                    {title}
+                                </h3>
                             )}
                             <Button
                                 variant="ghost"
+                                size="icon"
                                 onClick={onClose}
-                                className="!h-10 !w-10 !rounded-full !p-0 shadow-none hover:!bg-black/5"
+                                className="rounded-full shadow-none hover:bg-black/5"
                                 icon={X}
                                 iconSize={20}
                             />

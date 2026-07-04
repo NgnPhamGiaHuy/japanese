@@ -225,7 +225,7 @@ export default function KanaHub() {
                                     Survival
                                 </span>
                                 {bestInfinity > 0 && (
-                                    <span className="absolute top-3 right-3 rounded-full bg-[#ff9600] px-2 py-0.5 text-[9px] font-black text-white shadow-sm md:text-[10px]">
+                                    <span className="absolute top-3 right-3 rounded-full bg-[#ff9600] px-2 py-0.5 text-xs font-black text-white shadow-sm md:text-xs">
                                         Inf: {bestInfinity}
                                     </span>
                                 )}

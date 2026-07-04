@@ -35,14 +35,14 @@ export function LearnProgress({
                 </div>
                 <div className="ml-auto flex shrink-0 items-center gap-2 sm:ml-0 md:gap-3">
                     <span
-                        className={`flex shrink-0 items-center gap-1 text-[10px] font-black md:text-sm ${themeColor.text}`}
+                        className={`flex shrink-0 items-center gap-1 text-xs font-black md:text-sm ${themeColor.text}`}
                     >
                         {currentIndex + 1} / {total}
                     </span>
                     <Button
                         variant="ghost"
                         onClick={onToggleRandom}
-                        className={`flex! shrink-0! items-center! gap-1! rounded-lg! border-2! px-2! py-1.5! text-[10px]! font-bold! shadow-none transition-all hover:shadow-none active:translate-y-0 md:rounded-xl! md:px-3! md:py-2! md:text-xs! ${
+                        className={`flex! shrink-0! items-center! gap-1! rounded-lg! border-2! px-2! py-1.5! text-xs! font-bold! shadow-none transition-all hover:shadow-none active:translate-y-0 md:rounded-xl! md:px-3! md:py-2! md:text-xs! ${
                             isRandom
                                 ? `${themeColor.primaryLightBg} ${themeColor.primaryBorder} ${themeColor.text} shadow-sm`
                                 : "border-gray-200! bg-white! text-gray-500! hover:bg-gray-50!"

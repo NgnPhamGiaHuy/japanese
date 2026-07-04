@@ -37,7 +37,7 @@ export function PracticeHeader({
                     <Button
                         variant="ghost"
                         onClick={onModeChange}
-                        className="flex! shrink-0! items-center! gap-1! rounded-lg! border-2! border-gray-200! bg-white! px-2! py-1.5! text-[10px]! font-bold! text-gray-500! shadow-none transition-all hover:bg-gray-50! hover:shadow-none active:translate-y-0 md:rounded-xl! md:px-3! md:py-2! md:text-xs!"
+                        className="flex! shrink-0! items-center! gap-1! rounded-lg! border-2! border-gray-200! bg-white! px-2! py-1.5! text-xs! font-bold! text-gray-500! shadow-none transition-all hover:bg-gray-50! hover:shadow-none active:translate-y-0 md:rounded-xl! md:px-3! md:py-2! md:text-xs!"
                         icon={ModeIcon}
                         iconSize={14}
                     >
@@ -46,7 +46,7 @@ export function PracticeHeader({
                     <Button
                         variant="ghost"
                         onClick={onRandomToggle}
-                        className={`flex! shrink-0! items-center! gap-1! rounded-lg! border-2! px-2! py-1.5! text-[10px]! font-bold! shadow-none transition-all hover:shadow-none active:translate-y-0 md:rounded-xl! md:px-3! md:py-2! md:text-xs! ${
+                        className={`flex! shrink-0! items-center! gap-1! rounded-lg! border-2! px-2! py-1.5! text-xs! font-bold! shadow-none transition-all hover:shadow-none active:translate-y-0 md:rounded-xl! md:px-3! md:py-2! md:text-xs! ${
                             isRandom
                                 ? `${themeColor.primaryLightBg}! ${themeColor.text}! ${themeColor.primaryBorder}! shadow-sm`
                                 : "border-gray-200! bg-white! text-gray-500! hover:bg-gray-50!"

@@ -81,7 +81,7 @@ const UserMobileRow = ({ row }: UserMobileRowProps) => {
                 <div className="mt-2 flex flex-wrap items-center gap-2">
                     <RoleCell user={user} />
                     {user.lastSeenAt && (
-                        <span className="text-[10px] font-bold text-[#1cb0f6]">
+                        <span className="text-xs font-bold text-[#1cb0f6]">
                             Active{" "}
                             {new Date(user.lastSeenAt).toLocaleDateString(undefined, {
                                 month: "short",

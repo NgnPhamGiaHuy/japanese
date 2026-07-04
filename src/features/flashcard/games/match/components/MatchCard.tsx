@@ -25,9 +25,9 @@ const MatchCard = ({ label, surface, disabled, onPress, tabIndex }: MatchCardPro
     let fontSizeClass = "text-sm sm:text-base leading-snug"; // Default
 
     if (len > 30) {
-        fontSizeClass = "text-[9px] sm:text-[10px] leading-[1.1]"; // Extremely long
+        fontSizeClass = "text-xs sm:text-xs leading-[1.1]"; // Extremely long
     } else if (len > 18) {
-        fontSizeClass = "text-[11px] sm:text-xs leading-tight"; // Long
+        fontSizeClass = "text-xs sm:text-xs leading-tight"; // Long
     } else if (len > 10) {
         fontSizeClass = "text-xs sm:text-sm leading-tight"; // Medium
     }

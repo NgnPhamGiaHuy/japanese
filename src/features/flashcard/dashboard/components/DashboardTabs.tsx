@@ -50,7 +50,7 @@ const DashboardTabs = ({
                         badge={
                             count > 0 && (
                                 <span
-                                    className={`inline-flex h-5 w-5 items-center justify-center rounded-full ${color} text-[10px] text-white`}
+                                    className={`inline-flex h-5 w-5 items-center justify-center rounded-full ${color} text-xs text-white`}
                                 >
                                     {count}
                                 </span>

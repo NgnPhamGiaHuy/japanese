@@ -95,7 +95,7 @@ const StreakComboBadge = ({
                     {streak}
                 </span>
                 <span
-                    className={`inline-flex min-w-6 justify-center rounded-md bg-white/20 px-0.5 py-0.5 text-[10px] font-black text-white tabular-nums md:min-w-8 md:px-1 md:text-xs lg:min-w-9 lg:text-sm ${
+                    className={`inline-flex min-w-6 justify-center rounded-md bg-white/20 px-0.5 py-0.5 text-xs font-black text-white tabular-nums md:min-w-8 md:px-1 md:text-xs lg:min-w-9 lg:text-sm ${
                         mult != null ? "" : "pointer-events-none invisible text-transparent"
                     }`}
                     aria-hidden={mult == null}

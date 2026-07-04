@@ -1,0 +1,12 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "japanese-app-dev",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["--prefix", "src", "run", "dev"],
+      "port": 3000,
+      "autoPort": true
+    }
+  ]
+}
