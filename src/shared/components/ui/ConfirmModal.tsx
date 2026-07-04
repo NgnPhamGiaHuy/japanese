@@ -6,7 +6,6 @@ import { AnimatePresence, motion } from "framer-motion";
 import { AlertTriangle, Info, Trash2, X } from "lucide-react";
 
 import { useDialogA11y } from "@/shared/hooks";
-
 import Button from "./Button";
 
 /** Supported visual variants for the confirmation modal. */
@@ -111,7 +110,7 @@ const ConfirmModal = ({
                         initial={{ opacity: 0, scale: 0.9, y: 20 }}
                         animate={{ opacity: 1, scale: 1, y: 0 }}
                         exit={{ opacity: 0, scale: 0.9, y: 20 }}
-                        className="relative w-full max-w-sm overflow-hidden rounded-5xl border-2 border-b-8 border-gray-200 bg-white shadow-2xl"
+                        className="rounded-5xl relative w-full max-w-sm overflow-hidden border-2 border-b-8 border-gray-200 bg-white shadow-2xl"
                     >
                         {/* Close button */}
                         <div className="absolute top-4 right-4 z-10">
@@ -136,10 +135,7 @@ const ConfirmModal = ({
 
                             {/* Text Header */}
                             <div className="text-center">
-                                <h3
-                                    id={titleId}
-                                    className="mb-2 text-xl font-black text-[#3c3c3c]"
-                                >
+                                <h3 id={titleId} className="mb-2 text-xl font-black text-[#3c3c3c]">
                                     {title}
                                 </h3>
                                 <p className="text-base leading-relaxed font-bold text-[#afafaf]">

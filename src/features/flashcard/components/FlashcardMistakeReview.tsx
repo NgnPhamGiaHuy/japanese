@@ -270,7 +270,7 @@ const FlashcardMistakeReview = ({
                 {mcChoices && mcChoices.length === 4 ? (
                     /* Recognition Mode: Select the meaning you missed previously */
                     <div className="flex w-full flex-col gap-5">
-                        <div className="flex w-full flex-col items-center justify-center rounded-5xl border-2 border-b-8 border-[#ea2b2b]/20 bg-white px-6 py-8 text-center shadow-sm">
+                        <div className="rounded-5xl flex w-full flex-col items-center justify-center border-2 border-b-8 border-[#ea2b2b]/20 bg-white px-6 py-8 text-center shadow-sm">
                             {headerHint && (
                                 <span className="mb-2 text-lg font-bold tracking-widest text-[#afafaf]">
                                     {headerHint}
@@ -357,7 +357,7 @@ const FlashcardMistakeReview = ({
                             }}
                         >
                             {/* Front (Recall Trigger) */}
-                            <div className="absolute inset-0 flex flex-col items-center justify-center rounded-5xl border-2 border-b-8 border-[#ea2b2b]/20 bg-white p-6 text-center shadow-sm backface-hidden hover:-translate-y-1 hover:shadow-md">
+                            <div className="rounded-5xl absolute inset-0 flex flex-col items-center justify-center border-2 border-b-8 border-[#ea2b2b]/20 bg-white p-6 text-center shadow-sm backface-hidden hover:-translate-y-1 hover:shadow-md">
                                 {headerHint && (
                                     <span className="mb-2 shrink-0 text-xl font-bold tracking-widest text-[#afafaf]">
                                         {headerHint}
@@ -379,7 +379,7 @@ const FlashcardMistakeReview = ({
                             </div>
 
                             {/* Back (Memory Encoding with AI Aid) */}
-                            <div className="absolute inset-0 flex rotate-y-180 flex-col items-center justify-center rounded-5xl border-2 border-b-8 border-[#ea2b2b]/20 bg-white p-6 text-center shadow-sm backface-hidden sm:p-8">
+                            <div className="rounded-5xl absolute inset-0 flex rotate-y-180 flex-col items-center justify-center border-2 border-b-8 border-[#ea2b2b]/20 bg-white p-6 text-center shadow-sm backface-hidden sm:p-8">
                                 <Button
                                     onClick={(e) => {
                                         e.stopPropagation();

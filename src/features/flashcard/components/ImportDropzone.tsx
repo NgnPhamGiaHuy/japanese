@@ -90,7 +90,7 @@ const ImportDropzone: React.FC<ImportDropzoneProps> = ({
     return (
         <div
             {...getRootProps()}
-            className={`group relative flex cursor-pointer flex-col items-center justify-center space-y-4 rounded-5xl border-4 border-dashed p-16 text-center transition-all ${
+            className={`group rounded-5xl relative flex cursor-pointer flex-col items-center justify-center space-y-4 border-4 border-dashed p-16 text-center transition-all ${
                 isDragActive
                     ? "scale-[1.01] border-[var(--theme-color)] bg-[var(--theme-color)]/5 ring-4 ring-[var(--theme-color)]/10"
                     : "border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50/50"
@@ -123,7 +123,7 @@ const ImportDropzone: React.FC<ImportDropzoneProps> = ({
 
             {/* Premium Glow Effect during drag */}
             {isDragActive && (
-                <div className="pointer-events-none absolute inset-0 -z-10 animate-pulse rounded-5xl bg-[var(--theme-color)]/5 blur-xl" />
+                <div className="rounded-5xl pointer-events-none absolute inset-0 -z-10 animate-pulse bg-[var(--theme-color)]/5 blur-xl" />
             )}
         </div>
     );

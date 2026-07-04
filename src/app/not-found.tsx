@@ -5,7 +5,7 @@ import { ArrowLeft, Ghost } from "lucide-react";
 export default function NotFoundPage() {
     return (
         <div className="flex min-h-[100dvh] flex-col items-center justify-center bg-[#F7F7F8] p-6 text-center">
-            <div className="mb-8 flex h-32 w-32 -rotate-6 transform items-center justify-center rounded-6xl border-b-8 border-gray-300 bg-gray-200 text-[#afafaf] shadow-sm">
+            <div className="rounded-6xl mb-8 flex h-32 w-32 -rotate-6 transform items-center justify-center border-b-8 border-gray-300 bg-gray-200 text-[#afafaf] shadow-sm">
                 <Ghost size={64} strokeWidth={2.5} />
             </div>
 

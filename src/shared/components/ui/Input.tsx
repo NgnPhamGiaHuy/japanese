@@ -44,7 +44,7 @@ const Input = ({
             <input
                 {...props}
                 className={cn(
-                    "w-full border-b-2 border-transparent bg-transparent pb-2 font-black text-[#3c3c3c] outline-none transition-colors placeholder:text-gray-300",
+                    "w-full border-b-2 border-transparent bg-transparent pb-2 font-black text-[#3c3c3c] transition-colors outline-none placeholder:text-gray-300",
                     "focus:border-[var(--theme-color,var(--color-katakana))]",
                     className,
                 )}
@@ -63,8 +63,8 @@ const Input = ({
             <input
                 {...props}
                 className={cn(
-                    "h-12 w-full rounded-2xl border-2 border-gray-100 bg-white text-sm font-black text-[#3c3c3c] outline-none transition-all placeholder:font-bold placeholder:text-muted",
-                    "focus:border-[var(--theme-color,var(--color-katakana))] focus:ring-4 focus:ring-katakana/5",
+                    "placeholder:text-muted h-12 w-full rounded-2xl border-2 border-gray-100 bg-white text-sm font-black text-[#3c3c3c] transition-all outline-none placeholder:font-bold",
+                    "focus:ring-katakana/5 focus:border-[var(--theme-color,var(--color-katakana))] focus:ring-4",
                     Icon ? "pr-4 pl-11" : "px-4",
                     className,
                 )}

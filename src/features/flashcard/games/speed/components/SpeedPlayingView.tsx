@@ -83,10 +83,7 @@ const SpeedPlayingView = ({
                     <span className="text-sm font-black text-[#3c3c3c]">
                         Q{ui.questionNumber} / {ui.totalQuestions}
                     </span>
-                    <span
-                        className="text-xs font-black"
-                        style={{ color: difficultyConfig.color }}
-                    >
+                    <span className="text-xs font-black" style={{ color: difficultyConfig.color }}>
                         {difficultyConfig.label}
                     </span>
                 </div>

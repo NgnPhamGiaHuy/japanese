@@ -177,7 +177,7 @@ const FlashcardLearn = ({
 
             <div className="mx-auto flex w-full max-w-md flex-1 flex-col items-center justify-center gap-6 p-4 sm:p-6">
                 {/* Card face */}
-                <div className="relative flex w-full flex-col items-center justify-center rounded-5xl border-2 border-b-8 border-gray-200 bg-white p-8 text-center shadow-sm">
+                <div className="rounded-5xl relative flex w-full flex-col items-center justify-center border-2 border-b-8 border-gray-200 bg-white p-8 text-center shadow-sm">
                     <Button
                         variant="ghost"
                         onClick={() => playAudio(getAudioText(card))}

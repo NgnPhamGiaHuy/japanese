@@ -120,7 +120,7 @@ const LessonBuilderImportPane: React.FC<LessonBuilderImportPaneProps> = ({
 
             {inputMode === "uploads" && (
                 <div className="space-y-6">
-                    <div className="relative overflow-hidden rounded-3xl border-2 border-gray-100 bg-gradient-to-br from-white to-gray-50/50 p-6 shadow-sm sm:rounded-5xl sm:p-8">
+                    <div className="sm:rounded-5xl relative overflow-hidden rounded-3xl border-2 border-gray-100 bg-gradient-to-br from-white to-gray-50/50 p-6 shadow-sm sm:p-8">
                         <div className="relative z-10 flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
                             <div className="space-y-2">
                                 <span

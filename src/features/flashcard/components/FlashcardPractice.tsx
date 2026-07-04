@@ -253,7 +253,7 @@ const FlashcardPractice = ({
                 {/* ── Multiple-choice (Recognition Mode) ── */}
                 {isMCMode ? (
                     <div className="flex w-full flex-col gap-5">
-                        <div className="relative flex w-full flex-col items-center justify-center rounded-5xl border-2 border-b-8 border-gray-200 bg-white px-6 py-8 text-center shadow-sm sm:rounded-6xl">
+                        <div className="rounded-5xl sm:rounded-6xl relative flex w-full flex-col items-center justify-center border-2 border-b-8 border-gray-200 bg-white px-6 py-8 text-center shadow-sm">
                             {card.hint && (
                                 <Button
                                     variant="ghost"
@@ -360,7 +360,7 @@ const FlashcardPractice = ({
                             }}
                         >
                             {/* Front Side */}
-                            <div className="absolute inset-0 flex flex-col items-center justify-center rounded-5xl border-2 border-b-8 border-gray-200 bg-white p-6 text-center shadow-sm backface-hidden hover:-translate-y-1 hover:shadow-md">
+                            <div className="rounded-5xl absolute inset-0 flex flex-col items-center justify-center border-2 border-b-8 border-gray-200 bg-white p-6 text-center shadow-sm backface-hidden hover:-translate-y-1 hover:shadow-md">
                                 {headerHint && (
                                     <span className="mb-2 shrink-0 text-xl font-bold tracking-widest text-[#afafaf]">
                                         {headerHint}
@@ -422,7 +422,7 @@ const FlashcardPractice = ({
                             </div>
 
                             {/* Back Side */}
-                            <div className="absolute inset-0 flex rotate-y-180 flex-col items-center justify-center rounded-5xl border-2 border-b-8 border-gray-200 bg-white p-6 text-center shadow-sm backface-hidden sm:rounded-6xl sm:p-8">
+                            <div className="rounded-5xl sm:rounded-6xl absolute inset-0 flex rotate-y-180 flex-col items-center justify-center border-2 border-b-8 border-gray-200 bg-white p-6 text-center shadow-sm backface-hidden sm:p-8">
                                 <Button
                                     variant="ghost"
                                     onClick={(e) => {

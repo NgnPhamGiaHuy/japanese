@@ -148,9 +148,7 @@ const CommentItem = ({
                         <span className="text-xs text-gray-400">
                             {relativeTime(comment.createdAt)}
                         </span>
-                        {isEdited && (
-                            <span className="text-xs text-gray-400 italic">(edited)</span>
-                        )}
+                        {isEdited && <span className="text-xs text-gray-400 italic">(edited)</span>}
                         {resolved && (
                             <span className="flex items-center gap-0.5 text-xs font-bold text-emerald-600">
                                 <CheckCircle size={11} />

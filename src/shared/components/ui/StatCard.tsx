@@ -60,7 +60,7 @@ const StatCard = ({
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: index * 0.05 }}
-            className="group relative overflow-hidden rounded-5xl border-2 border-gray-100 bg-white p-6 shadow-sm transition-all hover:border-[#1cb0f6]/30 hover:shadow-lg hover:shadow-[#1cb0f6]/5"
+            className="group rounded-5xl relative overflow-hidden border-2 border-gray-100 bg-white p-6 shadow-sm transition-all hover:border-[#1cb0f6]/30 hover:shadow-lg hover:shadow-[#1cb0f6]/5"
         >
             <div className="relative z-10 flex flex-col gap-4">
                 <div className="flex items-center justify-between">

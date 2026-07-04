@@ -200,9 +200,7 @@ const LogRow = ({ log }: LogRowProps) => {
                         >
                             {relative}
                         </time>
-                        <span className="block text-xs font-bold text-[#afafaf]">
-                            {absolute}
-                        </span>
+                        <span className="block text-xs font-bold text-[#afafaf]">{absolute}</span>
                     </div>
                     {hasDetail && (
                         <ChevronDown

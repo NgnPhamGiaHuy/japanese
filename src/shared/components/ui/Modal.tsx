@@ -6,7 +6,6 @@ import { AnimatePresence, motion } from "framer-motion";
 import { X } from "lucide-react";
 
 import { useDialogA11y } from "@/shared/hooks";
-
 import Button from "./Button";
 
 /** Attributes for rendering a Modal component. */
@@ -71,7 +70,7 @@ const Modal = ({ isOpen, onClose, title, children, maxWidth = "md" }: ModalProps
                         initial={{ opacity: 0, scale: 0.9, y: 20 }}
                         animate={{ opacity: 1, scale: 1, y: 0 }}
                         exit={{ opacity: 0, scale: 0.9, y: 20 }}
-                        className={`relative w-full ${MAX_WIDTHS[maxWidth]} flex max-h-[90vh] flex-col overflow-hidden rounded-5xl border-2 border-b-8 border-gray-200 bg-white shadow-2xl`}
+                        className={`relative w-full ${MAX_WIDTHS[maxWidth]} rounded-5xl flex max-h-[90vh] flex-col overflow-hidden border-2 border-b-8 border-gray-200 bg-white shadow-2xl`}
                     >
                         {/* Header */}
                         <div className="flex items-center justify-between border-b border-gray-100 p-6">

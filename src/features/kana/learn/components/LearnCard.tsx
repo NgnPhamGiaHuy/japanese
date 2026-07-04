@@ -19,7 +19,7 @@ export function LearnCard({ char, themeColor, onPlay }: LearnCardProps) {
     const isMulti = char.char.length > 1;
 
     return (
-        <div className="relative flex w-full flex-col items-center rounded-4xl border-2 border-b-8 border-gray-200 bg-white p-6 shadow-sm md:rounded-6xl md:p-10">
+        <div className="md:rounded-6xl relative flex w-full flex-col items-center rounded-4xl border-2 border-b-8 border-gray-200 bg-white p-6 shadow-sm md:p-10">
             <span className="absolute top-4 left-4 text-xs font-black tracking-widest text-gray-400 uppercase">
                 {char.group}
             </span>

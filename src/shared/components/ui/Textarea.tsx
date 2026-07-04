@@ -18,8 +18,8 @@ const Textarea = ({ className = "", ...props }: TextareaProps) => {
         <textarea
             {...props}
             className={cn(
-                "w-full rounded-2xl border-2 border-gray-100 bg-white px-4 py-3 text-sm font-black text-[#3c3c3c] outline-none transition-all placeholder:font-bold placeholder:text-muted",
-                "focus:border-[var(--theme-color,var(--color-katakana))] focus:ring-4 focus:ring-katakana/5",
+                "placeholder:text-muted w-full rounded-2xl border-2 border-gray-100 bg-white px-4 py-3 text-sm font-black text-[#3c3c3c] transition-all outline-none placeholder:font-bold",
+                "focus:ring-katakana/5 focus:border-[var(--theme-color,var(--color-katakana))] focus:ring-4",
                 className,
             )}
         />

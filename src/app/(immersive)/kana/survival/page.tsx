@@ -296,7 +296,7 @@ const KanaSurvivalPage = () => {
                     {question && (
                         <>
                             <div
-                                className={`mb-4 flex h-[180px] w-full items-center justify-center rounded-6xl border-2 border-b-8 border-gray-200 bg-white shadow-sm sm:h-[220px] ${status === "wrong" ? "animate-shake" : ""}`}
+                                className={`rounded-6xl mb-4 flex h-[180px] w-full items-center justify-center border-2 border-b-8 border-gray-200 bg-white shadow-sm sm:h-[220px] ${status === "wrong" ? "animate-shake" : ""}`}
                             >
                                 <span className="text-[7rem] leading-none font-medium text-[#3c3c3c] select-none sm:text-[8rem]">
                                     {question.char}

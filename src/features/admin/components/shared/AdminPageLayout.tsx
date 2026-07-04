@@ -14,9 +14,7 @@ interface AdminPageLayoutProps {
  */
 const AdminPageLayout = ({ children }: AdminPageLayoutProps) => {
     return (
-        <div className="mx-auto flex max-w-8xl flex-col gap-6 p-4 md:gap-8 md:p-10">
-            {children}
-        </div>
+        <div className="max-w-8xl mx-auto flex flex-col gap-6 p-4 md:gap-8 md:p-10">{children}</div>
     );
 };
 

@@ -12,9 +12,9 @@
  *   <h3>Card Content</h3>
  * </Card>
  */
-import type { ReactNode } from "react";
-
 import { cn } from "@/shared/utils";
+
+import type { ReactNode } from "react";
 
 /** Attributes for rendering a Card component. */
 interface CardProps {
