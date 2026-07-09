@@ -10,10 +10,10 @@
 
 import { useEffect, useRef } from "react";
 
-import { ArrowLeft, Volume2, X } from "lucide-react";
+import { ArrowLeft, X } from "lucide-react";
 
 import { gameQuizStreakColumnClassName, StreakComboBadge } from "@/features/game/components";
-import { AnswerFeedback } from "@/features/kana/components";
+import { AnswerFeedback, KanaAudioButton } from "@/features/kana/components";
 import { ScreenHeaderBackButton, ScreenHeaderRow } from "@/shared/components/layout";
 import { Button } from "@/shared/components/ui";
 import { playAudio } from "@/shared/utils";
@@ -97,14 +97,11 @@ export function QuizPlaying({
                     <div
                         className={`rounded-6xl relative mb-4 flex h-[200px] w-full flex-col items-center justify-center border-2 border-b-8 border-gray-200 bg-white px-4 py-8 shadow-sm sm:h-[240px] ${status === "wrong" ? "animate-shake" : ""}`}
                     >
-                        <Button
-                            variant="ghost"
-                            onClick={() => playAudio(question.char)}
-                            title={`Play ${question.char}`}
-                            className="absolute top-4 right-4 rounded-full! border-2! border-gray-100! bg-gray-50! p-2! shadow-none transition-transform hover:bg-gray-100! hover:shadow-none active:translate-y-0"
-                            icon={Volume2}
-                            iconSize={18}
-                            iconClassName={themeColor.text}
+                        <KanaAudioButton
+                            char={question.char}
+                            onPlay={() => playAudio(question.char)}
+                            iconColorClassName={themeColor.text}
+                            className="absolute top-4 right-4 bg-gray-50! hover:bg-gray-100!"
                         />
                         <span className="text-text text-[7rem] leading-none font-medium select-none sm:text-9xl">
                             {question.char}

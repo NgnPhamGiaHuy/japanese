@@ -13,7 +13,7 @@ import Link from "next/link";
 
 import { BookOpen, Copy, CopyPlus, Edit2, Globe2, Info, Loader2, Lock } from "lucide-react";
 
-import { Button } from "@/shared/components/ui";
+import ActionRow from "./ActionRow";
 
 import type { DetailActionsPanelProps } from "../types";
 
@@ -30,6 +30,7 @@ const DetailActionsPanel = ({
     const { lesson, role, isOwner } = ctx;
     const themeHex = lesson.themeColor || "#1cb0f6";
     const canEdit = role === "owner" || role === "editor";
+    const themedIconStyle = { backgroundColor: `${themeHex}15`, color: themeHex };
 
     if (isOwner) {
         const isShared = !!(lesson.shareId || lesson.allowLinkAccess || lesson.isPublic);
@@ -37,82 +38,50 @@ const DetailActionsPanel = ({
         return (
             <aside className="flex flex-col gap-4">
                 {onEdit && (
-                    <Button
-                        variant="ghost"
+                    <ActionRow
+                        icon={Edit2}
+                        iconWrapperStyle={themedIconStyle}
+                        title="Edit Deck"
+                        subtitle="Add, remove, or update cards"
                         onClick={onEdit}
-                        className="!flex !w-full !items-center !justify-start !gap-4 !rounded-2xl border-2 border-transparent !bg-white !px-4 !py-4 shadow-sm transition-all hover:!border-gray-200 active:translate-y-0"
-                    >
-                        <div
-                            className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl"
-                            style={{
-                                backgroundColor: `${themeHex}15`,
-                                color: themeHex,
-                            }}
-                        >
-                            <Edit2 size={22} />
-                        </div>
-                        <div className="text-left">
-                            <div className="text-text text-lg font-black">Edit Deck</div>
-                            <div className="text-muted text-sm font-bold">
-                                Add, remove, or update cards
-                            </div>
-                        </div>
-                    </Button>
+                    />
                 )}
 
                 {/* Share / Manage Access — always visible for owners */}
                 {onManageAccess && (
-                    <Button
-                        variant="ghost"
-                        onClick={onManageAccess}
-                        className="!flex !w-full !items-center !justify-start !gap-4 !rounded-2xl border-2 border-transparent !bg-white !px-4 !py-4 shadow-sm transition-all hover:!border-gray-200 active:translate-y-0"
-                    >
-                        <div
-                            className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl ${
-                                isShared ? "text-hiragana bg-[#ebf8e6]" : "bg-blue-50 text-blue-500"
-                            }`}
-                        >
-                            {isShared ? <Globe2 size={22} /> : <Lock size={22} />}
-                        </div>
-                        <div className="text-left">
-                            <div className="flex items-center gap-2">
-                                <span className="text-text text-lg font-black">
-                                    {isShared ? "Manage Access" : "Share Deck"}
-                                </span>
+                    <ActionRow
+                        icon={isShared ? Globe2 : Lock}
+                        iconWrapperClassName={
+                            isShared ? "text-hiragana bg-[#ebf8e6]" : "bg-blue-50 text-blue-500"
+                        }
+                        title={
+                            <span className="flex items-center gap-2">
+                                <span>{isShared ? "Manage Access" : "Share Deck"}</span>
                                 {isShared && (
                                     <span className="text-hiragana rounded-lg bg-[#ebf8e6] px-2 py-0.5 text-xs font-black tracking-wider uppercase">
                                         Public
                                     </span>
                                 )}
-                            </div>
-                            <div className="text-muted text-sm font-bold">
-                                {isShared
-                                    ? "Control who can view or comment"
-                                    : "Enable link sharing for this deck"}
-                            </div>
-                        </div>
-                    </Button>
+                            </span>
+                        }
+                        subtitle={
+                            isShared
+                                ? "Control who can view or comment"
+                                : "Enable link sharing for this deck"
+                        }
+                        onClick={onManageAccess}
+                    />
                 )}
 
                 {/* Copy link — only when sharing is active */}
                 {isShared && onCopyLink && (
-                    <Button
-                        variant="ghost"
+                    <ActionRow
+                        icon={Copy}
+                        iconWrapperClassName="bg-gray-100 text-gray-600"
+                        title={linkCopied ? "Link Copied!" : "Copy Share Link"}
+                        subtitle="Share this deck with others"
                         onClick={onCopyLink}
-                        className="!flex !w-full !items-center !justify-start !gap-4 !rounded-2xl border-2 border-transparent !bg-white !px-4 !py-4 shadow-sm transition-all hover:!border-gray-200 active:translate-y-0"
-                    >
-                        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gray-100 text-gray-600">
-                            <Copy size={22} />
-                        </div>
-                        <div className="text-left">
-                            <div className="text-text text-lg font-black">
-                                {linkCopied ? "Link Copied!" : "Copy Share Link"}
-                            </div>
-                            <div className="text-muted text-sm font-bold">
-                                Share this deck with others
-                            </div>
-                        </div>
-                    </Button>
+                    />
                 )}
             </aside>
         );
@@ -187,87 +156,42 @@ const DetailActionsPanel = ({
             {/* Shared user actions */}
             <div className="flex flex-col gap-3">
                 {canEdit && onEdit && (
-                    <Button
-                        variant="ghost"
+                    <ActionRow
+                        icon={Edit2}
+                        iconWrapperStyle={themedIconStyle}
+                        title="Edit Deck Content"
+                        subtitle="Modify for all users"
                         onClick={onEdit}
-                        className="!flex !w-full !items-center !justify-start !gap-4 !rounded-2xl border-2 border-transparent !bg-white !px-4 !py-4 shadow-sm transition-all hover:!border-gray-200 active:translate-y-0"
-                    >
-                        <div
-                            className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl"
-                            style={{
-                                backgroundColor: `${themeHex}15`,
-                                color: themeHex,
-                            }}
-                        >
-                            <Edit2 size={22} />
-                        </div>
-                        <div className="text-left">
-                            <div className="text-text text-lg font-black">Edit Deck Content</div>
-                            <div className="text-muted text-sm font-bold">Modify for all users</div>
-                        </div>
-                    </Button>
+                    />
                 )}
                 {onDuplicate ? (
-                    <Button
-                        variant="ghost"
+                    <ActionRow
+                        icon={saving ? Loader2 : CopyPlus}
+                        iconClassName={saving ? "animate-spin" : undefined}
+                        iconWrapperClassName="bg-gray-100 text-gray-600"
+                        title={saving ? "Duplicating..." : "Duplicate Deck"}
+                        subtitle="Save a copy to your collection"
                         onClick={onDuplicate}
                         disabled={saving}
-                        className="!flex !w-full !items-center !justify-start !gap-4 !rounded-2xl border-2 border-transparent !bg-white !px-4 !py-4 shadow-sm transition-all hover:!border-gray-200 active:translate-y-0 disabled:opacity-50"
-                    >
-                        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gray-100 text-gray-600">
-                            {saving ? (
-                                <Loader2 size={22} className="animate-spin" />
-                            ) : (
-                                <CopyPlus size={22} />
-                            )}
-                        </div>
-                        <div className="text-left">
-                            <div className="text-text text-lg font-black">
-                                {saving ? "Duplicating..." : "Duplicate Deck"}
-                            </div>
-                            <div className="text-muted text-sm font-bold">
-                                Save a copy to your collection
-                            </div>
-                        </div>
-                    </Button>
+                    />
                 ) : !currentUserId ? (
                     <Link href="/login" className="w-full">
-                        <Button
-                            variant="ghost"
-                            className="!flex !w-full !items-center !justify-start !gap-4 !rounded-2xl border-2 border-transparent !bg-white !px-4 !py-4 shadow-sm transition-all hover:!border-gray-200 active:translate-y-0"
-                        >
-                            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gray-100 text-gray-600">
-                                <CopyPlus size={22} />
-                            </div>
-                            <div className="text-left">
-                                <div className="text-text text-lg font-black">
-                                    Log in to Duplicate
-                                </div>
-                                <div className="text-muted text-sm font-bold">
-                                    Sign in to save this deck
-                                </div>
-                            </div>
-                        </Button>
+                        <ActionRow
+                            icon={CopyPlus}
+                            iconWrapperClassName="bg-gray-100 text-gray-600"
+                            title="Log in to Duplicate"
+                            subtitle="Sign in to save this deck"
+                        />
                     </Link>
                 ) : null}
                 {onCopyLink && (
-                    <Button
-                        variant="ghost"
+                    <ActionRow
+                        icon={Copy}
+                        iconWrapperClassName="bg-gray-100 text-gray-600"
+                        title={linkCopied ? "Link Copied!" : "Copy Share Link"}
+                        subtitle="Share this deck with others"
                         onClick={onCopyLink}
-                        className="!flex !w-full !items-center !justify-start !gap-4 !rounded-2xl border-2 border-transparent !bg-white !px-4 !py-4 shadow-sm transition-all hover:!border-gray-200 active:translate-y-0"
-                    >
-                        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gray-100 text-gray-600">
-                            <Copy size={22} />
-                        </div>
-                        <div className="text-left">
-                            <div className="text-text text-lg font-black">
-                                {linkCopied ? "Link Copied!" : "Copy Share Link"}
-                            </div>
-                            <div className="text-muted text-sm font-bold">
-                                Share this deck with others
-                            </div>
-                        </div>
-                    </Button>
+                    />
                 )}
             </div>
         </aside>

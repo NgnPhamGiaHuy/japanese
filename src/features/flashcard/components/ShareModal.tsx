@@ -2,25 +2,22 @@
 
 import { useEffect, useId, useMemo, useState } from "react";
 
-import { Check, ChevronDown, Copy, Mail, ShieldAlert, X } from "lucide-react";
+import { Check, Copy, ShieldAlert, X } from "lucide-react";
 
-import { buildShareId, inviteByEmail, revokeEmailInvite } from "@/features/flashcard/services";
-import { ROLE_CONFIG, sanitizePublicRole } from "@/features/flashcard/utils/rbac";
-import {
-    resolveVisibilityColor,
-    VISIBILITY_MAPPINGS,
-    VisibilityLevel,
-} from "@/features/flashcard/utils/visibility";
+import { buildShareId } from "@/features/flashcard/services";
+import { sanitizePublicRole } from "@/features/flashcard/utils/rbac";
 import { useAppStore } from "@/lib/app-store";
 import { ActivityAction } from "@/lib/logging/actions.enum";
 import { enqueueClientLog } from "@/lib/logging/browser";
-import { Button, Input, Select } from "@/shared/components/ui";
-import { useDialogA11y } from "@/shared/hooks";
+import { Button } from "@/shared/components/ui";
+import { useCopyToClipboard, useDialogA11y } from "@/shared/hooks";
 import { useAlert } from "@/shared/providers";
 import { hexToThemeColor } from "@/shared/utils";
+import ShareCollaboratorsPanel from "./ShareCollaboratorsPanel";
+import SharePrivacyPicker from "./SharePrivacyPicker";
+import { useShareInvites } from "../hooks";
 
 import type { DeckAccessRole } from "@/features/flashcard/types";
-import type { SelectOption } from "@/shared/components/ui";
 import type { Lesson } from "../types";
 
 /**
@@ -45,47 +42,7 @@ export type Role = DeckAccessRole;
  * - link: anyone with the share link (not discoverable)
  * - public: fully public, discoverable without a link
  */
-type PrivacyMode = "restricted" | "link" | "public";
-
-const sharingOptions: SelectOption<Role>[] = [
-    {
-        value: "viewer",
-        label: ROLE_CONFIG.viewer.label,
-        icon: ROLE_CONFIG.viewer.icon,
-        color: ROLE_CONFIG.viewer.color,
-    },
-    {
-        value: "commenter",
-        label: ROLE_CONFIG.commenter.label,
-        icon: ROLE_CONFIG.commenter.icon,
-        color: ROLE_CONFIG.commenter.color,
-    },
-    {
-        value: "editor",
-        label: ROLE_CONFIG.editor.label,
-        icon: ROLE_CONFIG.editor.icon,
-        color: ROLE_CONFIG.editor.color,
-    },
-];
-
-/**
- * Options for the public/link "Default role" picker.
- * Editor is intentionally excluded — public access is capped at commenter.
- */
-const publicRoleOptions: SelectOption<"viewer" | "commenter">[] = [
-    {
-        value: "viewer",
-        label: ROLE_CONFIG.viewer.label,
-        icon: ROLE_CONFIG.viewer.icon,
-        color: ROLE_CONFIG.viewer.color,
-    },
-    {
-        value: "commenter",
-        label: ROLE_CONFIG.commenter.label,
-        icon: ROLE_CONFIG.commenter.icon,
-        color: ROLE_CONFIG.commenter.color,
-    },
-];
+export type PrivacyMode = "restricted" | "link" | "public";
 
 interface ShareModalProps {
     /** The deck being shared */
@@ -168,9 +125,6 @@ const ShareModal = ({ lesson, onShareLink, onUpdateRoles, onClose }: ShareModalP
     const isPublicMode = privacyMode === "public";
 
     const [roles, setRoles] = useState<Record<string, Role>>(lesson.roles || {});
-    const [inviteEmail, setInviteEmail] = useState("");
-    const [inviteRole, setInviteRole] = useState<Role>("viewer");
-    const [inviteError, setInviteError] = useState<string | null>(null);
 
     // Sync when the lesson prop changes (for real-time consistency)
     useEffect(() => {
@@ -183,8 +137,19 @@ const ShareModal = ({ lesson, onShareLink, onUpdateRoles, onClose }: ShareModalP
 
     // ── UI state ──────────────────────────────────────────────────────
     const [openPrivacyMenu, setOpenPrivacyMenu] = useState(false);
-    const [copied, setCopied] = useState(false);
+    const { copied, copy: copyLink } = useCopyToClipboard();
     const [saving, setSaving] = useState(false);
+
+    const {
+        inviteEmail,
+        setInviteEmail,
+        inviteRole,
+        setInviteRole,
+        inviteError,
+        setInviteError,
+        handleInvite,
+        handleRevokeEmailInvite,
+    } = useShareInvites({ lesson, setSaving });
 
     const titleId = useId();
     // Escape closes the privacy dropdown first if it's open, otherwise the whole modal —
@@ -199,10 +164,8 @@ const ShareModal = ({ lesson, onShareLink, onUpdateRoles, onClose }: ShareModalP
 
     const handleCopy = async () => {
         if (!shareLink) return;
-        await navigator.clipboard.writeText(shareLink);
-        setCopied(true);
+        await copyLink(shareLink);
         showAlert("success", "Link copied to clipboard");
-        setTimeout(() => setCopied(false), 2000);
     };
 
     /** Handles privacy mode change — persists to Firestore immediately. */
@@ -275,62 +238,6 @@ const ShareModal = ({ lesson, onShareLink, onUpdateRoles, onClose }: ShareModalP
         }
     };
 
-    const handleInvite = async () => {
-        if (!inviteEmail.trim()) return;
-        const email = inviteEmail.trim().toLowerCase();
-
-        // Basic email validation
-        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-            setInviteError("Please enter a valid email address.");
-            return;
-        }
-
-        // Don't invite the owner
-        if (email === user?.email?.toLowerCase()) {
-            setInviteError("You can't invite yourself.");
-            return;
-        }
-
-        setInviteError(null);
-        setSaving(true);
-        try {
-            const ownerId = lesson.ownerId ?? lesson.userId;
-            if (!ownerId) return;
-            await inviteByEmail(
-                ownerId,
-                lesson.id,
-                email,
-                inviteRole as "viewer" | "commenter" | "editor",
-                user?.displayName,
-                user?.photoURL ?? null,
-                lesson.title,
-            );
-            setInviteEmail("");
-            showAlert("success", `Invitation sent to ${email}`);
-        } catch (err) {
-            console.error("[ShareModal] handleInvite failed:", err);
-            setInviteError("Failed to send invite. Please try again.");
-            showAlert("error", "Invitation failed");
-        } finally {
-            setSaving(false);
-        }
-    };
-
-    const handleRevokeEmailInvite = async (email: string) => {
-        const ownerId = lesson.ownerId ?? lesson.userId;
-        if (!ownerId) return;
-        setSaving(true);
-        try {
-            await revokeEmailInvite(ownerId, lesson.id, email);
-            showAlert("success", "Invitation revoked");
-        } catch (err) {
-            console.error("[ShareModal] handleRevokeEmailInvite failed:", err);
-            showAlert("error", "Failed to revoke invitation");
-        } finally {
-            setSaving(false);
-        }
-    };
-
     const handleUpdateUserRole = async (targetId: string, newRole: Role) => {
         if (roles[targetId] === "owner" || targetId === user?.uid) return;
         const newRoles = { ...roles, [targetId]: newRole };
@@ -372,338 +279,38 @@ const ShareModal = ({ lesson, onShareLink, onUpdateRoles, onClose }: ShareModalP
                     {/* ── Role specific views ──────────────────────────────────────── */}
                     {canManageRoles ? (
                         <>
-                            {/* Invite Input */}
-                            <div className="mb-6">
-                                <div className="flex items-center gap-2">
-                                    <Input
-                                        type="email"
-                                        variant="default"
-                                        placeholder="Invite by email address"
-                                        value={inviteEmail}
-                                        onChange={(e) => {
-                                            setInviteEmail(e.target.value);
-                                            setInviteError(null);
-                                        }}
-                                        onKeyDown={(e) => {
-                                            if (e.key === "Enter") void handleInvite();
-                                        }}
-                                        disabled={saving}
-                                        containerClassName="flex-1"
-                                    />
-                                    <Select
-                                        value={inviteRole}
-                                        options={sharingOptions}
-                                        onChange={(r) => setInviteRole(r)}
-                                        disabled={saving}
-                                        themeHex={themeHex}
-                                        align="right"
-                                    />
-                                    <Button
-                                        onClick={handleInvite}
-                                        disabled={!inviteEmail.trim() || saving}
-                                        variant="primary"
-                                        color="blue"
-                                        className="h-12 px-6"
-                                    >
-                                        Invite
-                                    </Button>
-                                </div>
-                                {inviteError && (
-                                    <p className="mt-1.5 text-xs font-bold text-red-500">
-                                        {inviteError}
-                                    </p>
-                                )}
-                            </div>
+                            <ShareCollaboratorsPanel
+                                lesson={lesson}
+                                roles={roles}
+                                saving={saving}
+                                themeHex={themeHex}
+                                inviteEmail={inviteEmail}
+                                inviteRole={inviteRole}
+                                inviteError={inviteError}
+                                onInviteEmailChange={(value) => {
+                                    setInviteEmail(value);
+                                    setInviteError(null);
+                                }}
+                                onInviteRoleChange={setInviteRole}
+                                onInvite={() => void handleInvite()}
+                                onRevokeInvite={(email) => void handleRevokeEmailInvite(email)}
+                                onUpdateUserRole={(targetId, newRole) =>
+                                    void handleUpdateUserRole(targetId, newRole)
+                                }
+                                onRemoveUser={(targetId) => void handleRemoveUser(targetId)}
+                            />
 
-                            {/* Collaborators List */}
-                            <div className="mb-6">
-                                <h3 className="text-text mb-3 text-xs font-black tracking-widest uppercase">
-                                    People with access
-                                </h3>
-                                <div className="flex flex-col gap-2">
-                                    {Object.entries(roles).map(([uid, r]) => {
-                                        const meta = lesson.collaboratorMeta?.[uid];
-                                        const isCurrentUser = uid === user?.uid;
-                                        const displayName = isCurrentUser
-                                            ? "You"
-                                            : meta?.displayName ||
-                                              meta?.email?.split("@")[0] ||
-                                              `User ${uid.substring(0, 6)}`;
-                                        const displayEmail = isCurrentUser
-                                            ? user?.email || ""
-                                            : meta?.email || "";
-                                        const initial = isCurrentUser
-                                            ? (
-                                                  user?.displayName?.[0] ??
-                                                  user?.email?.[0] ??
-                                                  "Y"
-                                              ).toUpperCase()
-                                            : (
-                                                  meta?.displayName?.[0] ??
-                                                  meta?.email?.[0] ??
-                                                  uid[0]
-                                              ).toUpperCase();
-
-                                        return (
-                                            <div
-                                                key={uid}
-                                                className="flex items-center justify-between rounded-xl px-2 py-2 transition-colors hover:bg-gray-50"
-                                            >
-                                                <div className="flex items-center gap-3">
-                                                    <div className="relative">
-                                                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gray-200 font-bold text-gray-500">
-                                                            {initial}
-                                                        </div>
-                                                        <div
-                                                            className="absolute -right-1 -bottom-1 flex h-4 w-4 items-center justify-center rounded-full border-2 border-white text-[8px] text-white"
-                                                            style={{
-                                                                backgroundColor:
-                                                                    ROLE_CONFIG[r].color,
-                                                            }}
-                                                        >
-                                                            {(() => {
-                                                                const RoleIcon =
-                                                                    ROLE_CONFIG[r].icon;
-                                                                return <RoleIcon size={8} />;
-                                                            })()}
-                                                        </div>
-                                                    </div>
-                                                    <div>
-                                                        <div className="text-text font-black">
-                                                            {displayName}
-                                                        </div>
-                                                        {displayEmail && (
-                                                            <div className="text-xs font-bold text-gray-400">
-                                                                {displayEmail}
-                                                            </div>
-                                                        )}
-                                                    </div>
-                                                </div>
-
-                                                <Select
-                                                    value={r}
-                                                    options={sharingOptions}
-                                                    onChange={(newRole) =>
-                                                        handleUpdateUserRole(uid, newRole)
-                                                    }
-                                                    onRemove={
-                                                        r !== "owner" && uid !== user?.uid
-                                                            ? () => handleRemoveUser(uid)
-                                                            : undefined
-                                                    }
-                                                    removeLabel="Remove access"
-                                                    disabled={saving || r === "owner"}
-                                                    themeHex={themeHex}
-                                                    variant="compact"
-                                                />
-                                            </div>
-                                        );
-                                    })}
-                                </div>
-
-                                {/* Pending email invites */}
-                                {lesson.invitedEmails &&
-                                    Object.keys(lesson.invitedEmails).length > 0 && (
-                                        <div className="mt-4">
-                                            <h4 className="mb-2 text-xs font-black tracking-wider text-gray-400 uppercase">
-                                                Pending invites
-                                            </h4>
-                                            <div className="flex flex-col gap-2">
-                                                {Object.entries(lesson.invitedEmails).map(
-                                                    ([email, invite]) => (
-                                                        <div
-                                                            key={email}
-                                                            className="flex items-center justify-between rounded-xl px-2 py-2 transition-colors hover:bg-gray-50"
-                                                        >
-                                                            <div className="flex items-center gap-3">
-                                                                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-amber-100 text-amber-600">
-                                                                    <Mail size={18} />
-                                                                </div>
-                                                                <div>
-                                                                    <div className="text-text font-black">
-                                                                        {email}
-                                                                    </div>
-                                                                    <div className="text-xs font-bold text-amber-500">
-                                                                        Invite pending ·{" "}
-                                                                        {invite.role}
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                            <Button
-                                                                variant="ghost"
-                                                                onClick={() =>
-                                                                    void handleRevokeEmailInvite(
-                                                                        email,
-                                                                    )
-                                                                }
-                                                                disabled={saving}
-                                                                className="!p-1 !text-xs !font-bold text-gray-400 transition-colors hover:bg-red-50 hover:text-red-500"
-                                                            >
-                                                                Revoke
-                                                            </Button>
-                                                        </div>
-                                                    ),
-                                                )}
-                                            </div>
-                                        </div>
-                                    )}
-                            </div>
-
-                            <h3 className="text-text mb-4 border-t-2 border-gray-100 pt-6 text-xs font-black tracking-wider uppercase">
-                                General access
-                            </h3>
-
-                            <div className="mb-6 flex flex-col gap-4 rounded-2xl border-2 border-gray-100 p-4">
-                                <div className="flex items-start gap-4">
-                                    <div className="mt-1 flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gray-100">
-                                        {(() => {
-                                            const v =
-                                                VISIBILITY_MAPPINGS[
-                                                    privacyMode === "public"
-                                                        ? VisibilityLevel.PUBLIC
-                                                        : privacyMode === "link"
-                                                          ? VisibilityLevel.SHARED
-                                                          : VisibilityLevel.PRIVATE
-                                                ];
-                                            const Icon = v.icon;
-                                            return (
-                                                <Icon
-                                                    style={{
-                                                        color: resolveVisibilityColor(v, themeHex),
-                                                    }}
-                                                    size={20}
-                                                />
-                                            );
-                                        })()}
-                                    </div>
-
-                                    <div className="relative flex-1">
-                                        {/* Privacy picker */}
-                                        <Button
-                                            variant="ghost"
-                                            className="text-text flex w-fit items-center gap-2 !py-1 !pr-2 !text-lg !font-black hover:bg-gray-100"
-                                            onClick={() => setOpenPrivacyMenu((v) => !v)}
-                                            disabled={saving}
-                                        >
-                                            {
-                                                VISIBILITY_MAPPINGS[
-                                                    privacyMode === "public"
-                                                        ? VisibilityLevel.PUBLIC
-                                                        : privacyMode === "link"
-                                                          ? VisibilityLevel.SHARED
-                                                          : VisibilityLevel.PRIVATE
-                                                ].label
-                                            }
-                                            <ChevronDown
-                                                size={20}
-                                                className={`text-gray-400 transition-transform ${openPrivacyMenu ? "rotate-180" : ""}`}
-                                            />
-                                        </Button>
-
-                                        {openPrivacyMenu && (
-                                            <>
-                                                <div
-                                                    className="fixed inset-0 z-40"
-                                                    onClick={() => setOpenPrivacyMenu(false)}
-                                                />
-                                                <div className="animate-in fade-in zoom-in-95 absolute top-10 left-0 z-50 w-72 overflow-hidden rounded-2xl border-2 border-gray-100 bg-white shadow-lg">
-                                                    {(
-                                                        ["restricted", "link", "public"] as const
-                                                    ).map((mode) => {
-                                                        const level =
-                                                            mode === "public"
-                                                                ? VisibilityLevel.PUBLIC
-                                                                : mode === "link"
-                                                                  ? VisibilityLevel.SHARED
-                                                                  : VisibilityLevel.PRIVATE;
-                                                        const v = VISIBILITY_MAPPINGS[level];
-                                                        const Icon = v.icon;
-                                                        const isSelected = privacyMode === mode;
-
-                                                        return (
-                                                            <Button
-                                                                key={mode}
-                                                                variant="ghost"
-                                                                className="flex w-full items-center !justify-start gap-3 !rounded-none border-b-2 border-gray-50 !p-4 !text-left shadow-none hover:bg-gray-50 hover:shadow-none"
-                                                                onClick={() => {
-                                                                    void handleSavePrivacyMode(
-                                                                        mode,
-                                                                    );
-                                                                    setOpenPrivacyMenu(false);
-                                                                }}
-                                                            >
-                                                                <Icon
-                                                                    className="shrink-0"
-                                                                    style={{
-                                                                        color: resolveVisibilityColor(
-                                                                            v,
-                                                                            themeHex,
-                                                                        ),
-                                                                    }}
-                                                                    size={20}
-                                                                />
-                                                                <div className="flex-1 text-left">
-                                                                    <div className="text-text font-black">
-                                                                        {v.label}
-                                                                    </div>
-                                                                    <div className="text-xs font-bold text-gray-400">
-                                                                        {v.description}
-                                                                    </div>
-                                                                </div>
-                                                                {isSelected && (
-                                                                    <Check
-                                                                        style={{
-                                                                            color: resolveVisibilityColor(
-                                                                                v,
-                                                                                themeHex,
-                                                                            ),
-                                                                        }}
-                                                                        size={20}
-                                                                        className="shrink-0"
-                                                                    />
-                                                                )}
-                                                            </Button>
-                                                        );
-                                                    })}
-                                                </div>
-                                            </>
-                                        )}
-
-                                        <p className="text-muted mt-1 text-sm font-bold">
-                                            {
-                                                VISIBILITY_MAPPINGS[
-                                                    privacyMode === "public"
-                                                        ? VisibilityLevel.PUBLIC
-                                                        : privacyMode === "link"
-                                                          ? VisibilityLevel.SHARED
-                                                          : VisibilityLevel.PRIVATE
-                                                ].description
-                                            }
-                                        </p>
-                                    </div>
-                                </div>
-
-                                {/* Role picker — shown for link and public modes, capped at commenter */}
-                                {privacyMode !== "restricted" && (
-                                    <div className="relative ml-14 flex items-center justify-between border-t-2 border-gray-100 pt-3">
-                                        <span className="text-sm font-bold text-gray-400">
-                                            Default role
-                                        </span>
-                                        <Select
-                                            value={publicRole || "viewer"}
-                                            options={publicRoleOptions}
-                                            onChange={(r) =>
-                                                void handleSavePublicRole(
-                                                    r as "viewer" | "commenter",
-                                                )
-                                            }
-                                            disabled={saving}
-                                            themeHex={themeHex}
-                                            align="right"
-                                        />
-                                    </div>
-                                )}
-                            </div>
+                            <SharePrivacyPicker
+                                privacyMode={privacyMode}
+                                publicRole={publicRole}
+                                saving={saving}
+                                themeHex={themeHex}
+                                openPrivacyMenu={openPrivacyMenu}
+                                onTogglePrivacyMenu={() => setOpenPrivacyMenu((v) => !v)}
+                                onClosePrivacyMenu={() => setOpenPrivacyMenu(false)}
+                                onChangePrivacyMode={(mode) => void handleSavePrivacyMode(mode)}
+                                onChangePublicRole={(role) => void handleSavePublicRole(role)}
+                            />
                         </>
                     ) : (
                         /* ── Rest of users view ─────────────────────────── */

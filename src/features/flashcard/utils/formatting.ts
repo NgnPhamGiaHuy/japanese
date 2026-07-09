@@ -5,7 +5,6 @@
  */
 
 export const ALTERNATIVE_SEPARATOR = " / ";
-export const COLUMN_SEPARATOR = ",";
 
 /**
  * Normalizes and splits a string of alternatives into an array.

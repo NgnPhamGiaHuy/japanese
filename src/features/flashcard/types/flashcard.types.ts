@@ -260,12 +260,6 @@ export type SharedLessonViewModel = Readonly<
 >;
 
 /**
- * Deep-readonly projection of FlashCard for shared contexts.
- * SRS fields are present as read-only snapshots; no writes are permitted.
- */
-export type SharedCardViewModel = Readonly<FlashCard>;
-
-/**
  * Canonical role type for deck access control.
  * Single source of truth — import from here, not from individual utility files.
  *

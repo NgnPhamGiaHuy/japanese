@@ -23,10 +23,10 @@ import {
 } from "firebase/firestore";
 
 import { APP_ID, auth, db } from "@/lib/firebase";
-import { logNotificationsDelivered } from "./actions";
+import { logNotificationsDelivered } from "../actions";
 
 import type { Unsubscribe } from "firebase/firestore";
-import type { AppNotification, NotificationData, NotificationType } from "./types";
+import type { AppNotification, NotificationData, NotificationType } from "../types";
 
 // ─── Path helpers ─────────────────────────────────────────────────────────────
 

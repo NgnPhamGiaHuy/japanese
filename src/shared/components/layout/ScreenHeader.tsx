@@ -10,7 +10,7 @@ import { cn } from "@/shared/utils";
 
 import type { LucideIcon } from "lucide-react";
 
-export const SCREEN_HEADER_BAR_CLASS =
+const SCREEN_HEADER_BAR_CLASS =
     "sticky top-0 bg-white/90 backdrop-blur-md z-40 border-b-2 border-gray-200";
 
 /** Sticky offset for content that needs to sit flush beneath the header (e.g. a secondary sticky bar). */
@@ -19,7 +19,7 @@ export const SCREEN_HEADER_HEIGHT_CLASS = "top-16";
 export const SCREEN_HEADER_BACK_BUTTON_CLASS =
     "flex items-center justify-center w-10 h-10 shrink-0 rounded-xl text-muted hover:text-text hover:bg-gray-100 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-katakana focus-visible:ring-offset-2";
 
-export const ScreenHeaderBackLink = ({
+const ScreenHeaderBackLink = ({
     href,
     "aria-label": ariaLabel = "Go back",
 }: {

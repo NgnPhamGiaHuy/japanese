@@ -2,11 +2,12 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useMemo } from "react";
 
 import { Bell, BookOpen, Gamepad2, Shield } from "lucide-react";
 
 import { useAdminRole } from "@/features/admin/context/AdminContext";
-import { useNotifications } from "@/features/notifications/NotificationsContext";
+import { useNotifications } from "@/features/notifications/context/NotificationsContext";
 import { useAppStore } from "@/lib/app-store";
 import { UserAvatar } from "@/shared/components/ui";
 
@@ -100,7 +101,10 @@ export const BottomNav = () => {
     const { user } = useAppStore();
     const { unreadCount } = useNotifications();
     const { role } = useAdminRole();
-    const ROUTES = buildRoutes(unreadCount, user?.photoURL, !!role);
+    const ROUTES = useMemo(
+        () => buildRoutes(unreadCount, user?.photoURL, !!role),
+        [unreadCount, user?.photoURL, role],
+    );
 
     const isActive = (href: string) => {
         if (href === "/") return pathname === "/";

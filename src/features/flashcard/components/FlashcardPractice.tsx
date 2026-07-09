@@ -8,11 +8,15 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 
-import { Check, Lightbulb, RefreshCw, Volume2, X } from "lucide-react";
+import { Check, Lightbulb, RefreshCw, X } from "lucide-react";
 
+import { StatGrid } from "@/features/game/components";
 import { useAppStore } from "@/lib/app-store";
-import { Button } from "@/shared/components/ui";
+import { Button, EmptyState } from "@/shared/components/ui";
 import { hexToThemeColor, playAudio, playSFX, shuffleArray } from "@/shared/utils";
+import FlashcardAudioButton from "./FlashcardAudioButton";
+import GradeButtons from "./GradeButtons";
+import McChoiceGrid from "./McChoiceGrid";
 import { getDailyProgress, gradeCard } from "../services";
 import { getAudioText, reinsertCard, resolveCardFaces } from "../utils";
 
@@ -122,18 +126,21 @@ const FlashcardPractice = ({
 
     if (cards.length === 0) {
         return (
-            <div className="bg-bg flex h-screen flex-col items-center justify-center p-6 text-center">
-                <div className="mb-6 flex h-24 w-24 items-center justify-center rounded-4xl border-b-8 border-gray-200 bg-white text-gray-400 shadow-sm">
-                    <Check size={48} strokeWidth={3} />
-                </div>
-                <h2 className="text-text mb-2 text-2xl font-black">All caught up!</h2>
-                <p className="text-muted mb-8 font-bold">
-                    No cards are due for practice right now.
-                </p>
-                <Button onClick={onClose} variant="secondary" className="px-8 py-3">
-                    Go Back
-                </Button>
-            </div>
+            <EmptyState
+                fullScreen
+                rotateIcon={false}
+                icon={Check}
+                iconBg="bg-white"
+                iconBorder="border-gray-200"
+                iconTextColor="text-gray-400"
+                title="All caught up!"
+                description="No cards are due for practice right now."
+                action={
+                    <Button onClick={onClose} variant="secondary" className="px-8 py-3">
+                        Go Back
+                    </Button>
+                }
+            />
         );
     }
 
@@ -205,19 +212,23 @@ const FlashcardPractice = ({
                 <p className="text-muted mb-8 text-lg font-bold">
                     Accuracy: <span className="text-text font-black">{accuracy}%</span>
                 </p>
-                <div className="mb-10 flex w-full max-w-sm gap-4">
-                    <div className="flex-1 rounded-3xl border-2 border-b-8 border-gray-200 bg-white p-6 text-center shadow-sm">
-                        <div className="text-hiragana text-5xl font-black">{stats.correct}</div>
-                        <div className="text-muted mt-2 text-xs font-black tracking-widest uppercase">
-                            Correct
-                        </div>
-                    </div>
-                    <div className="flex-1 rounded-3xl border-2 border-b-8 border-gray-200 bg-white p-6 text-center shadow-sm">
-                        <div className="text-survival text-5xl font-black">{stats.incorrect}</div>
-                        <div className="text-muted mt-2 text-xs font-black tracking-widest uppercase">
-                            Review
-                        </div>
-                    </div>
+                <div className="mb-10 w-full max-w-sm">
+                    <StatGrid
+                        variant="large"
+                        className="flex w-full gap-4"
+                        stats={[
+                            {
+                                value: stats.correct,
+                                label: "Correct",
+                                color: "var(--color-hiragana)",
+                            },
+                            {
+                                value: stats.incorrect,
+                                label: "Review",
+                                color: "var(--color-survival)",
+                            },
+                        ]}
+                    />
                 </div>
                 <Button
                     variant="primary"
@@ -297,57 +308,14 @@ const FlashcardPractice = ({
                             </p>
                         </div>
 
-                        <div className="grid grid-cols-2 gap-3">
-                            {mcChoices!.map((choice) => {
-                                const isSelected = mcSelected === choice;
-                                const isCorrect = choice === card.meaning;
-                                let style: React.CSSProperties = {
-                                    backgroundColor: "white",
-                                    borderBottomColor: "var(--color-border)",
-                                };
-                                let v: "primary" | "secondary" = "secondary";
-                                if (mcSelected !== null) {
-                                    if (isCorrect) {
-                                        v = "primary";
-                                        style = {
-                                            backgroundColor: "var(--color-hiragana)",
-                                            borderBottomColor: "var(--color-hiragana-strong)",
-                                        };
-                                    } else if (isSelected) {
-                                        v = "primary";
-                                        style = {
-                                            backgroundColor: "#ff4b4b",
-                                            borderBottomColor: "var(--color-danger)",
-                                        };
-                                    } else {
-                                        style = {
-                                            backgroundColor: "white",
-                                            borderBottomColor: "var(--color-border)",
-                                            opacity: 0.5,
-                                        };
-                                    }
-                                }
-                                return (
-                                    <Button
-                                        key={choice}
-                                        onClick={() => handleMCSelect(choice)}
-                                        disabled={mcSelected !== null}
-                                        variant={v}
-                                        className={`!px-4 !py-4 !text-left !text-sm !leading-snug !font-bold shadow-none transition-all hover:shadow-none ${mcSelected !== null && !isCorrect && !isSelected ? "opacity-50" : ""}`}
-                                        style={style}
-                                        color={
-                                            mcSelected !== null && (isCorrect || isSelected)
-                                                ? "white"
-                                                : mcSelected !== null
-                                                  ? "#afafaf"
-                                                  : "#3c3c3c"
-                                        }
-                                    >
-                                        {choice}
-                                    </Button>
-                                );
-                            })}
-                        </div>
+                        <McChoiceGrid
+                            choices={mcChoices!}
+                            correctAnswer={card.meaning}
+                            selected={mcSelected}
+                            onSelect={handleMCSelect}
+                            textColorMode="buttonColorProp"
+                            tileClassName="!leading-snug"
+                        />
                     </div>
                 ) : (
                     /* ── Flip mode (Recall Mode) ── */
@@ -423,14 +391,10 @@ const FlashcardPractice = ({
 
                             {/* Back Side */}
                             <div className="rounded-5xl sm:rounded-6xl absolute inset-0 flex rotate-y-180 flex-col items-center justify-center border-2 border-b-8 border-gray-200 bg-white p-6 text-center shadow-sm backface-hidden sm:p-8">
-                                <Button
-                                    variant="ghost"
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        playAudio(getAudioText(card));
-                                    }}
-                                    className="absolute top-4 right-4 z-10 shrink-0 !rounded-full bg-gray-100 !p-2 shadow-none hover:shadow-none active:translate-y-0"
-                                    icon={Volume2}
+                                <FlashcardAudioButton
+                                    onPlay={() => playAudio(getAudioText(card))}
+                                    stopPropagation
+                                    className="z-10 shrink-0"
                                     iconClassName="h-5 w-5 sm:h-6 sm:w-6 text-gray-500"
                                 />
 
@@ -464,38 +428,10 @@ const FlashcardPractice = ({
 
                         {/* Four-button Grade UI — visible only after flip */}
                         <div
-                            className={`mt-6 grid w-full grid-cols-2 gap-3 transition-opacity duration-300 sm:mt-10 ${isFlipped ? "opacity-100" : "pointer-events-none opacity-0"}`}
+                            className={`mt-6 transition-opacity duration-300 sm:mt-10 ${isFlipped ? "opacity-100" : "pointer-events-none opacity-0"}`}
                             onClick={(e) => e.stopPropagation()}
                         >
-                            <button
-                                aria-label="Again — card will repeat soon"
-                                onClick={() => void handleGrade("Again")}
-                                className="border-danger/60 rounded-[1.25rem] border-2 border-b-8 bg-[#ff4b4b] py-4 text-base font-black text-white shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-[#ff4b4b] focus-visible:ring-offset-2 active:translate-y-0 active:border-b-2"
-                            >
-                                Again
-                            </button>
-                            <button
-                                aria-label="Hard — interval shortened"
-                                onClick={() => void handleGrade("Hard")}
-                                className="bg-survival rounded-[1.25rem] border-2 border-b-8 border-[#e07000]/60 py-4 text-base font-black text-white shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-[#ff9600] focus-visible:ring-offset-2 active:translate-y-0 active:border-b-2"
-                            >
-                                Hard
-                            </button>
-                            <button
-                                aria-label="Good — normal interval"
-                                onClick={() => void handleGrade("Good")}
-                                className="border-hiragana-strong/60 bg-hiragana focus-visible:ring-hiragana rounded-[1.25rem] border-2 border-b-8 py-4 text-base font-black text-white shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 active:translate-y-0 active:border-b-2"
-                            >
-                                Good
-                            </button>
-                            <button
-                                aria-label="Easy — interval extended"
-                                onClick={() => void handleGrade("Easy")}
-                                className="rounded-[1.25rem] border-2 border-b-8 border-[#0090c0]/60 py-4 text-base font-black text-white shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1cb0f6] focus-visible:ring-offset-2 active:translate-y-0 active:border-b-2"
-                                style={{ backgroundColor: themeHex }}
-                            >
-                                Easy
-                            </button>
+                            <GradeButtons onGrade={handleGrade} themeHex={themeHex} />
                         </div>
                     </>
                 )}

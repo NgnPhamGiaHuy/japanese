@@ -5,7 +5,7 @@ import { useState } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 import AdminProvider from "@/features/admin/context/AdminContext";
-import { NotificationsProvider } from "@/features/notifications/NotificationsContext";
+import { NotificationsProvider } from "@/features/notifications/context/NotificationsContext";
 import { useActivityTracker, useFirebaseAuth } from "@/features/user/hooks";
 import { useAppStore } from "@/lib/app-store";
 import { FontSyncer } from "@/lib/FontSyncer";

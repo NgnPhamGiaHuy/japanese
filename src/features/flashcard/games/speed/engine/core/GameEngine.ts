@@ -3,8 +3,7 @@
  *
  * @remarks
  * Coordinates all game subsystems (state machine, timer, scoring, questions) to provide
- * a unified game loop. Maintains immutable state snapshots and delegates mode-specific
- * logic to strategy implementations.
+ * a unified game loop. Maintains immutable state snapshots.
  *
  * Key responsibilities:
  * - Lifecycle management (start, play, end)
@@ -20,8 +19,9 @@ import { ProgressionTracker } from "./ProgressionTracker";
 import { ScoringEngine } from "./ScoringEngine";
 import { TimerController } from "./TimerController";
 import { QuestionEngine } from "../questions";
+import { getSpeedDifficultyLevel, SPEED_TOTAL_QUESTIONS } from "../speedRules";
 
-import type { AnswerResult, GameEngineConfig, GameState, ModeStrategy, TimerState } from "../types";
+import type { AnswerResult, GameEngineConfig, GameState, TimerState } from "../types";
 
 export class GameEngine {
     private state: GameState;
@@ -30,18 +30,15 @@ export class GameEngine {
     private readonly scoring: ScoringEngine;
     private readonly progression: ProgressionTracker;
     private readonly questionEngine: QuestionEngine;
-    private readonly strategy: ModeStrategy;
     private readonly config: GameEngineConfig;
 
     constructor(config: GameEngineConfig) {
         this.config = config;
-        this.strategy = config.strategy;
         this.stateMachine = new GameStateMachine();
-        this.scoring = new ScoringEngine(this.strategy);
+        this.scoring = new ScoringEngine();
         this.progression = new ProgressionTracker();
         this.questionEngine = new QuestionEngine({
             cards: config.cards,
-            strategy: this.strategy,
         });
 
         this.timer = new TimerController({
@@ -134,7 +131,7 @@ export class GameEngine {
             phase: "intro",
             feedbackStatus: "idle",
             questionIndex: 0,
-            totalQuestions: this.strategy.totalQuestions,
+            totalQuestions: SPEED_TOTAL_QUESTIONS,
             score: 0,
             streak: 0,
             maxStreak: 0,
@@ -157,7 +154,7 @@ export class GameEngine {
      * otherwise loads next question and continues playing.
      */
     private completeFeedback(): void {
-        if (this.state.questionIndex >= this.strategy.totalQuestions - 1) {
+        if (this.state.questionIndex >= SPEED_TOTAL_QUESTIONS - 1) {
             this.endGame();
             return;
         }
@@ -229,7 +226,7 @@ export class GameEngine {
      * QuestionEngine, and starts timer with appropriate time limit.
      */
     private loadNextQuestion(): void {
-        const level = this.strategy.getDifficultyLevel(
+        const level = getSpeedDifficultyLevel(
             this.state.questionIndex,
             this.state.streak,
             this.progression.getHistory(),

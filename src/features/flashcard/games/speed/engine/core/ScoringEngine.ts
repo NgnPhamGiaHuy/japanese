@@ -1,19 +1,18 @@
 /**
- * Centralized scoring engine that delegates to mode-specific strategies.
- * Handles score calculation, combo tracking, and bonus computation.
+ * Scoring engine — score calculation, combo tracking, and bonus computation.
  */
 
-import type { ModeStrategy, ScoringParams, ScoringResult } from "../types";
+import { calculateSpeedPoints, getSpeedComboThreshold } from "../speedRules";
+
+import type { ScoringParams, ScoringResult } from "../types";
 
 export class ScoringEngine {
-    constructor(private readonly strategy: ModeStrategy) {}
-
     /**
-     * Calculates points for an answer using the mode's strategy.
+     * Calculates points for an answer using Speed Mode's rules.
      */
     calculate(params: ScoringParams): ScoringResult {
-        const points = this.strategy.calculatePoints(params);
-        const comboThreshold = this.strategy.getComboThreshold();
+        const points = calculateSpeedPoints(params);
+        const comboThreshold = getSpeedComboThreshold();
         const multiplier = Math.floor(params.streak / comboThreshold) + 1;
 
         return {

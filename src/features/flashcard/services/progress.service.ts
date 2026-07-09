@@ -24,10 +24,8 @@ import {
     getDoc,
     getDocs,
     increment,
-    query,
     setDoc,
     updateDoc,
-    where,
     writeBatch,
 } from "firebase/firestore";
 
@@ -40,10 +38,6 @@ import type { Grade } from "../domain/srs";
 import type { DailyStudyStats, UserCardProgress } from "../domain/types";
 
 // ─── Firestore Path Helpers ────────────────────────────────────────────────
-
-export function userProgressRoot(userId: string): CollectionReference {
-    return collection(db, "artifacts", APP_ID, "userProgress", userId, "lessons");
-}
 
 export function userProgressLessonCol(userId: string, lessonId: string): CollectionReference {
     return collection(
@@ -83,32 +77,6 @@ export function dailyStatsDoc(userId: string): DocumentReference {
 // ─── Read Operations ────────────────────────────────────────────────────────
 
 /**
- * Fetches a single card's progress for a user.
- *
- * @returns Progress state, or FRESH_SRS_STATE if never studied.
- */
-export async function getUserCardProgress(
-    userId: string,
-    lessonId: string,
-    cardId: string,
-): Promise<UserCardProgress> {
-    const snap = await getDoc(userProgressCardDoc(userId, lessonId, cardId));
-
-    if (!snap.exists()) {
-        // Card never studied — return fresh state
-        return {
-            cardId,
-            lessonId,
-            sourceOwnerId: "", // Will be set on first grade
-            ...FRESH_SRS_STATE,
-            createdAt: Date.now(),
-        };
-    }
-
-    return snap.data() as UserCardProgress;
-}
-
-/**
  * Fetches all card progress for a lesson.
  *
  * @remarks
@@ -127,36 +95,6 @@ export async function getUserLessonProgress(
     snap.docs.forEach((d) => {
         const data = d.data() as UserCardProgress;
         map.set(d.id, data);
-    });
-
-    return map;
-}
-
-/**
- * Fetches progress for multiple lessons (for dashboard stats).
- *
- * @remarks
- * Uses a collection group query — requires Firestore index.
- */
-export async function getUserProgressAcrossLessons(
-    userId: string,
-    lessonIds: string[],
-): Promise<Map<string, UserCardProgress[]>> {
-    if (lessonIds.length === 0) return new Map();
-
-    const q = query(
-        collection(db, "artifacts", APP_ID, "userProgress", userId, "lessons"),
-        where("lessonId", "in", lessonIds.slice(0, 10)), // Firestore 'in' limit
-    );
-
-    const snap = await getDocs(q);
-    const map = new Map<string, UserCardProgress[]>();
-
-    snap.docs.forEach((d) => {
-        const data = d.data() as UserCardProgress;
-        const existing = map.get(data.lessonId) ?? [];
-        existing.push(data);
-        map.set(data.lessonId, existing);
     });
 
     return map;
@@ -280,23 +218,6 @@ export async function resetLessonProgressForUser(userId: string, lessonId: strin
         batch.update(d.ref, resetPayload);
     });
 
-    await batch.commit();
-}
-
-/**
- * Deletes all progress for a lesson (hard delete).
- *
- * @remarks
- * Use this when a user wants to completely remove their learning history.
- * Prefer resetLessonProgressForUser for "start over" functionality.
- */
-export async function deleteLessonProgressForUser(userId: string, lessonId: string): Promise<void> {
-    const snap = await getDocs(userProgressLessonCol(userId, lessonId));
-
-    if (snap.empty) return;
-
-    const batch = writeBatch(db);
-    snap.docs.forEach((d) => batch.delete(d.ref));
     await batch.commit();
 }
 

@@ -63,8 +63,6 @@ export function speedGameMode(deckId: string): string {
     return `${SPEED_GAME_MODE}_${deckId}`;
 }
 
-export type SpeedDifficulty = 1 | 2 | 3;
-
 export interface SpeedDifficultyConfig {
     /** The question index (0-based) where this level begins */
     threshold: number;

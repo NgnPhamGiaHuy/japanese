@@ -9,11 +9,10 @@ import { allowAudio, playPronunciationFeedback, playSFX } from "@/shared/utils";
 import { GameEngine } from "../engine/core/GameEngine";
 
 import type { FlashCard } from "@/features/flashcard/types";
-import type { GameState, ModeStrategy } from "../engine/types";
+import type { GameState } from "../engine/types";
 
 interface UseGameEngineConfig {
     cards: FlashCard[];
-    strategy: ModeStrategy;
     gameMode: string;
     bestScore: number;
     userId?: string;
@@ -69,7 +68,7 @@ export function useGameEngine(config: UseGameEngineConfig) {
     });
 
     /**
-     * Rebuilds the engine whenever cards or strategy change.
+     * Rebuilds the engine whenever cards change.
      *
      * @remarks
      * Cards arrive asynchronously (Firestore fetch). The engine must be
@@ -81,7 +80,6 @@ export function useGameEngine(config: UseGameEngineConfig) {
 
         const engine = new GameEngine({
             cards: config.cards,
-            strategy: config.strategy,
             userId: userIdRef.current,
             displayName: displayNameRef.current,
             onScoreSync: (score) => {
@@ -111,7 +109,7 @@ export function useGameEngine(config: UseGameEngineConfig) {
             engine.destroy();
             engineRef.current = null;
         };
-    }, [config.cards, config.strategy]);
+    }, [config.cards]);
 
     /**
      * Polls engine state every 100ms to drive React re-renders.
@@ -144,10 +142,10 @@ export function useGameEngine(config: UseGameEngineConfig) {
         const card = config.cards.find((c) => c.id === question.cardId);
         if (!card) return;
 
-        if (allowAudio(config.strategy.name, "feedback")) {
+        if (allowAudio("speed", "feedback")) {
             playPronunciationFeedback(getAudioText(card), 250);
         }
-    }, [state?.feedbackStatus, state?.currentQuestion, config.cards, config.strategy.name]);
+    }, [state?.feedbackStatus, state?.currentQuestion, config.cards]);
 
     const startGame = useCallback(async () => {
         await startSession();

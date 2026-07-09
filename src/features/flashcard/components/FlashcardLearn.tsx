@@ -8,11 +8,14 @@
 
 import { useEffect, useRef, useState } from "react";
 
-import { BookOpen, Volume2, X } from "lucide-react";
+import { BookOpen, X } from "lucide-react";
 
+import { StatGrid } from "@/features/game/components";
 import { useAppStore } from "@/lib/app-store";
-import { Button } from "@/shared/components/ui";
+import { Button, EmptyState } from "@/shared/components/ui";
 import { hexToThemeColor, playAudio, playSFX } from "@/shared/utils";
+import FlashcardAudioButton from "./FlashcardAudioButton";
+import GradeButtons from "./GradeButtons";
 import { gradeCard } from "../services";
 import { getAudioText, reinsertCard, resolveCardFaces } from "../utils";
 
@@ -63,16 +66,22 @@ const FlashcardLearn = ({
 
     if (cards.length === 0) {
         return (
-            <div className="bg-bg flex h-screen flex-col items-center justify-center p-6 text-center">
-                <div className="mb-6 flex h-24 w-24 items-center justify-center rounded-4xl border-b-8 border-gray-200 bg-white text-gray-400 shadow-sm">
-                    <BookOpen size={48} strokeWidth={2.5} />
-                </div>
-                <h2 className="text-text mb-2 text-2xl font-black">Nothing to learn!</h2>
-                <p className="text-muted mb-8 font-bold">All cards have already been introduced.</p>
-                <Button onClick={onClose} variant="secondary" className="px-8 py-3">
-                    Go Back
-                </Button>
-            </div>
+            <EmptyState
+                fullScreen
+                rotateIcon={false}
+                icon={BookOpen}
+                iconStrokeWidth={2.5}
+                iconBg="bg-white"
+                iconBorder="border-gray-200"
+                iconTextColor="text-gray-400"
+                title="Nothing to learn!"
+                description="All cards have already been introduced."
+                action={
+                    <Button onClick={onClose} variant="secondary" className="px-8 py-3">
+                        Go Back
+                    </Button>
+                }
+            />
         );
     }
 
@@ -130,19 +139,23 @@ const FlashcardLearn = ({
                 <p className="text-muted mb-8 text-lg font-bold">
                     You learned {cards.length} new card{cards.length !== 1 ? "s" : ""}.
                 </p>
-                <div className="mb-10 flex w-full max-w-sm gap-4">
-                    <div className="flex-1 rounded-3xl border-2 border-b-8 border-gray-200 bg-white p-6 text-center shadow-sm">
-                        <div className="text-hiragana text-5xl font-black">{stats.correct}</div>
-                        <div className="text-muted mt-2 text-xs font-black tracking-widest uppercase">
-                            Got It
-                        </div>
-                    </div>
-                    <div className="flex-1 rounded-3xl border-2 border-b-8 border-gray-200 bg-white p-6 text-center shadow-sm">
-                        <div className="text-survival text-5xl font-black">{stats.incorrect}</div>
-                        <div className="text-muted mt-2 text-xs font-black tracking-widest uppercase">
-                            Study More
-                        </div>
-                    </div>
+                <div className="mb-10 w-full max-w-sm">
+                    <StatGrid
+                        variant="large"
+                        className="flex w-full gap-4"
+                        stats={[
+                            {
+                                value: stats.correct,
+                                label: "Got It",
+                                color: "var(--color-hiragana)",
+                            },
+                            {
+                                value: stats.incorrect,
+                                label: "Study More",
+                                color: "var(--color-survival)",
+                            },
+                        ]}
+                    />
                 </div>
                 <Button
                     variant="primary"
@@ -176,11 +189,8 @@ const FlashcardLearn = ({
             <div className="mx-auto flex w-full max-w-md flex-1 flex-col items-center justify-center gap-6 p-4 sm:p-6">
                 {/* Card face */}
                 <div className="rounded-5xl relative flex w-full flex-col items-center justify-center border-2 border-b-8 border-gray-200 bg-white p-8 text-center shadow-sm">
-                    <Button
-                        variant="ghost"
-                        onClick={() => playAudio(getAudioText(card))}
-                        className="absolute top-4 right-4 !rounded-full bg-gray-100 !p-2 shadow-none hover:shadow-none active:translate-y-0"
-                        icon={Volume2}
+                    <FlashcardAudioButton
+                        onPlay={() => playAudio(getAudioText(card))}
                         iconClassName="h-5 w-5 text-gray-400"
                     />
 
@@ -256,37 +266,7 @@ const FlashcardLearn = ({
                         Show Answer
                     </button>
                 ) : (
-                    <div className="grid w-full grid-cols-2 gap-3">
-                        <button
-                            aria-label="Again — card will repeat soon"
-                            onClick={() => void handleGrade("Again")}
-                            className="border-danger/60 rounded-[1.25rem] border-2 border-b-8 bg-[#ff4b4b] py-4 text-base font-black text-white shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-[#ff4b4b] focus-visible:ring-offset-2 active:translate-y-0 active:border-b-2"
-                        >
-                            Again
-                        </button>
-                        <button
-                            aria-label="Hard — interval shortened"
-                            onClick={() => void handleGrade("Hard")}
-                            className="bg-survival rounded-[1.25rem] border-2 border-b-8 border-[#e07000]/60 py-4 text-base font-black text-white shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-[#ff9600] focus-visible:ring-offset-2 active:translate-y-0 active:border-b-2"
-                        >
-                            Hard
-                        </button>
-                        <button
-                            aria-label="Good — normal interval"
-                            onClick={() => void handleGrade("Good")}
-                            className="border-hiragana-strong/60 bg-hiragana focus-visible:ring-hiragana rounded-[1.25rem] border-2 border-b-8 py-4 text-base font-black text-white shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 active:translate-y-0 active:border-b-2"
-                        >
-                            Good
-                        </button>
-                        <button
-                            aria-label="Easy — interval extended"
-                            onClick={() => void handleGrade("Easy")}
-                            className="rounded-[1.25rem] border-2 border-b-8 border-[#0090c0]/60 py-4 text-base font-black text-white shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1cb0f6] focus-visible:ring-offset-2 active:translate-y-0 active:border-b-2"
-                            style={{ backgroundColor: themeHex }}
-                        >
-                            Easy
-                        </button>
-                    </div>
+                    <GradeButtons onGrade={handleGrade} themeHex={themeHex} />
                 )}
             </div>
         </div>

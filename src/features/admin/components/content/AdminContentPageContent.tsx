@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 
 import { Database, Filter } from "lucide-react";
 
@@ -42,6 +42,17 @@ const AdminContentPageContent = () => {
     const [selectedDeckTitle, setSelectedDeckTitle] = useState("");
     const [deckToDelete, setDeckToDelete] = useState<string | null>(null);
 
+    const filteredItems = useMemo(
+        () =>
+            data?.items.filter(
+                (item) =>
+                    item.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                    item.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                    item.ownerEmail?.toLowerCase().includes(searchTerm.toLowerCase()),
+            ) || [],
+        [data, searchTerm],
+    );
+
     if (isLoading)
         return (
             <AdminPageLayout>
@@ -54,14 +65,6 @@ const AdminContentPageContent = () => {
                 <AdminErrorState message={error.message} onRetry={() => refetch()} />
             </AdminPageLayout>
         );
-
-    const filteredItems =
-        data?.items.filter(
-            (item) =>
-                item.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                item.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                item.ownerEmail?.toLowerCase().includes(searchTerm.toLowerCase()),
-        ) || [];
 
     const handleView = async (path: string, title: string) => {
         setSelectedDeckTitle(title);

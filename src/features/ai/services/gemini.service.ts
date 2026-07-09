@@ -1,13 +1,19 @@
 import { getGenerativeModel } from "firebase/ai";
 
-import { splitAtomicPrimary, validateAtomicCard } from "@/features/flashcard/utils/card.validator";
 import { firebaseAI } from "@/lib/firebase";
+import { splitAtomicPrimary, validateAtomicCard } from "@/shared/utils";
 import { getCardGenerationPrompt, getDeckGenerationPrompt } from "./prompt-builder";
 import { AI_CONFIG } from "../config";
 import { getMatchDistractorsPrompt } from "../prompts/match.distractors";
 
-import type { FlashCard } from "@/features/flashcard/types";
 import type { GeneratedCard, JLPTLevel } from "../types";
+
+/** Minimal card shape this service needs — avoids depending on flashcard's full FlashCard type. */
+interface DistractorSourceCard {
+    primary: string;
+    alternatives?: string[];
+    meaning: string;
+}
 
 export type { GeneratedCard, JLPTLevel } from "../types";
 
@@ -345,7 +351,7 @@ export const generateCardData = async (word: string): Promise<GeneratedCard> => 
  * Strictly separates Japanese and English to prevent mixed-language tiles.
  */
 export const generateMatchDistractors = async (
-    cards: FlashCard[],
+    cards: DistractorSourceCard[],
     count: number,
 ): Promise<string[]> => {
     const safeCount = Math.min(Math.max(count, 1), 24);

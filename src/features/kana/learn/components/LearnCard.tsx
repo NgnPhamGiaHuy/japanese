@@ -8,10 +8,7 @@
 
 "use client";
 
-import { Volume2 } from "lucide-react";
-
-import { KanaStrokeAnimation } from "@/features/kana/components";
-import { Button } from "@/shared/components/ui";
+import { KanaAudioButton, KanaStrokeAnimation } from "@/features/kana/components";
 
 import type { LearnCardProps } from "../types";
 
@@ -23,13 +20,12 @@ export function LearnCard({ char, themeColor, onPlay }: LearnCardProps) {
             <span className="absolute top-4 left-4 text-xs font-black tracking-widest text-gray-400 uppercase">
                 {char.group}
             </span>
-            <Button
-                variant="ghost"
-                onClick={onPlay}
-                title={`Play ${char.char}`}
-                className={`absolute top-4 right-4 rounded-full! border-2! border-gray-100! bg-gray-50! p-2! shadow-none transition-transform hover:bg-gray-100! hover:shadow-none active:translate-y-0 ${themeColor.text}`}
-                icon={Volume2}
+            <KanaAudioButton
+                char={char.char}
+                onPlay={onPlay}
                 iconSize={20}
+                iconColorClassName={themeColor.text}
+                className="absolute top-4 right-4 bg-gray-50! hover:bg-gray-100!"
             />
 
             <div className="mt-10 mb-6 flex min-h-[140px] w-full items-center justify-center md:min-h-[220px]">

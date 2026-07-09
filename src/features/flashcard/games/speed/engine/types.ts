@@ -104,26 +104,6 @@ export interface ScoringResult {
 }
 
 /**
- * Mode-specific strategy interface.
- * Each game mode implements this to define its unique rules and behavior.
- */
-export interface ModeStrategy {
-    readonly name: string;
-    readonly totalQuestions: number;
-
-    getTimeLimit(level: number, questionIndex: number): number;
-    getDifficultyLevel(
-        questionIndex: number,
-        streak: number,
-        history: readonly AnswerEvent[],
-    ): number;
-    calculatePoints(params: ScoringParams): number;
-    getQuestionConfig(level: number): QuestionGenerationConfig;
-    shouldAdvanceLevel(state: GameState): boolean;
-    getComboThreshold(): number;
-}
-
-/**
  * Configuration for the game engine.
  *
  * @remarks
@@ -132,7 +112,6 @@ export interface ModeStrategy {
  */
 export interface GameEngineConfig {
     cards: FlashCard[];
-    strategy: ModeStrategy;
     userId?: string;
     displayName?: string;
     onScoreSync: (score: number) => void;

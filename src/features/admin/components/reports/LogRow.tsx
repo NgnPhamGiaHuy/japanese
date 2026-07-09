@@ -12,102 +12,17 @@
 
 import { useMemo, useState } from "react";
 
-import { Check, ChevronDown, Copy, Hash, Server, Smartphone } from "lucide-react";
+import { ChevronDown, Hash } from "lucide-react";
 
-import { Badge, Button } from "@/shared/components/ui";
+import { Badge } from "@/shared/components/ui";
+import LogCopyButton from "./LogCopyButton";
 import LogLevelBadge from "./LogLevelBadge";
+import LogMetadataViewer from "./LogMetadataViewer";
+import LogSourceBadge from "./LogSourceBadge";
 import LogTypeBadge from "./LogTypeBadge";
 import { formatLogTimestamp } from "../../utils/log.utils";
 
 import type { AdminLog } from "../../types";
-
-// ─── Metadata viewer ──────────────────────────────────────────────────────────
-
-const INTERNAL_META_KEYS = new Set([
-    "logType",
-    "userName",
-    "userEmail",
-    "entityType",
-    "entityId",
-    "source",
-]);
-
-/**
- * Structured metadata viewer for log entries.
- *
- * @remarks
- * Filters out internal tracking keys and displays remaining metadata in a responsive grid.
- * Handles objects by stringifying them and provides a high-contrast mono font style.
- */
-const MetadataViewer = ({ meta }: { meta: Record<string, unknown> }) => {
-    const entries = Object.entries(meta).filter(([k]) => !INTERNAL_META_KEYS.has(k));
-    if (entries.length === 0) return null;
-    return (
-        <div className="mt-2 grid grid-cols-1 gap-1 sm:grid-cols-2">
-            {entries.map(([k, v]) => (
-                <div key={k} className="flex min-w-0 gap-1.5 rounded-lg bg-gray-100/80 px-2 py-1">
-                    <span className="text-muted shrink-0 text-xs font-black tracking-wider uppercase">
-                        {k}
-                    </span>
-                    <span className="text-text min-w-0 truncate font-mono text-xs">
-                        {typeof v === "object" ? JSON.stringify(v) : String(v ?? "—")}
-                    </span>
-                </div>
-            ))}
-        </div>
-    );
-};
-
-// ─── Copy button ──────────────────────────────────────────────────────────────
-
-/**
- * Utility button for copying text to the clipboard.
- *
- * @remarks
- * Uses a minimal ghost variant to avoid visual clutter. Provides temporary
- * visual feedback via a checkmark icon after successful copying.
- */
-const CopyButton = ({ text, title }: { text: string; title?: string }) => {
-    const [copied, setCopied] = useState(false);
-    const handleCopy = async (e: React.MouseEvent) => {
-        e.stopPropagation();
-        await navigator.clipboard.writeText(text);
-        setCopied(true);
-        setTimeout(() => setCopied(false), 1500);
-    };
-    return (
-        <Button
-            variant="ghost"
-            color="gray"
-            onClick={handleCopy}
-            title={title ?? "Copy"}
-            icon={copied ? Check : Copy}
-            iconSize={12}
-            iconClassName={copied ? "text-hiragana" : "text-muted"}
-            className="hover:text-text h-6 w-6 !p-0 transition-colors hover:!bg-transparent"
-        />
-    );
-};
-
-// ─── Source badge ─────────────────────────────────────────────────────────────
-
-/**
- * Displays the architectural source of the log event.
- */
-const SourceBadge = ({ source }: { source?: string }) => {
-    if (!source) return null;
-    const isClient = source === "client";
-    return (
-        <Badge
-            variant="default"
-            size="sm"
-            icon={isClient ? Smartphone : Server}
-            className="text-muted border-gray-100 bg-gray-50 tracking-wider uppercase"
-        >
-            {source.replace("_", " ")}
-        </Badge>
-    );
-};
 
 // ─── Main row ─────────────────────────────────────────────────────────────────
 
@@ -166,7 +81,7 @@ const LogRow = ({ log }: LogRowProps) => {
                     <div className="flex flex-wrap items-center gap-2">
                         <LogLevelBadge level={level} />
                         <LogTypeBadge type={type} />
-                        <SourceBadge source={log.source} />
+                        <LogSourceBadge source={log.source} />
                         {log.ip && (
                             <span className="text-muted text-xs font-black tracking-wider uppercase">
                                 IP {log.ip}
@@ -239,7 +154,7 @@ const LogRow = ({ log }: LogRowProps) => {
                                     {log.entityId ? ` · ${log.entityId.slice(0, 12)}…` : ""}
                                 </Badge>
                                 {log.entityId && (
-                                    <CopyButton text={log.entityId} title="Copy entity ID" />
+                                    <LogCopyButton text={log.entityId} title="Copy entity ID" />
                                 )}
                             </div>
                         )}
@@ -254,7 +169,7 @@ const LogRow = ({ log }: LogRowProps) => {
                             >
                                 {log.id.slice(0, 12)}…
                             </Badge>
-                            <CopyButton text={log.id} title="Copy log ID" />
+                            <LogCopyButton text={log.id} title="Copy log ID" />
                         </div>
                     </div>
 
@@ -271,7 +186,7 @@ const LogRow = ({ log }: LogRowProps) => {
                     )}
 
                     {/* Metadata key-value grid */}
-                    {log.metadata && <MetadataViewer meta={log.metadata} />}
+                    {log.metadata && <LogMetadataViewer meta={log.metadata} />}
                 </div>
             )}
         </article>

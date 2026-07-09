@@ -16,7 +16,7 @@
  * Architecture:
  * - GameEngine handles pure game logic
  * - This hook manages React lifecycle and side effects
- * - SpeedModeStrategy defines mode-specific rules
+ * - Speed Mode's rules live in engine/speedRules.ts
  */
 
 "use client";
@@ -25,7 +25,6 @@ import { useCallback, useMemo } from "react";
 
 import { SPEED_GAME_CONFIG, timerColor } from "@/features/flashcard/games/speed/config";
 import { useGameEngine } from "./useGameEngine";
-import { SpeedModeStrategy } from "../engine/strategies/SpeedModeStrategy";
 
 import type { FlashCard } from "../../../types";
 
@@ -62,8 +61,6 @@ export function useSpeedModeSession({
     displayName,
     addXP,
 }: UseSpeedModeSessionParams) {
-    const strategy = useMemo(() => new SpeedModeStrategy(), []);
-
     const {
         state,
         startGame: engineStartGame,
@@ -71,7 +68,6 @@ export function useSpeedModeSession({
         reset,
     } = useGameEngine({
         cards: allCards,
-        strategy,
         gameMode,
         bestScore,
         userId,

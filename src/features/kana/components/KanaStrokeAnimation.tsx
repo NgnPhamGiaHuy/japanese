@@ -1,30 +1,19 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useQueries } from "@tanstack/react-query";
 
 interface SvgData {
     paths: string[];
     texts: { text: string; transform: string | null }[];
 }
 
-interface SvgEntry {
-    char: string;
-    data: SvgData | null;
-}
-
-const svgCache: Record<string, SvgData | null> = {};
-
 async function fetchKanaSvg(char: string): Promise<SvgData | null> {
-    if (char in svgCache) return svgCache[char];
     const hex = char.charCodeAt(0).toString(16).padStart(5, "0");
     try {
         const res = await fetch(
             `https://raw.githubusercontent.com/KanjiVG/kanjivg/master/kanji/${hex}.svg`,
         );
-        if (!res.ok) {
-            svgCache[char] = null;
-            return null;
-        }
+        if (!res.ok) return null;
         const text = await res.text();
         const parser = new DOMParser();
         const doc = parser.parseFromString(text, "image/svg+xml");
@@ -35,10 +24,8 @@ async function fetchKanaSvg(char: string): Promise<SvgData | null> {
             text: t.textContent ?? "",
             transform: t.getAttribute("transform"),
         }));
-        svgCache[char] = { paths, texts };
-        return svgCache[char];
+        return { paths, texts };
     } catch {
-        svgCache[char] = null;
         return null;
     }
 }
@@ -54,27 +41,17 @@ const KanaStrokeAnimation = ({
     svgClassName = "w-12 h-12 md:w-24 md:h-24",
     strokeColor = "#1cb0f6",
 }: KanaStrokeAnimationProps) => {
-    const [svgData, setSvgData] = useState<SvgEntry[]>([]);
-    const [loading, setLoading] = useState(true);
+    const chars = charStr.split("");
+    const queries = useQueries({
+        queries: chars.map((c) => ({
+            queryKey: ["kana-stroke-svg", c],
+            queryFn: () => fetchKanaSvg(c),
+            staleTime: Infinity,
+        })),
+    });
 
-    useEffect(() => {
-        let mounted = true;
-        (async () => {
-            const chars = charStr.split("");
-            const data: SvgEntry[] = [];
-            for (const c of chars) {
-                const d = await fetchKanaSvg(c);
-                data.push({ char: c, data: d });
-            }
-            if (mounted) {
-                setSvgData(data);
-                setLoading(false);
-            }
-        })();
-        return () => {
-            mounted = false;
-        };
-    }, [charStr]);
+    const loading = queries.some((q) => q.isLoading);
+    const svgData = chars.map((c, i) => ({ char: c, data: queries[i].data ?? null }));
 
     if (loading) return <div className={`animate-pulse rounded-xl bg-gray-200 ${svgClassName}`} />;
 

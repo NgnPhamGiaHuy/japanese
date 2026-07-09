@@ -1,6 +1,9 @@
 export { default as AdminReportsPageContent } from "./AdminReportsPageContent";
+export { default as LogCopyButton } from "./LogCopyButton";
 export { default as LogLevelBadge } from "./LogLevelBadge";
+export { default as LogMetadataViewer } from "./LogMetadataViewer";
 export { default as LogRow } from "./LogRow";
+export { default as LogSourceBadge } from "./LogSourceBadge";
 export { default as LogTypeBadge } from "./LogTypeBadge";
 export { default as LogsFilters } from "./LogsFilters";
 export { default as LogsVirtualList } from "./LogsVirtualList";

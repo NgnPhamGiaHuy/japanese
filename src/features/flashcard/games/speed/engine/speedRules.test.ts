@@ -1,28 +1,31 @@
 import { describe, expect, it } from "vitest";
 
-import { SpeedModeStrategy } from "./SpeedModeStrategy";
+import {
+    calculateSpeedPoints,
+    getSpeedComboThreshold,
+    getSpeedTimeLimit,
+    SPEED_TOTAL_QUESTIONS,
+} from "./speedRules";
 
-import type { ScoringParams } from "../types";
+import type { ScoringParams } from "./types";
 
 /**
- * Locks Speed-mode balance values after the M8 config merge: SpeedModeStrategy now
+ * Locks Speed-mode balance values after the M8 config merge: speedRules
  * derives scoring/level values from SPEED_GAME_CONFIG (single source) instead of a
  * duplicate local table. These assertions are the pre-merge values — the test fails
  * if the merge changed observable behavior.
  */
-describe("SpeedModeStrategy", () => {
-    const strategy = new SpeedModeStrategy();
-
+describe("speedRules", () => {
     it("exposes 20 total questions and a combo step of 5", () => {
-        expect(strategy.totalQuestions).toBe(20);
-        expect(strategy.getComboThreshold()).toBe(5);
+        expect(SPEED_TOTAL_QUESTIONS).toBe(20);
+        expect(getSpeedComboThreshold()).toBe(5);
     });
 
     it("maps levels 1/2/3 to time limits 10/8/5, with a 10s out-of-range fallback", () => {
-        expect(strategy.getTimeLimit(1)).toBe(10);
-        expect(strategy.getTimeLimit(2)).toBe(8);
-        expect(strategy.getTimeLimit(3)).toBe(5);
-        expect(strategy.getTimeLimit(99)).toBe(10);
+        expect(getSpeedTimeLimit(1)).toBe(10);
+        expect(getSpeedTimeLimit(2)).toBe(8);
+        expect(getSpeedTimeLimit(3)).toBe(5);
+        expect(getSpeedTimeLimit(99)).toBe(10);
     });
 
     it("scores (base + speedBonus) × combo multiplier, and 0 for wrong answers", () => {
@@ -36,10 +39,10 @@ describe("SpeedModeStrategy", () => {
         });
 
         // Full time remaining → speedBonus 50, multiplier 1 → (100 + 50) × 1.
-        expect(strategy.calculatePoints(params({}))).toBe(150);
+        expect(calculateSpeedPoints(params({}))).toBe(150);
         // No time left, streak 5 → speedBonus 0, multiplier 2 → (100 + 0) × 2.
-        expect(strategy.calculatePoints(params({ timeRemaining: 0, streak: 5 }))).toBe(200);
+        expect(calculateSpeedPoints(params({ timeRemaining: 0, streak: 5 }))).toBe(200);
         // Wrong answer scores nothing.
-        expect(strategy.calculatePoints(params({ correct: false }))).toBe(0);
+        expect(calculateSpeedPoints(params({ correct: false }))).toBe(0);
     });
 });

@@ -1,13 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
-
 import { ShieldAlert } from "lucide-react";
 
-import { useAppStore } from "@/lib/app-store";
 import { EmptyState, LoadingSpinner } from "@/shared/components/ui";
-import { fetchAdminRoleAction } from "../../actions";
-import { useAdminToken } from "../../hooks";
+import { useAdminRoleCheck } from "../../hooks";
 
 interface AdminGuardProps {
     children: React.ReactNode;
@@ -21,40 +17,9 @@ interface AdminGuardProps {
  * the /admin path before the page content is mounted.
  */
 const AdminGuard = ({ children }: AdminGuardProps) => {
-    const { user, isAuthReady } = useAppStore();
-    const getAdminIdToken = useAdminToken();
-    const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
-    const [loading, setLoading] = useState(true);
+    const { isAdmin, isLoading } = useAdminRoleCheck();
 
-    useEffect(() => {
-        if (!isAuthReady) return;
-
-        if (!user) {
-            setIsAdmin(false);
-            setLoading(false);
-            return;
-        }
-
-        const checkAdmin = async () => {
-            try {
-                const token = await getAdminIdToken();
-                const result = await fetchAdminRoleAction(token);
-                setIsAdmin(
-                    result.ok &&
-                        (result.data.role === "admin" || result.data.role === "superadmin"),
-                );
-            } catch (error) {
-                console.error("Admin check failed:", error);
-                setIsAdmin(false);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        checkAdmin();
-    }, [user, isAuthReady]);
-
-    if (loading || !isAuthReady) {
+    if (isLoading) {
         return <LoadingSpinner label="Verifying permissions…" />;
     }
 

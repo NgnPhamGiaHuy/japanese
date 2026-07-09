@@ -4,12 +4,12 @@ import { useState } from "react";
 
 import { AlertCircle, Settings2, Sparkles, Zap } from "lucide-react";
 
+import useAIDeck from "@/features/ai/hooks/useAIDeck";
 import { Button, Input } from "@/shared/components/ui";
 import { hexToThemeColor } from "@/shared/utils";
-import useAIDeck from "../hooks/useAIDeck";
 
-import type { ImportRow } from "@/features/flashcard/components/ImportPreview";
-import type { AIGenerateMode, JLPTLevel } from "../types";
+import type { AIGenerateMode, JLPTLevel } from "@/features/ai/types";
+import type { ImportRow } from "./ImportPreview";
 
 interface AIBulkPanelProps {
     themeColor: string;

@@ -47,13 +47,19 @@ export function useDashboardState() {
     }, [user]);
 
     const activeDragLessonIdRef = useRef<string | null>(null);
-    const [orderedLessons, setOrderedLessons] = useState<Lesson[]>([]);
 
-    useEffect(() => {
-        if (activeTab === "personal") setOrderedLessons(lessons);
-        else if (activeTab === "shared") setOrderedLessons(sharedLessons);
-        else setOrderedLessons(publicLessons);
-    }, [lessons, sharedLessons, publicLessons, activeTab]);
+    // orderedLessons mirrors the active tab's list, but can be locally overridden
+    // mid-drag by handleLessonsReorder for an optimistic reorder before the
+    // Firestore write confirms. Synced during render (not an effect) so a tab/data
+    // change takes effect immediately, without an extra commit-then-recompute pass.
+    const sourceList =
+        activeTab === "personal" ? lessons : activeTab === "shared" ? sharedLessons : publicLessons;
+    const [orderedLessons, setOrderedLessons] = useState<Lesson[]>(sourceList);
+    const [syncedSourceList, setSyncedSourceList] = useState(sourceList);
+    if (sourceList !== syncedSourceList) {
+        setSyncedSourceList(sourceList);
+        setOrderedLessons(sourceList);
+    }
 
     const handleLessonsReorder = async (nextLessons: Lesson[]) => {
         setOrderedLessons(nextLessons);

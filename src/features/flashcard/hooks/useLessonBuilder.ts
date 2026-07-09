@@ -1,10 +1,14 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 
 import { v4 as uuidv4 } from "uuid";
 
 import useAICard from "@/features/ai/hooks/useAICard";
+import { useAppStore } from "@/lib/app-store";
+import { useAlert } from "@/shared/providers";
+import { deleteCardImage, uploadCardImage } from "../services";
 import { joinAlternatives } from "../utils/formatting";
 import { parseText } from "../utils/parser";
+import { CardValidationError } from "../utils/card.validator";
 
 import type { EditorCard, FlashCard, Lesson } from "../types";
 
@@ -17,10 +21,30 @@ export const makeCard = (order = 0): EditorCard => ({
     order,
 });
 
+/** Serializes cards to the CSV text shown in the paste-mode textarea. */
+function buildPasteText(cards: EditorCard[]): string {
+    const lines = cards.map((c) => {
+        const parts = [c.primary || "", joinAlternatives(c.alternatives), c.meaning || "", c.example || ""];
+        return parts.map((p) => (p.includes(",") ? `"${p.replace(/"/g, '""')}"` : p)).join(",");
+    });
+    return lines.join("\n");
+}
+
+interface UseLessonBuilderParams {
+    initialLesson?: Lesson;
+    initialCards?: FlashCard[];
+    onSave: (lesson: Lesson, cards: FlashCard[], isNew: boolean) => Promise<void>;
+    onDelete?: (id: string) => Promise<void>;
+    onClose: () => void;
+}
+
 export function useLessonBuilder({
     initialLesson,
     initialCards,
-}: { initialLesson?: Lesson; initialCards?: FlashCard[] } = {}) {
+    onSave,
+    onDelete,
+    onClose,
+}: UseLessonBuilderParams) {
     const [lesson, setLesson] = useState<Partial<Lesson>>(
         initialLesson || {
             title: "",
@@ -31,31 +55,34 @@ export function useLessonBuilder({
         },
     );
     const [cards, setCards] = useState<EditorCard[]>(initialCards?.map((c) => ({ ...c })) || []);
-    const [pasteText, setPasteText] = useState("");
+    const [pasteText, setPasteText] = useState(() => buildPasteText(cards));
     const [previewRows, setPreviewRows] = useState<any[] | null>(null);
     const [tagInput, setTagInput] = useState("");
     const [inputMode, setInputMode] = useState<"ai" | "manual" | "paste" | "uploads">("manual");
     const [aiStatus, setAiStatus] = useState<Record<string, { loading: boolean; error?: string }>>(
         {},
     );
+    const [saving, setSaving] = useState(false);
 
     const aiCard = useAICard();
+    const { user } = useAppStore();
+    const { showAlert } = useAlert();
     const themeHex = lesson.themeColor || "#1cb0f6";
     const clearedImagePathsRef = useRef<string[]>([]);
 
-    useEffect(() => {
-        if (inputMode === "paste") return;
-        const lines = cards.map((c) => {
-            const parts = [
-                c.primary || "",
-                joinAlternatives(c.alternatives),
-                c.meaning || "",
-                c.example || "",
-            ];
-            return parts.map((p) => (p.includes(",") ? `"${p.replace(/"/g, '""')}"` : p)).join(",");
-        });
-        setPasteText(lines.join("\n"));
-    }, [cards, inputMode, setPasteText]);
+    // pasteText mirrors `cards` as CSV, except while the user is actively editing
+    // the paste textarea (inputMode === "paste") — synced during render (not an
+    // effect) so a cards/mode change takes effect immediately.
+    const [prevCardsForPaste, setPrevCardsForPaste] = useState(cards);
+    const [prevInputModeForPaste, setPrevInputModeForPaste] = useState(inputMode);
+    if (
+        inputMode !== "paste" &&
+        (cards !== prevCardsForPaste || inputMode !== prevInputModeForPaste)
+    ) {
+        setPrevCardsForPaste(cards);
+        setPrevInputModeForPaste(inputMode);
+        setPasteText(buildPasteText(cards));
+    }
 
     const handleLiveSync = (rawText: string) => {
         const { valid } = parseText(rawText);
@@ -122,7 +149,57 @@ export function useLessonBuilder({
         [cards],
     );
 
+    const handleSave = async () => {
+        if (!lesson.title?.trim()) return showAlert("warning", "Title is required");
+        setSaving(true);
+        try {
+            const processed: FlashCard[] = [];
+            for (const c of cards) {
+                const { imageFile, ...base } = c;
+                if (imageFile && user) {
+                    const res = await uploadCardImage(imageFile, user.uid, base.id);
+                    if (base.imagePath) deleteCardImage(base.imagePath).catch(() => {});
+                    processed.push({
+                        ...base,
+                        imageUrl: res.imageUrl,
+                        imagePath: res.imagePath,
+                    } as FlashCard);
+                } else processed.push(base as FlashCard);
+            }
+            await onSave(lesson as Lesson, processed, !initialLesson);
+            for (const path of clearedImagePathsRef.current) deleteCardImage(path).catch(() => {});
+            clearedImagePathsRef.current = [];
+        } catch (err) {
+            if (err instanceof CardValidationError)
+                showAlert(
+                    "error",
+                    "Some cards violate atomic principle (one word/phrase per card).",
+                );
+            else console.error(err);
+        } finally {
+            setSaving(false);
+        }
+    };
+
+    const handleDelete = async () => {
+        if (!onDelete || !initialLesson?.id) return;
+        if (!confirm("Are you sure you want to delete this deck?")) return;
+        setSaving(true);
+        try {
+            await onDelete(initialLesson.id);
+            onClose();
+        } catch (err) {
+            console.error(err);
+            showAlert("error", "Failed to delete deck");
+        } finally {
+            setSaving(false);
+        }
+    };
+
     return {
+        saving,
+        handleSave,
+        handleDelete,
         lesson,
         setLesson,
         cards,

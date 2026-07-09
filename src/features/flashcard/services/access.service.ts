@@ -3,38 +3,20 @@
  * Central access control layer for the flashcard sharing system.
  *
  * Responsibilities:
- * - Resolve a user's effective role for a given lesson
  * - Convert pending email invites to permanent collaborator entries on login
  * - Invite users by email (stored as pending until they log in)
  */
 
 import { deleteField, setDoc } from "firebase/firestore";
 
-import { notifyInvite } from "@/features/notifications/notification.service";
+import { notifyInvite } from "@/features/notifications/services";
 import { buildShareId, lessonDoc } from "./lesson.service";
-import { resolveRole } from "../utils/rbac";
 
 import type { User } from "firebase/auth";
 import type { DeckAccessRole, Lesson } from "../types";
 
 // Re-export for callers that import DeckAccessRole from access.service
 export type { DeckAccessRole };
-
-// ─── Core access resolver ─────────────────────────────────────────────────────
-
-/**
- * Resolves the effective role for a user on a given lesson.
- * Delegates to the canonical RBAC engine in `rbac.ts`.
- *
- * @deprecated Prefer `resolveRole` from `rbac.ts` for new code.
- */
-export function resolveUserAccess(user: User | null, lesson: Lesson): DeckAccessRole {
-    return resolveRole({
-        lesson,
-        userId: user?.uid ?? null,
-        userEmail: user?.email ?? null,
-    });
-}
 
 // ─── Permission helpers — delegate to rbac.ts ─────────────────────────────────
 

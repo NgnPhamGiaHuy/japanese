@@ -29,6 +29,14 @@ interface EmptyStateProps {
     iconBg?: string;
     /** Tailwind border color class for the icon container. */
     iconBorder?: string;
+    /** Tailwind text color class for the icon itself. */
+    iconTextColor?: string;
+    /** Whether the icon well is tilted -6deg (the default "playful" look). */
+    rotateIcon?: boolean;
+    /** Renders as a fixed full-viewport takeover instead of an inline py-20 section. */
+    fullScreen?: boolean;
+    /** Icon stroke width. */
+    iconStrokeWidth?: number;
 }
 
 const EmptyState = ({
@@ -38,13 +46,23 @@ const EmptyState = ({
     action,
     iconBg = "bg-both",
     iconBorder = "border-both-strong",
+    iconTextColor = "text-white",
+    rotateIcon = true,
+    fullScreen = false,
+    iconStrokeWidth = 3,
 }: EmptyStateProps) => {
     return (
-        <div className="py-20 text-center">
+        <div
+            className={
+                fullScreen
+                    ? "bg-bg flex h-screen flex-col items-center justify-center p-6 text-center"
+                    : "py-20 text-center"
+            }
+        >
             <div
-                className={`mx-auto mb-6 flex h-24 w-24 -rotate-6 items-center justify-center rounded-4xl border-b-8 ${iconBg} ${iconBorder} text-white shadow-sm`}
+                className={`mx-auto mb-6 flex h-24 w-24 ${rotateIcon ? "-rotate-6" : ""} items-center justify-center rounded-4xl border-b-8 ${iconBg} ${iconBorder} ${iconTextColor} shadow-sm`}
             >
-                <Icon size={48} strokeWidth={3} />
+                <Icon size={48} strokeWidth={iconStrokeWidth} />
             </div>
             <h2 className="text-text mb-2 text-2xl font-black">{title}</h2>
             <p className="text-muted mb-8 font-bold">{description}</p>

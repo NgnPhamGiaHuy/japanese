@@ -12,6 +12,7 @@ import { useState } from "react";
 
 import { AlertCircle, BookOpen, RefreshCw, RotateCcw } from "lucide-react";
 
+import { StatGrid } from "@/features/game/components";
 import { Button, ConfirmModal } from "@/shared/components/ui";
 import ModeButton from "./ModeButton";
 
@@ -71,27 +72,28 @@ const StudyModeSelector = ({
                     </p>
                 </div>
 
-                <div className="mb-8 flex gap-3">
-                    <div className="rounded-xl border-2 border-gray-200 bg-white px-4 py-2 text-center shadow-sm">
-                        <div className="text-katakana text-xl font-black">{status.newCount}</div>
-                        <div className="text-xs font-black tracking-widest text-slate-400 uppercase">
-                            New
-                        </div>
-                    </div>
-                    <div className="rounded-xl border-2 border-gray-200 bg-white px-4 py-2 text-center shadow-sm">
-                        <div className="text-survival text-xl font-black">{status.dueCount}</div>
-                        <div className="text-xs font-black tracking-widest text-slate-400 uppercase">
-                            Due
-                        </div>
-                    </div>
-                    <div className="rounded-xl border-2 border-gray-200 bg-white px-4 py-2 text-center shadow-sm">
-                        <div className="text-hiragana text-xl font-black">
-                            {status.totalCount - status.newCount}
-                        </div>
-                        <div className="text-xs font-black tracking-widest text-slate-400 uppercase">
-                            Learned
-                        </div>
-                    </div>
+                <div className="mb-8">
+                    <StatGrid
+                        variant="compact"
+                        className="flex gap-3"
+                        stats={[
+                            {
+                                value: status.newCount,
+                                label: "New",
+                                color: "var(--color-katakana)",
+                            },
+                            {
+                                value: status.dueCount,
+                                label: "Due",
+                                color: "var(--color-survival)",
+                            },
+                            {
+                                value: status.totalCount - status.newCount,
+                                label: "Learned",
+                                color: "var(--color-hiragana)",
+                            },
+                        ]}
+                    />
                 </div>
 
                 <div className="flex w-full max-w-sm flex-col gap-3">

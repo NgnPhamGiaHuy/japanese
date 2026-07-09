@@ -22,7 +22,7 @@ import {
     updateDoc,
 } from "firebase/firestore";
 
-import { notifyComment, notifyReply } from "@/features/notifications/notification.service";
+import { notifyComment, notifyReply } from "@/features/notifications/services";
 import { APP_ID, db } from "@/lib/firebase";
 
 import type { CollectionReference, DocumentReference, Unsubscribe } from "firebase/firestore";
@@ -487,21 +487,5 @@ export async function deleteComment(
             "Failed to delete comment. Please try again.",
             error as Error,
         );
-    }
-}
-
-/**
- * Gets comment count for a specific card (for badge display).
- */
-export async function getCommentCount(
-    ownerId: string,
-    lessonId: string,
-    cardId: string,
-): Promise<number> {
-    try {
-        const comments = await getComments(ownerId, lessonId, cardId);
-        return comments.reduce((total, comment) => total + 1 + (comment.replies?.length || 0), 0);
-    } catch {
-        return 0;
     }
 }

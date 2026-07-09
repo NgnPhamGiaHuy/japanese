@@ -1,19 +1,15 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
 
 import { AnimatePresence, motion } from "framer-motion";
 import { Save, X } from "lucide-react";
 
-import { useAppStore } from "@/lib/app-store";
 import { Button } from "@/shared/components/ui";
-import { useAlert } from "@/shared/providers";
 import LessonBuilderCardList from "./LessonBuilderCardList";
 import LessonBuilderImportPane from "./LessonBuilderImportPane";
 import LessonBuilderMeta from "./LessonBuilderMeta";
 import { useLessonBuilder } from "../hooks/useLessonBuilder";
-import { deleteCardImage, uploadCardImage } from "../services";
-import { CardValidationError } from "../utils/card.validator";
 
 import type { FlashCard, Lesson } from "../types";
 
@@ -32,58 +28,14 @@ const LessonBuilder: React.FC<LessonBuilderProps> = ({
     onDelete,
     onClose,
 }) => {
-    const builder = useLessonBuilder({ initialLesson: editingLesson, initialCards });
-    const { user } = useAppStore();
-    const { showAlert } = useAlert();
-    const [saving, setSaving] = useState(false);
-
-    const handleSave = async () => {
-        if (!builder.lesson.title?.trim()) return showAlert("warning", "Title is required");
-        setSaving(true);
-        try {
-            const processed: FlashCard[] = [];
-            for (const c of builder.cards) {
-                const { imageFile, ...base } = c;
-                if (imageFile && user) {
-                    const res = await uploadCardImage(imageFile, user.uid, base.id);
-                    if (base.imagePath) deleteCardImage(base.imagePath).catch(() => {});
-                    processed.push({
-                        ...base,
-                        imageUrl: res.imageUrl,
-                        imagePath: res.imagePath,
-                    } as FlashCard);
-                } else processed.push(base as FlashCard);
-            }
-            await onSave(builder.lesson as Lesson, processed, !editingLesson);
-            for (const path of builder.clearedImagePathsRef.current)
-                deleteCardImage(path).catch(() => {});
-            builder.clearedImagePathsRef.current = [];
-        } catch (err) {
-            if (err instanceof CardValidationError)
-                showAlert(
-                    "error",
-                    "Some cards violate atomic principle (one word/phrase per card).",
-                );
-            else console.error(err);
-        } finally {
-            setSaving(false);
-        }
-    };
-
-    const handleDelete = async () => {
-        if (!onDelete || !editingLesson?.id) return;
-        if (!confirm("Are you sure you want to delete this deck?")) return;
-        setSaving(true);
-        try {
-            await onDelete(editingLesson.id);
-            onClose();
-        } catch (err) {
-            console.error(err);
-            showAlert("error", "Failed to delete deck");
-        } finally {
-            setSaving(false);
-        }
-    };
+    const builder = useLessonBuilder({
+        initialLesson: editingLesson,
+        initialCards,
+        onSave,
+        onDelete,
+        onClose,
+    });
+    const { saving, handleSave, handleDelete } = builder;
 
     return (
         <div

@@ -1,6 +1,8 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo } from "react";
+
+import { useQuery } from "@tanstack/react-query";
 
 import { matchGameMode } from "@/features/flashcard/games/match/config";
 import { speedGameMode } from "@/features/flashcard/games/speed/config";
@@ -10,9 +12,6 @@ import { useCardsWithProgress } from "../hooks/useCardsWithProgress";
 import { useLessons } from "../hooks/useLessons";
 
 import type { FlashcardData, FlashcardLoaderState, FlashcardSource } from "./types";
-
-/** Session-scoped cache for shared deck metadata (cleared on full page reload). */
-const sharedDataCache = new Map<string, FlashcardData>();
 
 /**
  * Loads flashcard data and keeps cards live via real-time subscriptions.
@@ -76,85 +75,49 @@ export function useFlashcardLoader(source: FlashcardSource): FlashcardLoaderStat
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [lesson, ownerId, lessonId, source.type]);
 
-    // ── Shared deck: one-time load with session cache ──────────────────────
-    const [sharedState, setSharedState] = useState<FlashcardLoaderState>({
-        data: null,
-        isLoading: source.type === "shared",
-        isReady: false,
-        isNotFound: false,
-        error: null,
-    });
-
+    // ── Shared deck: one-time load, cached for the life of the query client ─
     const shareId = source.type === "shared" ? source.shareId : "";
 
-    useEffect(() => {
-        if (source.type !== "shared" || !shareId) return;
-        // Wait for auth to resolve — avoids false 404 on slow networks
-        if (!isAuthReady) return;
-
-        const cached = sharedDataCache.get(shareId);
-        if (cached) {
-            setSharedState({
-                data: cached,
-                isLoading: false,
-                isReady: true,
-                isNotFound: false,
-                error: null,
-            });
-            return;
-        }
-
-        let cancelled = false;
-        setSharedState({
-            data: null,
-            isLoading: true,
-            isReady: false,
-            isNotFound: false,
-            error: null,
-        });
-
-        loadFlashcardData(source, undefined, undefined, user?.uid, user)
-            .then((data) => {
-                if (cancelled) return;
-                if (!data) {
-                    setSharedState({
-                        data: null,
-                        isLoading: false,
-                        isReady: false,
-                        isNotFound: true,
-                        error: null,
-                    });
-                } else {
-                    sharedDataCache.set(shareId, data);
-                    setSharedState({
-                        data,
-                        isLoading: false,
-                        isReady: true,
-                        isNotFound: false,
-                        error: null,
-                    });
-                }
-            })
-            .catch((error) => {
-                if (cancelled) return;
-                setSharedState({
-                    data: null,
-                    isLoading: false,
-                    isReady: false,
-                    isNotFound: false,
-                    error: error instanceof Error ? error : new Error(String(error)),
-                });
-            });
-
-        return () => {
-            cancelled = true;
-        };
-        // user object intentionally omitted — uid is the stable identity key
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [shareId, isAuthReady, user?.uid]);
+    const sharedQuery = useQuery({
+        queryKey: ["shared-flashcard", shareId, user?.uid ?? null],
+        queryFn: async () => {
+            try {
+                return await loadFlashcardData(source, undefined, undefined, user?.uid, user);
+            } catch (err) {
+                throw err instanceof Error ? err : new Error(String(err));
+            }
+        },
+        enabled: source.type === "shared" && !!shareId && isAuthReady,
+        staleTime: Infinity,
+        retry: false,
+    });
 
     // ── Return correct state per source type ──────────────────────────────
-    if (source.type === "shared") return sharedState;
+    if (source.type === "shared") {
+        // Wait for auth to resolve — avoids false 404 on slow networks
+        if (!isAuthReady || sharedQuery.isLoading) {
+            return { data: null, isLoading: true, isReady: false, isNotFound: false, error: null };
+        }
+        if (sharedQuery.error) {
+            return {
+                data: null,
+                isLoading: false,
+                isReady: false,
+                isNotFound: false,
+                error: sharedQuery.error,
+            };
+        }
+        if (!sharedQuery.data) {
+            return { data: null, isLoading: false, isReady: false, isNotFound: true, error: null };
+        }
+        return {
+            data: sharedQuery.data,
+            isLoading: false,
+            isReady: true,
+            isNotFound: false,
+            error: null,
+        };
+    }
 
     // Personal deck
     const isLoading = lessonsLoading || cardsLoading || !personalData;

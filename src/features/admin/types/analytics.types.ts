@@ -74,13 +74,3 @@ export interface AnalyticsData {
     logsByLevel: LogLevelPoint[];
     topActions: TopActionPoint[];
 }
-
-export interface DailyAnalyticsSnapshot {
-    date: string;
-    newUsers: number;
-    activeUsers: number;
-    sessions: number;
-    errors: number;
-    flashcardsCreated: number;
-    featureUsage: Record<string, number>;
-}

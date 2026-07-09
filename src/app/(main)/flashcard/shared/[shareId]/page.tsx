@@ -16,6 +16,7 @@ import { FlashcardDetailLayout } from "@/features/flashcard/detail";
 import { useLessons, useSharedLesson } from "@/features/flashcard/hooks";
 import { useAppStore } from "@/lib/app-store";
 import { Button } from "@/shared/components/ui";
+import { useCopyToClipboard } from "@/shared/hooks";
 import { useAlert } from "@/shared/providers";
 
 import type { DeckContext } from "@/features/flashcard/detail";
@@ -40,7 +41,7 @@ export default function SharedLessonPage({ params }: { params: Promise<{ shareId
     const { result, status, error } = useSharedLesson(shareId);
 
     const [saving, setSaving] = useState(false);
-    const [linkCopied, setLinkCopied] = useState(false);
+    const { copied: linkCopied, copy: copyLink } = useCopyToClipboard();
     const [sharingLesson, setSharingLesson] = useState(false);
 
     if (status === "loading") {
@@ -160,10 +161,8 @@ export default function SharedLessonPage({ params }: { params: Promise<{ shareId
     };
 
     const handleCopyLink = async () => {
-        await navigator.clipboard.writeText(window.location.href);
-        setLinkCopied(true);
+        await copyLink(window.location.href);
         showAlert("success", "Link copied to clipboard");
-        setTimeout(() => setLinkCopied(false), 2000);
     };
 
     return (

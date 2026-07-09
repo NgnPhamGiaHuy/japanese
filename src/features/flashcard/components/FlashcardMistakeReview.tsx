@@ -8,12 +8,16 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 
-import { AlertCircle, Brain, Check, Lightbulb, Loader2, Volume2, X } from "lucide-react";
+import { AlertCircle, Brain, Check, Lightbulb, Loader2, X } from "lucide-react";
 
-import useAICard from "@/features/ai/hooks/useAICard";
+import useAIExplanation from "@/features/ai/hooks/useAIExplanation";
+import { StatGrid } from "@/features/game/components";
 import { useAppStore } from "@/lib/app-store";
-import { Button } from "@/shared/components/ui";
+import { Button, EmptyState } from "@/shared/components/ui";
 import { hexToThemeColor, playAudio, playSFX, shuffleArray } from "@/shared/utils";
+import FlashcardAudioButton from "./FlashcardAudioButton";
+import GradeButtons from "./GradeButtons";
+import McChoiceGrid from "./McChoiceGrid";
 import { gradeCard } from "../services";
 import { getAudioText, reinsertCard, resolveCardFaces } from "../utils";
 
@@ -44,42 +48,6 @@ interface FlashcardMistakeReviewProps {
     /** Session completion callback */
     onComplete: (stats: StudyStats) => void;
 }
-
-/**
- * Custom hook for lazy-loading AI mnemonics.
- * Triggers generation only when the card is first revealed to optimize token usage.
- * Resets when the card changes so each card gets its own fresh tip.
- *
- * @param card - The target card
- * @param revealed - Reveal flag (trigger)
- */
-const useAIExplanation = (card: CardWithProgress | undefined, revealed: boolean) => {
-    const { generate, status, error } = useAICard();
-    const aiLoading = status === "loading";
-    const [explanation, setExplanation] = useState<string | null>(null);
-
-    // Reset explanation whenever the card changes so the previous card's tip
-    // doesn't bleed into the next card.
-    useEffect(() => {
-        setExplanation(null);
-    }, [card?.id]);
-
-    useEffect(() => {
-        if (!revealed || !card) return;
-        // Don't re-fetch if we already have a tip for this card
-        if (explanation !== null) return;
-        if (card.hint) {
-            setExplanation(card.hint);
-        } else {
-            generate(getAudioText(card)).then((result) => {
-                if (result?.hint) setExplanation(result.hint);
-            });
-        }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [revealed, card?.id]);
-
-    return { explanation, loading: aiLoading, error };
-};
 
 /**
  * FlashcardMistakeReview Component
@@ -134,20 +102,29 @@ const FlashcardMistakeReview = ({
     const [mcSelected, setMcSelected] = useState<string | null>(null);
 
     /** Load AI explanation (mnemonic) as soon as the card is flipped or answered */
-    const { explanation, loading: aiLoading } = useAIExplanation(card, isFlipped || !!mcSelected);
+    const { explanation, loading: aiLoading } = useAIExplanation(
+        card,
+        card ? getAudioText(card) : "",
+        isFlipped || !!mcSelected,
+    );
 
     if (cards.length === 0) {
         return (
-            <div className="bg-bg flex h-screen flex-col items-center justify-center p-6 text-center">
-                <div className="text-hiragana mb-6 flex h-24 w-24 items-center justify-center rounded-4xl border-b-8 border-gray-200 bg-white shadow-sm">
-                    <Check size={48} strokeWidth={3} />
-                </div>
-                <h2 className="text-text mb-2 text-2xl font-black">No mistakes to review!</h2>
-                <p className="text-muted mb-8 font-bold">You nailed everything. Keep it up!</p>
-                <Button onClick={onClose} variant="secondary" className="px-8 py-3">
-                    Go Back
-                </Button>
-            </div>
+            <EmptyState
+                fullScreen
+                rotateIcon={false}
+                icon={Check}
+                iconBg="bg-white"
+                iconBorder="border-gray-200"
+                iconTextColor="text-hiragana"
+                title="No mistakes to review!"
+                description="You nailed everything. Keep it up!"
+                action={
+                    <Button onClick={onClose} variant="secondary" className="px-8 py-3">
+                        Go Back
+                    </Button>
+                }
+            />
         );
     }
 
@@ -215,19 +192,23 @@ const FlashcardMistakeReview = ({
                 <p className="text-muted mb-8 text-lg font-bold">
                     You revisited {cards.length} difficult card{cards.length !== 1 ? "s" : ""}.
                 </p>
-                <div className="mb-10 flex w-full max-w-sm gap-4">
-                    <div className="flex-1 rounded-3xl border-2 border-b-8 border-gray-200 bg-white p-6 text-center shadow-sm">
-                        <div className="text-hiragana text-5xl font-black">{stats.correct}</div>
-                        <div className="text-muted mt-2 text-xs font-black tracking-widest uppercase">
-                            Fixed
-                        </div>
-                    </div>
-                    <div className="flex-1 rounded-3xl border-2 border-b-8 border-gray-200 bg-white p-6 text-center shadow-sm">
-                        <div className="text-survival text-5xl font-black">{stats.incorrect}</div>
-                        <div className="text-muted mt-2 text-xs font-black tracking-widest uppercase">
-                            Still hard
-                        </div>
-                    </div>
+                <div className="mb-10 w-full max-w-sm">
+                    <StatGrid
+                        variant="large"
+                        className="flex w-full gap-4"
+                        stats={[
+                            {
+                                value: stats.correct,
+                                label: "Fixed",
+                                color: "var(--color-hiragana)",
+                            },
+                            {
+                                value: stats.incorrect,
+                                label: "Still hard",
+                                color: "var(--color-survival)",
+                            },
+                        ]}
+                    />
                 </div>
                 <Button
                     variant="primary"
@@ -293,61 +274,13 @@ const FlashcardMistakeReview = ({
                                 Choose the correct meaning
                             </p>
                         </div>
-                        <div className="grid grid-cols-2 gap-3">
-                            {mcChoices.map((choice) => {
-                                const isSelected = mcSelected === choice;
-                                const isCorrect = choice === card.meaning;
-                                let style: React.CSSProperties = {
-                                    backgroundColor: "white",
-                                    borderBottomColor: "var(--color-border)",
-                                };
-                                let v: "primary" | "secondary" = "secondary";
-                                if (mcSelected !== null) {
-                                    if (isCorrect) {
-                                        v = "primary";
-                                        style = {
-                                            backgroundColor: "var(--color-hiragana)",
-                                            borderBottomColor: "var(--color-hiragana-strong)",
-                                        };
-                                    } else if (isSelected) {
-                                        v = "primary";
-                                        style = {
-                                            backgroundColor: "#ff4b4b",
-                                            borderBottomColor: "var(--color-danger)",
-                                        };
-                                    } else {
-                                        style = {
-                                            backgroundColor: "white",
-                                            borderBottomColor: "var(--color-border)",
-                                            opacity: 0.5,
-                                        };
-                                    }
-                                }
-                                return (
-                                    <Button
-                                        key={choice}
-                                        onClick={() => handleMCSelect(choice)}
-                                        disabled={mcSelected !== null}
-                                        variant={v}
-                                        className={`!px-4 !py-4 !text-left !text-sm !font-bold shadow-none transition-all hover:shadow-none ${mcSelected !== null && !isCorrect && !isSelected ? "opacity-50" : ""}`}
-                                        style={style}
-                                    >
-                                        <span
-                                            style={{
-                                                color:
-                                                    mcSelected !== null && (isCorrect || isSelected)
-                                                        ? "white"
-                                                        : mcSelected !== null
-                                                          ? "#afafaf"
-                                                          : "#3c3c3c",
-                                            }}
-                                        >
-                                            {choice}
-                                        </span>
-                                    </Button>
-                                );
-                            })}
-                        </div>
+                        <McChoiceGrid
+                            choices={mcChoices}
+                            correctAnswer={card.meaning}
+                            selected={mcSelected}
+                            onSelect={handleMCSelect}
+                            textColorMode="innerSpan"
+                        />
                     </div>
                 ) : (
                     /* Recall Mode: Flip and study AI-generated Memory Tips */
@@ -383,14 +316,10 @@ const FlashcardMistakeReview = ({
 
                             {/* Back (Memory Encoding with AI Aid) */}
                             <div className="rounded-5xl border-danger/20 absolute inset-0 flex rotate-y-180 flex-col items-center justify-center border-2 border-b-8 bg-white p-6 text-center shadow-sm backface-hidden sm:p-8">
-                                <Button
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        playAudio(getAudioText(card));
-                                    }}
-                                    className="absolute top-4 right-4 !rounded-full bg-gray-100 !p-2 shadow-none transition-colors hover:shadow-none active:translate-y-0"
-                                    variant="ghost"
-                                    icon={Volume2}
+                                <FlashcardAudioButton
+                                    onPlay={() => playAudio(getAudioText(card))}
+                                    stopPropagation
+                                    className="transition-colors"
                                     iconClassName="h-5 w-5 text-gray-500"
                                 />
 
@@ -434,38 +363,10 @@ const FlashcardMistakeReview = ({
 
                         {/* Four-button Grade UI — visible only after flip */}
                         <div
-                            className={`mt-6 grid w-full grid-cols-2 gap-3 transition-opacity duration-300 ${isFlipped ? "opacity-100" : "pointer-events-none opacity-0"}`}
+                            className={`mt-6 transition-opacity duration-300 ${isFlipped ? "opacity-100" : "pointer-events-none opacity-0"}`}
                             onClick={(e) => e.stopPropagation()}
                         >
-                            <button
-                                aria-label="Again — card will repeat soon"
-                                onClick={() => void handleGrade("Again")}
-                                className="border-danger/60 rounded-[1.25rem] border-2 border-b-8 bg-[#ff4b4b] py-4 text-base font-black text-white shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-[#ff4b4b] focus-visible:ring-offset-2 active:translate-y-0 active:border-b-2"
-                            >
-                                Again
-                            </button>
-                            <button
-                                aria-label="Hard — interval shortened"
-                                onClick={() => void handleGrade("Hard")}
-                                className="bg-survival rounded-[1.25rem] border-2 border-b-8 border-[#e07000]/60 py-4 text-base font-black text-white shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-[#ff9600] focus-visible:ring-offset-2 active:translate-y-0 active:border-b-2"
-                            >
-                                Hard
-                            </button>
-                            <button
-                                aria-label="Good — normal interval"
-                                onClick={() => void handleGrade("Good")}
-                                className="border-hiragana-strong/60 bg-hiragana focus-visible:ring-hiragana rounded-[1.25rem] border-2 border-b-8 py-4 text-base font-black text-white shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 active:translate-y-0 active:border-b-2"
-                            >
-                                Good
-                            </button>
-                            <button
-                                aria-label="Easy — interval extended"
-                                onClick={() => void handleGrade("Easy")}
-                                className="rounded-[1.25rem] border-2 border-b-8 border-[#0090c0]/60 py-4 text-base font-black text-white shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1cb0f6] focus-visible:ring-offset-2 active:translate-y-0 active:border-b-2"
-                                style={{ backgroundColor: themeHex }}
-                            >
-                                Easy
-                            </button>
+                            <GradeButtons onGrade={handleGrade} themeHex={themeHex} />
                         </div>
                     </>
                 )}

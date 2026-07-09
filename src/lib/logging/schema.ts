@@ -14,5 +14,3 @@ export const systemLogInputSchema = z.object({
     level: canonicalLevelSchema,
     source: logSourceSchema,
 });
-
-export type SystemLogInputParsed = z.infer<typeof systemLogInputSchema>;

@@ -47,21 +47,3 @@ export async function persistSystemLog(raw: SystemLogInput): Promise<string> {
     await ref.set(payload);
     return ref.id;
 }
-
-export async function logInfo(input: Omit<SystemLogInput, "level">): Promise<string> {
-    return persistSystemLog({ ...input, level: "info" });
-}
-
-export async function logWarn(input: Omit<SystemLogInput, "level">): Promise<string> {
-    return persistSystemLog({ ...input, level: "warn" });
-}
-
-export async function logError(input: Omit<SystemLogInput, "level">): Promise<string> {
-    return persistSystemLog({ ...input, level: "error" });
-}
-
-export async function logUserAction(
-    input: Omit<SystemLogInput, "level"> & { level?: SystemLogRecord["level"] },
-): Promise<string> {
-    return persistSystemLog({ ...input, level: input.level ?? "info" });
-}

@@ -13,22 +13,21 @@ import { DistractorBuilder } from "./DistractorBuilder";
 import { QuestionTypeSelector } from "./QuestionTypeSelector";
 import { CardMemoryManager } from "../memory/CardMemoryManager";
 import { CardSelector } from "../memory/CardSelector";
+import { getSpeedQuestionConfig, getSpeedTimeLimit } from "../speedRules";
 
 import type { FlashCard } from "@/features/flashcard/types";
-import type { ModeStrategy, Question } from "../types";
+import type { Question } from "../types";
 
 export class QuestionEngine {
     private readonly cardMemory: CardMemoryManager;
     private readonly cardSelector: CardSelector;
     private readonly distractorBuilder: DistractorBuilder;
     private readonly typeSelector: QuestionTypeSelector;
-    private readonly strategy: ModeStrategy;
     private readonly cards: FlashCard[];
     private recentCardIds: string[] = [];
 
-    constructor(params: { cards: FlashCard[]; strategy: ModeStrategy }) {
+    constructor(params: { cards: FlashCard[] }) {
         this.cards = params.cards;
-        this.strategy = params.strategy;
         this.cardMemory = new CardMemoryManager(params.cards);
         this.cardSelector = new CardSelector(this.cardMemory);
         this.distractorBuilder = new DistractorBuilder();
@@ -49,7 +48,7 @@ export class QuestionEngine {
      * Tracks recently shown cards to prevent immediate repetition.
      */
     generateQuestion(level: number): Question {
-        const config = this.strategy.getQuestionConfig(level);
+        const config = getSpeedQuestionConfig(level);
 
         const card = this.cardSelector.selectNext({
             cards: this.cards,
@@ -94,7 +93,7 @@ export class QuestionEngine {
             options,
             metadata: {
                 difficulty: level,
-                timeLimit: this.strategy.getTimeLimit(level, 0),
+                timeLimit: getSpeedTimeLimit(level),
                 showHint: level <= 1,
             },
         };

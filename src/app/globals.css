@@ -13,7 +13,6 @@
     --color-bg: #f7f7f8;
     --color-text: #3c3c3c;
     --color-muted: #afafaf;
-    --color-surface: #ffffff;
     --color-border: #e5e7eb;
     --color-danger-bg: #ffdfe0;
     --color-teal: #00d1e0;
@@ -125,21 +124,6 @@ body {
 
 .animate-shake {
     animation: shake 0.4s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
-}
-
-@keyframes floatUp {
-    0% {
-        opacity: 1;
-        transform: translateY(0) scale(1);
-    }
-    100% {
-        opacity: 0;
-        transform: translateY(-25px) scale(1.2);
-    }
-}
-
-.animate-float-up {
-    animation: floatUp 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
 }
 
 /* =========================================================

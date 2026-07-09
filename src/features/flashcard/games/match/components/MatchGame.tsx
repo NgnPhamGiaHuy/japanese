@@ -15,9 +15,9 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useEffect, useRef } from "react";
 
 import { logMatchGameCompleted } from "@/features/flashcard/actions/activity-log.actions";
+import { useGameCompletionLogger } from "@/features/flashcard/games/hooks";
 import { useFlashcardGameBestScore } from "@/features/flashcard/hooks/useFlashcardGameBestScore";
 import { scoreToTier, TIER_INFO } from "@/features/game/domain";
 import { useUserProgress } from "@/features/user/hooks";
@@ -59,25 +59,14 @@ const MatchGame = ({ data }: MatchGameProps) => {
     const tier = scoreToTier(bestScore);
     const tierInfo = TIER_INFO[tier];
 
-    // Log when the game reaches the results phase (once per session)
-    const loggedRef = useRef(false);
-    useEffect(() => {
-        if (game.phase !== "results" || loggedRef.current || !user) return;
-        loggedRef.current = true;
-        void (async () => {
-            try {
-                const token = await user.getIdToken();
-                const finalTier = scoreToTier(game.score);
-                void logMatchGameCompleted(token, user.uid, data.lesson.id, data.lesson.title, {
-                    score: game.score,
-                    timeMs: 0,
-                    tier: finalTier,
-                });
-            } catch {
-                // Non-blocking
-            }
-        })();
-    }, [game.phase, game.score, user, data.lesson.id, data.lesson.title]);
+    useGameCompletionLogger({
+        phase: game.phase,
+        score: game.score,
+        user,
+        lessonId: data.lesson.id,
+        lessonTitle: data.lesson.title,
+        logFn: logMatchGameCompleted,
+    });
 
     // ── Phase: Intro ───────────────────────────────────────────────────────
     if (game.phase === "intro") {

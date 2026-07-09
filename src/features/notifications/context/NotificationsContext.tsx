@@ -23,10 +23,10 @@
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
 
 import { useAppStore } from "@/lib/app-store";
-import { subscribeNotifications } from "./notification.service";
-import { groupNotificationsByTime, isUnread } from "./types";
+import { subscribeNotifications } from "../services";
+import { groupNotificationsByTime, isUnread } from "../types";
 
-import type { AppNotification, NotificationGroup } from "./types";
+import type { AppNotification, NotificationGroup } from "../types";
 
 // ─── Context shape ────────────────────────────────────────────────────────────
 

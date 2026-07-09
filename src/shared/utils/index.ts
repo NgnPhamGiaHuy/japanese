@@ -1,4 +1,5 @@
 export * from "./array";
+export * from "./atomicCard";
 export * from "./audio";
 export * from "./cn";
 export * from "./colors";

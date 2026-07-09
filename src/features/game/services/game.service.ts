@@ -11,7 +11,6 @@ import {
     serverTimestamp,
     setDoc,
     updateDoc,
-    where,
 } from "firebase/firestore";
 
 import { scoreToTier } from "@/features/game/domain";
@@ -41,16 +40,6 @@ export interface LeaderboardEntry {
     score: number;
     gameMode: string;
     timestamp: string;
-}
-
-export interface GameSession {
-    id: string;
-    userId: string;
-    userName: string;
-    gameMode: string;
-    score: number;
-    status: "playing" | "finished";
-    updatedAt: Date | null;
 }
 
 export interface GameResultInput {
@@ -307,28 +296,3 @@ export const subscribeGameStats = (
     });
 };
 
-/**
- * Real-time subscription to active game sessions for a given mode.
- * Useful for showing "live" players during gameplay.
- */
-export const subscribeActiveSessions = (
-    gameMode: string,
-    onUpdate: (sessions: GameSession[]) => void,
-): Unsubscribe => {
-    const q = query(
-        sessionsCol(),
-        where("gameMode", "==", gameMode),
-        where("status", "==", "playing"),
-        orderBy("score", "desc"),
-        limit(10),
-    );
-
-    return onSnapshot(q, (snap) => {
-        const sessions: GameSession[] = snap.docs.map((d) => ({
-            id: d.id,
-            ...(d.data() as Omit<GameSession, "id">),
-            updatedAt: d.data().updatedAt?.toDate() ?? null,
-        }));
-        onUpdate(sessions);
-    });
-};
