@@ -6,9 +6,9 @@ import useAICard from "@/features/ai/hooks/useAICard";
 import { useAppStore } from "@/lib/app-store";
 import { useAlert } from "@/shared/providers";
 import { deleteCardImage, uploadCardImage } from "../services";
+import { CardValidationError } from "../utils/card.validator";
 import { joinAlternatives } from "../utils/formatting";
 import { parseText } from "../utils/parser";
-import { CardValidationError } from "../utils/card.validator";
 
 import type { EditorCard, FlashCard, Lesson } from "../types";
 
@@ -24,7 +24,12 @@ export const makeCard = (order = 0): EditorCard => ({
 /** Serializes cards to the CSV text shown in the paste-mode textarea. */
 function buildPasteText(cards: EditorCard[]): string {
     const lines = cards.map((c) => {
-        const parts = [c.primary || "", joinAlternatives(c.alternatives), c.meaning || "", c.example || ""];
+        const parts = [
+            c.primary || "",
+            joinAlternatives(c.alternatives),
+            c.meaning || "",
+            c.example || "",
+        ];
         return parts.map((p) => (p.includes(",") ? `"${p.replace(/"/g, '""')}"` : p)).join(",");
     });
     return lines.join("\n");

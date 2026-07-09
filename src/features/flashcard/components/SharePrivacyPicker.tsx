@@ -103,10 +103,7 @@ const SharePrivacyPicker = ({
 
                         {openPrivacyMenu && (
                             <>
-                                <div
-                                    className="fixed inset-0 z-40"
-                                    onClick={onClosePrivacyMenu}
-                                />
+                                <div className="fixed inset-0 z-40" onClick={onClosePrivacyMenu} />
                                 <div className="animate-in fade-in zoom-in-95 absolute top-10 left-0 z-50 w-72 overflow-hidden rounded-2xl border-2 border-gray-100 bg-white shadow-lg">
                                     {(["restricted", "link", "public"] as const).map((mode) => {
                                         const level =

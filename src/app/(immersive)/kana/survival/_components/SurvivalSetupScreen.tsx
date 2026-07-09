@@ -100,9 +100,7 @@ const SurvivalSetupScreen = ({ game, bestScores, alphabet, userId }: SurvivalSet
                                     +{TIME_ATTACK_MAX_STREAK_BONUS_SEC}s
                                 </span>{" "}
                                 per correct — always less than a wrong answer (
-                                <span className="text-text">
-                                    −{TIME_ATTACK_WRONG_PENALTY_SEC}s
-                                </span>
+                                <span className="text-text">−{TIME_ATTACK_WRONG_PENALTY_SEC}s</span>
                                 ), so the clock eventually runs out.
                             </p>
                         </div>

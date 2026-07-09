@@ -17,8 +17,14 @@ interface AnalyticsExportModalProps {
  * for external analysis and AI model training.
  */
 const AnalyticsExportModal = ({ isOpen, onClose }: AnalyticsExportModalProps) => {
-    const { datasets, selectedDataset, setSelectedDataset, status, errorMessage, handleStartExport } =
-        useAnalyticsExport(onClose);
+    const {
+        datasets,
+        selectedDataset,
+        setSelectedDataset,
+        status,
+        errorMessage,
+        handleStartExport,
+    } = useAnalyticsExport(onClose);
 
     return (
         <Modal isOpen={isOpen} onClose={onClose} title="Advanced Data Export" maxWidth="xl">

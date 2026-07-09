@@ -1,8 +1,8 @@
 "use client";
 
-import type { LucideIcon } from "lucide-react";
-
 import { Button } from "@/shared/components/ui";
+
+import type { LucideIcon } from "lucide-react";
 
 interface ActionRowProps {
     icon: LucideIcon;

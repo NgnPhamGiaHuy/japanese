@@ -57,7 +57,11 @@ const SurvivalGameOverScreen = ({
                     </Button>
                 </div>
 
-                <Leaderboard gameMode={game.activeModeKey} currentUserId={userId} accentColor="#ff9600" />
+                <Leaderboard
+                    gameMode={game.activeModeKey}
+                    currentUserId={userId}
+                    accentColor="#ff9600"
+                />
             </div>
         </div>
     );

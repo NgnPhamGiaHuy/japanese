@@ -3,8 +3,8 @@
 import { useEffect, useState } from "react";
 
 import { useAppStore } from "@/lib/app-store";
-import { fetchAdminRoleAction } from "../actions";
 import { useAdminToken } from "./useAdminToken";
+import { fetchAdminRoleAction } from "../actions";
 
 export interface AdminRoleCheckResult {
     role: "admin" | "superadmin" | null;

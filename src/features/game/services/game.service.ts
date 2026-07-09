@@ -295,4 +295,3 @@ export const subscribeGameStats = (
         onUpdate(stats);
     });
 };
-

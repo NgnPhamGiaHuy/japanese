@@ -118,7 +118,9 @@ const ShareCollaboratorsPanel = ({
                         const isCurrentUser = uid === user?.uid;
                         const displayName = isCurrentUser
                             ? "You"
-                            : meta?.displayName || meta?.email?.split("@")[0] || `User ${uid.substring(0, 6)}`;
+                            : meta?.displayName ||
+                              meta?.email?.split("@")[0] ||
+                              `User ${uid.substring(0, 6)}`;
                         const displayEmail = isCurrentUser ? user?.email || "" : meta?.email || "";
                         const initial = isCurrentUser
                             ? (user?.displayName?.[0] ?? user?.email?.[0] ?? "Y").toUpperCase()

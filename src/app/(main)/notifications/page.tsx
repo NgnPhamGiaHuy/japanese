@@ -8,11 +8,11 @@ import {
     logNotificationsCleared,
     logNotificationsReadAll,
 } from "@/features/notifications/actions/activity-log.actions";
+import { useNotifications } from "@/features/notifications/context/NotificationsContext";
 import {
     deleteAllNotifications,
     markAllNotificationsRead,
 } from "@/features/notifications/services";
-import { useNotifications } from "@/features/notifications/context/NotificationsContext";
 import { isUnread } from "@/features/notifications/types";
 import { useAppStore } from "@/lib/app-store";
 import { auth } from "@/lib/firebase";
