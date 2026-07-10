@@ -22,16 +22,19 @@ import type { PracticeMode } from "../types";
 export function KanaPractice() {
     const { dataset, alphabet, themeColor } = useKanaDataset();
     const [practiceMode, setPracticeMode] = useState<PracticeMode>(1);
-    const { char, isRandom, next, prev, playCurrent, toggleRandom } = useKanaPlayDeck({
-        dataset,
-        alphabet,
-        speakOnNavigate: practiceMode === 3,
-    });
+    const { char, isRandom, next, prev, playCurrent, autoPlayCurrent, toggleRandom } =
+        useKanaPlayDeck({
+            dataset,
+            alphabet,
+            // Mode 3 is listen-and-write, so navigation speaks. The learner's auto-play setting is
+            // enforced downstream by the audio manager.
+            speakOnNavigate: practiceMode === 3,
+        });
 
     const cycleMode = () => {
         const nextMode = practiceMode >= 3 ? 1 : ((practiceMode + 1) as PracticeMode);
         setPracticeMode(nextMode);
-        if (nextMode === 3) playCurrent();
+        if (nextMode === 3) autoPlayCurrent();
     };
 
     if (!char) return null;

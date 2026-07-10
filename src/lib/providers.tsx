@@ -8,6 +8,7 @@ import AdminProvider from "@/features/admin/context/AdminContext";
 import { NotificationsProvider } from "@/features/notifications/context/NotificationsContext";
 import { useActivityTracker, useFirebaseAuth } from "@/features/user/hooks";
 import { useAppStore } from "@/lib/app-store";
+import { AudioProvider } from "@/lib/AudioProvider";
 import { FontSyncer } from "@/lib/FontSyncer";
 import { AlertProvider } from "@/shared/providers";
 
@@ -56,6 +57,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
         <QueryClientProvider client={queryClient}>
             <AlertProvider>
                 <FontSyncer />
+                <AudioProvider />
                 <AuthGate>
                     <AdminProvider>
                         <NotificationsProvider>{children}</NotificationsProvider>

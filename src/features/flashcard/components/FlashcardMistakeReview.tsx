@@ -6,18 +6,19 @@
 
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useMemo, useState } from "react";
 
 import { AlertCircle, Brain, Check, Lightbulb, Loader2, X } from "lucide-react";
 
 import useAIExplanation from "@/features/ai/hooks/useAIExplanation";
 import { StatGrid } from "@/features/game/components";
-import { useAppStore } from "@/lib/app-store";
+import { playSfx, sequence, speak } from "@/shared/audio";
 import { Button, EmptyState } from "@/shared/components/ui";
-import { hexToThemeColor, playAudio, playSFX, shuffleArray } from "@/shared/utils";
+import { hexToThemeColor, shuffleArray } from "@/shared/utils";
 import FlashcardAudioButton from "./FlashcardAudioButton";
 import GradeButtons from "./GradeButtons";
 import McChoiceGrid from "./McChoiceGrid";
+import { useRevealPronunciation } from "../hooks/useRevealPronunciation";
 import { gradeCard } from "../services";
 import { getAudioText, reinsertCard, resolveCardFaces } from "../utils";
 
@@ -64,7 +65,6 @@ const FlashcardMistakeReview = ({
     onComplete,
 }: FlashcardMistakeReviewProps) => {
     const themeHex = lesson.themeColor || "#1cb0f6";
-    const { globalAutoPlay } = useAppStore();
 
     /** Local queue state — initialized from cards prop, supports Again re-insertion */
     const [queue, setQueue] = useState<CardWithProgress[]>(() => [...cards]);
@@ -82,15 +82,7 @@ const FlashcardMistakeReview = ({
 
     const card = queue[currentIndex];
 
-    // Play audio when the card is flipped to the back face
-    const prevFlippedRef = useRef(false);
-    useEffect(() => {
-        const justFlipped = isFlipped && !prevFlippedRef.current;
-        if (justFlipped && globalAutoPlay && card) {
-            playAudio(getAudioText(card));
-        }
-        prevFlippedRef.current = isFlipped;
-    }, [isFlipped, globalAutoPlay, card]);
+    useRevealPronunciation(isFlipped, card, "flashcard-mistake-review");
 
     const mcChoices = useMemo<string[] | null>(() => {
         const d = card?.distractors;
@@ -139,7 +131,8 @@ const FlashcardMistakeReview = ({
     const headerHint = displayHint && displayHint !== altSubtitle ? displayHint : null;
     const progress = (currentIndex / queue.length) * 100;
 
-    const handleGrade = (grade: Grade) => {
+    /** @param playCue - False when the multiple-choice path already sounded the answer. */
+    const handleGrade = (grade: Grade, playCue = true) => {
         const knew = grade === "Good" || grade === "Easy";
         const nextMistakes = knew ? stats.mistakeCardIds : [...stats.mistakeCardIds, card.id];
         setStats({
@@ -147,7 +140,7 @@ const FlashcardMistakeReview = ({
             incorrect: stats.incorrect + (!knew ? 1 : 0),
             mistakeCardIds: nextMistakes,
         });
-        playSFX(knew ? "correct" : "wrong");
+        if (playCue) playSfx(knew ? "correct" : "wrong");
         setIsFlipped(false);
         setMcSelected(null);
 
@@ -171,9 +164,22 @@ const FlashcardMistakeReview = ({
         setMcSelected(choice);
         const correct = choice === card.meaning;
         const grade: Grade = correct ? "Good" : "Again";
+
+        // The answer is already revealed, so speaking it is reinforcement, not a leak.
+        void sequence("flashcard-mc", [
+            { sfx: correct ? "correct" : "wrong" },
+            { waitForTail: correct ? "correct" : "wrong" },
+            {
+                speak: {
+                    text: getAudioText(card),
+                    options: { trigger: "auto", source: "flashcard-mistake-review-mc" },
+                },
+            },
+        ]);
+
         /** Short delay for visual feedback before auto-advancing */
         setTimeout(() => {
-            void handleGrade(grade);
+            void handleGrade(grade, false);
         }, 900);
     };
 
@@ -288,7 +294,7 @@ const FlashcardMistakeReview = ({
                         <div
                             className={`perspective-1000 preserve-3d relative flex aspect-3/4 w-full cursor-pointer flex-col justify-center transition-all duration-500 ${isFlipped ? "rotate-y-180" : ""}`}
                             onClick={() => {
-                                playSFX("click");
+                                playSfx("click");
                                 setIsFlipped((f) => !f);
                             }}
                         >
@@ -317,7 +323,12 @@ const FlashcardMistakeReview = ({
                             {/* Back (Memory Encoding with AI Aid) */}
                             <div className="rounded-5xl border-danger/20 absolute inset-0 flex rotate-y-180 flex-col items-center justify-center border-2 border-b-8 bg-white p-6 text-center shadow-sm backface-hidden sm:p-8">
                                 <FlashcardAudioButton
-                                    onPlay={() => playAudio(getAudioText(card))}
+                                    onPlay={() =>
+                                        speak(getAudioText(card), {
+                                            trigger: "user",
+                                            source: "flashcard-mistake-review",
+                                        })
+                                    }
                                     stopPropagation
                                     className="transition-colors"
                                     iconClassName="h-5 w-5 text-gray-500"

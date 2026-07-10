@@ -2,14 +2,14 @@ import { isValidElement } from "react";
 
 import { describe, expect, it, vi } from "vitest";
 
-import { playAudio } from "@/shared/utils";
+import { speak } from "@/shared/audio";
 import { ChartCell } from "./ChartCell";
 
 import type { ReactElement } from "react";
 import type { KanaChar } from "@/features/kana/types";
 
-vi.mock("@/shared/utils", () => ({
-    playAudio: vi.fn(),
+vi.mock("@/shared/audio", () => ({
+    speak: vi.fn(),
 }));
 
 const kana: KanaChar = {
@@ -37,7 +37,8 @@ describe("ChartCell", () => {
         expect(button.props.title).toBe("Play ア");
         button.props.onClick();
 
-        expect(playAudio).toHaveBeenCalledTimes(1);
-        expect(playAudio).toHaveBeenCalledWith("ア");
+        expect(speak).toHaveBeenCalledTimes(1);
+        // A chart tap is an explicit request, so it must never be gated by the auto-play setting.
+        expect(speak).toHaveBeenCalledWith("ア", { trigger: "user", source: "kana-chart" });
     });
 });

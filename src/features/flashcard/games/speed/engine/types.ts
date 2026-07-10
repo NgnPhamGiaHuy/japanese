@@ -116,8 +116,16 @@ export interface GameEngineConfig {
     displayName?: string;
     onScoreSync: (score: number) => void;
     onSessionEnd: (finalScore: number) => Promise<void>;
-    onAudioPlay?: (text: string) => void;
     onSFXPlay?: (sfx: "correct" | "wrong" | "click") => void;
+    /**
+     * Fired after every state mutation.
+     *
+     * @remarks
+     * The React adapter used to poll `getState()` on a 100ms interval, which added up to 100ms of
+     * jitter before feedback audio could be scheduled and re-rendered the whole tree even while
+     * the game sat on its intro screen.
+     */
+    onStateChange?: () => void;
 }
 
 /**

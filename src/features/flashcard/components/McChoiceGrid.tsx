@@ -37,8 +37,19 @@ const McChoiceGrid = ({
     textColorMode,
     tileClassName = "",
 }: McChoiceGridProps) => {
+    // Correctness is signalled only by tile colour, which a screen-reader user cannot perceive.
+    const announcement =
+        selected === null
+            ? ""
+            : selected === correctAnswer
+              ? `Correct. The answer is ${correctAnswer}.`
+              : `Incorrect. The answer is ${correctAnswer}.`;
+
     return (
         <div className="grid grid-cols-2 gap-3">
+            <span role="status" aria-live="polite" className="sr-only">
+                {announcement}
+            </span>
             {choices.map((choice) => {
                 const isSelected = selected === choice;
                 const isCorrect = choice === correctAnswer;

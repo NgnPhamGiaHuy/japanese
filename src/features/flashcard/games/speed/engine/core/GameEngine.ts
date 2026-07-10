@@ -65,6 +65,12 @@ export class GameEngine {
         this.questionEngine.reset();
 
         this.loadNextQuestion();
+        this.notify();
+    }
+
+    /** Signals the React adapter that `getState()` will now return something different. */
+    private notify(): void {
+        this.config.onStateChange?.();
     }
 
     /**
@@ -89,6 +95,7 @@ export class GameEngine {
         this.state.feedbackStatus = result.correct ? "correct" : "wrong";
 
         this.config.onSFXPlay?.(result.correct ? "correct" : "wrong");
+        this.notify();
 
         setTimeout(() => this.completeFeedback(), 1100);
     }
@@ -103,6 +110,7 @@ export class GameEngine {
         this.stateMachine.transition("RESET");
         this.timer.stop();
         this.state = this.createInitialState();
+        this.notify();
     }
 
     /**
@@ -167,6 +175,7 @@ export class GameEngine {
         this.state.phase = "playing";
 
         this.loadNextQuestion();
+        this.notify();
     }
 
     /**
@@ -199,6 +208,7 @@ export class GameEngine {
         }
 
         this.config.onSFXPlay?.("wrong");
+        this.notify();
 
         setTimeout(() => this.completeFeedback(), 1100);
     }
@@ -215,6 +225,7 @@ export class GameEngine {
 
         this.timer.stop();
         this.state.phase = "results";
+        this.notify();
         void this.config.onSessionEnd(this.state.score);
     }
 
@@ -312,5 +323,6 @@ export class GameEngine {
     private handleTimerTick(timerState: TimerState): void {
         this.state.timeRemaining = timerState.remaining;
         this.state.timerFraction = timerState.fraction;
+        this.notify();
     }
 }

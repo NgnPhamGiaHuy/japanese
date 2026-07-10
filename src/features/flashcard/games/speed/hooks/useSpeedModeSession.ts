@@ -35,7 +35,6 @@ interface UseSpeedModeSessionParams {
     allCards: FlashCard[];
     lessonExists: boolean;
     gameMode: string;
-    bestScore: number;
     userId?: string;
     displayName?: string | null;
     addXP: (amount: number) => Promise<void>;
@@ -56,7 +55,6 @@ export function useSpeedModeSession({
     allCards,
     lessonExists,
     gameMode,
-    bestScore,
     userId,
     displayName,
     addXP,
@@ -69,7 +67,6 @@ export function useSpeedModeSession({
     } = useGameEngine({
         cards: allCards,
         gameMode,
-        bestScore,
         userId,
         displayName: displayName ?? undefined,
         addXP,

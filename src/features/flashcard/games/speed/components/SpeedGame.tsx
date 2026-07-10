@@ -48,7 +48,6 @@ const SpeedGame = ({ data }: SpeedGameProps) => {
         allCards: data.cards,
         lessonExists: true,
         gameMode,
-        bestScore,
         userId: user?.uid,
         displayName: user?.displayName,
         addXP,

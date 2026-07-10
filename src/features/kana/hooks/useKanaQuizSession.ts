@@ -22,7 +22,8 @@ import { useCallback, useLayoutEffect, useRef, useState } from "react";
 import { comboMultiplier } from "@/features/game/domain";
 import { useGameSession } from "@/features/game/hooks";
 import { useUserProgress } from "@/features/user/hooks";
-import { allowAudio, playPronunciationFeedback, playSFX, shuffleArray } from "@/shared/utils";
+import { playSfx, sequence } from "@/shared/audio";
+import { shuffleArray } from "@/shared/utils";
 import { VISUAL_GROUPS } from "../data";
 
 import type { KanaChar, QuestionType } from "../types";
@@ -132,10 +133,15 @@ export function useKanaQuizSession({
      *
      * @remarks
      * Refills the deck when empty (shuffled full dataset).
-     * Accepts an optional forced question type; otherwise picks randomly.
+     *
+     * Survival is the only caller that omits `forceType`, and its screen always draws
+     * multiple-choice romaji. The fallback used to pick randomly from
+     * `["read", "reverse", "listen", "type"]`, but no screen rendered those differently, so the
+     * choice was invisible to the learner. A real listening question needs a screen that hides the
+     * glyph; the speech policy already has the prompt-stage exception waiting for it.
      */
     const generateQuestion = useCallback(
-        (forceType?: QuestionType, isSmartMode = false) => {
+        (forceType?: QuestionType) => {
             if (deckRef.current.length === 0) {
                 deckRef.current = shuffleArray([...dataset]);
             }
@@ -144,18 +150,8 @@ export function useKanaQuizSession({
             const distractors = buildDistractors(target, dataset);
             const allOptions = shuffleArray([...distractors, target]);
 
-            let selectedType: QuestionType;
-            if (forceType) {
-                selectedType = forceType;
-            } else if (isSmartMode) {
-                selectedType = "type";
-            } else {
-                const types: QuestionType[] = ["read", "reverse", "listen", "type"];
-                selectedType = types[Math.floor(Math.random() * types.length)];
-            }
-
+            setQuestionType(forceType ?? "read");
             setQuestion(target);
-            setQuestionType(selectedType);
             setOptions(allOptions);
             setStatus("idle");
         },
@@ -213,10 +209,10 @@ export function useKanaQuizSession({
                     return next;
                 });
 
-                playSFX("correct");
+                playSfx("correct");
                 onCorrectComboRef.current?.({ points: pts, streak: nextStreak });
             } else {
-                playSFX("wrong");
+                playSfx("wrong");
                 streakRef.current = 0;
                 setStreak(0);
 
@@ -228,8 +224,22 @@ export function useKanaQuizSession({
                 }
             }
 
-            if (question && allowAudio(questionType, "feedback")) {
-                playPronunciationFeedback(question.char);
+            // The cue fired above; speak once it has rung out. `replace` because answering the next
+            // question means the previous character's pronunciation is no longer the feedback.
+            if (question) {
+                void sequence(
+                    "kana-quiz-feedback",
+                    [
+                        { waitForTail: isCorrect ? "correct" : "wrong" },
+                        {
+                            speak: {
+                                text: question.char,
+                                options: { trigger: "auto", source: "kana-quiz", questionType },
+                            },
+                        },
+                    ],
+                    { policy: "replace" },
+                );
             }
 
             setTimeout(

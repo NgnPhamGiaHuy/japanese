@@ -14,9 +14,9 @@ import { ArrowLeft, X } from "lucide-react";
 
 import { gameQuizStreakColumnClassName, StreakComboBadge } from "@/features/game/components";
 import { AnswerFeedback, KanaAudioButton } from "@/features/kana/components";
+import { speak } from "@/shared/audio";
 import { ScreenHeaderBackButton, ScreenHeaderRow } from "@/shared/components/layout";
 import { Button } from "@/shared/components/ui";
-import { playAudio } from "@/shared/utils";
 
 import type { KanaChar, QuestionType } from "@/features/kana/types";
 import type { QuizMode } from "../types";
@@ -99,7 +99,9 @@ export function QuizPlaying({
                     >
                         <KanaAudioButton
                             char={question.char}
-                            onPlay={() => playAudio(question.char)}
+                            onPlay={() =>
+                                speak(question.char, { trigger: "user", source: "kana-quiz" })
+                            }
                             iconColorClassName={themeColor.text}
                             className="absolute top-4 right-4 bg-gray-50! hover:bg-gray-100!"
                         />
@@ -162,7 +164,9 @@ export function QuizPlaying({
                         question={question}
                         questionType={questionType}
                         primaryBg={themeColor.bg}
-                        onReplayAudio={() => playAudio(question.char)}
+                        onReplayAudio={() =>
+                            speak(question.char, { trigger: "user", source: "kana-quiz" })
+                        }
                     />
                 </div>
             )}

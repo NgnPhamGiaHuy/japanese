@@ -6,17 +6,18 @@
 
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import { Check, Lightbulb, RefreshCw, X } from "lucide-react";
 
 import { StatGrid } from "@/features/game/components";
-import { useAppStore } from "@/lib/app-store";
+import { playSfx, sequence, speak } from "@/shared/audio";
 import { Button, EmptyState } from "@/shared/components/ui";
-import { hexToThemeColor, playAudio, playSFX, shuffleArray } from "@/shared/utils";
+import { hexToThemeColor, shuffleArray } from "@/shared/utils";
 import FlashcardAudioButton from "./FlashcardAudioButton";
 import GradeButtons from "./GradeButtons";
 import McChoiceGrid from "./McChoiceGrid";
+import { useRevealPronunciation } from "../hooks/useRevealPronunciation";
 import { getDailyProgress, gradeCard } from "../services";
 import { getAudioText, reinsertCard, resolveCardFaces } from "../utils";
 
@@ -63,7 +64,6 @@ const FlashcardPractice = ({
     onAnswer,
     onComplete,
 }: FlashcardPracticeProps) => {
-    const { globalAutoPlay } = useAppStore();
     const themeHex = lesson.themeColor || "#1cb0f6";
 
     /** Local queue state — initialized from cards prop, supports Again re-insertion */
@@ -83,7 +83,6 @@ const FlashcardPractice = ({
 
     /** Local state for the multiple-choice selection animation */
     const [mcSelected, setMcSelected] = useState<string | null>(null);
-    const prevFlippedRef = useRef(false);
 
     /** Fetch daily progress on mount for informational purposes */
     useEffect(() => {
@@ -92,20 +91,10 @@ const FlashcardPractice = ({
         }
     }, [userId]);
 
-    /**
-     * Pronunciation Reinforcement
-     * Plays audio upon "reveal" (flipping the card) to bond visual memory with sound.
-     */
-    useEffect(() => {
-        const justFlipped = isFlipped && !prevFlippedRef.current;
-        if (justFlipped && globalAutoPlay) {
-            const card = queue[currentIndex];
-            if (card) playAudio(getAudioText(card));
-        }
-        prevFlippedRef.current = isFlipped;
-    }, [isFlipped, globalAutoPlay, queue, currentIndex]);
-
     const card = queue[currentIndex];
+
+    /** Pronunciation reinforcement — bonds the written form to its sound on reveal. */
+    useRevealPronunciation(isFlipped, card, "flashcard-practice");
 
     /**
      * Multiple Choice Choice Generation
@@ -155,7 +144,11 @@ const FlashcardPractice = ({
     const headerHint = displayHint && displayHint !== altSubtitle ? displayHint : null;
     const progress = (currentIndex / queue.length) * 100;
 
-    const handleGrade = (grade: Grade) => {
+    /**
+     * @param playCue - False when the caller already sounded the answer. Multiple-choice grading
+     *   is deferred by 750ms for the colour animation, but its cue must fire on selection.
+     */
+    const handleGrade = (grade: Grade, playCue = true) => {
         const knew = grade === "Good" || grade === "Easy";
         const nextMistakes = knew ? stats.mistakeCardIds : [...stats.mistakeCardIds, card.id];
         setStats({
@@ -166,7 +159,7 @@ const FlashcardPractice = ({
         setIsFlipped(false);
         setHintVisible(false);
         setMcSelected(null);
-        playSFX(knew ? "correct" : "wrong");
+        if (playCue) playSfx(knew ? "correct" : "wrong");
 
         // Advance UI immediately — writes are fire-and-forget
         if (grade === "Again") {
@@ -189,8 +182,22 @@ const FlashcardPractice = ({
         setMcSelected(choice);
         const correct = choice === card.meaning;
         const grade: Grade = correct ? "Good" : "Again";
+
+        // Cue immediately, then speak once it has rung out. The answer is already on screen, so
+        // hearing it is reinforcement. `handleGrade` must not sound the cue a second time.
+        void sequence("flashcard-mc", [
+            { sfx: correct ? "correct" : "wrong" },
+            { waitForTail: correct ? "correct" : "wrong" },
+            {
+                speak: {
+                    text: getAudioText(card),
+                    options: { trigger: "auto", source: "flashcard-practice-mc" },
+                },
+            },
+        ]);
+
         /** Short delay to allow user to see the success/error colors before advancing */
-        setTimeout(() => void handleGrade(grade), 750);
+        setTimeout(() => void handleGrade(grade, false), 750);
     };
 
     // ── Summary (XP and Accuracy Report) ───────────────────────────────────
@@ -269,7 +276,7 @@ const FlashcardPractice = ({
                                 <Button
                                     variant="ghost"
                                     onClick={() => {
-                                        playSFX("click");
+                                        playSfx("click");
                                         setHintVisible((v) => !v);
                                     }}
                                     className="absolute top-4 left-4 !rounded-xl border-2 border-gray-100 bg-gray-50 !p-2 shadow-none transition-colors hover:bg-gray-100 hover:shadow-none"
@@ -323,7 +330,7 @@ const FlashcardPractice = ({
                         <div
                             className={`perspective-1000 preserve-3d relative flex aspect-3/4 w-full cursor-pointer flex-col justify-center transition-all duration-500 ${isFlipped ? "rotate-y-180" : ""}`}
                             onClick={() => {
-                                playSFX("click");
+                                playSfx("click");
                                 setIsFlipped((f) => !f);
                             }}
                         >
@@ -363,7 +370,7 @@ const FlashcardPractice = ({
                                         variant="ghost"
                                         onClick={(e) => {
                                             e.stopPropagation();
-                                            playSFX("click");
+                                            playSfx("click");
                                             setHintVisible((v) => !v);
                                         }}
                                         className="absolute bottom-6 left-6 !flex !items-center !gap-1.5 !rounded-xl border-2 border-gray-100 bg-gray-50 !px-3 !py-1.5 !text-xs !font-black tracking-wide uppercase shadow-none hover:shadow-none"
@@ -392,7 +399,12 @@ const FlashcardPractice = ({
                             {/* Back Side */}
                             <div className="rounded-5xl sm:rounded-6xl absolute inset-0 flex rotate-y-180 flex-col items-center justify-center border-2 border-b-8 border-gray-200 bg-white p-6 text-center shadow-sm backface-hidden sm:p-8">
                                 <FlashcardAudioButton
-                                    onPlay={() => playAudio(getAudioText(card))}
+                                    onPlay={() =>
+                                        speak(getAudioText(card), {
+                                            trigger: "user",
+                                            source: "flashcard-practice",
+                                        })
+                                    }
                                     stopPropagation
                                     className="z-10 shrink-0"
                                     iconClassName="h-5 w-5 sm:h-6 sm:w-6 text-gray-500"

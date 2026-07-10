@@ -2,7 +2,7 @@
 
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 
-import { playAudio } from "@/shared/utils";
+import { speak } from "@/shared/audio";
 
 import type { AlphabetMode, KanaChar } from "../types";
 
@@ -10,6 +10,10 @@ interface UseKanaPlayDeckParams {
     dataset: KanaChar[];
     alphabet: AlphabetMode;
     onVisit?: (char: KanaChar) => void;
+    /**
+     * Whether this mode speaks when the learner moves to the next character.
+     * This is a mode concern only — the user's auto-play setting is enforced by the audio manager.
+     */
     speakOnNavigate?: boolean;
 }
 
@@ -61,7 +65,9 @@ export function useKanaPlayDeck({
         const nextChar = dataset[nextIndex];
 
         setNavigation({ ...normalizedNavigation, currentIndex: nextIndex });
-        if (speakOnNavigate && nextChar) playAudio(nextChar.char);
+        if (speakOnNavigate && nextChar) {
+            speak(nextChar.char, { trigger: "auto", source: "kana-deck" });
+        }
     };
 
     const toggleRandom = () => {
@@ -71,8 +77,14 @@ export function useKanaPlayDeck({
         });
     };
 
+    /** Learner tapped the speaker button. Never gated by the auto-play setting. */
     const playCurrent = () => {
-        if (char) playAudio(char.char);
+        if (char) speak(char.char, { trigger: "user", source: "kana-deck" });
+    };
+
+    /** The app decided to speak (e.g. entering a listen-and-write mode). Respects auto-play. */
+    const autoPlayCurrent = () => {
+        if (char) speak(char.char, { trigger: "auto", source: "kana-deck" });
     };
 
     return {
@@ -82,6 +94,7 @@ export function useKanaPlayDeck({
         next: () => navigate(1),
         prev: () => navigate(-1),
         playCurrent,
+        autoPlayCurrent,
         toggleRandom,
     };
 }

@@ -125,6 +125,12 @@ interface ButtonProps {
     title?: string;
     /** Accessible name for icon-only buttons with no visible text label. */
     "aria-label"?: string;
+    /** ARIA role override — use `"switch"` for on/off toggles rendered as buttons. */
+    role?: React.AriaRole;
+    /** On/off state for `role="switch"` toggles. */
+    "aria-checked"?: boolean;
+    /** Pressed state for toggle buttons that are not switches. */
+    "aria-pressed"?: boolean;
     /** Inline CSS styles. */
     style?: React.CSSProperties;
 }
@@ -161,6 +167,9 @@ const Button = ({
     id,
     title,
     "aria-label": ariaLabel,
+    role,
+    "aria-checked": ariaChecked,
+    "aria-pressed": ariaPressed,
     style,
     badge,
 }: ButtonProps) => {
@@ -206,6 +215,9 @@ const Button = ({
             id={id}
             title={title}
             aria-label={ariaLabel}
+            role={role}
+            aria-checked={ariaChecked}
+            aria-pressed={ariaPressed}
             type={type}
             onClick={(e: any) => !loading && onClick?.(e)}
             onMouseEnter={onMouseEnter}

@@ -21,7 +21,8 @@ import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react
 import { comboMultiplier } from "@/features/game/domain";
 import { useGameSession } from "@/features/game/hooks";
 import { auth } from "@/lib/firebase";
-import { getValidRomaji, playAudio, playSFX } from "@/shared/utils";
+import { playSfx, sequence } from "@/shared/audio";
+import { getValidRomaji } from "@/shared/utils";
 import { useKanaQuizSession } from "./useKanaQuizSession";
 import { logKanaSurvivalCompleted } from "../actions";
 
@@ -394,6 +395,28 @@ export const useSurvivalGame = ({
     }, [phase, challengeMode, updateDropGame]);
 
     /**
+     * Sounds a completed word: cue always, pronunciation only when there is room for it.
+     *
+     * @remarks
+     * Drop mode used to fire the click cue, the correct cue and a pronunciation in the same tick,
+     * on every completed word. A fast typist finishing words under a second apart cancelled each
+     * pronunciation mid-utterance, so the mode produced a stream of clipped syllables. The
+     * `ignore-if-busy` policy keeps the cue instant while letting the voice finish what it
+     * started — the reward is the cue; the pronunciation is a bonus when the pace allows.
+     */
+    const announceCompletedWord = useCallback((char: string) => {
+        playSfx("correct");
+        void sequence(
+            "survival-drop-feedback",
+            [
+                { waitForTail: "correct" },
+                { speak: { text: char, options: { trigger: "auto", source: "survival-drop" } } },
+            ],
+            { policy: "ignore-if-busy" },
+        );
+    }, []);
+
+    /**
      * Handles keyboard input for Drop Mode.
      *
      * @remarks
@@ -415,14 +438,13 @@ export const useSurvivalGame = ({
                     if (still.length > 0) {
                         target.typed = newTyped;
                         target.validOptions = still;
-                        playSFX("click");
+                        playSfx("click");
                         hit = true;
                         if (still.some((o) => o === newTyped)) {
                             state.words = state.words.filter((w) => w.id !== target.id);
                             state.activeId = null;
                             dropStreak.current += 1;
-                            playSFX("correct");
-                            playAudio(target.char);
+                            announceCompletedWord(target.char);
                             const pts = comboMultiplier(dropStreak.current);
                             dropScore.current += pts;
                             setLastPoints(pts);
@@ -443,14 +465,13 @@ export const useSurvivalGame = ({
                         o.startsWith(inputChar),
                     );
                     state.activeId = target.id;
-                    playSFX("click");
+                    playSfx("click");
                     hit = true;
                     if (target.validOptions.some((o) => o === inputChar)) {
                         state.words = state.words.filter((w) => w.id !== target.id);
                         state.activeId = null;
                         dropStreak.current += 1;
-                        playSFX("correct");
-                        playAudio(target.char);
+                        announceCompletedWord(target.char);
                         const pts = comboMultiplier(dropStreak.current);
                         dropScore.current += pts;
                         setLastPoints(pts);
@@ -461,14 +482,18 @@ export const useSurvivalGame = ({
 
             if (!hit) {
                 dropStreak.current = 0;
-                playSFX("wrong");
-                engine.setStatus("wrong");
-                setErrorFlash(true);
-                setTimeout(() => setErrorFlash(false), 200);
+                // A keypress can only be "wrong" if there was something to type. Without this
+                // guard, tapping keys before the first character spawns scolds the player.
+                if (state.words.length > 0) {
+                    playSfx("wrong");
+                    engine.setStatus("wrong");
+                    setErrorFlash(true);
+                    setTimeout(() => setErrorFlash(false), 200);
+                }
             }
             setDropTick((t) => t + 1);
         },
-        [engine],
+        [announceCompletedWord, engine],
     );
 
     // ── Drop score sync ───────────────────────────────────────────────────────

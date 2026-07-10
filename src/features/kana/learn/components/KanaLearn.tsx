@@ -14,7 +14,6 @@ import { ChevronRight } from "lucide-react";
 
 import { useKanaDataset, useKanaPlayDeck } from "@/features/kana/hooks";
 import { useUserProgress } from "@/features/user/hooks";
-import { useAppStore } from "@/lib/app-store";
 import { ScreenHeader } from "@/shared/components/layout";
 import { Button } from "@/shared/components/ui";
 import { LearnCard } from "./LearnCard";
@@ -23,14 +22,14 @@ import { LearnProgress } from "./LearnProgress";
 export function KanaLearn() {
     const { dataset, alphabet, themeColor } = useKanaDataset();
     const { markLearned } = useUserProgress();
-    const { globalAutoPlay } = useAppStore();
     const markedThisSession = useRef(new Set<string>());
 
     const { char, currentIndex, isRandom, next, prev, playCurrent, toggleRandom } = useKanaPlayDeck(
         {
             dataset,
             alphabet,
-            speakOnNavigate: globalAutoPlay,
+            // Learn mode always speaks on navigation; the auto-play setting is applied downstream.
+            speakOnNavigate: true,
             onVisit: (visitedChar) => {
                 if (markedThisSession.current.has(visitedChar.char)) return;
                 markedThisSession.current.add(visitedChar.char);

@@ -5,7 +5,7 @@ import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react
 import { getAudioText } from "@/features/flashcard/utils/displayEngine";
 import { useGameSession } from "@/features/game/hooks/useGameSession";
 import { recordGameResult } from "@/features/game/services";
-import { allowAudio, playPronunciationFeedback, playSFX } from "@/shared/utils";
+import { playSfx, sequence } from "@/shared/audio";
 import { GameEngine } from "../engine/core/GameEngine";
 
 import type { FlashCard } from "@/features/flashcard/types";
@@ -14,7 +14,6 @@ import type { GameState } from "../engine/types";
 interface UseGameEngineConfig {
     cards: FlashCard[];
     gameMode: string;
-    bestScore: number;
     userId?: string;
     displayName?: string;
     addXP: (amount: number) => Promise<void>;
@@ -24,8 +23,8 @@ interface UseGameEngineConfig {
  * React adapter for the GameEngine class.
  *
  * @remarks
- * Bridges the imperative GameEngine with React's declarative model.
- * Manages engine lifecycle, state polling, and session persistence.
+ * Bridges the imperative GameEngine with React's declarative model: the engine pushes state
+ * changes via `onStateChange`, and this hook owns lifecycle and session persistence.
  *
  * All users (owner or shared) write to their own userProgress namespace,
  * so no isSharedContext branching is needed here.
@@ -36,7 +35,6 @@ export function useGameEngine(config: UseGameEngineConfig) {
 
     // Stable refs prevent engine rebuilds on every render while keeping callbacks current.
     const addXPRef = useRef(config.addXP);
-    const bestScoreRef = useRef(config.bestScore);
     const gameModeRef = useRef(config.gameMode);
     const userIdRef = useRef(config.userId);
     const displayNameRef = useRef(config.displayName);
@@ -59,7 +57,6 @@ export function useGameEngine(config: UseGameEngineConfig) {
      */
     useLayoutEffect(() => {
         addXPRef.current = config.addXP;
-        bestScoreRef.current = config.bestScore;
         gameModeRef.current = config.gameMode;
         userIdRef.current = config.userId;
         displayNameRef.current = config.displayName;
@@ -99,7 +96,8 @@ export function useGameEngine(config: UseGameEngineConfig) {
                     );
                 }
             },
-            onSFXPlay: (sfx) => playSFX(sfx),
+            onSFXPlay: (sfx) => playSfx(sfx),
+            onStateChange: () => setState(engine.getState()),
         });
 
         engineRef.current = engine;
@@ -112,39 +110,38 @@ export function useGameEngine(config: UseGameEngineConfig) {
     }, [config.cards]);
 
     /**
-     * Polls engine state every 100ms to drive React re-renders.
+     * Speaks the answer once the feedback cue has rung out.
      *
      * @remarks
-     * The engine mutates its own state synchronously (timer ticks, answer
-     * evaluation). Polling at 100ms is fast enough for smooth UI updates
-     * while staying well below the 80ms timer tick rate.
-     */
-    useEffect(() => {
-        const interval = setInterval(() => {
-            const current = engineRef.current?.getState();
-            if (current) setState(current);
-        }, 100);
-
-        return () => clearInterval(interval);
-    }, []);
-
-    /**
-     * Plays audio feedback when answer status changes.
+     * The engine plays the correct/wrong cue synchronously via `onSFXPlay`. The sequencer then
+     * waits out that cue's envelope before the pronunciation starts, which is what the old
+     * hard-coded 250ms delay claimed to do but never did — the `correct` cue rings for ~540ms.
      *
-     * @remarks
-     * SFX fires inside the engine via onSFXPlay. This effect handles the
-     * delayed pronunciation playback (250ms offset so the SFX is heard first).
+     * `replace` policy: answering the next question mid-pronunciation abandons the previous one,
+     * because feedback belongs to the question on screen.
      */
     useEffect(() => {
         const question = state?.currentQuestion;
-        if (!question || state.feedbackStatus === "idle") return;
+        const status = state?.feedbackStatus;
+        if (!question || !status || status === "idle") return;
 
         const card = config.cards.find((c) => c.id === question.cardId);
         if (!card) return;
 
-        if (allowAudio("speed", "feedback")) {
-            playPronunciationFeedback(getAudioText(card), 250);
-        }
+        const cue = status === "correct" ? "correct" : "wrong";
+        void sequence(
+            "speed-feedback",
+            [
+                { waitForTail: cue },
+                {
+                    speak: {
+                        text: getAudioText(card),
+                        options: { trigger: "auto", source: "speed" },
+                    },
+                },
+            ],
+            { policy: "replace" },
+        );
     }, [state?.feedbackStatus, state?.currentQuestion, config.cards]);
 
     const startGame = useCallback(async () => {

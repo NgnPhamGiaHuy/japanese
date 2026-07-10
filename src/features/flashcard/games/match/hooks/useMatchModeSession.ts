@@ -31,7 +31,8 @@ import {
 } from "@/features/flashcard/games/match/config";
 import { useGameSession } from "@/features/game/hooks";
 import { recordGameResult } from "@/features/game/services";
-import { allowAudio, playAudio, playSFX, shuffleArray } from "@/shared/utils";
+import { playSfx, sequence } from "@/shared/audio";
+import { shuffleArray } from "@/shared/utils";
 import { useMatchGameStore } from "../../../hooks";
 import { gradeCard } from "../../../services/card.service";
 import { getAudioText } from "../../../utils/displayEngine";
@@ -238,7 +239,7 @@ export function useMatchModeSession({
                 !a.isDistractor && !b.isDistractor && a.pairId != null && a.pairId === b.pairId;
 
             if (isMatch) {
-                playSFX("correct");
+                playSfx("correct");
 
                 setStreak((prev) => {
                     const newStreak = prev + 1;
@@ -276,10 +277,23 @@ export function useMatchModeSession({
                             () => {},
                         );
 
-                        if (allowAudio("match", "feedback")) {
-                            // Delay so the "ting" SFX is heard before pronunciation.
-                            setTimeout(() => playAudio(getAudioText(card)), 300);
-                        }
+                        // The cue already fired; wait out its tail, then speak. Consecutive matches
+                        // QUEUE rather than replace, so a fast player hears each matched word in
+                        // full instead of a string of clipped first syllables. Input is not gated
+                        // on the audio — the queue absorbs the pace, and overflows are dropped.
+                        void sequence(
+                            "match-feedback",
+                            [
+                                { waitForTail: "correct" },
+                                {
+                                    speak: {
+                                        text: getAudioText(card),
+                                        options: { trigger: "auto", source: "match" },
+                                    },
+                                },
+                            ],
+                            { policy: "queue", queueDepth: 2 },
+                        );
                     }
                 }
 
@@ -288,7 +302,7 @@ export function useMatchModeSession({
             }
 
             // Wrong match — penalise score, shake tiles, decrement lives if active.
-            playSFX("wrong");
+            playSfx("wrong");
             setStreak(0);
             setWrongAttempts((prev) => prev + 1);
             setScore((prev) => {
@@ -339,7 +353,7 @@ export function useMatchModeSession({
             }
 
             if (current.selectedIds.length === 0) {
-                playSFX("click");
+                playSfx("click");
                 current.setSelected([id]);
                 return;
             }
@@ -350,7 +364,7 @@ export function useMatchModeSession({
                     current.setSelected([]);
                     return;
                 }
-                playSFX("click");
+                playSfx("click");
                 current.setSelected([first, id]);
                 current.setProcessing(true);
                 setTimeout(() => resolveTwo(first, id), 120);

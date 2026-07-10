@@ -7,8 +7,9 @@
  */
 "use client";
 
-import { Volume2 } from "lucide-react";
+import { Volume2, VolumeX } from "lucide-react";
 
+import { useAudioStatus } from "@/shared/audio";
 import { Button } from "@/shared/components/ui";
 import { cn } from "@/shared/utils";
 
@@ -32,13 +33,19 @@ const KanaAudioButton = ({
     iconColorClassName,
     className,
 }: KanaAudioButtonProps) => {
+    // When pronunciation keeps failing, say so rather than leaving the learner tapping in silence.
+    // The button stays enabled: the next tap is also the retry.
+    const unavailable = useAudioStatus() === "unavailable";
+    const label = unavailable ? "Pronunciation unavailable — tap to retry" : `Play ${char}`;
+
     return (
         <Button
             variant="ghost"
             onClick={onPlay}
-            title={`Play ${char}`}
-            className={cn(BASE_CLASS, className)}
-            icon={Volume2}
+            title={label}
+            aria-label={label}
+            className={cn(BASE_CLASS, unavailable && "opacity-60", className)}
+            icon={unavailable ? VolumeX : Volume2}
             iconSize={iconSize}
             iconClassName={iconColorClassName}
         />

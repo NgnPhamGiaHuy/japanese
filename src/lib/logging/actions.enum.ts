@@ -43,6 +43,9 @@ export const ActivityAction = {
     NOTIFICATIONS_CLEARED: "notification.cleared_all",
     NOTIFICATIONS_DELIVERED: "notification.delivered",
 
+    // ── Audio ─────────────────────────────────────────────────────────────────
+    AUDIO_PLAYBACK_FAILED: "audio.playback_failed",
+
     // ── Admin actions ─────────────────────────────────────────────────────────
     ADMIN_ROLE_GRANTED: "admin.role_granted",
     ADMIN_ROLE_REVOKED: "admin.role_revoked",

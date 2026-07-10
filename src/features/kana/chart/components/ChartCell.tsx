@@ -10,8 +10,8 @@
 
 import { motion } from "framer-motion";
 
+import { speak } from "@/shared/audio";
 import { Button } from "@/shared/components/ui";
-import { playAudio } from "@/shared/utils";
 
 import type { ChartCellProps } from "../types";
 
@@ -35,7 +35,7 @@ export function ChartCell({ item, showRomaji, learned, isHiragana }: ChartCellPr
         >
             <Button
                 variant="secondary"
-                onClick={() => playAudio(item.char)}
+                onClick={() => speak(item.char, { trigger: "user", source: "kana-chart" })}
                 title={`Play ${item.char}`}
                 className={`flex! h-full! w-full! flex-col! items-center! justify-center! p-0! shadow-none transition-all! duration-200 ${
                     learned ? learnedBg : "hover:bg-gray-50!"

@@ -127,6 +127,25 @@ body {
 }
 
 /* =========================================================
+   REDUCED MOTION
+
+   Answer feedback is carried by colour, motion and sound at once. A learner who has asked the
+   OS for less motion still gets the colour change and the live-region announcement, and the
+   state change lands instantly instead of animating. Durations are collapsed rather than set to
+   zero so that `animationend` / `transitionend` listeners still fire.
+   ========================================================= */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+}
+
+/* =========================================================
    3D CARD FLIP (Flashcard Player)
    ========================================================= */
 .perspective-1000 {

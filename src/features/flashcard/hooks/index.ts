@@ -6,6 +6,7 @@ export * from "./useDeckProgressStatus";
 export * from "./useFlashcardGameBestScore";
 export * from "./useLessons";
 export * from "./useMatchGameStore";
+export * from "./useRevealPronunciation";
 export * from "./useShareInvites";
 export * from "./useSharedLesson";
 export * from "./useVisibility";

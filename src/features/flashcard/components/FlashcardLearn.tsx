@@ -6,16 +6,17 @@
 
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 
 import { BookOpen, X } from "lucide-react";
 
 import { StatGrid } from "@/features/game/components";
-import { useAppStore } from "@/lib/app-store";
+import { playSfx, speak } from "@/shared/audio";
 import { Button, EmptyState } from "@/shared/components/ui";
-import { hexToThemeColor, playAudio, playSFX } from "@/shared/utils";
+import { hexToThemeColor } from "@/shared/utils";
 import FlashcardAudioButton from "./FlashcardAudioButton";
 import GradeButtons from "./GradeButtons";
+import { useRevealPronunciation } from "../hooks/useRevealPronunciation";
 import { gradeCard } from "../services";
 import { getAudioText, reinsertCard, resolveCardFaces } from "../utils";
 
@@ -39,7 +40,6 @@ const FlashcardLearn = ({
     onAnswer,
     onComplete,
 }: FlashcardLearnProps) => {
-    const { globalAutoPlay } = useAppStore();
     const themeHex = lesson.themeColor || "#1cb0f6";
 
     /** Local queue state — initialized from cards prop, supports Again re-insertion */
@@ -53,16 +53,8 @@ const FlashcardLearn = ({
     });
     const [showSummary, setShowSummary] = useState(false);
     const showAnswerRef = useRef<HTMLButtonElement>(null);
-    const prevRevealedRef = useRef(false);
 
-    useEffect(() => {
-        const justRevealed = revealed && !prevRevealedRef.current;
-        if (justRevealed && globalAutoPlay) {
-            const card = queue[currentIndex];
-            if (card) playAudio(getAudioText(card));
-        }
-        prevRevealedRef.current = revealed;
-    }, [revealed, globalAutoPlay, queue, currentIndex]);
+    useRevealPronunciation(revealed, queue[currentIndex], "flashcard-learn");
 
     if (cards.length === 0) {
         return (
@@ -94,7 +86,7 @@ const FlashcardLearn = ({
     const progress = (currentIndex / queue.length) * 100;
 
     const handleShowAnswer = () => {
-        playSFX("click");
+        playSfx("click");
         setRevealed(true);
     };
 
@@ -106,7 +98,7 @@ const FlashcardLearn = ({
             incorrect: stats.incorrect + (!knew ? 1 : 0),
             mistakeCardIds: nextMistakes,
         });
-        playSFX(knew ? "correct" : "wrong");
+        playSfx(knew ? "correct" : "wrong");
 
         // Advance UI immediately — writes are fire-and-forget
         if (grade === "Again") {
@@ -190,7 +182,12 @@ const FlashcardLearn = ({
                 {/* Card face */}
                 <div className="rounded-5xl relative flex w-full flex-col items-center justify-center border-2 border-b-8 border-gray-200 bg-white p-8 text-center shadow-sm">
                     <FlashcardAudioButton
-                        onPlay={() => playAudio(getAudioText(card))}
+                        onPlay={() =>
+                            speak(getAudioText(card), {
+                                trigger: "user",
+                                source: "flashcard-learn",
+                            })
+                        }
                         iconClassName="h-5 w-5 text-gray-400"
                     />
 

@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import { motion } from "framer-motion";
-import { ChevronRight, Info, LogOut, Monitor, ShieldAlert } from "lucide-react";
+import { ChevronRight, Info, LogOut, Monitor, ShieldAlert, Volume2 } from "lucide-react";
 
 import { useUserProgress } from "@/features/user/hooks";
 import { signOut } from "@/features/user/services";
@@ -14,8 +14,17 @@ import { Button, Card, ConfirmModal, UserMeta } from "@/shared/components/ui";
 import { SPACING } from "@/shared/constants";
 
 export default function SettingsPage() {
-    const { user, useHandwriting, globalAutoPlay, toggleHandwriting, toggleAutoPlay } =
-        useAppStore();
+    const {
+        user,
+        useHandwriting,
+        globalAutoPlay,
+        sfxMuted,
+        voiceMuted,
+        toggleHandwriting,
+        toggleAutoPlay,
+        toggleSfxMuted,
+        toggleVoiceMuted,
+    } = useAppStore();
     const { resetProgress } = useUserProgress();
     const router = useRouter();
     const [showResetConfirm, setShowResetConfirm] = useState(false);
@@ -40,7 +49,7 @@ export default function SettingsPage() {
                 </div>
 
                 <div className="space-y-10">
-                    {/* Appearance & Audio */}
+                    {/* Appearance */}
                     <SettingsSection title="Appearance" icon={Monitor}>
                         <SettingsToggle
                             label="Handwriting Font"
@@ -49,9 +58,27 @@ export default function SettingsPage() {
                             onToggle={toggleHandwriting}
                             color="purple"
                         />
+                    </SettingsSection>
+
+                    {/* Audio — three independent controls, so muting one never silences another */}
+                    <SettingsSection title="Audio" icon={Volume2}>
                         <SettingsToggle
-                            label="Auto-Play Audio"
-                            sub="Read kana aloud automatically"
+                            label="Sound Effects"
+                            sub="Answer and tap feedback tones"
+                            value={!sfxMuted}
+                            onToggle={toggleSfxMuted}
+                            color="orange"
+                        />
+                        <SettingsToggle
+                            label="Pronunciation"
+                            sub="Japanese audio for characters and words"
+                            value={!voiceMuted}
+                            onToggle={toggleVoiceMuted}
+                            color="green"
+                        />
+                        <SettingsToggle
+                            label="Auto-Play Pronunciation"
+                            sub="Speak automatically in lessons and games. Tapping a speaker button always plays."
                             value={globalAutoPlay}
                             onToggle={toggleAutoPlay}
                             color="blue"
@@ -76,6 +103,13 @@ export default function SettingsPage() {
                             onClick={() => setShowResetConfirm(true)}
                             variant="danger"
                         />
+                        <div className="px-6 py-6">
+                            <p className="text-text text-lg font-black">Pronunciation Audio</p>
+                            <p className="text-muted text-sm font-bold">
+                                Japanese text is sent to Google&apos;s text-to-speech service to
+                                generate pronunciation. Turn off Pronunciation above to stop this.
+                            </p>
+                        </div>
                     </SettingsSection>
 
                     {/* About */}
@@ -165,6 +199,9 @@ function SettingsToggle({
             <Button
                 variant="ghost"
                 onClick={onToggle}
+                role="switch"
+                aria-checked={value}
+                aria-label={label}
                 className={`!relative !h-8 !w-14 !shrink-0 !rounded-full !border-2 !border-b-4 !p-0 shadow-none transition-all duration-200 hover:shadow-none active:translate-y-[2px] ${
                     value
                         ? colors[color]

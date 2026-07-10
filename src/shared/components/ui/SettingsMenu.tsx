@@ -10,8 +10,11 @@
  *   isOpen={isMenuOpen}
  *   onToggle={() => setIsMenuOpen(!isMenuOpen)}
  *   primaryBg="bg-blue-500"
- *   audioToggle={{ label: "Sound Effects", icon: Volume2, value: true, onChange: handleToggle }}
+ *   audioToggle={{ label: "Autoplay Audio", icon: Volume2, value: true, onChange: handleToggle }}
  * />
+ *
+ * This menu exposes one audio toggle. The full set of audio controls — sound effects,
+ * pronunciation, and auto-play, each independent — lives on the Settings page.
  */
 import { Settings, Trash2, Volume2 } from "lucide-react";
 

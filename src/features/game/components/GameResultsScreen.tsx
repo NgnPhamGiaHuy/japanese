@@ -13,6 +13,7 @@ import Confetti from "react-confetti";
 import { motion } from "framer-motion";
 
 import { Button } from "@/shared/components/ui";
+import { usePrefersReducedMotion } from "@/shared/hooks";
 import Leaderboard from "./Leaderboard";
 import { StatGrid } from "./StatGrid";
 
@@ -68,15 +69,18 @@ export function GameResultsScreen({
     onPlayAgain,
     onCollectXP,
 }: GameResultsScreenProps) {
+    const prefersReducedMotion = usePrefersReducedMotion();
     const isNewBest = score > bestScore;
     const calculatedXP = xpEarned ?? Math.round(score / 10);
+    // Confetti is JavaScript-driven, so the global reduced-motion CSS rule cannot reach it.
+    const showConfetti = isNewBest && !prefersReducedMotion;
 
     const { innerWidth: width, innerHeight: height } =
         typeof window !== "undefined" ? window : { innerWidth: 500, innerHeight: 900 };
 
     return (
         <div className="bg-bg fixed inset-0 z-50 flex flex-col items-center overflow-y-auto">
-            {isNewBest && (
+            {showConfetti && (
                 <Confetti
                     width={width}
                     height={height}
