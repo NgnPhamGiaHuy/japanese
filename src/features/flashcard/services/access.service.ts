@@ -7,13 +7,29 @@
  * - Invite users by email (stored as pending until they log in)
  */
 
+/**
+ * @file access.service
+ * Central access control layer for the flashcard sharing system.
+ *
+ * Responsibilities:
+ * - Convert pending email invites to permanent collaborator entries on login
+ * - Invite users by email (stored as pending until they log in)
+ */
+/**
+ * @file access.service
+ * Central access control layer for the flashcard sharing system.
+ *
+ * Responsibilities:
+ * - Convert pending email invites to permanent collaborator entries on login
+ * - Invite users by email (stored as pending until they log in)
+ */
 import { deleteField, setDoc } from "firebase/firestore";
 
-import { notifyInvite } from "@/features/notifications/services";
+import { emitNotification, notifyInvite } from "@/features/notifications/services";
 import { buildShareId, lessonDoc } from "./lesson.service";
 
 import type { User } from "firebase/auth";
-import type { DeckAccessRole, Lesson } from "../types";
+import type { DeckAccessRole, Lesson } from "../types"; // Re-export for callers that import DeckAccessRole from access.service
 
 // Re-export for callers that import DeckAccessRole from access.service
 export type { DeckAccessRole };
@@ -78,16 +94,7 @@ export async function syncInviteToCollaborator(
         { merge: true },
     );
 
-    // Notify the user that they now have access
-    const shareId = buildShareId(ownerId, lessonId);
-    notifyInvite({
-        toUserId: user.uid,
-        senderId: ownerId,
-        deckId: lessonId,
-        deckTitle: lesson.title,
-        shareLink: `/flashcard/shared/${shareId}`,
-        role: roleToGrant,
-    }).catch(() => {}); // Fire-and-forget — don't block access on notification failure
+    void emitNotification({ kind: "invite_accepted", ownerId, lessonId });
 
     return roleToGrant as DeckAccessRole;
 }

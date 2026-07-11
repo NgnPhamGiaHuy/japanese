@@ -139,7 +139,12 @@ export const BottomNav = () => {
 
                             {/* Unread badge for Alerts */}
                             {route.badge != null && route.badge > 0 && (
-                                <span className="bg-danger absolute -top-1.5 -right-1.5 flex h-4 min-w-4 items-center justify-center rounded-full px-1 text-xs font-black text-white">
+                                <span
+                                    className="bg-danger absolute -top-1.5 -right-1.5 flex h-4 min-w-4 items-center justify-center rounded-full px-1 text-xs font-black text-white"
+                                    role="status"
+                                    aria-live="polite"
+                                    aria-label={`${route.badge} unread notifications`}
+                                >
                                     {route.badge > 99 ? "99+" : route.badge}
                                 </span>
                             )}

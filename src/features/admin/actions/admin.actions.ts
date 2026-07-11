@@ -2,6 +2,7 @@
 
 import { cookies } from "next/headers";
 
+import { notifySystemEvent } from "@/features/notifications/actions/notification.actions";
 import { ActivityAction } from "@/lib/logging/actions.enum";
 import {
     adminDb,
@@ -182,10 +183,18 @@ export async function deleteGlobalFlashcardAction(path: string): Promise<ActionR
     try {
         const { uid, role } = await assertAdminAction("canManageContent");
         const token = await getAuthToken();
-        await deleteGlobalFlashcard(path);
+        const { ownerId, lessonId, title } = await deleteGlobalFlashcard(path);
         void logAdminAction(token, uid, ActivityAction.ADMIN_CONTENT_DELETED, "ADMIN_ACTION", {
             path,
             role,
+        });
+        // Notify the deck owner their content was removed (server-internal,
+        // never blocks the delete).
+        void notifySystemEvent({
+            kind: "content_removed",
+            recipientId: ownerId,
+            lessonId,
+            lessonTitle: title,
         });
         return ok(undefined);
     } catch (err) {

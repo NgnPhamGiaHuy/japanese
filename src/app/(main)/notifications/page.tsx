@@ -12,18 +12,21 @@ import { useNotifications } from "@/features/notifications/context/Notifications
 import {
     deleteAllNotifications,
     markAllNotificationsRead,
+    restoreNotifications,
 } from "@/features/notifications/services";
 import { isUnread } from "@/features/notifications/types";
 import { useAppStore } from "@/lib/app-store";
 import { auth } from "@/lib/firebase";
 import { ScreenHeader } from "@/shared/components/layout";
 import { Button } from "@/shared/components/ui";
+import { useAlert } from "@/shared/providers";
 import { NotificationGroupSection } from "./_components/NotificationListItem";
 import { NotificationsEmptyState, SkeletonRows } from "./_components/NotificationsPlaceholders";
 
 export default function NotificationsPage() {
     const { user } = useAppStore();
-    const { notifications, groups, loading, unreadCount } = useNotifications();
+    const { notifications, groups, loading, unreadCount, error, retry } = useNotifications();
+    const { showAlert } = useAlert();
     const [filter, setFilter] = useState<"all" | "unread">("all");
     const [isMarkingAll, startMarkAll] = useTransition();
     const [isClearingAll, startClearAll] = useTransition();
@@ -51,12 +54,25 @@ export default function NotificationsPage() {
 
     const handleClearAll = () => {
         if (!user || notifications.length === 0) return;
-        const count = notifications.length;
+        const uid = user.uid;
         startClearAll(async () => {
-            await deleteAllNotifications(user.uid);
+            const clearedIds = await deleteAllNotifications(uid);
             void auth.currentUser
                 ?.getIdToken()
-                .then((token) => logNotificationsCleared(token, user.uid, count));
+                .then((token) => logNotificationsCleared(token, uid, clearedIds.length));
+            if (clearedIds.length > 0) {
+                showAlert(
+                    "info",
+                    `Cleared ${clearedIds.length} notification${clearedIds.length === 1 ? "" : "s"}.`,
+                    {
+                        action: {
+                            label: "Undo",
+                            onClick: () => void restoreNotifications(uid, clearedIds),
+                        },
+                        durationMs: 8000,
+                    },
+                );
+            }
         });
     };
 
@@ -132,7 +148,20 @@ export default function NotificationsPage() {
                 </div>
 
                 {/* Content */}
-                {loading ? (
+                {error && !loading ? (
+                    <div className="flex flex-col items-center gap-3 rounded-2xl bg-white px-6 py-12 text-center">
+                        <p className="text-sm font-bold text-gray-500">
+                            Couldn&apos;t load your notifications.
+                        </p>
+                        <Button
+                            variant="ghost"
+                            onClick={retry}
+                            className="!text-katakana !rounded-xl !px-4 !py-2 !text-sm !font-black"
+                        >
+                            Try again
+                        </Button>
+                    </div>
+                ) : loading ? (
                     <SkeletonRows />
                 ) : totalDisplayed === 0 ? (
                     <NotificationsEmptyState filter={filter} />

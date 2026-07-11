@@ -14,6 +14,7 @@ import { RefreshCw } from "lucide-react";
 import ShareModal from "@/features/flashcard/components/ShareModal";
 import { FlashcardDetailLayout } from "@/features/flashcard/detail";
 import { useLessons, useSharedLesson } from "@/features/flashcard/hooks";
+import { emitNotification } from "@/features/notifications/services";
 import { useAppStore } from "@/lib/app-store";
 import { Button } from "@/shared/components/ui";
 import { useCopyToClipboard } from "@/shared/hooks";
@@ -151,6 +152,17 @@ export default function SharedLessonPage({ params }: { params: Promise<{ shareId
                 cleanCards,
                 true,
             );
+
+            // Tell the original owner their deck was saved (server derives the
+            // recipient + skips self).
+            if (meta.sourceUserId && meta.sourceLessonId && meta.sourceUserId !== user.uid) {
+                void emitNotification({
+                    kind: "deck_duplicated",
+                    ownerId: meta.sourceUserId,
+                    lessonId: meta.sourceLessonId,
+                });
+            }
+
             router.back();
         } catch (err) {
             console.error("[SharedLessonPage] Duplicate failed:", err);

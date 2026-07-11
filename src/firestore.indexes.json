@@ -31,6 +31,22 @@
                 { "fieldPath": "isDeleted", "order": "ASCENDING" },
                 { "fieldPath": "createdAt", "order": "DESCENDING" }
             ]
+        },
+        {
+            "collectionGroup": "notifications",
+            "queryScope": "COLLECTION",
+            "fields": [
+                { "fieldPath": "status", "order": "ASCENDING" },
+                { "fieldPath": "isDeleted", "order": "ASCENDING" }
+            ]
+        },
+        {
+            "collectionGroup": "notifications",
+            "queryScope": "COLLECTION",
+            "fields": [
+                { "fieldPath": "read", "order": "ASCENDING" },
+                { "fieldPath": "isDeleted", "order": "ASCENDING" }
+            ]
         }
     ],
     "fieldOverrides": [

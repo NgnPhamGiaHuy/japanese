@@ -20,6 +20,12 @@ import Button from "./Button";
 /** Categorization of the notification severity and visual intent. */
 export type AlertType = "info" | "success" | "warning" | "error";
 
+/** An optional inline action (e.g. "Undo") rendered before the close button. */
+export interface AlertAction {
+    label: string;
+    onClick: () => void;
+}
+
 /** Attributes for rendering a transient notification. */
 interface AlertProps {
     /** Visual theme and icon mapping. */
@@ -28,22 +34,26 @@ interface AlertProps {
     message: string;
     /** Triggered when the user dismisses the alert or the timer expires. */
     onClose: () => void;
+    /** Optional inline action button (e.g. Undo). Dismisses after firing. */
+    action?: AlertAction;
+    /** Override the auto-dismiss duration (ms). Defaults per-type. */
+    durationMs?: number;
 }
 
-const Alert = ({ type, message, onClose }: AlertProps) => {
+// UX Research: Error/Warning info needs more time to process than simple success.
+const ALERT_DURATIONS: Record<AlertType, number> = {
+    success: 4000,
+    info: 4000,
+    warning: 6000,
+    error: 8000,
+};
+
+const Alert = ({ type, message, onClose, action, durationMs }: AlertProps) => {
     const [isPaused, setIsPaused] = useState(false);
     // Persists the remaining duration across re-renders when paused
     const timeLeft = useRef<number>(0);
     // Ensures current callback is always used without breaking effect stability
     const closeRef = useRef(onClose);
-
-    // UX Research: Error/Warning info needs more time to process than simple success.
-    const durations: Record<AlertType, number> = {
-        success: 4000,
-        info: 4000,
-        warning: 6000,
-        error: 8000,
-    };
 
     // Keep the callback fresh without triggering timer resets
     useEffect(() => {
@@ -53,8 +63,9 @@ const Alert = ({ type, message, onClose }: AlertProps) => {
     useEffect(() => {
         if (isPaused) return;
 
-        // Uses stored time if resume after pause, otherwise falls back to defaults
-        const duration = timeLeft.current || durations[type];
+        // Uses stored time if resume after pause, otherwise falls back to the
+        // caller override or the per-type default.
+        const duration = timeLeft.current || durationMs || ALERT_DURATIONS[type];
         const start = Date.now();
 
         const timer = setTimeout(() => {
@@ -67,7 +78,7 @@ const Alert = ({ type, message, onClose }: AlertProps) => {
             const elapsed = Date.now() - start;
             timeLeft.current = Math.max(0, duration - elapsed);
         };
-    }, [type, isPaused]);
+    }, [type, isPaused, durationMs]);
 
     const config = {
         info: {
@@ -123,9 +134,22 @@ const Alert = ({ type, message, onClose }: AlertProps) => {
                 {icon}
             </div>
             <div className="flex-1 text-sm leading-relaxed font-bold">{message}</div>
+            {action && (
+                <Button
+                    variant="ghost"
+                    onClick={() => {
+                        action.onClick();
+                        onClose();
+                    }}
+                    className="!shrink-0 !rounded-lg !px-2.5 !py-1 !text-xs !font-black underline underline-offset-2 shadow-none hover:!bg-white/50 hover:shadow-none active:translate-y-0"
+                >
+                    {action.label}
+                </Button>
+            )}
             <Button
                 variant="ghost"
                 onClick={onClose}
+                aria-label="Dismiss"
                 className="!p-1.5 opacity-40 transition-all hover:opacity-100"
                 icon={X}
             />

@@ -6,6 +6,7 @@ import { Check, Copy, ShieldAlert, X } from "lucide-react";
 
 import { buildShareId } from "@/features/flashcard/services";
 import { sanitizePublicRole } from "@/features/flashcard/utils/rbac";
+import { emitNotification } from "@/features/notifications/services";
 import { useAppStore } from "@/lib/app-store";
 import { ActivityAction } from "@/lib/logging/actions.enum";
 import { enqueueClientLog } from "@/lib/logging/browser";
@@ -219,7 +220,7 @@ const ShareModal = ({ lesson, onShareLink, onUpdateRoles, onClose }: ShareModalP
      * Orchestrator for persisting role changes.
      * Computes the new collaborators list (keys of roles object) and calls parent handler.
      */
-    const commitRolesUpdate = async (newRoles: Record<string, Role>) => {
+    const commitRolesUpdate = async (newRoles: Record<string, Role>): Promise<boolean> => {
         setRoles(newRoles);
         const newCollaborators = Object.keys(newRoles);
         setSaving(true);
@@ -229,26 +230,50 @@ const ShareModal = ({ lesson, onShareLink, onUpdateRoles, onClose }: ShareModalP
                 collaboratorCount: newCollaborators.length,
             });
             showAlert("success", "Collaborator permissions updated");
+            return true;
         } catch (err) {
             console.error("[ShareModal] commitRolesUpdate failed:", err);
             setRoles(lesson.roles || {});
             showAlert("error", "Failed to update permissions");
+            return false;
         } finally {
             setSaving(false);
         }
     };
 
+    // The owner manages sharing on their own deck, so lesson.ownerId (or the
+    // current user) is the authoritative owner the server writer expects.
+    const deckOwnerId = lesson.ownerId ?? lesson.userId ?? user?.uid;
+
     const handleUpdateUserRole = async (targetId: string, newRole: Role) => {
         if (roles[targetId] === "owner" || targetId === user?.uid) return;
         const newRoles = { ...roles, [targetId]: newRole };
-        await commitRolesUpdate(newRoles);
+        const okUpdate = await commitRolesUpdate(newRoles);
+        // Notify the affected collaborator (server verifies owner + target).
+        if (okUpdate && deckOwnerId) {
+            void emitNotification({
+                kind: "role_change",
+                ownerId: deckOwnerId,
+                lessonId: lesson.id,
+                targetUserId: targetId,
+                newRole,
+            });
+        }
     };
 
     const handleRemoveUser = async (targetId: string) => {
         if (roles[targetId] === "owner" || targetId === user?.uid) return;
         const newRoles = { ...roles };
         delete newRoles[targetId];
-        await commitRolesUpdate(newRoles);
+        const okRemove = await commitRolesUpdate(newRoles);
+        if (okRemove && deckOwnerId) {
+            void emitNotification({
+                kind: "access_revoked",
+                ownerId: deckOwnerId,
+                lessonId: lesson.id,
+                targetUserId: targetId,
+            });
+        }
     };
 
     return (

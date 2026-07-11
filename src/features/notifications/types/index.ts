@@ -1,4 +1,15 @@
+import { startOfDay, subDays } from "date-fns";
+
+import type { NotificationCategory, NotificationPriority } from "../domain/events";
+
 export type NotificationType = "invite" | "comment" | "reply" | "role_change";
+
+/** An actor behind a (possibly collapsed) notification — powers avatar stacks. */
+export interface NotificationActor {
+    uid: string;
+    name?: string | null;
+    photoURL?: string | null;
+}
 
 /**
  * Lifecycle status of a notification.
@@ -64,6 +75,18 @@ export interface AppNotification {
      */
     read?: boolean;
 
+    // ─── Platform fields (Epic 4+) — all optional; unset on older docs ────
+    /** Interruption tier from the type registry (badge/inbox/quiet). */
+    priority?: NotificationPriority;
+    /** Object-scoped collapse token (recipient folded into the doc ID). */
+    collapseKey?: string;
+    /** Preference/rendering bucket. */
+    category?: NotificationCategory;
+    /** Count of collapsed events this doc represents (grouping). */
+    count?: number;
+    /** Distinct actors behind a collapsed doc (avatar stacks). */
+    actors?: NotificationActor[];
+
     createdAt: number;
 }
 
@@ -88,15 +111,16 @@ export type NotificationGroup = {
     items: AppNotification[];
 };
 
-export function groupNotificationsByTime(notifications: AppNotification[]): NotificationGroup[] {
-    const now = Date.now();
-    const DAY = 86_400_000;
-
-    const todayStart = new Date();
-    todayStart.setHours(0, 0, 0, 0);
-    const todayMs = todayStart.getTime();
-
-    const yesterdayMs = todayMs - DAY;
+export function groupNotificationsByTime(
+    notifications: AppNotification[],
+    /** Injectable "now" for deterministic tests; defaults to the current time. */
+    reference: Date = new Date(),
+): NotificationGroup[] {
+    // Calendar-aware boundaries (date-fns) so the "Yesterday" bucket stays
+    // correct across DST transitions — a fixed `todayMs - 86_400_000`
+    // subtraction lands an hour early or late twice a year.
+    const todayMs = startOfDay(reference).getTime();
+    const yesterdayMs = startOfDay(subDays(reference, 1)).getTime();
 
     const groups: Record<"Today" | "Yesterday" | "Earlier", AppNotification[]> = {
         Today: [],

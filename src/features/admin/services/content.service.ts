@@ -91,10 +91,23 @@ export async function getDeckCards(path: string): Promise<any[]> {
     }));
 }
 
-export async function deleteGlobalFlashcard(path: string): Promise<void> {
+export async function deleteGlobalFlashcard(
+    path: string,
+): Promise<{ ownerId: string; lessonId: string; title: string | null }> {
     if (!path) throw new Error("Path is required");
+    // Capture owner + title BEFORE deleting so the owner can be notified.
+    // Path shape: artifacts/{appId}/users/{ownerId}/lessons/{lessonId}
+    const ref = adminDb.doc(path);
+    const snap = await ref.get();
+    const data = snap.exists ? snap.data() : undefined;
+    const parts = path.split("/");
+    const ownerId = parts[parts.indexOf("users") + 1] ?? "";
+    const lessonId = parts[parts.indexOf("lessons") + 1] ?? "";
+
     // Deep delete: typically we would also delete the subcollection 'cards'
     // For now, delete the lesson document.
     // In a full implementation, we'd iterate cards too.
-    await adminDb.doc(path).delete();
+    await ref.delete();
+
+    return { ownerId, lessonId, title: (data?.title as string | undefined) ?? null };
 }

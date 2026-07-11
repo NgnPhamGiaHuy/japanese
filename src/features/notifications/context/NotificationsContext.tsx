@@ -20,7 +20,7 @@
  *   already-populated state — zero cold-start delay on navigation.
  * - Firestore pushes arrive once and update every subscriber simultaneously.
  */
-import { createContext, useContext, useEffect, useMemo, useState } from "react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 
 import { useAppStore } from "@/lib/app-store";
 import { subscribeNotifications } from "../services";
@@ -35,6 +35,8 @@ interface NotificationsContextValue {
     groups: NotificationGroup[];
     unreadCount: number;
     loading: boolean;
+    error: Error | null;
+    retry: () => void;
 }
 
 // Exported so useNotifications.ts can re-export it
@@ -45,20 +47,35 @@ const NotificationsContext = createContext<NotificationsContextValue>({
     groups: [],
     unreadCount: 0,
     loading: true,
+    error: null,
+    retry: () => {},
 });
+
+// Stable empty reference so the render-time guard doesn't allocate each render.
+const EMPTY: AppNotification[] = [];
 
 // ─── Provider ─────────────────────────────────────────────────────────────────
 
 export function NotificationsProvider({ children }: { children: React.ReactNode }) {
     const { user } = useAppStore();
-    const [notifications, setNotifications] = useState<AppNotification[]>([]);
+
+    const [state, setState] = useState<{ uid: string | null; items: AppNotification[] }>({
+        uid: null,
+        items: EMPTY,
+    });
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<Error | null>(null);
+    // Bumping this forces the subscription effect to re-run (manual retry).
+    const [retryNonce, setRetryNonce] = useState(0);
+
+    const retry = useCallback(() => setRetryNonce((n) => n + 1), []);
 
     useEffect(() => {
         const uid = user?.uid ?? null;
 
+        // On logout the render-time guard below already yields EMPTY (cached
+        // uid !== null), so no state reset is needed here — just stop loading.
         if (!uid) {
-            setNotifications([]);
             setLoading(false);
             return;
         }
@@ -68,23 +85,31 @@ export function NotificationsProvider({ children }: { children: React.ReactNode 
         const unsub = subscribeNotifications(
             uid,
             (updated) => {
-                setNotifications(updated);
+                setState({ uid, items: updated });
+                setError(null);
                 setLoading(false);
             },
-            () => {
+            (err) => {
+                setError(err);
                 setLoading(false);
             },
         );
 
         return unsub;
-    }, [user?.uid]);
+    }, [user?.uid, retryNonce]);
+
+    // Only trust cached items that belong to the CURRENT user. On an A → B
+    // switch, `state` still holds A's items until B's first snapshot arrives —
+    // this render-time guard prevents A's list/badge from flashing.
+    const currentUid = user?.uid ?? null;
+    const notifications = state.uid === currentUid ? state.items : EMPTY;
 
     const unreadCount = useMemo(() => notifications.filter(isUnread).length, [notifications]);
     const groups = useMemo(() => groupNotificationsByTime(notifications), [notifications]);
 
     const value = useMemo(
-        () => ({ notifications, groups, unreadCount, loading }),
-        [notifications, groups, unreadCount, loading],
+        () => ({ notifications, groups, unreadCount, loading, error, retry }),
+        [notifications, groups, unreadCount, loading, error, retry],
     );
 
     return <NotificationsContext.Provider value={value}>{children}</NotificationsContext.Provider>;

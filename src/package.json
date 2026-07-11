@@ -6,6 +6,8 @@
         "dev": "next dev",
         "build": "next build",
         "test": "vitest run",
+        "test:emu": "firebase emulators:exec --only firestore,auth \"vitest run --config vitest.emu.config.ts\"",
+        "emulators:start": "firebase emulators:start --only firestore,auth",
         "start": "next start",
         "lint": "eslint",
         "prepare": "cd .. && husky src/.husky"
@@ -44,6 +46,7 @@
         "zustand": "^5.0.12"
     },
     "devDependencies": {
+        "@firebase/rules-unit-testing": "^5.0.1",
         "@ianvs/prettier-plugin-sort-imports": "^4.4.1",
         "@tailwindcss/postcss": "^4",
         "@types/node": "^20",

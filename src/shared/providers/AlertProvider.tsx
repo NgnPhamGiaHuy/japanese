@@ -6,11 +6,21 @@ import { AnimatePresence } from "framer-motion";
 
 import { Alert, AlertType } from "@/shared/components/ui";
 
+import type { AlertAction } from "@/shared/components/ui";
+
+/** Optional extras for an alert (inline action, custom duration). */
+export interface AlertOptions {
+    action?: AlertAction;
+    durationMs?: number;
+}
+
 /** Internal state representation of an active notification. */
 interface AlertItem {
     id: string;
     type: AlertType;
     message: string;
+    action?: AlertAction;
+    durationMs?: number;
 }
 
 /** Interface for the global alerting API. */
@@ -19,8 +29,9 @@ interface AlertContextType {
      * Imperative call to trigger a transient notification.
      * @param type - Severity level affecting color and duration.
      * @param message - The content to be announced to the user.
+     * @param options - Optional inline action (e.g. Undo) and duration override.
      */
-    showAlert: (type: AlertType, message: string) => void;
+    showAlert: (type: AlertType, message: string, options?: AlertOptions) => void;
 }
 
 const AlertContext = createContext<AlertContextType | undefined>(undefined);
@@ -35,9 +46,15 @@ const AlertContext = createContext<AlertContextType | undefined>(undefined);
 export const AlertProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const [alerts, setAlerts] = useState<AlertItem[]>([]);
 
-    const showAlert = useCallback((type: AlertType, message: string) => {
+    const showAlert = useCallback((type: AlertType, message: string, options?: AlertOptions) => {
         setAlerts((prev) => {
-            const newItem = { id: Math.random().toString(36).substring(2, 9), type, message };
+            const newItem = {
+                id: Math.random().toString(36).substring(2, 9),
+                type,
+                message,
+                action: options?.action,
+                durationMs: options?.durationMs,
+            };
             // Implementation of logical stack cap (FIFO) to avoid screen clutter
             const next = [...prev, newItem];
             return next.slice(-3);
@@ -59,6 +76,8 @@ export const AlertProvider: React.FC<{ children: React.ReactNode }> = ({ childre
                             key={a.id}
                             type={a.type}
                             message={a.message}
+                            action={a.action}
+                            durationMs={a.durationMs}
                             onClose={() => handleClose(a.id)}
                         />
                     ))}

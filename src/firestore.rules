@@ -30,6 +30,30 @@ service cloud.firestore {
       return lessonData.isPublic == true || lessonData.allowLinkAccess == true;
     }
 
+    // ─── NOTIFICATION VALIDATION (Epic 3 — Stage 2) ─────────────────────────
+    // Cross-user notification creation is server-only (Admin SDK bypasses
+    // rules); clients may only create in their OWN inbox. The helpers below
+    // still guard the pending-invite create path (client-written, email-keyed)
+    // and the immutability of an existing notification on update.
+
+    function isValidNotificationType(t) {
+      return t in ['invite', 'comment', 'reply', 'role_change'];
+    }
+
+    function withinNotificationSizeLimits(data) {
+      return data.title is string && data.title.size() <= 200
+             && data.message is string && data.message.size() <= 2000;
+    }
+
+    // Fields that must never change once a notification exists (only read-state
+    // and the soft-delete flag may be mutated).
+    function notificationImmutableFieldsUnchanged() {
+      return request.resource.data.senderId == resource.data.senderId
+             && request.resource.data.type == resource.data.type
+             && request.resource.data.userId == resource.data.userId
+             && request.resource.data.createdAt == resource.data.createdAt;
+    }
+
     // ─── CORE DOMAIN RULES ──────────────────────────────────────────────────
 
     match /artifacts/{appId} {
@@ -81,8 +105,22 @@ service cloud.firestore {
         }
 
         match /notifications/{notiId} {
-          allow read, update, delete: if isOwner(userId);
-          allow create: if isSignedIn();
+          allow read: if isOwner(userId);
+
+          // Create: ONLY the inbox owner may write into their own inbox — this
+          // covers pending-invite delivery, where the delivering user copies
+          // pending items into their OWN notifications (senderId is the original
+          // sender, but userId == the writer). Every other cross-user
+          // notification is created server-side via the Admin SDK
+          // (emitNotificationAction), which bypasses rules — so a client can
+          // never create a notification in someone else's inbox.
+          allow create: if isOwner(userId);
+
+          // Update: owner only, and only read-state / soft-delete — the sender,
+          // type, target, and createdAt of an existing notification are frozen.
+          allow update: if isOwner(userId) && notificationImmutableFieldsUnchanged();
+
+          // No hard delete — the app soft-deletes via `isDeleted: true` (update).
         }
         
         match /sharedProgress/{shareId} {
@@ -94,10 +132,15 @@ service cloud.firestore {
       // ─── PENDING NOTIFICATIONS (Pre-login invites) ────────────────────────
       
       match /pendingNotifications/{email}/items/{id} {
-        // Users can read pending invites sent to their specific email
+        // Users can read/delete pending invites sent to their specific email.
         allow read, delete: if isSignedIn() && request.auth.token.email.lower() == email.lower();
-        // Anyone signed in can send a notification/invite
-        allow create: if isSignedIn();
+        // A signed-in caller may enqueue a pending invite, but cannot forge the
+        // sender and must send a well-formed payload. (Stage 2 moves this to
+        // server-only creation via the Admin SDK.)
+        allow create: if isSignedIn()
+                      && request.resource.data.senderId == request.auth.uid
+                      && isValidNotificationType(request.resource.data.type)
+                      && withinNotificationSizeLimits(request.resource.data);
       }
     }
 

@@ -22,7 +22,7 @@ import {
     updateDoc,
 } from "firebase/firestore";
 
-import { notifyComment, notifyReply } from "@/features/notifications/services";
+import { emitNotification } from "@/features/notifications/services";
 import { APP_ID, db } from "@/lib/firebase";
 
 import type { CollectionReference, DocumentReference, Unsubscribe } from "firebase/firestore";
@@ -160,11 +160,6 @@ export async function addComment(
     userId: string,
     authorName?: string | null,
     authorEmail?: string | null,
-    notifyCtx?: {
-        deckTitle?: string | null;
-        cardKanji?: string | null;
-        shareLink: string;
-    },
 ): Promise<string> {
     try {
         const validation = validateCommentContent(content);
@@ -186,17 +181,17 @@ export async function addComment(
             replies: [],
         });
 
-        // Notify deck owner (fire-and-forget, skip if commenter is the owner)
-        if (notifyCtx && userId !== ownerId) {
-            notifyComment({
-                toUserId: ownerId,
-                senderId: userId,
-                senderName: authorName,
-                deckId: lessonId,
-                deckTitle: notifyCtx.deckTitle,
-                shareLink: notifyCtx.shareLink,
-                cardKanji: notifyCtx.cardKanji,
-            }).catch(() => {});
+        // Notify the deck owner via the authorized server-side writer
+        // (fire-and-forget; skip self). The writer verifies the sender and
+        // derives the recipient — the client only supplies identifiers.
+        if (userId !== ownerId) {
+            void emitNotification({
+                kind: "comment",
+                ownerId,
+                lessonId,
+                cardId,
+                commentId: commentRef.id,
+            });
         }
 
         return commentRef.id;
@@ -235,10 +230,6 @@ export async function replyToComment(
     userId: string,
     authorName?: string | null,
     authorEmail?: string | null,
-    notifyCtx?: {
-        deckTitle?: string | null;
-        shareLink: string;
-    },
 ): Promise<void> {
     try {
         const validation = validateCommentContent(content);
@@ -268,16 +259,16 @@ export async function replyToComment(
             ],
         });
 
-        // Notify the parent comment author (fire-and-forget)
-        if (notifyCtx && parentComment.userId && parentComment.userId !== userId) {
-            notifyReply({
-                toUserId: parentComment.userId,
-                senderId: userId,
-                senderName: authorName,
-                deckId: lessonId,
-                deckTitle: notifyCtx.deckTitle,
-                shareLink: notifyCtx.shareLink,
-            }).catch(() => {});
+        // Notify the parent comment author via the authorized server-side
+        // writer (fire-and-forget; skip self).
+        if (parentComment.userId && parentComment.userId !== userId) {
+            void emitNotification({
+                kind: "reply",
+                ownerId,
+                lessonId,
+                cardId,
+                commentId,
+            });
         }
     } catch (error: unknown) {
         if (error instanceof CommentError) throw error;
@@ -317,7 +308,20 @@ export async function resolveComment(
         const snap = await getDoc(ref);
         if (!snap.exists())
             throw new CommentError(CommentErrorCode.COMMENT_NOT_FOUND, "Comment not found");
-        await updateDoc(ref, { resolved: !snap.data().resolved });
+        const nowResolved = !snap.data().resolved;
+        await updateDoc(ref, { resolved: nowResolved });
+
+        // Notify the comment author when their thread is resolved (not on
+        // unresolve; server derives the recipient and skips self).
+        if (nowResolved) {
+            void emitNotification({
+                kind: "comment_resolved",
+                ownerId,
+                lessonId,
+                cardId,
+                commentId,
+            });
+        }
     } catch (error: unknown) {
         if (error instanceof CommentError) throw error;
         const e = error as { code?: string };

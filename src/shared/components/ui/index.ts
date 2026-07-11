@@ -1,5 +1,5 @@
 export { default as Alert } from "./Alert";
-export type { AlertType } from "./Alert";
+export type { AlertType, AlertAction } from "./Alert";
 export { default as Button } from "./Button";
 export { default as Input } from "./Input";
 export { default as Textarea } from "./Textarea";
