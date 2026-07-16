@@ -7,9 +7,14 @@ import { X } from "lucide-react";
 
 import { Button, Input, Textarea } from "@/shared/components/ui";
 
+import type { FieldErrors, UseFormRegister, UseFormSetValue } from "react-hook-form";
+import type { LessonMetadataInput } from "@/shared/schemas";
+
 interface LessonBuilderMetaProps {
-    lesson: any;
-    setLesson: (lesson: any) => void;
+    register: UseFormRegister<LessonMetadataInput>;
+    formErrors: FieldErrors<LessonMetadataInput>;
+    setFormValue: UseFormSetValue<LessonMetadataInput>;
+    categories: string[];
     tagInput: string;
     setTagInput: (val: string) => void;
     addTag: (val: string) => void;
@@ -19,8 +24,10 @@ interface LessonBuilderMetaProps {
 }
 
 const LessonBuilderMeta: React.FC<LessonBuilderMetaProps> = ({
-    lesson,
-    setLesson,
+    register,
+    formErrors,
+    setFormValue,
+    categories,
     tagInput,
     setTagInput,
     addTag,
@@ -34,28 +41,42 @@ const LessonBuilderMeta: React.FC<LessonBuilderMetaProps> = ({
             animate={{ opacity: 1, y: 0 }}
             className="space-y-4 rounded-3xl border-2 border-b-8 border-gray-200 bg-white p-4 shadow-sm sm:rounded-4xl sm:p-6"
         >
-            <Input
-                variant="underline"
-                type="text"
-                placeholder="Deck Title ✱ (e.g. JLPT N5 Verbs)"
-                className="text-2xl sm:text-3xl"
-                value={lesson.title}
-                onChange={(e) => setLesson({ ...lesson, title: e.target.value })}
-                disabled={saving}
-            />
+            <div>
+                <Input
+                    variant="underline"
+                    type="text"
+                    placeholder="Deck Title ✱ (e.g. JLPT N5 Verbs)"
+                    className="text-2xl sm:text-3xl"
+                    disabled={saving}
+                    aria-invalid={!!formErrors.title}
+                    aria-describedby={formErrors.title ? "lesson-title-error" : undefined}
+                    {...register("title")}
+                />
+                {formErrors.title && (
+                    <p id="lesson-title-error" role="alert" className="mt-1 text-xs text-red-500">
+                        {formErrors.title.message}
+                    </p>
+                )}
+            </div>
             <Textarea
                 variant="underline"
                 placeholder="Describe what this deck is about..."
                 className="h-16 sm:h-20"
-                value={lesson.description}
-                onChange={(e) => setLesson({ ...lesson, description: e.target.value })}
                 disabled={saving}
+                aria-invalid={!!formErrors.description}
+                aria-describedby={formErrors.description ? "lesson-description-error" : undefined}
+                {...register("description")}
             />
+            {formErrors.description && (
+                <p id="lesson-description-error" role="alert" className="mt-1 text-xs text-red-500">
+                    {formErrors.description.message}
+                </p>
+            )}
 
             <div className="pt-2">
                 <div className="mb-4 flex flex-wrap gap-2 sm:gap-2.5">
                     <AnimatePresence>
-                        {(lesson.categories || []).map((cat: string) => (
+                        {categories.map((cat: string) => (
                             <motion.div
                                 key={cat}
                                 initial={{ scale: 0.8, opacity: 0 }}
@@ -96,9 +117,7 @@ const LessonBuilderMeta: React.FC<LessonBuilderMetaProps> = ({
                                 <button
                                     key={sug}
                                     type="button"
-                                    disabled={
-                                        saving || lesson.categories?.includes(sug.toLowerCase())
-                                    }
+                                    disabled={saving || categories.includes(sug.toLowerCase())}
                                     onClick={() => addTag(sug)}
                                     className="focus-visible:ring-katakana rounded-lg border-b-2 border-gray-200 bg-white px-2.5 py-1 text-xs font-black tracking-widest text-gray-500 uppercase transition-all hover:-translate-y-0.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:opacity-30 sm:rounded-xl sm:px-3 sm:py-1.5 sm:text-xs"
                                 >
@@ -135,11 +154,11 @@ const LessonBuilderMeta: React.FC<LessonBuilderMetaProps> = ({
                                 <button
                                     key={color}
                                     type="button"
-                                    onClick={() => setLesson({ ...lesson, themeColor: color })}
+                                    onClick={() =>
+                                        setFormValue("themeColor", color, { shouldDirty: true })
+                                    }
                                     className={`focus-visible:ring-katakana h-9 w-9 rounded-full border-2 transition-all hover:scale-110 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 sm:h-10 sm:w-10 ${
-                                        (lesson.themeColor || "#1cb0f6") === color
-                                            ? "border-black"
-                                            : "border-transparent"
+                                        themeHex === color ? "border-black" : "border-transparent"
                                     }`}
                                     style={{ backgroundColor: color }}
                                 />

@@ -2,9 +2,9 @@
 
 /**
  * @file actions/notification.actions.ts
- * Server-side Notification Service (Epic 5). The single authorized writer for
+ * Server-side Notification Service. The single authorized writer for
  * cross-user notifications, using the Admin SDK (which bypasses Firestore rules,
- * so Epic 3 Stage 2 can flip client `create` to owner-self-only).
+ * so client `create` could later be flipped to owner-self-only).
  *
  * Guarantees per emit:
  *  1. Sender identity comes from the verified ID token — never the client.
@@ -14,12 +14,12 @@
  *  4. The write is IDEMPOTENT/COLLAPSING: a deterministic doc ID (collapseId)
  *     means retries overwrite and burst events fold into one doc with a running
  *     `count` + `actors` stack, inside a transaction that preserves createdAt.
- *
- * @see NOTIFICATION_SYSTEM_IMPLEMENTATION_PLAN.md — Epic 5, Epic 8
  */
 import { FieldValue } from "firebase-admin/firestore";
+import { z } from "zod";
 
-import { adminAuth, adminDb } from "@/lib/firebase-admin";
+import { adminDb } from "@/lib/firebase-admin";
+import { actionClient, verifyIdToken } from "@/lib/safe-action";
 import { contentFor, mergeActors, shareLinkFor } from "../domain/build";
 import { collapseId } from "../domain/id";
 import { collapseKeyOf, policyOf } from "../domain/registry";
@@ -48,37 +48,40 @@ function notificationPath(recipientId: string, notiId: string): string {
     return `artifacts/${APP_ID}/users/${recipientId}/notifications/${notiId}`;
 }
 
-/**
- * Emit a notification. `idToken` authenticates the caller; `rawInput` carries
- * only identifiers (see schema.ts). Never throws across the boundary — returns
- * `{ ok, error }`.
- */
 type EmitInput = ReturnType<typeof emitNotificationInputSchema.parse>;
 
-export async function emitNotificationAction(
-    idToken: string,
-    rawInput: unknown,
-): Promise<EmitResult> {
-    try {
-        const input = emitNotificationInputSchema.parse(rawInput);
-
-        // 1. Authenticate the sender from the token (not the client).
-        const decoded = await adminAuth.verifyIdToken(idToken);
-        const senderId = decoded.uid;
+/**
+ * Emit a notification. `idToken` (bind arg #1) authenticates the caller —
+ * verified via `verifyIdToken` as the first step of the action body, using
+ * `lib/safe-action.ts`'s shared helper instead of an inline
+ * `adminAuth.verifyIdToken` call; `rawInput` (the main input) carries only
+ * identifiers (see schema.ts), validated against `emitNotificationInputSchema`
+ * by `.inputSchema()` before this body runs. Business authorization (does
+ * this sender have access?) and recipient derivation stay exactly as before —
+ * verification only proves *who* is calling, not what they're allowed to do.
+ * Never throws across the boundary — returns `{ ok, error }` (migrated to
+ * next-safe-action; the adapter below preserves this exact
+ * return shape so the single call site, services/notify.ts, is unaffected).
+ */
+const emitNotificationSafeAction = actionClient
+    .bindArgsSchemas([z.string()])
+    .inputSchema(emitNotificationInputSchema)
+    .action(async ({ parsedInput: input, bindArgsParsedInputs }) => {
+        const { uid: senderId, decoded } = await verifyIdToken(bindArgsParsedInputs[0]);
         const senderName = decoded.name ?? decoded.email ?? "Someone";
 
-        // 2. Load the referenced lesson (all kinds reference one).
+        // 1. Load the referenced lesson (all kinds reference one).
         const lessonSnap = await adminDb.doc(lessonPath(input.ownerId, input.lessonId)).get();
-        if (!lessonSnap.exists) return { ok: false, error: "lesson-not-found" };
+        if (!lessonSnap.exists) throw new Error("lesson-not-found");
         const lesson = lessonSnap.data() ?? {};
 
-        // 3. Authorize the sender + derive the recipient, per kind.
+        // 2. Authorize the sender + derive the recipient, per kind.
         const resolved = await authorizeAndResolve(input, senderId, lesson);
-        if (!resolved.ok) return { ok: false, error: resolved.error };
+        if (!resolved.ok) throw new Error(resolved.error);
         const recipientId = resolved.recipientId;
-        if (!recipientId || recipientId === senderId) return { ok: true }; // self / none → no-op
+        if (!recipientId || recipientId === senderId) return; // self / none → no-op
 
-        // 4. Write (idempotent + collapsing).
+        // 3. Write (idempotent + collapsing).
         const niInput: NotificationInput = {
             kind: input.kind,
             recipientId,
@@ -91,6 +94,19 @@ export async function emitNotificationAction(
             role: input.kind === "role_change" ? input.newRole : undefined,
         };
         await writeNotification(niInput, (lesson.title as string | undefined) ?? "a deck");
+    });
+
+export async function emitNotificationAction(
+    idToken: string,
+    rawInput: unknown,
+): Promise<EmitResult> {
+    try {
+        // rawInput is deliberately `unknown` at this boundary (untrusted
+        // external input) — next-safe-action's `.inputSchema()` validates it
+        // at runtime regardless of what we claim its type is here.
+        const result = await emitNotificationSafeAction(idToken, rawInput as EmitInput);
+        if (result.serverError) return { ok: false, error: result.serverError };
+        if (result.validationErrors) return { ok: false, error: "invalid-input" };
         return { ok: true };
     } catch (err) {
         return { ok: false, error: err instanceof Error ? err.message : "unknown" };

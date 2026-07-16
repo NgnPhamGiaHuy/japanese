@@ -1,15 +1,20 @@
 import { useMemo, useRef, useState } from "react";
+import { useForm } from "react-hook-form";
 
+import { zodResolver } from "@hookform/resolvers/zod";
 import { v4 as uuidv4 } from "uuid";
 
 import useAICard from "@/features/ai/hooks/useAICard";
 import { useAppStore } from "@/lib/app-store";
 import { useAlert } from "@/shared/providers";
+import { lessonMetadataSchema } from "@/shared/schemas";
 import { deleteCardImage, uploadCardImage } from "../services";
 import { CardValidationError } from "../utils/card.validator";
 import { joinAlternatives } from "../utils/formatting";
 import { parseText } from "../utils/parser";
 
+import type { LessonMetadata, LessonMetadataInput } from "@/shared/schemas";
+import type { ImportRow } from "../components/ImportPreview";
 import type { EditorCard, FlashCard, Lesson } from "../types";
 
 export const makeCard = (order = 0): EditorCard => ({
@@ -50,18 +55,21 @@ export function useLessonBuilder({
     onDelete,
     onClose,
 }: UseLessonBuilderParams) {
-    const [lesson, setLesson] = useState<Partial<Lesson>>(
-        initialLesson || {
-            title: "",
-            description: "",
-            themeColor: "#1cb0f6",
-            createdAt: Date.now(),
-            categories: ["vocabulary"],
+    const form = useForm<LessonMetadataInput, unknown, LessonMetadata>({
+        resolver: zodResolver(lessonMetadataSchema),
+        defaultValues: {
+            title: initialLesson?.title ?? "",
+            description: initialLesson?.description ?? "",
+            categories: initialLesson?.categories ?? ["vocabulary"],
+            type: initialLesson?.type,
+            themeColor: initialLesson?.themeColor ?? "#1cb0f6",
         },
-    );
+    });
+    const { register, setValue, getValues, handleSubmit, formState } = form;
+
     const [cards, setCards] = useState<EditorCard[]>(initialCards?.map((c) => ({ ...c })) || []);
     const [pasteText, setPasteText] = useState(() => buildPasteText(cards));
-    const [previewRows, setPreviewRows] = useState<any[] | null>(null);
+    const [previewRows, setPreviewRows] = useState<ImportRow[] | null>(null);
     const [tagInput, setTagInput] = useState("");
     const [inputMode, setInputMode] = useState<"ai" | "manual" | "paste" | "uploads">("manual");
     const [aiStatus, setAiStatus] = useState<Record<string, { loading: boolean; error?: string }>>(
@@ -72,7 +80,10 @@ export function useLessonBuilder({
     const aiCard = useAICard();
     const { user } = useAppStore();
     const { showAlert } = useAlert();
-    const themeHex = lesson.themeColor || "#1cb0f6";
+    // Narrow watches — only these two rerender the tree on change (swatch click,
+    // add/remove tag), unlike title/description which stay uncontrolled via `register`.
+    const themeHex = form.watch("themeColor") || "#1cb0f6";
+    const categories = form.watch("categories") || [];
     const clearedImagePathsRef = useRef<string[]>([]);
 
     // pasteText mirrors `cards` as CSV, except while the user is actively editing
@@ -127,10 +138,10 @@ export function useLessonBuilder({
         }
     };
 
-    const updateCard = (id: string, field: keyof EditorCard, value: any) =>
+    const updateCard = <K extends keyof EditorCard>(id: string, field: K, value: EditorCard[K]) =>
         setCards((prev) => prev.map((c) => (c.id === id ? { ...c, [field]: value } : c)));
 
-    const handleImportConfirm = (validRows: any[]) => {
+    const handleImportConfirm = (validRows: ImportRow[]) => {
         const newCards = validRows.map((r, i) => ({ ...makeCard(cards.length + i), ...r }));
         setCards(
             inputMode === "ai" || inputMode === "uploads"
@@ -154,37 +165,45 @@ export function useLessonBuilder({
         [cards],
     );
 
-    const handleSave = async () => {
-        if (!lesson.title?.trim()) return showAlert("warning", "Title is required");
-        setSaving(true);
-        try {
-            const processed: FlashCard[] = [];
-            for (const c of cards) {
-                const { imageFile, ...base } = c;
-                if (imageFile && user) {
-                    const res = await uploadCardImage(imageFile, user.uid, base.id);
-                    if (base.imagePath) deleteCardImage(base.imagePath).catch(() => {});
-                    processed.push({
-                        ...base,
-                        imageUrl: res.imageUrl,
-                        imagePath: res.imagePath,
-                    } as FlashCard);
-                } else processed.push(base as FlashCard);
+    const handleSave = handleSubmit(
+        async (data) => {
+            setSaving(true);
+            try {
+                const processed: FlashCard[] = [];
+                for (const c of cards) {
+                    const { imageFile, ...base } = c;
+                    if (imageFile && user) {
+                        const res = await uploadCardImage(imageFile, user.uid, base.id);
+                        if (base.imagePath) deleteCardImage(base.imagePath).catch(() => {});
+                        processed.push({
+                            ...base,
+                            imageUrl: res.imageUrl,
+                            imagePath: res.imagePath,
+                        } as FlashCard);
+                    } else processed.push(base as FlashCard);
+                }
+                const mergedLesson = {
+                    ...initialLesson,
+                    ...data,
+                    createdAt: initialLesson?.createdAt ?? Date.now(),
+                } as Lesson;
+                await onSave(mergedLesson, processed, !initialLesson);
+                for (const path of clearedImagePathsRef.current)
+                    deleteCardImage(path).catch(() => {});
+                clearedImagePathsRef.current = [];
+            } catch (err) {
+                if (err instanceof CardValidationError)
+                    showAlert(
+                        "error",
+                        "Some cards violate atomic principle (one word/phrase per card).",
+                    );
+                else console.error(err);
+            } finally {
+                setSaving(false);
             }
-            await onSave(lesson as Lesson, processed, !initialLesson);
-            for (const path of clearedImagePathsRef.current) deleteCardImage(path).catch(() => {});
-            clearedImagePathsRef.current = [];
-        } catch (err) {
-            if (err instanceof CardValidationError)
-                showAlert(
-                    "error",
-                    "Some cards violate atomic principle (one word/phrase per card).",
-                );
-            else console.error(err);
-        } finally {
-            setSaving(false);
-        }
-    };
+        },
+        () => showAlert("warning", formState.errors.title?.message ?? "Title is required"),
+    );
 
     const handleDelete = async () => {
         if (!onDelete || !initialLesson?.id) return;
@@ -205,8 +224,10 @@ export function useLessonBuilder({
         saving,
         handleSave,
         handleDelete,
-        lesson,
-        setLesson,
+        register,
+        formErrors: formState.errors,
+        setFormValue: setValue,
+        categories,
         cards,
         setCards,
         tagInput,
@@ -227,19 +248,18 @@ export function useLessonBuilder({
         existingWordsForAI,
         addTag: (val: string) => {
             const trimmed = val.trim().toLowerCase();
-            if (trimmed && (lesson.categories || []).length < 3) {
-                setLesson((prev) => ({
-                    ...prev,
-                    categories: [...(prev.categories || []), trimmed],
-                }));
+            const current = getValues("categories") || [];
+            if (trimmed && current.length < 3) {
+                setValue("categories", [...current, trimmed], { shouldDirty: true });
                 setTagInput("");
             }
         },
         removeCategory: (cat: string) =>
-            setLesson((prev) => ({
-                ...prev,
-                categories: prev.categories?.filter((c) => c !== cat),
-            })),
+            setValue(
+                "categories",
+                (getValues("categories") || []).filter((c) => c !== cat),
+                { shouldDirty: true },
+            ),
         addCard: () => setCards((prev) => [...prev, makeCard(prev.length)]),
         deleteCard: (id: string) => setCards((prev) => prev.filter((c) => c.id !== id)),
         handleImageChange: (file: File | null, id: string) => {

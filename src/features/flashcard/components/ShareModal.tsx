@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useId, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 
+import { Dialog } from "@base-ui/react/dialog";
 import { Check, Copy, ShieldAlert, X } from "lucide-react";
 
 import { buildShareId } from "@/features/flashcard/services";
@@ -11,7 +12,7 @@ import { useAppStore } from "@/lib/app-store";
 import { ActivityAction } from "@/lib/logging/actions.enum";
 import { enqueueClientLog } from "@/lib/logging/browser";
 import { Button } from "@/shared/components/ui";
-import { useCopyToClipboard, useDialogA11y } from "@/shared/hooks";
+import { useCopyToClipboard } from "@/shared/hooks";
 import { useAlert } from "@/shared/providers";
 import { hexToThemeColor } from "@/shared/utils";
 import ShareCollaboratorsPanel from "./ShareCollaboratorsPanel";
@@ -127,14 +128,17 @@ const ShareModal = ({ lesson, onShareLink, onUpdateRoles, onClose }: ShareModalP
 
     const [roles, setRoles] = useState<Record<string, Role>>(lesson.roles || {});
 
-    // Sync when the lesson prop changes (for real-time consistency)
-    useEffect(() => {
-        if (lesson.isPublic) setPrivacyMode("public");
-        else if (lesson.allowLinkAccess) setPrivacyMode("link");
-        else setPrivacyMode("restricted");
+    // Sync when the lesson prop changes (for real-time consistency) — adjusted
+    // directly during render (React's documented pattern for "reset state
+    // when a prop changes") rather than in an effect, since a following
+    // effect would flash the previous lesson's values for one extra render.
+    const [syncedLesson, setSyncedLesson] = useState(lesson);
+    if (syncedLesson !== lesson) {
+        setSyncedLesson(lesson);
+        setPrivacyMode(derivePrivacyMode());
         setPublicRole(sanitizePublicRole(lesson.publicRole));
         setRoles(lesson.roles || {});
-    }, [lesson]);
+    }
 
     // ── UI state ──────────────────────────────────────────────────────
     const [openPrivacyMenu, setOpenPrivacyMenu] = useState(false);
@@ -142,23 +146,12 @@ const ShareModal = ({ lesson, onShareLink, onUpdateRoles, onClose }: ShareModalP
     const [saving, setSaving] = useState(false);
 
     const {
-        inviteEmail,
-        setInviteEmail,
-        inviteRole,
-        setInviteRole,
+        register: registerInvite,
+        control: inviteControl,
         inviteError,
-        setInviteError,
         handleInvite,
         handleRevokeEmailInvite,
     } = useShareInvites({ lesson, setSaving });
-
-    const titleId = useId();
-    // Escape closes the privacy dropdown first if it's open, otherwise the whole modal —
-    // this component has no isOpen prop, it's only ever mounted while it should be open.
-    const dialogRef = useDialogA11y<HTMLDivElement>(true, () => {
-        if (openPrivacyMenu) setOpenPrivacyMenu(false);
-        else onClose();
-    });
 
     const themeHex = lesson.themeColor || "#1cb0f6";
     const themeColorStr = hexToThemeColor(themeHex);
@@ -277,147 +270,161 @@ const ShareModal = ({ lesson, onShareLink, onUpdateRoles, onClose }: ShareModalP
     };
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black/40 p-4 backdrop-blur-sm">
-            <div
-                ref={dialogRef}
-                role="dialog"
-                aria-modal="true"
-                aria-labelledby={titleId}
-                className="my-auto flex w-full max-w-lg flex-col rounded-4xl border-2 border-b-8 border-gray-200 bg-white shadow-xl"
-            >
-                {/* Header */}
-                <div className="flex shrink-0 items-center justify-between border-b-2 border-gray-100 p-6">
-                    <h2 id={titleId} className="text-text text-2xl font-black">
-                        Share Deck
-                    </h2>
-                    <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={onClose}
-                        icon={X}
-                        disabled={saving}
-                        aria-label="Close"
-                    />
-                </div>
-
-                <div className="overflow-visible p-6">
-                    {/* ── Role specific views ──────────────────────────────────────── */}
-                    {canManageRoles ? (
-                        <>
-                            <ShareCollaboratorsPanel
-                                lesson={lesson}
-                                roles={roles}
-                                saving={saving}
-                                themeHex={themeHex}
-                                inviteEmail={inviteEmail}
-                                inviteRole={inviteRole}
-                                inviteError={inviteError}
-                                onInviteEmailChange={(value) => {
-                                    setInviteEmail(value);
-                                    setInviteError(null);
-                                }}
-                                onInviteRoleChange={setInviteRole}
-                                onInvite={() => void handleInvite()}
-                                onRevokeInvite={(email) => void handleRevokeEmailInvite(email)}
-                                onUpdateUserRole={(targetId, newRole) =>
-                                    void handleUpdateUserRole(targetId, newRole)
-                                }
-                                onRemoveUser={(targetId) => void handleRemoveUser(targetId)}
+        <Dialog.Root
+            open
+            disablePointerDismissal
+            onOpenChange={(open) => {
+                if (open) return;
+                // Escape closes the privacy dropdown first if it's open, otherwise the
+                // whole modal — this component has no isOpen prop, it's only ever
+                // mounted while it should be open (`open` above stays a constant `true`;
+                // the parent unmounts this component entirely to actually close it).
+                if (openPrivacyMenu) setOpenPrivacyMenu(false);
+                else onClose();
+            }}
+        >
+            <Dialog.Portal>
+                <Dialog.Popup
+                    aria-modal="true"
+                    className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black/40 p-4 backdrop-blur-sm outline-none"
+                >
+                    <div className="my-auto flex w-full max-w-lg flex-col rounded-4xl border-2 border-b-8 border-gray-200 bg-white shadow-xl">
+                        {/* Header */}
+                        <div className="flex shrink-0 items-center justify-between border-b-2 border-gray-100 p-6">
+                            <Dialog.Title className="text-text text-2xl font-black">
+                                Share Deck
+                            </Dialog.Title>
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={onClose}
+                                icon={X}
+                                disabled={saving}
+                                aria-label="Close"
                             />
+                        </div>
 
-                            <SharePrivacyPicker
-                                privacyMode={privacyMode}
-                                publicRole={publicRole}
-                                saving={saving}
-                                themeHex={themeHex}
-                                openPrivacyMenu={openPrivacyMenu}
-                                onTogglePrivacyMenu={() => setOpenPrivacyMenu((v) => !v)}
-                                onClosePrivacyMenu={() => setOpenPrivacyMenu(false)}
-                                onChangePrivacyMode={(mode) => void handleSavePrivacyMode(mode)}
-                                onChangePublicRole={(role) => void handleSavePublicRole(role)}
-                            />
-                        </>
-                    ) : (
-                        /* ── Rest of users view ─────────────────────────── */
-                        <div className="mb-6 flex flex-col gap-4">
-                            <div className="flex items-center gap-4 rounded-2xl border-2 border-gray-100 bg-gray-50/50 p-4">
-                                <div
-                                    className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full"
-                                    style={{ backgroundColor: `${themeHex}20` }}
-                                >
-                                    <ShieldAlert style={{ color: themeHex }} size={20} />
-                                </div>
-                                <div>
-                                    <p className="text-text font-black capitalize">
-                                        {currentRole || "Viewer"} Access
-                                    </p>
-                                    <p className="text-muted text-sm font-bold">
-                                        {currentRole === "editor"
-                                            ? "You can edit this deck's content, but only the owner can modify sharing settings."
-                                            : currentRole === "commenter"
-                                              ? "You can comment on items in this deck."
-                                              : "You can study this deck but cannot edit it."}
-                                    </p>
-                                </div>
-                            </div>
+                        <div className="overflow-visible p-6">
+                            {/* ── Role specific views ──────────────────────────────────────── */}
+                            {canManageRoles ? (
+                                <>
+                                    <ShareCollaboratorsPanel
+                                        lesson={lesson}
+                                        roles={roles}
+                                        saving={saving}
+                                        themeHex={themeHex}
+                                        registerInvite={registerInvite}
+                                        inviteControl={inviteControl}
+                                        inviteError={inviteError}
+                                        onInvite={() => void handleInvite()}
+                                        onRevokeInvite={(email) =>
+                                            void handleRevokeEmailInvite(email)
+                                        }
+                                        onUpdateUserRole={(targetId, newRole) =>
+                                            void handleUpdateUserRole(targetId, newRole)
+                                        }
+                                        onRemoveUser={(targetId) => void handleRemoveUser(targetId)}
+                                    />
 
-                            {/* Collaborator overview for non-owners */}
-                            <div className="rounded-2xl border-2 border-gray-100 p-4">
-                                <h4 className="text-muted mb-2 text-xs font-black tracking-widest uppercase">
-                                    Collaborators
-                                </h4>
-                                <div className="flex -space-x-2">
-                                    {Object.entries(roles)
-                                        .slice(0, 5)
-                                        .map(([uid, r]) => (
-                                            <div
-                                                key={uid}
-                                                className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-white bg-gray-200 text-xs font-bold text-gray-500"
-                                                title={`${uid} - ${r}`}
-                                            >
-                                                {uid.slice(0, 2).toUpperCase()}
-                                            </div>
-                                        ))}
-                                    {Object.keys(roles).length > 5 && (
-                                        <div className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-white bg-gray-100 text-xs font-bold text-gray-500">
-                                            +{Object.keys(roles).length - 5}
+                                    <SharePrivacyPicker
+                                        privacyMode={privacyMode}
+                                        publicRole={publicRole}
+                                        saving={saving}
+                                        themeHex={themeHex}
+                                        openPrivacyMenu={openPrivacyMenu}
+                                        onTogglePrivacyMenu={() => setOpenPrivacyMenu((v) => !v)}
+                                        onClosePrivacyMenu={() => setOpenPrivacyMenu(false)}
+                                        onChangePrivacyMode={(mode) =>
+                                            void handleSavePrivacyMode(mode)
+                                        }
+                                        onChangePublicRole={(role) =>
+                                            void handleSavePublicRole(role)
+                                        }
+                                    />
+                                </>
+                            ) : (
+                                /* ── Rest of users view ─────────────────────────── */
+                                <div className="mb-6 flex flex-col gap-4">
+                                    <div className="flex items-center gap-4 rounded-2xl border-2 border-gray-100 bg-gray-50/50 p-4">
+                                        <div
+                                            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full"
+                                            style={{ backgroundColor: `${themeHex}20` }}
+                                        >
+                                            <ShieldAlert style={{ color: themeHex }} size={20} />
                                         </div>
-                                    )}
+                                        <div>
+                                            <p className="text-text font-black capitalize">
+                                                {currentRole || "Viewer"} Access
+                                            </p>
+                                            <p className="text-muted text-sm font-bold">
+                                                {currentRole === "editor"
+                                                    ? "You can edit this deck's content, but only the owner can modify sharing settings."
+                                                    : currentRole === "commenter"
+                                                      ? "You can comment on items in this deck."
+                                                      : "You can study this deck but cannot edit it."}
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    {/* Collaborator overview for non-owners */}
+                                    <div className="rounded-2xl border-2 border-gray-100 p-4">
+                                        <h4 className="text-muted mb-2 text-xs font-black tracking-widest uppercase">
+                                            Collaborators
+                                        </h4>
+                                        <div className="flex -space-x-2">
+                                            {Object.entries(roles)
+                                                .slice(0, 5)
+                                                .map(([uid, r]) => (
+                                                    <div
+                                                        key={uid}
+                                                        className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-white bg-gray-200 text-xs font-bold text-gray-500"
+                                                        title={`${uid} - ${r}`}
+                                                    >
+                                                        {uid.slice(0, 2).toUpperCase()}
+                                                    </div>
+                                                ))}
+                                            {Object.keys(roles).length > 5 && (
+                                                <div className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-white bg-gray-100 text-xs font-bold text-gray-500">
+                                                    +{Object.keys(roles).length - 5}
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
                                 </div>
+                            )}
+
+                            {/* Footer actions */}
+                            <div className="flex shrink-0 items-center justify-between pt-2">
+                                <Button
+                                    variant="secondary"
+                                    color={copied ? "green" : "gray"}
+                                    icon={copied ? Check : Copy}
+                                    onClick={handleCopy}
+                                    className={`h-12 rounded-2xl border-2 px-6 text-sm font-bold transition-colors ${
+                                        copied
+                                            ? "text-hiragana border-[#58cc02] bg-[#f2fbf0]"
+                                            : "text-text border-gray-200 hover:bg-gray-50"
+                                    }`}
+                                    disabled={saving}
+                                >
+                                    {copied ? "Link copied" : "Copy link"}
+                                </Button>
+
+                                <Button
+                                    variant="primary"
+                                    color={themeColorStr}
+                                    onClick={onClose}
+                                    className="h-12 px-10 text-sm"
+                                    disabled={saving}
+                                >
+                                    Done
+                                </Button>
                             </div>
                         </div>
-                    )}
-
-                    {/* Footer actions */}
-                    <div className="flex shrink-0 items-center justify-between pt-2">
-                        <Button
-                            variant="secondary"
-                            color={copied ? "green" : "gray"}
-                            icon={copied ? Check : Copy}
-                            onClick={handleCopy}
-                            className={`h-12 rounded-2xl border-2 px-6 text-sm font-bold transition-colors ${
-                                copied
-                                    ? "text-hiragana border-[#58cc02] bg-[#f2fbf0]"
-                                    : "text-text border-gray-200 hover:bg-gray-50"
-                            }`}
-                            disabled={saving}
-                        >
-                            {copied ? "Link copied" : "Copy link"}
-                        </Button>
-
-                        <Button
-                            variant="primary"
-                            color={themeColorStr}
-                            onClick={onClose}
-                            className="h-12 px-10 text-sm"
-                            disabled={saving}
-                        >
-                            Done
-                        </Button>
                     </div>
-                </div>
-            </div>
-        </div>
+                </Dialog.Popup>
+            </Dialog.Portal>
+        </Dialog.Root>
     );
 };
 

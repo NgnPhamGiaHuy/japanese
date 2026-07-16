@@ -1,6 +1,9 @@
 import "server-only";
 
+import { createSafeActionClient } from "next-safe-action";
 import { cookies } from "next/headers";
+
+import { z } from "zod";
 
 import { adminAuth, adminDb } from "@/lib/firebase-admin";
 import { hasPermission, normalizeAdminRole } from "../utils/rbac";
@@ -58,3 +61,32 @@ export async function assertAdminAction(action: PermissionAction): Promise<Calle
     if (!token) throw new Error("UNAUTHORIZED: Session token missing");
     return assertPermissionFromToken(token, action);
 }
+
+/**
+ * Admin-scoped safe-action client: each action declares its
+ * required permission via `.metadata({permission})`; this middleware runs
+ * the existing `assertAdminAction` once and exposes the resolved
+ * `{uid, role}` as `ctx`. Folds the cookie-session + role/permission check
+ * that every admin action previously hand-rolled into one place.
+ */
+export const adminActionClient = createSafeActionClient({
+    defineMetadataSchema: () =>
+        z.object({
+            permission: z.enum([
+                "canViewDashboard",
+                "canViewAnalytics",
+                "canViewReports",
+                "canManageUsers",
+                "canDeleteUsers",
+                "canPromoteUsers",
+                "canManageContent",
+                "canChangeSettings",
+            ]),
+        }),
+    handleServerError(e) {
+        return e instanceof Error ? e.message : "An unexpected error occurred";
+    },
+}).use(async ({ next, metadata }) => {
+    const caller = await assertAdminAction(metadata.permission);
+    return next({ ctx: caller });
+});

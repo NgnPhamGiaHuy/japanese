@@ -1,6 +1,7 @@
 import { getGenerativeModel } from "firebase/ai";
 
 import { firebaseAI } from "@/lib/firebase";
+import { generatedCardArraySchema, generatedCardSchema } from "@/shared/schemas";
 import { splitAtomicPrimary, validateAtomicCard } from "@/shared/utils";
 import { getCardGenerationPrompt, getDeckGenerationPrompt } from "./prompt-builder";
 import { AI_CONFIG } from "../config";
@@ -57,46 +58,16 @@ function dedupeDeckCards(cards: GeneratedCard[], existingWords: string[]): Gener
     return filtered;
 }
 
-// ─── Direct Gemini API (primary) ──────────────────────────────────────────────
-
-const DIRECT_API_KEY = process.env.NEXT_PUBLIC_GEMINI_API_KEY;
-const GEMINI_BASE = "https://generativelanguage.googleapis.com/v1beta/models";
-
-/**
- * Calls the Gemini REST API directly using the user-supplied API key.
- * Returns the raw text response.
- */
-async function callGeminiDirect(modelName: string, prompt: string): Promise<string> {
-    const url = `${GEMINI_BASE}/${modelName}:generateContent?key=${DIRECT_API_KEY}`;
-    const body = {
-        contents: [{ parts: [{ text: prompt }] }],
-        generationConfig: {
-            temperature: AI_CONFIG.generation.temperature,
-            topP: AI_CONFIG.generation.topP,
-            maxOutputTokens: AI_CONFIG.generation.maxOutputTokens,
-        },
-    };
-
-    const res = await fetch(url, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
-    });
-
-    if (!res.ok) {
-        const errText = await res.text().catch(() => res.statusText);
-        if (res.status === 429)
-            throw new AIServiceError("AI quota exceeded — please try again later", "quota_error");
-        throw new AIServiceError(`Gemini API error ${res.status}: ${errText}`, "api_error");
-    }
-
-    const data = await res.json();
-    const text: string = data?.candidates?.[0]?.content?.parts?.[0]?.text ?? "";
-    if (!text) throw new AIServiceError("Gemini API returned empty response", "api_error");
-    return text;
-}
-
-// ─── Firebase AI fallback ─────────────────────────────────────────────────────
+// ─── Firebase AI Logic (sole path) ────────────────────────────────────────────
+//
+// All Gemini calls are proxied through Firebase AI Logic — no API key is ever
+// present in client code or the client bundle. App Check (once enabled, see
+// the App Check hardening work) attests the caller to Firebase before the
+// request is forwarded to the Gemini provider.
+//
+// A prior direct-REST path with a client-exposed API key existed here and
+// has been removed entirely — do not reintroduce a client-side Gemini key
+// (any env var prefixed NEXT_PUBLIC_ is inlined into the browser bundle).
 
 function getFirebaseModel(modelName: string) {
     return getGenerativeModel(firebaseAI, {
@@ -110,7 +81,7 @@ function getFirebaseModel(modelName: string) {
     });
 }
 
-async function callFirebaseFallback(modelName: string, prompt: string): Promise<string> {
+async function callFirebaseAI(modelName: string, prompt: string): Promise<string> {
     const model = getFirebaseModel(modelName);
     const result = await model.generateContent(prompt);
     return result.response.text();
@@ -129,21 +100,9 @@ async function fileToBase64(file: File): Promise<{ mimeType: string; data: strin
     });
 }
 
-/**
- * Generates content using the direct API key first.
- * Falls back to Firebase AI if the key is not configured or the direct call fails.
- */
+/** Generates content via Firebase AI Logic — see the module header for why. */
 async function generateContent(modelName: string, prompt: string): Promise<string> {
-    if (DIRECT_API_KEY) {
-        try {
-            return await callGeminiDirect(modelName, prompt);
-        } catch (err) {
-            // Re-throw quota errors — no point falling back
-            if (err instanceof AIServiceError && err.code === "quota_error") throw err;
-            console.warn("[AI] Direct API failed, falling back to Firebase AI:", err);
-        }
-    }
-    return callFirebaseFallback(modelName, prompt);
+    return callFirebaseAI(modelName, prompt);
 }
 
 async function generateMultimodalContent(
@@ -152,45 +111,6 @@ async function generateMultimodalContent(
     files: File[],
 ): Promise<string> {
     const base64Files = await Promise.all(files.map(fileToBase64));
-
-    if (DIRECT_API_KEY) {
-        try {
-            const url = `${GEMINI_BASE}/${modelName}:generateContent?key=${DIRECT_API_KEY}`;
-            const body = {
-                contents: [
-                    {
-                        parts: [
-                            { text: prompt },
-                            ...base64Files.map((f) => ({
-                                inline_data: { mime_type: f.mimeType, data: f.data },
-                            })),
-                        ],
-                    },
-                ],
-                generationConfig: {
-                    temperature: AI_CONFIG.generation.temperature,
-                    topP: AI_CONFIG.generation.topP,
-                    maxOutputTokens: AI_CONFIG.generation.maxOutputTokens,
-                    responseMimeType: "application/json",
-                },
-            };
-
-            const res = await fetch(url, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(body),
-            });
-
-            if (res.ok) {
-                const data = await res.json();
-                return data?.candidates?.[0]?.content?.parts?.[0]?.text ?? "";
-            }
-        } catch (err) {
-            console.warn("[AI] Direct Multimodal failed, falling back to Firebase:", err);
-        }
-    }
-
-    // Firebase fallback
     const model = getFirebaseModel(modelName);
     const parts = [
         prompt,
@@ -202,91 +122,32 @@ async function generateMultimodalContent(
     return result.response.text();
 }
 
+/** Parses raw (untrusted) Gemini JSON into a GeneratedCard — see ai-output.schema.ts. */
 function parseCard(raw: unknown): GeneratedCard {
-    if (typeof raw !== "object" || raw === null) {
-        throw new AIServiceError("AI returned an unexpected shape", "invalid_response");
+    const result = generatedCardSchema.safeParse(raw);
+    if (!result.success) {
+        const message = result.error.issues[0]?.message ?? "AI returned an unexpected shape";
+        throw new AIServiceError(message, "invalid_response");
     }
-    const obj = raw as Record<string, unknown>;
-
-    const primary = String(obj.primary ?? "").trim();
-    const alternatives = Array.isArray(obj.alternatives)
-        ? obj.alternatives
-              .filter(
-                  (value): value is string => typeof value === "string" && value.trim().length > 0,
-              )
-              .map((value) => value.trim())
-        : [];
-    const meaning = String(obj.meaning ?? "").trim();
-    const example = String(obj.example ?? "").trim();
-
-    if (!primary) {
-        throw new AIServiceError("AI response missing required field: primary", "invalid_response");
-    }
-
-    if (!meaning) {
-        throw new AIServiceError("AI response missing required field: meaning", "invalid_response");
-    }
-
-    const distractors = Array.isArray(obj.distractors)
-        ? obj.distractors
-              .filter((d): d is string => typeof d === "string" && d.trim().length > 0)
-              .map((d) => d.trim())
-              .slice(0, 3)
-        : undefined;
-
-    const hint =
-        typeof obj.hint === "string" && obj.hint.trim().length > 0
-            ? obj.hint.trim().slice(0, 120)
-            : undefined;
-
-    const usageNote =
-        typeof obj.usageNote === "string" && obj.usageNote.trim().length > 0
-            ? obj.usageNote.trim().slice(0, 120)
-            : undefined;
-
-    const rawDiff = Number(obj.difficulty);
-    const difficulty: 1 | 2 | 3 | undefined = [1, 2, 3].includes(rawDiff)
-        ? (rawDiff as 1 | 2 | 3)
-        : undefined;
-
-    const mnemonic =
-        typeof obj.mnemonic === "string" && obj.mnemonic.trim().length > 0
-            ? obj.mnemonic.trim().slice(0, 120)
-            : undefined;
-
-    // clozeTemplate must contain exactly one ___ token
-    const rawCloze =
-        typeof obj.clozeTemplate === "string" && obj.clozeTemplate.trim().length > 0
-            ? obj.clozeTemplate.trim()
-            : undefined;
-    const clozeTokenCount = rawCloze ? (rawCloze.match(/___/g) ?? []).length : 0;
-    const clozeTemplate = clozeTokenCount === 1 ? rawCloze : undefined;
-
-    return {
-        primary,
-        alternatives,
-        meaning,
-        example,
-        distractors,
-        hint,
-        usageNote,
-        difficulty,
-        mnemonic,
-        clozeTemplate,
-    };
+    return result.data;
 }
 
 function parseCardArray(raw: unknown): GeneratedCard[] {
     if (!Array.isArray(raw)) {
         throw new AIServiceError("AI response is not an array", "invalid_response");
     }
-    return raw.map((item, i) => {
-        try {
-            return parseCard(item);
-        } catch {
-            throw new AIServiceError(`Card at index ${i} has invalid shape`, "invalid_response");
-        }
-    });
+    const result = generatedCardArraySchema.safeParse(raw);
+    if (!result.success) {
+        const issue = result.error.issues[0];
+        const index = issue?.path[0];
+        throw new AIServiceError(
+            typeof index === "number"
+                ? `Card at index ${index} has invalid shape`
+                : "AI response contains an invalid card",
+            "invalid_response",
+        );
+    }
+    return result.data;
 }
 
 function classifyError(err: unknown): never {

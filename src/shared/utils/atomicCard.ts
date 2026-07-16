@@ -5,17 +5,21 @@
  * Shared between features/flashcard (validating user-entered/imported cards)
  * and features/ai (validating Gemini-generated cards) — neither feature owns
  * this concept, so it lives here rather than forcing one to depend on the other.
+ *
+ * The rule check itself now lives in shared/schemas/card.schema.ts (the zod
+ * v4 single source of truth) — this module re-exports the types
+ * and delegates `validateAtomicCard` to it, preserving the existing
+ * `{ valid, violations }` call signature for its three call sites
+ * (parser.ts, gemini.service.ts, lesson.service.ts) unchanged.
  */
+
+import { checkAtomicPrimaryViolations } from "@/shared/schemas/card.schema";
+
+import type { CardViolation, ViolationRule } from "@/shared/schemas/card.schema";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
-export type ViolationRule = "comma_separated" | "slash_separated" | "parenthetical";
-
-export interface CardViolation {
-    field: "primary";
-    rule: ViolationRule;
-    offendingValue: string;
-}
+export type { CardViolation, ViolationRule };
 
 export interface ValidationResult {
     valid: boolean;
@@ -35,10 +39,11 @@ export interface ValidationResult {
  * @param card - Any object with a `primary` string field.
  * @returns `{ valid: boolean; violations: CardViolation[] }`
  */
-export function validateAtomicCard(_card: { primary: string }): ValidationResult {
+export function validateAtomicCard(card: { primary: string }): ValidationResult {
+    const violations = checkAtomicPrimaryViolations(card.primary);
     return {
-        valid: true,
-        violations: [],
+        valid: violations.length === 0,
+        violations,
     };
 }
 

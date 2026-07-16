@@ -1,5 +1,7 @@
 "use client";
 
+import { forwardRef } from "react";
+
 import { cn } from "@/shared/utils";
 
 import type { TextareaHTMLAttributes } from "react";
@@ -19,30 +21,35 @@ interface TextareaProps extends TextareaHTMLAttributes<HTMLTextAreaElement> {
  * @example
  * <Textarea placeholder="Description" value={value} onChange={...} rows={4} />
  */
-const Textarea = ({ variant = "default", className = "", ...props }: TextareaProps) => {
-    if (variant === "underline") {
+const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
+    ({ variant = "default", className = "", ...props }, ref) => {
+        if (variant === "underline") {
+            return (
+                <textarea
+                    ref={ref}
+                    {...props}
+                    className={cn(
+                        "text-muted w-full resize-none border-b-2 border-transparent bg-transparent font-bold transition-colors outline-none placeholder:text-gray-300",
+                        "focus:border-[var(--theme-color,var(--color-katakana))]",
+                        className,
+                    )}
+                />
+            );
+        }
+
         return (
             <textarea
+                ref={ref}
                 {...props}
                 className={cn(
-                    "text-muted w-full resize-none border-b-2 border-transparent bg-transparent font-bold transition-colors outline-none placeholder:text-gray-300",
-                    "focus:border-[var(--theme-color,var(--color-katakana))]",
+                    "placeholder:text-muted text-text w-full rounded-2xl border-2 border-gray-100 bg-white px-4 py-3 text-sm font-black transition-all outline-none placeholder:font-bold",
+                    "focus:ring-katakana/5 focus:border-[var(--theme-color,var(--color-katakana))] focus:ring-4",
                     className,
                 )}
             />
         );
-    }
-
-    return (
-        <textarea
-            {...props}
-            className={cn(
-                "placeholder:text-muted text-text w-full rounded-2xl border-2 border-gray-100 bg-white px-4 py-3 text-sm font-black transition-all outline-none placeholder:font-bold",
-                "focus:ring-katakana/5 focus:border-[var(--theme-color,var(--color-katakana))] focus:ring-4",
-                className,
-            )}
-        />
-    );
-};
+    },
+);
+Textarea.displayName = "Textarea";
 
 export default Textarea;

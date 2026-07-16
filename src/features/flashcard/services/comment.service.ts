@@ -24,6 +24,7 @@ import {
 
 import { emitNotification } from "@/features/notifications/services";
 import { APP_ID, db } from "@/lib/firebase";
+import { commentContentSchema } from "@/shared/schemas";
 
 import type { CollectionReference, DocumentReference, Unsubscribe } from "firebase/firestore";
 import type { Comment } from "../types/flashcard.types";
@@ -115,21 +116,14 @@ export function commentDoc(
 // ─── Validation and Sanitization ───────────────────────────────────────────
 
 /**
- * Validates comment content before submission.
- * Rules: non-empty, max 2000 chars, trimmed whitespace
+ * Validates comment content before submission — delegates to the shared
+ * zod schema (single source of truth); see shared/schemas/comment.schema.ts.
  */
 export function validateCommentContent(content: string): { valid: boolean; error?: string } {
-    const trimmed = content.trim();
-
-    if (trimmed.length === 0) {
-        return { valid: false, error: "Comment cannot be empty" };
-    }
-
-    if (trimmed.length > 2000) {
-        return { valid: false, error: "Comment cannot exceed 2000 characters" };
-    }
-
-    return { valid: true };
+    const result = commentContentSchema.safeParse(content);
+    return result.success
+        ? { valid: true }
+        : { valid: false, error: result.error.issues[0]?.message };
 }
 
 /**

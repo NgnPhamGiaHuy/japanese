@@ -16,17 +16,33 @@ import type { Firestore } from "firebase-admin/firestore";
  * at build time, crashing any CI/build without secrets. The Admin SDK is only
  * needed inside a request (server action / server component), so deferring init
  * to first use keeps builds credential-free.
+ *
+ * Against the emulator (FIRESTORE_EMULATOR_HOST set — `npm run test:emu`), the
+ * Admin SDK routes every call to the local emulator regardless of which
+ * credential initialized the app, so a bare projectId is enough — real
+ * service-account creds are neither required nor necessarily present in that
+ * environment. Mirrors the pattern already used by scripts/backfill-*.mjs.
  */
 function getAdminApp(): App {
-    return getApps().length > 0
-        ? getApp()
-        : initializeApp({
-              credential: cert({
-                  projectId: process.env.FIREBASE_ADMIN_PROJECT_ID,
-                  clientEmail: process.env.FIREBASE_ADMIN_CLIENT_EMAIL,
-                  privateKey: process.env.FIREBASE_ADMIN_PRIVATE_KEY?.replace(/\\n/g, "\n"),
-              }),
-          });
+    if (getApps().length > 0) return getApp();
+    if (process.env.FIRESTORE_EMULATOR_HOST) {
+        // GCLOUD_PROJECT is what `firebase emulators:exec` actually binds the
+        // running emulator to (from .firebaserc) — must match, or verifyIdToken
+        // rejects every token on an "aud" (audience) mismatch.
+        return initializeApp({
+            projectId:
+                process.env.GCLOUD_PROJECT ??
+                process.env.FIREBASE_ADMIN_PROJECT_ID ??
+                "demo-notifications",
+        });
+    }
+    return initializeApp({
+        credential: cert({
+            projectId: process.env.FIREBASE_ADMIN_PROJECT_ID,
+            clientEmail: process.env.FIREBASE_ADMIN_CLIENT_EMAIL,
+            privateKey: process.env.FIREBASE_ADMIN_PRIVATE_KEY?.replace(/\\n/g, "\n"),
+        }),
+    });
 }
 
 let authInstance: Auth | undefined;

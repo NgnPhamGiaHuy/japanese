@@ -1,5 +1,7 @@
 "use client";
 
+import { forwardRef } from "react";
+
 import { cn } from "@/shared/utils";
 
 import type { LucideIcon } from "lucide-react";
@@ -31,46 +33,54 @@ interface InputProps extends Omit<InputHTMLAttributes<HTMLInputElement>, "size">
  * @example
  * <Input icon={Search} placeholder="Search..." value={value} onChange={...} />
  */
-const Input = ({
-    variant = "default",
-    icon: Icon,
-    iconSize = 18,
-    className = "",
-    containerClassName = "",
-    ...props
-}: InputProps) => {
-    if (variant === "underline") {
-        return (
-            <input
-                {...props}
-                className={cn(
-                    "text-text w-full border-b-2 border-transparent bg-transparent pb-2 font-black transition-colors outline-none placeholder:text-gray-300",
-                    "focus:border-[var(--theme-color,var(--color-katakana))]",
-                    className,
-                )}
-            />
-        );
-    }
-
-    return (
-        <div className={cn("relative", containerClassName)}>
-            {Icon && (
-                <Icon
-                    className="text-muted pointer-events-none absolute top-1/2 left-4 -translate-y-1/2"
-                    size={iconSize}
+const Input = forwardRef<HTMLInputElement, InputProps>(
+    (
+        {
+            variant = "default",
+            icon: Icon,
+            iconSize = 18,
+            className = "",
+            containerClassName = "",
+            ...props
+        },
+        ref,
+    ) => {
+        if (variant === "underline") {
+            return (
+                <input
+                    ref={ref}
+                    {...props}
+                    className={cn(
+                        "text-text w-full border-b-2 border-transparent bg-transparent pb-2 font-black transition-colors outline-none placeholder:text-gray-300",
+                        "focus:border-[var(--theme-color,var(--color-katakana))]",
+                        className,
+                    )}
                 />
-            )}
-            <input
-                {...props}
-                className={cn(
-                    "placeholder:text-muted text-text h-12 w-full rounded-2xl border-2 border-gray-100 bg-white text-sm font-black transition-all outline-none placeholder:font-bold",
-                    "focus:ring-katakana/5 focus:border-[var(--theme-color,var(--color-katakana))] focus:ring-4",
-                    Icon ? "pr-4 pl-11" : "px-4",
-                    className,
+            );
+        }
+
+        return (
+            <div className={cn("relative", containerClassName)}>
+                {Icon && (
+                    <Icon
+                        className="text-muted pointer-events-none absolute top-1/2 left-4 -translate-y-1/2"
+                        size={iconSize}
+                    />
                 )}
-            />
-        </div>
-    );
-};
+                <input
+                    ref={ref}
+                    {...props}
+                    className={cn(
+                        "placeholder:text-muted text-text h-12 w-full rounded-2xl border-2 border-gray-100 bg-white text-sm font-black transition-all outline-none placeholder:font-bold",
+                        "focus:ring-katakana/5 focus:border-[var(--theme-color,var(--color-katakana))] focus:ring-4",
+                        Icon ? "pr-4 pl-11" : "px-4",
+                        className,
+                    )}
+                />
+            </div>
+        );
+    },
+);
+Input.displayName = "Input";
 
 export default Input;

@@ -2,15 +2,13 @@
 
 /**
  * @file actions/access.actions.ts
- * Server-side access-control actions that require the Admin SDK (Task 2.9).
+ * Server-side access-control actions that require the Admin SDK.
  *
  * Declining an invite must REVOKE the pending invite, not just dismiss the
  * notification — otherwise the invitee's `invitedEmails` entry survives and
  * `syncInviteToCollaborator` silently re-grants access the next time they open
  * the share link. The invitee has no write access to the owner's lesson, so the
  * revoke must happen server-side via the Admin SDK.
- *
- * @see NOTIFICATION_SYSTEM_IMPLEMENTATION_PLAN.md — Task 2.9
  */
 import { FieldPath, FieldValue } from "firebase-admin/firestore";
 

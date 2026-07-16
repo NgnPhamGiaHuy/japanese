@@ -1,13 +1,17 @@
 "use client";
 
+import { Controller } from "react-hook-form";
+
 import { Mail } from "lucide-react";
 
 import { ROLE_CONFIG } from "@/features/flashcard/utils/rbac";
 import { useAppStore } from "@/lib/app-store";
 import { Button, Input, Select } from "@/shared/components/ui";
 
+import type { Control, UseFormRegister } from "react-hook-form";
 import type { DeckAccessRole } from "@/features/flashcard/types";
 import type { SelectOption } from "@/shared/components/ui";
+import type { ShareInvite } from "@/shared/schemas";
 import type { Lesson } from "../types";
 
 type Role = DeckAccessRole;
@@ -38,11 +42,9 @@ interface ShareCollaboratorsPanelProps {
     roles: Record<string, Role>;
     saving: boolean;
     themeHex: string;
-    inviteEmail: string;
-    inviteRole: Role;
+    registerInvite: UseFormRegister<ShareInvite>;
+    inviteControl: Control<ShareInvite>;
     inviteError: string | null;
-    onInviteEmailChange: (value: string) => void;
-    onInviteRoleChange: (role: Role) => void;
     onInvite: () => void;
     onRevokeInvite: (email: string) => void;
     onUpdateUserRole: (targetId: string, newRole: Role) => void;
@@ -55,11 +57,9 @@ const ShareCollaboratorsPanel = ({
     roles,
     saving,
     themeHex,
-    inviteEmail,
-    inviteRole,
+    registerInvite,
+    inviteControl,
     inviteError,
-    onInviteEmailChange,
-    onInviteRoleChange,
     onInvite,
     onRevokeInvite,
     onUpdateUserRole,
@@ -76,25 +76,32 @@ const ShareCollaboratorsPanel = ({
                         type="email"
                         variant="default"
                         placeholder="Invite by email address"
-                        value={inviteEmail}
-                        onChange={(e) => onInviteEmailChange(e.target.value)}
                         onKeyDown={(e) => {
                             if (e.key === "Enter") onInvite();
                         }}
                         disabled={saving}
                         containerClassName="flex-1"
+                        aria-invalid={!!inviteError}
+                        aria-describedby={inviteError ? "invite-email-error" : undefined}
+                        {...registerInvite("email")}
                     />
-                    <Select
-                        value={inviteRole}
-                        options={sharingOptions}
-                        onChange={onInviteRoleChange}
-                        disabled={saving}
-                        themeHex={themeHex}
-                        align="right"
+                    <Controller
+                        name="role"
+                        control={inviteControl}
+                        render={({ field }) => (
+                            <Select
+                                value={field.value}
+                                options={sharingOptions}
+                                onChange={field.onChange}
+                                disabled={saving}
+                                themeHex={themeHex}
+                                align="right"
+                            />
+                        )}
                     />
                     <Button
                         onClick={onInvite}
-                        disabled={!inviteEmail.trim() || saving}
+                        disabled={saving}
                         variant="primary"
                         color="blue"
                         className="h-12 px-6"
@@ -103,7 +110,13 @@ const ShareCollaboratorsPanel = ({
                     </Button>
                 </div>
                 {inviteError && (
-                    <p className="mt-1.5 text-xs font-bold text-red-500">{inviteError}</p>
+                    <p
+                        id="invite-email-error"
+                        role="alert"
+                        className="mt-1.5 text-xs font-bold text-red-500"
+                    >
+                        {inviteError}
+                    </p>
                 )}
             </div>
 

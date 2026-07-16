@@ -71,9 +71,10 @@ const LessonBuilder: React.FC<LessonBuilderProps> = ({
                     existingWords={builder.existingWordsForAI}
                     handleImportConfirm={builder.handleImportConfirm}
                     saving={saving}
-                    onAISuccess={(title, description) =>
-                        builder.setLesson((prev) => ({ ...prev, title, description }))
-                    }
+                    onAISuccess={(title, description) => {
+                        builder.setFormValue("title", title, { shouldDirty: true });
+                        builder.setFormValue("description", description, { shouldDirty: true });
+                    }}
                 />
                 <AnimatePresence mode="wait">
                     {(builder.inputMode === "manual" || builder.inputMode === "paste") && (
