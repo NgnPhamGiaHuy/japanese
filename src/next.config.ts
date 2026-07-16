@@ -1,3 +1,5 @@
+import { withSentryConfig } from "@sentry/nextjs";
+
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
@@ -15,4 +17,12 @@ const nextConfig: NextConfig = {
     },
 };
 
-export default nextConfig;
+// Source-map upload needs SENTRY_AUTH_TOKEN (org/project auth), which no
+// dev/CI environment here has — disabled until real credentials exist so the
+// build never attempts a network call it can't authenticate.
+export default withSentryConfig(nextConfig, {
+    silent: true,
+    sourcemaps: {
+        disable: !process.env.SENTRY_AUTH_TOKEN,
+    },
+});

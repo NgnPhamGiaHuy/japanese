@@ -10,6 +10,7 @@ import { useActivityTracker, useFirebaseAuth } from "@/features/user/hooks";
 import { useAppStore } from "@/lib/app-store";
 import { AudioProvider } from "@/lib/AudioProvider";
 import { FontSyncer } from "@/lib/FontSyncer";
+import { PostHogProvider } from "@/lib/PostHogProvider";
 import { AlertProvider } from "@/shared/providers";
 
 function AuthGate({ children }: { children: React.ReactNode }) {
@@ -58,6 +59,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
             <AlertProvider>
                 <FontSyncer />
                 <AudioProvider />
+                <PostHogProvider />
                 <AuthGate>
                     <AdminProvider>
                         <NotificationsProvider>{children}</NotificationsProvider>

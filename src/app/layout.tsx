@@ -2,7 +2,9 @@ import type { Metadata } from "next";
 
 import "./globals.css";
 
+import { fontVariables } from "@/lib/fonts";
 import { Providers } from "@/lib/providers";
+import { ReactScan } from "./_components/ReactScan";
 
 export const metadata: Metadata = {
     title: "Kana & Nihongo Master",
@@ -21,8 +23,9 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
     return (
-        <html lang="en">
+        <html lang="en" className={fontVariables}>
             <body suppressHydrationWarning>
+                <ReactScan />
                 <Providers>{children}</Providers>
             </body>
         </html>
