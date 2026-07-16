@@ -5,6 +5,7 @@ import { useCallback, useEffect, useState } from "react";
 import { useAppStore } from "@/lib/app-store";
 import * as CardService from "../services/card.service";
 
+import type { OrderChange } from "@/shared/utils";
 import type { FlashCard } from "../types";
 
 /**
@@ -38,15 +39,21 @@ export function useCards(lessonId?: string, ownerId?: string) {
         error: null,
     });
 
+    // Render-time reset: whenever the target user/lesson identity changes,
+    // sync loading/empty state immediately instead of a synchronous
+    // setState at the top of the effect below.
+    const targetUserId = user ? ownerId || user.uid : null;
+    const paramsKey = targetUserId ? `${targetUserId}:${lessonId ?? ""}` : null;
+    const [prevParamsKey, setPrevParamsKey] = useState(paramsKey);
+    if (paramsKey !== prevParamsKey) {
+        setPrevParamsKey(paramsKey);
+        setState({ cards: [], loading: Boolean(targetUserId), error: null });
+    }
+
     useEffect(() => {
-        if (!user) {
-            setState({ cards: [], loading: false, error: null });
+        if (!user || !targetUserId) {
             return;
         }
-
-        const targetUserId = ownerId || user.uid;
-
-        setState((prev) => ({ ...prev, loading: true, error: null }));
 
         const unsubscribe = CardService.subscribeCards(
             targetUserId,
@@ -63,7 +70,7 @@ export function useCards(lessonId?: string, ownerId?: string) {
         );
 
         return unsubscribe;
-    }, [user, lessonId, ownerId]);
+    }, [user, lessonId, ownerId, targetUserId]);
 
     const createCard = useCallback(
         async (card: Omit<FlashCard, "id">): Promise<string | undefined> => {
@@ -89,10 +96,10 @@ export function useCards(lessonId?: string, ownerId?: string) {
         [user],
     );
 
-    const reorderCard = useCallback(
-        async (cardId: string, newOrder: number): Promise<void> => {
+    const reorderCards = useCallback(
+        async (changes: OrderChange[]): Promise<void> => {
             if (!user) return;
-            await CardService.reorderCard(user.uid, cardId, newOrder);
+            await CardService.reorderCards(user.uid, changes);
         },
         [user],
     );
@@ -118,7 +125,7 @@ export function useCards(lessonId?: string, ownerId?: string) {
         createCard,
         updateCard,
         deleteCard,
-        reorderCard,
+        reorderCards,
         resetCard,
         resetLesson,
     };

@@ -8,7 +8,7 @@
 
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 import {
     closestCenter,
@@ -42,9 +42,15 @@ const DetailCardsPanel = ({
     const canEdit = role === "owner" || role === "editor";
     const [orderedCards, setOrderedCards] = useState(cards);
 
-    useEffect(() => {
+    // Render-time reset: sync orderedCards whenever a new `cards` value
+    // arrives (Firestore update, or a different lesson) — orderedCards
+    // locally diverges from `cards` during the optimistic drag-then-save
+    // window in handleDragEnd below.
+    const [prevCards, setPrevCards] = useState(cards);
+    if (cards !== prevCards) {
+        setPrevCards(cards);
         setOrderedCards(cards);
-    }, [cards]);
+    }
 
     const sensors = useSensors(
         useSensor(MouseSensor, { activationConstraint: { distance: 8 } }),
@@ -60,17 +66,13 @@ const DetailCardsPanel = ({
         const newIndex = orderedCards.findIndex((c) => c.id === over.id);
         if (oldIndex === -1 || newIndex === -1) return;
 
-        const { nextItems, movedId, newOrder } = reorderWithFractionalIndex(
-            orderedCards,
-            oldIndex,
-            newIndex,
-        );
+        const { nextItems, changes } = reorderWithFractionalIndex(orderedCards, oldIndex, newIndex);
 
         setOrderedCards(nextItems);
 
         if (!onReorderCard) return;
         try {
-            await onReorderCard(movedId, newOrder);
+            await onReorderCard(changes);
         } catch (err) {
             console.error("[handleDragEnd] Reorder failed:", err);
             setOrderedCards(cards);

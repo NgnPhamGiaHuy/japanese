@@ -34,7 +34,7 @@ export default function FlashcardDetailPage({ params }: { params: Promise<{ id: 
     const router = useRouter();
     const { user } = useAppStore();
     const { lessons, loading: lessonsLoading, shareLesson, updateLessonRoles } = useLessons();
-    const { cards, loading: cardsLoading, reorderCard } = useCards(id);
+    const { cards, loading: cardsLoading, reorderCards } = useCards(id);
 
     const [sharingLesson, setSharingLesson] = useState(false);
     const { copied: linkCopied, copy: copyLink } = useCopyToClipboard();
@@ -99,7 +99,7 @@ export default function FlashcardDetailPage({ params }: { params: Promise<{ id: 
                 onCopyLink={handleCopyLink}
                 onManageAccess={() => setSharingLesson(true)}
                 onEdit={() => router.push(`/flashcard/${id}/edit`)}
-                onReorderCard={reorderCard}
+                onReorderCard={reorderCards}
             />
 
             {sharingLesson && (

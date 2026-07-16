@@ -19,14 +19,23 @@ import {
     where,
     writeBatch,
 } from "firebase/firestore";
+import { generateNKeysBetween } from "fractional-indexing";
 
 import { APP_ID, db } from "@/lib/firebase";
+import { lessonMetadataSchema } from "@/shared/schemas";
+import { sortByOrder } from "@/shared/utils";
 import { cardDoc, cardsCol } from "./card.service";
 import { deleteCardImage } from "./image.service";
 import { CardValidationError, validateAtomicCard } from "../utils/card.validator";
 
 import type { Unsubscribe } from "firebase/firestore";
+import type { OrderChange } from "@/shared/utils";
 import type { DeckAccessRole, FlashCard, Lesson } from "../types";
+
+/** Newest-first tiebreak for lessons with no order value (or an equal one) —
+ *  a brand-new, never-reordered deck should appear at the top of the
+ *  dashboard, not fall to wherever its id happens to sort. */
+const newestFirst = (a: Lesson, b: Lesson) => b.createdAt - a.createdAt;
 
 // ─── Firestore path helpers ────────────────────────────────────────────────
 
@@ -183,14 +192,12 @@ export function subscribeLessons(
     return onSnapshot(
         lessonsCol(userId),
         (snap) => {
-            const lessons = snap.docs
-                .map((d) => normalizeLesson({ ...d.data(), id: d.id, __ownerIdFallback: userId }))
-                .sort((a, b) => {
-                    const aOrder = a.order ?? Infinity;
-                    const bOrder = b.order ?? Infinity;
-                    if (aOrder !== bOrder) return aOrder - bOrder;
-                    return b.createdAt - a.createdAt;
-                });
+            const lessons = sortByOrder(
+                snap.docs.map((d) =>
+                    normalizeLesson({ ...d.data(), id: d.id, __ownerIdFallback: userId }),
+                ),
+                newestFirst,
+            );
             onUpdate(lessons);
         },
         onError,
@@ -223,22 +230,19 @@ export function subscribeSharedLessons(
     };
 
     const mapLessonsFromSnapshot = (snap: SnapshotLike) => {
-        const lessons: Lesson[] = snap.docs
-            .map((d) => {
-                const raw = d.data() as Record<string, unknown>;
-                return normalizeLesson({
-                    ...raw,
-                    id: d.id,
-                    __ownerIdFallback: extractOwnerIdFromPath(d.ref.path),
-                });
-            })
-            .filter((l) => l.roles?.[userId] !== "owner")
-            .sort((a: Lesson, b: Lesson) => {
-                const aOrder = a.order ?? Infinity;
-                const bOrder = b.order ?? Infinity;
-                if (aOrder !== bOrder) return aOrder - bOrder;
-                return b.createdAt - a.createdAt;
-            });
+        const lessons: Lesson[] = sortByOrder(
+            snap.docs
+                .map((d) => {
+                    const raw = d.data() as Record<string, unknown>;
+                    return normalizeLesson({
+                        ...raw,
+                        id: d.id,
+                        __ownerIdFallback: extractOwnerIdFromPath(d.ref.path),
+                    });
+                })
+                .filter((l) => l.roles?.[userId] !== "owner"),
+            newestFirst,
+        );
         onUpdate(lessons);
     };
 
@@ -321,14 +325,16 @@ export async function updateLesson(userId: string, lesson: Lesson): Promise<void
 }
 
 /**
- * Updates the order of a single lesson (O(1) write).
+ * Applies a batch of fractional-index order changes (see
+ * `reorderWithFractionalIndex`, which always renormalizes the whole
+ * reordered set) in a single atomic write.
  */
-export async function reorderLesson(
-    userId: string,
-    lessonId: string,
-    newOrder: number,
-): Promise<void> {
-    await updateDoc(lessonDoc(userId, lessonId), { order: newOrder });
+export async function reorderLessons(userId: string, changes: OrderChange[]): Promise<void> {
+    const batch = writeBatch(db);
+    for (const { id, order } of changes) {
+        batch.update(lessonDoc(userId, id), { order });
+    }
+    await batch.commit();
 }
 
 /**
@@ -432,8 +438,9 @@ export async function saveLessonWithCards(
     cards: Omit<FlashCard, "lessonId">[],
     isNew: boolean,
 ): Promise<void> {
-    if (!lesson.title.trim()) {
-        throw new Error("Lesson title is required");
+    const titleCheck = lessonMetadataSchema.shape.title.safeParse(lesson.title);
+    if (!titleCheck.success) {
+        throw new Error(titleCheck.error.issues[0]?.message ?? "Lesson title is required");
     }
     validateCardIds(cards);
 
@@ -508,17 +515,24 @@ export async function saveLessonWithCards(
     }
 
     // ── Upsert all incoming cards with explicit sort order ────────────────
+    // Every save re-stamps every card's order as a fresh fractional-indexing
+    // key sequence (matching the incoming array's order) — this is also what
+    // transparently migrates a still-legacy-numeric lesson's cards onto the
+    // new scheme the first time it's saved after this migration shipped, no
+    // separate backfill needed. `sortOrder` (the pre-fractional-indexing
+    // legacy field) is no longer written — sortByOrder only ever falls back
+    // to it when `order` is unset, which is never true for a saved card.
+    const orderKeys = generateNKeysBetween(null, null, cards.length);
     for (let i = 0; i < cards.length; i++) {
         const card = cards[i];
         const isTemp = !card.id || card.id.startsWith("c_");
         const ref = isTemp ? doc(cardsCol(userId)) : cardDoc(userId, card.id);
 
-        const { id: _cardId, ...rawData } = card as FlashCard;
+        const { id: _cardId, sortOrder: _sortOrder, ...rawData } = card as FlashCard;
         const cardData = omitUndefined({
             ...rawData,
             lessonId: targetLessonId,
-            order: i * 1000,
-            sortOrder: i,
+            order: orderKeys[i],
         });
 
         batch.set(ref, cardData);

@@ -45,7 +45,7 @@ export interface FlashCard {
     };
 
     /** Explicit sort order within the lesson (Fractional Indexing) */
-    order?: number;
+    order?: number | string;
     /** Legacy sort order field (deprecated) */
     sortOrder?: number;
 
@@ -162,7 +162,7 @@ export interface Lesson {
     themeColor?: string;
 
     /** Explicit sort order on dashboard (Fractional Indexing) */
-    order?: number;
+    order?: number | string;
 
     /** If this lesson was imported from a shared source, the original lesson doc ID */
     sourceLessonId?: string;

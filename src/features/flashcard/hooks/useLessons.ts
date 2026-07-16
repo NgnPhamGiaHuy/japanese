@@ -6,6 +6,7 @@ import { useAppStore } from "@/lib/app-store";
 import { logDeckCreated, logDeckDeleted, logDeckUpdated } from "../actions/activity-log.actions";
 import * as LessonService from "../services";
 
+import type { OrderChange } from "@/shared/utils";
 import type { DeckAccessRole, FlashCard, Lesson } from "../types";
 
 /**
@@ -43,14 +44,16 @@ export function useLessons() {
         error: null,
     });
 
-    useEffect(() => {
-        setState({
-            lessons: [],
-            sharedLessons: [],
-            loading: !!user,
-            error: null,
-        });
+    // Render-time reset: whenever the user identity changes, reset lessons
+    // state immediately instead of a synchronous setState at the top of
+    // the effect below.
+    const [prevUid, setPrevUid] = useState(user?.uid ?? null);
+    if ((user?.uid ?? null) !== prevUid) {
+        setPrevUid(user?.uid ?? null);
+        setState({ lessons: [], sharedLessons: [], loading: !!user, error: null });
+    }
 
+    useEffect(() => {
         if (!user) return;
 
         // Subscribe to personal lessons
@@ -207,10 +210,10 @@ export function useLessons() {
         [user],
     );
 
-    const reorderLesson = useCallback(
-        async (ownerId: string, lessonId: string, newOrder: number): Promise<void> => {
+    const reorderLessons = useCallback(
+        async (ownerId: string, changes: OrderChange[]): Promise<void> => {
             if (!user) return;
-            await LessonService.reorderLesson(ownerId, lessonId, newOrder);
+            await LessonService.reorderLessons(ownerId, changes);
         },
         [user],
     );
@@ -222,7 +225,7 @@ export function useLessons() {
         saveFullLesson,
         shareLesson,
         updateLessonRoles,
-        reorderLesson,
+        reorderLessons,
     };
 }
 
@@ -240,8 +243,16 @@ export function usePublicLessons() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
-    useEffect(() => {
+    // Render-time reset: whenever the user identity changes, mark loading
+    // immediately instead of a synchronous setState at the top of the
+    // effect below.
+    const [prevUid, setPrevUid] = useState(user?.uid ?? null);
+    if ((user?.uid ?? null) !== prevUid) {
+        setPrevUid(user?.uid ?? null);
         setLoading(true);
+    }
+
+    useEffect(() => {
         const unsub = LessonService.subscribePublicLessons(
             user?.uid ?? null,
             (lessons) => {

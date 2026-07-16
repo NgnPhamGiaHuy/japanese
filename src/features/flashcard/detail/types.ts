@@ -7,6 +7,7 @@
  */
 
 import type { FlashCard, Lesson } from "@/features/flashcard/types";
+import type { OrderChange } from "@/shared/utils";
 
 /** Roles determining capabilities within a collaborative deck */
 export type DeckRole = "owner" | "editor" | "commenter" | "viewer";
@@ -46,8 +47,9 @@ export interface FlashcardDetailLayoutProps {
     onManageAccess?: () => void;
     /** Visual loading state for duplication */
     saving?: boolean;
-    /** Callback for O(1) single card reordering */
-    onReorderCard?: (cardId: string, newOrder: number) => Promise<void>;
+    /** Callback for card reordering — applies a batch of fractional-index
+     *  order changes (see reorderWithFractionalIndex). */
+    onReorderCard?: (changes: OrderChange[]) => Promise<void>;
 }
 
 export interface DetailHeaderProps {
@@ -70,7 +72,7 @@ export interface DetailCardsPanelProps {
     ctx: DeckContext;
     selectedCardId: string | null;
     onSelectCard: (cardId: string) => void;
-    onReorderCard?: (cardId: string, newOrder: number) => Promise<void>;
+    onReorderCard?: (changes: OrderChange[]) => Promise<void>;
 }
 
 export interface DetailCommentsPanelProps {

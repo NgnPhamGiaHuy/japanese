@@ -39,7 +39,7 @@ export interface FlashCardContent {
     imagePath?: string;
 
     // Explicit sort order
-    order?: number;
+    order?: number | string;
     sortOrder?: number;
 
     // AI-enriched fields

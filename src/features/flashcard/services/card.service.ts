@@ -8,9 +8,11 @@ import {
     setDoc,
     updateDoc,
     where,
+    writeBatch,
 } from "firebase/firestore";
 
 import { APP_ID, db } from "@/lib/firebase";
+import { sortByOrder } from "@/shared/utils";
 import {
     gradeCardForUser,
     resetCardProgressForUser,
@@ -18,6 +20,7 @@ import {
 } from "./progress.service";
 
 import type { Unsubscribe } from "firebase/firestore";
+import type { OrderChange } from "@/shared/utils";
 import type { Grade } from "../domain";
 import type { FlashCard } from "../types";
 
@@ -64,15 +67,11 @@ export function subscribeCards(
     return onSnapshot(
         q,
         (snap) => {
-            const cards = snap.docs
-                .map((d) => assertCardSchema(userId, { ...d.data(), id: d.id } as FlashCard))
-                // Sort by explicit order (fractional indexing) first, then by document ID as tiebreaker
-                .sort((a, b) => {
-                    const aOrder = a.order ?? a.sortOrder ?? Infinity;
-                    const bOrder = b.order ?? b.sortOrder ?? Infinity;
-                    if (aOrder !== bOrder) return aOrder - bOrder;
-                    return a.id.localeCompare(b.id);
-                });
+            const cards = sortByOrder(
+                snap.docs.map((d) =>
+                    assertCardSchema(userId, { ...d.data(), id: d.id } as FlashCard),
+                ),
+            );
             onUpdate(cards);
         },
         onError,
@@ -120,10 +119,16 @@ export async function deleteCard(userId: string, cardId: string): Promise<void> 
 }
 
 /**
- * Updates the order of a single card for O(1) performance.
+ * Applies a batch of fractional-index order changes (see
+ * `reorderWithFractionalIndex`, which always renormalizes the whole
+ * reordered set) in a single atomic write.
  */
-export async function reorderCard(userId: string, cardId: string, newOrder: number): Promise<void> {
-    await updateDoc(cardDoc(userId, cardId), { order: newOrder });
+export async function reorderCards(userId: string, changes: OrderChange[]): Promise<void> {
+    const batch = writeBatch(db);
+    for (const { id, order } of changes) {
+        batch.update(cardDoc(userId, id), { order });
+    }
+    await batch.commit();
 }
 
 // ─── SRS Processing ───────────────────────────────────────────────────────
