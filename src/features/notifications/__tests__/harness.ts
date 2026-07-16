@@ -1,6 +1,6 @@
 /**
  * @file __tests__/harness.ts
- * Emulator test harness (Epic 1.2). Wraps @firebase/rules-unit-testing so the
+ * Emulator test harness. Wraps @firebase/rules-unit-testing so the
  * rules suite and integration tests share one setup.
  *
  * Requires the Firestore/Auth emulator (FIRESTORE_EMULATOR_HOST) and

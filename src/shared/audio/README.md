@@ -68,6 +68,6 @@ knew how long a sound lasted.
 ## Known limitation
 
 `voice/googleTranslateTts.ts` still calls an undocumented Google Translate endpoint with a browser
-`speechSynthesis` fallback. Both tiers are unreliable, uncacheable and offline-hostile — see
-`AUDIO_SYSTEM_ROOT_CAUSE_ANALYSIS.md` (RC-1, RC-2). It is isolated behind the manager precisely so
-it can be replaced by a tiered provider chain without touching a single call site.
+`speechSynthesis` fallback. Both tiers are unreliable, uncacheable and offline-hostile. It is
+isolated behind the manager precisely so it can be replaced by a tiered provider chain without
+touching a single call site.

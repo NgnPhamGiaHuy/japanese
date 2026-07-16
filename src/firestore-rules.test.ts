@@ -1,6 +1,6 @@
 /**
  * @file firestore-rules.test.ts
- * Security-rules tests for the notification paths (Epic 1.4 / Epic 3 Stage 2).
+ * Security-rules tests for the notification paths.
  *
  * GATED: requires the Firestore emulator + @firebase/rules-unit-testing. Runs
  * via `npm run test:emu` (vitest.emu.config.ts), never in the default unit run.

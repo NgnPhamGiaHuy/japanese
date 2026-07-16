@@ -75,7 +75,7 @@ export interface AppNotification {
      */
     read?: boolean;
 
-    // ─── Platform fields (Epic 4+) — all optional; unset on older docs ────
+    // ─── Platform fields — all optional; unset on older docs ──────────────
     /** Interruption tier from the type registry (badge/inbox/quiet). */
     priority?: NotificationPriority;
     /** Object-scoped collapse token (recipient folded into the doc ID). */

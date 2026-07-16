@@ -1,6 +1,6 @@
 /**
  * @file domain/registry.ts
- * The notification type registry (Epic 4) — the single source of truth mapping
+ * The notification type registry — the single source of truth mapping
  * each NotificationKind to its policy: priority, category, whether a producer is
  * wired this phase, and how it collapses.
  *
@@ -11,8 +11,6 @@
  * Pure (no Firebase). `collapseKey` returns the OBJECT-scoped grouping token;
  * the recipient is folded in by domain/id.ts collapseId(), so two different
  * users never share a collapse doc.
- *
- * @see NOTIFICATION_SYSTEM_IMPLEMENTATION_PLAN.md — Epic 4, Epic 8
  */
 
 import type {

@@ -9,8 +9,6 @@
  *
  * Always fire-and-forget: a notification must never block or fail the user's
  * primary action (posting a comment, etc.).
- *
- * @see NOTIFICATION_SYSTEM_IMPLEMENTATION_PLAN.md — Epic 5, Epic 8
  */
 
 import { auth } from "@/lib/firebase";

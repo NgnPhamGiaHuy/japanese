@@ -1,13 +1,11 @@
 /**
  * @file domain/build.ts
- * Pure builders shared by the server-side Notification Service (Epic 5):
+ * Pure builders shared by the server-side Notification Service:
  * notification title/message copy, deck share links, and actor-stack merging.
  *
  * No Firebase, isomorphic (browser + node) — unit-testable and safe to import
  * from both the client facade and the server writer, which must agree on
  * outputs (e.g. the share link must match features/flashcard buildShareId).
- *
- * @see NOTIFICATION_SYSTEM_IMPLEMENTATION_PLAN.md — Epic 5
  */
 
 import type { NotificationKind } from "./events";

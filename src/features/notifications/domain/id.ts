@@ -1,6 +1,6 @@
 /**
  * @file domain/id.ts
- * Deterministic notification document IDs (Epic 4) — the backbone of both
+ * Deterministic notification document IDs — the backbone of both
  * idempotency and grouping.
  *
  * `collapseId(input)` hashes (kind + recipient + object-scoped collapse key) to
@@ -13,8 +13,6 @@
  * Pure and isomorphic (browser + node) — no crypto import, no Firebase — so it
  * is unit-testable and usable from both the client facade and the server
  * writer, which must agree on the ID.
- *
- * @see NOTIFICATION_SYSTEM_IMPLEMENTATION_PLAN.md — Epic 4, Epic 5
  */
 
 import { collapseKeyOf } from "./registry";

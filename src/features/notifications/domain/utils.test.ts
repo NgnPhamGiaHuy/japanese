@@ -47,7 +47,7 @@ describe("chunk", () => {
     });
 });
 
-describe("planDelivery — idempotent pending delivery (Task 2.4)", () => {
+describe("planDelivery — idempotent pending delivery", () => {
     const items = [
         { id: "p1", data: { type: "invite", createdAt: 1, senderId: "s" } },
         { id: "p2", data: { type: "invite", createdAt: 2, senderId: "s" } },

@@ -2,9 +2,6 @@
 
 **Status**: Accepted, partially implemented
 **Date**: 2026-07-10
-**Context documents**: `SOUND_ARCHITECTURE_DISCOVERY.md` (structural inventory),
-`AUDIO_SYSTEM_ROOT_CAUSE_ANALYSIS.md` (why pronunciation was unreliable),
-`AUDIO_IMPLEMENTATION_MASTER_PLAN.md` (the epic/task plan this ADR records the outcome of)
 
 ## Context
 

@@ -4,9 +4,9 @@
  * Voice transport: the Google Translate TTS endpoint with a browser-speech fallback.
  *
  * @remarks
- * This is the app's only pronunciation transport, and it is the known-fragile one documented in
- * AUDIO_SYSTEM_ROOT_CAUSE_ANALYSIS.md: an undocumented, rate-limited, uncacheable endpoint (RC-1)
- * backed by a fallback that has no Japanese voice on many devices (RC-2).
+ * This is the app's only pronunciation transport, and it is the known-fragile one: an
+ * undocumented, rate-limited, uncacheable endpoint backed by a fallback that has no Japanese
+ * voice on many devices.
  *
  * It is confined to this file so a tiered provider chain can replace it without touching a single
  * call site. Scheduling, delays and cancellation policy belong to the sequencer; this module only

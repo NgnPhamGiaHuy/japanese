@@ -1,14 +1,12 @@
 /**
  * @file schema.ts
- * Zod contract for the client → server notification emit call (Epic 5).
+ * Zod contract for the client → server notification emit call.
  *
  * SECURITY BY CONSTRUCTION: the client sends only IDENTIFIERS (which deck/card/
  * comment). It never sends `senderId` (the server takes it from the verified ID
  * token) or `recipientId` (the server derives it authoritatively from the
  * lesson/comment). So a caller cannot forge a sender or spam an arbitrary
  * recipient — the two failure modes the legacy client-write path allowed.
- *
- * @see NOTIFICATION_SYSTEM_IMPLEMENTATION_PLAN.md — Epic 5, Epic 3 Stage 2
  */
 
 import { z } from "zod";

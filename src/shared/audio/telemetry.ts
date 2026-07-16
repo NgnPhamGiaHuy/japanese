@@ -2,9 +2,8 @@
  * Audio telemetry bus.
  *
  * @remarks
- * Root cause RC-0 (see AUDIO_SYSTEM_ROOT_CAUSE_ANALYSIS.md §7): every failure branch in the
- * pronunciation pipeline was silent, so "pronunciation sometimes fails" was unattributable.
- * This module gives every branch a name and a sink.
+ * Every failure branch in the pronunciation pipeline used to be silent, so "pronunciation
+ * sometimes fails" was unattributable. This module gives every branch a name and a sink.
  *
  * Deliberately dependency-free: no React, no Firebase, no browser globals beyond an optional
  * `console`. Sinks are installed from the outside so tests can assert on emitted events without

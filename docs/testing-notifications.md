@@ -1,8 +1,7 @@
 # Notification testing & migration runbook
 
-Companion to `NOTIFICATION_SYSTEM_IMPLEMENTATION_PLAN.md`. Covers how to run the
-two test tiers, the pending index/rules deploy, and the one-time data backfill.
-All commands run from the project root (`src/`).
+Covers how to run the two test tiers, the pending index/rules deploy, and the
+one-time data backfill. All commands run from the project root (`src/`).
 
 ## Test tiers
 

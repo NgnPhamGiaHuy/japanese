@@ -1,6 +1,6 @@
 /**
  * @file domain/events.ts
- * The normalized event vocabulary of the notification platform (Epic 4).
+ * The normalized event vocabulary of the notification platform.
  *
  * A "domain event" is what a producer emits ("user A commented on card X in deck
  * Y, owner is B"). The notification policy (registry.ts) turns that into an
@@ -11,9 +11,7 @@
  * NOTE on `NotificationKind` vs the legacy `NotificationType` (types/index.ts):
  * the legacy 4-value union still describes stored documents and drives the
  * existing icon switch. `NotificationKind` is the FORWARD superset the platform
- * is built around; the two are reconciled as producers migrate (Epic 8).
- *
- * @see NOTIFICATION_SYSTEM_IMPLEMENTATION_PLAN.md — Epic 4
+ * is built around; the two are reconciled as producers migrate.
  */
 
 /**

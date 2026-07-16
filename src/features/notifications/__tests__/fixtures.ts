@@ -1,6 +1,6 @@
 /**
  * @file __tests__/fixtures.ts
- * Pure notification fixtures (Epic 1.2). No Firebase imports — usable from both
+ * Pure notification fixtures. No Firebase imports — usable from both
  * the plain unit suite and the emulator suite.
  *
  * Deliberately produces all THREE legacy doc shapes that the migration must

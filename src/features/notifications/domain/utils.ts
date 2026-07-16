@@ -5,8 +5,6 @@
  * Deliberately imports NO Firebase — so these functions are unit-testable in the
  * plain `node` Vitest environment without an emulator or browser globals
  * (mirrors the pattern used by shared/audio/*).
- *
- * @see NOTIFICATION_SYSTEM_IMPLEMENTATION_PLAN.md — Epic 2 (2.3, 2.4, 2.6)
  */
 
 /**
@@ -66,7 +64,7 @@ export interface DeliveryWrite {
 }
 
 /**
- * Pure planner for `deliverPendingNotifications` (Task 2.4). Given the pending
+ * Pure planner for `deliverPendingNotifications`. Given the pending
  * items for an email, returns the write plan grouped into commit-sized batches.
  *
  * The idempotency guarantee lives here and is unit-tested without an emulator:
