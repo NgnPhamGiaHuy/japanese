@@ -1,7 +1,12 @@
-import { getFirestore } from "@firebase/firestore";
+import { connectFirestoreEmulator, getFirestore } from "@firebase/firestore";
 import { getAI, GoogleAIBackend } from "firebase/ai";
 import { getApps, initializeApp } from "firebase/app";
-import { getAuth, GoogleAuthProvider } from "firebase/auth";
+import {
+    connectAuthEmulator,
+    getAuth,
+    GoogleAuthProvider,
+    signInWithCustomToken,
+} from "firebase/auth";
 import { getStorage } from "firebase/storage";
 
 const firebaseConfig = {
@@ -21,6 +26,41 @@ export const db = getFirestore(app);
 export const storage = getStorage(app);
 export const googleProvider = new GoogleAuthProvider();
 export const APP_ID = process.env.NEXT_PUBLIC_APP_ID ?? "kana-nihongo-master";
+
+// ─── Emulator wiring (E2E only) ────────────────────────────────────────────
+//
+// Never active by default. Requires BOTH an explicit opt-in env var AND a
+// non-production NODE_ENV, so a misconfigured env var can never point a real
+// deployment at emulator hosts. Set by playwright.config.ts's webServer env,
+// never by .env/.env.local. connectXEmulator() throws if called twice on the
+// same instance (e.g. Next.js Fast Refresh re-running this module) — guarded
+// with a module-scope flag rather than try/catch, so a real second-call bug
+// still surfaces instead of being silently swallowed.
+let emulatorsConnected = false;
+if (
+    process.env.NEXT_PUBLIC_USE_FIREBASE_EMULATOR === "true" &&
+    process.env.NODE_ENV !== "production" &&
+    !emulatorsConnected
+) {
+    connectAuthEmulator(auth, "http://127.0.0.1:9099", { disableWarnings: true });
+    connectFirestoreEmulator(db, "127.0.0.1", 8080);
+    emulatorsConnected = true;
+
+    // Test-only sign-in bridge: the login screen only offers a Google-OAuth
+    // popup, which E2E can't drive reliably. e2e/helpers/emulator-auth.ts
+    // mints a custom token via the Admin SDK against the SAME Auth emulator;
+    // the test calls this to sign in, exercising the real onIdTokenChanged →
+    // setAuthCookie → proxy.ts pipeline exactly as a real sign-in would,
+    // without needing real Google credentials. Only ever defined inside this
+    // already double-gated block.
+    if (typeof window !== "undefined") {
+        (
+            window as typeof window & { __e2eSignIn?: (customToken: string) => Promise<void> }
+        ).__e2eSignIn = async (customToken: string) => {
+            await signInWithCustomToken(auth, customToken);
+        };
+    }
+}
 
 /**
  * Firebase AI Logic instance using the Google AI (Gemini Developer) backend.

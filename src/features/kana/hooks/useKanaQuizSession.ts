@@ -34,6 +34,13 @@ const TARGET_SCORE = 20;
 const CORRECT_FEEDBACK_ADVANCE_MS = 1250;
 const WRONG_FEEDBACK_ADVANCE_MS = 1550;
 
+/** The subset of useGameSession's return value this hook needs to drive a session. */
+interface InjectedSession {
+    startSession: () => Promise<void>;
+    syncScore: (score: number) => void;
+    endSession: (finalScore: number) => Promise<void>;
+}
+
 interface UseKanaQuizSessionParams {
     dataset: KanaChar[];
     gameMode: string;
@@ -42,6 +49,7 @@ interface UseKanaQuizSessionParams {
     displayName?: string | null;
     /** Optional callback fired after each correct answer with points and new streak. */
     onCorrectCombo?: (info: { points: number; streak: number }) => void;
+    session?: InjectedSession;
 }
 
 /**
@@ -94,6 +102,7 @@ export function useKanaQuizSession({
     userId,
     displayName,
     onCorrectCombo,
+    session,
 }: UseKanaQuizSessionParams) {
     const { userData, recordCharStat } = useUserProgress();
 
@@ -113,11 +122,12 @@ export function useKanaQuizSession({
         onCorrectComboRef.current = onCorrectCombo;
     });
 
-    const { startSession, syncScore, endSession } = useGameSession({
+    const ownSession = useGameSession({
         userId: userId ?? null,
         userName: displayName ?? "Player",
         gameMode,
     });
+    const { startSession, syncScore, endSession } = session ?? ownSession;
 
     // Stable refs so callbacks never hold stale closures.
     const syncScoreRef = useRef(syncScore);

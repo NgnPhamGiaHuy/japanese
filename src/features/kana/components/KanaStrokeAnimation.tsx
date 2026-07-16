@@ -7,7 +7,7 @@ interface SvgData {
     texts: { text: string; transform: string | null }[];
 }
 
-async function fetchKanaSvg(char: string): Promise<SvgData | null> {
+export async function fetchKanaSvg(char: string): Promise<SvgData | null> {
     const hex = char.charCodeAt(0).toString(16).padStart(5, "0");
     try {
         const res = await fetch(

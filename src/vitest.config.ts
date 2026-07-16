@@ -1,7 +1,14 @@
+import path from "node:path";
 import { fileURLToPath } from "node:url";
 
+import { storybookTest } from "@storybook/addon-vitest/vitest-plugin";
+import { playwright } from "@vitest/browser-playwright";
 import { defineConfig } from "vitest/config";
 
+const dirname =
+    typeof __dirname !== "undefined" ? __dirname : path.dirname(fileURLToPath(import.meta.url));
+
+// More info at: https://storybook.js.org/docs/next/writing-tests/integrations/vitest-addon
 export default defineConfig({
     resolve: {
         alias: {
@@ -9,16 +16,50 @@ export default defineConfig({
         },
     },
     test: {
-        environment: "node",
-        // Emulator-backed tests (*.emu.test.ts) and the security-rules suite
-        // require the Firestore/Auth emulator + @firebase/rules-unit-testing and
-        // run via `npm run test:emu` (vitest.emu.config.ts). Exclude them from
-        // the default unit run so `npm test` stays green without infra.
-        exclude: [
-            "**/node_modules/**",
-            "**/.next/**",
-            "**/*.emu.test.ts",
-            "**/firestore-rules.test.ts",
+        projects: [
+            {
+                extends: true,
+                test: {
+                    environment: "node",
+                    exclude: [
+                        "**/node_modules/**",
+                        "**/.next/**",
+                        "**/*.emu.test.ts",
+                        "**/firestore-rules.test.ts",
+                        "**/e2e/**",
+                        "**/*.browser.test.{ts,tsx}",
+                    ],
+                },
+            },
+            {
+                extends: true,
+                plugins: [
+                    storybookTest({
+                        configDir: path.join(dirname, ".storybook"),
+                    }),
+                ],
+                optimizeDeps: {
+                    include: [
+                        "aria-query",
+                        "lz-string",
+                        "@testing-library/dom",
+                        "@testing-library/jest-dom",
+                    ],
+                },
+                test: {
+                    name: "storybook",
+                    browser: {
+                        enabled: true,
+                        headless: true,
+                        provider: playwright({}),
+                        instances: [
+                            {
+                                browser: "chromium",
+                            },
+                        ],
+                    },
+                },
+            },
         ],
     },
 });
