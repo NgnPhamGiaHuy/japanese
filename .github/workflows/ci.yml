@@ -1,0 +1,139 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+# Cancel superseded runs on the same branch/PR to save CI minutes.
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    # The Next.js app (package.json, tsconfig, etc.) lives in src/, not the repo root.
+    working-directory: src
+
+env:
+  NODE_VERSION: "20"
+
+jobs:
+  # Fast stage: typecheck (via build), lint, unit tests. No emulator, no Java needed.
+  build-lint-test:
+    name: Build, Lint, Unit Test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: "npm"
+          cache-dependency-path: src/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint
+        # Report-only for now: the repo has pre-existing lint errors (unrelated
+        # to CI setup) that predate this workflow, since lint was never wired
+        # into pre-commit or CI before. Do not flip this to blocking (remove
+        # continue-on-error) until that backlog is paid down. Build and test
+        # above, and the emulator suite below, ARE fully blocking already.
+        run: npm run lint
+        continue-on-error: true
+
+      - name: Build (includes TypeScript typecheck)
+        run: npm run build
+        env:
+          # Placeholder Firebase client config so `next build` can statically
+          # analyze pages that reference these NEXT_PUBLIC_* vars. No real
+          # secrets are used or required for build/lint/unit-test.
+          NEXT_PUBLIC_FIREBASE_API_KEY: "ci-placeholder"
+          NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN: "ci-placeholder.firebaseapp.com"
+          NEXT_PUBLIC_FIREBASE_PROJECT_ID: "ci-placeholder"
+          NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET: "ci-placeholder.firebasestorage.app"
+          NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID: "0"
+          NEXT_PUBLIC_FIREBASE_APP_ID: "ci-placeholder"
+
+      - name: Unit tests
+        run: npm run test
+
+  # Emulator stage: the Firestore/Auth security-rules suite. Needs a JVM
+  # (firebase-tools >=15.24 requires JDK 21+) and no real Firebase project —
+  # the emulator runs entirely locally in the runner.
+  emulator-rules-tests:
+    name: Firestore/Auth Rules (Emulator)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: "npm"
+          cache-dependency-path: src/package-lock.json
+
+      - name: Set up JDK (required by the Firestore/Auth emulators)
+        uses: actions/setup-java@v4
+        with:
+          distribution: "temurin"
+          java-version: "21"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run emulator-backed rules suite
+        run: npm run test:emu
+
+  # Browser stage: Playwright E2E (auth + realtime journeys) AND Vitest
+  # Browser Mode component tests share this job — both need the same
+  # Chromium install (one download, not two), and both need the JVM for the
+  # Firestore/Auth emulator the E2E suite starts. playwright.config.ts starts
+  # its own emulator + dedicated Next dev server (port 3100); nothing here
+  # depends on the other jobs' state.
+  e2e-tests:
+    name: Browser Tests (E2E + Component)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: "npm"
+          cache-dependency-path: src/package-lock.json
+
+      - name: Set up JDK (required by the Firestore/Auth emulators)
+        uses: actions/setup-java@v4
+        with:
+          distribution: "temurin"
+          java-version: "21"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+
+      - name: Component tests (Vitest Browser Mode)
+        run: npm run test:browser
+
+      - name: Run Playwright E2E suite
+        run: npx playwright test --project=chromium
+
+      - name: Upload Playwright report
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: src/playwright-report/
+          retention-days: 14

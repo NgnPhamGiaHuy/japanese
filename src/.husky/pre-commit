@@ -6,11 +6,16 @@ echo "🔍 Running pre-commit checks..."
 
 cd src
 
-# 1. Faster checks (Format & Lint staged files)
+# 1. Lint + format staged files (eslint --fix, then prettier — see package.json's
+# "lint-staged" config). Previously configured but never invoked here.
+echo "🧹 Linting staged files..."
+npx lint-staged || exit 1
+
+# 2. Format everything (catches formatting drift outside the staged set)
 echo "✨ Formatting ..."
 prettier --write . || exit 1
 
-# 2. Safety check (Ensure full production build passes)
+# 3. Safety check (Ensure full production build passes)
 # Note: This can be slow. Remove if it hampers your workflow.
 echo "🏗️ Verifying production build..."
 npm run build || exit 1

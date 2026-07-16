@@ -1,5 +1,7 @@
+// For more info, see https://github.com/storybookjs/eslint-plugin-storybook#configuration-flat-config-format
 import nextVitals from "eslint-config-next/core-web-vitals";
 import nextTs from "eslint-config-next/typescript";
+import storybook from "eslint-plugin-storybook";
 import { defineConfig, globalIgnores } from "eslint/config";
 
 const eslintConfig = defineConfig([
@@ -49,6 +51,16 @@ const eslintConfig = defineConfig([
             ],
         },
     },
+    {
+        // Self-imposed 200-line ceiling (architecture.rule.md). Introduced as a
+        // WARNING first, not an error — the repo has ~46 pre-existing files over
+        // the limit; tighten to "error" per file as they're split (see R31/E11).
+        files: ["**/*.{ts,tsx}"],
+        rules: {
+            "max-lines": ["warn", { max: 200 }],
+        },
+    },
+    ...storybook.configs["flat/recommended"],
 ]);
 
 export default eslintConfig;
