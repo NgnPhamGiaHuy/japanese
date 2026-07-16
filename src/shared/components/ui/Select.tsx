@@ -1,7 +1,6 @@
 "use client";
 
-import { useState } from "react";
-
+import { Select as BaseSelect } from "@base-ui/react/select";
 import { Check, ChevronDown } from "lucide-react";
 
 import Button from "./Button";
@@ -42,6 +41,12 @@ interface CustomSelectProps<T> {
     className?: string;
 }
 
+/** Sentinel item value for the "remove" action, so it stays a real (keyboard-navigable,
+ * typeahead-able) listbox item instead of a plain button mixed into the popup — while
+ * staying invisible to the public onChange/onRemove contract. Module-level so it's a
+ * stable reference across renders (item-selection equality is reference-based). */
+const REMOVE_SENTINEL = Symbol("select-remove");
+
 /**
  * Premium custom dropdown selection component.
  *
@@ -68,22 +73,33 @@ const Select = <T extends string | number>({
     variant = "full",
     className = "",
 }: CustomSelectProps<T>) => {
-    const [isOpen, setIsOpen] = useState(false);
     const isCompact = variant === "compact";
-
     const selectedOption = options.find((opt) => opt.value === value);
 
     return (
-        <div className={`relative ${className}`}>
-            <Button
-                variant="ghost"
-                className={
-                    isCompact
-                        ? "!flex !items-center !gap-1 !rounded-lg !px-2 !py-1 !text-sm !font-bold !text-gray-500 shadow-none transition-colors hover:bg-gray-200 hover:shadow-none"
-                        : "!text-text !flex !h-12 !items-center !gap-2 !rounded-xl border-2 border-gray-200 bg-gray-50 !px-4 !text-sm !font-bold shadow-none transition-colors hover:bg-gray-100 hover:shadow-none"
+        <BaseSelect.Root<T | typeof REMOVE_SENTINEL>
+            value={value}
+            onValueChange={(newValue) => {
+                if (newValue === REMOVE_SENTINEL) {
+                    onRemove?.();
+                    return;
                 }
-                onClick={() => setIsOpen(!isOpen)}
-                disabled={disabled}
+                if (newValue !== null) onChange(newValue as T);
+            }}
+            disabled={disabled}
+        >
+            <BaseSelect.Trigger
+                className={className}
+                render={
+                    <Button
+                        variant="ghost"
+                        className={`group ${
+                            isCompact
+                                ? "!flex !items-center !gap-1 !rounded-lg !px-2 !py-1 !text-sm !font-bold !text-gray-500 shadow-none transition-colors hover:bg-gray-200 hover:shadow-none"
+                                : "!text-text !flex !h-12 !items-center !gap-2 !rounded-xl border-2 border-gray-200 bg-gray-50 !px-4 !text-sm !font-bold shadow-none transition-colors hover:bg-gray-100 hover:shadow-none"
+                        }`}
+                    />
+                }
             >
                 {selectedOption?.icon && (
                     <selectedOption.icon
@@ -93,27 +109,27 @@ const Select = <T extends string | number>({
                     />
                 )}
                 <span className="capitalize">{selectedOption?.label || value}</span>
-                <ChevronDown
-                    size={isCompact ? 14 : 16}
-                    className={`text-gray-400 transition-transform ${isOpen ? "rotate-180" : ""}`}
-                />
-            </Button>
+                <BaseSelect.Icon>
+                    <ChevronDown
+                        size={isCompact ? 14 : 16}
+                        className="text-gray-400 transition-transform group-data-[popup-open]:rotate-180"
+                    />
+                </BaseSelect.Icon>
+            </BaseSelect.Trigger>
 
-            {isOpen && (
-                <>
-                    <div className="fixed inset-0 z-40" onClick={() => setIsOpen(false)} />
-                    <div
-                        className={`animate-in fade-in zoom-in-95 absolute top-full ${align === "right" ? "right-0" : "left-0"} z-50 mt-1 w-max min-w-[120px] overflow-hidden rounded-2xl border-2 border-gray-100 bg-white shadow-lg`}
-                    >
+            <BaseSelect.Portal>
+                <BaseSelect.Positioner
+                    side="bottom"
+                    align={align === "right" ? "end" : "start"}
+                    sideOffset={4}
+                    className="z-50"
+                >
+                    <BaseSelect.Popup className="fade-in zoom-in-95 data-[ending-style]:fade-out data-[ending-style]:zoom-out-95 w-max min-w-[120px] overflow-hidden rounded-2xl border-2 border-gray-100 bg-white shadow-lg transition-[opacity,transform] duration-150 outline-none data-[ending-style]:opacity-0 data-[starting-style]:opacity-0">
                         {options.map((opt) => (
-                            <Button
+                            <BaseSelect.Item
                                 key={opt.value}
-                                variant="ghost"
-                                className={`!flex !w-full !items-center !justify-between !gap-4 ${isCompact ? "!p-3 !text-sm" : "!p-4"} !text-text !text-left !font-bold capitalize shadow-none hover:bg-gray-50 hover:shadow-none active:translate-y-0`}
-                                onClick={() => {
-                                    onChange(opt.value);
-                                    setIsOpen(false);
-                                }}
+                                value={opt.value}
+                                className={`flex w-full cursor-pointer items-center justify-between gap-4 ${isCompact ? "p-3 text-sm" : "p-4"} text-text text-left font-bold capitalize outline-none select-none hover:bg-gray-50 data-[highlighted]:bg-gray-50`}
                             >
                                 <div className="flex items-center gap-2">
                                     {opt.icon && (
@@ -122,32 +138,28 @@ const Select = <T extends string | number>({
                                             style={opt.color ? { color: opt.color } : undefined}
                                         />
                                     )}
-                                    {opt.label}
+                                    <BaseSelect.ItemText>{opt.label}</BaseSelect.ItemText>
                                 </div>
-                                {value === opt.value && (
+                                <BaseSelect.ItemIndicator>
                                     <Check style={{ color: themeHex }} size={isCompact ? 14 : 16} />
-                                )}
-                            </Button>
+                                </BaseSelect.ItemIndicator>
+                            </BaseSelect.Item>
                         ))}
                         {onRemove && (
                             <>
-                                <div className="my-1 h-0.5 w-full bg-gray-100" />
-                                <Button
-                                    variant="ghost"
-                                    className={`!flex !w-full !items-center !justify-between ${isCompact ? "!p-3 !text-sm" : "!p-4"} !text-left !font-bold !text-red-500 shadow-none hover:bg-red-50 hover:shadow-none active:translate-y-0`}
-                                    onClick={() => {
-                                        onRemove();
-                                        setIsOpen(false);
-                                    }}
+                                <BaseSelect.Separator className="my-1 h-0.5 w-full bg-gray-100" />
+                                <BaseSelect.Item
+                                    value={REMOVE_SENTINEL}
+                                    className={`flex w-full cursor-pointer items-center justify-between ${isCompact ? "p-3 text-sm" : "p-4"} text-left font-bold text-red-500 outline-none select-none hover:bg-red-50 data-[highlighted]:bg-red-50`}
                                 >
-                                    {removeLabel}
-                                </Button>
+                                    <BaseSelect.ItemText>{removeLabel}</BaseSelect.ItemText>
+                                </BaseSelect.Item>
                             </>
                         )}
-                    </div>
-                </>
-            )}
-        </div>
+                    </BaseSelect.Popup>
+                </BaseSelect.Positioner>
+            </BaseSelect.Portal>
+        </BaseSelect.Root>
     );
 };
 

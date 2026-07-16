@@ -1,8 +1,8 @@
 "use client";
 
-import React, { createContext, useCallback, useContext, useState } from "react";
+import React, { createContext, useCallback, useContext } from "react";
 
-import { AnimatePresence } from "framer-motion";
+import { toast, Toaster } from "sonner";
 
 import { Alert, AlertType } from "@/shared/components/ui";
 
@@ -10,15 +10,6 @@ import type { AlertAction } from "@/shared/components/ui";
 
 /** Optional extras for an alert (inline action, custom duration). */
 export interface AlertOptions {
-    action?: AlertAction;
-    durationMs?: number;
-}
-
-/** Internal state representation of an active notification. */
-interface AlertItem {
-    id: string;
-    type: AlertType;
-    message: string;
     action?: AlertAction;
     durationMs?: number;
 }
@@ -36,53 +27,47 @@ interface AlertContextType {
 
 const AlertContext = createContext<AlertContextType | undefined>(undefined);
 
+// UX Research: Error/Warning info needs more time to process than simple success.
+const ALERT_DURATIONS: Record<AlertType, number> = {
+    success: 4000,
+    info: 4000,
+    warning: 6000,
+    error: 8000,
+};
+
 /**
  * Global Notification Orchestrator
  *
  * @remarks
- * Manages a FIFO (First-In-First-Out) stack of notifications. Capped at 3 visible alerts to maintain
- * visual hygiene. Integrates with AnimatePresence to handle physics-based exit transitions.
+ * `showAlert` renders the app's themed `Alert` chrome through sonner's
+ * `toast.custom()`, so sonner owns timing, stacking (capped via
+ * `visibleToasts`), positioning, swipe-dismiss, and the accessible live
+ * region, while the visual design stays the existing one.
  */
 export const AlertProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-    const [alerts, setAlerts] = useState<AlertItem[]>([]);
-
     const showAlert = useCallback((type: AlertType, message: string, options?: AlertOptions) => {
-        setAlerts((prev) => {
-            const newItem = {
-                id: Math.random().toString(36).substring(2, 9),
-                type,
-                message,
-                action: options?.action,
-                durationMs: options?.durationMs,
-            };
-            // Implementation of logical stack cap (FIFO) to avoid screen clutter
-            const next = [...prev, newItem];
-            return next.slice(-3);
-        });
-    }, []);
-
-    const handleClose = useCallback((id: string) => {
-        setAlerts((prev) => prev.filter((a) => a.id !== id));
+        toast.custom(
+            (id) => (
+                <Alert
+                    type={type}
+                    message={message}
+                    action={options?.action}
+                    onClose={() => toast.dismiss(id)}
+                />
+            ),
+            { duration: options?.durationMs ?? ALERT_DURATIONS[type] },
+        );
     }, []);
 
     return (
         <AlertContext.Provider value={{ showAlert }}>
             {children}
-            {/* ── Alert Stack Container ── */}
-            <div className="pointer-events-none fixed right-4 bottom-4 left-4 z-[100] flex flex-col items-center gap-3 sm:right-6 sm:bottom-6 sm:left-auto sm:items-end">
-                <AnimatePresence mode="popLayout">
-                    {alerts.map((a) => (
-                        <Alert
-                            key={a.id}
-                            type={a.type}
-                            message={a.message}
-                            action={a.action}
-                            durationMs={a.durationMs}
-                            onClose={() => handleClose(a.id)}
-                        />
-                    ))}
-                </AnimatePresence>
-            </div>
+            <Toaster
+                position="bottom-right"
+                visibleToasts={3}
+                gap={12}
+                containerAriaLabel="Notifications"
+            />
         </AlertContext.Provider>
     );
 };

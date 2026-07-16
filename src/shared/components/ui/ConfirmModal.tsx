@@ -1,11 +1,8 @@
 "use client";
 
-import { useId } from "react";
-
-import { AnimatePresence, motion } from "framer-motion";
+import { Dialog } from "@base-ui/react/dialog";
 import { AlertTriangle, Info, Trash2, X } from "lucide-react";
 
-import { useDialogA11y } from "@/shared/hooks";
 import Button from "./Button";
 
 /** Supported visual variants for the confirmation modal. */
@@ -56,21 +53,21 @@ const VARIANTS = {
         icon: Trash2,
         color: "red",
         accent: "bg-danger-bg text-danger",
-        btnVariant: "primary" as const,
+        btnVariant: "primary",
     },
     warning: {
         icon: AlertTriangle,
         color: "orange",
         accent: "bg-orange-50 text-orange-500",
-        btnVariant: "primary" as const,
+        btnVariant: "primary",
     },
     info: {
         icon: Info,
         color: "blue",
         accent: "bg-blue-50 text-blue-500",
-        btnVariant: "primary" as const,
+        btnVariant: "primary",
     },
-};
+} as const;
 
 const ConfirmModal = ({
     isOpen,
@@ -85,43 +82,33 @@ const ConfirmModal = ({
 }: ConfirmModalProps) => {
     const v = VARIANTS[variant];
     const Icon = v.icon;
-    const titleId = useId();
-    const dialogRef = useDialogA11y<HTMLDivElement>(isOpen, onClose);
 
     return (
-        <AnimatePresence>
-            {isOpen && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
-                    {/* Backdrop */}
-                    <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        onClick={onClose}
-                        className="absolute inset-0 bg-black/40 backdrop-blur-sm"
-                    />
+        <Dialog.Root open={isOpen} onOpenChange={(open) => !open && !loading && onClose()}>
+            <Dialog.Portal>
+                {/* Backdrop */}
+                <Dialog.Backdrop className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm transition-opacity duration-200 data-[ending-style]:opacity-0 data-[starting-style]:opacity-0" />
 
-                    {/* Modal Content */}
-                    <motion.div
-                        ref={dialogRef}
-                        role="dialog"
+                {/* Centering layer — pointer-events pass through to the backdrop except over the modal itself */}
+                <div className="pointer-events-none fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
+                    <Dialog.Popup
                         aria-modal="true"
-                        aria-labelledby={titleId}
-                        initial={{ opacity: 0, scale: 0.9, y: 20 }}
-                        animate={{ opacity: 1, scale: 1, y: 0 }}
-                        exit={{ opacity: 0, scale: 0.9, y: 20 }}
-                        className="rounded-5xl relative w-full max-w-sm overflow-hidden border-2 border-b-8 border-gray-200 bg-white shadow-2xl"
+                        className="rounded-5xl pointer-events-auto relative w-full max-w-sm overflow-hidden border-2 border-b-8 border-gray-200 bg-white shadow-2xl transition-all duration-200 data-[ending-style]:translate-y-5 data-[ending-style]:scale-90 data-[ending-style]:opacity-0 data-[starting-style]:translate-y-5 data-[starting-style]:scale-90 data-[starting-style]:opacity-0"
                     >
                         {/* Close button */}
                         <div className="absolute top-4 right-4 z-10">
-                            <Button
-                                variant="ghost"
-                                size="icon"
-                                onClick={onClose}
-                                className="rounded-full shadow-none hover:bg-black/5"
-                                icon={X}
-                                iconSize={20}
+                            <Dialog.Close
                                 disabled={loading}
+                                render={
+                                    <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        className="rounded-full shadow-none hover:bg-black/5"
+                                        icon={X}
+                                        iconSize={20}
+                                        disabled={loading}
+                                    />
+                                }
                             />
                         </div>
 
@@ -135,19 +122,19 @@ const ConfirmModal = ({
 
                             {/* Text Header */}
                             <div className="text-center">
-                                <h3 id={titleId} className="text-text mb-2 text-xl font-black">
+                                <Dialog.Title className="text-text mb-2 text-xl font-black">
                                     {title}
-                                </h3>
-                                <p className="text-muted text-base leading-relaxed font-bold">
+                                </Dialog.Title>
+                                <Dialog.Description className="text-muted text-base leading-relaxed font-bold">
                                     {message}
-                                </p>
+                                </Dialog.Description>
                             </div>
 
                             {/* Actions */}
                             <div className="mt-8 flex flex-col gap-3">
                                 <Button
                                     variant={v.btnVariant}
-                                    color={v.color as any}
+                                    color={v.color}
                                     onClick={onConfirm}
                                     loading={loading}
                                     className="w-full !py-4 !text-base"
@@ -164,10 +151,10 @@ const ConfirmModal = ({
                                 </Button>
                             </div>
                         </div>
-                    </motion.div>
+                    </Dialog.Popup>
                 </div>
-            )}
-        </AnimatePresence>
+            </Dialog.Portal>
+        </Dialog.Root>
     );
 };
 

@@ -1,12 +1,16 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { DayPicker } from "react-day-picker";
 
 import { clsx } from "clsx";
+import { format, parseISO } from "date-fns";
 import { AnimatePresence, motion } from "framer-motion";
 import { Calendar as CalendarIcon, ChevronLeft, ChevronRight, X } from "lucide-react";
 
 import Button from "./Button";
+
+import "react-day-picker/style.css";
 
 /** Attributes for rendering a DatePicker component. */
 interface CustomDatePickerProps {
@@ -47,33 +51,14 @@ const DatePicker = ({
     disabled = false,
 }: CustomDatePickerProps) => {
     const [isOpen, setIsOpen] = useState(false);
-    const [viewDate, setViewDate] = useState(() => (value ? new Date(value) : new Date()));
 
-    const selectedDate = useMemo(() => (value ? new Date(value) : null), [value]);
+    // parseISO (unlike `new Date("YYYY-MM-DD")`) parses the date part as
+    // local midnight, not UTC — avoids the classic off-by-one-day bug when
+    // the local timezone is behind UTC.
+    const selectedDate = useMemo(() => (value ? parseISO(value) : undefined), [value]);
 
-    const daysInMonth = useMemo(() => {
-        const year = viewDate.getFullYear();
-        const month = viewDate.getMonth();
-        const firstDay = new Date(year, month, 1).getDay();
-        const days = new Date(year, month + 1, 0).getDate();
-
-        const arr = [];
-        // Fill empty days for previous month
-        for (let i = 0; i < firstDay; i++) arr.push(null);
-        // Fill current month days
-        for (let i = 1; i <= days; i++) arr.push(new Date(year, month, i));
-        return arr;
-    }, [viewDate]);
-
-    const handleMonthChange = (offset: number) => {
-        const next = new Date(viewDate.getFullYear(), viewDate.getMonth() + offset, 1);
-        setViewDate(next);
-    };
-
-    const handleDateSelect = (date: Date) => {
-        // Offset for timezone to keep it as ISO string date part
-        const iso = date.toISOString().split("T")[0];
-        onChange(iso);
+    const handleDateSelect = (date: Date | undefined) => {
+        onChange(date ? format(date, "yyyy-MM-dd") : undefined);
         setIsOpen(false);
     };
 
@@ -135,63 +120,44 @@ const DatePicker = ({
                             exit={{ opacity: 0, scale: 0.95, y: 10 }}
                             className="absolute top-full right-0 z-50 mt-2 w-72 overflow-hidden rounded-4xl border-2 border-gray-100 bg-white p-4 shadow-2xl"
                         >
-                            <div className="mb-4 flex items-center justify-between">
-                                <span className="text-text text-sm font-black">
-                                    {viewDate.toLocaleDateString(undefined, {
-                                        month: "long",
-                                        year: "numeric",
-                                    })}
-                                </span>
-                                <div className="flex gap-1">
-                                    <button
-                                        onClick={() => handleMonthChange(-1)}
-                                        className="hover:text-katakana focus-visible:ring-katakana flex h-8 w-8 items-center justify-center rounded-xl text-gray-400 hover:bg-gray-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
-                                    >
-                                        <ChevronLeft size={18} />
-                                    </button>
-                                    <button
-                                        onClick={() => handleMonthChange(1)}
-                                        className="hover:text-katakana focus-visible:ring-katakana flex h-8 w-8 items-center justify-center rounded-xl text-gray-400 hover:bg-gray-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
-                                    >
-                                        <ChevronRight size={18} />
-                                    </button>
-                                </div>
-                            </div>
-
-                            <div className="grid grid-cols-7 gap-1">
-                                {["S", "M", "T", "W", "T", "F", "S"].map((d, i) => (
-                                    <span
-                                        key={i}
-                                        className="text-muted text-center text-xs font-black tracking-widest uppercase"
-                                    >
-                                        {d}
-                                    </span>
-                                ))}
-                                {daysInMonth.map((date, i) => {
-                                    if (!date) return <div key={i} />;
-                                    const isSelected =
-                                        selectedDate?.toDateString() === date.toDateString();
-                                    const isToday =
-                                        new Date().toDateString() === date.toDateString();
-
-                                    return (
-                                        <button
-                                            key={i}
-                                            onClick={() => handleDateSelect(date)}
-                                            className={clsx(
-                                                "focus-visible:ring-katakana flex h-8 w-8 items-center justify-center rounded-xl text-xs font-black transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2",
-                                                isSelected
-                                                    ? "bg-katakana text-white shadow-lg shadow-[#1cb0f6]/20"
-                                                    : isToday
-                                                      ? "text-katakana bg-gray-100"
-                                                      : "text-text hover:text-katakana hover:bg-gray-50",
-                                            )}
-                                        >
-                                            {date.getDate()}
-                                        </button>
-                                    );
-                                })}
-                            </div>
+                            <DayPicker
+                                mode="single"
+                                selected={selectedDate}
+                                onSelect={handleDateSelect}
+                                defaultMonth={selectedDate ?? new Date()}
+                                showOutsideDays
+                                components={{
+                                    Chevron: ({ orientation }) =>
+                                        orientation === "left" ? (
+                                            <ChevronLeft size={18} />
+                                        ) : (
+                                            <ChevronRight size={18} />
+                                        ),
+                                }}
+                                classNames={{
+                                    root: "text-text",
+                                    month_caption:
+                                        "flex items-center justify-center pb-4 text-sm font-black",
+                                    nav: "flex items-center justify-between absolute inset-x-0 top-0 px-1",
+                                    button_previous:
+                                        "hover:text-katakana focus-visible:ring-katakana flex h-8 w-8 items-center justify-center rounded-xl text-gray-400 hover:bg-gray-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2",
+                                    button_next:
+                                        "hover:text-katakana focus-visible:ring-katakana flex h-8 w-8 items-center justify-center rounded-xl text-gray-400 hover:bg-gray-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2",
+                                    weekdays: "flex",
+                                    weekday:
+                                        "text-muted flex-1 text-center text-xs font-black tracking-widest uppercase",
+                                    week: "mt-1 flex w-full",
+                                    day: "flex-1 p-0.5",
+                                    day_button:
+                                        "focus-visible:ring-katakana flex h-8 w-8 items-center justify-center rounded-xl text-xs font-black transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 text-text hover:text-katakana hover:bg-gray-50",
+                                    today: "[&>button]:text-katakana [&>button]:bg-gray-100",
+                                    selected:
+                                        "[&>button]:bg-katakana [&>button]:text-white [&>button]:shadow-lg [&>button]:shadow-[#1cb0f6]/20 [&>button]:hover:text-white",
+                                    outside: "[&>button]:text-gray-300",
+                                    disabled:
+                                        "[&>button]:opacity-30 [&>button]:pointer-events-none",
+                                }}
+                            />
                         </motion.div>
                     </>
                 )}

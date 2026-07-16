@@ -1,11 +1,8 @@
 "use client";
 
-import { useId } from "react";
-
-import { AnimatePresence, motion } from "framer-motion";
+import { Dialog } from "@base-ui/react/dialog";
 import { X } from "lucide-react";
 
-import { useDialogA11y } from "@/shared/hooks";
 import Button from "./Button";
 
 /** Attributes for rendering a Modal component. */
@@ -44,57 +41,45 @@ const MAX_WIDTHS = {
  * </Modal>
  */
 const Modal = ({ isOpen, onClose, title, children, maxWidth = "md" }: ModalProps) => {
-    const titleId = useId();
-    const dialogRef = useDialogA11y<HTMLDivElement>(isOpen, onClose);
-
     return (
-        <AnimatePresence>
-            {isOpen && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
-                    {/* Backdrop */}
-                    <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        onClick={onClose}
-                        className="absolute inset-0 bg-black/40 backdrop-blur-sm"
-                    />
+        <Dialog.Root open={isOpen} onOpenChange={(open) => !open && onClose()}>
+            <Dialog.Portal>
+                {/* Backdrop */}
+                <Dialog.Backdrop className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm transition-opacity duration-200 data-[ending-style]:opacity-0 data-[starting-style]:opacity-0" />
 
-                    {/* Modal Content */}
-                    <motion.div
-                        ref={dialogRef}
-                        role="dialog"
+                {/* Centering layer — pointer-events pass through to the backdrop except over the modal itself */}
+                <div className="pointer-events-none fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
+                    <Dialog.Popup
                         aria-modal="true"
-                        aria-labelledby={title ? titleId : undefined}
                         aria-label={title ? undefined : "Dialog"}
-                        initial={{ opacity: 0, scale: 0.9, y: 20 }}
-                        animate={{ opacity: 1, scale: 1, y: 0 }}
-                        exit={{ opacity: 0, scale: 0.9, y: 20 }}
-                        className={`relative w-full ${MAX_WIDTHS[maxWidth]} rounded-5xl flex max-h-[90vh] flex-col overflow-hidden border-2 border-b-8 border-gray-200 bg-white shadow-2xl`}
+                        className={`pointer-events-auto relative w-full ${MAX_WIDTHS[maxWidth]} rounded-5xl flex max-h-[90vh] flex-col overflow-hidden border-2 border-b-8 border-gray-200 bg-white shadow-2xl transition-all duration-200 data-[ending-style]:translate-y-5 data-[ending-style]:scale-90 data-[ending-style]:opacity-0 data-[starting-style]:translate-y-5 data-[starting-style]:scale-90 data-[starting-style]:opacity-0`}
                     >
                         {/* Header */}
                         <div className="flex items-center justify-between border-b border-gray-100 p-6">
                             {title && (
-                                <h3 id={titleId} className="text-text text-xl font-black">
+                                <Dialog.Title className="text-text text-xl font-black">
                                     {title}
-                                </h3>
+                                </Dialog.Title>
                             )}
-                            <Button
-                                variant="ghost"
-                                size="icon"
-                                onClick={onClose}
-                                className="rounded-full shadow-none hover:bg-black/5"
-                                icon={X}
-                                iconSize={20}
+                            <Dialog.Close
+                                render={
+                                    <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        className="rounded-full shadow-none hover:bg-black/5"
+                                        icon={X}
+                                        iconSize={20}
+                                    />
+                                }
                             />
                         </div>
 
                         {/* Content */}
                         <div className="flex-1 overflow-y-auto p-6">{children}</div>
-                    </motion.div>
+                    </Dialog.Popup>
                 </div>
-            )}
-        </AnimatePresence>
+            </Dialog.Portal>
+        </Dialog.Root>
     );
 };
 
