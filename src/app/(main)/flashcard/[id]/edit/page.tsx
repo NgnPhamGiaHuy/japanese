@@ -7,19 +7,21 @@
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
-import { use, useEffect, useState } from "react";
+import { use } from "react";
 
-import { getDoc } from "firebase/firestore";
+import { useCollectionQuery, useDocumentQuery } from "@tanstack-query-firebase/react/firestore";
+import { query, where } from "firebase/firestore";
 
 import LessonBuilder from "@/features/flashcard/components/LessonBuilder";
 import { useCards } from "@/features/flashcard/hooks";
 import { useLessons } from "@/features/flashcard/hooks/useLessons";
 import { lessonDoc, normalizeLesson } from "@/features/flashcard/services";
+import { cardsCol } from "@/features/flashcard/services/card.service";
 import { useAppStore } from "@/lib/app-store";
 import { useAlert } from "@/shared/providers";
 import { sortByOrder } from "@/shared/utils";
 
-import type { FlashCard, Lesson } from "@/features/flashcard/types";
+import type { FlashCard } from "@/features/flashcard/types";
 
 /**
  * Flashcard Edit View
@@ -49,52 +51,56 @@ export default function FlashcardEditPage({ params }: { params: Promise<{ id: st
     const { lessons, saveFullLesson, deleteLesson } = useLessons();
     const { cards: ownCards } = useCards(id);
 
-    /** State for collaborative edits (fetched ad-hoc) */
-    const [sharedLesson, setSharedLesson] = useState<Lesson | null>(null);
-    const [sharedCards, setSharedCards] = useState<FlashCard[]>([]);
-    const [loadingShared, setLoadingShared] = useState(isSharedEdit);
-
     /**
-     * 🔙 Pure history-based navigation
+     * Returns to the `returnTo` param when present (e.g. shared-edit mode,
+     * which links in from a specific share page rather than plain history),
+     * otherwise falls back to browser history.
      */
     const handleBack = () => {
+        if (returnTo) {
+            router.push(returnTo);
+            return;
+        }
         router.back();
     };
 
     /**
-     * Cross-User Data Fetching
-     * Fetches the original lesson and cards from the owner's Firestore paths.
+     * Cross-User Data Fetching (bridged via @tanstack-query-firebase/react)
+     * Fetches the original lesson and cards from the owner's Firestore paths —
+     * a genuine one-shot read never covered by an onSnapshot listener (the
+     * app's realtime hooks only ever watch the *current* user's own lessons/
+     * cards), so this is exactly the case the query bridge exists for: cached
+     * for the app's default staleTime and deduped across remounts of this
+     * route, instead of refetched unconditionally on every mount.
+     *
+     * `enabled` gates both queries off entirely outside shared-edit mode; the
+     * `|| "_disabled_"` fallback keeps the ref/query construction itself
+     * valid (a real DocumentReference/Query object is still required even
+     * when disabled) without ever letting a disabled query actually run.
      */
-    useEffect(() => {
-        if (!isSharedEdit || !ownerId) return;
+    const sharedLessonQuery = useDocumentQuery(lessonDoc(ownerId || "_disabled_", id), {
+        queryKey: ["shared-edit-lesson", ownerId, id],
+        enabled: isSharedEdit && !!ownerId,
+    });
+    const sharedCardsQuery = useCollectionQuery(
+        query(cardsCol(ownerId || "_disabled_"), where("lessonId", "==", id)),
+        { queryKey: ["shared-edit-cards", ownerId, id], enabled: isSharedEdit && !!ownerId },
+    );
 
-        Promise.all([
-            getDoc(lessonDoc(ownerId, id)),
-            import("@/features/flashcard/services/card.service").then(({ cardsCol }) =>
-                import("firebase/firestore").then(({ getDocs, query, where }) =>
-                    getDocs(query(cardsCol(ownerId), where("lessonId", "==", id))),
-                ),
-            ),
-        ])
-            .then(([lessonSnap, cardsSnap]) => {
-                if (lessonSnap.exists()) {
-                    setSharedLesson(
-                        normalizeLesson({
-                            ...lessonSnap.data(),
-                            id: lessonSnap.id,
-                            __ownerIdFallback: ownerId,
-                        }),
-                    );
-                }
-                setSharedCards(
-                    sortByOrder(
-                        cardsSnap.docs.map((d) => ({ ...d.data(), id: d.id }) as FlashCard),
-                    ),
-                );
-                setLoadingShared(false);
-            })
-            .catch(() => setLoadingShared(false));
-    }, [isSharedEdit, ownerId, id]);
+    const sharedLessonSnap = sharedLessonQuery.data;
+    const sharedLesson =
+        sharedLessonSnap && sharedLessonSnap.exists()
+            ? normalizeLesson({
+                  ...sharedLessonSnap.data(),
+                  id: sharedLessonSnap.id,
+                  __ownerIdFallback: ownerId,
+              })
+            : null;
+    const sharedCards = sortByOrder(
+        (sharedCardsQuery.data?.docs ?? []).map((d) => ({ ...d.data(), id: d.id }) as FlashCard),
+    );
+    const loadingShared =
+        isSharedEdit && (sharedLessonQuery.isLoading || sharedCardsQuery.isLoading);
 
     const lesson = isSharedEdit ? sharedLesson : lessons.find((l) => l.id === id);
     const cards = isSharedEdit ? sharedCards : ownCards;

@@ -52,12 +52,23 @@ interface UseCardsWithProgressState {
  */
 export function useCardsWithProgress(lessonId: string, ownerId: string): UseCardsWithProgressState {
     const { user } = useAppStore();
+    const hasParams = Boolean(user && ownerId && lessonId);
+    const paramsKey = hasParams ? `${user!.uid}:${ownerId}:${lessonId}` : null;
 
     const [state, setState] = useState<UseCardsWithProgressState>({
         cards: [],
         loading: true,
         error: null,
     });
+
+    // Render-time reset: whenever the (user, owner, lesson) identity
+    // changes, mark loading immediately instead of a synchronous setState
+    // at the top of the effect below.
+    const [prevParamsKey, setPrevParamsKey] = useState(paramsKey);
+    if (paramsKey !== prevParamsKey) {
+        setPrevParamsKey(paramsKey);
+        setState({ cards: [], loading: hasParams, error: null });
+    }
 
     // Refs hold the latest snapshot from each stream so either listener
     // can trigger a re-merge without waiting for the other.
@@ -66,11 +77,8 @@ export function useCardsWithProgress(lessonId: string, ownerId: string): UseCard
 
     useEffect(() => {
         if (!user || !ownerId || !lessonId) {
-            setState({ cards: [], loading: false, error: null });
             return;
         }
-
-        setState((prev) => ({ ...prev, loading: true, error: null }));
 
         let contentReady = false;
         let progressReady = false;
@@ -137,39 +145,8 @@ export function useCardsWithProgress(lessonId: string, ownerId: string): UseCard
         };
     }, [user?.uid, ownerId, lessonId]);
 
-    return state;
-}
-
-/**
- * Content-only hook for deck editing — no SRS state needed.
- */
-export function useCardContent(
-    lessonId: string,
-    ownerId: string,
-): { cards: FlashCardContent[]; loading: boolean; error: string | null } {
-    const [state, setState] = useState<{
-        cards: FlashCardContent[];
-        loading: boolean;
-        error: string | null;
-    }>({ cards: [], loading: true, error: null });
-
-    useEffect(() => {
-        if (!ownerId || !lessonId) {
-            setState({ cards: [], loading: false, error: null });
-            return;
-        }
-
-        return subscribeCards(
-            ownerId,
-            (cards) =>
-                setState({ cards: cards as FlashCardContent[], loading: false, error: null }),
-            (err) => {
-                console.error("[useCardContent] error:", err);
-                setState({ cards: [], loading: false, error: "Failed to load cards." });
-            },
-            lessonId,
-        );
-    }, [ownerId, lessonId]);
-
+    if (!hasParams) {
+        return { cards: [], loading: false, error: null };
+    }
     return state;
 }
