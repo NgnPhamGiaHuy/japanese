@@ -5,28 +5,35 @@ import { flexRender } from "@tanstack/react-table";
 import { LoadingSpinner } from "@/shared/components/ui";
 
 import type { Table } from "@tanstack/react-table";
-import type { AdminUser } from "../../types";
 
-interface UsersTableBodyProps {
-    table: Table<AdminUser>;
-    loading: boolean;
+interface DataTableBodyProps<T> {
+    table: Table<T>;
+    loading?: boolean;
+    loadingLabel?: string;
 }
 
 /**
- * Main Content Body for the Users Table.
- *
- * @remarks Renders table rows for the desktop <table> layout.
- * The mobile card list is handled separately via UserMobileRow.
+ * Shared desktop `<tbody>` for admin tables — generalizes the
+ * former `UsersTableBody`. `colSpan` is derived from the table's own
+ * visible-leaf-column count instead of being hardcoded per table.
  */
-const UsersTableBody = ({ table, loading }: UsersTableBodyProps) => {
+function DataTableBody<T>({
+    table,
+    loading = false,
+    loadingLabel = "Loading…",
+}: DataTableBodyProps<T>) {
     const rows = table.getRowModel().rows;
+    const columnCount = table.getVisibleLeafColumns().length;
 
     if (loading) {
         return (
             <tbody>
                 <tr>
-                    <td colSpan={6} className="text-muted py-16 text-center text-sm font-bold">
-                        <LoadingSpinner fullScreen={false} label="Loading users..." />
+                    <td
+                        colSpan={columnCount}
+                        className="text-muted py-16 text-center text-sm font-bold"
+                    >
+                        <LoadingSpinner fullScreen={false} label={loadingLabel} />
                     </td>
                 </tr>
             </tbody>
@@ -55,6 +62,6 @@ const UsersTableBody = ({ table, loading }: UsersTableBodyProps) => {
             ))}
         </tbody>
     );
-};
+}
 
-export default UsersTableBody;
+export default DataTableBody;

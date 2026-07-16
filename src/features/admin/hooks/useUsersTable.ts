@@ -2,16 +2,9 @@
 
 import { useState } from "react";
 
-import {
-    getCoreRowModel,
-    getFilteredRowModel,
-    getSortedRowModel,
-    useReactTable,
-} from "@tanstack/react-table";
-
+import { useDataTable } from "./useDataTable";
 import { useUsersTableColumns } from "./useUsersTableColumns";
 
-import type { SortingState } from "@tanstack/react-table";
 import type { AdminUser } from "../types";
 
 interface UseUsersTableProps {
@@ -37,9 +30,6 @@ export const useUsersTable = ({
     onDemote,
     onDelete,
 }: UseUsersTableProps) => {
-    const [globalFilter, setGlobalFilter] = useState("");
-    const [sorting, setSorting] = useState<SortingState>([]);
-    const [rowSelection, setRowSelection] = useState<Record<string, boolean>>({});
     const [pendingAction, setPendingAction] = useState<{
         type: "delete" | "promote" | "demote";
         uids: string[];
@@ -54,15 +44,9 @@ export const useUsersTable = ({
         onDelete: (uid) => setPendingAction({ type: "delete", uids: [uid] }),
     });
 
-    const table = useReactTable({
+    const { table, globalFilter, setGlobalFilter, setRowSelection } = useDataTable<AdminUser>({
         data: users,
         columns,
-        state: { globalFilter, sorting, rowSelection: canDelete ? rowSelection : {} },
-        onSortingChange: setSorting,
-        onRowSelectionChange: setRowSelection,
-        getCoreRowModel: getCoreRowModel(),
-        getSortedRowModel: getSortedRowModel(),
-        getFilteredRowModel: getFilteredRowModel(),
         enableRowSelection: canDelete,
         globalFilterFn: (row, _, filterValue) => {
             const q = String(filterValue).toLowerCase();
@@ -95,7 +79,6 @@ export const useUsersTable = ({
         table,
         globalFilter,
         setGlobalFilter,
-        rowSelection,
         setRowSelection,
         pendingAction,
         setPendingAction,

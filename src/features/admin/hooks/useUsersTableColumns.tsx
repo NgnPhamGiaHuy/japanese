@@ -67,6 +67,7 @@ export const useUsersTableColumns = ({
                 </div>
             ),
             size: 280,
+            meta: { align: "start" },
             cell: ({ row }) => <UserCell user={row.original} />,
         }),
         col.display({
@@ -137,6 +138,7 @@ export const useUsersTableColumns = ({
             col.display({
                 id: "actions",
                 size: 190,
+                meta: { align: "end" },
                 header: () => <div className="w-full pr-6 text-right">Actions</div>,
                 cell: ({ row }) => (
                     <ActionsCell

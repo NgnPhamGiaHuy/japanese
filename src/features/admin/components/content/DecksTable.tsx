@@ -1,6 +1,9 @@
-import DecksMobileList from "./DecksMobileList";
-import DecksTableRow from "./DecksTableRow";
-import { AdminTable } from "../shared";
+"use client";
+
+import DeckMobileRow from "./DeckMobileRow";
+import { AdminTable, DataTableBody, DataTableHeader, DataTableMobileList } from "../shared";
+import { useDataTable } from "../../hooks/useDataTable";
+import { useDecksTableColumns } from "../../hooks/useDecksTableColumns";
 
 import type { AdminDeck } from "../../types";
 
@@ -15,59 +18,27 @@ interface DecksTableProps {
  * Global Decks Administrative Table.
  *
  * @remarks
- * Displays all platform flashcard sets. Delegates individual row rendering
- * to DecksTableRow for modularity and performance.
- *
- * @example
- * <DecksTable
- *   items={decks}
- *   onDelete={handleDelete}
- *   onView={handleView}
- *   isDeleting={false}
- * />
+ * Migrated onto the shared `@tanstack/react-table` engine — same
+ * external prop interface and rendered output as before, now sharing one
+ * table implementation with Users instead of a hand-rolled `<table>`.
+ * No sorting/selection existed here before this migration and none is
+ * added; every column is a display column for exactly that reason.
  */
 const DecksTable = ({ items, onDelete, onView, isDeleting }: DecksTableProps) => {
+    const columns = useDecksTableColumns({ onView, onDelete, isDeleting });
+    const { table } = useDataTable<AdminDeck>({ data: items, columns });
+
     return (
         <AdminTable
             mobileList={
-                <DecksMobileList
-                    items={items}
-                    onView={onView}
-                    onDelete={onDelete}
-                    isDeleting={isDeleting}
+                <DataTableMobileList
+                    table={table}
+                    renderRow={(row) => <DeckMobileRow row={row} />}
                 />
             }
         >
-            <thead>
-                <tr className="border-b-2 border-gray-50 bg-gray-50/30">
-                    <th className="text-muted px-6 py-4 text-xs font-black tracking-widest uppercase">
-                        Flashcard Set (Deck)
-                    </th>
-                    <th className="text-muted px-6 py-4 text-xs font-black tracking-widest uppercase">
-                        Owner
-                    </th>
-                    <th className="text-muted px-6 py-4 text-xs font-black tracking-widest uppercase">
-                        Size
-                    </th>
-                    <th className="text-muted px-6 py-4 text-xs font-black tracking-widest uppercase">
-                        Created
-                    </th>
-                    <th className="text-muted px-6 py-4 text-right text-xs font-black tracking-widest uppercase">
-                        Actions
-                    </th>
-                </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-50">
-                {items.map((deck) => (
-                    <DecksTableRow
-                        key={deck.path}
-                        deck={deck}
-                        onView={onView}
-                        onDelete={onDelete}
-                        isDeleting={isDeleting}
-                    />
-                ))}
-            </tbody>
+            <DataTableHeader table={table} />
+            <DataTableBody table={table} />
         </AdminTable>
     );
 };

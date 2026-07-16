@@ -2,14 +2,18 @@
 
 import { Users as UsersIcon } from "lucide-react";
 
-import { Button, LoadingSpinner } from "@/shared/components/ui";
+import { Button } from "@/shared/components/ui";
 import UserMobileRow from "./UserMobileRow";
 import UsersActionConfirmModal from "./UsersActionConfirmModal";
-import UsersTableBody from "./UsersTableBody";
-import UsersTableHeader from "./UsersTableHeader";
 import UsersTablePagination from "./UsersTablePagination";
 import UsersTableToolbar from "./UsersTableToolbar";
-import { AdminEmptyState, AdminTable } from "../shared";
+import {
+    AdminEmptyState,
+    AdminTable,
+    DataTableBody,
+    DataTableHeader,
+    DataTableMobileList,
+} from "../shared";
 import { useUsersTable } from "../../hooks";
 
 import type { AdminUser } from "../../types";
@@ -39,14 +43,7 @@ interface UsersTableProps {
  * Adheres to < 120 lines by delegating logic to useUsersTable hook.
  */
 const UsersTable = (props: UsersTableProps) => {
-    const {
-        users,
-        totalUsers = 0,
-        loading = false,
-        currentPage = 0,
-        canDelete,
-        canPromote,
-    } = props;
+    const { totalUsers = 0, loading = false, currentPage = 0, canDelete, canPromote } = props;
     const totalPages = Math.ceil(totalUsers / 25);
 
     const {
@@ -62,7 +59,6 @@ const UsersTable = (props: UsersTableProps) => {
 
     const selectedRows = table.getSelectedRowModel().rows;
     const filteredRows = table.getFilteredRowModel().rows;
-    const hasData = users.length > 0;
     const hasResults = filteredRows.length > 0;
 
     return (
@@ -98,17 +94,12 @@ const UsersTable = (props: UsersTableProps) => {
                 }
                 mobileList={
                     hasResults ? (
-                        loading ? (
-                            <div className="flex justify-center py-16">
-                                <LoadingSpinner fullScreen={false} label="Loading users..." />
-                            </div>
-                        ) : (
-                            <div className="divide-y divide-gray-100">
-                                {table.getRowModel().rows.map((row) => (
-                                    <UserMobileRow key={row.id} row={row} />
-                                ))}
-                            </div>
-                        )
+                        <DataTableMobileList
+                            table={table}
+                            loading={loading}
+                            loadingLabel="Loading users..."
+                            renderRow={(row) => <UserMobileRow row={row} />}
+                        />
                     ) : undefined
                 }
                 pagination={
@@ -128,8 +119,12 @@ const UsersTable = (props: UsersTableProps) => {
             >
                 {hasResults ? (
                     <>
-                        <UsersTableHeader table={table} />
-                        <UsersTableBody table={table} loading={loading} />
+                        <DataTableHeader table={table} />
+                        <DataTableBody
+                            table={table}
+                            loading={loading}
+                            loadingLabel="Loading users..."
+                        />
                     </>
                 ) : (
                     <div className="col-span-full">
