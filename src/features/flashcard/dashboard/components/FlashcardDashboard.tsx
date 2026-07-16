@@ -12,13 +12,27 @@
 
 import { useRouter } from "next/navigation";
 
+import {
+    closestCenter,
+    DndContext,
+    KeyboardSensor,
+    MouseSensor,
+    TouchSensor,
+    useSensor,
+    useSensors,
+} from "@dnd-kit/core";
+import {
+    SortableContext,
+    sortableKeyboardCoordinates,
+    verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
 import { Plus } from "lucide-react";
 
 import ShareModal from "@/features/flashcard/components/ShareModal";
 import { useLessons } from "@/features/flashcard/hooks";
 import { buildShareId } from "@/features/flashcard/services";
 import { ScreenHeader } from "@/shared/components/layout";
-import { Button, ConfirmModal, ReorderList } from "@/shared/components/ui";
+import { Button, ConfirmModal } from "@/shared/components/ui";
 import { SPACING } from "@/shared/constants";
 import DashboardEmpty from "./DashboardEmpty";
 import DashboardError from "./DashboardError";
@@ -27,6 +41,7 @@ import DashboardTabs from "./DashboardTabs";
 import SortableDeckCard from "./SortableDeckCard";
 import { useDashboardModals, useDashboardState } from "../hooks";
 
+import type { DragEndEvent } from "@dnd-kit/core";
 import type { Lesson } from "@/features/flashcard/types";
 
 const FlashcardDashboard = () => {
@@ -41,9 +56,20 @@ const FlashcardDashboard = () => {
         loading,
         error,
         handleLessonsReorder,
-        activeDragLessonIdRef,
         getGameStats,
     } = useDashboardState();
+
+    const sensors = useSensors(
+        useSensor(MouseSensor, { activationConstraint: { distance: 8 } }),
+        useSensor(TouchSensor, { activationConstraint: { delay: 250, tolerance: 5 } }),
+        useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
+    );
+
+    const handleDragEnd = (event: DragEndEvent) => {
+        const { active, over } = event;
+        if (!over || active.id === over.id) return;
+        void handleLessonsReorder(String(active.id), String(over.id));
+    };
 
     const {
         sharingLesson,
@@ -99,46 +125,60 @@ const FlashcardDashboard = () => {
                     <DashboardEmpty activeTab={activeTab} />
                 )}
 
-                {/* All tabs use ReorderList for layout consistency */}
+                {/* All tabs render through the same sortable list for layout
+                    consistency — only personal/shared decks are actually
+                    draggable (canReorder), discover decks render inert. */}
                 {!loading && !error && orderedLessons.length > 0 && (
-                    <ReorderList
-                        items={orderedLessons}
-                        onReorder={handleLessonsReorder}
-                        className="space-y-4"
+                    <DndContext
+                        sensors={sensors}
+                        collisionDetection={closestCenter}
+                        onDragEnd={handleDragEnd}
                     >
-                        {orderedLessons.map((lesson) => {
-                            const { matchStats, speedStats } = getGameStats(lesson.id);
-                            const isDiscover = activeTab === "discover";
-                            const sid = resolveShareId(lesson);
+                        <SortableContext
+                            items={orderedLessons.map((lesson) => lesson.id)}
+                            strategy={verticalListSortingStrategy}
+                        >
+                            <div className="space-y-4">
+                                {orderedLessons.map((lesson) => {
+                                    const { matchStats, speedStats } = getGameStats(lesson.id);
+                                    const isDiscover = activeTab === "discover";
+                                    const sid = resolveShareId(lesson);
 
-                            return (
-                                <SortableDeckCard
-                                    key={isDiscover ? `${lesson.ownerId}-${lesson.id}` : lesson.id}
-                                    lesson={lesson}
-                                    isShared={activeTab === "shared" || isDiscover}
-                                    matchStats={matchStats}
-                                    speedStats={speedStats}
-                                    onDelete={
-                                        isDiscover ? undefined : () => setDeletingLesson(lesson)
-                                    }
-                                    onShare={
-                                        isDiscover
-                                            ? () => {
-                                                  if (sid) router.push(`/flashcard/shared/${sid}`);
-                                              }
-                                            : () => setSharingLesson(lesson)
-                                    }
-                                    canReorder={activeTab === "personal" || activeTab === "shared"}
-                                    onDragStart={() => {
-                                        activeDragLessonIdRef.current = lesson.id;
-                                    }}
-                                    onDragEnd={() => {
-                                        activeDragLessonIdRef.current = null;
-                                    }}
-                                />
-                            );
-                        })}
-                    </ReorderList>
+                                    return (
+                                        <SortableDeckCard
+                                            key={
+                                                isDiscover
+                                                    ? `${lesson.ownerId}-${lesson.id}`
+                                                    : lesson.id
+                                            }
+                                            lesson={lesson}
+                                            isShared={activeTab === "shared" || isDiscover}
+                                            matchStats={matchStats}
+                                            speedStats={speedStats}
+                                            onDelete={
+                                                isDiscover
+                                                    ? undefined
+                                                    : () => setDeletingLesson(lesson)
+                                            }
+                                            onShare={
+                                                isDiscover
+                                                    ? () => {
+                                                          if (sid)
+                                                              router.push(
+                                                                  `/flashcard/shared/${sid}`,
+                                                              );
+                                                      }
+                                                    : () => setSharingLesson(lesson)
+                                            }
+                                            canReorder={
+                                                activeTab === "personal" || activeTab === "shared"
+                                            }
+                                        />
+                                    );
+                                })}
+                            </div>
+                        </SortableContext>
+                    </DndContext>
                 )}
             </div>
 

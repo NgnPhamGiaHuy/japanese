@@ -22,6 +22,4 @@ export interface DeckCardProps {
 
 export interface SortableDeckCardProps extends DeckCardProps {
     canReorder?: boolean;
-    onDragStart: () => void;
-    onDragEnd: () => void;
 }

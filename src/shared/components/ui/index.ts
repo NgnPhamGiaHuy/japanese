@@ -9,8 +9,6 @@ export { default as Select } from "./Select";
 export { default as StatCard } from "./StatCard";
 export { default as UserAvatar } from "./UserAvatar";
 export { default as UserMeta } from "./UserMeta";
-export { default as ReorderItem } from "./ReorderItem";
-export { default as ReorderList } from "./ReorderList";
 export { default as ActionCard } from "./ActionCard";
 export { default as SettingsMenu } from "./SettingsMenu";
 export { default as Badge } from "./Badge";

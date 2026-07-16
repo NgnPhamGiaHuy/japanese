@@ -1,8 +1,10 @@
 "use client";
 
-import { Image as ImageIcon, Sparkles, Trash2 } from "lucide-react";
+import { useSortable } from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
+import { GripVertical, Image as ImageIcon, Sparkles, Trash2 } from "lucide-react";
 
-import { Button, Input, ReorderItem } from "@/shared/components/ui";
+import { Button, Input } from "@/shared/components/ui";
 import { joinAlternatives, splitAlternatives } from "../utils/formatting";
 
 import type { EditorCard } from "../types";
@@ -15,7 +17,7 @@ interface DraggableCardProps {
     aiLoading: boolean;
     aiError?: string;
     onRemove: (id: string) => void;
-    onUpdate: (id: string, field: keyof EditorCard, value: any) => void;
+    onUpdate: <K extends keyof EditorCard>(id: string, field: K, value: EditorCard[K]) => void;
     onAIFill: (id: string, word: string) => void;
     onImageChange: (file: File | null, id: string) => void;
     onImageClear: (path: string) => void;
@@ -23,7 +25,9 @@ interface DraggableCardProps {
 
 /**
  * DraggableCard Component
- * Isolated item for Reorder.Group to allow useDragControls for a dedicated handle.
+ * Isolated item for the lesson builder's sortable card list — a dedicated
+ * grip handle (not the whole card) drives the drag, since the card is full
+ * of real text inputs that need normal click/select/type behavior.
  */
 const DraggableCard = ({
     card,
@@ -38,12 +42,36 @@ const DraggableCard = ({
     onImageChange,
     onImageClear,
 }: DraggableCardProps) => {
+    const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+        id: card.id,
+        disabled: saving,
+    });
+
+    const style = {
+        transform: CSS.Transform.toString(transform),
+        transition,
+        zIndex: isDragging ? 50 : undefined,
+        opacity: isDragging ? 0.72 : undefined,
+    } as React.CSSProperties;
+
     return (
-        <ReorderItem
-            value={card}
-            disabled={saving}
+        <div
+            ref={setNodeRef}
+            style={style}
             className="group relative rounded-3xl border-2 border-b-8 border-gray-200 bg-white p-4 shadow-sm transition-colors select-text focus-within:border-[var(--theme-color)] sm:rounded-4xl sm:p-6"
         >
+            {!saving && (
+                <button
+                    type="button"
+                    {...attributes}
+                    {...listeners}
+                    className="focus-visible:ring-katakana absolute top-1/2 -left-8 -translate-y-1/2 cursor-pointer opacity-0 transition-all group-hover:opacity-100 hover:scale-110 focus:outline-none focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-offset-2 active:cursor-grabbing md:-left-10"
+                    aria-label="Reorder card"
+                >
+                    <GripVertical size={24} className="text-gray-300 hover:text-gray-500" />
+                </button>
+            )}
+
             {/* Index Badge */}
             <div className="absolute -top-2 -left-2 flex h-8 w-8 -rotate-3 transform items-center justify-center rounded-lg border-b-4 border-black bg-[#3c3c3c] text-sm font-black text-white shadow-sm transition-all group-active:scale-110 sm:-top-3 sm:-left-3 sm:h-10 sm:w-10 sm:rounded-xl sm:text-lg">
                 {idx + 1}
@@ -206,7 +234,7 @@ const DraggableCard = ({
                     </div>
                 </div>
             </div>
-        </ReorderItem>
+        </div>
     );
 };
 

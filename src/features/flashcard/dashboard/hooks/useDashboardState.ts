@@ -7,7 +7,7 @@
  */
 
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 
 import { matchGameMode } from "@/features/flashcard/games/match/config";
 import { speedGameMode } from "@/features/flashcard/games/speed/config";
@@ -24,7 +24,7 @@ import type { GameStatEntry } from "@/features/game/services";
 type ActiveTab = "personal" | "shared" | "discover";
 
 export function useDashboardState() {
-    const { lessons, sharedLessons, loading, error, reorderLesson } = useLessons();
+    const { lessons, sharedLessons, loading, error, reorderLessons } = useLessons();
     const { publicLessons, loading: publicLoading, error: publicError } = usePublicLessons();
     const { user } = useAppStore();
     const { showAlert } = useAlert();
@@ -46,8 +46,6 @@ export function useDashboardState() {
         return subscribeGameStats(user.uid, setGameStats);
     }, [user]);
 
-    const activeDragLessonIdRef = useRef<string | null>(null);
-
     // orderedLessons mirrors the active tab's list, but can be locally overridden
     // mid-drag by handleLessonsReorder for an optimistic reorder before the
     // Firestore write confirms. Synced during render (not an effect) so a tab/data
@@ -61,27 +59,34 @@ export function useDashboardState() {
         setOrderedLessons(sourceList);
     }
 
-    const handleLessonsReorder = async (nextLessons: Lesson[]) => {
-        setOrderedLessons(nextLessons);
-
-        const activeId = activeDragLessonIdRef.current;
-        if (!activeId || (activeTab !== "personal" && activeTab !== "shared")) return;
-
+    /**
+     * @dnd-kit's DragEndEvent hands us the moved item's id and the id it was
+     * dropped on directly — unlike framer-motion's Reorder, which only gives
+     * an already-reordered array back, forcing the caller to track "which id
+     * is being dragged" separately to reverse-engineer old/new indices.
+     */
+    const handleLessonsReorder = async (activeId: string, overId: string) => {
         const oldIndex = orderedLessons.findIndex((lesson) => lesson.id === activeId);
-        const newIndex = nextLessons.findIndex((lesson) => lesson.id === activeId);
+        const newIndex = orderedLessons.findIndex((lesson) => lesson.id === overId);
         if (oldIndex === -1 || newIndex === -1 || oldIndex === newIndex) return;
+
+        const { nextItems, changes } = reorderWithFractionalIndex(
+            orderedLessons,
+            oldIndex,
+            newIndex,
+        );
+        setOrderedLessons(nextItems);
+
+        // Discover-tab cards render non-draggable (canReorder=false disables
+        // their useSortable), so this is a defensive check, not a live path.
+        if (activeTab !== "personal" && activeTab !== "shared") return;
 
         try {
             const movedLesson = orderedLessons.find((l) => l.id === activeId);
             const ownerId = movedLesson?.ownerId ?? movedLesson?.userId ?? user?.uid;
             if (!ownerId) return;
 
-            const { movedId, newOrder } = reorderWithFractionalIndex(
-                orderedLessons,
-                oldIndex,
-                newIndex,
-            );
-            await reorderLesson(ownerId, movedId, newOrder);
+            await reorderLessons(ownerId, changes);
         } catch (err) {
             console.error("[handleLessonsReorder] Reorder failed:", err);
             setOrderedLessons(lessons);
@@ -107,7 +112,6 @@ export function useDashboardState() {
         loading: isLoading,
         error: activeError,
         handleLessonsReorder,
-        activeDragLessonIdRef,
         getGameStats,
     };
 }

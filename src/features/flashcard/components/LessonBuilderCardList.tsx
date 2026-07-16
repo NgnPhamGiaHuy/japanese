@@ -2,19 +2,35 @@
 
 import React from "react";
 
-import { motion, Reorder } from "framer-motion";
+import {
+    closestCenter,
+    DndContext,
+    KeyboardSensor,
+    MouseSensor,
+    TouchSensor,
+    useSensor,
+    useSensors,
+} from "@dnd-kit/core";
+import {
+    arrayMove,
+    SortableContext,
+    sortableKeyboardCoordinates,
+    verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
+import { motion } from "framer-motion";
 import { Plus } from "lucide-react";
 import { v4 as uuidv4 } from "uuid";
 
 import { Button } from "@/shared/components/ui";
 import DraggableCard from "./DraggableCard";
 
+import type { DragEndEvent } from "@dnd-kit/core";
 import type { EditorCard } from "../types";
 
 interface LessonBuilderCardListProps {
     cards: EditorCard[];
     setCards: (cards: EditorCard[]) => void;
-    updateCard: (id: string, field: keyof EditorCard, value: any) => void;
+    updateCard: <K extends keyof EditorCard>(id: string, field: K, value: EditorCard[K]) => void;
     deleteCard: (id: string) => void;
     handleImageChange: (file: File | null, id: string) => void;
     themeHex: string;
@@ -36,6 +52,23 @@ const LessonBuilderCardList: React.FC<LessonBuilderCardListProps> = ({
     onAIFill,
     onImageClear,
 }) => {
+    const sensors = useSensors(
+        useSensor(MouseSensor, { activationConstraint: { distance: 8 } }),
+        useSensor(TouchSensor, { activationConstraint: { delay: 250, tolerance: 5 } }),
+        useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
+    );
+
+    const handleDragEnd = (event: DragEndEvent) => {
+        const { active, over } = event;
+        if (!over || active.id === over.id) return;
+
+        const oldIndex = cards.findIndex((c) => c.id === active.id);
+        const newIndex = cards.findIndex((c) => c.id === over.id);
+        if (oldIndex === -1 || newIndex === -1) return;
+
+        setCards(arrayMove(cards, oldIndex, newIndex));
+    };
+
     return (
         <div className="space-y-6">
             <div className="flex items-center justify-between px-2">
@@ -62,36 +95,35 @@ const LessonBuilderCardList: React.FC<LessonBuilderCardListProps> = ({
                 </Button>
             </div>
 
-            <Reorder.Group
-                axis="y"
-                values={cards}
-                onReorder={setCards}
-                className="space-y-6 sm:space-y-8"
+            <DndContext
+                sensors={sensors}
+                collisionDetection={closestCenter}
+                onDragEnd={handleDragEnd}
             >
-                {cards.map((card, index) => (
-                    <Reorder.Item
-                        key={card.id}
-                        value={card}
-                        initial={{ opacity: 0, x: -20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: index * 0.05 }}
-                    >
-                        <DraggableCard
-                            card={card}
-                            idx={index}
-                            onUpdate={(id, field, val) => updateCard(id, field, val)}
-                            onRemove={(id) => deleteCard(id)}
-                            onAIFill={(id, word) => onAIFill(id, word)}
-                            onImageChange={(file, id) => handleImageChange(file, id)}
-                            onImageClear={(path) => onImageClear(path)}
-                            themeHex={themeHex}
-                            saving={saving}
-                            aiLoading={aiStatus?.[card.id]?.loading || false}
-                            aiError={aiStatus?.[card.id]?.error}
-                        />
-                    </Reorder.Item>
-                ))}
-            </Reorder.Group>
+                <SortableContext
+                    items={cards.map((c) => c.id)}
+                    strategy={verticalListSortingStrategy}
+                >
+                    <div className="space-y-6 sm:space-y-8">
+                        {cards.map((card, index) => (
+                            <DraggableCard
+                                key={card.id}
+                                card={card}
+                                idx={index}
+                                onUpdate={(id, field, val) => updateCard(id, field, val)}
+                                onRemove={(id) => deleteCard(id)}
+                                onAIFill={(id, word) => onAIFill(id, word)}
+                                onImageChange={(file, id) => handleImageChange(file, id)}
+                                onImageClear={(path) => onImageClear(path)}
+                                themeHex={themeHex}
+                                saving={saving}
+                                aiLoading={aiStatus?.[card.id]?.loading || false}
+                                aiError={aiStatus?.[card.id]?.error}
+                            />
+                        ))}
+                    </div>
+                </SortableContext>
+            </DndContext>
 
             <motion.div
                 whileHover={{ scale: 1.02 }}
