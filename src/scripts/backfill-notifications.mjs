@@ -18,14 +18,20 @@
  * WHAT IT DOES (per notifications doc, via collectionGroup across all users):
  *   - stamps `status` (derived from existing `status` → `read` → default unread)
  *   - stamps `isDeleted: false` when absent
- *   - stamps `expiresAt` per the retention policy:
+ *   - stamps `expiresAt` per the retention policy, as a Firestore `Timestamp`:
  *       soft-deleted → +30d,  read → +180d,  unread → (none, never expires)
+ *
+ * `expiresAt` MUST be a Firestore `Timestamp`, not a plain number — native
+ * Firestore TTL policies only evaluate `Timestamp`-typed fields and silently
+ * ignore a raw epoch-millis number. This script also RE-PATCHES any doc whose
+ * `expiresAt` is already present but stored as a number (written by the
+ * pre-fix client code) — see the `alreadyTimestamp` check in computePatch().
  *
  * SAFETY
  * ──────
  *   - DRY RUN BY DEFAULT. It only writes when invoked with `--commit`.
- *   - Idempotent: re-running never double-applies (it only fills missing fields
- *     and recomputes expiresAt deterministically).
+ *   - Idempotent: re-running never double-applies (it only fills missing fields,
+ *     converts numeric `expiresAt` to `Timestamp`, and recomputes deterministically).
  *   - Chunked at 400 writes/batch (under the 500-op ceiling).
  *   - Writes a manifest of every touched doc path to stdout for auditing.
  *   - Rehearse on the emulator first:
@@ -36,11 +42,9 @@
  * CREDS: uses firebase-admin. Against prod, set FIREBASE_ADMIN_PROJECT_ID /
  * FIREBASE_ADMIN_CLIENT_EMAIL / FIREBASE_ADMIN_PRIVATE_KEY. Against the
  * emulator, FIRESTORE_EMULATOR_HOST is enough (no real creds needed).
- *
- * @see NOTIFICATION_SYSTEM_IMPLEMENTATION_PLAN.md — Epic 2.2, 13.1, 14.1
  */
 import { cert, getApps, initializeApp } from "firebase-admin/app";
-import { getFirestore } from "firebase-admin/firestore";
+import { getFirestore, Timestamp } from "firebase-admin/firestore";
 
 const COMMIT = process.argv.includes("--commit");
 const WRITE_CHUNK = 400;
@@ -88,14 +92,36 @@ function computePatch(data) {
     if (data.isDeleted === undefined) patch.isDeleted = false;
 
     const created = toMillis(data.createdAt);
-    let expiresAt;
-    if (isDeleted) expiresAt = created + DELETED_TTL_DAYS * DAY_MS;
-    else if (status === "read") expiresAt = created + READ_TTL_DAYS * DAY_MS;
-    else expiresAt = null; // unread — never expires
-    // Only stamp when it changes (idempotent).
-    if (expiresAt !== null && data.expiresAt !== expiresAt) patch.expiresAt = expiresAt;
+    let expiresAtMillis;
+    if (isDeleted) expiresAtMillis = created + DELETED_TTL_DAYS * DAY_MS;
+    else if (status === "read") expiresAtMillis = created + READ_TTL_DAYS * DAY_MS;
+    else expiresAtMillis = null; // unread — never expires
+
+    if (expiresAtMillis !== null) {
+        const alreadyTimestamp = data.expiresAt instanceof Timestamp;
+        const currentMillis = alreadyTimestamp
+            ? data.expiresAt.toMillis()
+            : typeof data.expiresAt === "number"
+              ? data.expiresAt
+              : null;
+        // Patch when: the field is missing, stored as the wrong type (a plain
+        // number instead of a Timestamp — the bug this script exists to fix),
+        // or numerically stale relative to the freshly-derived value.
+        if (!alreadyTimestamp || currentMillis !== expiresAtMillis) {
+            patch.expiresAt = Timestamp.fromMillis(expiresAtMillis);
+        }
+    }
 
     return Object.keys(patch).length > 0 ? patch : null;
+}
+
+/** Renders a patch for the audit manifest, expanding Timestamp fields to ISO strings. */
+function formatPatchForLog(patch) {
+    const readable = {};
+    for (const [key, value] of Object.entries(patch)) {
+        readable[key] = value instanceof Timestamp ? value.toDate().toISOString() : value;
+    }
+    return JSON.stringify(readable);
 }
 
 async function main() {
@@ -114,7 +140,7 @@ async function main() {
 
     console.log(`[backfill] ${patches.length} docs need patching`);
     for (const p of patches) {
-        console.log(`  ${p.path} ← ${JSON.stringify(p.patch)}`);
+        console.log(`  ${p.path} ← ${formatPatchForLog(p.patch)}`);
     }
 
     if (!COMMIT) {

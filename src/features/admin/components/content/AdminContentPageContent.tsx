@@ -94,10 +94,7 @@ const AdminContentPageContent = () => {
                 }
             />
 
-            <ContentOverviewStats
-                totalDecks={data?.total || 0}
-                filteredCount={filteredItems.length}
-            />
+            <ContentOverviewStats totalDecks={data?.total || 0} />
 
             <AdminSearchInput
                 placeholder="Search by deck title, description or owner email..."

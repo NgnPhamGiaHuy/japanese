@@ -4,8 +4,9 @@ import { AdminGuard, AdminSidebar } from "@/features/admin/components";
  * Layout component for the Admin dashboard section.
  *
  * @remarks Wraps admin routes with authentication guards and sidebar navigation.
- * Global admin role context (`AdminProvider`) is mounted once, app-wide, in the
- * parent `(main)/layout.tsx` — this section only needs the route-level guard.
+ * Global admin role context (`AdminProvider`) is mounted once, app-wide, at
+ * the true root — see `lib/providers.tsx` — this section only needs the
+ * route-level guard (`AdminGuard`, which reads that same context).
  * @example
  * <AdminLayout>
  *   <AdminPage />

@@ -19,7 +19,7 @@ const SurvivalGameOverScreen = ({
     userId,
     onBack,
 }: SurvivalGameOverScreenProps) => {
-    const finalScore = game.challengeMode === "drop" ? game.dropScore.current : game.engine.score;
+    const finalScore = game.challengeMode === "drop" ? game.dropScore : game.engine.score;
 
     return (
         <div className="bg-bg fixed inset-0 z-50 flex flex-col overflow-y-auto">

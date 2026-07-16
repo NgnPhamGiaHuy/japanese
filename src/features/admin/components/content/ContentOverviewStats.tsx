@@ -1,40 +1,33 @@
 "use client";
 
-import { Box, Layers, Trash2 } from "lucide-react";
+import { Layers } from "lucide-react";
 
 import { AdminStatCard } from "../shared";
 
 interface ContentOverviewStatsProps {
     totalDecks: number;
-    filteredCount: number;
 }
 
 /**
  * High-level Content Statistics for the Admin View.
  *
- * @remarks Displays key metrics about global deck distribution and utilization.
+ * @remarks Displays key metrics about global deck distribution.
  * Strictly presentational.
+ *
+ * "Ghost Decks" and "Platform Utilization" tiles were removed here: neither
+ * corresponded to a real, defined metric — "Ghost Decks" was `filteredCount - 2`
+ * (unexplained magic-number arithmetic on the current search-filtered count,
+ * not an orphaned-deck concept) and "Platform Utilization" was a hardcoded
+ * "98%". Re-add only once a real metric backs them.
  */
-export const ContentOverviewStats = ({ totalDecks, filteredCount }: ContentOverviewStatsProps) => {
+export const ContentOverviewStats = ({ totalDecks }: ContentOverviewStatsProps) => {
     return (
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+        <div className="grid grid-cols-1">
             <AdminStatCard
                 label="Global Decks"
                 value={totalDecks}
                 icon={Layers}
                 color="text-both"
-            />
-            <AdminStatCard
-                label="Ghost Decks"
-                value={filteredCount - 2 > 0 ? filteredCount - 2 : 0}
-                icon={Trash2}
-                color="text-danger"
-            />
-            <AdminStatCard
-                label="Platform Utilization"
-                value="98%"
-                icon={Box}
-                color="text-hiragana"
             />
         </div>
     );

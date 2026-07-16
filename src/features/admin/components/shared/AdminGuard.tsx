@@ -3,7 +3,7 @@
 import { ShieldAlert } from "lucide-react";
 
 import { EmptyState, LoadingSpinner } from "@/shared/components/ui";
-import { useAdminRoleCheck } from "../../hooks";
+import { useAdminRole } from "../../context/AdminContext";
 
 interface AdminGuardProps {
     children: React.ReactNode;
@@ -12,12 +12,16 @@ interface AdminGuardProps {
 /**
  * Global Admin Route Guard.
  *
- * @remarks Enforces RBAC on the client-side by verifying ID tokens and
- * querying the server for role claims. Prevents unauthorized access to
- * the /admin path before the page content is mounted.
+ * @remarks Enforces RBAC on the client-side by reading the already-resolved
+ * role from AdminContext (mounted once at the app root) rather than
+ * independently re-verifying the ID token and re-querying the server —
+ * this used to be a third redundant admin-role check alongside the two
+ * AdminProvider mounts. Prevents unauthorized access to the /admin path
+ * before the page content is mounted.
  */
 const AdminGuard = ({ children }: AdminGuardProps) => {
-    const { isAdmin, isLoading } = useAdminRoleCheck();
+    const { role, isLoading } = useAdminRole();
+    const isAdmin = role !== null;
 
     if (isLoading) {
         return <LoadingSpinner label="Verifying permissions…" />;

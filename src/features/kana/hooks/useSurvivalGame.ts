@@ -77,6 +77,11 @@ export const useSurvivalGame = ({
     const [lastPoints, setLastPoints] = useState(0);
     const [pointsAnimKey, setPointsAnimKey] = useState(0);
     const [timeAttackPeak, setTimeAttackPeak] = useState(0);
+    // Drop-mode score/streak — declared here (not down by the rest of the
+    // drop-mode state) so startGame, defined below, can reset them without
+    // a forward reference.
+    const [dropScore, setDropScore] = useState(0);
+    const [dropStreak, setDropStreak] = useState(0);
 
     const isGameOverRef = useRef(false);
     const challengeModeRef = useRef(challengeMode);
@@ -144,6 +149,7 @@ export const useSurvivalGame = ({
         userId,
         displayName: userName || localName,
         onCorrectCombo,
+        session: { startSession, syncScore, endSession },
     });
 
     // ── Time-attack countdown ─────────────────────────────────────────────────
@@ -188,13 +194,6 @@ export const useSurvivalGame = ({
         }
     }, [timeLeft, phase, challengeMode, engine.score, userId, alphabet]);
 
-    // ── Live score sync ───────────────────────────────────────────────────────
-    useEffect(() => {
-        if (phase === "playing") {
-            syncScoreRef.current(engine.score);
-        }
-    }, [engine.score, phase]);
-
     // ── Game start ───────────────────────────────────────────────────────────
     const startGame = useCallback(() => {
         engine.resetEngine();
@@ -202,8 +201,8 @@ export const useSurvivalGame = ({
         setErrorFlash(false);
         setLastPoints(0);
         isGameOverRef.current = false;
-        dropScore.current = 0;
-        dropStreak.current = 0;
+        setDropScore(0);
+        setDropStreak(0);
 
         if (challengeMode === "time") {
             const initial = timeMinutes * 60;
@@ -267,8 +266,11 @@ export const useSurvivalGame = ({
     });
     const [dropTick, setDropTick] = useState(0);
     const rafRef = useRef<number>(0);
-    const dropScore = useRef(0);
-    const dropStreak = useRef(0);
+    // dropScore/dropStreak are declared earlier, alongside the other top-level
+    // state — SurvivalDropScreen reads them directly during render
+    // (currentScore/streak props), so they're state, not refs: a ref mutation
+    // wouldn't reliably show up there, since ref writes don't trigger a
+    // re-render on their own.
 
     /**
      * RAF loop for Drop Mode.
@@ -280,6 +282,11 @@ export const useSurvivalGame = ({
      * - More complex character groups unlock after 30/60/90 seconds
      *
      * Words that fall off screen cost a life. Lives reaching 0 ends the game.
+     *
+     * Does one frame's work and returns — the requestAnimationFrame recursion
+     * that drives the loop lives in the effect below (via a latest-callback
+     * ref), not here, so this can freely depend on state like dropScore
+     * without that dependency change restarting the loop.
      */
     const updateDropGame = useCallback(
         (time: number) => {
@@ -344,12 +351,12 @@ export const useSurvivalGame = ({
             }
 
             if (lost > 0) {
-                dropStreak.current = 0;
+                setDropStreak(0);
                 setLives((l) => {
                     const n = l - lost;
                     if (n <= 0 && !isGameOverRef.current) {
                         isGameOverRef.current = true;
-                        const finalScore = dropScore.current;
+                        const finalScore = dropScore;
                         onSaveScoreRef.current(
                             finalScore,
                             userNameRef.current || localNameRef.current,
@@ -373,13 +380,23 @@ export const useSurvivalGame = ({
             }
 
             setDropTick((t) => t + 1);
-            if (!isGameOverRef.current) rafRef.current = requestAnimationFrame(updateDropGame);
         },
-        [alphabet, dataset, userId],
+        [alphabet, dataset, userId, dropScore, setDropStreak],
     );
+
+    // Latest-callback ref: the RAF loop below always invokes the freshest
+    // updateDropGame without needing it as an effect dependency — otherwise
+    // every dropScore change (i.e. every completed word) would tear down and
+    // restart the whole loop instead of just continuing it.
+    const updateDropGameRef = useRef(updateDropGame);
+    useLayoutEffect(() => {
+        updateDropGameRef.current = updateDropGame;
+    });
 
     useEffect(() => {
         if (phase === "playing" && challengeMode === "drop") {
+            // dropScore/dropStreak are already reset by startGame, the only
+            // path that sets phase to "playing" — no need to reset again here.
             dropState.current = {
                 words: [],
                 activeId: null,
@@ -387,12 +404,15 @@ export const useSurvivalGame = ({
                 startTime: 0,
                 lastSpawn: 0,
             };
-            dropScore.current = 0;
-            dropStreak.current = 0;
-            rafRef.current = requestAnimationFrame(updateDropGame);
+
+            const loop = (time: number) => {
+                updateDropGameRef.current(time);
+                if (!isGameOverRef.current) rafRef.current = requestAnimationFrame(loop);
+            };
+            rafRef.current = requestAnimationFrame(loop);
         }
         return () => cancelAnimationFrame(rafRef.current);
-    }, [phase, challengeMode, updateDropGame]);
+    }, [phase, challengeMode]);
 
     /**
      * Sounds a completed word: cue always, pronunciation only when there is room for it.
@@ -443,10 +463,11 @@ export const useSurvivalGame = ({
                         if (still.some((o) => o === newTyped)) {
                             state.words = state.words.filter((w) => w.id !== target.id);
                             state.activeId = null;
-                            dropStreak.current += 1;
+                            const newStreak = dropStreak + 1;
+                            const pts = comboMultiplier(newStreak);
                             announceCompletedWord(target.char);
-                            const pts = comboMultiplier(dropStreak.current);
-                            dropScore.current += pts;
+                            setDropStreak(newStreak);
+                            setDropScore((s) => s + pts);
                             setLastPoints(pts);
                             setPointsAnimKey(Date.now());
                             engine.setStatus("correct");
@@ -470,10 +491,11 @@ export const useSurvivalGame = ({
                     if (target.validOptions.some((o) => o === inputChar)) {
                         state.words = state.words.filter((w) => w.id !== target.id);
                         state.activeId = null;
-                        dropStreak.current += 1;
+                        const newStreak = dropStreak + 1;
+                        const pts = comboMultiplier(newStreak);
                         announceCompletedWord(target.char);
-                        const pts = comboMultiplier(dropStreak.current);
-                        dropScore.current += pts;
+                        setDropStreak(newStreak);
+                        setDropScore((s) => s + pts);
                         setLastPoints(pts);
                         setPointsAnimKey(Date.now());
                     }
@@ -481,7 +503,7 @@ export const useSurvivalGame = ({
             }
 
             if (!hit) {
-                dropStreak.current = 0;
+                setDropStreak(0);
                 // A keypress can only be "wrong" if there was something to type. Without this
                 // guard, tapping keys before the first character spawns scolds the player.
                 if (state.words.length > 0) {
@@ -493,15 +515,18 @@ export const useSurvivalGame = ({
             }
             setDropTick((t) => t + 1);
         },
-        [announceCompletedWord, engine],
+        [announceCompletedWord, engine, dropStreak, setDropStreak, setDropScore],
     );
 
     // ── Drop score sync ───────────────────────────────────────────────────────
+    // Depends on dropScore directly now that it's state, not dropTick (which
+    // ticked on every animation frame — far more often than the score, which
+    // only actually changes once per completed word).
     useEffect(() => {
         if (phase === "playing" && challengeMode === "drop") {
-            syncScoreRef.current(dropScore.current);
+            syncScoreRef.current(dropScore);
         }
-    }, [dropTick, phase, challengeMode]);
+    }, [dropScore, phase, challengeMode]);
 
     return {
         phase,

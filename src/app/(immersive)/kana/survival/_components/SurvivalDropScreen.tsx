@@ -28,7 +28,7 @@ const SurvivalDropScreen = ({ game, userId, inputRef }: SurvivalDropScreenProps)
                 gameMode={game.activeModeKey}
                 currentUserId={userId}
                 currentUserName={game.localName}
-                currentScore={game.dropScore.current}
+                currentScore={game.dropScore}
             />
             <ScreenHeaderRow className="z-10 shrink-0" symmetricSidebars>
                 <ScreenHeaderBackButton
@@ -39,8 +39,8 @@ const SurvivalDropScreen = ({ game, userId, inputRef }: SurvivalDropScreenProps)
                 />
                 <LivesDisplay lives={game.lives} />
                 <GameStreakScoreStack
-                    streak={game.dropStreak.current}
-                    score={game.dropScore.current}
+                    streak={game.dropStreak}
+                    score={game.dropScore}
                     lastPoints={game.lastPoints}
                     pointsAnimKey={game.pointsAnimKey}
                     scoreClassName="text-2xl font-black tabular-nums leading-none tracking-tight text-[#ffb347] md:text-4xl lg:text-5xl"

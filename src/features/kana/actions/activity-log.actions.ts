@@ -56,29 +56,3 @@ export async function logKanaSurvivalCompleted(
         metadata: { logType: "USER_ACTION", alphabet, challengeMode, ...stats },
     });
 }
-
-// ─── Kana Practice ─────────────────────────────────────────────────────────────
-
-/**
- * Logs a completed kana practice session.
- *
- * @param idToken  - Firebase ID token of the learner.
- * @param userId   - UID of the learner.
- * @param alphabet - Active alphabet: "hiragana" | "katakana" | "both".
- * @param stats    - Final session stats.
- */
-export async function logKanaPracticeCompleted(
-    idToken: string,
-    userId: string,
-    alphabet: string,
-    stats: { cardsReviewed: number; mode: string },
-): Promise<void> {
-    await logUserActionServer(idToken, {
-        action: ActivityAction.KANA_PRACTICE_COMPLETED,
-        entityType: "study",
-        entityId: `kana_practice_${alphabet}`,
-        level: "info",
-        userId,
-        metadata: { logType: "USER_ACTION", alphabet, ...stats },
-    });
-}

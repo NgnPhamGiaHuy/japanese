@@ -75,12 +75,7 @@ const AdminOverviewPage = () => {
             />
 
             <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
-                <AdminStatCard
-                    label="Total Users"
-                    value={stats.totalUsers}
-                    icon={Users}
-                    trend={{ value: 12, isPositive: true }}
-                />
+                <AdminStatCard label="Total Users" value={stats.totalUsers} icon={Users} />
                 <AdminStatCard
                     label="Active Today"
                     value={stats.activeUsersToday}
