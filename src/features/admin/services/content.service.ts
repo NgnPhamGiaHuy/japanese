@@ -2,6 +2,7 @@ import "server-only";
 
 import { adminAuth, adminDb } from "./admin.service";
 
+import type { FlashCard } from "@/features/flashcard/types";
 import type { AdminDeck, PaginatedContent } from "../types";
 
 export async function getGlobalContentPaginated(limit = 50): Promise<PaginatedContent> {
@@ -62,7 +63,7 @@ export async function getGlobalContentPaginated(limit = 50): Promise<PaginatedCo
     };
 }
 
-export async function getDeckCards(path: string): Promise<any[]> {
+export async function getDeckCards(path: string): Promise<(FlashCard & { path: string })[]> {
     if (!path) throw new Error("Path is required");
 
     // Path format: artifacts/{appID}/users/{userId}/lessons/{lessonId}
@@ -84,11 +85,14 @@ export async function getDeckCards(path: string): Promise<any[]> {
 
     const cardsSnap = await cardsRef.where("lessonId", "==", lessonId).get();
 
-    return cardsSnap.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-        path: doc.ref.path,
-    }));
+    return cardsSnap.docs.map(
+        (doc) =>
+            ({
+                id: doc.id,
+                ...doc.data(),
+                path: doc.ref.path,
+            }) as FlashCard & { path: string },
+    );
 }
 
 export async function deleteGlobalFlashcard(

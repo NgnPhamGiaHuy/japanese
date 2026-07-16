@@ -4,8 +4,9 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 
+import { Dialog } from "@base-ui/react/dialog";
 import { clsx } from "clsx";
-import { AnimatePresence, motion } from "framer-motion";
+import { motion } from "framer-motion";
 import {
     BarChart3,
     Database,
@@ -18,7 +19,6 @@ import {
 } from "lucide-react";
 
 import { Button } from "@/shared/components/ui";
-import { useDialogA11y } from "@/shared/hooks";
 
 const navItems = [
     { label: "Dashboard", href: "/admin", icon: LayoutDashboard },
@@ -100,7 +100,6 @@ const Footer = () => (
  */
 const AdminSidebar = () => {
     const [drawerOpen, setDrawerOpen] = useState(false);
-    const drawerRef = useDialogA11y<HTMLDivElement>(drawerOpen, () => setDrawerOpen(false));
 
     return (
         <>
@@ -128,50 +127,37 @@ const AdminSidebar = () => {
             </header>
 
             {/* ── Mobile drawer ── */}
-            <AnimatePresence>
-                {drawerOpen && (
-                    <>
-                        {/* Backdrop */}
-                        <motion.div
-                            key="backdrop"
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            exit={{ opacity: 0 }}
-                            transition={{ duration: 0.2 }}
-                            className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm lg:hidden"
-                            onClick={() => setDrawerOpen(false)}
-                        />
-                        {/* Drawer panel */}
-                        <motion.div
-                            ref={drawerRef}
-                            role="dialog"
-                            aria-modal="true"
-                            aria-label="Navigation"
-                            key="drawer"
-                            initial={{ x: "-100%" }}
-                            animate={{ x: 0 }}
-                            exit={{ x: "-100%" }}
-                            transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                            className="fixed top-0 left-0 z-50 flex h-full w-72 flex-col border-r-2 border-gray-100 bg-white lg:hidden"
-                        >
-                            <div className="flex h-14 items-center justify-between px-4">
-                                <Logo />
-                                <Button
-                                    variant="ghost"
-                                    size="icon-sm"
-                                    onClick={() => setDrawerOpen(false)}
-                                    aria-label="Close navigation"
-                                    className="rounded-xl"
-                                    icon={X}
-                                    iconSize={20}
-                                />
-                            </div>
-                            <NavLinks onNavigate={() => setDrawerOpen(false)} />
-                            <Footer />
-                        </motion.div>
-                    </>
-                )}
-            </AnimatePresence>
+            <Dialog.Root open={drawerOpen} onOpenChange={setDrawerOpen}>
+                <Dialog.Portal>
+                    {/* Backdrop */}
+                    <Dialog.Backdrop className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm transition-opacity duration-200 data-[ending-style]:opacity-0 data-[starting-style]:opacity-0 lg:hidden" />
+
+                    {/* Drawer panel */}
+                    <Dialog.Popup
+                        aria-modal="true"
+                        aria-label="Navigation"
+                        className="fixed top-0 left-0 z-50 flex h-full w-72 flex-col border-r-2 border-gray-100 bg-white transition-transform duration-200 ease-out data-[ending-style]:-translate-x-full data-[starting-style]:-translate-x-full lg:hidden"
+                    >
+                        <div className="flex h-14 items-center justify-between px-4">
+                            <Logo />
+                            <Dialog.Close
+                                render={
+                                    <Button
+                                        variant="ghost"
+                                        size="icon-sm"
+                                        aria-label="Close navigation"
+                                        className="rounded-xl"
+                                        icon={X}
+                                        iconSize={20}
+                                    />
+                                }
+                            />
+                        </div>
+                        <NavLinks onNavigate={() => setDrawerOpen(false)} />
+                        <Footer />
+                    </Dialog.Popup>
+                </Dialog.Portal>
+            </Dialog.Root>
         </>
     );
 };

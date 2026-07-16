@@ -1,5 +1,7 @@
 "use client";
 
+import { forwardRef } from "react";
+
 import { motion } from "framer-motion";
 import { Loader2, LucideIcon } from "lucide-react";
 
@@ -147,32 +149,35 @@ interface ButtonProps {
  *   Start Lesson
  * </Button>
  */
-const Button = ({
-    children,
-    onClick,
-    onMouseEnter,
-    onMouseLeave,
-    variant = "primary",
-    size = "md",
-    color = "blue",
-    alphabet,
-    className = "",
-    icon: Icon,
-    iconSize = 20,
-    iconClassName = "",
-    disabled,
-    loading,
-    active,
-    type = "button",
-    id,
-    title,
-    "aria-label": ariaLabel,
-    role,
-    "aria-checked": ariaChecked,
-    "aria-pressed": ariaPressed,
-    style,
-    badge,
-}: ButtonProps) => {
+const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button(
+    {
+        children,
+        onClick,
+        onMouseEnter,
+        onMouseLeave,
+        variant = "primary",
+        size = "md",
+        color = "blue",
+        alphabet,
+        className = "",
+        icon: Icon,
+        iconSize = 20,
+        iconClassName = "",
+        disabled,
+        loading,
+        active,
+        type = "button",
+        id,
+        title,
+        "aria-label": ariaLabel,
+        role,
+        "aria-checked": ariaChecked,
+        "aria-pressed": ariaPressed,
+        style,
+        badge,
+    }: ButtonProps,
+    ref,
+) {
     const resolvedColor = alphabet ? ALPHABET_MAP[alphabet] : color;
     const isStandardTheme = typeof resolvedColor === "string" && THEMES[resolvedColor as string];
     const t = isStandardTheme ? THEMES[resolvedColor as string] : THEMES.blue;
@@ -209,6 +214,7 @@ const Button = ({
 
     return (
         <motion.button
+            ref={ref}
             whileHover={disabled || loading ? {} : { scale: variant === "ghost" ? 1.05 : 1.02 }}
             whileTap={disabled || loading ? {} : { scale: 0.95 }}
             transition={{ type: "spring", stiffness: 400, damping: 17 }}
@@ -219,7 +225,7 @@ const Button = ({
             aria-checked={ariaChecked}
             aria-pressed={ariaPressed}
             type={type}
-            onClick={(e: any) => !loading && onClick?.(e)}
+            onClick={(e: React.MouseEvent<HTMLButtonElement>) => !loading && onClick?.(e)}
             onMouseEnter={onMouseEnter}
             onMouseLeave={onMouseLeave}
             disabled={disabled || loading}
@@ -235,6 +241,6 @@ const Button = ({
             {badge && <div className="ml-2">{badge}</div>}
         </motion.button>
     );
-};
+});
 
 export default Button;

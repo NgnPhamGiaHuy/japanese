@@ -4,8 +4,10 @@ import { Image as ImageIcon, MessageSquare } from "lucide-react";
 
 import { Badge, Card } from "@/shared/components/ui";
 
+import type { FlashCard } from "@/features/flashcard/types";
+
 interface DeckCardItemProps {
-    card: any;
+    card: FlashCard & { path: string };
 }
 
 /**
@@ -39,7 +41,8 @@ export const DeckCardItem = ({ card }: DeckCardItemProps) => {
 
             {card.example && (
                 <div className="mt-3 flex gap-2 rounded-lg border border-gray-100 bg-gray-50/80 p-3 text-xs font-bold text-[#4b4b4b] italic">
-                    <MessageSquare size={14} className="shrink-0 text-gray-400" />"{card.example}"
+                    <MessageSquare size={14} className="shrink-0 text-gray-400" />
+                    &ldquo;{card.example}&rdquo;
                 </div>
             )}
         </Card>
