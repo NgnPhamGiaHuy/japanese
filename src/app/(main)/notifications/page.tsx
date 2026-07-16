@@ -20,12 +20,22 @@ import { auth } from "@/lib/firebase";
 import { ScreenHeader } from "@/shared/components/layout";
 import { Button } from "@/shared/components/ui";
 import { useAlert } from "@/shared/providers";
-import { NotificationGroupSection } from "./_components/NotificationListItem";
 import { NotificationsEmptyState, SkeletonRows } from "./_components/NotificationsPlaceholders";
+import NotificationsVirtualList from "./_components/NotificationsVirtualList";
 
 export default function NotificationsPage() {
     const { user } = useAppStore();
-    const { notifications, groups, loading, unreadCount, error, retry } = useNotifications();
+    const {
+        notifications,
+        groups,
+        loading,
+        loadingMore,
+        hasMore,
+        loadMore,
+        unreadCount,
+        error,
+        retry,
+    } = useNotifications();
     const { showAlert } = useAlert();
     const [filter, setFilter] = useState<"all" | "unread">("all");
     const [isMarkingAll, startMarkAll] = useTransition();
@@ -163,18 +173,34 @@ export default function NotificationsPage() {
                     </div>
                 ) : loading ? (
                     <SkeletonRows />
-                ) : totalDisplayed === 0 ? (
-                    <NotificationsEmptyState filter={filter} />
                 ) : (
                     <div className="space-y-4">
-                        {displayedGroups.map((group) => (
-                            <NotificationGroupSection
-                                key={group.label}
-                                group={group}
+                        {totalDisplayed === 0 ? (
+                            <NotificationsEmptyState filter={filter} />
+                        ) : (
+                            <NotificationsVirtualList
+                                groups={displayedGroups}
                                 userId={user!.uid}
                                 onRefresh={noop}
                             />
-                        ))}
+                        )}
+                        {/* Independent of totalDisplayed/filter: the "unread"
+                            tab filters the already-loaded window client-side,
+                            so it can show zero matches here while older,
+                            not-yet-loaded notifications (possibly unread)
+                            still exist beyond it. */}
+                        {hasMore && (
+                            <div className="flex justify-center pb-4">
+                                <Button
+                                    variant="secondary"
+                                    onClick={loadMore}
+                                    loading={loadingMore}
+                                    className="!rounded-xl !px-6 !py-2.5 !text-sm !font-black"
+                                >
+                                    Load more
+                                </Button>
+                            </div>
+                        )}
                     </div>
                 )}
             </div>

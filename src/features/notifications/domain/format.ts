@@ -1,11 +1,10 @@
 /**
  * @file domain/format.ts
- * Pure display helpers for the inbox UI (Epic 9): live relative timestamps and
+ * Pure display helpers for the inbox UI: live relative timestamps and
  * collapsed-notification (avatar-stack) presentation. No React, no Firebase —
  * unit-testable.
- *
- * @see NOTIFICATION_SYSTEM_IMPLEMENTATION_PLAN.md — Epic 9
  */
+import type { AppNotification, NotificationGroup } from "../types";
 
 /**
  * Relative timestamp, computed against an injected `now` so it can tick live
@@ -53,4 +52,39 @@ export function overflowCount(
 /** True when a notification represents more than one collapsed event. */
 export function isCollapsed(count: number | undefined): boolean {
     return (count ?? 1) > 1;
+}
+
+/**
+ * One row of a virtualized, time-grouped notification list: each
+ * group's sticky-label header and its notification rows are flattened into a
+ * single sequence so `@tanstack/react-virtual` can window across group
+ * boundaries — group size varies with how far a user has paginated, so
+ * windowing per-group (rather than the flat sequence) wouldn't bound the DOM
+ * count for a single large group.
+ */
+export type FlatNotificationItem =
+    | { kind: "header"; key: string; label: NotificationGroup["label"] }
+    | {
+          kind: "row";
+          key: string;
+          notification: AppNotification;
+          isFirstInGroup: boolean;
+          isLastInGroup: boolean;
+      };
+
+export function flattenNotificationGroups(groups: NotificationGroup[]): FlatNotificationItem[] {
+    const flat: FlatNotificationItem[] = [];
+    for (const group of groups) {
+        flat.push({ kind: "header", key: `header:${group.label}`, label: group.label });
+        group.items.forEach((notification, i) => {
+            flat.push({
+                kind: "row",
+                key: notification.id,
+                notification,
+                isFirstInGroup: i === 0,
+                isLastInGroup: i === group.items.length - 1,
+            });
+        });
+    }
+    return flat;
 }

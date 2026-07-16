@@ -19,6 +19,7 @@ import {
     orderBy,
     query,
     serverTimestamp,
+    Timestamp,
     updateDoc,
     where,
     writeBatch,
@@ -44,6 +45,10 @@ const DELIVERY_CHUNK = 200;
 const DAY_MS = 86_400_000;
 const READ_TTL_MS = 180 * DAY_MS;
 const DELETED_TTL_MS = 30 * DAY_MS;
+
+function expiresAtFromNow(ttlMs: number, nowMs: number = Date.now()): Timestamp {
+    return Timestamp.fromMillis(nowMs + ttlMs);
+}
 
 // ─── Path helpers ─────────────────────────────────────────────────────────────
 
@@ -107,7 +112,7 @@ export async function createPendingNotification(
  * Called on login — moves all pending notifications for this email into the
  * user's notification center and deletes the pending entries.
  *
- * Idempotency & concurrency (Task 2.4): the destination doc REUSES the pending
+ * Idempotency & concurrency: the destination doc REUSES the pending
  * doc's ID. This makes concurrent deliveries (the same email logging in on two
  * devices, or `onIdTokenChanged` firing on every ~hourly token refresh)
  * converge on a `set` overwrite instead of producing duplicate inbox docs.
@@ -201,16 +206,24 @@ export async function notifyInvite({
  *    a simple createdAt-only query and filter isDeleted client-side.
  * 3. If the FALLBACK errors too, surface it via `onError` and re-subscribe with
  *    capped exponential backoff (1s → 2s → … → 60s), resetting on any success.
- *    (Task 2.8 — previously a dead fallback stream stayed dead until the uid
+ *    (previously a dead fallback stream stayed dead until the uid
  *    changed, and an errored stream was indistinguishable from an empty inbox.)
  *
  * No listener leaks: the returned unsubscribe stops the active listener AND any
  * pending retry timer.
+ *
+ * Pagination: `limitCount` grows the live window itself (50 → 100
+ * → 150 …) rather than layering a separate one-shot "older page" cache on top.
+ * A static tail cache would go stale in a subtle way — as new docs push the
+ * live window's oldest item out, that item falls into a gap that's neither
+ * live-covered nor part of any already-fetched page. Re-querying with a bigger
+ * limit keeps everything under one always-live source of truth instead.
  */
 export function subscribeNotifications(
     userId: string,
     onUpdate: (notifications: AppNotification[]) => void,
     onError?: (err: Error) => void,
+    limitCount: number = 50,
 ): Unsubscribe {
     let active = true;
     let currentUnsub: Unsubscribe = () => {};
@@ -234,7 +247,11 @@ export function subscribeNotifications(
     };
 
     const openFallback = () => {
-        const fallbackQ = query(notificationsCol(userId), orderBy("createdAt", "desc"), limit(50));
+        const fallbackQ = query(
+            notificationsCol(userId),
+            orderBy("createdAt", "desc"),
+            limit(limitCount),
+        );
         currentUnsub = onSnapshot(
             fallbackQ,
             (snap) => {
@@ -255,7 +272,7 @@ export function subscribeNotifications(
             where("isDeleted", "!=", true),
             orderBy("isDeleted"),
             orderBy("createdAt", "desc"),
-            limit(50),
+            limit(limitCount),
         );
         currentUnsub = onSnapshot(
             primaryQ,
@@ -292,7 +309,7 @@ export async function markNotificationRead(userId: string, notificationId: strin
         status: "read",
         read: true, // keep legacy field in sync
         readAt: now,
-        expiresAt: now + READ_TTL_MS,
+        expiresAt: expiresAtFromNow(READ_TTL_MS, now),
     });
 }
 
@@ -332,6 +349,7 @@ export async function markAllNotificationsRead(userId: string): Promise<void> {
     // Chunk at 400 updates/batch — a user with >500 unread used to throw here
     // (single unbounded batch exceeded the 500-op ceiling).
     const now = Date.now();
+    const expiresAt = expiresAtFromNow(READ_TTL_MS, now);
     for (const group of chunk(allDocs, UPDATE_CHUNK)) {
         const batch = writeBatch(db);
         group.forEach((d) =>
@@ -339,7 +357,7 @@ export async function markAllNotificationsRead(userId: string): Promise<void> {
                 status: "read",
                 read: true,
                 readAt: now,
-                expiresAt: now + READ_TTL_MS,
+                expiresAt,
             }),
         );
         await batch.commit();
@@ -355,7 +373,7 @@ export async function markAllNotificationsRead(userId: string): Promise<void> {
 export async function deleteNotification(userId: string, notificationId: string): Promise<void> {
     await updateDoc(notificationDoc(userId, notificationId), {
         isDeleted: true,
-        expiresAt: Date.now() + DELETED_TTL_MS,
+        expiresAt: expiresAtFromNow(DELETED_TTL_MS),
     });
 }
 
@@ -365,7 +383,7 @@ export async function deleteNotification(userId: string, notificationId: string)
  * (via restoreNotifications).
  *
  * The previous version capped at a single 500-doc batch and silently stranded
- * anything beyond 500 (Task 2.6). Now it pages through the collection so
+ * anything beyond 500. Now it pages through the collection so
  * "Clear all" actually clears all.
  */
 export async function deleteAllNotifications(userId: string): Promise<string[]> {
@@ -378,7 +396,7 @@ export async function deleteAllNotifications(userId: string): Promise<string[]> 
         );
         if (snap.empty) break;
 
-        const expiresAt = Date.now() + DELETED_TTL_MS;
+        const expiresAt = expiresAtFromNow(DELETED_TTL_MS);
         const batch = writeBatch(db);
         snap.docs.forEach((d) => {
             batch.update(d.ref, { isDeleted: true, expiresAt });

@@ -23,12 +23,10 @@ import {
 } from "@/features/notifications/services";
 import { isUnread } from "@/features/notifications/types";
 import { auth } from "@/lib/firebase";
-import { SCREEN_HEADER_HEIGHT_CLASS } from "@/shared/components/layout";
 import { Button } from "@/shared/components/ui";
-import { useNow } from "@/shared/hooks";
 import { useAlert } from "@/shared/providers";
 
-import type { AppNotification, NotificationGroup } from "@/features/notifications/types";
+import type { AppNotification } from "@/features/notifications/types";
 
 function resolveLink(n: AppNotification): string {
     return n.data?.shareLink ?? n.link ?? "/flashcard";
@@ -132,7 +130,7 @@ function InviteActions({
                     notification.type,
                     notification.title,
                 );
-                // Task 2.9: actually revoke the pending invite so it can't
+                // Actually revoke the pending invite so it can't
                 // silently re-convert to access on the next share-link visit.
                 if (ownerId && lessonId) void declineInviteAction(token, ownerId, lessonId);
             }
@@ -328,42 +326,6 @@ export function NotificationRow({
                     <InviteActions notification={notification} userId={userId} onDone={onRefresh} />
                 </div>
             )}
-        </div>
-    );
-}
-
-/** Sticky-labeled group of notification rows (e.g. "Today", "This week"). */
-export function NotificationGroupSection({
-    group,
-    userId,
-    onRefresh,
-}: {
-    group: NotificationGroup;
-    userId: string;
-    onRefresh: () => void;
-}) {
-    // One ticker per group keeps relative timestamps live without a per-row timer.
-    const now = useNow(30_000);
-    return (
-        <div>
-            <div className={`sticky ${SCREEN_HEADER_HEIGHT_CLASS} bg-bg z-10 px-4 py-2`}>
-                <span className="text-muted text-xs font-black tracking-widest uppercase">
-                    {group.label}
-                </span>
-            </div>
-            <div className="overflow-hidden rounded-2xl border-2 border-gray-200 bg-white shadow-sm">
-                {group.items.map((n, i) => (
-                    <div key={n.id}>
-                        <NotificationRow
-                            notification={n}
-                            userId={userId}
-                            now={now}
-                            onRefresh={onRefresh}
-                        />
-                        {i < group.items.length - 1 && <div className="mx-4 h-px bg-gray-100" />}
-                    </div>
-                ))}
-            </div>
         </div>
     );
 }
