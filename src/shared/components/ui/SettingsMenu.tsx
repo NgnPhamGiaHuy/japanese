@@ -155,7 +155,7 @@ const SettingsMenu = ({
 
                         {dangerAction && (
                             <>
-                                <div className="mt-2 mb-1 border-b border-gray-100 px-3 py-2 text-xs font-black tracking-wider text-red-500 uppercase">
+                                <div className="text-danger mt-2 mb-1 border-b border-gray-100 px-3 py-2 text-xs font-black tracking-wider uppercase">
                                     Danger Zone
                                 </div>
                                 {!dangerAction.showConfirm ? (
@@ -169,7 +169,7 @@ const SettingsMenu = ({
                                         render={
                                             <Button
                                                 variant="ghost"
-                                                className="flex w-full items-center gap-2 rounded-xl px-3 py-3 text-left text-sm font-bold text-red-500 shadow-none transition-colors hover:bg-red-50 hover:shadow-none active:translate-y-0 data-[highlighted]:bg-red-50"
+                                                className="text-danger hover:bg-danger-bg data-[highlighted]:bg-danger-bg flex w-full items-center gap-2 rounded-xl px-3 py-3 text-left text-sm font-bold shadow-none transition-colors hover:shadow-none active:translate-y-0"
                                                 icon={Trash2}
                                                 iconSize={16}
                                             />
@@ -178,8 +178,8 @@ const SettingsMenu = ({
                                         {dangerAction.label}
                                     </Menu.Item>
                                 ) : (
-                                    <div className="animate-in zoom-in mt-1 flex flex-col gap-2 rounded-xl border border-red-100 bg-red-50 px-3 py-2 duration-200">
-                                        <span className="text-xs font-bold text-red-600">
+                                    <div className="animate-in zoom-in border-danger/20 bg-danger-bg mt-1 flex flex-col gap-2 rounded-xl border px-3 py-2 duration-200">
+                                        <span className="text-danger text-xs font-bold">
                                             Are you sure? This cannot be undone.
                                         </span>
                                         <div className="flex gap-2">

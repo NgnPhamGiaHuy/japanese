@@ -27,6 +27,7 @@ import {
 
 import { Card, Input, Select } from "@/shared/components/ui";
 import { AdminDateRangeFilter, AdminSearchInput } from "../shared";
+import { LOG_LEVEL_META } from "../../domain/logMeta";
 import { LOG_LEVEL_OPTIONS, LOG_TYPE_OPTIONS } from "../../utils/filters";
 
 import type { SelectOption } from "@/shared/components/ui";
@@ -58,14 +59,7 @@ const LogsFilters = ({ filters, onChange, activeFilterCount = 0 }: LogsFiltersPr
                       : l === "security"
                         ? Shield
                         : Info,
-            color:
-                l === "error"
-                    ? "#ea2b2b"
-                    : l === "warn"
-                      ? "#ff9600"
-                      : l === "security"
-                        ? "#ce82ff"
-                        : "#1cb0f6",
+            color: LOG_LEVEL_META[l].chartColor,
         })),
     ];
 

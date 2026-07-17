@@ -21,6 +21,7 @@ import LogLevelBadge from "./LogLevelBadge";
 import LogMetadataViewer from "./LogMetadataViewer";
 import LogSourceBadge from "./LogSourceBadge";
 import LogTypeBadge from "./LogTypeBadge";
+import { LOG_LEVEL_META } from "../../domain/logMeta";
 import { formatLogTimestamp } from "../../utils/log.utils";
 
 import type { AdminLog } from "../../types";
@@ -50,14 +51,7 @@ const LogRow = ({ log }: LogRowProps) => {
         !!log.entityId ||
         !!log.entityType;
 
-    const borderByLevel =
-        level === "error"
-            ? "border-l-danger"
-            : level === "warn"
-              ? "border-l-amber-400"
-              : level === "security"
-                ? "border-l-[#ce82ff]"
-                : "border-l-[#1cb0f6]";
+    const borderByLevel = LOG_LEVEL_META[level].border;
 
     return (
         <article

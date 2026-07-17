@@ -6,6 +6,7 @@ import { format } from "date-fns";
 import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 
 import { AdminChartContainer } from "../shared";
+import { CHART_TOOLTIP_STYLE } from "../../domain/chartTheme";
 import { LOG_TYPE_META } from "../../domain/logMeta";
 
 import type { LogType, LogVolumePoint } from "../../types";
@@ -14,13 +15,6 @@ interface LogVolumeChartProps {
     data: LogVolumePoint[];
     onClick?: (type: string) => void;
 }
-
-const TOOLTIP_STYLE = {
-    borderRadius: "24px",
-    border: "none",
-    boxShadow: "0 20px 40px -10px rgba(0,0,0,0.1)",
-    padding: "12px 16px",
-};
 
 /**
  * Log Volume Over Time — stacked bar chart.
@@ -74,7 +68,7 @@ const LogVolumeChart = ({ data, onClick }: LogVolumeChartProps) => {
                         tick={{ fontWeight: "bold", fill: "#afafaf" }}
                     />
                     <Tooltip
-                        contentStyle={TOOLTIP_STYLE}
+                        contentStyle={CHART_TOOLTIP_STYLE}
                         labelStyle={{ fontWeight: 900, fontSize: 11, marginBottom: 6 }}
                         labelFormatter={(v) => {
                             try {

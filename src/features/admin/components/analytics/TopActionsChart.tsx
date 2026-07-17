@@ -15,6 +15,7 @@ import {
 } from "recharts";
 
 import { AdminChartContainer } from "../shared";
+import { CHART_PALETTE, CHART_TOOLTIP_STYLE } from "../../domain/chartTheme";
 
 import type { TopActionPoint } from "../../types";
 
@@ -23,12 +24,14 @@ interface TopActionsChartProps {
     onClick?: (action: string) => void;
 }
 
+/** Indices into CHART_PALETTE: 0 blue, 1 green, 2 purple, 3 orange. */
 function colorForAction(action: string): string {
-    if (action.startsWith("user.login") || action.startsWith("user.logout")) return "#1cb0f6";
-    if (action.startsWith("admin.")) return "#ce82ff";
+    if (action.startsWith("user.login") || action.startsWith("user.logout"))
+        return CHART_PALETTE[0];
+    if (action.startsWith("admin.")) return CHART_PALETTE[2];
     if (action.startsWith("deck.") || action.startsWith("card.") || action.startsWith("study."))
-        return "#ff9600";
-    if (action.startsWith("share.")) return "#58cc02";
+        return CHART_PALETTE[3];
+    if (action.startsWith("share.")) return CHART_PALETTE[1];
     return "#afafaf";
 }
 
@@ -74,12 +77,7 @@ const TopActionsChart = ({ data, onClick }: TopActionsChartProps) => {
                     />
                     <Tooltip
                         cursor={{ fill: "#f8fafc", radius: 12 }}
-                        contentStyle={{
-                            borderRadius: "24px",
-                            border: "none",
-                            boxShadow: "0 20px 40px -10px rgba(0,0,0,0.1)",
-                            padding: "12px 16px",
-                        }}
+                        contentStyle={CHART_TOOLTIP_STYLE}
                         labelStyle={{ fontWeight: 900, fontSize: 12, marginBottom: 4 }}
                         // recharts' Tooltip formatter args aren't meaningfully typed upstream.
                         // eslint-disable-next-line @typescript-eslint/no-explicit-any

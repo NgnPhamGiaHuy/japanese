@@ -15,6 +15,7 @@ import {
 } from "recharts";
 
 import { AdminChartContainer } from "../shared";
+import { CHART_TOOLTIP_STYLE } from "../../domain/chartTheme";
 
 interface GrowthChartProps {
     data: { date: string; newUsers: number; totalUsers: number }[];
@@ -59,12 +60,7 @@ const GrowthChart = ({ data, onClick }: GrowthChartProps) => {
                     />
                     <Tooltip
                         cursor={{ stroke: "#1cb0f6", strokeWidth: 2 }}
-                        contentStyle={{
-                            borderRadius: "24px",
-                            border: "none",
-                            boxShadow: "0 20px 40px -10px rgba(0,0,0,0.1)",
-                            padding: "12px 16px",
-                        }}
+                        contentStyle={CHART_TOOLTIP_STYLE}
                         labelStyle={{
                             fontWeight: "black",
                             fontSize: "12px",

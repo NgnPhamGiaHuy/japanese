@@ -9,6 +9,8 @@
  */
 import { LucideIcon } from "lucide-react";
 
+import { SEMANTIC_STATUS } from "@/shared/utils";
+
 import type { ReactNode } from "react";
 
 /** Visual theme variant — exported so callers building variant lookup tables
@@ -35,10 +37,12 @@ interface BadgeProps {
 const VARIANT_STYLES = {
     default: "bg-gray-100 text-gray-600",
     primary: "bg-both text-white",
+    // Deliberately a solid fill, not the tinted style below — no other file
+    // defines a competing "success" treatment to consolidate against.
     success: "bg-hiragana text-white",
-    warning: "bg-amber-100 text-amber-600",
-    danger: "bg-danger-bg text-danger",
-    info: "bg-katakana/10 text-katakana",
+    warning: `${SEMANTIC_STATUS.warning.bg} ${SEMANTIC_STATUS.warning.text}`,
+    danger: `${SEMANTIC_STATUS.danger.bg} ${SEMANTIC_STATUS.danger.text}`,
+    info: `${SEMANTIC_STATUS.info.bg} ${SEMANTIC_STATUS.info.text}`,
 };
 
 const SIZE_STYLES = {

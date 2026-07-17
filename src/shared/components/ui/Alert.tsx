@@ -14,6 +14,7 @@ import { useTranslations } from "next-intl";
 
 import { AlertCircle, CheckCircle, Info, X, XCircle } from "lucide-react";
 
+import { SEMANTIC_STATUS } from "@/shared/utils";
 import Button from "./Button";
 
 /** Categorization of the notification severity and visual intent. */
@@ -43,31 +44,31 @@ const CONFIG: Record<
 > = {
     info: {
         icon: <Info size={20} />,
-        bg: "bg-blue-50",
-        border: "border-blue-200",
-        text: "text-blue-800",
-        iconColor: "text-blue-500",
+        bg: SEMANTIC_STATUS.info.bg,
+        border: SEMANTIC_STATUS.info.border,
+        text: SEMANTIC_STATUS.info.text,
+        iconColor: SEMANTIC_STATUS.info.text,
     },
     success: {
         icon: <CheckCircle size={20} />,
-        bg: "bg-emerald-50",
-        border: "border-emerald-200",
-        text: "text-emerald-800",
-        iconColor: "text-emerald-500",
+        bg: SEMANTIC_STATUS.success.bg,
+        border: SEMANTIC_STATUS.success.border,
+        text: SEMANTIC_STATUS.success.text,
+        iconColor: SEMANTIC_STATUS.success.text,
     },
     warning: {
         icon: <AlertCircle size={20} />,
-        bg: "bg-amber-50",
-        border: "border-amber-200",
-        text: "text-amber-800",
-        iconColor: "text-amber-500",
+        bg: SEMANTIC_STATUS.warning.bg,
+        border: SEMANTIC_STATUS.warning.border,
+        text: SEMANTIC_STATUS.warning.text,
+        iconColor: SEMANTIC_STATUS.warning.text,
     },
     error: {
         icon: <XCircle size={20} />,
-        bg: "bg-rose-50",
-        border: "border-rose-200",
-        text: "text-rose-800",
-        iconColor: "text-rose-500",
+        bg: SEMANTIC_STATUS.danger.bg,
+        border: SEMANTIC_STATUS.danger.border,
+        text: SEMANTIC_STATUS.danger.text,
+        iconColor: SEMANTIC_STATUS.danger.text,
     },
 };
 

@@ -14,13 +14,12 @@ import {
 } from "recharts";
 
 import { AdminChartContainer } from "../shared";
+import { CHART_PALETTE, CHART_TOOLTIP_STYLE } from "../../domain/chartTheme";
 
 interface EngagementChartProps {
     data: { feature: string; count: number; percentage: number }[];
     onClick?: (feature: string) => void;
 }
-
-const COLORS = ["#1cb0f6", "#58cc02", "#ce82ff", "#ff9600", "#ff4b4b"];
 
 /**
  * Feature Engagement Vertical Bar Chart.
@@ -47,12 +46,7 @@ const EngagementChart = ({ data, onClick }: EngagementChartProps) => {
                     />
                     <Tooltip
                         cursor={{ fill: "#f8fafc", radius: 12, cursor: "pointer" }}
-                        contentStyle={{
-                            borderRadius: "24px",
-                            border: "none",
-                            boxShadow: "0 20px 40px -10px rgba(0,0,0,0.1)",
-                            padding: "12px 16px",
-                        }}
+                        contentStyle={CHART_TOOLTIP_STYLE}
                         labelStyle={{
                             fontWeight: "black",
                             fontSize: "12px",
@@ -72,7 +66,10 @@ const EngagementChart = ({ data, onClick }: EngagementChartProps) => {
                         className="cursor-pointer"
                     >
                         {data.map((_, index) => (
-                            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                            <Cell
+                                key={`cell-${index}`}
+                                fill={CHART_PALETTE[index % CHART_PALETTE.length]}
+                            />
                         ))}
                     </Bar>
                 </BarChart>

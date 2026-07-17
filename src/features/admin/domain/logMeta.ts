@@ -14,6 +14,11 @@
  * recharts renders these into raw SVG `fill`/inline-style attributes, which
  * don't resolve Tailwind's arbitrary-value classes the way JSX className
  * does.
+ *
+ * `border` was added (E17-T3) to extend this coverage to LogsFilters.tsx and
+ * LogRow.tsx, the two files that missed the original E11-T6 consolidation —
+ * LogRow's warn case previously hardcoded `border-l-amber-400`, which visibly
+ * drifted from every other warn-level color here (`#ff9600`/`survival`).
  */
 import type { BadgeVariant } from "@/shared/components/ui";
 import type { LogLevel, LogType } from "../types";
@@ -24,6 +29,7 @@ export interface LogLevelMeta {
     text: string;
     bg: string;
     dot: string;
+    border: string;
 }
 
 export const LOG_LEVEL_META: Record<LogLevel, LogLevelMeta> = {
@@ -33,6 +39,7 @@ export const LOG_LEVEL_META: Record<LogLevel, LogLevelMeta> = {
         text: "text-katakana",
         bg: "bg-katakana/10 hover:bg-katakana/20",
         dot: "bg-katakana",
+        border: "border-l-katakana",
     },
     warn: {
         variant: "warning",
@@ -40,6 +47,7 @@ export const LOG_LEVEL_META: Record<LogLevel, LogLevelMeta> = {
         text: "text-orange-500",
         bg: "bg-orange-50 hover:bg-orange-100",
         dot: "bg-orange-400",
+        border: "border-l-survival",
     },
     error: {
         variant: "danger",
@@ -47,6 +55,7 @@ export const LOG_LEVEL_META: Record<LogLevel, LogLevelMeta> = {
         text: "text-danger",
         bg: "bg-danger-bg hover:bg-[#ffc8c9]",
         dot: "bg-danger",
+        border: "border-l-danger",
     },
     security: {
         variant: "primary",
@@ -54,6 +63,7 @@ export const LOG_LEVEL_META: Record<LogLevel, LogLevelMeta> = {
         text: "text-both",
         bg: "bg-both/10 hover:bg-both/20",
         dot: "bg-both",
+        border: "border-l-both",
     },
 };
 

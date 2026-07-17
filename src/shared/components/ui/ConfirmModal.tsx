@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { Dialog } from "@base-ui/react/dialog";
 import { AlertTriangle, Info, Trash2, X } from "lucide-react";
 
+import { SEMANTIC_STATUS } from "@/shared/utils";
 import Button from "./Button";
 
 /** Supported visual variants for the confirmation modal. */
@@ -53,20 +54,20 @@ interface ConfirmModalProps {
 const VARIANTS = {
     danger: {
         icon: Trash2,
-        color: "red",
-        accent: "bg-danger-bg text-danger",
+        color: SEMANTIC_STATUS.danger.theme,
+        accent: `${SEMANTIC_STATUS.danger.bg} ${SEMANTIC_STATUS.danger.text}`,
         btnVariant: "primary",
     },
     warning: {
         icon: AlertTriangle,
-        color: "orange",
-        accent: "bg-orange-50 text-orange-500",
+        color: SEMANTIC_STATUS.warning.theme,
+        accent: `${SEMANTIC_STATUS.warning.bg} ${SEMANTIC_STATUS.warning.text}`,
         btnVariant: "primary",
     },
     info: {
         icon: Info,
-        color: "blue",
-        accent: "bg-blue-50 text-blue-500",
+        color: SEMANTIC_STATUS.info.theme,
+        accent: `${SEMANTIC_STATUS.info.bg} ${SEMANTIC_STATUS.info.text}`,
         btnVariant: "primary",
     },
 } as const;

@@ -11,7 +11,7 @@ import { cn } from "@/shared/utils";
 type AlphabetMode = "hiragana" | "katakana" | "both";
 
 /** Predefined theme color names or custom hex strings. */
-type ThemeColor =
+export type ThemeColor =
     | "blue"
     | "green"
     | "purple"

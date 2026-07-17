@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from "recharts";
 
 import { AdminChartContainer } from "../shared";
+import { CHART_TOOLTIP_STYLE } from "../../domain/chartTheme";
 import { LOG_LEVEL_META } from "../../domain/logMeta";
 
 import type { LogLevel, LogLevelPoint } from "../../types";
@@ -61,12 +62,7 @@ const LogLevelChart = ({ data, onClick }: LogLevelChartProps) => {
                         ))}
                     </Pie>
                     <Tooltip
-                        contentStyle={{
-                            borderRadius: "24px",
-                            border: "none",
-                            boxShadow: "0 20px 40px -10px rgba(0,0,0,0.1)",
-                            padding: "12px 16px",
-                        }}
+                        contentStyle={CHART_TOOLTIP_STYLE}
                         // recharts' Tooltip formatter args aren't meaningfully typed upstream.
                         // eslint-disable-next-line @typescript-eslint/no-explicit-any
                         formatter={(value: any, name: any) => [

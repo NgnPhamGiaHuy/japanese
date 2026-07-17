@@ -5,8 +5,7 @@ import { useTranslations } from "next-intl";
 import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from "recharts";
 
 import { AdminChartContainer } from "../shared";
-
-const COLORS = ["#ce82ff", "#1cb0f6", "#58cc02", "#ffc800", "#ff4b4b"];
+import { CHART_PALETTE, CHART_TOOLTIP_STYLE } from "../../domain/chartTheme";
 
 interface RoleChartProps {
     data: { name: string; value: number }[];
@@ -39,17 +38,13 @@ const RoleChart = ({ data, onClick }: RoleChartProps) => {
                         className="cursor-pointer"
                     >
                         {data.map((_, index) => (
-                            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                            <Cell
+                                key={`cell-${index}`}
+                                fill={CHART_PALETTE[index % CHART_PALETTE.length]}
+                            />
                         ))}
                     </Pie>
-                    <Tooltip
-                        contentStyle={{
-                            borderRadius: "24px",
-                            border: "none",
-                            boxShadow: "0 20px 40px -10px rgba(0,0,0,0.1)",
-                            padding: "12px 16px",
-                        }}
-                    />
+                    <Tooltip contentStyle={CHART_TOOLTIP_STYLE} />
                 </PieChart>
             </ResponsiveContainer>
 
@@ -58,7 +53,7 @@ const RoleChart = ({ data, onClick }: RoleChartProps) => {
                     <div key={item.name} className="flex items-center gap-2">
                         <div
                             className="h-2 w-2 rounded-full"
-                            style={{ backgroundColor: COLORS[index % COLORS.length] }}
+                            style={{ backgroundColor: CHART_PALETTE[index % CHART_PALETTE.length] }}
                         />
                         <span className="text-text text-xs font-black tracking-tighter uppercase">
                             {item.name}: {item.value}
