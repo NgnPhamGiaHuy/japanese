@@ -17,6 +17,8 @@
 
 import "server-only";
 
+import { cache } from "react";
+
 import { adminDb } from "@/lib/firebase-admin";
 import { decodeShareId } from "@/shared/utils/shareToken";
 
@@ -40,8 +42,12 @@ export interface PublicSharedLessonPreview {
  * both falsy) — the last case covers invite-only shares, which only resolve
  * for the specific invited viewer and must never render for an anonymous
  * server request.
+ *
+ * Wrapped in React's `cache()` so the page body, generateMetadata, and
+ * opengraph-image — which all need this same data for the same request —
+ * share one Firestore read instead of three.
  */
-export async function getPublicSharedLessonPreview(
+export const getPublicSharedLessonPreview = cache(async function getPublicSharedLessonPreview(
     shareId: string,
 ): Promise<PublicSharedLessonPreview | null> {
     const payload = decodeShareId(shareId);
@@ -76,4 +82,4 @@ export async function getPublicSharedLessonPreview(
         console.error("[getPublicSharedLessonPreview] error:", err);
         return null;
     }
-}
+});

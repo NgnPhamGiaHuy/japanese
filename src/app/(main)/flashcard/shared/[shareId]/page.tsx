@@ -18,6 +18,41 @@ import { Suspense } from "react";
 import { getPublicSharedLessonPreview } from "@/features/flashcard/services/shared-preview.service";
 import SharedLessonPageClient from "./SharedLessonPageClient";
 
+import type { Metadata } from "next";
+
+export async function generateMetadata({
+    params,
+}: {
+    params: Promise<{ shareId: string }>;
+}): Promise<Metadata> {
+    const { shareId } = await params;
+    const preview = await getPublicSharedLessonPreview(shareId);
+
+    if (!preview) {
+        return { title: "Shared Deck | Kana & Nihongo Master" };
+    }
+
+    const title = `${preview.title} | Kana & Nihongo Master`;
+    const description =
+        preview.description ||
+        `A shared Japanese flashcard deck with ${preview.cardCount} cards${preview.ownerName ? ` by ${preview.ownerName}` : ""}.`;
+
+    return {
+        title,
+        description,
+        openGraph: {
+            title: preview.title,
+            description,
+            type: "website",
+        },
+        twitter: {
+            card: "summary_large_image",
+            title: preview.title,
+            description,
+        },
+    };
+}
+
 function LoadingShell() {
     return (
         <div className="bg-bg fixed inset-0 flex items-center justify-center">
