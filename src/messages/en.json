@@ -21,7 +21,23 @@
         "goBack": "Go Back",
         "deleteDeckTitle": "Delete Deck?",
         "deleteDeckMessage": "Are you sure you want to permanently delete \"{title}\"? This action cannot be undone.",
-        "delete": "Delete"
+        "delete": "Delete",
+        "notFound": "Not Found",
+        "deckNotFound": "Deck Not Found"
+    },
+    "ErrorScreens": {
+        "errorTitle": "Something Went Wrong",
+        "errorMessage": "An unexpected error occurred while loading {scope}. You can try again, or head back home.",
+        "tryAgain": "Try Again",
+        "goHome": "Go Home",
+        "scopeActivity": "this activity",
+        "scopePage": "this page",
+        "scopeLogin": "the sign-in page",
+        "maintenanceTitle": "Down for Maintenance",
+        "maintenanceMessage": "We're making some improvements. Please check back shortly.",
+        "notFoundTitle": "You're Lost!",
+        "notFoundMessage": "The page you are looking for has vanished into thin air.",
+        "goBackHome": "Go Back Home"
     },
     "Nav": {
         "home": "Home",
@@ -403,6 +419,27 @@
         "dismiss": "Dismiss notification",
         "accept": "Accept",
         "decline": "Decline"
+    },
+    "CommandPalette": {
+        "title": "Command palette",
+        "searchPlaceholder": "Search pages and actions…",
+        "noResults": "No results found.",
+        "groupNavigate": "Navigate",
+        "groupAdmin": "Admin",
+        "actions": {
+            "home": { "label": "Home", "keywords": "lessons,start" },
+            "kana": { "label": "Kana Chart", "keywords": "hiragana,katakana,alphabet" },
+            "flashcard": { "label": "Decks", "keywords": "flashcards,study,cards" },
+            "notifications": { "label": "Notifications", "keywords": "alerts,inbox" },
+            "profile": { "label": "Profile", "keywords": "account,me" },
+            "settings": { "label": "Settings", "keywords": "preferences,config" },
+            "admin-dashboard": { "label": "Admin Dashboard", "keywords": "" },
+            "admin-users": { "label": "Admin · Users", "keywords": "" },
+            "admin-content": { "label": "Admin · Content", "keywords": "" },
+            "admin-analytics": { "label": "Admin · Analytics", "keywords": "reports,stats,charts" },
+            "admin-reports": { "label": "Admin · Reports", "keywords": "logs,flags" },
+            "admin-settings": { "label": "Admin · Settings", "keywords": "" }
+        }
     },
     "AdminNav": {
         "brandName": "ADMIN",

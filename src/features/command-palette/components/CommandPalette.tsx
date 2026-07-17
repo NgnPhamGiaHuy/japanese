@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 
 import { Dialog } from "@base-ui/react/dialog";
@@ -28,7 +29,32 @@ const ITEM_CLASSES =
  * Modal.tsx (E6-T2) rather than cmdk's own Radix-based Command.Dialog, so it
  * inherits the app's one overlay system instead of a second one.
  */
+/**
+ * One palette row. `value` is the localized label so cmdk's fuzzy match runs
+ * against what the user actually sees; `keywords` are stored as one
+ * comma-separated message per action (a message can't hold an array) and
+ * carry both English and Japanese terms in ja.json so either matches.
+ */
+const ActionItem = ({ action, onSelect }: { action: CommandAction; onSelect: () => void }) => {
+    const t = useTranslations("CommandPalette");
+    const label = t(`actions.${action.id}.label`);
+    const keywords = t(`actions.${action.id}.keywords`);
+
+    return (
+        <Command.Item
+            value={label}
+            keywords={keywords ? keywords.split(",") : undefined}
+            onSelect={onSelect}
+            className={ITEM_CLASSES}
+        >
+            <action.icon size={16} className="text-muted shrink-0" />
+            {label}
+        </Command.Item>
+    );
+};
+
 const CommandPalette = ({ open, onOpenChange }: CommandPaletteProps) => {
+    const t = useTranslations("CommandPalette");
     const router = useRouter();
     const { role } = useAdminRole();
     const [search, setSearch] = useState("");
@@ -50,64 +76,47 @@ const CommandPalette = ({ open, onOpenChange }: CommandPaletteProps) => {
                 <div className="pointer-events-none fixed inset-0 z-50 flex items-start justify-center p-4 pt-[12vh] sm:p-6 sm:pt-[15vh]">
                     <Dialog.Popup
                         aria-modal="true"
-                        aria-label="Command palette"
+                        aria-label={t("title")}
                         className="pointer-events-auto relative flex max-h-[70vh] w-full max-w-lg flex-col overflow-hidden rounded-3xl border-2 border-b-8 border-gray-200 bg-white shadow-2xl transition-all duration-200 data-[ending-style]:translate-y-3 data-[ending-style]:scale-95 data-[ending-style]:opacity-0 data-[starting-style]:translate-y-3 data-[starting-style]:scale-95 data-[starting-style]:opacity-0"
                     >
-                        <Command
-                            label="Command palette"
-                            className="flex min-h-0 flex-1 flex-col"
-                            loop
-                        >
+                        <Command label={t("title")} className="flex min-h-0 flex-1 flex-col" loop>
                             <div className="flex items-center gap-3 border-b border-gray-100 px-5 py-4">
                                 <Search size={18} className="text-muted shrink-0" />
                                 <Command.Input
                                     autoFocus
                                     value={search}
                                     onValueChange={setSearch}
-                                    placeholder="Search pages and actions…"
+                                    placeholder={t("searchPlaceholder")}
                                     className="text-text placeholder:text-muted w-full bg-transparent text-base font-medium outline-none"
                                 />
                             </div>
                             <Command.List className="flex-1 overflow-y-auto p-2">
                                 <Command.Empty className="text-muted px-4 py-8 text-center text-sm font-bold">
-                                    No results found.
+                                    {t("noResults")}
                                 </Command.Empty>
-                                <Command.Group heading="Navigate" className={GROUP_HEADING_CLASSES}>
+                                <Command.Group
+                                    heading={t("groupNavigate")}
+                                    className={GROUP_HEADING_CLASSES}
+                                >
                                     {MAIN_ACTIONS.map((action) => (
-                                        <Command.Item
+                                        <ActionItem
                                             key={action.id}
-                                            value={action.label}
-                                            keywords={action.keywords}
+                                            action={action}
                                             onSelect={() => handleSelect(action)}
-                                            className={ITEM_CLASSES}
-                                        >
-                                            <action.icon
-                                                size={16}
-                                                className="text-muted shrink-0"
-                                            />
-                                            {action.label}
-                                        </Command.Item>
+                                        />
                                     ))}
                                 </Command.Group>
                                 {role && (
                                     <Command.Group
-                                        heading="Admin"
+                                        heading={t("groupAdmin")}
                                         className={GROUP_HEADING_CLASSES}
                                     >
                                         {ADMIN_ACTIONS.map((action) => (
-                                            <Command.Item
+                                            <ActionItem
                                                 key={action.id}
-                                                value={action.label}
-                                                keywords={action.keywords}
+                                                action={action}
                                                 onSelect={() => handleSelect(action)}
-                                                className={ITEM_CLASSES}
-                                            >
-                                                <action.icon
-                                                    size={16}
-                                                    className="text-muted shrink-0"
-                                                />
-                                                {action.label}
-                                            </Command.Item>
+                                            />
                                         ))}
                                     </Command.Group>
                                 )}

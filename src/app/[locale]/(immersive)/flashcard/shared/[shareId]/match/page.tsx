@@ -13,6 +13,7 @@
 
 "use client";
 
+import { useTranslations } from "next-intl";
 import { use } from "react";
 
 import { MatchGame } from "@/features/flashcard/games/match";
@@ -22,6 +23,7 @@ import { LoadingSpinner, NotFoundScreen } from "@/shared/components/ui";
 
 export default function SharedMatchPage({ params }: { params: Promise<{ shareId: string }> }) {
     const { shareId } = use(params);
+    const t = useTranslations("Common");
     const router = useRouter();
     const loader = useFlashcardLoader({ type: "shared", shareId });
 
@@ -32,7 +34,7 @@ export default function SharedMatchPage({ params }: { params: Promise<{ shareId:
 
     // ── 404 Guard ──────────────────────────────────────────────────────────
     if (loader.isNotFound || !loader.data) {
-        return <NotFoundScreen title="Deck Not Found" onBack={() => router.back()} />;
+        return <NotFoundScreen title={t("deckNotFound")} onBack={() => router.back()} />;
     }
 
     // ── Delegate to Feature ────────────────────────────────────────────────

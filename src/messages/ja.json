@@ -21,7 +21,23 @@
         "goBack": "戻る",
         "deleteDeckTitle": "デッキを削除しますか？",
         "deleteDeckMessage": "「{title}」を完全に削除してもよろしいですか？この操作は取り消せません。",
-        "delete": "削除"
+        "delete": "削除",
+        "notFound": "見つかりません",
+        "deckNotFound": "デッキが見つかりません"
+    },
+    "ErrorScreens": {
+        "errorTitle": "問題が発生しました",
+        "errorMessage": "{scope}の読み込み中に予期しないエラーが発生しました。もう一度お試しいただくか、ホームに戻ってください。",
+        "tryAgain": "再試行",
+        "goHome": "ホームへ",
+        "scopeActivity": "このアクティビティ",
+        "scopePage": "このページ",
+        "scopeLogin": "サインインページ",
+        "maintenanceTitle": "メンテナンス中",
+        "maintenanceMessage": "現在改善作業を行っています。しばらくしてからもう一度お越しください。",
+        "notFoundTitle": "ページが見つかりません",
+        "notFoundMessage": "お探しのページは存在しないか、移動された可能性があります。",
+        "goBackHome": "ホームに戻る"
     },
     "Nav": {
         "home": "ホーム",
@@ -403,6 +419,48 @@
         "dismiss": "通知を削除",
         "accept": "承認",
         "decline": "拒否"
+    },
+    "CommandPalette": {
+        "title": "コマンドパレット",
+        "searchPlaceholder": "ページや操作を検索…",
+        "noResults": "結果が見つかりません。",
+        "groupNavigate": "移動",
+        "groupAdmin": "管理",
+        "actions": {
+            "home": { "label": "ホーム", "keywords": "home,ホーム,レッスン,lessons,start" },
+            "kana": {
+                "label": "かな表",
+                "keywords": "kana,かな,ひらがな,hiragana,カタカナ,katakana,五十音"
+            },
+            "flashcard": {
+                "label": "デッキ",
+                "keywords": "decks,deck,デッキ,単語帳,flashcards,study,cards"
+            },
+            "notifications": {
+                "label": "通知",
+                "keywords": "notifications,通知,お知らせ,alerts,inbox"
+            },
+            "profile": { "label": "プロフィール", "keywords": "profile,プロフィール,account,me" },
+            "settings": { "label": "設定", "keywords": "settings,設定,preferences,config" },
+            "admin-dashboard": {
+                "label": "管理ダッシュボード",
+                "keywords": "admin,管理,dashboard,ダッシュボード"
+            },
+            "admin-users": { "label": "管理 · ユーザー", "keywords": "admin,管理,users,ユーザー" },
+            "admin-content": {
+                "label": "管理 · コンテンツ",
+                "keywords": "admin,管理,content,コンテンツ"
+            },
+            "admin-analytics": {
+                "label": "管理 · 分析",
+                "keywords": "admin,管理,analytics,分析,reports,stats,charts,統計"
+            },
+            "admin-reports": {
+                "label": "管理 · レポート",
+                "keywords": "admin,管理,reports,レポート,logs,ログ,flags"
+            },
+            "admin-settings": { "label": "管理 · 設定", "keywords": "admin,管理,settings,設定" }
+        }
     },
     "AdminNav": {
         "brandName": "ADMIN",

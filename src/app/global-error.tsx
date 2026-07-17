@@ -30,7 +30,16 @@ export default function GlobalError({
     return (
         <html lang="en" className={fontVariables}>
             <body>
-                <ErrorFallback scope="the app" reset={reset} />
+                {/*
+                  English-only by necessity: this boundary replaces the root
+                  layout, so NextIntlClientProvider isn't mounted and there is
+                  no locale context to translate against. lang="en" above says
+                  the same thing.
+                */}
+                <ErrorFallback
+                    message="An unexpected error occurred while loading the app. You can try again, or head back home."
+                    reset={reset}
+                />
             </body>
         </html>
     );

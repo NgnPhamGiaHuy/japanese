@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useEffect } from "react";
 
 import * as Sentry from "@sentry/nextjs";
@@ -13,10 +14,20 @@ export default function MainError({
     error: Error & { digest?: string };
     reset: () => void;
 }) {
+    const t = useTranslations("ErrorScreens");
+
     useEffect(() => {
         console.error("[error boundary: (main)]", error);
         Sentry.captureException(error);
     }, [error]);
 
-    return <ErrorFallback scope="this page" reset={reset} />;
+    return (
+        <ErrorFallback
+            title={t("errorTitle")}
+            message={t("errorMessage", { scope: t("scopePage") })}
+            retryLabel={t("tryAgain")}
+            homeLabel={t("goHome")}
+            reset={reset}
+        />
+    );
 }
