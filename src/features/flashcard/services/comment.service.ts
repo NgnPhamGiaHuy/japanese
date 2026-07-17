@@ -1,6 +1,12 @@
 /**
  * @file comment.service
- * Social orchestration layer for threaded flashcard feedback.
+ * Social orchestration layer for threaded flashcard feedback — the CRUD
+ * operations (add/reply/resolve/get/subscribe/update/delete). Split from a
+ * single 489-line file (E11-T3): errors → comment-errors.ts, path helpers →
+ * comment-paths.ts, validation/sanitization → comment-validation.ts. This
+ * file re-exports all of them, so every existing import path
+ * (`../services/comment.service`, and the `export * from "./comment.service"`
+ * in services/index.ts) keeps working unchanged.
  *
  * @remarks
  * Design Architecture:
@@ -12,9 +18,7 @@
 
 import {
     addDoc,
-    collection,
     deleteDoc,
-    doc,
     getDoc,
     getDocs,
     onSnapshot,
@@ -23,124 +27,16 @@ import {
 } from "firebase/firestore";
 
 import { emitNotification } from "@/features/notifications/services";
-import { APP_ID, db } from "@/lib/firebase";
-import { commentContentSchema } from "@/shared/schemas";
+import { CommentError, CommentErrorCode, mapFirestoreCommentError } from "./comment-errors";
+import { commentDoc, commentsCol } from "./comment-paths";
+import { sanitizeCommentContent, validateCommentContent } from "./comment-validation";
 
-import type { CollectionReference, DocumentReference, Unsubscribe } from "firebase/firestore";
+import type { Unsubscribe } from "firebase/firestore";
 import type { Comment } from "../types/flashcard.types";
 
-// ─── Error Handling ────────────────────────────────────────────────────────
-
-/**
- * Specific error codes for comment operations, mapped to user-friendly UI messages.
- */
-export enum CommentErrorCode {
-    /** Insufficient RBAC permissions (e.g. viewer trying to delete) */
-    PERMISSION_DENIED = "PERMISSION_DENIED",
-    /** Failed validation rules (empty or too long) */
-    INVALID_CONTENT = "INVALID_CONTENT",
-    /** Target ID does not exist */
-    COMMENT_NOT_FOUND = "COMMENT_NOT_FOUND",
-    /** Connectivity issues */
-    NETWORK_ERROR = "NETWORK_ERROR",
-    /** Catch-all for unexpected failures */
-    UNKNOWN_ERROR = "UNKNOWN_ERROR",
-}
-
-/**
- * Domain-specific error class for social operations.
- * Wraps Firestore errors with semantic codes and human-readable context.
- */
-export class CommentError extends Error {
-    code: CommentErrorCode;
-    originalError?: Error;
-
-    constructor(code: CommentErrorCode, message: string, originalError?: Error) {
-        super(message);
-        this.code = code;
-        this.originalError = originalError;
-        this.name = "CommentError";
-    }
-}
-
-// ─── Firestore path helpers ────────────────────────────────────────────────
-
-/**
- * Returns a reference to the comments subcollection for a specific card.
- * Path: artifacts/{APP_ID}/users/{ownerId}/lessons/{lessonId}/cards/{cardId}/comments
- */
-export function commentsCol(
-    ownerId: string,
-    lessonId: string,
-    cardId: string,
-): CollectionReference {
-    return collection(
-        db,
-        "artifacts",
-        APP_ID,
-        "users",
-        ownerId,
-        "lessons",
-        lessonId,
-        "cards",
-        cardId,
-        "comments",
-    );
-}
-
-/**
- * Returns a reference to a specific comment document.
- * Path: artifacts/{APP_ID}/users/{ownerId}/lessons/{lessonId}/cards/{cardId}/comments/{commentId}
- */
-export function commentDoc(
-    ownerId: string,
-    lessonId: string,
-    cardId: string,
-    commentId: string,
-): DocumentReference {
-    return doc(
-        db,
-        "artifacts",
-        APP_ID,
-        "users",
-        ownerId,
-        "lessons",
-        lessonId,
-        "cards",
-        cardId,
-        "comments",
-        commentId,
-    );
-}
-
-// ─── Validation and Sanitization ───────────────────────────────────────────
-
-/**
- * Validates comment content before submission — delegates to the shared
- * zod schema (single source of truth); see shared/schemas/comment.schema.ts.
- */
-export function validateCommentContent(content: string): { valid: boolean; error?: string } {
-    const result = commentContentSchema.safeParse(content);
-    return result.success
-        ? { valid: true }
-        : { valid: false, error: result.error.issues[0]?.message };
-}
-
-/**
- * Sanitizes comment content to prevent XSS.
- * Escapes HTML entities while preserving markdown.
- */
-export function sanitizeCommentContent(content: string): string {
-    return content
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#x27;")
-        .replace(/\//g, "&#x2F;");
-}
-
-// ─── Core CRUD Operations ──────────────────────────────────────────────────
+export { CommentError, CommentErrorCode } from "./comment-errors";
+export { commentDoc, commentsCol } from "./comment-paths";
+export { sanitizeCommentContent, validateCommentContent } from "./comment-validation";
 
 /**
  * Adds a new comment to a flashcard.
@@ -190,24 +86,10 @@ export async function addComment(
 
         return commentRef.id;
     } catch (error: unknown) {
-        if (error instanceof CommentError) throw error;
-        const e = error as { code?: string };
-        if (e.code === "permission-denied")
-            throw new CommentError(
-                CommentErrorCode.PERMISSION_DENIED,
-                "You don't have permission to add comments",
-                error as Error,
-            );
-        if (e.code === "unavailable")
-            throw new CommentError(
-                CommentErrorCode.NETWORK_ERROR,
-                "Network error. Please check your connection.",
-                error as Error,
-            );
-        throw new CommentError(
-            CommentErrorCode.UNKNOWN_ERROR,
+        mapFirestoreCommentError(
+            error,
+            "You don't have permission to add comments",
             "Failed to add comment. Please try again.",
-            error as Error,
         );
     }
 }
@@ -265,24 +147,10 @@ export async function replyToComment(
             });
         }
     } catch (error: unknown) {
-        if (error instanceof CommentError) throw error;
-        const e = error as { code?: string };
-        if (e.code === "permission-denied")
-            throw new CommentError(
-                CommentErrorCode.PERMISSION_DENIED,
-                "You don't have permission to reply to comments",
-                error as Error,
-            );
-        if (e.code === "unavailable")
-            throw new CommentError(
-                CommentErrorCode.NETWORK_ERROR,
-                "Network error. Please check your connection.",
-                error as Error,
-            );
-        throw new CommentError(
-            CommentErrorCode.UNKNOWN_ERROR,
+        mapFirestoreCommentError(
+            error,
+            "You don't have permission to reply to comments",
             "Failed to add reply. Please try again.",
-            error as Error,
         );
     }
 }
@@ -317,24 +185,10 @@ export async function resolveComment(
             });
         }
     } catch (error: unknown) {
-        if (error instanceof CommentError) throw error;
-        const e = error as { code?: string };
-        if (e.code === "permission-denied")
-            throw new CommentError(
-                CommentErrorCode.PERMISSION_DENIED,
-                "You don't have permission to resolve comments",
-                error as Error,
-            );
-        if (e.code === "unavailable")
-            throw new CommentError(
-                CommentErrorCode.NETWORK_ERROR,
-                "Network error. Please check your connection.",
-                error as Error,
-            );
-        throw new CommentError(
-            CommentErrorCode.UNKNOWN_ERROR,
+        mapFirestoreCommentError(
+            error,
+            "You don't have permission to resolve comments",
             "Failed to resolve comment. Please try again.",
-            error as Error,
         );
     }
 }
@@ -351,23 +205,10 @@ export async function getComments(
         const snapshot = await getDocs(commentsCol(ownerId, lessonId, cardId));
         return snapshot.docs.map((d) => ({ ...d.data(), id: d.id })) as Comment[];
     } catch (error: unknown) {
-        const e = error as { code?: string };
-        if (e.code === "permission-denied")
-            throw new CommentError(
-                CommentErrorCode.PERMISSION_DENIED,
-                "You don't have permission to view comments",
-                error as Error,
-            );
-        if (e.code === "unavailable")
-            throw new CommentError(
-                CommentErrorCode.NETWORK_ERROR,
-                "Network error. Please check your connection.",
-                error as Error,
-            );
-        throw new CommentError(
-            CommentErrorCode.UNKNOWN_ERROR,
+        mapFirestoreCommentError(
+            error,
+            "You don't have permission to view comments",
             "Failed to fetch comments. Please try again.",
-            error as Error,
         );
     }
 }
@@ -426,24 +267,10 @@ export async function updateComment(
             throw new CommentError(CommentErrorCode.COMMENT_NOT_FOUND, "Comment not found");
         await updateDoc(ref, { content: sanitized, updatedAt: Date.now() });
     } catch (error: unknown) {
-        if (error instanceof CommentError) throw error;
-        const e = error as { code?: string };
-        if (e.code === "permission-denied")
-            throw new CommentError(
-                CommentErrorCode.PERMISSION_DENIED,
-                "You don't have permission to edit this comment",
-                error as Error,
-            );
-        if (e.code === "unavailable")
-            throw new CommentError(
-                CommentErrorCode.NETWORK_ERROR,
-                "Network error. Please check your connection.",
-                error as Error,
-            );
-        throw new CommentError(
-            CommentErrorCode.UNKNOWN_ERROR,
+        mapFirestoreCommentError(
+            error,
+            "You don't have permission to edit this comment",
             "Failed to update comment. Please try again.",
-            error as Error,
         );
     }
 }
@@ -466,24 +293,10 @@ export async function deleteComment(
             throw new CommentError(CommentErrorCode.COMMENT_NOT_FOUND, "Comment not found");
         await deleteDoc(ref);
     } catch (error: unknown) {
-        if (error instanceof CommentError) throw error;
-        const e = error as { code?: string };
-        if (e.code === "permission-denied")
-            throw new CommentError(
-                CommentErrorCode.PERMISSION_DENIED,
-                "You don't have permission to delete this comment",
-                error as Error,
-            );
-        if (e.code === "unavailable")
-            throw new CommentError(
-                CommentErrorCode.NETWORK_ERROR,
-                "Network error. Please check your connection.",
-                error as Error,
-            );
-        throw new CommentError(
-            CommentErrorCode.UNKNOWN_ERROR,
+        mapFirestoreCommentError(
+            error,
+            "You don't have permission to delete this comment",
             "Failed to delete comment. Please try again.",
-            error as Error,
         );
     }
 }
