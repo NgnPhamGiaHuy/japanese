@@ -55,6 +55,8 @@
         "appearance": "表示",
         "handwritingFont": "手書き風フォント",
         "handwritingFontSub": "筆記体風のかなフォントを使用",
+        "language": "言語",
+        "languageSub": "アプリの表示言語を切り替え",
         "audio": "音声",
         "soundEffects": "効果音",
         "soundEffectsSub": "解答・タップ時の効果音",

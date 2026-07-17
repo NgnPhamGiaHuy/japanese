@@ -55,6 +55,8 @@
         "appearance": "Appearance",
         "handwritingFont": "Handwriting Font",
         "handwritingFontSub": "Use brush-style kana font",
+        "language": "Language",
+        "languageSub": "Switch the app's display language",
         "audio": "Audio",
         "soundEffects": "Sound Effects",
         "soundEffectsSub": "Answer and tap feedback tones",

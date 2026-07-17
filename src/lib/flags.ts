@@ -19,6 +19,7 @@ import type { ServerTemplate } from "firebase-admin/remote-config";
  */
 const DEFAULT_FLAGS = {
     maintenance_mode: false,
+    locale_switch_enabled: false,
 } as const;
 
 export type FlagKey = keyof typeof DEFAULT_FLAGS;
@@ -79,6 +80,7 @@ export async function getFlags(): Promise<Flags> {
         const config = template.evaluate();
         return {
             maintenance_mode: config.getBoolean("maintenance_mode"),
+            locale_switch_enabled: config.getBoolean("locale_switch_enabled"),
         };
     } catch {
         return { ...DEFAULT_FLAGS };
