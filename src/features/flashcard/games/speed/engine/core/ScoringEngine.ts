@@ -2,6 +2,7 @@
  * Scoring engine — score calculation, combo tracking, and bonus computation.
  */
 
+import { comboMultiplier } from "@/features/game/domain";
 import { calculateSpeedPoints, getSpeedComboThreshold } from "../speedRules";
 
 import type { ScoringParams, ScoringResult } from "../types";
@@ -12,8 +13,7 @@ export class ScoringEngine {
      */
     calculate(params: ScoringParams): ScoringResult {
         const points = calculateSpeedPoints(params);
-        const comboThreshold = getSpeedComboThreshold();
-        const multiplier = Math.floor(params.streak / comboThreshold) + 1;
+        const multiplier = comboMultiplier(params.streak, getSpeedComboThreshold());
 
         return {
             points,

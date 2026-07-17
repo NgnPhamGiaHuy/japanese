@@ -11,6 +11,7 @@
  * single source of truth in ../config — this module only implements behavior.
  */
 
+import { comboMultiplier } from "@/features/game/domain";
 import { SPEED_GAME_CONFIG } from "../config";
 
 import type { AnswerEvent, QuestionGenerationConfig, ScoringParams } from "./types";
@@ -57,7 +58,7 @@ export function calculateSpeedPoints(params: ScoringParams): number {
 
     const speedRatio = params.timeRemaining / params.timeLimit;
     const speedBonus = Math.round(speedRatio * MAX_SPEED_BONUS);
-    const multiplier = Math.floor(params.streak / COMBO_STEP) + 1;
+    const multiplier = comboMultiplier(params.streak, COMBO_STEP);
 
     return (BASE_POINTS + speedBonus) * multiplier;
 }

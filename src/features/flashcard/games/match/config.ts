@@ -7,6 +7,8 @@
  * Scoring: base per match + combo, optional time bonus when the clock is on.
  */
 
+import { comboBonusAdditive } from "@/features/game/domain";
+
 export const MATCH_GAME_MODE = "flashcard_match";
 
 /** Per-deck game mode key stored in Firestore and used for the leaderboard. */
@@ -94,7 +96,8 @@ export const DIFFICULTY_CONFIG: Record<MatchDifficulty, DifficultyConfig> = {
 // ─── Scoring constants ────────────────────────────────────────────────────────
 
 export const BASE_POINTS_PER_MATCH = 100;
-/** Bonus per combo level (level = Math.floor(streak / 3)). */
+/** Every COMBO_STEP-streak match adds one more COMBO_BONUS_PER_LEVEL (additive — see game/domain/combo.ts). */
+export const COMBO_STEP = 3;
 export const COMBO_BONUS_PER_LEVEL = 30;
 /** Points deducted per wrong attempt. */
 export const WRONG_PENALTY = 50;
@@ -103,9 +106,7 @@ export const TIME_BONUS_PER_SECOND = 10;
 
 /** Incremental score for a single correct match. */
 export function calcMatchPoints(streak: number): number {
-    const comboLevel = Math.floor(streak / 3);
-    const comboBonus = comboLevel * COMBO_BONUS_PER_LEVEL;
-    return BASE_POINTS_PER_MATCH + comboBonus;
+    return BASE_POINTS_PER_MATCH + comboBonusAdditive(streak, COMBO_STEP, COMBO_BONUS_PER_LEVEL);
 }
 
 /** Time bonus applied once when all real pairs clear before timeout. */
@@ -115,7 +116,7 @@ export function calcTimeBonus(timeRemaining: number): number {
 
 /** Combo description shown in the combo popup (e.g. "3× COMBO!"). */
 export function comboLabel(streak: number): string {
-    if (streak < 3) return "";
-    const level = Math.floor(streak / 3);
+    if (streak < COMBO_STEP) return "";
+    const level = Math.floor(streak / COMBO_STEP);
     return `${level + 2}× COMBO!`;
 }
