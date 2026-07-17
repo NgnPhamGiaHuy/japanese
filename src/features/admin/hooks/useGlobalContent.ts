@@ -44,7 +44,7 @@ export function useGlobalContent() {
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: adminQueryKeys.content() });
-            queryClient.invalidateQueries({ queryKey: [adminQueryKeys.dashboard()] });
+            queryClient.invalidateQueries({ queryKey: adminQueryKeys.dashboard() });
             if (selectedDeckPath) setSelectedDeckPath(null);
         },
     });
