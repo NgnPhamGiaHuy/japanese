@@ -18,7 +18,12 @@ export function validateCommentContent(content: string): { valid: boolean; error
 
 /**
  * Sanitizes comment content to prevent XSS.
- * Escapes HTML entities while preserving markdown.
+ *
+ * @remarks
+ * Escapes only the characters that are actually dangerous inside
+ * dangerouslySetInnerHTML (`&`, `<`, `>`, `"`, `'`). Does NOT escape `/` —
+ * it isn't an XSS vector on its own, and escaping it broke URL auto-linking
+ * for every comment containing a link.
  */
 export function sanitizeCommentContent(content: string): string {
     return content
@@ -26,6 +31,5 @@ export function sanitizeCommentContent(content: string): string {
         .replace(/</g, "&lt;")
         .replace(/>/g, "&gt;")
         .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#x27;")
-        .replace(/\//g, "&#x2F;");
+        .replace(/'/g, "&#x27;");
 }

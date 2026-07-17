@@ -40,13 +40,10 @@ export interface CommentItemProps {
 }
 
 // ─── Markdown renderer (pure function, no state) ──────────────────────────────
+// `raw` is already HTML-escaped by sanitizeCommentContent at write time — this
+// only layers markdown formatting on top of it, it must not escape again.
 const renderMarkdown = (raw: string): string => {
     return raw
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#039;")
         .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
         .replace(/\*(.+?)\*/g, "<em>$1</em>")
         .replace(/_(.+?)_/g, "<em>$1</em>")
