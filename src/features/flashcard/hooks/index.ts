@@ -1,4 +1,5 @@
 export * from "./useCards";
+export * from "./useCardSessionState";
 export * from "./useCardsWithProgress";
 export * from "./useCommentCount";
 export * from "./useCommentPanel";

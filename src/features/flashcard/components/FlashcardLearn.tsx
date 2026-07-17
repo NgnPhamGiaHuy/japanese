@@ -8,17 +8,18 @@
 
 import { useRef, useState } from "react";
 
-import { BookOpen, X } from "lucide-react";
+import { BookOpen } from "lucide-react";
 
 import { DEFAULT_DECK_THEME_COLOR } from "@/features/flashcard/types";
-import { StatGrid } from "@/features/game/components";
 import { playSfx, speak } from "@/shared/audio";
 import { Button, EmptyState } from "@/shared/components/ui";
-import { hexToThemeColor } from "@/shared/utils";
 import FlashcardAudioButton from "./FlashcardAudioButton";
 import GradeButtons from "./GradeButtons";
+import StudyProgressHeader from "./StudyProgressHeader";
+import StudySummaryScreen from "./StudySummaryScreen";
+import { useCardSessionState } from "../hooks/useCardSessionState";
 import { useRevealPronunciation } from "../hooks/useRevealPronunciation";
-import { getAudioText, reinsertCard, resolveCardFaces } from "../utils";
+import { getAudioText, resolveCardFaces } from "../utils";
 
 import type { CardWithProgress, Grade } from "../domain";
 import type { Lesson, StudyStats } from "../types";
@@ -34,19 +35,12 @@ interface FlashcardLearnProps {
 const FlashcardLearn = ({ lesson, cards, onClose, onAnswer, onComplete }: FlashcardLearnProps) => {
     const themeHex = lesson.themeColor || DEFAULT_DECK_THEME_COLOR;
 
-    /** Local queue state — initialized from cards prop, supports Again re-insertion */
-    const [queue, setQueue] = useState<CardWithProgress[]>(() => [...cards]);
-    const [currentIndex, setCurrentIndex] = useState(0);
+    const { card, currentIndex, queue, progress, stats, showSummary, submitGrade } =
+        useCardSessionState(cards, onAnswer);
     const [revealed, setRevealed] = useState(false);
-    const [stats, setStats] = useState<StudyStats>({
-        correct: 0,
-        incorrect: 0,
-        mistakeCardIds: [],
-    });
-    const [showSummary, setShowSummary] = useState(false);
     const showAnswerRef = useRef<HTMLButtonElement>(null);
 
-    useRevealPronunciation(revealed, queue[currentIndex], "flashcard-learn");
+    useRevealPronunciation(revealed, card, "flashcard-learn");
 
     if (cards.length === 0) {
         return (
@@ -69,13 +63,11 @@ const FlashcardLearn = ({ lesson, cards, onClose, onAnswer, onComplete }: Flashc
         );
     }
 
-    const card = queue[currentIndex];
     if (!card) return null;
 
     const faces = resolveCardFaces(card, "learn");
     const displayFront = faces.front.clozeTemplate ?? faces.front.primary ?? "";
     const back = faces.back;
-    const progress = (currentIndex / queue.length) * 100;
 
     const handleShowAnswer = () => {
         playSfx("click");
@@ -83,91 +75,37 @@ const FlashcardLearn = ({ lesson, cards, onClose, onAnswer, onComplete }: Flashc
     };
 
     const handleGrade = (grade: Grade) => {
-        const knew = grade === "Good" || grade === "Easy";
-        const nextMistakes = knew ? stats.mistakeCardIds : [...stats.mistakeCardIds, card.id];
-        setStats({
-            correct: stats.correct + (knew ? 1 : 0),
-            incorrect: stats.incorrect + (!knew ? 1 : 0),
-            mistakeCardIds: nextMistakes,
-        });
-        playSfx(knew ? "correct" : "wrong");
-
-        // Advance UI immediately — writes are fire-and-forget
-        if (grade === "Again") {
-            setQueue(reinsertCard(queue, currentIndex));
-            setRevealed(false);
-        } else {
-            setRevealed(false);
-            if (currentIndex < queue.length - 1) {
-                setCurrentIndex((i) => i + 1);
-            } else {
-                setShowSummary(true);
-            }
-        }
-
-        void onAnswer(card, grade).catch(() => {});
+        setRevealed(false);
+        submitGrade(grade);
     };
 
     if (showSummary) {
         const xpEarned = stats.correct * 2;
         return (
-            <div className="bg-bg fixed inset-0 z-50 flex flex-col items-center justify-center p-6 text-center">
-                <div
-                    className="mb-6 flex h-24 w-24 -rotate-6 items-center justify-center rounded-4xl border-b-8 shadow-sm"
-                    style={{ backgroundColor: themeHex, borderColor: `${themeHex}AA` }}
-                >
-                    <BookOpen size={48} className="text-white" strokeWidth={3} />
-                </div>
-                <h2 className="text-text mb-1 text-4xl font-black">Lesson Complete!</h2>
-                <p className="text-muted mb-8 text-lg font-bold">
-                    You learned {cards.length} new card{cards.length !== 1 ? "s" : ""}.
-                </p>
-                <div className="mb-10 w-full max-w-sm">
-                    <StatGrid
-                        variant="large"
-                        className="flex w-full gap-4"
-                        stats={[
-                            {
-                                value: stats.correct,
-                                label: "Got It",
-                                color: "var(--color-hiragana)",
-                            },
-                            {
-                                value: stats.incorrect,
-                                label: "Study More",
-                                color: "var(--color-survival)",
-                            },
-                        ]}
-                    />
-                </div>
-                <Button
-                    variant="primary"
-                    color={hexToThemeColor(themeHex)}
-                    onClick={() => onComplete(stats)}
-                    className="w-full max-w-xs py-5 text-xl"
-                >
-                    Collect +{xpEarned} XP
-                </Button>
-            </div>
+            <StudySummaryScreen
+                icon={BookOpen}
+                title="Lesson Complete!"
+                subtitle={`You learned ${cards.length} new card${cards.length !== 1 ? "s" : ""}.`}
+                themeHex={themeHex}
+                stats={[
+                    { value: stats.correct, label: "Got It", color: "var(--color-hiragana)" },
+                    { value: stats.incorrect, label: "Study More", color: "var(--color-survival)" },
+                ]}
+                xpEarned={xpEarned}
+                onComplete={() => onComplete(stats)}
+            />
         );
     }
 
     return (
         <div className="bg-bg fixed inset-0 z-50 flex flex-col">
-            <header className="flex items-center justify-between p-4">
-                <Button variant="ghost" size="icon" onClick={onClose} icon={X} aria-label="Close" />
-                <div className="mx-4 flex-1">
-                    <div className="h-4 overflow-hidden rounded-full bg-gray-200">
-                        <div
-                            className="h-full transition-all duration-300"
-                            style={{ width: `${progress}%`, backgroundColor: themeHex }}
-                        />
-                    </div>
-                </div>
-                <span className="text-muted w-12 text-right text-sm font-black">
-                    {currentIndex + 1}/{queue.length}
-                </span>
-            </header>
+            <StudyProgressHeader
+                onClose={onClose}
+                current={currentIndex + 1}
+                total={queue.length}
+                progress={progress}
+                color={themeHex}
+            />
 
             <div className="mx-auto flex w-full max-w-md flex-1 flex-col items-center justify-center gap-6 p-4 sm:p-6">
                 {/* Card face */}

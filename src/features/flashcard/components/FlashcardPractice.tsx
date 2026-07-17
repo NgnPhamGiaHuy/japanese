@@ -8,19 +8,21 @@
 
 import { useEffect, useMemo, useState } from "react";
 
-import { Check, Lightbulb, RefreshCw, X } from "lucide-react";
+import { Check, Lightbulb, RefreshCw } from "lucide-react";
 
 import { DEFAULT_DECK_THEME_COLOR } from "@/features/flashcard/types";
-import { StatGrid } from "@/features/game/components";
 import { playSfx, sequence, speak } from "@/shared/audio";
 import { Button, EmptyState } from "@/shared/components/ui";
-import { hexToThemeColor, shuffleArray } from "@/shared/utils";
+import { shuffleArray } from "@/shared/utils";
 import FlashcardAudioButton from "./FlashcardAudioButton";
 import GradeButtons from "./GradeButtons";
 import McChoiceGrid from "./McChoiceGrid";
+import StudyProgressHeader from "./StudyProgressHeader";
+import StudySummaryScreen from "./StudySummaryScreen";
+import { useCardSessionState } from "../hooks/useCardSessionState";
 import { useRevealPronunciation } from "../hooks/useRevealPronunciation";
 import { getDailyProgress } from "../services";
-import { getAudioText, reinsertCard, resolveCardFaces } from "../utils";
+import { getAudioText, resolveCardFaces } from "../utils";
 
 import type { CardWithProgress, Grade } from "../domain";
 import type { Lesson, StudyStats } from "../types";
@@ -67,19 +69,9 @@ const FlashcardPractice = ({
 }: FlashcardPracticeProps) => {
     const themeHex = lesson.themeColor || DEFAULT_DECK_THEME_COLOR;
 
-    /** Local queue state — initialized from cards prop, supports Again re-insertion */
-    const [queue, setQueue] = useState<CardWithProgress[]>(() => [...cards]);
-    const [currentIndex, setCurrentIndex] = useState(0);
+    const { card, currentIndex, queue, progress, stats, showSummary, submitGrade } =
+        useCardSessionState(cards, onAnswer);
     const [isFlipped, setIsFlipped] = useState(false);
-
-    /** Tracking session performance for XP calculation and summary */
-    const [stats, setStats] = useState<StudyStats>({
-        correct: 0,
-        incorrect: 0,
-        mistakeCardIds: [],
-    });
-
-    const [showSummary, setShowSummary] = useState(false);
     const [hintVisible, setHintVisible] = useState(false);
 
     /** Local state for the multiple-choice selection animation */
@@ -91,8 +83,6 @@ const FlashcardPractice = ({
             void getDailyProgress(userId);
         }
     }, [userId]);
-
-    const card = queue[currentIndex];
 
     /** Pronunciation reinforcement — bonds the written form to its sound on reveal. */
     useRevealPronunciation(isFlipped, card, "flashcard-practice");
@@ -143,35 +133,16 @@ const FlashcardPractice = ({
     const displayHint = back.hint || null;
     const altSubtitle = back.alternatives.find((value) => value !== displayFront) || null;
     const headerHint = displayHint && displayHint !== altSubtitle ? displayHint : null;
-    const progress = (currentIndex / queue.length) * 100;
 
     /**
      * @param playCue - False when the caller already sounded the answer. Multiple-choice grading
      *   is deferred by 750ms for the colour animation, but its cue must fire on selection.
      */
     const handleGrade = (grade: Grade, playCue = true) => {
-        const knew = grade === "Good" || grade === "Easy";
-        const nextMistakes = knew ? stats.mistakeCardIds : [...stats.mistakeCardIds, card.id];
-        setStats({
-            correct: stats.correct + (knew ? 1 : 0),
-            incorrect: stats.incorrect + (!knew ? 1 : 0),
-            mistakeCardIds: nextMistakes,
-        });
         setIsFlipped(false);
         setHintVisible(false);
         setMcSelected(null);
-        if (playCue) playSfx(knew ? "correct" : "wrong");
-
-        // Advance UI immediately — writes are fire-and-forget
-        if (grade === "Again") {
-            setQueue(reinsertCard(queue, currentIndex));
-        } else {
-            if (currentIndex < queue.length - 1) {
-                setCurrentIndex((i) => i + 1);
-            } else {
-                setShowSummary(true);
-            }
-        }
+        submitGrade(grade, { playCue });
 
         void onAnswer(card, grade).catch(() => {});
     };
@@ -207,64 +178,35 @@ const FlashcardPractice = ({
                 ? Math.round((stats.correct / (stats.correct + stats.incorrect)) * 100)
                 : 0;
         return (
-            <div className="bg-bg fixed inset-0 z-50 flex flex-col items-center justify-center p-6 text-center">
-                <div
-                    className="mb-6 flex h-24 w-24 -rotate-6 items-center justify-center rounded-4xl border-b-8 shadow-sm"
-                    style={{ backgroundColor: themeHex, borderColor: `${themeHex}AA` }}
-                >
-                    <RefreshCw size={48} className="text-white" strokeWidth={3} />
-                </div>
-                <h2 className="text-text mb-1 text-4xl font-black">Practice Done!</h2>
-                <p className="text-muted mb-8 text-lg font-bold">
-                    Accuracy: <span className="text-text font-black">{accuracy}%</span>
-                </p>
-                <div className="mb-10 w-full max-w-sm">
-                    <StatGrid
-                        variant="large"
-                        className="flex w-full gap-4"
-                        stats={[
-                            {
-                                value: stats.correct,
-                                label: "Correct",
-                                color: "var(--color-hiragana)",
-                            },
-                            {
-                                value: stats.incorrect,
-                                label: "Review",
-                                color: "var(--color-survival)",
-                            },
-                        ]}
-                    />
-                </div>
-                <Button
-                    variant="primary"
-                    color={hexToThemeColor(themeHex)}
-                    onClick={() => onComplete(stats)}
-                    className="w-full max-w-xs py-5 text-xl"
-                >
-                    Collect +{xpEarned} XP
-                </Button>
-            </div>
+            <StudySummaryScreen
+                icon={RefreshCw}
+                title="Practice Done!"
+                subtitle={
+                    <>
+                        Accuracy: <span className="text-text font-black">{accuracy}%</span>
+                    </>
+                }
+                themeHex={themeHex}
+                stats={[
+                    { value: stats.correct, label: "Correct", color: "var(--color-hiragana)" },
+                    { value: stats.incorrect, label: "Review", color: "var(--color-survival)" },
+                ]}
+                xpEarned={xpEarned}
+                onComplete={() => onComplete(stats)}
+            />
         );
     }
 
     // ── Session UI ───────────────────────────────────────────────────────────
     return (
         <div className="bg-bg fixed inset-0 z-50 flex flex-col">
-            <header className="flex items-center justify-between p-4">
-                <Button variant="ghost" size="icon" onClick={onClose} icon={X} aria-label="Close" />
-                <div className="mx-4 flex-1">
-                    <div className="h-4 overflow-hidden rounded-full bg-gray-200">
-                        <div
-                            className="h-full transition-all duration-300"
-                            style={{ width: `${progress}%`, backgroundColor: themeHex }}
-                        />
-                    </div>
-                </div>
-                <span className="text-muted w-12 text-right text-sm font-black">
-                    {currentIndex + 1}/{queue.length}
-                </span>
-            </header>
+            <StudyProgressHeader
+                onClose={onClose}
+                current={currentIndex + 1}
+                total={queue.length}
+                progress={progress}
+                color={themeHex}
+            />
 
             <div className="mx-auto flex w-full max-w-md flex-1 flex-col items-center justify-center p-4 sm:p-6">
                 {/* ── Multiple-choice (Recognition Mode) ── */}

@@ -8,19 +8,21 @@
 
 import { useMemo, useState } from "react";
 
-import { AlertCircle, Brain, Check, Lightbulb, Loader2, X } from "lucide-react";
+import { AlertCircle, Brain, Check, Lightbulb, Loader2 } from "lucide-react";
 
 import useAIExplanation from "@/features/ai/hooks/useAIExplanation";
 import { DEFAULT_DECK_THEME_COLOR } from "@/features/flashcard/types";
-import { StatGrid } from "@/features/game/components";
 import { playSfx, sequence, speak } from "@/shared/audio";
 import { Button, EmptyState } from "@/shared/components/ui";
-import { hexToThemeColor, shuffleArray } from "@/shared/utils";
+import { shuffleArray } from "@/shared/utils";
 import FlashcardAudioButton from "./FlashcardAudioButton";
 import GradeButtons from "./GradeButtons";
 import McChoiceGrid from "./McChoiceGrid";
+import StudyProgressHeader from "./StudyProgressHeader";
+import StudySummaryScreen from "./StudySummaryScreen";
+import { useCardSessionState } from "../hooks/useCardSessionState";
 import { useRevealPronunciation } from "../hooks/useRevealPronunciation";
-import { getAudioText, reinsertCard, resolveCardFaces } from "../utils";
+import { getAudioText, resolveCardFaces } from "../utils";
 
 import type { CardWithProgress, Grade } from "../domain";
 import type { Lesson, StudyStats } from "../types";
@@ -63,21 +65,9 @@ const FlashcardMistakeReview = ({
 }: FlashcardMistakeReviewProps) => {
     const themeHex = lesson.themeColor || DEFAULT_DECK_THEME_COLOR;
 
-    /** Local queue state — initialized from cards prop, supports Again re-insertion */
-    const [queue, setQueue] = useState<CardWithProgress[]>(() => [...cards]);
-    const [currentIndex, setCurrentIndex] = useState(0);
+    const { card, currentIndex, queue, progress, stats, showSummary, submitGrade } =
+        useCardSessionState(cards, onAnswer);
     const [isFlipped, setIsFlipped] = useState(false);
-
-    /** Local session stats for reward calculation */
-    const [stats, setStats] = useState<StudyStats>({
-        correct: 0,
-        incorrect: 0,
-        mistakeCardIds: [],
-    });
-
-    const [showSummary, setShowSummary] = useState(false);
-
-    const card = queue[currentIndex];
 
     useRevealPronunciation(isFlipped, card, "flashcard-mistake-review");
 
@@ -126,33 +116,12 @@ const FlashcardMistakeReview = ({
     const displayHint = back.hint || null;
     const altSubtitle = back.alternatives.find((value) => value !== displayFront) || null;
     const headerHint = displayHint && displayHint !== altSubtitle ? displayHint : null;
-    const progress = (currentIndex / queue.length) * 100;
 
     /** @param playCue - False when the multiple-choice path already sounded the answer. */
     const handleGrade = (grade: Grade, playCue = true) => {
-        const knew = grade === "Good" || grade === "Easy";
-        const nextMistakes = knew ? stats.mistakeCardIds : [...stats.mistakeCardIds, card.id];
-        setStats({
-            correct: stats.correct + (knew ? 1 : 0),
-            incorrect: stats.incorrect + (!knew ? 1 : 0),
-            mistakeCardIds: nextMistakes,
-        });
-        if (playCue) playSfx(knew ? "correct" : "wrong");
         setIsFlipped(false);
         setMcSelected(null);
-
-        // Advance UI immediately — writes are fire-and-forget
-        if (grade === "Again") {
-            setQueue(reinsertCard(queue, currentIndex));
-        } else {
-            if (currentIndex < queue.length - 1) {
-                setCurrentIndex((i) => i + 1);
-            } else {
-                setShowSummary(true);
-            }
-        }
-
-        void onAnswer(card, grade).catch(() => {});
+        submitGrade(grade, { playCue });
     };
 
     const handleMCSelect = (choice: string) => {
@@ -183,68 +152,32 @@ const FlashcardMistakeReview = ({
     if (showSummary) {
         const xpEarned = stats.correct * 3;
         return (
-            <div className="bg-bg fixed inset-0 z-50 flex flex-col items-center justify-center p-6 text-center">
-                <div
-                    className="mb-6 flex h-24 w-24 -rotate-6 items-center justify-center rounded-4xl border-b-8 shadow-sm"
-                    style={{ backgroundColor: themeHex, borderColor: `${themeHex}AA` }}
-                >
-                    <Brain size={48} className="text-white" strokeWidth={2.5} />
-                </div>
-                <h2 className="text-text mb-1 text-4xl font-black">Review Done!</h2>
-                <p className="text-muted mb-8 text-lg font-bold">
-                    You revisited {cards.length} difficult card{cards.length !== 1 ? "s" : ""}.
-                </p>
-                <div className="mb-10 w-full max-w-sm">
-                    <StatGrid
-                        variant="large"
-                        className="flex w-full gap-4"
-                        stats={[
-                            {
-                                value: stats.correct,
-                                label: "Fixed",
-                                color: "var(--color-hiragana)",
-                            },
-                            {
-                                value: stats.incorrect,
-                                label: "Still hard",
-                                color: "var(--color-survival)",
-                            },
-                        ]}
-                    />
-                </div>
-                <Button
-                    variant="primary"
-                    color={hexToThemeColor(themeHex)}
-                    onClick={() => onComplete(stats)}
-                    className="w-full max-w-xs py-5 text-xl"
-                >
-                    Collect +{xpEarned} XP
-                </Button>
-            </div>
+            <StudySummaryScreen
+                icon={Brain}
+                iconStrokeWidth={2.5}
+                title="Review Done!"
+                subtitle={`You revisited ${cards.length} difficult card${cards.length !== 1 ? "s" : ""}.`}
+                themeHex={themeHex}
+                stats={[
+                    { value: stats.correct, label: "Fixed", color: "var(--color-hiragana)" },
+                    { value: stats.incorrect, label: "Still hard", color: "var(--color-survival)" },
+                ]}
+                xpEarned={xpEarned}
+                onComplete={() => onComplete(stats)}
+            />
         );
     }
 
     // ── Player UI ────────────────────────────────────────────────────────────
     return (
         <div className="bg-bg fixed inset-0 z-50 flex flex-col">
-            {/* Header: Error-themed progress bar */}
-            <header className="flex items-center justify-between p-4">
-                <Button variant="ghost" size="icon" onClick={onClose} icon={X} aria-label="Close" />
-                <div className="mx-4 flex-1">
-                    <div className="h-4 overflow-hidden rounded-full bg-gray-200">
-                        <div
-                            className="h-full transition-all duration-300"
-                            style={{
-                                width: `${progress}%`,
-                                backgroundColor: "var(--color-danger)",
-                            }}
-                        />
-                    </div>
-                </div>
-                <span className="text-muted w-12 text-right text-sm font-black">
-                    {currentIndex + 1}/{queue.length}
-                </span>
-            </header>
+            <StudyProgressHeader
+                onClose={onClose}
+                current={currentIndex + 1}
+                total={queue.length}
+                progress={progress}
+                color="var(--color-danger)"
+            />
 
             {/* Visual Guard: Mistake Mode Badge */}
             <div className="border-danger-bg bg-danger-bg text-danger mx-auto flex items-center gap-2 rounded-xl border px-4 py-1.5 text-xs font-black uppercase">
