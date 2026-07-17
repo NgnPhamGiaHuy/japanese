@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 
 interface UserIdentityAvatarProps {
@@ -35,6 +36,7 @@ const UserIdentityAvatar = ({
     isOnline,
     size,
 }: UserIdentityAvatarProps) => {
+    const t = useTranslations("AdminUsers");
     const [imgFailed, setImgFailed] = useState(false);
     const { avatar, dot } = SIZE_CLASSES[size];
 
@@ -45,7 +47,7 @@ const UserIdentityAvatar = ({
             {photoURL && !imgFailed ? (
                 <img
                     src={photoURL}
-                    alt={displayName ?? "User Avatar"}
+                    alt={displayName ?? t("userAvatarAlt")}
                     className="h-full w-full object-cover"
                     onError={() => setImgFailed(true)}
                 />

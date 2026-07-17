@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import { Users as UsersIcon } from "lucide-react";
 
 import { Button } from "@/shared/components/ui";
@@ -43,6 +45,7 @@ interface UsersTableProps {
  * Adheres to < 120 lines by delegating logic to useUsersTable hook.
  */
 const UsersTable = (props: UsersTableProps) => {
+    const t = useTranslations("AdminUsers");
     const { totalUsers = 0, loading = false, currentPage = 0, canDelete, canPromote } = props;
     const totalPages = Math.ceil(totalUsers / 25);
 
@@ -97,7 +100,7 @@ const UsersTable = (props: UsersTableProps) => {
                         <DataTableMobileList
                             table={table}
                             loading={loading}
-                            loadingLabel="Loading users..."
+                            loadingLabel={t("loadingUsers")}
                             renderRow={(row) => <UserMobileRow row={row} />}
                         />
                     ) : undefined
@@ -123,23 +126,23 @@ const UsersTable = (props: UsersTableProps) => {
                         <DataTableBody
                             table={table}
                             loading={loading}
-                            loadingLabel="Loading users..."
+                            loadingLabel={t("loadingUsers")}
                         />
                     </>
                 ) : (
                     <div className="col-span-full">
                         <AdminEmptyState
-                            title={globalFilter ? "No users match your search" : "No users found"}
+                            title={globalFilter ? t("noUsersMatchSearch") : t("noUsersFound")}
                             description={
                                 globalFilter
-                                    ? `Try adjusting your search for "${globalFilter}" or clearing filters.`
-                                    : "Individual user accounts will appear here as they register on the platform."
+                                    ? t("tryAdjustingSearch", { search: globalFilter })
+                                    : t("individualUserAccounts")
                             }
                             icon={UsersIcon}
                             action={
                                 globalFilter ? (
                                     <Button variant="secondary" onClick={() => setGlobalFilter("")}>
-                                        Clear Search
+                                        {t("clearSearch")}
                                     </Button>
                                 ) : undefined
                             }

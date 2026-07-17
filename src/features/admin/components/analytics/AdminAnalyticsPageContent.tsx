@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import dynamic from "next/dynamic";
 import { useState } from "react";
 
@@ -66,6 +67,7 @@ const TopActionsChart = dynamic(() => import("./TopActionsChart"), {
  * from the useAnalytics hook. Handles loading and error states for the entire view.
  */
 const AdminAnalyticsPageContent = () => {
+    const t = useTranslations("AdminAnalytics");
     const { data, isLoading, error, refetch } = useAnalytics();
     const [isExportModalOpen, setIsExportModalOpen] = useState(false);
     const {
@@ -80,24 +82,22 @@ const AdminAnalyticsPageContent = () => {
     if (isLoading)
         return (
             <AdminPageLayout>
-                <LoadingSpinner fullScreen={false} label="Loading deep insights..." />
+                <LoadingSpinner fullScreen={false} label={t("loadingInsights")} />
             </AdminPageLayout>
         );
     if (error || !data) {
         return (
             <AdminPageLayout>
                 <AdminErrorState
-                    message={error?.message ?? "Analytics failed to load"}
+                    message={error?.message ?? t("analyticsFailedToLoad")}
                     onRetry={() => refetch()}
                 />
             </AdminPageLayout>
         );
     }
 
-    const drilldownTitle = selection ? `Drilling down: ${selection.label}` : "";
-    const drilldownDesc = selection
-        ? `Viewing detailed records associated with ${selection.value}. Records are live from Firebase.`
-        : "";
+    const drilldownTitle = selection ? t("drilldownTitle", { label: selection.label }) : "";
+    const drilldownDesc = selection ? t("drilldownDescription", { value: selection.value }) : "";
 
     const isGlobalEmpty =
         data.growth.length === 0 &&
@@ -109,13 +109,13 @@ const AdminAnalyticsPageContent = () => {
         return (
             <AdminPageLayout>
                 <AdminPageHeader
-                    title="Advanced Analytics"
-                    description="Cohort behavior and system performance insights."
+                    title={t("title")}
+                    description={t("descriptionShort")}
                     icon={BarChart3}
                 />
                 <AdminEmptyState
-                    title="No analytics data"
-                    description="System metrics are computed daily. Data will appear here once the first batch is processed."
+                    title={t("noAnalyticsData")}
+                    description={t("noAnalyticsDataDescription")}
                     icon={BarChart3}
                 />
             </AdminPageLayout>
@@ -125,8 +125,8 @@ const AdminAnalyticsPageContent = () => {
     return (
         <AdminPageLayout>
             <AdminPageHeader
-                title="Advanced Analytics"
-                description="Long-term trends, cohort behavior, and system performance insights."
+                title={t("title")}
+                description={t("description")}
                 icon={BarChart3}
                 actions={
                     <div className="flex gap-2">
@@ -135,7 +135,7 @@ const AdminAnalyticsPageContent = () => {
                             className="gap-2 !px-3 !py-2 !text-xs sm:!px-4 sm:!py-2 sm:!text-sm"
                         >
                             <Calendar size={14} />
-                            Last 30 Days
+                            {t("last30Days")}
                         </Button>
                         <Button
                             variant="primary"
@@ -143,7 +143,7 @@ const AdminAnalyticsPageContent = () => {
                             onClick={() => setIsExportModalOpen(true)}
                         >
                             <Download size={14} />
-                            Export CSV
+                            {t("exportCsv")}
                         </Button>
                     </div>
                 }
@@ -152,19 +152,23 @@ const AdminAnalyticsPageContent = () => {
             <div className="grid grid-cols-1 gap-4 sm:gap-6 lg:grid-cols-2">
                 <GrowthChart
                     data={data.growth}
-                    onClick={(date) => openDrilldown("user_growth", "Registration Growth", date)}
+                    onClick={(date) =>
+                        openDrilldown("user_growth", t("registrationGrowthLabel"), date)
+                    }
                 />
                 <RoleChart
                     data={data.roles}
-                    onClick={(role) => openDrilldown("role", "Administrative Distribution", role)}
+                    onClick={(role) =>
+                        openDrilldown("role", t("administrativeDistributionLabel"), role)
+                    }
                 />
                 <EngagementChart
                     data={data.engagement}
-                    onClick={(feat) => openDrilldown("feature", "Feature Engagement", feat)}
+                    onClick={(feat) => openDrilldown("feature", t("engagement"), feat)}
                 />
                 <ContentDistributionChart
                     data={data.content}
-                    onClick={(cat) => openDrilldown("content", "Content Breakdown", cat)}
+                    onClick={(cat) => openDrilldown("content", t("contentBreakdownLabel"), cat)}
                 />
                 <RetentionChart data={data.retention} />
                 <ErrorTrendChart data={data.errorTrends} />
@@ -193,7 +197,7 @@ const AdminAnalyticsPageContent = () => {
                     <div className="flex items-center gap-3 pt-2">
                         <div className="h-px flex-1 bg-gray-100" />
                         <span className="text-muted text-xs font-black tracking-widest uppercase">
-                            System Log Insights
+                            {t("systemLogInsights")}
                         </span>
                         <div className="h-px flex-1 bg-gray-100" />
                     </div>
@@ -202,20 +206,24 @@ const AdminAnalyticsPageContent = () => {
                             <LogVolumeChart
                                 data={data.logVolume ?? []}
                                 onClick={(type) =>
-                                    openDrilldown("log_type", `Log Type: ${type}`, type)
+                                    openDrilldown("log_type", t("logTypeDrilldown", { type }), type)
                                 }
                             />
                         </div>
                         <LogLevelChart
                             data={data.logsByLevel ?? []}
                             onClick={(level) =>
-                                openDrilldown("log_level", `Severity: ${level}`, level)
+                                openDrilldown("log_level", t("severityDrilldown", { level }), level)
                             }
                         />
                         <TopActionsChart
                             data={data.topActions ?? []}
                             onClick={(action) =>
-                                openDrilldown("log_action", `Action: ${action}`, action)
+                                openDrilldown(
+                                    "log_action",
+                                    t("actionDrilldown", { action }),
+                                    action,
+                                )
                             }
                         />
                     </div>

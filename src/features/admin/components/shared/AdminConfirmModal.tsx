@@ -36,8 +36,8 @@ const AdminConfirmModal = ({
     onConfirm,
     title,
     message,
-    confirmText = "Confirm",
-    cancelText = "Cancel",
+    confirmText,
+    cancelText,
     variant = "info",
     isLoading = false,
 }: AdminConfirmModalProps) => {

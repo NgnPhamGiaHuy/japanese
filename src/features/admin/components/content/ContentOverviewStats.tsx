@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import { Layers } from "lucide-react";
 
 import { AdminStatCard } from "../shared";
@@ -21,10 +23,11 @@ interface ContentOverviewStatsProps {
  * "98%". Re-add only once a real metric backs them.
  */
 export const ContentOverviewStats = ({ totalDecks }: ContentOverviewStatsProps) => {
+    const t = useTranslations("AdminContent");
     return (
         <div className="grid grid-cols-1">
             <AdminStatCard
-                label="Global Decks"
+                label={t("globalDecks")}
                 value={totalDecks}
                 icon={Layers}
                 color="text-both"

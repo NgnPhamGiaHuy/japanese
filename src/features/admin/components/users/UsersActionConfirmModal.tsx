@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import { AdminConfirmModal } from "../shared";
 
 interface UsersActionConfirmModalProps {
@@ -21,28 +23,31 @@ const UsersActionConfirmModal = ({
     onClose,
     onConfirm,
 }: UsersActionConfirmModalProps) => {
+    const t = useTranslations("AdminUsers");
     if (!pendingAction) return null;
 
     const { type, uids } = pendingAction;
+    const actionLabel = t(
+        type === "delete" ? "actionDelete" : type === "promote" ? "actionPromote" : "actionDemote",
+    );
 
     return (
         <AdminConfirmModal
             isOpen={!!pendingAction}
             onClose={onClose}
             onConfirm={onConfirm}
-            title={
+            title={t(
                 type === "delete"
-                    ? "Delete Users?"
+                    ? "deleteUsersTitle"
                     : type === "promote"
-                      ? "Promote Users?"
-                      : "Demote Users?"
-            }
+                      ? "promoteUsersTitle"
+                      : "demoteUsersTitle",
+            )}
             message={
                 uids.length === 1
-                    ? `Are you sure you want to ${type} this user?`
-                    : `Apply "${type}" to ${uids.length} selected users?`
+                    ? t("confirmSingleAction", { action: actionLabel })
+                    : t("confirmBulkAction", { action: actionLabel, count: uids.length })
             }
-            confirmText="Confirm"
             variant={type === "delete" ? "danger" : "info"}
             isLoading={isProcessing}
         />

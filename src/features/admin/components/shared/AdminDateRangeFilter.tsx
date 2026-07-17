@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import { Filter, RotateCcw } from "lucide-react";
 
 import { DatePicker } from "@/shared/components/ui";
@@ -26,18 +28,19 @@ const AdminDateRangeFilter = ({
     onReset,
     hasActiveFilters = false,
 }: AdminDateRangeFilterProps) => {
+    const t = useTranslations("AdminCommon");
     return (
         <div className="flex flex-col items-center justify-between gap-4 border-t border-gray-50 pt-4 lg:flex-row">
             <div className="flex flex-wrap items-center gap-3">
                 <DatePicker
-                    label="From"
-                    placeholder="Start date"
+                    label={t("from")}
+                    placeholder={t("startDate")}
                     value={startDate}
                     onChange={onStartChange}
                 />
                 <DatePicker
-                    label="To"
-                    placeholder="End date"
+                    label={t("to")}
+                    placeholder={t("endDate")}
                     value={endDate}
                     onChange={onEndChange}
                 />
@@ -50,7 +53,7 @@ const AdminDateRangeFilter = ({
                     className="text-muted hover:text-danger flex items-center gap-2 text-xs font-black tracking-widest uppercase transition-all"
                 >
                     <RotateCcw size={12} />
-                    Reset
+                    {t("reset")}
                 </button>
                 <div className="h-6 w-px bg-gray-100" />
                 <div className="flex items-center gap-2 px-2 text-xs font-black tracking-widest uppercase">
@@ -62,7 +65,7 @@ const AdminDateRangeFilter = ({
                         }`}
                     >
                         <Filter size={10} className={hasActiveFilters ? "animate-pulse" : ""} />
-                        <span>Active Filters</span>
+                        <span>{t("activeFilters")}</span>
                         {hasActiveFilters && (
                             <div className="bg-katakana h-2 w-2 rounded-full shadow-sm shadow-[#1cb0f6]/50" />
                         )}

@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import { isOnline } from "@/shared/utils";
 import UserIdentityAvatar from "./UserIdentityAvatar";
 
@@ -16,6 +18,8 @@ interface UserCellProps {
  * Includes a subtle hover transition for a premium feel.
  */
 const UserCell = ({ user }: UserCellProps) => {
+    const t = useTranslations("AdminCommon");
+    const tUsers = useTranslations("AdminUsers");
     const online = isOnline(user.lastSeenAt);
 
     return (
@@ -30,16 +34,16 @@ const UserCell = ({ user }: UserCellProps) => {
             <div className="min-w-0">
                 <div className="flex items-center gap-1.5">
                     <p className="text-text truncate text-[15px] font-black">
-                        {user.displayName || "Anonymous User"}
+                        {user.displayName || t("anonymousUser")}
                     </p>
                     {online && (
                         <span className="bg-hiragana flex h-4 animate-pulse items-center rounded-full px-1.5 text-[8px] font-black tracking-widest text-white uppercase shadow-sm shadow-[#58cc02]/20">
-                            Live
+                            {t("live")}
                         </span>
                     )}
                 </div>
                 <p className="text-muted truncate text-xs leading-none font-bold">
-                    {user.email ?? "No email linked"}
+                    {user.email ?? tUsers("noEmailLinked")}
                 </p>
             </div>
         </div>

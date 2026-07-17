@@ -1,8 +1,19 @@
+import { NextIntlClientProvider } from "next-intl";
+
 import { describe, expect, test, vi } from "vitest";
 import { render } from "vitest-browser-react";
 import { userEvent } from "vitest/browser";
 
+import messages from "@/messages/en.json";
 import DeckDetailsPanel from "./DeckDetailsPanel";
+
+function withIntl(children: React.ReactNode) {
+    return (
+        <NextIntlClientProvider locale="en" messages={messages}>
+            {children}
+        </NextIntlClientProvider>
+    );
+}
 
 /**
  * Real-browser test — the safety net for the useDialogA11y retirement:
@@ -14,13 +25,15 @@ describe("DeckDetailsPanel", () => {
     test("renders as an accessible dialog labelled by the deck title", async () => {
         const onClose = vi.fn();
         const screen = await render(
-            <DeckDetailsPanel
-                isOpen
-                onClose={onClose}
-                deckTitle="JLPT N5 Verbs"
-                cards={[]}
-                isLoading={false}
-            />,
+            withIntl(
+                <DeckDetailsPanel
+                    isOpen
+                    onClose={onClose}
+                    deckTitle="JLPT N5 Verbs"
+                    cards={[]}
+                    isLoading={false}
+                />,
+            ),
         );
 
         const dialog = screen.getByRole("dialog");
@@ -35,13 +48,15 @@ describe("DeckDetailsPanel", () => {
     test("closes on Escape", async () => {
         const onClose = vi.fn();
         await render(
-            <DeckDetailsPanel
-                isOpen
-                onClose={onClose}
-                deckTitle="JLPT N5 Verbs"
-                cards={[]}
-                isLoading={false}
-            />,
+            withIntl(
+                <DeckDetailsPanel
+                    isOpen
+                    onClose={onClose}
+                    deckTitle="JLPT N5 Verbs"
+                    cards={[]}
+                    isLoading={false}
+                />,
+            ),
         );
 
         await userEvent.keyboard("{Escape}");
@@ -51,16 +66,18 @@ describe("DeckDetailsPanel", () => {
     test("traps Tab focus within the panel", async () => {
         const onClose = vi.fn();
         const screen = await render(
-            <div>
-                <button type="button">Outside button (must never receive focus)</button>
-                <DeckDetailsPanel
-                    isOpen
-                    onClose={onClose}
-                    deckTitle="JLPT N5 Verbs"
-                    cards={[]}
-                    isLoading={false}
-                />
-            </div>,
+            withIntl(
+                <div>
+                    <button type="button">Outside button (must never receive focus)</button>
+                    <DeckDetailsPanel
+                        isOpen
+                        onClose={onClose}
+                        deckTitle="JLPT N5 Verbs"
+                        cards={[]}
+                        isLoading={false}
+                    />
+                </div>,
+            ),
         );
 
         const dialog = screen.getByRole("dialog").element();

@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import { CheckCircle2, Download } from "lucide-react";
 
 import { Button, LoadingSpinner, Modal } from "@/shared/components/ui";
@@ -17,6 +19,7 @@ interface AnalyticsExportModalProps {
  * for external analysis and AI model training.
  */
 const AnalyticsExportModal = ({ isOpen, onClose }: AnalyticsExportModalProps) => {
+    const t = useTranslations("AdminAnalytics");
     const {
         datasets,
         selectedDataset,
@@ -27,24 +30,20 @@ const AnalyticsExportModal = ({ isOpen, onClose }: AnalyticsExportModalProps) =>
     } = useAnalyticsExport(onClose);
 
     return (
-        <Modal isOpen={isOpen} onClose={onClose} title="Advanced Data Export" maxWidth="xl">
+        <Modal isOpen={isOpen} onClose={onClose} title={t("exportTitle")} maxWidth="xl">
             <div className="space-y-6">
                 <div className="bg-katakana/5 rounded-2xl p-4">
-                    <p className="text-katakana text-sm font-bold">
-                        Pro Tip: For training AI models, choose high-granularity datasets like 'User
-                        Progress' or 'Behavioral Logs' to provide the model with record-level
-                        evidence.
-                    </p>
+                    <p className="text-katakana text-sm font-bold">{t("proTip")}</p>
                 </div>
 
                 {status === "processing" ? (
                     <div className="py-8">
                         <LoadingSpinner
                             fullScreen={false}
-                            label={`Compiling ${selectedDataset.label} Dataset...`}
+                            label={t("compilingDataset", { label: selectedDataset.label })}
                         />
                         <p className="text-katakana mt-4 animate-pulse text-center text-xs font-black tracking-widest uppercase">
-                            Establishing authoritative connection to Firebase...
+                            {t("establishingConnection")}
                         </p>
                     </div>
                 ) : status === "success" ? (
@@ -52,17 +51,16 @@ const AnalyticsExportModal = ({ isOpen, onClose }: AnalyticsExportModalProps) =>
                         <div className="bg-hiragana/10 mb-4 rounded-full p-5">
                             <CheckCircle2 size={56} className="text-hiragana" />
                         </div>
-                        <h3 className="text-text text-xl font-black">Dataset Generated</h3>
+                        <h3 className="text-text text-xl font-black">{t("datasetGenerated")}</h3>
                         <p className="text-muted max-w-xs text-sm font-bold">
-                            Your authoritative report for {selectedDataset.label} is being handed to
-                            your browser.
+                            {t("authoritativeReport", { label: selectedDataset.label })}
                         </p>
                     </div>
                 ) : (
                     <>
                         <div className="space-y-4">
                             <label className="text-muted text-xs font-black tracking-widest uppercase">
-                                Select AI-Ready Dataset
+                                {t("selectDataset")}
                             </label>
                             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                                 {datasets.map((dataset) => {
@@ -112,7 +110,7 @@ const AnalyticsExportModal = ({ isOpen, onClose }: AnalyticsExportModalProps) =>
                                 onClick={handleStartExport}
                             >
                                 <Download size={20} />
-                                Export Authoritative Dataset
+                                {t("exportAuthoritativeDataset")}
                             </Button>
                         </div>
                     </>

@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import { Image as ImageIcon, MessageSquare } from "lucide-react";
 
 import { Badge, Card } from "@/shared/components/ui";
@@ -17,6 +19,7 @@ interface DeckCardItemProps {
  * Strictly presentational component for usage within the DeckDetailsPanel.
  */
 export const DeckCardItem = ({ card }: DeckCardItemProps) => {
+    const t = useTranslations("AdminContent");
     return (
         <Card
             variant="dashboard"
@@ -35,7 +38,7 @@ export const DeckCardItem = ({ card }: DeckCardItemProps) => {
                     variant="default"
                     className="!bg-katakana/10 !text-katakana !text-xs !font-black tracking-wider uppercase"
                 >
-                    {card.interval > 0 ? `${card.interval}d` : "New"}
+                    {card.interval > 0 ? `${card.interval}d` : t("newCardBadge")}
                 </Badge>
             </div>
 

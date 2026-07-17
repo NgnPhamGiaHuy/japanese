@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import {
     Area,
     AreaChart,
@@ -23,8 +25,9 @@ interface RetentionChartProps {
  * volume of active users remaining after registration.
  */
 const RetentionChart = ({ data }: RetentionChartProps) => {
+    const t = useTranslations("AdminAnalytics");
     return (
-        <AdminChartContainer title="User Retention Rate (%)">
+        <AdminChartContainer title={t("retention")}>
             <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={data} margin={{ top: 15, right: 30, left: 0, bottom: 0 }}>
                     <defs>
@@ -39,7 +42,7 @@ const RetentionChart = ({ data }: RetentionChartProps) => {
                         fontSize={10}
                         tickLine={false}
                         axisLine={false}
-                        tickFormatter={(val) => `Day ${val}`}
+                        tickFormatter={(val) => t("dayLabel", { day: val })}
                         dy={10}
                     />
                     <YAxis
@@ -62,7 +65,7 @@ const RetentionChart = ({ data }: RetentionChartProps) => {
                             fontSize: "12px",
                             marginBottom: "4px",
                         }}
-                        formatter={(value) => [`${Number(value ?? 0)}%`, "Retention"]}
+                        formatter={(value) => [`${Number(value ?? 0)}%`, t("retentionLegend")]}
                     />
                     <Area
                         type="monotone"

@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import {
     Bar,
     BarChart,
@@ -27,8 +29,9 @@ const COLORS = ["#1cb0f6", "#58cc02", "#ce82ff", "#ff9600", "#ff4b4b"];
  * to accommodate long feature names while maintaining readability.
  */
 const EngagementChart = ({ data, onClick }: EngagementChartProps) => {
+    const t = useTranslations("AdminAnalytics");
     return (
-        <AdminChartContainer title="Feature Engagement">
+        <AdminChartContainer title={t("engagement")}>
             <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={data} layout="vertical">
                     <CartesianGrid strokeDasharray="8 8" horizontal={false} stroke="#f0f0f0" />
@@ -61,6 +64,8 @@ const EngagementChart = ({ data, onClick }: EngagementChartProps) => {
                         radius={[16, 16, 16, 16]}
                         barSize={32}
                         animationDuration={1500}
+                        // recharts' Bar onClick payload isn't meaningfully typed upstream.
+                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
                         onClick={(data: any) =>
                             onClick?.(data.payload?.feature ?? data.feature ?? "")
                         }

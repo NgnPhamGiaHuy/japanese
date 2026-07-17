@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from "recharts";
 
 import { AdminChartContainer } from "../shared";
@@ -19,14 +21,15 @@ interface LogLevelChartProps {
  * custom legend below, and click-to-drilldown on each slice and legend item.
  */
 const LogLevelChart = ({ data, onClick }: LogLevelChartProps) => {
+    const t = useTranslations("AdminAnalytics");
     if (!data || data.length === 0) return null;
 
     const total = data.reduce((s, d) => s + d.count, 0);
 
     return (
         <AdminChartContainer
-            title="Events by Severity"
-            subtitle={`${total.toLocaleString()} total entries`}
+            title={t("eventsBySeverity")}
+            subtitle={t("totalEntries", { count: total.toLocaleString() })}
         >
             <ResponsiveContainer width="100%" height="100%">
                 <PieChart>

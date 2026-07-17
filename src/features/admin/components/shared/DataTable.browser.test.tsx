@@ -1,8 +1,11 @@
+import { NextIntlClientProvider } from "next-intl";
+
 import { createColumnHelper } from "@tanstack/react-table";
 import { describe, expect, test } from "vitest";
 import { render } from "vitest-browser-react";
 import { userEvent } from "vitest/browser";
 
+import messages from "@/messages/en.json";
 import AdminTable from "./AdminTable";
 import DataTableBody from "./DataTableBody";
 import DataTableHeader from "./DataTableHeader";
@@ -55,19 +58,21 @@ const columns = [
 function Harness({ enableRowSelection = true }: { enableRowSelection?: boolean }) {
     const { table } = useDataTable<Person>({ data: people, columns, enableRowSelection });
     return (
-        <AdminTable
-            mobileList={
-                <DataTableMobileList
-                    table={table}
-                    renderRow={(row) => (
-                        <div data-testid={`mobile-${row.original.id}`}>{row.original.name}</div>
-                    )}
-                />
-            }
-        >
-            <DataTableHeader table={table} />
-            <DataTableBody table={table} />
-        </AdminTable>
+        <NextIntlClientProvider locale="en" messages={messages}>
+            <AdminTable
+                mobileList={
+                    <DataTableMobileList
+                        table={table}
+                        renderRow={(row) => (
+                            <div data-testid={`mobile-${row.original.id}`}>{row.original.name}</div>
+                        )}
+                    />
+                }
+            >
+                <DataTableHeader table={table} />
+                <DataTableBody table={table} />
+            </AdminTable>
+        </NextIntlClientProvider>
     );
 }
 

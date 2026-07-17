@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import { ShieldAlert } from "lucide-react";
 
 import { EmptyState, LoadingSpinner } from "@/shared/components/ui";
@@ -20,11 +22,12 @@ interface AdminGuardProps {
  * before the page content is mounted.
  */
 const AdminGuard = ({ children }: AdminGuardProps) => {
+    const t = useTranslations("AdminCommon");
     const { role, isLoading } = useAdminRole();
     const isAdmin = role !== null;
 
     if (isLoading) {
-        return <LoadingSpinner label="Verifying permissions…" />;
+        return <LoadingSpinner label={t("verifyingPermissions")} />;
     }
 
     if (!isAdmin) {
@@ -32,8 +35,8 @@ const AdminGuard = ({ children }: AdminGuardProps) => {
             <div className="pt-20">
                 <EmptyState
                     icon={ShieldAlert}
-                    title="Access Denied"
-                    description="You do not have permission to view the admin dashboard."
+                    title={t("accessDenied")}
+                    description={t("accessDeniedMessage")}
                     iconBg="bg-danger"
                     iconBorder="border-danger-strong"
                 />

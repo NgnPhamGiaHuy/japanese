@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import { LoadingSpinner } from "@/shared/components/ui";
 
 import type { Row, Table } from "@tanstack/react-table";
@@ -21,12 +23,13 @@ function DataTableMobileList<T>({
     table,
     renderRow,
     loading = false,
-    loadingLabel = "Loading…",
+    loadingLabel,
 }: DataTableMobileListProps<T>) {
+    const t = useTranslations("AdminCommon");
     if (loading) {
         return (
             <div className="flex justify-center py-16">
-                <LoadingSpinner fullScreen={false} label={loadingLabel} />
+                <LoadingSpinner fullScreen={false} label={loadingLabel ?? t("loading")} />
             </div>
         );
     }

@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
+import { useState, useSyncExternalStore } from "react";
 
 import { Users as UsersIcon } from "lucide-react";
 
@@ -11,6 +12,8 @@ import { useAdminRole } from "../../context/AdminContext";
 import { useUsers } from "../../hooks";
 import { hasPermission } from "../../utils/rbac";
 
+const emptySubscribe = () => () => {};
+
 /**
  * Admin Users Management Page.
  *
@@ -19,14 +22,15 @@ import { hasPermission } from "../../utils/rbac";
  * identity and access management (IAM).
  */
 const AdminUsersPageContent = () => {
-    const [mounted, setMounted] = useState(false);
+    const t = useTranslations("AdminUsers");
+    const mounted = useSyncExternalStore(
+        emptySubscribe,
+        () => true,
+        () => false,
+    );
     const { role } = useAdminRole();
     const [pageTokens, setPageTokens] = useState<(string | undefined)[]>([undefined]);
     const [currentPage, setCurrentPage] = useState(0);
-
-    useEffect(() => {
-        setMounted(true);
-    }, []);
 
     const {
         users,
@@ -52,7 +56,7 @@ const AdminUsersPageContent = () => {
     if (!mounted || isLoadingUsers)
         return (
             <AdminPageLayout>
-                <LoadingSpinner fullScreen={false} label="Loading users..." />
+                <LoadingSpinner fullScreen={false} label={t("loadingUsers")} />
             </AdminPageLayout>
         );
     if (usersError)
@@ -64,11 +68,7 @@ const AdminUsersPageContent = () => {
 
     return (
         <AdminPageLayout>
-            <AdminPageHeader
-                title="Users"
-                description="Manage users, roles, and moderation actions."
-                icon={UsersIcon}
-            />
+            <AdminPageHeader title={t("title")} description={t("description")} icon={UsersIcon} />
             <UsersTable
                 users={users}
                 totalUsers={usersTotal}
@@ -97,7 +97,7 @@ const AdminUsersPageContent = () => {
                 onDelete={removeUser}
             />
             <p className="text-muted px-1 text-xs font-bold tracking-widest uppercase">
-                Role controls are server-enforced
+                {t("roleControlsNote")}
             </p>
         </AdminPageLayout>
     );

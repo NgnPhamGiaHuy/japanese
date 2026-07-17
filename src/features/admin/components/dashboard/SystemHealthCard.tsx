@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import { AdminCard } from "../shared";
 
 interface SystemHealthCardProps {
@@ -19,11 +21,12 @@ const SystemHealthCard = ({
     activeAdmins,
     activeSuperAdmins,
 }: SystemHealthCardProps) => {
+    const t = useTranslations("AdminDashboard");
     return (
-        <AdminCard title="System Health">
+        <AdminCard title={t("systemHealth")}>
             <div className="space-y-4">
                 <div className="flex items-center justify-between">
-                    <span className="text-muted text-xs font-bold">Error Rate</span>
+                    <span className="text-muted text-xs font-bold">{t("errorRate")}</span>
                     <span
                         className={
                             errorRate > 2 ? "text-danger font-black" : "text-hiragana font-black"
@@ -39,7 +42,7 @@ const SystemHealthCard = ({
                     />
                 </div>
                 <div className="flex items-center justify-between">
-                    <span className="text-muted text-xs font-bold">Active Team</span>
+                    <span className="text-muted text-xs font-bold">{t("activeTeam")}</span>
                     <span className="text-text font-black">
                         {activeAdmins}A / {activeSuperAdmins}S
                     </span>

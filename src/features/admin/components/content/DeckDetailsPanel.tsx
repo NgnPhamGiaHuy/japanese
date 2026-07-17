@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import { Dialog } from "@base-ui/react/dialog";
 import { Book, X } from "lucide-react";
 
@@ -29,6 +31,8 @@ const DeckDetailsPanel = ({
     cards,
     isLoading,
 }: DeckDetailsPanelProps) => {
+    const t = useTranslations("AdminContent");
+    const tCommon = useTranslations("Common");
     return (
         <Dialog.Root open={isOpen} onOpenChange={(open) => !open && onClose()}>
             <Dialog.Portal>
@@ -48,7 +52,7 @@ const DeckDetailsPanel = ({
                                     {deckTitle}
                                 </Dialog.Title>
                                 <p className="text-muted text-sm font-bold">
-                                    Global Content Preview
+                                    {t("globalContentPreview")}
                                 </p>
                             </div>
                             <Dialog.Close
@@ -56,7 +60,7 @@ const DeckDetailsPanel = ({
                                     <Button
                                         variant="ghost"
                                         size="icon"
-                                        aria-label="Close"
+                                        aria-label={tCommon("close")}
                                         className="text-muted hover:text-text bg-gray-50 hover:bg-gray-100"
                                         icon={X}
                                         iconSize={20}
@@ -71,7 +75,7 @@ const DeckDetailsPanel = ({
                                 <div className="flex h-64 flex-col items-center justify-center">
                                     <LoadingSpinner fullScreen={false} />
                                     <p className="text-muted mt-4 text-xs font-black tracking-widest uppercase">
-                                        Gathering words...
+                                        {t("gatheringWords")}
                                     </p>
                                 </div>
                             ) : (
@@ -87,7 +91,7 @@ const DeckDetailsPanel = ({
                                                 className="mx-auto mb-4 text-gray-100"
                                             />
                                             <p className="text-muted text-sm font-bold">
-                                                This deck is currently empty.
+                                                {t("deckEmpty")}
                                             </p>
                                         </div>
                                     )}
@@ -98,8 +102,10 @@ const DeckDetailsPanel = ({
                         {/* Footer */}
                         <div className="border-t-2 border-gray-50 bg-gray-50/30 p-6">
                             <div className="text-muted flex items-center justify-between text-xs font-black tracking-widest uppercase">
-                                <span>{cards?.length || 0} vocabulary items total</span>
-                                <span>Read-only Administrative View</span>
+                                <span>
+                                    {t("vocabularyItemsTotal", { count: cards?.length || 0 })}
+                                </span>
+                                <span>{t("readOnlyView")}</span>
                             </div>
                         </div>
                     </div>

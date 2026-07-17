@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import { AlertTriangle } from "lucide-react";
 
 import { Button, EmptyState } from "@/shared/components/ui";
@@ -16,11 +18,12 @@ interface AdminErrorStateProps {
  * optional retry trigger. Uses a destructive color palette for high visibility.
  */
 const AdminErrorState = ({ message, onRetry }: AdminErrorStateProps) => {
+    const t = useTranslations("AdminCommon");
     return (
         <div className="flex min-h-[70vh] flex-col items-center justify-center space-y-4">
             <EmptyState
                 icon={AlertTriangle}
-                title="Unable to load admin data"
+                title={t("unableToLoad")}
                 description={message}
                 iconBg="bg-danger"
                 iconBorder="border-danger-strong"
@@ -28,7 +31,7 @@ const AdminErrorState = ({ message, onRetry }: AdminErrorStateProps) => {
             {onRetry && (
                 <div className="flex justify-center">
                     <Button variant="secondary" onClick={onRetry}>
-                        Retry
+                        {t("retry")}
                     </Button>
                 </div>
             )}

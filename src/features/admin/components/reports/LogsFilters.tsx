@@ -10,6 +10,8 @@
  */
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import {
     Activity,
     AlertTriangle,
@@ -42,8 +44,9 @@ interface LogsFiltersProps {
 const ALL = "__all__" as const;
 
 const LogsFilters = ({ filters, onChange, activeFilterCount = 0 }: LogsFiltersProps) => {
+    const t = useTranslations("AdminReports");
     const levelOptions: SelectOption<LogLevel | typeof ALL>[] = [
-        { value: ALL, label: "All Levels", icon: Info },
+        { value: ALL, label: t("allLevels"), icon: Info },
         ...LOG_LEVEL_OPTIONS.map((l) => ({
             value: l,
             label: l.charAt(0).toUpperCase() + l.slice(1),
@@ -67,7 +70,7 @@ const LogsFilters = ({ filters, onChange, activeFilterCount = 0 }: LogsFiltersPr
     ];
 
     const typeOptions: SelectOption<LogType | typeof ALL>[] = [
-        { value: ALL, label: "All Types", icon: Terminal },
+        { value: ALL, label: t("allTypes"), icon: Terminal },
         ...LOG_TYPE_OPTIONS.map((t) => ({
             value: t,
             label: t
@@ -93,7 +96,7 @@ const LogsFilters = ({ filters, onChange, activeFilterCount = 0 }: LogsFiltersPr
             <AdminSearchInput
                 value={filters.search ?? ""}
                 onChange={(v) => onChange({ ...filters, search: v || undefined })}
-                placeholder="Search action, user, email, metadata…"
+                placeholder={t("searchPlaceholder")}
             />
 
             {/* Row 2: selects — full width on mobile, inline on sm+ */}
@@ -123,7 +126,7 @@ const LogsFilters = ({ filters, onChange, activeFilterCount = 0 }: LogsFiltersPr
                 iconSize={14}
                 value={filters.userId ?? ""}
                 onChange={(e) => onChange({ ...filters, userId: e.target.value || undefined })}
-                placeholder="Filter by user ID, name, or email…"
+                placeholder={t("userFilterPlaceholder")}
             />
 
             {/* Row 4: date range */}

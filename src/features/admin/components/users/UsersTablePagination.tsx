@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import { Button } from "@/shared/components/ui";
 
 interface UsersTablePaginationProps {
@@ -33,10 +35,15 @@ const UsersTablePagination = ({
     loading,
     maxDiscoveredPage,
 }: UsersTablePaginationProps) => {
+    const t = useTranslations("AdminUsers");
     return (
         <div className="flex flex-col gap-2 border-t-2 border-gray-100 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
             <span className="text-muted text-xs font-bold">
-                Page {currentPage + 1} of {Math.max(1, totalPages)} · {totalUsers} total
+                {t("pageOf", {
+                    current: currentPage + 1,
+                    total: Math.max(1, totalPages),
+                    totalUsers,
+                })}
             </span>
             <div className="flex flex-wrap gap-1">
                 <Button
@@ -46,7 +53,7 @@ const UsersTablePagination = ({
                     disabled={!hasPrevPage || loading || !onPrevPage}
                     className="mr-1 !h-8 !px-3 !py-1 !text-xs"
                 >
-                    Prev
+                    {t("prev")}
                 </Button>
 
                 {Array.from({ length: totalPages }, (_, i) => i).map((pageIdx) => {
@@ -93,7 +100,7 @@ const UsersTablePagination = ({
                     disabled={!hasNextPage || loading || !onNextPage}
                     className="ml-1 !h-8 !px-3 !py-1 !text-xs"
                 >
-                    Next
+                    {t("next")}
                 </Button>
             </div>
         </div>

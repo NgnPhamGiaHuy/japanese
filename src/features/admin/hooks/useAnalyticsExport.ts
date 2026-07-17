@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 
 import { Activity, BarChart2, BookOpen, Users } from "lucide-react";
@@ -16,29 +17,21 @@ import { exportToCSV } from "../utils/export.utils";
 export const EXPORT_DATASETS = [
     {
         id: "analytics",
-        label: "Daily Metrics",
-        description: "Aggregated growth and activity snapshots",
         icon: BarChart2,
         action: exportAnalyticsAction,
     },
     {
         id: "users",
-        label: "User Progress",
-        description: "Detailed learner profiles, XP, and streaks",
         icon: Users,
         action: exportUsersDatasetAction,
     },
     {
         id: "content",
-        label: "Content Audit",
-        description: "Global deck metadata and categorization",
         icon: BookOpen,
         action: exportContentDatasetAction,
     },
     {
         id: "logs",
-        label: "Behavioral Logs",
-        description: "Raw event timeline for behavioral AI training",
         icon: Activity,
         action: exportLogsDatasetAction,
     },
@@ -49,7 +42,13 @@ export const EXPORT_DATASETS = [
  * so the component stays UI-only.
  */
 export function useAnalyticsExport(onClose: () => void) {
-    const [selectedDataset, setSelectedDataset] = useState(EXPORT_DATASETS[0]);
+    const t = useTranslations("AdminAnalytics");
+    const datasets = EXPORT_DATASETS.map((dataset) => ({
+        ...dataset,
+        label: t(`datasets.${dataset.id}.label`),
+        description: t(`datasets.${dataset.id}.description`),
+    }));
+    const [selectedDataset, setSelectedDataset] = useState(datasets[0]);
     const [status, setStatus] = useState<"idle" | "processing" | "success" | "error">("idle");
     const [errorMessage, setErrorMessage] = useState("");
     const getAdminIdToken = useAdminToken();
@@ -71,6 +70,9 @@ export function useAnalyticsExport(onClose: () => void) {
 
             // Specialized processing for Daily Metrics (flattening)
             if (selectedDataset.id === "analytics") {
+                // result.data's shape varies per dataset action (analytics/users/content/logs
+                // each return differently-shaped Firestore records) — no sound static type here.
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 processedData = result.data.map((d: any) => {
                     const { featureUsage, ...rest } = d;
                     return {
@@ -92,18 +94,18 @@ export function useAnalyticsExport(onClose: () => void) {
                     setStatus("idle");
                 }, 1500);
             } else {
-                setErrorMessage("The retrieved dataset contains no records.");
+                setErrorMessage(t("noRecordsError"));
                 setStatus("error");
             }
-        } catch (err: any) {
+        } catch (err) {
             console.error("Export failed:", err);
-            setErrorMessage(err.message || "An unexpected error occurred during export.");
+            setErrorMessage((err instanceof Error && err.message) || t("unexpectedError"));
             setStatus("error");
         }
     };
 
     return {
-        datasets: EXPORT_DATASETS,
+        datasets,
         selectedDataset,
         setSelectedDataset,
         status,

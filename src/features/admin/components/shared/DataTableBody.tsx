@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import { flexRender } from "@tanstack/react-table";
 
 import { LoadingSpinner } from "@/shared/components/ui";
@@ -17,11 +19,8 @@ interface DataTableBodyProps<T> {
  * former `UsersTableBody`. `colSpan` is derived from the table's own
  * visible-leaf-column count instead of being hardcoded per table.
  */
-function DataTableBody<T>({
-    table,
-    loading = false,
-    loadingLabel = "Loading…",
-}: DataTableBodyProps<T>) {
+function DataTableBody<T>({ table, loading = false, loadingLabel }: DataTableBodyProps<T>) {
+    const t = useTranslations("AdminCommon");
     const rows = table.getRowModel().rows;
     const columnCount = table.getVisibleLeafColumns().length;
 
@@ -33,7 +32,7 @@ function DataTableBody<T>({
                         colSpan={columnCount}
                         className="text-muted py-16 text-center text-sm font-bold"
                     >
-                        <LoadingSpinner fullScreen={false} label={loadingLabel} />
+                        <LoadingSpinner fullScreen={false} label={loadingLabel ?? t("loading")} />
                     </td>
                 </tr>
             </tbody>

@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from "recharts";
 
 import { AdminChartContainer } from "../shared";
@@ -18,8 +20,9 @@ interface ContentDistributionChartProps {
  * such as Vocabulary, Grammar, and Kanji.
  */
 const ContentDistributionChart = ({ data, onClick }: ContentDistributionChartProps) => {
+    const t = useTranslations("AdminAnalytics");
     return (
-        <AdminChartContainer title="Content Distribution">
+        <AdminChartContainer title={t("contentDistribution")}>
             <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                     <Pie
@@ -30,6 +33,8 @@ const ContentDistributionChart = ({ data, onClick }: ContentDistributionChartPro
                         dataKey="value"
                         stroke="none"
                         cornerRadius={12}
+                        // recharts' Pie onClick payload isn't meaningfully typed upstream.
+                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
                         onClick={(data: any) => onClick?.(data.payload?.name ?? data.name ?? "")}
                         className="cursor-pointer"
                     >

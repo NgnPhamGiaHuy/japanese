@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
 
 import { Database, Filter } from "lucide-react";
@@ -25,6 +26,7 @@ import { useGlobalContent } from "../../hooks";
  * Delegates data visualization to ContentOverviewStats and list rendering to DecksTable.
  */
 const AdminContentPageContent = () => {
+    const t = useTranslations("AdminContent");
     const {
         data,
         isLoading,
@@ -56,7 +58,7 @@ const AdminContentPageContent = () => {
     if (isLoading)
         return (
             <AdminPageLayout>
-                <LoadingSpinner fullScreen={false} label="Auditing global decks..." />
+                <LoadingSpinner fullScreen={false} label={t("loadingDecks")} />
             </AdminPageLayout>
         );
     if (error)
@@ -81,14 +83,14 @@ const AdminContentPageContent = () => {
     return (
         <AdminPageLayout>
             <AdminPageHeader
-                title="Content Management"
-                description="Moderate and audit global flashcard sets (decks) and their content."
+                title={t("title")}
+                description={t("description")}
                 icon={Database}
                 actions={
                     <div className="flex gap-2">
                         <Button variant="secondary" className="gap-2 !px-4 !py-2 text-sm">
                             <Filter size={14} />
-                            Filter by Owner
+                            {t("filterByOwner")}
                         </Button>
                     </div>
                 }
@@ -97,7 +99,7 @@ const AdminContentPageContent = () => {
             <ContentOverviewStats totalDecks={data?.total || 0} />
 
             <AdminSearchInput
-                placeholder="Search by deck title, description or owner email..."
+                placeholder={t("searchPlaceholder")}
                 value={searchTerm}
                 onChange={setSearchTerm}
             />
@@ -111,17 +113,17 @@ const AdminContentPageContent = () => {
                 />
             ) : (
                 <AdminEmptyState
-                    title={searchTerm ? "No results found" : "No decks available"}
+                    title={searchTerm ? t("noResultsFound") : t("noDecksAvailable")}
                     description={
                         searchTerm
-                            ? `No flashcard sets match "${searchTerm}". Try a different term.`
-                            : "Platform flashcard sets will appear here once users create them."
+                            ? t("noMatchSearch", { search: searchTerm })
+                            : t("willAppearHere")
                     }
                     icon={Database}
                     action={
                         searchTerm ? (
                             <Button variant="secondary" onClick={() => setSearchTerm("")}>
-                                Clear Search
+                                {t("clearSearch")}
                             </Button>
                         ) : undefined
                     }
@@ -140,8 +142,8 @@ const AdminContentPageContent = () => {
                 isOpen={!!deckToDelete}
                 onClose={() => setDeckToDelete(null)}
                 onConfirm={handleDelete}
-                title="Delete Flashcard Set?"
-                message="Are you sure you want to permanently delete this Entire Flashcard Set (Deck)? All words within this deck will also be removed. This action cannot be undone."
+                title={t("deleteDeckTitle")}
+                message={t("deleteDeckMessage")}
                 variant="danger"
                 isLoading={isDeleting}
             />

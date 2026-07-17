@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import {
     Bar,
     BarChart,
@@ -43,12 +45,13 @@ function shortLabel(action: string): string {
  * barSize=32, and colour-coded cells. Adds LabelList for count values on bars.
  */
 const TopActionsChart = ({ data, onClick }: TopActionsChartProps) => {
+    const t = useTranslations("AdminAnalytics");
     if (!data || data.length === 0) return null;
 
     return (
         <AdminChartContainer
-            title="Top Actions"
-            subtitle="Most frequent log events"
+            title={t("topActions")}
+            subtitle={t("mostFrequentEvents")}
             chartHeight={360}
         >
             <ResponsiveContainer width="100%" height="100%">
@@ -78,13 +81,17 @@ const TopActionsChart = ({ data, onClick }: TopActionsChartProps) => {
                             padding: "12px 16px",
                         }}
                         labelStyle={{ fontWeight: 900, fontSize: 12, marginBottom: 4 }}
-                        formatter={(v: any) => [v, "occurrences"]}
+                        // recharts' Tooltip formatter args aren't meaningfully typed upstream.
+                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                        formatter={(v: any) => [v, t("occurrences")]}
                     />
                     <Bar
                         dataKey="count"
                         radius={[16, 16, 16, 16]}
                         barSize={32}
                         animationDuration={1500}
+                        // recharts' Bar onClick payload isn't meaningfully typed upstream.
+                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
                         onClick={(d: any) => onClick?.(d.action ?? "")}
                         className={onClick ? "cursor-pointer" : undefined}
                     >

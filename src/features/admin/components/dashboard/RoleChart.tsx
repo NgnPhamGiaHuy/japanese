@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from "recharts";
 
 import { AdminChartContainer } from "../shared";
@@ -18,8 +20,9 @@ interface RoleChartProps {
  * and standard roles using a donut-style radial chart.
  */
 const RoleChart = ({ data, onClick }: RoleChartProps) => {
+    const t = useTranslations("AdminDashboard");
     return (
-        <AdminChartContainer title="Access Roles">
+        <AdminChartContainer title={t("accessRoles")}>
             <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                     <Pie
@@ -30,6 +33,8 @@ const RoleChart = ({ data, onClick }: RoleChartProps) => {
                         dataKey="value"
                         stroke="none"
                         cornerRadius={12}
+                        // recharts' Pie onClick payload isn't meaningfully typed upstream.
+                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
                         onClick={(data: any) => onClick?.(data.payload?.name ?? data.name ?? "")}
                         className="cursor-pointer"
                     >

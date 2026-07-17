@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import type { LucideIcon } from "lucide-react";
 import type { ReactNode } from "react";
 
@@ -24,6 +26,7 @@ const AdminPageHeader = ({
     actions,
     isLive = false,
 }: AdminPageHeaderProps) => {
+    const t = useTranslations("AdminCommon");
     return (
         <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
             <div className="min-w-0">
@@ -39,7 +42,7 @@ const AdminPageHeader = ({
                             <div className="bg-hiragana/10 flex items-center gap-1.5 rounded-full px-2.5 py-1">
                                 <span className="bg-hiragana h-1.5 w-1.5 animate-pulse rounded-full" />
                                 <span className="text-hiragana text-xs font-black tracking-widest uppercase">
-                                    Live
+                                    {t("live")}
                                 </span>
                             </div>
                         )}

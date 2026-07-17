@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import { Check, Copy } from "lucide-react";
 
 import { Button } from "@/shared/components/ui";
@@ -13,6 +15,7 @@ import { useCopyToClipboard } from "@/shared/hooks";
  * visual feedback via a checkmark icon after successful copying.
  */
 const LogCopyButton = ({ text, title }: { text: string; title?: string }) => {
+    const t = useTranslations("AdminReports");
     const { copied, copy } = useCopyToClipboard(1500);
     const handleCopy = async (e: React.MouseEvent) => {
         e.stopPropagation();
@@ -23,7 +26,7 @@ const LogCopyButton = ({ text, title }: { text: string; title?: string }) => {
             variant="ghost"
             color="gray"
             onClick={handleCopy}
-            title={title ?? "Copy"}
+            title={title ?? t("copy")}
             icon={copied ? Check : Copy}
             iconSize={12}
             iconClassName={copied ? "text-hiragana" : "text-muted"}

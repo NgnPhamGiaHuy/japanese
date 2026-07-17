@@ -14,6 +14,8 @@
  */
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import { clsx } from "clsx";
 
 import { Card } from "@/shared/components/ui";
@@ -49,7 +51,10 @@ const LogsSummaryHeader = ({
     activeType,
     activeLevel,
 }: LogsSummaryHeaderProps) => {
-    const activeTypes = (Object.keys(countsByType) as LogType[]).filter((t) => countsByType[t] > 0);
+    const tr = useTranslations("AdminReports");
+    const activeTypes = (Object.keys(countsByType) as LogType[]).filter(
+        (type) => countsByType[type] > 0,
+    );
 
     return (
         <Card className="flex flex-col gap-3 px-4 py-3 sm:gap-4 sm:px-6 sm:py-4">
@@ -57,11 +62,11 @@ const LogsSummaryHeader = ({
             <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:gap-3">
                 <div className="flex flex-col">
                     <span className="text-muted text-xs font-black tracking-widest uppercase">
-                        This Page
+                        {tr("thisPage")}
                     </span>
                     <span className="text-text text-xl font-black sm:text-2xl">
                         {totalLoaded}
-                        <span className="text-muted ml-1 text-xs font-bold">entries</span>
+                        <span className="text-muted ml-1 text-xs font-bold">{tr("entries")}</span>
                     </span>
                 </div>
 
@@ -75,7 +80,7 @@ const LogsSummaryHeader = ({
                             <button
                                 key={l}
                                 onClick={() => onLevelClick?.(l)}
-                                title={`Filter by ${l}`}
+                                title={tr("filterByLevel", { level: l })}
                                 className={clsx(
                                     "focus-visible:ring-katakana flex items-center gap-1 rounded-full px-2 py-1 text-xs font-black tracking-wider uppercase transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-1 sm:gap-1.5 sm:px-2.5 sm:py-1 sm:text-xs",
                                     isActive
@@ -102,15 +107,15 @@ const LogsSummaryHeader = ({
             {activeTypes.length > 0 && (
                 <div className="flex flex-col gap-2">
                     <div className="flex h-2 w-full overflow-hidden rounded-full bg-gray-100">
-                        {activeTypes.map((t) => {
-                            const pct = (countsByType[t]! / totalLoaded) * 100;
+                        {activeTypes.map((type) => {
+                            const pct = (countsByType[type]! / totalLoaded) * 100;
                             return (
                                 <div
-                                    key={t}
-                                    title={`${t}: ${countsByType[t]}`}
+                                    key={type}
+                                    title={`${type}: ${countsByType[type]}`}
                                     style={{
                                         width: `${pct}%`,
-                                        backgroundColor: LOG_TYPE_META[t].chartColor,
+                                        backgroundColor: LOG_TYPE_META[type].chartColor,
                                     }}
                                     className="transition-all"
                                 />
@@ -118,19 +123,19 @@ const LogsSummaryHeader = ({
                         })}
                     </div>
                     <div className="flex flex-wrap gap-1.5 sm:gap-2">
-                        {activeTypes.map((t) => {
-                            const s = LOG_TYPE_META[t] ?? {
-                                label: t,
+                        {activeTypes.map((type) => {
+                            const s = LOG_TYPE_META[type] ?? {
+                                label: type,
                                 bg: "bg-gray-100 hover:bg-gray-200",
                                 text: "text-gray-600",
                                 activeBg: "bg-gray-600 text-white",
                             };
-                            const isActive = activeType === t;
+                            const isActive = activeType === type;
                             return (
                                 <button
-                                    key={t}
-                                    onClick={() => onTypeClick?.(t)}
-                                    title={`Filter by ${t}`}
+                                    key={type}
+                                    onClick={() => onTypeClick?.(type)}
+                                    title={tr("filterByType", { type })}
                                     className={clsx(
                                         "focus-visible:ring-katakana flex items-center gap-1 rounded-full px-2 py-1 text-xs font-black tracking-wider uppercase transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-1 sm:gap-1.5 sm:px-2.5 sm:py-1 sm:text-xs",
                                         isActive ? s.activeBg : `${s.bg} ${s.text}`,
@@ -138,7 +143,7 @@ const LogsSummaryHeader = ({
                                     )}
                                 >
                                     {s.label}
-                                    <span className="font-mono">{countsByType[t]}</span>
+                                    <span className="font-mono">{countsByType[type]}</span>
                                 </button>
                             );
                         })}

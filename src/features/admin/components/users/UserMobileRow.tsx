@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import { flexRender } from "@tanstack/react-table";
 
 import { isOnline } from "@/shared/utils";
@@ -22,6 +24,8 @@ interface UserMobileRowProps {
  * TanStack Table, so we just flexRender the actions cell directly.
  */
 const UserMobileRow = ({ row }: UserMobileRowProps) => {
+    const t = useTranslations("AdminCommon");
+    const tUsers = useTranslations("AdminUsers");
     const user = row.original;
     const online = isOnline(user.lastSeenAt);
 
@@ -57,24 +61,27 @@ const UserMobileRow = ({ row }: UserMobileRowProps) => {
             <div className="min-w-0 flex-1">
                 <div className="flex flex-wrap items-center gap-1.5">
                     <p className="text-text text-sm font-black">
-                        {user.displayName || "Anonymous User"}
+                        {user.displayName || t("anonymousUser")}
                     </p>
                     {online && (
                         <span className="bg-hiragana flex h-4 items-center rounded-full px-1.5 text-[8px] font-black tracking-widest text-white uppercase">
-                            Live
+                            {t("live")}
                         </span>
                     )}
                 </div>
-                <p className="text-muted truncate text-xs font-bold">{user.email ?? "No email"}</p>
+                <p className="text-muted truncate text-xs font-bold">
+                    {user.email ?? tUsers("noEmailShort")}
+                </p>
 
                 <div className="mt-2 flex flex-wrap items-center gap-2">
                     <RoleCell user={user} />
                     {user.lastSeenAt && (
                         <span className="text-katakana text-xs font-bold">
-                            Active{" "}
-                            {new Date(user.lastSeenAt).toLocaleDateString(undefined, {
-                                month: "short",
-                                day: "numeric",
+                            {tUsers("activeOn", {
+                                date: new Date(user.lastSeenAt).toLocaleDateString(undefined, {
+                                    month: "short",
+                                    day: "numeric",
+                                }),
                             })}
                         </span>
                     )}

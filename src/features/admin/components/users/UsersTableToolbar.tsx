@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import { Trash2, Users } from "lucide-react";
 
 import { Button } from "@/shared/components/ui";
@@ -33,6 +35,7 @@ const UsersTableToolbar = ({
     canDelete,
     canPromote,
 }: UsersTableToolbarProps) => {
+    const t = useTranslations("AdminUsers");
     if (selectedCount > 0) {
         return (
             <AdminBulkActionsBar count={selectedCount} onCancel={onClearSelection}>
@@ -46,7 +49,7 @@ const UsersTableToolbar = ({
                             iconSize={14}
                             onClick={onPromote}
                         >
-                            Promote
+                            {t("promote")}
                         </Button>
                         <Button
                             variant="secondary"
@@ -54,7 +57,7 @@ const UsersTableToolbar = ({
                             className="!h-9 !px-4 !py-0 !text-xs"
                             onClick={onDemote}
                         >
-                            Demote
+                            {t("demote")}
                         </Button>
                     </>
                 )}
@@ -66,7 +69,7 @@ const UsersTableToolbar = ({
                         iconSize={14}
                         onClick={onDelete}
                     >
-                        Delete
+                        {t("delete")}
                     </Button>
                 )}
             </AdminBulkActionsBar>
@@ -76,7 +79,7 @@ const UsersTableToolbar = ({
     return (
         <div className="p-3">
             <AdminSearchInput
-                placeholder="Search by email or name…"
+                placeholder={t("searchPlaceholder")}
                 value={globalFilter}
                 onChange={onGlobalFilterChange}
                 className="!h-10"

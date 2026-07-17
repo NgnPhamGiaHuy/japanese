@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import { flexRender } from "@tanstack/react-table";
 import { format } from "date-fns";
 import { Calendar, Layers } from "lucide-react";
@@ -20,6 +22,8 @@ interface DeckMobileRowProps {
  * this just `flexRender`s that cell rather than re-declaring onView/onDelete.
  */
 const DeckMobileRow = ({ row }: DeckMobileRowProps) => {
+    const t = useTranslations("AdminContent");
+    const tCommon = useTranslations("AdminCommon");
     const deck = row.original;
     const actionsCell = row.getVisibleCells().find((c) => c.column.id === "actions");
 
@@ -35,7 +39,7 @@ const DeckMobileRow = ({ row }: DeckMobileRowProps) => {
             <div className="min-w-0 flex-1">
                 <p className="text-text text-sm font-black">{deck.title}</p>
                 <p className="text-muted mt-0.5 line-clamp-1 text-xs font-bold">
-                    {deck.description || "No description provided."}
+                    {deck.description || tCommon("noDescription")}
                 </p>
 
                 {/* Tags */}
@@ -64,7 +68,7 @@ const DeckMobileRow = ({ row }: DeckMobileRowProps) => {
                             {deck.ownerAvatar ? (
                                 <img
                                     src={deck.ownerAvatar}
-                                    alt={deck.ownerName ?? "Owner"}
+                                    alt={deck.ownerName ?? t("ownerAvatarAlt")}
                                     className="h-full w-full object-cover"
                                 />
                             ) : (
@@ -73,14 +77,14 @@ const DeckMobileRow = ({ row }: DeckMobileRowProps) => {
                                 </span>
                             )}
                         </div>
-                        <span>{deck.ownerName || deck.ownerEmail || "Unknown"}</span>
+                        <span>{deck.ownerName || deck.ownerEmail || t("unknownOwner")}</span>
                     </div>
 
                     {/* Card count */}
                     <div className="flex items-center gap-1">
                         <Layers size={10} className="text-both" />
                         <span className="text-text font-black">{deck.cardCount}</span>
-                        <span className="tracking-widest uppercase">words</span>
+                        <span className="tracking-widest uppercase">{tCommon("words")}</span>
                     </div>
 
                     {/* Date */}

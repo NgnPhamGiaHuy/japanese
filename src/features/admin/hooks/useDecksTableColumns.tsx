@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import { createColumnHelper } from "@tanstack/react-table";
 import { format } from "date-fns";
 import { Calendar, Eye, Layers, Trash2 } from "lucide-react";
@@ -28,17 +30,19 @@ interface ColumnProps {
  * couldn't represent anyway.
  */
 export const useDecksTableColumns = ({ onView, onDelete, isDeleting }: ColumnProps) => {
+    const t = useTranslations("AdminContent");
+    const tCommon = useTranslations("AdminCommon");
     const columns = [
         col.display({
             id: "deck",
-            header: () => "Flashcard Set (Deck)",
+            header: () => t("columnDeck"),
             cell: ({ row }) => {
                 const deck = row.original;
                 return (
                     <div className="flex flex-col gap-0.5">
                         <span className="text-text text-sm font-black">{deck.title}</span>
                         <span className="text-muted line-clamp-1 max-w-md text-xs font-bold">
-                            {deck.description || "No description provided."}
+                            {deck.description || tCommon("noDescription")}
                         </span>
                         <div className="mt-2 flex flex-wrap gap-1.5">
                             {(deck.categories && deck.categories.length > 0
@@ -63,7 +67,7 @@ export const useDecksTableColumns = ({ onView, onDelete, isDeleting }: ColumnPro
         }),
         col.display({
             id: "owner",
-            header: () => "Owner",
+            header: () => t("columnOwner"),
             cell: ({ row }) => {
                 const deck = row.original;
                 return (
@@ -72,7 +76,7 @@ export const useDecksTableColumns = ({ onView, onDelete, isDeleting }: ColumnPro
                             {deck.ownerAvatar ? (
                                 <img
                                     src={deck.ownerAvatar}
-                                    alt={deck.ownerName ?? "Owner Avatar"}
+                                    alt={deck.ownerName ?? t("ownerAvatarAlt")}
                                     className="h-full w-full object-cover"
                                 />
                             ) : (
@@ -83,7 +87,7 @@ export const useDecksTableColumns = ({ onView, onDelete, isDeleting }: ColumnPro
                         </div>
                         <div className="flex flex-col">
                             <span className="text-text text-xs font-black">
-                                {deck.ownerName || "Unknown User"}
+                                {deck.ownerName || tCommon("unknownUser")}
                             </span>
                             <span className="text-muted text-xs font-bold">
                                 {deck.ownerEmail || deck.ownerId}
@@ -95,20 +99,20 @@ export const useDecksTableColumns = ({ onView, onDelete, isDeleting }: ColumnPro
         }),
         col.display({
             id: "size",
-            header: () => "Size",
+            header: () => t("columnSize"),
             cell: ({ row }) => (
                 <div className="text-text flex items-center gap-1.5 text-sm font-black">
                     <Layers size={14} className="text-both" />
                     {row.original.cardCount}
                     <span className="text-muted ml-1 text-xs font-bold tracking-widest uppercase">
-                        Words
+                        {tCommon("words")}
                     </span>
                 </div>
             ),
         }),
         col.display({
             id: "created",
-            header: () => "Created",
+            header: () => t("columnCreated"),
             cell: ({ row }) => (
                 <div className="text-muted flex items-center gap-2 text-xs font-bold">
                     <Calendar size={12} />
@@ -121,7 +125,7 @@ export const useDecksTableColumns = ({ onView, onDelete, isDeleting }: ColumnPro
         col.display({
             id: "actions",
             meta: { align: "end" },
-            header: () => <div className="w-full text-right">Actions</div>,
+            header: () => <div className="w-full text-right">{t("columnActions")}</div>,
             cell: ({ row }) => {
                 const deck = row.original;
                 return (
@@ -133,7 +137,7 @@ export const useDecksTableColumns = ({ onView, onDelete, isDeleting }: ColumnPro
                             iconSize={16}
                             onClick={() => onView(deck.path, deck.title)}
                             className="hover:bg-katakana/10 hover:text-katakana"
-                            aria-label={`View ${deck.title}`}
+                            aria-label={t("viewAria", { title: deck.title })}
                         />
                         <Button
                             variant="ghost"
@@ -143,7 +147,7 @@ export const useDecksTableColumns = ({ onView, onDelete, isDeleting }: ColumnPro
                             onClick={() => onDelete(deck.path)}
                             disabled={isDeleting}
                             className="hover:text-danger hover:bg-red-50"
-                            aria-label={`Delete ${deck.title}`}
+                            aria-label={t("deleteAria", { title: deck.title })}
                         />
                     </div>
                 );

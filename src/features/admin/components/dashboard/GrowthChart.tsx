@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import { format } from "date-fns";
 import {
     CartesianGrid,
@@ -26,8 +28,9 @@ interface GrowthChartProps {
  * 'Total Users' accumulation over time.
  */
 const GrowthChart = ({ data, onClick }: GrowthChartProps) => {
+    const t = useTranslations("AdminDashboard");
     return (
-        <AdminChartContainer title="User Acquisition Growth">
+        <AdminChartContainer title={t("userAcquisitionGrowth")}>
             <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={data}>
                     <CartesianGrid strokeDasharray="8 8" vertical={false} stroke="#f0f0f0" />
@@ -71,7 +74,7 @@ const GrowthChart = ({ data, onClick }: GrowthChartProps) => {
                     <Legend verticalAlign="top" height={36} iconType="circle" />
                     <Line
                         yAxisId="right"
-                        name="Total Users"
+                        name={t("totalUsersLegend")}
                         type="monotone"
                         dataKey="totalUsers"
                         stroke="#58cc02"
@@ -79,13 +82,15 @@ const GrowthChart = ({ data, onClick }: GrowthChartProps) => {
                         dot={false}
                         activeDot={{ r: 6, strokeWidth: 0, fill: "#58cc02" }}
                         animationDuration={1500}
+                        // recharts' Line onClick payload isn't meaningfully typed upstream.
+                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
                         onClick={(data: any) =>
                             onClick?.(data.activePayload?.[0]?.payload?.date ?? "")
                         }
                     />
                     <Line
                         yAxisId="left"
-                        name="New Users"
+                        name={t("newUsersLegend")}
                         type="monotone"
                         dataKey="newUsers"
                         stroke="#1cb0f6"
@@ -93,6 +98,8 @@ const GrowthChart = ({ data, onClick }: GrowthChartProps) => {
                         dot={false}
                         activeDot={{ r: 8, strokeWidth: 0, fill: "#1cb0f6" }}
                         animationDuration={2000}
+                        // recharts' Line onClick payload isn't meaningfully typed upstream.
+                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
                         onClick={(data: any) =>
                             onClick?.(data.activePayload?.[0]?.payload?.date ?? "")
                         }

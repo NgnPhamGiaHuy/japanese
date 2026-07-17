@@ -10,6 +10,7 @@
  */
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
 
 import { ChevronDown, Hash } from "lucide-react";
@@ -32,6 +33,7 @@ interface LogRowProps {
 }
 
 const LogRow = ({ log }: LogRowProps) => {
+    const t = useTranslations("AdminReports");
     const [expanded, setExpanded] = useState(false);
 
     const { relative, absolute } = useMemo(
@@ -84,13 +86,13 @@ const LogRow = ({ log }: LogRowProps) => {
                         <LogSourceBadge source={log.source} />
                         {log.ip && (
                             <span className="text-muted text-xs font-black tracking-wider uppercase">
-                                IP {log.ip}
+                                {t("ip", { address: log.ip })}
                             </span>
                         )}
                     </div>
 
                     <h3 className="text-text text-sm leading-snug font-bold">
-                        {log.action ?? "(no action)"}
+                        {log.action ?? t("noAction")}
                     </h3>
 
                     <p className="text-muted flex flex-wrap items-center gap-x-1.5 gap-y-0.5 text-xs font-bold sm:text-xs">
@@ -143,7 +145,7 @@ const LogRow = ({ log }: LogRowProps) => {
                         {log.entityType && (
                             <div className="flex items-center gap-1.5 text-xs">
                                 <span className="text-muted font-black tracking-wider uppercase">
-                                    Entity
+                                    {t("entity")}
                                 </span>
                                 <Badge
                                     variant="default"
@@ -154,13 +156,13 @@ const LogRow = ({ log }: LogRowProps) => {
                                     {log.entityId ? ` · ${log.entityId.slice(0, 12)}…` : ""}
                                 </Badge>
                                 {log.entityId && (
-                                    <LogCopyButton text={log.entityId} title="Copy entity ID" />
+                                    <LogCopyButton text={log.entityId} title={t("copyEntityId")} />
                                 )}
                             </div>
                         )}
                         <div className="flex items-center gap-1.5 text-xs">
                             <span className="text-muted font-black tracking-wider uppercase">
-                                Log ID
+                                {t("logId")}
                             </span>
                             <Badge
                                 variant="default"
@@ -169,7 +171,7 @@ const LogRow = ({ log }: LogRowProps) => {
                             >
                                 {log.id.slice(0, 12)}…
                             </Badge>
-                            <LogCopyButton text={log.id} title="Copy log ID" />
+                            <LogCopyButton text={log.id} title={t("copyLogId")} />
                         </div>
                     </div>
 
@@ -177,7 +179,7 @@ const LogRow = ({ log }: LogRowProps) => {
                     {log.userAgent && (
                         <div className="mb-2 rounded-lg border border-gray-200 bg-white px-3 py-2">
                             <span className="text-muted mb-1 block text-xs font-black tracking-wider uppercase">
-                                User Agent
+                                {t("userAgent")}
                             </span>
                             <p className="font-mono text-xs break-all text-gray-500">
                                 {log.userAgent}

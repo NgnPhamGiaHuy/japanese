@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import { format } from "date-fns";
 import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 
@@ -31,6 +33,7 @@ const TOOLTIP_STYLE = {
  * <LogVolumeChart data={[{ date: '2024-01-01', AUTH: 10, SYSTEM: 5 }]} />
  */
 const LogVolumeChart = ({ data, onClick }: LogVolumeChartProps) => {
+    const t = useTranslations("AdminAnalytics");
     if (!data || data.length === 0) return null;
 
     const activeTypes = (Object.keys(LOG_TYPE_META) as string[]).filter((t) =>
@@ -41,7 +44,7 @@ const LogVolumeChart = ({ data, onClick }: LogVolumeChartProps) => {
     );
 
     return (
-        <AdminChartContainer title="Log Volume Over Time" subtitle="Daily event count by type">
+        <AdminChartContainer title={t("logVolumeOverTime")} subtitle={t("dailyEventCount")}>
             <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={data} margin={{ top: 4, right: 4, left: -8, bottom: 0 }}>
                     <CartesianGrid strokeDasharray="8 8" vertical={false} stroke="#f0f0f0" />

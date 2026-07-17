@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import { Shield, ShieldCheck } from "lucide-react";
 
 import { Button } from "@/shared/components/ui";
@@ -29,6 +31,7 @@ const ActionsCell = ({
     onDemote,
     onDelete,
 }: ActionsCellProps) => {
+    const t = useTranslations("AdminUsers");
     return (
         <div className="flex flex-wrap items-center justify-end gap-2 pr-4">
             {canPromote &&
@@ -41,7 +44,7 @@ const ActionsCell = ({
                         onClick={() => onDemote(user.uid)}
                     >
                         <Shield size={12} />
-                        Demote
+                        {t("demote")}
                     </Button>
                 ) : (
                     <Button
@@ -51,7 +54,7 @@ const ActionsCell = ({
                         onClick={() => onPromote(user.uid)}
                     >
                         <ShieldCheck size={12} />
-                        Promote
+                        {t("promote")}
                     </Button>
                 ))}
             {canDelete && (
@@ -61,7 +64,7 @@ const ActionsCell = ({
                     onClick={() => onDelete(user.uid)}
                     disabled={user.isSuperAdmin}
                 >
-                    Delete
+                    {t("delete")}
                 </Button>
             )}
         </div>

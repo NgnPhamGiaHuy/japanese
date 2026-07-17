@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import { Activity, BookOpen, Database, Users, Zap } from "lucide-react";
 
 import { Link } from "@/i18n/navigation";
@@ -24,19 +26,20 @@ import { useAdminDashboard } from "../../hooks";
  * recent operational activity feed, and system health monitoring.
  */
 const AdminOverviewPage = () => {
+    const t = useTranslations("AdminDashboard");
     const { data, isLoading, error, refetch } = useAdminDashboard();
 
     if (isLoading)
         return (
             <AdminPageLayout>
-                <LoadingSpinner fullScreen={false} label="Loading overview..." />
+                <LoadingSpinner fullScreen={false} label={t("loadingOverview")} />
             </AdminPageLayout>
         );
     if (error || !data) {
         return (
             <AdminPageLayout>
                 <AdminErrorState
-                    message={error?.message ?? "Overview failed to load"}
+                    message={error?.message ?? t("overviewFailedToLoad")}
                     onRetry={() => refetch()}
                 />
             </AdminPageLayout>
@@ -48,8 +51,8 @@ const AdminOverviewPage = () => {
     return (
         <AdminPageLayout>
             <AdminPageHeader
-                title="System Overview"
-                description="Real-time operational snapshot of the platform."
+                title={t("title")}
+                description={t("description")}
                 icon={Zap}
                 actions={
                     <div className="flex gap-2">
@@ -58,7 +61,7 @@ const AdminOverviewPage = () => {
                                 variant="secondary"
                                 className="!px-3 !py-2 !text-xs sm:!px-4 sm:!py-2 sm:!text-sm"
                             >
-                                Manage Users
+                                {t("manageUsers")}
                             </Button>
                         </Link>
                         <Link href="/admin/reports">
@@ -66,7 +69,7 @@ const AdminOverviewPage = () => {
                                 variant="primary"
                                 className="!px-3 !py-2 !text-xs sm:!px-4 sm:!py-2 sm:!text-sm"
                             >
-                                View Logs
+                                {t("viewLogs")}
                             </Button>
                         </Link>
                     </div>
@@ -74,16 +77,20 @@ const AdminOverviewPage = () => {
             />
 
             <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
-                <AdminStatCard label="Total Users" value={stats.totalUsers} icon={Users} />
+                <AdminStatCard label={t("totalUsers")} value={stats.totalUsers} icon={Users} />
                 <AdminStatCard
-                    label="Active Today"
+                    label={t("activeToday")}
                     value={stats.activeUsersToday}
                     icon={Activity}
                     color="text-hiragana"
                 />
-                <AdminStatCard label="Flashcards" value={stats.totalFlashcards} icon={Database} />
                 <AdminStatCard
-                    label="Total Sessions"
+                    label={t("flashcards")}
+                    value={stats.totalFlashcards}
+                    icon={Database}
+                />
+                <AdminStatCard
+                    label={t("totalSessions")}
                     value={stats.totalSessions}
                     icon={BookOpen}
                     color="text-both"
@@ -92,7 +99,7 @@ const AdminOverviewPage = () => {
 
             <div className="grid grid-cols-1 gap-4 sm:gap-6 lg:grid-cols-3">
                 <AdminCard
-                    title="Operational Feed"
+                    title={t("operationalFeed")}
                     padding="none"
                     className="lg:col-span-2"
                     actions={
@@ -100,7 +107,7 @@ const AdminOverviewPage = () => {
                             href="/admin/reports"
                             className="text-katakana text-xs font-black tracking-widest uppercase hover:underline"
                         >
-                            Full Audit Trail
+                            {t("fullAuditTrail")}
                         </Link>
                     }
                 >
@@ -109,8 +116,8 @@ const AdminOverviewPage = () => {
                             recentActivity.map((log) => <LogRow key={log.id} log={log} />)
                         ) : (
                             <AdminEmptyState
-                                title="No recent activity"
-                                description="Operation logs will appear here as they happen."
+                                title={t("noRecentActivity")}
+                                description={t("noRecentActivityDescription")}
                                 icon={Activity}
                             />
                         )}

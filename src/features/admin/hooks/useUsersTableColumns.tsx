@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import { createColumnHelper } from "@tanstack/react-table";
 
 import ActionsCell from "../components/users/ActionsCell";
@@ -31,6 +33,7 @@ export const useUsersTableColumns = ({
     onDemote,
     onDelete,
 }: ColumnProps) => {
+    const t = useTranslations("AdminUsers");
     const columns = [
         col.display({
             id: "select",
@@ -63,7 +66,7 @@ export const useUsersTableColumns = ({
             id: "user",
             header: () => (
                 <div className="pl-4 text-left font-black tracking-widest text-gray-400 uppercase">
-                    User
+                    {t("columnUser")}
                 </div>
             ),
             size: 280,
@@ -73,7 +76,7 @@ export const useUsersTableColumns = ({
         col.display({
             id: "role",
             size: 120,
-            header: () => <div className="w-full text-center">Role</div>,
+            header: () => <div className="w-full text-center">{t("columnRole")}</div>,
             cell: ({ row }) => <RoleCell user={row.original} />,
         }),
         col.accessor("lastSignInTime", {
@@ -81,7 +84,7 @@ export const useUsersTableColumns = ({
             size: 130,
             header: () => (
                 <div className="text-center font-black tracking-widest text-gray-400 uppercase">
-                    Last Login
+                    {t("columnLastLogin")}
                 </div>
             ),
             cell: ({ getValue }) => {
@@ -89,7 +92,7 @@ export const useUsersTableColumns = ({
                 return (
                     <div className="text-center">
                         {!raw ? (
-                            <span className="text-muted text-xs">Never</span>
+                            <span className="text-muted text-xs">{t("never")}</span>
                         ) : (
                             <span className="text-muted text-xs font-bold">
                                 {new Date(raw).toLocaleDateString(undefined, {
@@ -108,7 +111,7 @@ export const useUsersTableColumns = ({
             size: 130,
             header: () => (
                 <div className="text-center font-black tracking-widest text-gray-400 uppercase">
-                    Last Active
+                    {t("columnLastActive")}
                 </div>
             ),
             cell: ({ getValue }) => {
@@ -116,7 +119,7 @@ export const useUsersTableColumns = ({
                 return (
                     <div className="text-center">
                         {!raw ? (
-                            <span className="text-muted text-xs">Unknown</span>
+                            <span className="text-muted text-xs">{t("unknownDate")}</span>
                         ) : (
                             <span className="text-katakana text-xs font-bold">
                                 {new Date(raw).toLocaleDateString(undefined, {
@@ -139,7 +142,7 @@ export const useUsersTableColumns = ({
                 id: "actions",
                 size: 190,
                 meta: { align: "end" },
-                header: () => <div className="w-full pr-6 text-right">Actions</div>,
+                header: () => <div className="w-full pr-6 text-right">{t("columnActions")}</div>,
                 cell: ({ row }) => (
                     <ActionsCell
                         user={row.original}

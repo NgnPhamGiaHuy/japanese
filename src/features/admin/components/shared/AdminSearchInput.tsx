@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import { Search } from "lucide-react";
 
 import { Input } from "@/shared/components/ui";
@@ -20,14 +22,15 @@ interface AdminSearchInputProps {
 const AdminSearchInput = ({
     value,
     onChange,
-    placeholder = "Search...",
+    placeholder,
     className = "",
 }: AdminSearchInputProps) => {
+    const t = useTranslations("AdminCommon");
     return (
         <Input
             type="text"
             icon={Search}
-            placeholder={placeholder}
+            placeholder={placeholder ?? t("searchPlaceholder")}
             value={value}
             onChange={(e) => onChange(e.target.value)}
             containerClassName={className}

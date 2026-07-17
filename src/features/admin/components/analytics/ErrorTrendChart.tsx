@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import { format } from "date-fns";
 import {
     CartesianGrid,
@@ -24,8 +26,9 @@ interface ErrorTrendChartProps {
  * making it easier to identify specific regression periods.
  */
 const ErrorTrendChart = ({ data }: ErrorTrendChartProps) => {
+    const t = useTranslations("AdminAnalytics");
     return (
-        <AdminChartContainer title="System Error Trends" className="bg-red-50/10">
+        <AdminChartContainer title={t("errorTrends")} className="bg-red-50/10">
             <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={data}>
                     <CartesianGrid strokeDasharray="8 8" vertical={false} stroke="#f0f0f0" />

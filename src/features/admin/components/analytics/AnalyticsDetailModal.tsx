@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import { Database, Search } from "lucide-react";
 
 import { LoadingSpinner, Modal } from "@/shared/components/ui";
@@ -10,9 +12,11 @@ interface AnalyticsDetailModalProps {
     onClose: () => void;
     title: string;
     description: string;
-    data: any;
+    // Shape varies per drilldown type (user_growth/role/feature/content/log_*
+    // each fetch differently-shaped Firestore records) — no sound static type here.
+    data: unknown;
     isLoading: boolean;
-    error: any;
+    error: Error | null;
 }
 
 /**
@@ -30,13 +34,14 @@ const AnalyticsDetailModal = ({
     isLoading,
     error,
 }: AnalyticsDetailModalProps) => {
+    const t = useTranslations("AdminAnalytics");
     return (
         <Modal isOpen={isOpen} onClose={onClose} title={title} maxWidth="4xl">
             <div className="space-y-6">
                 <p className="text-muted text-sm font-bold">{description}</p>
 
                 {isLoading ? (
-                    <LoadingSpinner fullScreen={false} label="Fetching detailed records..." />
+                    <LoadingSpinner fullScreen={false} label={t("fetchingDetailedRecords")} />
                 ) : error ? (
                     <AdminErrorState message={error.message} />
                 ) : (
@@ -44,13 +49,13 @@ const AnalyticsDetailModal = ({
                         {/* Summary for selected slice */}
                         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                             <AdminStatCard
-                                label="Total Records Found"
+                                label={t("totalRecordsFound")}
                                 value={Array.isArray(data) ? data.length : 0}
                                 icon={Database}
                             />
                             <AdminStatCard
-                                label="Analysis Phase"
-                                value="Detailed Drilldown"
+                                label={t("analysisPhase")}
+                                value={t("detailedDrilldown")}
                                 icon={Search}
                             />
                         </div>
@@ -61,22 +66,22 @@ const AnalyticsDetailModal = ({
                                 <thead className="border-b border-gray-100 bg-gray-50/50">
                                     <tr>
                                         <th className="text-muted px-5 py-4 text-xs font-black tracking-widest uppercase">
-                                            Subject
+                                            {t("subject")}
                                         </th>
                                         <th className="text-muted px-5 py-4 text-xs font-black tracking-widest uppercase">
-                                            Activity
+                                            {t("activity")}
                                         </th>
                                         <th className="text-muted px-5 py-4 text-xs font-black tracking-widest uppercase">
-                                            Occurred
+                                            {t("occurred")}
                                         </th>
                                         <th className="text-muted px-5 py-4 text-right text-xs font-black tracking-widest uppercase">
-                                            Insight
+                                            {t("insight")}
                                         </th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-gray-100">
                                     {Array.isArray(data) && data.length > 0 ? (
-                                        data.map((item: any, idx: number) => {
+                                        data.map((item, idx: number) => {
                                             const displayDate = item.timestamp
                                                 ? new Date(item.timestamp).toLocaleString([], {
                                                       month: "short",
@@ -99,7 +104,7 @@ const AnalyticsDetailModal = ({
                                                         <div className="text-text text-sm font-black">
                                                             {item.displayName ||
                                                                 item.userName ||
-                                                                "System"}
+                                                                t("system")}
                                                         </div>
                                                         <div className="text-muted max-w-[120px] truncate text-xs font-bold">
                                                             {item.email || item.uid || item.id}
@@ -109,7 +114,7 @@ const AnalyticsDetailModal = ({
                                                         <span className="rounded-lg bg-gray-100 px-2 py-1 text-xs font-black text-gray-700">
                                                             {item.action ||
                                                                 item.title ||
-                                                                "Unknown Action"}
+                                                                t("unknownAction")}
                                                         </span>
                                                     </td>
                                                     <td className="text-muted px-5 py-4 text-xs font-bold">
@@ -118,10 +123,12 @@ const AnalyticsDetailModal = ({
                                                     <td className="px-5 py-4 text-right">
                                                         <span className="text-katakana text-xs font-black">
                                                             {item.metadata?.score !== undefined
-                                                                ? `Score: ${item.metadata.score}`
+                                                                ? t("scoreLabel", {
+                                                                      score: item.metadata.score,
+                                                                  })
                                                                 : item.level
                                                                   ? item.level.toUpperCase()
-                                                                  : "Details"}
+                                                                  : t("detailsLabel")}
                                                         </span>
                                                     </td>
                                                 </tr>
@@ -133,7 +140,7 @@ const AnalyticsDetailModal = ({
                                                 colSpan={4}
                                                 className="text-muted px-5 py-12 text-center text-sm font-bold"
                                             >
-                                                No detailed records found for this selection.
+                                                {t("noDetailedRecords")}
                                             </td>
                                         </tr>
                                     )}
