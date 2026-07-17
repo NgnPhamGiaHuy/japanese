@@ -62,7 +62,7 @@ const LogsFilters = ({ filters, onChange, activeFilterCount = 0 }: LogsFiltersPr
                 l === "error"
                     ? "#ea2b2b"
                     : l === "warn"
-                      ? "#f59e0b"
+                      ? "#ff9600"
                       : l === "security"
                         ? "#ce82ff"
                         : "#1cb0f6",

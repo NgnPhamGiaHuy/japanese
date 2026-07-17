@@ -18,7 +18,7 @@ import { emitNotification } from "@/features/notifications/services";
 import { useRouter } from "@/i18n/navigation";
 import { useAppStore } from "@/lib/app-store";
 import { SITE_URL } from "@/lib/site";
-import { Button } from "@/shared/components/ui";
+import { Button, LoadingSpinner } from "@/shared/components/ui";
 import { useCopyToClipboard } from "@/shared/hooks";
 import { useAlert } from "@/shared/providers";
 
@@ -101,7 +101,7 @@ export default function SharedLessonPageClient({
                         )}
                     </div>
                 )}
-                <div className="h-8 w-8 animate-spin rounded-full border-4 border-gray-200 border-t-[#1cb0f6]" />
+                <LoadingSpinner fullScreen={false} />
             </div>
         );
     }

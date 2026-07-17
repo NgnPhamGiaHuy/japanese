@@ -88,11 +88,9 @@ function NotificationIcon({ type }: { type: string }) {
 function InviteActions({
     notification,
     userId,
-    onDone,
 }: {
     notification: AppNotification;
     userId: string;
-    onDone: () => void;
 }) {
     const t = useTranslations("NotificationsPage");
     const router = useRouter();
@@ -113,7 +111,6 @@ function InviteActions({
                         notification.title,
                     ),
                 );
-            onDone();
             router.push(link);
         });
     };
@@ -136,7 +133,6 @@ function InviteActions({
                 // silently re-convert to access on the next share-link visit.
                 if (ownerId && lessonId) void declineInviteAction(token, ownerId, lessonId);
             }
-            onDone();
         });
     };
 
@@ -204,12 +200,10 @@ export function NotificationRow({
     notification,
     userId,
     now,
-    onRefresh,
 }: {
     notification: AppNotification;
     userId: string;
     now: number;
-    onRefresh: () => void;
 }) {
     const t = useTranslations("NotificationsPage");
     const tCommon = useTranslations("Common");
@@ -330,7 +324,7 @@ export function NotificationRow({
             {/* Invite action buttons — rendered OUTSIDE the text div, never nested in it */}
             {notification.type === "invite" && unread && (
                 <div className="mt-1 pl-13">
-                    <InviteActions notification={notification} userId={userId} onDone={onRefresh} />
+                    <InviteActions notification={notification} userId={userId} />
                 </div>
             )}
         </div>

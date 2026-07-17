@@ -15,7 +15,7 @@ import { useCards, useLessons } from "@/features/flashcard/hooks";
 import { buildShareId } from "@/features/flashcard/services";
 import { useRouter } from "@/i18n/navigation";
 import { useAppStore } from "@/lib/app-store";
-import { Button } from "@/shared/components/ui";
+import { Button, LoadingSpinner } from "@/shared/components/ui";
 import { useCopyToClipboard } from "@/shared/hooks";
 import { useAlert } from "@/shared/providers";
 
@@ -43,11 +43,7 @@ export default function FlashcardDetailPage({ params }: { params: Promise<{ id: 
     const { copied: linkCopied, copy: copyLink } = useCopyToClipboard();
 
     if (lessonsLoading || cardsLoading) {
-        return (
-            <div className="bg-bg fixed inset-0 flex items-center justify-center">
-                <div className="h-8 w-8 animate-spin rounded-full border-4 border-gray-200 border-t-[#1cb0f6]" />
-            </div>
-        );
+        return <LoadingSpinner />;
     }
 
     const lesson = lessons.find((l) => l.id === id);

@@ -7,6 +7,7 @@ import { z } from "zod";
 import { notifySystemEvent } from "@/features/notifications/actions/notification.actions";
 import { ActivityAction } from "@/lib/logging/actions.enum";
 import { toActionResult } from "@/lib/safe-action";
+import { COOKIE_NAME } from "@/shared/utils/cookie";
 import {
     adminActionClient,
     adminDb,
@@ -49,7 +50,7 @@ import {
 
 async function getAuthToken(): Promise<string> {
     const cookieStore = await cookies();
-    const token = cookieStore.get("auth-token")?.value;
+    const token = cookieStore.get(COOKIE_NAME)?.value;
     if (!token) throw new Error("UNAUTHORIZED: Session token missing");
     return token;
 }

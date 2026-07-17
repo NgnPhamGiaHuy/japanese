@@ -20,6 +20,7 @@ import { lessonDoc, normalizeLesson } from "@/features/flashcard/services";
 import { cardsCol } from "@/features/flashcard/services/card.service";
 import { useRouter } from "@/i18n/navigation";
 import { useAppStore } from "@/lib/app-store";
+import { LoadingSpinner } from "@/shared/components/ui";
 import { useAlert } from "@/shared/providers";
 import { sortByOrder } from "@/shared/utils";
 
@@ -111,11 +112,7 @@ export default function FlashcardEditPage({ params }: { params: Promise<{ id: st
     const loading = isSharedEdit ? loadingShared : !lesson;
 
     if (loading) {
-        return (
-            <div className="bg-bg fixed inset-0 flex items-center justify-center">
-                <div className="h-8 w-8 animate-spin rounded-full border-4 border-gray-200 border-t-[#1cb0f6]" />
-            </div>
-        );
+        return <LoadingSpinner />;
     }
 
     if (!lesson) {

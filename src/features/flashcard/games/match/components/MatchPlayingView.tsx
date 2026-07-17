@@ -12,6 +12,7 @@ import { AnimatePresence, m } from "motion/react";
 import { LivesDisplay, MiniLeaderboard } from "@/features/game/components";
 import { ScreenHeaderBackButton, ScreenHeaderRow } from "@/shared/components/layout";
 import MatchGrid from "./MatchGrid";
+import { COMBO_STEP } from "../config";
 import { useMatchGameStore } from "../../../hooks/useMatchGameStore";
 
 interface MatchPlayingViewProps {
@@ -93,7 +94,7 @@ const MatchPlayingView = ({
                     <span className="text-text text-2xl font-black tabular-nums md:text-3xl">
                         {score}
                     </span>
-                    {streak >= 3 ? (
+                    {streak >= COMBO_STEP ? (
                         <span className="text-survival text-xs font-black whitespace-nowrap">
                             🔥 {streak}×
                         </span>

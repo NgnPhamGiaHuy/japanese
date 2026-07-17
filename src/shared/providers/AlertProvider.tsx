@@ -1,7 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import React, { createContext, useCallback, useContext } from "react";
+import React, { createContext, useCallback, useContext, useMemo } from "react";
 
 import { toast, Toaster } from "sonner";
 
@@ -61,8 +61,10 @@ export const AlertProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         );
     }, []);
 
+    const value = useMemo(() => ({ showAlert }), [showAlert]);
+
     return (
-        <AlertContext.Provider value={{ showAlert }}>
+        <AlertContext.Provider value={value}>
             {children}
             <Toaster
                 position="bottom-right"

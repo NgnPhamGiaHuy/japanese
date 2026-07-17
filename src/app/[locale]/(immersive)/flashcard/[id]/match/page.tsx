@@ -18,6 +18,7 @@ import { use } from "react";
 
 import { MatchGame } from "@/features/flashcard/games/match";
 import { useFlashcardLoader } from "@/features/flashcard/loaders";
+import { LoadingSpinner } from "@/shared/components/ui";
 
 export default function MatchModePage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = use(params);
@@ -25,11 +26,7 @@ export default function MatchModePage({ params }: { params: Promise<{ id: string
 
     // ── Loading State ──────────────────────────────────────────────────────
     if (loader.isLoading) {
-        return (
-            <div className="bg-bg fixed inset-0 flex items-center justify-center">
-                <div className="h-8 w-8 animate-spin rounded-full border-4 border-gray-200 border-t-[#ce82ff]" />
-            </div>
-        );
+        return <LoadingSpinner color="#ce82ff" />;
     }
 
     // ── 404 Guard ──────────────────────────────────────────────────────────

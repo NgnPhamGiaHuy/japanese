@@ -165,7 +165,7 @@ export function useDropMode({
                     lane = lanes[(lanes.indexOf(lane) + 1) % lanes.length];
 
                 state.words.push({
-                    id: Math.random().toString(36).substring(2, 11),
+                    id: crypto.randomUUID(),
                     char: charData.char,
                     validOptions: getValidRomaji(charData.romaji),
                     typed: "",

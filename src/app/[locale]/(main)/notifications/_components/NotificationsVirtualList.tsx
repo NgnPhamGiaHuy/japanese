@@ -13,7 +13,6 @@ import type { NotificationGroup } from "@/features/notifications/types";
 interface NotificationsVirtualListProps {
     groups: NotificationGroup[];
     userId: string;
-    onRefresh: () => void;
 }
 
 /**
@@ -41,7 +40,7 @@ interface NotificationsVirtualListProps {
  * cosmetic nicety on what's normally a short, personal list. Left as a plain
  * inline label that scrolls with its group.
  */
-const NotificationsVirtualList = ({ groups, userId, onRefresh }: NotificationsVirtualListProps) => {
+const NotificationsVirtualList = ({ groups, userId }: NotificationsVirtualListProps) => {
     const now = useNow(30_000);
     const listRef = useRef<HTMLDivElement>(null);
     const [scrollMargin, setScrollMargin] = useState(0);
@@ -96,7 +95,6 @@ const NotificationsVirtualList = ({ groups, userId, onRefresh }: NotificationsVi
                                     notification={item.notification}
                                     userId={userId}
                                     now={now}
-                                    onRefresh={onRefresh}
                                 />
                                 {!item.isLastInGroup && <div className="mx-4 h-px bg-gray-100" />}
                             </div>

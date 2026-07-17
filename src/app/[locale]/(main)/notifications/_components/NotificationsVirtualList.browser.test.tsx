@@ -99,7 +99,7 @@ async function renderList(groups: NotificationGroup[]) {
     const screen = await render(
         <NextIntlClientProvider locale="en" messages={messages}>
             <AlertProvider>
-                <NotificationsVirtualList groups={groups} userId="u1" onRefresh={() => {}} />
+                <NotificationsVirtualList groups={groups} userId="u1" />
             </AlertProvider>
         </NextIntlClientProvider>,
     );

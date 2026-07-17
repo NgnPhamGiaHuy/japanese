@@ -1,6 +1,7 @@
 import createMiddleware from "next-intl/middleware";
 import { NextResponse } from "next/server";
 
+import { COOKIE_NAME } from "@/shared/utils/cookie";
 import { routing } from "./i18n/routing";
 
 import type { NextRequest } from "next/server";
@@ -77,7 +78,7 @@ export function proxy(request: NextRequest) {
     const intlResponse = handleI18nRouting(request);
 
     const { path, canonicalPrefix } = splitLocale(pathname);
-    const token = request.cookies.get("auth-token")?.value;
+    const token = request.cookies.get(COOKIE_NAME)?.value;
 
     const isPublic =
         PUBLIC_PATHS.some((p) => path.startsWith(p)) ||

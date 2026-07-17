@@ -18,6 +18,7 @@ import { Suspense } from "react";
 
 import { getPublicSharedLessonPreview } from "@/features/flashcard/services/shared-preview.service";
 import { routing } from "@/i18n/routing";
+import { LoadingSpinner } from "@/shared/components/ui";
 import SharedLessonPageClient from "./SharedLessonPageClient";
 
 import type { Metadata } from "next";
@@ -80,11 +81,7 @@ export async function generateMetadata({
 }
 
 function LoadingShell() {
-    return (
-        <div className="bg-bg fixed inset-0 flex items-center justify-center">
-            <div className="h-8 w-8 animate-spin rounded-full border-4 border-gray-200 border-t-[#1cb0f6]" />
-        </div>
-    );
+    return <LoadingSpinner />;
 }
 
 export default async function SharedLessonPage({

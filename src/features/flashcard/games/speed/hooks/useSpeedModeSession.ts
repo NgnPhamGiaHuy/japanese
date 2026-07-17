@@ -24,6 +24,7 @@
 import { useCallback, useMemo } from "react";
 
 import { SPEED_GAME_CONFIG, timerColor } from "@/features/flashcard/games/speed/config";
+import { comboMultiplier } from "@/features/game/domain";
 import { useGameEngine } from "./useGameEngine";
 
 import type { FlashCard } from "../../../types";
@@ -164,7 +165,7 @@ export function useSpeedModeSession({
         }
 
         const { SCORING, UI } = SPEED_GAME_CONFIG;
-        const multiplier = Math.floor(state.streak / SCORING.COMBO_STEP) + 1;
+        const multiplier = comboMultiplier(state.streak, SCORING.COMBO_STEP);
         const secondsLeft = Math.ceil(state.timeRemaining);
 
         return {

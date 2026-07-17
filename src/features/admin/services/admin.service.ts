@@ -6,6 +6,7 @@ import { cookies } from "next/headers";
 import { z } from "zod";
 
 import { adminAuth, adminDb } from "@/lib/firebase-admin";
+import { COOKIE_NAME } from "@/shared/utils/cookie";
 import { hasPermission, normalizeAdminRole } from "../utils/rbac";
 
 import type { AdminRole, CallerContext } from "../types";
@@ -57,7 +58,7 @@ export async function assertPermissionFromToken(
 
 export async function assertAdminAction(action: PermissionAction): Promise<CallerContext> {
     const cookieStore = await cookies();
-    const token = cookieStore.get("auth-token")?.value;
+    const token = cookieStore.get(COOKIE_NAME)?.value;
     if (!token) throw new Error("UNAUTHORIZED: Session token missing");
     return assertPermissionFromToken(token, action);
 }

@@ -16,17 +16,14 @@ import { use } from "react";
 
 import { SpeedConstraintError, SpeedGame } from "@/features/flashcard/games/speed";
 import { useFlashcardLoader } from "@/features/flashcard/loaders";
+import { LoadingSpinner } from "@/shared/components/ui";
 
 export default function SpeedQuizPage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = use(params);
     const loader = useFlashcardLoader({ type: "personal", lessonId: id });
 
     if (loader.isLoading) {
-        return (
-            <div className="bg-bg fixed inset-0 flex items-center justify-center">
-                <div className="h-8 w-8 animate-spin rounded-full border-4 border-gray-200 border-t-[#ff9600]" />
-            </div>
-        );
+        return <LoadingSpinner color="#ff9600" />;
     }
 
     if (loader.isNotFound || !loader.data) return notFound();

@@ -1,7 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { useState, useTransition } from "react";
+import { useMemo, useState, useTransition } from "react";
 
 import { CheckCheck, Trash2 } from "lucide-react";
 
@@ -45,12 +45,15 @@ export default function NotificationsPage() {
     const [isClearingAll, startClearAll] = useTransition();
 
     // Filtered view for "unread" tab
-    const displayedGroups =
-        filter === "unread"
-            ? groups
-                  .map((g) => ({ ...g, items: g.items.filter(isUnread) }))
-                  .filter((g) => g.items.length > 0)
-            : groups;
+    const displayedGroups = useMemo(
+        () =>
+            filter === "unread"
+                ? groups
+                      .map((g) => ({ ...g, items: g.items.filter(isUnread) }))
+                      .filter((g) => g.items.length > 0)
+                : groups,
+        [filter, groups],
+    );
 
     const totalDisplayed = displayedGroups.reduce((sum, g) => sum + g.items.length, 0);
 
@@ -84,10 +87,6 @@ export default function NotificationsPage() {
             }
         });
     };
-
-    // Passed to child rows so invite accept/decline can trigger a no-op refresh
-    // (real-time listener handles the actual update)
-    const noop = () => {};
 
     return (
         <div className="bg-bg min-h-dvh pb-28">
@@ -175,11 +174,7 @@ export default function NotificationsPage() {
                         {totalDisplayed === 0 ? (
                             <NotificationsEmptyState filter={filter} />
                         ) : (
-                            <NotificationsVirtualList
-                                groups={displayedGroups}
-                                userId={user!.uid}
-                                onRefresh={noop}
-                            />
+                            <NotificationsVirtualList groups={displayedGroups} userId={user!.uid} />
                         )}
                         {/* Independent of totalDisplayed/filter: the "unread"
                             tab filters the already-loaded window client-side,
