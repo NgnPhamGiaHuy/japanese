@@ -105,12 +105,29 @@ export async function deleteGlobalFlashcard(
     const snap = await ref.get();
     const data = snap.exists ? snap.data() : undefined;
     const parts = path.split("/");
+    const appId = parts[parts.indexOf("artifacts") + 1] ?? "";
     const ownerId = parts[parts.indexOf("users") + 1] ?? "";
     const lessonId = parts[parts.indexOf("lessons") + 1] ?? "";
 
-    // Deep delete: typically we would also delete the subcollection 'cards'
-    // For now, delete the lesson document.
-    // In a full implementation, we'd iterate cards too.
+    // Cards live in a flat, top-level collection (artifacts/{appId}/users/{ownerId}/cards),
+    // linked to this lesson only via a `lessonId` field — not a Firestore subcollection of
+    // the lesson doc. Deleting the lesson alone orphans every one of its cards.
+    if (appId && ownerId && lessonId) {
+        const cardsRef = adminDb
+            .collection("artifacts")
+            .doc(appId)
+            .collection("users")
+            .doc(ownerId)
+            .collection("cards");
+        const cardsSnap = await cardsRef.where("lessonId", "==", lessonId).get();
+
+        if (!cardsSnap.empty) {
+            const bulkWriter = adminDb.bulkWriter();
+            cardsSnap.docs.forEach((cardDoc) => void bulkWriter.delete(cardDoc.ref));
+            await bulkWriter.close();
+        }
+    }
+
     await ref.delete();
 
     return { ownerId, lessonId, title: (data?.title as string | undefined) ?? null };
