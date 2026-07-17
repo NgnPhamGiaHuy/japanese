@@ -13,6 +13,7 @@
  * placed on the server.
  */
 
+import { getTranslations } from "next-intl/server";
 import { Suspense } from "react";
 
 import { getPublicSharedLessonPreview } from "@/features/flashcard/services/shared-preview.service";
@@ -30,25 +31,36 @@ function localizedPath(shareId: string, locale: string): string {
 export async function generateMetadata({
     params,
 }: {
-    params: Promise<{ shareId: string }>;
+    params: Promise<{ shareId: string; locale: string }>;
 }): Promise<Metadata> {
-    const { shareId } = await params;
+    const { shareId, locale } = await params;
+    const t = await getTranslations({ locale, namespace: "Metadata" });
     const preview = await getPublicSharedLessonPreview(shareId);
 
     const alternates = {
         languages: Object.fromEntries(
-            routing.locales.map((locale) => [locale, localizedPath(shareId, locale)]),
+            routing.locales.map((alternateLocale) => [
+                alternateLocale,
+                localizedPath(shareId, alternateLocale),
+            ]),
         ),
     };
 
     if (!preview) {
-        return { title: "Shared Deck | Kana & Nihongo Master", alternates };
+        return { title: t("sharedDeckFallbackTitle"), alternates };
     }
 
-    const title = `${preview.title} | Kana & Nihongo Master`;
+    const title = t("sharedDeckTitle", { title: preview.title });
+    // Two variants rather than an appended "by {owner}" clause — the owner
+    // attribution sits at the front of the sentence in Japanese.
     const description =
         preview.description ||
-        `A shared Japanese flashcard deck with ${preview.cardCount} cards${preview.ownerName ? ` by ${preview.ownerName}` : ""}.`;
+        (preview.ownerName
+            ? t("sharedDeckDescriptionByOwner", {
+                  count: preview.cardCount,
+                  owner: preview.ownerName,
+              })
+            : t("sharedDeckDescription", { count: preview.cardCount }));
 
     return {
         title,

@@ -30,6 +30,23 @@
         "undo": "Undo",
         "dismiss": "Dismiss"
     },
+    "Metadata": {
+        "siteTitle": "Kana & Nihongo Master",
+        "siteDescription": "Learn hiragana, katakana and Japanese vocabulary with quizzes, survival mode, and flashcards.",
+        "keywords": "Japanese,hiragana,katakana,kana,flashcard,JLPT,language learning",
+        "sharedDeckFallbackTitle": "Shared Deck | Kana & Nihongo Master",
+        "sharedDeckTitle": "{title} | Kana & Nihongo Master",
+        "sharedDeckDescription": "A shared Japanese flashcard deck with {count} cards.",
+        "sharedDeckDescriptionByOwner": "A shared Japanese flashcard deck with {count} cards by {owner}.",
+        "adminContentTitle": "Content Management | Admin",
+        "adminContentDescription": "Manage global platform flashcards and learning content.",
+        "adminAnalyticsTitle": "Analytics | Admin",
+        "adminAnalyticsDescription": "Platform usage statistics, user engagement, and system performance.",
+        "adminReportsTitle": "Reports | Admin",
+        "adminReportsDescription": "System logs, user reports, and audit trails.",
+        "adminSettingsTitle": "Settings | Admin",
+        "adminSettingsDescription": "Global administrative configuration."
+    },
     "ErrorScreens": {
         "errorTitle": "Something Went Wrong",
         "errorMessage": "An unexpected error occurred while loading {scope}. You can try again, or head back home.",

@@ -1,9 +1,18 @@
+import { getTranslations } from "next-intl/server";
+
 import { AdminContentPageContent } from "@/features/admin/components/content";
 
-export const metadata = {
-    title: "Content Management | Admin",
-    description: "Manage global platform flashcards and learning content.",
-};
+import type { Metadata } from "next";
+
+export async function generateMetadata({
+    params,
+}: {
+    params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+    const { locale } = await params;
+    const t = await getTranslations({ locale, namespace: "Metadata" });
+    return { title: t("adminContentTitle"), description: t("adminContentDescription") };
+}
 
 /**
  * Admin Content Management Page.

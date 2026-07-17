@@ -1,9 +1,18 @@
+import { getTranslations } from "next-intl/server";
+
 import { AdminSettingsPageContent } from "@/features/admin/components";
 
-export const metadata = {
-    title: "Settings | Admin",
-    description: "Global administrative configuration.",
-};
+import type { Metadata } from "next";
+
+export async function generateMetadata({
+    params,
+}: {
+    params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+    const { locale } = await params;
+    const t = await getTranslations({ locale, namespace: "Metadata" });
+    return { title: t("adminSettingsTitle"), description: t("adminSettingsDescription") };
+}
 
 /**
  * Admin Settings Page.

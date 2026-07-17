@@ -1,9 +1,18 @@
+import { getTranslations } from "next-intl/server";
+
 import { AdminReportsPageContent } from "@/features/admin/components";
 
-export const metadata = {
-    title: "Reports | Admin",
-    description: "System logs, user reports, and audit trails.",
-};
+import type { Metadata } from "next";
+
+export async function generateMetadata({
+    params,
+}: {
+    params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+    const { locale } = await params;
+    const t = await getTranslations({ locale, namespace: "Metadata" });
+    return { title: t("adminReportsTitle"), description: t("adminReportsDescription") };
+}
 
 /**
  * Admin Reports Page.

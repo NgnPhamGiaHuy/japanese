@@ -30,6 +30,23 @@
         "undo": "元に戻す",
         "dismiss": "閉じる"
     },
+    "Metadata": {
+        "siteTitle": "Kana & Nihongo Master",
+        "siteDescription": "クイズ、サバイバルモード、単語帳で、ひらがな・カタカナと日本語の語彙を学びましょう。",
+        "keywords": "日本語,ひらがな,カタカナ,かな,単語帳,フラッシュカード,JLPT,語学学習,Japanese,hiragana,katakana",
+        "sharedDeckFallbackTitle": "共有デッキ | Kana & Nihongo Master",
+        "sharedDeckTitle": "{title} | Kana & Nihongo Master",
+        "sharedDeckDescription": "{count}枚のカードを含む、共有された日本語単語デッキです。",
+        "sharedDeckDescriptionByOwner": "{owner}さんが共有した、{count}枚のカードを含む日本語単語デッキです。",
+        "adminContentTitle": "コンテンツ管理 | 管理",
+        "adminContentDescription": "プラットフォーム全体の単語カードと学習コンテンツを管理します。",
+        "adminAnalyticsTitle": "分析 | 管理",
+        "adminAnalyticsDescription": "利用統計、ユーザーエンゲージメント、システムパフォーマンス。",
+        "adminReportsTitle": "レポート | 管理",
+        "adminReportsDescription": "システムログ、ユーザーレポート、監査証跡。",
+        "adminSettingsTitle": "設定 | 管理",
+        "adminSettingsDescription": "プラットフォーム全体の管理設定。"
+    },
     "ErrorScreens": {
         "errorTitle": "問題が発生しました",
         "errorMessage": "{scope}の読み込み中に予期しないエラーが発生しました。もう一度お試しいただくか、ホームに戻ってください。",
