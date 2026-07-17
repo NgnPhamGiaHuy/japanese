@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import React, { useCallback } from "react";
 import { useDropzone } from "react-dropzone";
 
@@ -22,6 +23,7 @@ const ImportDropzone: React.FC<ImportDropzoneProps> = ({
     loading,
     themeColor,
 }) => {
+    const t = useTranslations("LessonBuilder");
     const onDrop = useCallback(
         (acceptedFiles: File[]) => {
             onFilesSelected(acceptedFiles);
@@ -80,7 +82,7 @@ const ImportDropzone: React.FC<ImportDropzoneProps> = ({
                         disabled={loading}
                         className="flex-1 !rounded-2xl !py-4 text-xs font-black tracking-widest uppercase shadow-sm"
                     >
-                        Reset Selection
+                        {t("resetSelection")}
                     </Button>
                 </div>
             </div>
@@ -115,9 +117,9 @@ const ImportDropzone: React.FC<ImportDropzoneProps> = ({
             </div>
 
             <div className="space-y-1.5">
-                <p className="text-text text-xl font-black">Drop anything here</p>
+                <p className="text-text text-xl font-black">{t("dropAnythingHere")}</p>
                 <p className="text-muted max-w-[200px] text-xs leading-relaxed font-bold">
-                    Images (Vision OCR) or CSV/TXT files (Instant Sync)
+                    {t("dropzoneHelper")}
                 </p>
             </div>
 

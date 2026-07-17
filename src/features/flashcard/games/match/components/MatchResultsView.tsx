@@ -5,6 +5,8 @@
 
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import { Trophy } from "lucide-react";
 
 import { GameResultsScreen } from "@/features/game/components";
@@ -38,11 +40,13 @@ const MatchResultsView = ({
     onPlayAgain,
     onCollectXP,
 }: MatchResultsViewProps) => {
+    const t = useTranslations("MatchGame");
+    const tGame = useTranslations("Game");
     const accuracy = totalCount > 0 ? Math.round((matchedCount / totalCount) * 100) : 0;
 
     return (
         <GameResultsScreen
-            title={matchedCount === totalCount ? "Perfect Match!" : "Time's Up!"}
+            title={matchedCount === totalCount ? t("perfectMatch") : t("timesUp")}
             icon={Trophy}
             iconBg="bg-both"
             iconBorder="var(--color-both-strong)"
@@ -50,10 +54,10 @@ const MatchResultsView = ({
             bestScore={bestScore}
             tierInfo={tierInfo}
             stats={[
-                { value: matchedCount, label: "Matched", color: "var(--color-hiragana)" },
-                { value: wrongAttempts, label: "Wrong", color: "var(--color-danger)" },
-                { value: maxStreak, label: "Streak", color: "var(--color-survival)" },
-                { value: `${accuracy}%`, label: "Accuracy", color: "var(--color-katakana)" },
+                { value: matchedCount, label: t("matched"), color: "var(--color-hiragana)" },
+                { value: wrongAttempts, label: tGame("wrong"), color: "var(--color-danger)" },
+                { value: maxStreak, label: tGame("streak"), color: "var(--color-survival)" },
+                { value: `${accuracy}%`, label: tGame("accuracy"), color: "var(--color-katakana)" },
             ]}
             gameMode={gameMode}
             currentUserId={currentUserId}

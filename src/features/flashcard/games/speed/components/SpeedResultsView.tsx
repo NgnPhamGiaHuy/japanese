@@ -5,6 +5,8 @@
 
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import { Zap } from "lucide-react";
 
 import { GameResultsScreen } from "@/features/game/components";
@@ -36,11 +38,13 @@ const SpeedResultsView = ({
     onPlayAgain,
     onCollectXP,
 }: SpeedResultsViewProps) => {
+    const t = useTranslations("SpeedGame");
+    const tGame = useTranslations("Game");
     const accuracy = totalQuestions > 0 ? Math.round((correctCount / totalQuestions) * 100) : 0;
 
     return (
         <GameResultsScreen
-            title="Speed Done!"
+            title={t("resultsTitle")}
             icon={Zap}
             iconBg="bg-survival"
             iconBorder="var(--color-survival-strong)"
@@ -48,14 +52,18 @@ const SpeedResultsView = ({
             bestScore={bestScore}
             tierInfo={tierInfo}
             stats={[
-                { value: correctCount, label: "Correct", color: "var(--color-hiragana)" },
+                { value: correctCount, label: tGame("correct"), color: "var(--color-hiragana)" },
                 {
                     value: Math.max(0, totalQuestions - correctCount),
-                    label: "Wrong",
+                    label: tGame("wrong"),
                     color: "var(--color-danger)",
                 },
-                { value: maxStreak, label: "Streak", color: "var(--color-survival)" },
-                { value: `${accuracy}%`, label: "Accuracy", color: "var(--color-katakana)" },
+                { value: maxStreak, label: tGame("streak"), color: "var(--color-survival)" },
+                {
+                    value: `${accuracy}%`,
+                    label: tGame("accuracy"),
+                    color: "var(--color-katakana)",
+                },
             ]}
             gameMode={gameMode}
             currentUserId={currentUserId}

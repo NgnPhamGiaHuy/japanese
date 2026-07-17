@@ -8,11 +8,12 @@
  */
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useCallback, useLayoutEffect, useRef, useState } from "react";
 
 import {
     calcMatchPoints,
-    comboLabel,
+    comboLevel,
     WRONG_PENALTY,
 } from "@/features/flashcard/games/match/config";
 import { playSfx, sequence } from "@/shared/audio";
@@ -37,6 +38,7 @@ export function useMatchScoring({
     livesModeRef,
     setLivesLeft,
 }: UseMatchScoringParams) {
+    const t = useTranslations("MatchGame");
     const [score, setScore] = useState(0);
     const [streak, setStreak] = useState(0);
     const [maxStreak, setMaxStreak] = useState(0);
@@ -107,10 +109,14 @@ export function useMatchScoring({
 
                     setMaxStreak((m) => Math.max(m, newStreak));
 
-                    const label = comboLabel(newStreak);
-                    if (label) {
+                    const level = comboLevel(newStreak);
+                    if (level !== null) {
                         const popupId = ++comboIdRef.current;
-                        setComboPopup({ id: popupId, text: label, bonus: points - 100 });
+                        setComboPopup({
+                            id: popupId,
+                            text: t("comboLevel", { level }),
+                            bonus: points - 100,
+                        });
                         setTimeout(() => {
                             setComboPopup((cur) => (cur?.id === popupId ? null : cur));
                         }, 1400);

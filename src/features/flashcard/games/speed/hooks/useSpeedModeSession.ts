@@ -132,10 +132,12 @@ export function useSpeedModeSession({
      *
      * @remarks
      * Original hook exposed full config object. Rebuild from engine's adaptive level.
+     * Includes the bare `level` number alongside `color` since SpeedPlayingView
+     * resolves the label text itself via useTranslations("SpeedGame").
      */
     const difficultyConfig = useMemo(() => {
-        if (!state) return SPEED_GAME_CONFIG.LEVELS[1];
-        return SPEED_GAME_CONFIG.LEVELS[state.adaptiveLevel as 1 | 2 | 3];
+        const level = state ? (state.adaptiveLevel as 1 | 2 | 3) : 1;
+        return { level, ...SPEED_GAME_CONFIG.LEVELS[level] };
     }, [state]);
 
     /**

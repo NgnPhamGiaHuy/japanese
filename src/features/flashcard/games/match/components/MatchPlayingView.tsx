@@ -4,6 +4,8 @@
 
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import { Clock, X } from "lucide-react";
 import { AnimatePresence, m } from "motion/react";
 
@@ -45,6 +47,9 @@ const MatchPlayingView = ({
     onBack,
     onCellTap,
 }: MatchPlayingViewProps) => {
+    const t = useTranslations("MatchGame");
+    const tGame = useTranslations("Game");
+    const tCommon = useTranslations("Common");
     const isUrgent = !timeUnlimited && timeLeft <= 10 && timeLeft > 0;
     const minutes = Math.floor(Math.max(0, timeLeft) / 60);
     const seconds = Math.max(0, timeLeft) % 60;
@@ -61,7 +66,7 @@ const MatchPlayingView = ({
                 <ScreenHeaderBackButton
                     onClick={onBack}
                     icon={X}
-                    aria-label="Back to lesson"
+                    aria-label={tGame("backToLesson")}
                     className="text-gray-400 hover:text-gray-600"
                 />
 
@@ -120,7 +125,7 @@ const MatchPlayingView = ({
                         <div className="text-base font-black text-white">{comboPopup.text}</div>
                         {comboPopup.bonus > 0 ? (
                             <div className="text-xs font-bold text-white/80">
-                                +{comboPopup.bonus} bonus pts
+                                {t("bonusPts", { bonus: comboPopup.bonus })}
                             </div>
                         ) : null}
                     </m.div>
@@ -130,12 +135,12 @@ const MatchPlayingView = ({
             <MiniLeaderboard
                 gameMode={gameMode}
                 currentUserId={currentUserId}
-                currentUserName={currentUserName ?? "You"}
+                currentUserName={currentUserName ?? tCommon("you")}
                 currentScore={score}
             />
 
             <p className="text-muted mx-auto mt-2 max-w-sm shrink-0 px-4 text-center text-xs font-black tracking-widest uppercase">
-                Tap two tiles that belong together
+                {t("tapTwoTiles")}
             </p>
 
             <MatchGrid

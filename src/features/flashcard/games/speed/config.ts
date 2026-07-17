@@ -21,26 +21,28 @@ export const SPEED_GAME_CONFIG = {
         COMBO_STEP: 5,
     },
 
-    /** Level definitions and escalation thresholds */
+    /**
+     * Level definitions and escalation thresholds.
+     * No `label` field — SpeedIntroView resolves "Level N" via
+     * useTranslations("SpeedGame") keyed by the level number, since a plain
+     * config module can't call useTranslations() itself.
+     */
     LEVELS: {
         1: {
             threshold: 0,
             timeLimit: 10,
-            label: "Level 1",
             showHint: true,
             color: "#58cc02",
         },
         2: {
             threshold: 5,
             timeLimit: 8,
-            label: "Level 2",
             showHint: false,
             color: "#ff9600",
         },
         3: {
             threshold: 10,
             timeLimit: 5,
-            label: "Level 3",
             showHint: false,
             color: "#ea2b2b",
         },
@@ -68,8 +70,6 @@ export interface SpeedDifficultyConfig {
     threshold: number;
     /** Seconds allowed per question at this level */
     timeLimit: number;
-    /** Human-readable name for the level */
-    label: string;
     /** Whether to show a lightweight representation hint */
     showHint: boolean;
     /** Theme color for this difficulty level */

@@ -5,6 +5,8 @@
 
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import { CheckCircle2, Gamepad2 } from "lucide-react";
 
 import { DIFFICULTY_CONFIG } from "@/features/flashcard/games/match/config";
@@ -37,16 +39,19 @@ const MatchIntroView = ({
     onStart,
     onDifficultyChange,
 }: MatchIntroViewProps) => {
+    const t = useTranslations("MatchGame");
+    const tGame = useTranslations("Game");
+
     return (
         <GameIntroScreen
-            title="Match Mode"
-            description="One visible grid: match real pairs; AI distractors on higher tiers add interference — timers, mixed prompts, and lives on harder settings."
+            title={t("title")}
+            description={t("description")}
             icon={Gamepad2}
             iconBg="bg-both"
             iconBorder="var(--color-both-strong)"
             bestScore={bestScore}
             tierInfo={tierInfo}
-            startButtonText={prepLoading ? "Preparing…" : "Play"}
+            startButtonText={prepLoading ? t("preparing") : tGame("play")}
             startButtonColor="purple"
             startDisabled={cardCount < requiredPairs || prepLoading}
             loading={prepLoading}
@@ -55,7 +60,7 @@ const MatchIntroView = ({
         >
             <div className="mb-6 w-full max-w-sm">
                 <p className="text-muted mb-3 text-center text-xs font-black tracking-widest uppercase">
-                    Select Difficulty
+                    {t("selectDifficulty")}
                 </p>
                 <div className="flex flex-col gap-2">
                     {([1, 2, 3, 4] as MatchDifficulty[]).map((level) => {
@@ -86,13 +91,13 @@ const MatchIntroView = ({
                                         <div
                                             className={`font-black ${active ? "text-white" : "text-text"}`}
                                         >
-                                            {config.label}
+                                            {t(`difficulty.${level}.label`)}
                                         </div>
                                         <div
                                             className={`text-xs font-bold ${active ? "text-white/70" : "text-muted"}`}
                                         >
-                                            {config.sub}
-                                            {disabled ? " (need more cards)" : ""}
+                                            {t(`difficulty.${level}.sub`)}
+                                            {disabled ? ` ${t("needMoreCardsSuffix")}` : ""}
                                         </div>
                                     </div>
                                     {active && (

@@ -4,6 +4,7 @@
  * Used for CSV, Paste, and AI bulk generation flows.
  */
 
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 
 import { AlertCircle, CheckCircle2, Trash2 } from "lucide-react";
@@ -86,6 +87,8 @@ const ImportPreview = ({
     onCancel,
     themeColor = "#1cb0f6",
 }: ImportPreviewProps) => {
+    const t = useTranslations("LessonBuilder");
+    const tCommon = useTranslations("Common");
     const themeColorStr = hexToThemeColor(themeColor);
 
     const [rows, setRows] = useState<ImportRow[]>(initialRows);
@@ -105,7 +108,7 @@ const ImportPreview = ({
                     const hasPrimary = newRow.primary.trim();
                     const hasMeaning = newRow.meaning.trim();
                     newRow.isInvalid = !(hasPrimary && hasMeaning);
-                    newRow.errorMsg = newRow.isInvalid ? "Requires primary and meaning" : "";
+                    newRow.errorMsg = newRow.isInvalid ? t("requiresPrimaryAndMeaning") : "";
                     return newRow;
                 }
                 return row;
@@ -125,14 +128,14 @@ const ImportPreview = ({
             {/* Header Summary & Actions */}
             <div className="flex items-center justify-between rounded-xl border-2 border-gray-200 bg-white p-4 shadow-sm">
                 <div>
-                    <h3 className="text-text text-lg font-black">Preview Cards</h3>
+                    <h3 className="text-text text-lg font-black">{t("previewCards")}</h3>
                     <p className="text-muted text-sm font-bold">
-                        {validCount} valid, {invalidCount} invalid
+                        {t("validInvalidCount", { valid: validCount, invalid: invalidCount })}
                     </p>
                 </div>
                 <div className="flex gap-2">
                     <Button variant="ghost" onClick={onCancel} className="px-4 text-gray-500">
-                        Cancel
+                        {tCommon("cancel")}
                     </Button>
                     <Button
                         variant="primary"
@@ -140,7 +143,7 @@ const ImportPreview = ({
                         disabled={validCount === 0}
                         onClick={() => onConfirm(rows.filter((r) => !r.isInvalid))}
                     >
-                        Import {validCount} Cards
+                        {t("importCards", { count: validCount })}
                     </Button>
                 </div>
             </div>
@@ -150,12 +153,12 @@ const ImportPreview = ({
                 <table className="text-text w-full table-fixed text-left font-bold">
                     <thead className="text-muted border-b-2 border-gray-200 bg-gray-50 text-xs tracking-widest uppercase sm:text-xs">
                         <tr>
-                            <th className="w-[22%] p-2 sm:p-4">Primary</th>
-                            <th className="w-[20%] p-2 sm:p-4">Alternatives</th>
-                            <th className="w-[18%] p-2 sm:p-4">Meaning</th>
-                            <th className="w-[22%] p-2 sm:p-4">Example</th>
-                            <th className="w-[8%] p-2 text-center sm:p-4">Status</th>
-                            <th className="w-[10%] p-2 text-center sm:p-4">Actions</th>
+                            <th className="w-[22%] p-2 sm:p-4">{t("colPrimary")}</th>
+                            <th className="w-[20%] p-2 sm:p-4">{t("colAlternatives")}</th>
+                            <th className="w-[18%] p-2 sm:p-4">{t("colMeaning")}</th>
+                            <th className="w-[22%] p-2 sm:p-4">{t("colExample")}</th>
+                            <th className="w-[8%] p-2 text-center sm:p-4">{t("colStatus")}</th>
+                            <th className="w-[10%] p-2 text-center sm:p-4">{t("colActions")}</th>
                         </tr>
                     </thead>
                     <tbody className="divide-y-2 divide-gray-100">
@@ -169,7 +172,7 @@ const ImportPreview = ({
                                         themeColor={themeColor}
                                         value={row.primary}
                                         onChange={(v) => updateRow(row.id, "primary", v)}
-                                        placeholder="Primary"
+                                        placeholder={t("colPrimary")}
                                     />
                                 </td>
                                 <td className="p-1 sm:p-2">
@@ -187,7 +190,7 @@ const ImportPreview = ({
                                                     .filter(Boolean),
                                             )
                                         }
-                                        placeholder="Alt..."
+                                        placeholder={t("altPlaceholder")}
                                     />
                                 </td>
                                 <td className="p-1 sm:p-2">
@@ -195,7 +198,7 @@ const ImportPreview = ({
                                         themeColor={themeColor}
                                         value={row.meaning}
                                         onChange={(v) => updateRow(row.id, "meaning", v)}
-                                        placeholder="Meaning"
+                                        placeholder={t("colMeaning")}
                                     />
                                 </td>
                                 <td className="p-1 sm:p-2">
@@ -204,7 +207,7 @@ const ImportPreview = ({
                                         muted
                                         value={row.example}
                                         onChange={(v) => updateRow(row.id, "example", v)}
-                                        placeholder="Optional example"
+                                        placeholder={t("exampleCellPlaceholder")}
                                     />
                                 </td>
                                 <td className="p-1 text-center sm:p-2">
@@ -236,7 +239,7 @@ const ImportPreview = ({
                         {rows.length === 0 && (
                             <tr>
                                 <td colSpan={6} className="text-muted p-8 text-center">
-                                    No rows parsed. Try a different format.
+                                    {t("noRowsParsed")}
                                 </td>
                             </tr>
                         )}

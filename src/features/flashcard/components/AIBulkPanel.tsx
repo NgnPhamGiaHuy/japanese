@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 
 import { AlertCircle, Settings2, Sparkles, Zap } from "lucide-react";
@@ -17,31 +18,30 @@ interface AIBulkPanelProps {
     existingWords?: string[];
 }
 
-const LEVEL_OPTIONS: { value: JLPTLevel; label: string; sub: string }[] = [
-    { value: "N5", label: "N5", sub: "Beginner" },
-    { value: "N4", label: "N4", sub: "Elementary" },
-    { value: "N3", label: "N3", sub: "Intermediate" },
-    { value: "N2", label: "N2", sub: "Upper-Int." },
-    { value: "General", label: "Mix", sub: "N5–N3" },
-];
+/**
+ * Values only — labels live in LessonBuilder.levelOption.*, resolved by the
+ * component, since a plain module-level array can't call useTranslations().
+ */
+const LEVEL_VALUES: JLPTLevel[] = ["N5", "N4", "N3", "N2", "General"];
 
 const COUNT_OPTIONS = [8, 12, 16, 20];
 
 const QUICK_DEFAULT_COUNT = 12;
 const QUICK_DEFAULT_LEVEL: JLPTLevel = "N5";
 
-const TOPIC_SUGGESTIONS = [
-    "N5 food vocabulary",
-    "daily greetings",
-    "family members",
-    "colors & numbers",
-    "weather expressions",
-    "transport & travel",
-    "school subjects",
-    "shopping phrases",
-    "body parts",
-    "time expressions",
-];
+/** Keys into LessonBuilder.topicSuggestion.* — same reasoning as LEVEL_VALUES. */
+const TOPIC_SUGGESTION_KEYS = [
+    "n5Food",
+    "dailyGreetings",
+    "familyMembers",
+    "colorsNumbers",
+    "weatherExpressions",
+    "transportTravel",
+    "schoolSubjects",
+    "shoppingPhrases",
+    "bodyParts",
+    "timeExpressions",
+] as const;
 
 interface ModeChipProps {
     active: boolean;
@@ -83,12 +83,20 @@ const ModeChip = ({ active, icon, label, sub, onClick, color }: ModeChipProps) =
 };
 
 const AIBulkPanel = ({ themeColor, onPreview, existingWords = [] }: AIBulkPanelProps) => {
+    const t = useTranslations("LessonBuilder");
     const { status, error, generate } = useAIDeck();
 
     const [mode, setMode] = useState<AIGenerateMode>("quick");
     const [topic, setTopic] = useState("");
     const [count, setCount] = useState(QUICK_DEFAULT_COUNT);
     const [level, setLevel] = useState<JLPTLevel>(QUICK_DEFAULT_LEVEL);
+
+    const levelOptions = LEVEL_VALUES.map((value) => ({
+        value,
+        label: t(`levelOption.${value}.label`),
+        sub: t(`levelOption.${value}.sub`),
+    }));
+    const topicSuggestions = TOPIC_SUGGESTION_KEYS.map((key) => t(`topicSuggestion.${key}`));
 
     const themeColorStr = hexToThemeColor(themeColor);
     const isLoading = status === "loading";
@@ -123,10 +131,10 @@ const AIBulkPanel = ({ themeColor, onPreview, existingWords = [] }: AIBulkPanelP
                 </div>
                 <div>
                     <h3 className="text-text text-lg font-black sm:text-xl">
-                        Generate Deck with AI
+                        {t("generateWithAI")}
                     </h3>
                     <p className="text-muted text-xs font-bold tracking-wide uppercase sm:text-xs">
-                        Describe a topic · review before saving
+                        {t("generateWithAISubtitle")}
                     </p>
                 </div>
             </div>
@@ -135,16 +143,19 @@ const AIBulkPanel = ({ themeColor, onPreview, existingWords = [] }: AIBulkPanelP
                 <ModeChip
                     active={mode === "quick"}
                     icon={<Zap size={14} className="sm:size-4" />}
-                    label="Quick"
-                    sub={`${QUICK_DEFAULT_COUNT} cards · ${QUICK_DEFAULT_LEVEL}`}
+                    label={t("modeQuick")}
+                    sub={t("modeQuickSub", {
+                        count: QUICK_DEFAULT_COUNT,
+                        level: QUICK_DEFAULT_LEVEL,
+                    })}
                     onClick={() => setMode("quick")}
                     color={themeColor}
                 />
                 <ModeChip
                     active={mode === "guided"}
                     icon={<Settings2 size={14} className="sm:size-4" />}
-                    label="Guided"
-                    sub="Custom count & level"
+                    label={t("modeGuided")}
+                    sub={t("modeGuidedSub")}
                     onClick={() => setMode("guided")}
                     color={themeColor}
                 />
@@ -152,14 +163,14 @@ const AIBulkPanel = ({ themeColor, onPreview, existingWords = [] }: AIBulkPanelP
 
             <div>
                 <label className="text-muted mb-2 block text-xs font-black tracking-widest uppercase">
-                    Topic or Theme
+                    {t("topicOrTheme")}
                 </label>
                 <Input
                     type="text"
                     variant="default"
                     className="h-auto rounded-2xl border-b-4 px-4 py-3.5 text-base sm:px-5 sm:py-4 sm:text-lg"
                     style={{ "--theme-color": themeColor } as React.CSSProperties}
-                    placeholder="e.g. N5 food vocabulary"
+                    placeholder={t("topicPlaceholder")}
                     value={topic}
                     onChange={(e) => setTopic(e.target.value)}
                     disabled={isLoading}
@@ -170,7 +181,7 @@ const AIBulkPanel = ({ themeColor, onPreview, existingWords = [] }: AIBulkPanelP
                 />
 
                 <div className="mt-3 flex flex-wrap gap-1.5 sm:gap-2">
-                    {TOPIC_SUGGESTIONS.slice(0, 5).map((s) => (
+                    {topicSuggestions.slice(0, 5).map((s) => (
                         <Button
                             key={s}
                             variant="ghost"
@@ -188,7 +199,7 @@ const AIBulkPanel = ({ themeColor, onPreview, existingWords = [] }: AIBulkPanelP
                 <div className="space-y-4 rounded-2xl border-2 border-dashed border-gray-100 bg-gray-50/50 p-4">
                     <div>
                         <label className="text-muted mb-2 block text-xs font-black tracking-widest uppercase">
-                            Number of Cards
+                            {t("numberOfCards")}
                         </label>
                         <div className="grid grid-cols-4 gap-2">
                             {COUNT_OPTIONS.map((n) => (
@@ -218,10 +229,10 @@ const AIBulkPanel = ({ themeColor, onPreview, existingWords = [] }: AIBulkPanelP
 
                     <div>
                         <label className="text-muted mb-2 block text-xs font-black tracking-widest uppercase">
-                            JLPT Level
+                            {t("jlptLevel")}
                         </label>
                         <div className="grid grid-cols-3 gap-2 sm:grid-cols-5 sm:gap-1.5">
-                            {LEVEL_OPTIONS.map((opt) => (
+                            {levelOptions.map((opt) => (
                                 <Button
                                     key={opt.value}
                                     onClick={() => setLevel(opt.value)}
@@ -275,15 +286,13 @@ const AIBulkPanel = ({ themeColor, onPreview, existingWords = [] }: AIBulkPanelP
                 icon={Sparkles}
             >
                 {isLoading
-                    ? `Generating ${effectiveCount} cards…`
-                    : `Preview ${effectiveCount} Generated Cards`}
+                    ? t("generatingCards", { count: effectiveCount })
+                    : t("previewGeneratedCards", { count: effectiveCount })}
             </Button>
 
             {isLoading ? (
                 <div className="space-y-2 text-center">
-                    <p className="text-muted text-sm font-bold">
-                        Gemini is crafting your flashcards…
-                    </p>
+                    <p className="text-muted text-sm font-bold">{t("geminiCrafting")}</p>
                     <div className="mx-auto h-1 w-48 overflow-hidden rounded-full bg-gray-200">
                         <div
                             className="h-full animate-pulse rounded-full"
@@ -292,10 +301,7 @@ const AIBulkPanel = ({ themeColor, onPreview, existingWords = [] }: AIBulkPanelP
                     </div>
                 </div>
             ) : (
-                <p className="text-muted text-center text-xs font-bold">
-                    AI generates cards with hints &amp; quiz answers → you review &amp; edit → then
-                    save
-                </p>
+                <p className="text-muted text-center text-xs font-bold">{t("aiGenerateFooter")}</p>
             )}
         </div>
     );

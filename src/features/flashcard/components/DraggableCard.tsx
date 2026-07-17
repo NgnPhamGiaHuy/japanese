@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { GripVertical, Image as ImageIcon, Sparkles, Trash2 } from "lucide-react";
@@ -42,6 +44,8 @@ const DraggableCard = ({
     onImageChange,
     onImageClear,
 }: DraggableCardProps) => {
+    const t = useTranslations("LessonBuilder");
+    const tDetail = useTranslations("FlashcardDetail");
     const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
         id: card.id,
         disabled: saving,
@@ -66,7 +70,7 @@ const DraggableCard = ({
                     {...attributes}
                     {...listeners}
                     className="focus-visible:ring-katakana absolute top-1/2 -left-8 -translate-y-1/2 cursor-pointer opacity-0 transition-all group-hover:opacity-100 hover:scale-110 focus:outline-none focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-offset-2 active:cursor-grabbing md:-left-10"
-                    aria-label="Reorder card"
+                    aria-label={tDetail("reorderCard")}
                 >
                     <GripVertical size={24} className="text-gray-300 hover:text-gray-500" />
                 </button>
@@ -84,7 +88,7 @@ const DraggableCard = ({
                 onClick={() => onRemove(card.id)}
                 disabled={saving}
                 className="absolute -top-2 -right-2 z-10 !h-8 !w-8 rotate-3 transform !p-1 opacity-100 transition-all hover:scale-110 active:scale-95 sm:-top-3 sm:-right-3 sm:!h-10 sm:!w-10 md:opacity-0 md:group-hover:opacity-100"
-                title="Remove Card"
+                title={t("removeCard")}
                 icon={Trash2}
                 iconSize={18}
             />
@@ -94,11 +98,11 @@ const DraggableCard = ({
                 <div className="md:col-span-2">
                     <div className="mb-1 flex items-center justify-between">
                         <label className="text-muted text-xs font-black tracking-widest uppercase sm:text-xs">
-                            Primary ✱
+                            {t("primaryLabel")}
                         </label>
                         <Button
                             variant="ghost"
-                            title={card.primary?.trim() ? "Auto-fill with AI" : "Type a word first"}
+                            title={card.primary?.trim() ? t("autoFillWithAI") : t("typeWordFirst")}
                             loading={aiLoading}
                             disabled={saving || !card.primary?.trim()}
                             onClick={() => onAIFill(card.id, card.primary || "")}
@@ -107,7 +111,7 @@ const DraggableCard = ({
                             icon={Sparkles}
                             iconSize={10}
                         >
-                            {aiLoading ? "Filling…" : "AI Fill"}
+                            {aiLoading ? t("filling") : t("aiFill")}
                         </Button>
                     </div>
                     <Input
@@ -127,12 +131,12 @@ const DraggableCard = ({
                 {(["alternative"] as const).map((repKey) => (
                     <div key={repKey}>
                         <label className="text-muted mb-1 block text-xs font-black tracking-widest uppercase sm:text-xs">
-                            Alternative
+                            {t("alternativeLabel")}
                         </label>
                         <Input
                             variant="underline"
                             className="border-gray-100 pb-1 text-base font-bold sm:pb-2 sm:text-xl"
-                            placeholder="Alternate forms (e.g. 漢字 / かな)"
+                            placeholder={t("alternateFormsPlaceholder")}
                             value={joinAlternatives(card.alternatives)}
                             onChange={(e) =>
                                 onUpdate(card.id, "alternatives", splitAlternatives(e.target.value))
@@ -145,12 +149,12 @@ const DraggableCard = ({
                 {/* Meaning */}
                 <div className="md:col-span-2">
                     <label className="text-muted mb-1 block text-xs font-black tracking-widest uppercase sm:text-xs">
-                        Meaning ✱
+                        {t("meaningLabel")}
                     </label>
                     <Input
                         variant="underline"
                         className="border-gray-100 pb-1 text-base font-bold sm:pb-2 sm:text-xl"
-                        placeholder="To eat"
+                        placeholder={t("meaningPlaceholder")}
                         value={card.meaning}
                         onChange={(e) => onUpdate(card.id, "meaning", e.target.value)}
                         disabled={saving}
@@ -160,7 +164,7 @@ const DraggableCard = ({
                 {/* Example Sentence */}
                 <div className="md:col-span-2">
                     <label className="text-muted mb-1 block text-xs font-black tracking-widest uppercase sm:text-xs">
-                        Example Sentence (Optional)
+                        {t("exampleSentenceLabel")}
                     </label>
                     <Input
                         variant="underline"
@@ -175,7 +179,7 @@ const DraggableCard = ({
                 {/* Image Section */}
                 <div className="md:col-span-2">
                     <label className="text-muted mb-1 block text-xs font-black tracking-widest uppercase">
-                        Card Image (Optional)
+                        {t("cardImageLabel")}
                     </label>
                     <div className="mt-2 flex items-center gap-4">
                         {card.previewUrl || card.imageUrl ? (
@@ -183,7 +187,7 @@ const DraggableCard = ({
                                 <img
                                     key={card.previewUrl || card.imageUrl}
                                     src={card.previewUrl || card.imageUrl}
-                                    alt="Card preview"
+                                    alt={t("cardPreviewAlt")}
                                     className="h-full w-full object-cover"
                                     crossOrigin="anonymous"
                                     referrerPolicy="no-referrer"
@@ -228,7 +232,9 @@ const DraggableCard = ({
                                 }}
                                 className="!text-text !rounded-xl !border-2 !border-gray-200 !bg-white !px-4 !py-2 !text-sm !font-bold shadow-sm hover:!bg-gray-50 active:translate-y-0"
                             >
-                                {card.previewUrl || card.imageUrl ? "Change Image" : "Upload Image"}
+                                {card.previewUrl || card.imageUrl
+                                    ? t("changeImage")
+                                    : t("uploadImage")}
                             </Button>
                         </div>
                     </div>

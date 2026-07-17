@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 
 import { getAudioText } from "@/features/flashcard/utils/displayEngine";
@@ -30,6 +31,7 @@ interface UseGameEngineConfig {
  * so no isSharedContext branching is needed here.
  */
 export function useGameEngine(config: UseGameEngineConfig) {
+    const tCommon = useTranslations("Common");
     const engineRef = useRef<GameEngine | null>(null);
     const [state, setState] = useState<GameState | null>(null);
 
@@ -41,7 +43,7 @@ export function useGameEngine(config: UseGameEngineConfig) {
 
     const { startSession, syncScore, endSession } = useGameSession({
         userId: config.userId ?? null,
-        userName: config.displayName ?? "Player",
+        userName: config.displayName ?? tCommon("player"),
         gameMode: config.gameMode,
     });
 
@@ -90,7 +92,7 @@ export function useGameEngine(config: UseGameEngineConfig) {
                 if (uid) {
                     await recordGameResult(
                         uid,
-                        displayNameRef.current ?? "Player",
+                        displayNameRef.current ?? tCommon("player"),
                         gameModeRef.current,
                         finalScore,
                     );

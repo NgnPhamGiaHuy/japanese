@@ -25,11 +25,14 @@ export interface MatchGameConfig {
 
 export type MatchDifficulty = 1 | 2 | 3 | 4;
 
+/**
+ * No `label`/`sub` fields — MatchIntroView resolves those via
+ * useTranslations("MatchGame") keyed by difficulty number, since a plain
+ * config module can't call useTranslations() itself.
+ */
 export interface DifficultyConfig {
     pairs: number;
     timeLimit: number;
-    label: string;
-    sub: string;
     color: string;
     game: MatchGameConfig;
     /** Count of lone distractor tiles fetched from AI (no matching pair) */
@@ -42,8 +45,6 @@ export const DIFFICULTY_CONFIG: Record<MatchDifficulty, DifficultyConfig> = {
     1: {
         pairs: 4,
         timeLimit: 120,
-        label: "Easy",
-        sub: "4 pairs · visible grid · no decoys",
         color: "#58cc02",
         distractorTiles: 0,
         lives: 0,
@@ -55,8 +56,6 @@ export const DIFFICULTY_CONFIG: Record<MatchDifficulty, DifficultyConfig> = {
     2: {
         pairs: 6,
         timeLimit: 90,
-        label: "Medium",
-        sub: "6 pairs · 2 AI distractors · timer",
         color: "#1cb0f6",
         distractorTiles: 2,
         lives: 4,
@@ -68,8 +67,6 @@ export const DIFFICULTY_CONFIG: Record<MatchDifficulty, DifficultyConfig> = {
     3: {
         pairs: 8,
         timeLimit: 120,
-        label: "Hard",
-        sub: "8 pairs · 8 distractors · timer · lives",
         color: "#ff9600",
         distractorTiles: 8,
         lives: 4,
@@ -81,8 +78,6 @@ export const DIFFICULTY_CONFIG: Record<MatchDifficulty, DifficultyConfig> = {
     4: {
         pairs: 6,
         timeLimit: 120,
-        label: "Master",
-        sub: "6 pairs · 18 AI distractors · mixed prompts · timer",
         color: "#ea2b2b",
         distractorTiles: 18,
         lives: 5,
@@ -114,9 +109,13 @@ export function calcTimeBonus(timeRemaining: number): number {
     return timeRemaining * TIME_BONUS_PER_SECOND;
 }
 
-/** Combo description shown in the combo popup (e.g. "3× COMBO!"). */
-export function comboLabel(streak: number): string {
-    if (streak < COMBO_STEP) return "";
-    const level = Math.floor(streak / COMBO_STEP);
-    return `${level + 2}× COMBO!`;
+/**
+ * Combo level shown in the combo popup, or null below the streak threshold.
+ * Returns a bare number rather than a formatted label — this is a plain
+ * function and can't call useTranslations(); useMatchScoring (a hook) formats
+ * it via MatchGame.comboLevel.
+ */
+export function comboLevel(streak: number): number | null {
+    if (streak < COMBO_STEP) return null;
+    return Math.floor(streak / COMBO_STEP) + 2;
 }

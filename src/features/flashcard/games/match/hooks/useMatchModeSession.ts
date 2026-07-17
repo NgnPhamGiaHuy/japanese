@@ -22,6 +22,7 @@
 
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 
 import { generateMatchDistractors } from "@/features/ai/services/gemini.service";
@@ -72,6 +73,7 @@ export function useMatchModeSession({
     displayName,
     addXP,
 }: UseMatchModeSessionParams) {
+    const tCommon = useTranslations("Common");
     const [phase, setPhase] = useState<MatchPhase>("intro");
     const [difficulty, setDifficulty] = useState<MatchDifficulty>(2);
     const [prepLoading, setPrepLoading] = useState(false);
@@ -90,7 +92,7 @@ export function useMatchModeSession({
 
     const { startSession, syncScore, endSession } = useGameSession({
         userId: userId ?? null,
-        userName: displayName ?? "Player",
+        userName: displayName ?? tCommon("player"),
         gameMode,
     });
 
@@ -278,7 +280,7 @@ export function useMatchModeSession({
         if (uid) {
             void recordGameResult(
                 uid,
-                displayNameRef.current ?? "Player",
+                displayNameRef.current ?? tCommon("player"),
                 gameModeRef.current,
                 finalScore,
             );

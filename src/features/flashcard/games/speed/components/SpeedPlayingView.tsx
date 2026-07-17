@@ -5,6 +5,8 @@
 
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import { X } from "lucide-react";
 import { AnimatePresence, m } from "motion/react";
 
@@ -33,7 +35,7 @@ interface SpeedPlayingViewProps {
         type: QuestionType;
     } | null;
     difficultyConfig: {
-        label: string;
+        level: number;
         color: string;
     };
     ui: {
@@ -69,13 +71,17 @@ const SpeedPlayingView = ({
     onBack,
     onAnswer,
 }: SpeedPlayingViewProps) => {
+    const t = useTranslations("SpeedGame");
+    const tGame = useTranslations("Game");
+    const tCommon = useTranslations("Common");
+
     return (
         <div className="bg-bg fixed inset-0 z-50 flex flex-col">
             <ScreenHeaderRow className="shrink-0" symmetricSidebars>
                 <ScreenHeaderBackButton
                     onClick={onBack}
                     icon={X}
-                    aria-label="Back to lesson"
+                    aria-label={tGame("backToLesson")}
                     className="text-gray-400 hover:text-gray-600"
                 />
 
@@ -84,7 +90,7 @@ const SpeedPlayingView = ({
                         Q{ui.questionNumber} / {ui.totalQuestions}
                     </span>
                     <span className="text-xs font-black" style={{ color: difficultyConfig.color }}>
-                        {difficultyConfig.label}
+                        {t(`level.${difficultyConfig.level}`)}
                     </span>
                 </div>
 
@@ -94,11 +100,11 @@ const SpeedPlayingView = ({
                     </span>
                     {ui.multiplier > 1 ? (
                         <span className="text-survival text-xs font-black whitespace-nowrap">
-                            🔥 {ui.multiplier}× combo
+                            🔥 {tGame("comboMultiplier", { multiplier: ui.multiplier })}
                         </span>
                     ) : (
                         <span className="invisible text-xs font-black select-none" aria-hidden>
-                            🔥 0× combo
+                            🔥 {tGame("comboMultiplier", { multiplier: 0 })}
                         </span>
                     )}
                 </div>
@@ -126,7 +132,7 @@ const SpeedPlayingView = ({
             <MiniLeaderboard
                 gameMode={gameMode}
                 currentUserId={currentUserId}
-                currentUserName={currentUserName ?? "You"}
+                currentUserName={currentUserName ?? tCommon("you")}
                 currentScore={score}
             />
 
@@ -166,7 +172,7 @@ const SpeedPlayingView = ({
                                 exit={{ opacity: 0 }}
                                 className="text-survival mt-2 text-xs font-black"
                             >
-                                ⚠ Hints reduced from here
+                                ⚠ {t("hintsReducedFromHere")}
                             </m.p>
                         ) : null}
                         {questionIndex === SPEED_GAME_CONFIG.LEVELS[3].threshold &&
@@ -177,8 +183,10 @@ const SpeedPlayingView = ({
                                 exit={{ opacity: 0 }}
                                 className="text-danger mt-2 text-xs font-black"
                             >
-                                ⚡ Speed increases — {SPEED_GAME_CONFIG.LEVELS[3].timeLimit} s per
-                                question!
+                                ⚡{" "}
+                                {t("speedIncreases", {
+                                    seconds: SPEED_GAME_CONFIG.LEVELS[3].timeLimit,
+                                })}
                             </m.p>
                         ) : null}
                     </AnimatePresence>
@@ -231,7 +239,7 @@ const SpeedPlayingView = ({
                             className="w-full rounded-2xl border border-gray-200 bg-white px-5 py-3 text-center"
                         >
                             <p className="text-muted text-xs font-black tracking-widest uppercase">
-                                Meaning
+                                {t("meaningLabel")}
                             </p>
                             <p className="text-text mt-1 text-base font-bold">
                                 {currentCard.meaning}

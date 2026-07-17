@@ -14,6 +14,8 @@
 
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import { logMatchGameCompleted } from "@/features/flashcard/actions/activity-log.actions";
 import { useGameCompletionLogger } from "@/features/flashcard/games/hooks";
 import { useFlashcardGameBestScore } from "@/features/flashcard/hooks/useFlashcardGameBestScore";
@@ -40,6 +42,7 @@ interface MatchGameProps {
  * Works with both personal and shared decks via unified FlashcardData.
  */
 const MatchGame = ({ data }: MatchGameProps) => {
+    const tCommon = useTranslations("Common");
     const router = useRouter();
     const { user } = useAppStore();
     const { addXP } = useUserProgress();
@@ -110,7 +113,7 @@ const MatchGame = ({ data }: MatchGameProps) => {
         <MatchPlaying
             gameMode={gameMode}
             currentUserId={user?.uid}
-            currentUserName={user?.displayName ?? "You"}
+            currentUserName={user?.displayName ?? tCommon("you")}
             score={game.score}
             streak={game.streak}
             timeLeft={game.timeLeft}

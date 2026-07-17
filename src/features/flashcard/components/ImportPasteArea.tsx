@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import React from "react";
 
 import { Sparkles } from "lucide-react";
@@ -11,6 +12,8 @@ interface ImportPasteAreaProps {
 }
 
 const ImportPasteArea: React.FC<ImportPasteAreaProps> = ({ value, onChange, themeColor }) => {
+    const t = useTranslations("LessonBuilder");
+
     return (
         <div className="space-y-6">
             <div className="rounded-5xl relative overflow-hidden border-2 border-gray-100 bg-gradient-to-br from-white to-gray-50/50 p-8 shadow-sm">
@@ -21,37 +24,33 @@ const ImportPasteArea: React.FC<ImportPasteAreaProps> = ({ value, onChange, them
                             style={{ backgroundColor: `${themeColor}1a`, color: themeColor }}
                         >
                             <Sparkles size={12} />
-                            Real-time Engine
+                            {t("realtimeEngine")}
                         </span>
-                        <h3 className="text-text text-xl font-black">Dynamic Synchronization</h3>
+                        <h3 className="text-text text-xl font-black">{t("dynamicSync")}</h3>
                         <p className="text-muted max-w-md text-sm leading-relaxed font-bold">
-                            Each line is instantly parsed into a flashcard. Commas, tabs, and
-                            hyphens are detected automatically for flawless mapping.
+                            {t("dynamicSyncDescription")}
                         </p>
                     </div>
 
                     <div className="grid grid-cols-2 gap-2">
-                        {[
-                            { label: "Expression", hint: "Col 1" },
-                            { label: "Alternative", hint: "Col 2" },
-                            { label: "Meaning", hint: "Col 3" },
-                            { label: "Example", hint: "Col 4" },
-                        ].map((item) => (
-                            <div
-                                key={item.label}
-                                className="flex min-w-[90px] flex-col items-center gap-0.5 rounded-xl border border-gray-200/50 bg-white px-3 py-2 shadow-sm"
-                            >
-                                <span
-                                    className="text-xs font-black tracking-widest uppercase"
-                                    style={{ color: themeColor }}
+                        {(["expression", "alternative", "meaning", "example"] as const).map(
+                            (key) => (
+                                <div
+                                    key={key}
+                                    className="flex min-w-[90px] flex-col items-center gap-0.5 rounded-xl border border-gray-200/50 bg-white px-3 py-2 shadow-sm"
                                 >
-                                    {item.label}
-                                </span>
-                                <span className="text-muted text-xs font-black uppercase">
-                                    {item.hint}
-                                </span>
-                            </div>
-                        ))}
+                                    <span
+                                        className="text-xs font-black tracking-widest uppercase"
+                                        style={{ color: themeColor }}
+                                    >
+                                        {t(`pasteColumn.${key}.label`)}
+                                    </span>
+                                    <span className="text-muted text-xs font-black uppercase">
+                                        {t(`pasteColumn.${key}.hint`)}
+                                    </span>
+                                </div>
+                            ),
+                        )}
                     </div>
                 </div>
 
@@ -74,7 +73,7 @@ const ImportPasteArea: React.FC<ImportPasteAreaProps> = ({ value, onChange, them
                         className="h-2 w-2 animate-pulse rounded-full"
                         style={{ backgroundColor: themeColor }}
                     />
-                    Live Sync Active
+                    {t("liveSyncActive")}
                 </div>
             </div>
         </div>
