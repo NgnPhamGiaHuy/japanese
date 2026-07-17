@@ -16,9 +16,16 @@
 import { Suspense } from "react";
 
 import { getPublicSharedLessonPreview } from "@/features/flashcard/services/shared-preview.service";
+import { routing } from "@/i18n/routing";
 import SharedLessonPageClient from "./SharedLessonPageClient";
 
 import type { Metadata } from "next";
+
+/** Locale-prefixed path for this route, per routing's "as-needed" scheme (E12-T1) — the default locale (en) is unprefixed. */
+function localizedPath(shareId: string, locale: string): string {
+    const prefix = locale === routing.defaultLocale ? "" : `/${locale}`;
+    return `${prefix}/flashcard/shared/${shareId}`;
+}
 
 export async function generateMetadata({
     params,
@@ -28,8 +35,14 @@ export async function generateMetadata({
     const { shareId } = await params;
     const preview = await getPublicSharedLessonPreview(shareId);
 
+    const alternates = {
+        languages: Object.fromEntries(
+            routing.locales.map((locale) => [locale, localizedPath(shareId, locale)]),
+        ),
+    };
+
     if (!preview) {
-        return { title: "Shared Deck | Kana & Nihongo Master" };
+        return { title: "Shared Deck | Kana & Nihongo Master", alternates };
     }
 
     const title = `${preview.title} | Kana & Nihongo Master`;
@@ -40,6 +53,7 @@ export async function generateMetadata({
     return {
         title,
         description,
+        alternates,
         openGraph: {
             title: preview.title,
             description,

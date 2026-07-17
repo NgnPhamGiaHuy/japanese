@@ -1,8 +1,14 @@
 import { listPublicSharedLessonUrls } from "@/features/flashcard/services/shared-preview.service";
+import { routing } from "@/i18n/routing";
+import { SITE_URL } from "@/lib/site";
 
 import type { MetadataRoute } from "next";
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
+/** Locale-prefixed URL for a route, per routing's "as-needed" scheme (E12-T1) — the default locale (en) is unprefixed. */
+function localizedUrl(path: string, locale: string): string {
+    const prefix = locale === routing.defaultLocale ? "" : `/${locale}`;
+    return `${SITE_URL}${prefix}${path}`;
+}
 
 /**
  * Only the shared-deck landing page has any per-item public content today
@@ -12,10 +18,18 @@ const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     const publicDecks = await listPublicSharedLessonUrls();
 
-    return publicDecks.map(({ shareId, lastModified }) => ({
-        url: `${SITE_URL}/flashcard/shared/${shareId}`,
-        lastModified,
-        changeFrequency: "weekly",
-        priority: 0.7,
-    }));
+    return publicDecks.map(({ shareId, lastModified }) => {
+        const path = `/flashcard/shared/${shareId}`;
+        return {
+            url: localizedUrl(path, routing.defaultLocale),
+            lastModified,
+            changeFrequency: "weekly",
+            priority: 0.7,
+            alternates: {
+                languages: Object.fromEntries(
+                    routing.locales.map((locale) => [locale, localizedUrl(path, locale)]),
+                ),
+            },
+        };
+    });
 }

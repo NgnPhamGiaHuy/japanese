@@ -16,6 +16,7 @@ import { useLessons, useSharedLesson } from "@/features/flashcard/hooks";
 import { emitNotification } from "@/features/notifications/services";
 import { useRouter } from "@/i18n/navigation";
 import { useAppStore } from "@/lib/app-store";
+import { SITE_URL } from "@/lib/site";
 import { Button } from "@/shared/components/ui";
 import { useCopyToClipboard } from "@/shared/hooks";
 import { useAlert } from "@/shared/providers";
@@ -24,8 +25,6 @@ import type { LearningResource, WithContext } from "schema-dts";
 import type { DeckContext } from "@/features/flashcard/detail";
 import type { PublicSharedLessonPreview } from "@/features/flashcard/services/shared-preview.service";
 import type { FlashCard } from "@/features/flashcard/types";
-
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
 
 interface SharedLessonPageClientProps {
     shareId: string;
