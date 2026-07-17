@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import { Trophy } from "lucide-react";
 
 import { Leaderboard } from "@/features/game/components";
@@ -19,6 +21,8 @@ const SurvivalGameOverScreen = ({
     userId,
     onBack,
 }: SurvivalGameOverScreenProps) => {
+    const t = useTranslations("Survival");
+    const tGame = useTranslations("Game");
     const finalScore = game.challengeMode === "drop" ? game.dropScore : game.engine.score;
 
     return (
@@ -27,13 +31,13 @@ const SurvivalGameOverScreen = ({
                 <div className="border-survival-strong bg-survival mb-4 flex h-20 w-20 -rotate-6 items-center justify-center rounded-[1.75rem] border-b-8 text-white shadow-sm">
                     <Trophy size={48} strokeWidth={3} />
                 </div>
-                <h2 className="text-text mb-1 text-4xl font-black">Game Over!</h2>
+                <h2 className="text-text mb-1 text-4xl font-black">{t("gameOver")}</h2>
                 <p className="text-muted mb-1 text-xl font-bold">
-                    Final Score:{" "}
+                    {t("finalScore")}{" "}
                     <span className="text-survival mx-1 text-3xl font-black">{finalScore}</span>
                 </p>
                 <p className="text-muted mb-6 text-sm font-bold">
-                    Best: {bestScores[game.activeModeKey] ?? 0}
+                    {tGame("best", { score: bestScores[game.activeModeKey] ?? 0 })}
                 </p>
 
                 <div className="mb-6 w-full space-y-3">
@@ -43,17 +47,17 @@ const SurvivalGameOverScreen = ({
                         onClick={game.startGame}
                         className="w-full py-5 text-xl"
                     >
-                        Play Again
+                        {tGame("playAgain")}
                     </Button>
                     <Button
                         variant="outline"
                         onClick={() => game.setPhase("setup")}
                         className="w-full py-4 text-lg"
                     >
-                        Change Mode
+                        {tGame("changeMode")}
                     </Button>
                     <Button variant="ghost" className="w-full py-4 text-lg" onClick={onBack}>
-                        Back to Kana
+                        {t("backToKana")}
                     </Button>
                 </div>
 

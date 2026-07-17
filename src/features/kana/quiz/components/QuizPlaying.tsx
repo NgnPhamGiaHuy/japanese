@@ -8,6 +8,7 @@
 
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useEffect, useRef } from "react";
 
 import { ArrowLeft, X } from "lucide-react";
@@ -57,6 +58,7 @@ export function QuizPlaying({
     onMCAnswer,
     onBack,
 }: QuizPlayingProps) {
+    const t = useTranslations("KanaQuiz");
     const inputRef = useRef<HTMLInputElement>(null);
 
     // Auto-focus input when question changes or status becomes idle
@@ -72,7 +74,7 @@ export function QuizPlaying({
                 <ScreenHeaderBackButton
                     onClick={onBack}
                     icon={quizMode === "type" ? ArrowLeft : X}
-                    aria-label={quizMode === "type" ? "Back to quiz menu" : "Exit quiz"}
+                    aria-label={quizMode === "type" ? t("backToMenu") : t("exitQuiz")}
                 />
                 <div className="mx-2 h-2.5 min-w-0 flex-1 overflow-hidden rounded-full bg-gray-200 md:h-4">
                     <div
@@ -117,7 +119,7 @@ export function QuizPlaying({
                                 autoCapitalize="none"
                                 autoComplete="off"
                                 className="text-text w-full rounded-2xl border-2 border-b-4 border-gray-200 bg-white px-6 py-4 text-2xl font-black transition-colors outline-none focus:border-[#1cb0f6]"
-                                placeholder="Type romaji"
+                                placeholder={t("typeRomajiPlaceholder")}
                                 value={typedInput}
                                 onChange={(e) => onTypedInputChange(e.target.value)}
                                 onKeyDown={(e) => e.key === "Enter" && onTypeAnswer()}
@@ -129,7 +131,7 @@ export function QuizPlaying({
                                 disabled={status !== "idle"}
                                 className="w-full py-4 text-xl"
                             >
-                                Check
+                                {t("check")}
                             </Button>
                         </div>
                     ) : (

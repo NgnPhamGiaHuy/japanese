@@ -7,6 +7,8 @@
  */
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import { Volume2, VolumeX } from "lucide-react";
 
 import { useAudioStatus } from "@/shared/audio";
@@ -33,10 +35,12 @@ const KanaAudioButton = ({
     iconColorClassName,
     className,
 }: KanaAudioButtonProps) => {
+    const t = useTranslations("KanaAudioButton");
+    const tCommon = useTranslations("Common");
     // When pronunciation keeps failing, say so rather than leaving the learner tapping in silence.
     // The button stays enabled: the next tap is also the retry.
     const unavailable = useAudioStatus() === "unavailable";
-    const label = unavailable ? "Pronunciation unavailable — tap to retry" : `Play ${char}`;
+    const label = unavailable ? t("pronunciationUnavailable") : `${tCommon("play")} ${char}`;
 
     return (
         <Button

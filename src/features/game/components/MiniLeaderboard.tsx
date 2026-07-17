@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 
 import { Trophy } from "lucide-react";
@@ -20,11 +21,12 @@ const MiniLeaderboard = ({
     currentUserName,
     currentScore = 0,
 }: MiniLeaderboardProps) => {
+    const t = useTranslations("Game");
     const { entries, userRank } = useLeaderboard(
         gameMode,
         5,
         currentUserId
-            ? { userId: currentUserId, displayName: currentUserName || "You" }
+            ? { userId: currentUserId, displayName: currentUserName || t("you") }
             : undefined,
         currentScore,
     );
@@ -70,7 +72,7 @@ const MiniLeaderboard = ({
             <div className="mb-1 flex items-center gap-2 border-b border-gray-100 pb-1">
                 <Trophy size={14} className="text-survival" />
                 <span className="text-xs font-bold tracking-wider text-gray-400 uppercase">
-                    Live Rank
+                    {t("liveRank")}
                 </span>
             </div>
 
@@ -93,7 +95,7 @@ const MiniLeaderboard = ({
                                 {entry.rank}
                             </span>
                             <span className="max-w-[80px] truncate">
-                                {entry.isCurrentUser ? "You" : entry.displayName}
+                                {entry.isCurrentUser ? t("you") : entry.displayName}
                             </span>
                         </div>
                         <div className="flex items-center gap-1 font-bold">

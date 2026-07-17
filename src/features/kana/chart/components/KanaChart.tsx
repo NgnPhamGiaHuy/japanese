@@ -73,7 +73,7 @@ export function KanaChart() {
                                 katakana={katakana}
                                 showRomaji={showRomaji}
                                 isLearned={isLearned}
-                                playLabel={t("play")}
+                                playLabel={tCommon("play")}
                             />
                         ))}
 
@@ -94,7 +94,7 @@ export function KanaChart() {
                                     isLearned={isLearned}
                                     isHiragana={alphabet === "hiragana"}
                                     blockKeyPrefix={block.title}
-                                    playLabel={t("play")}
+                                    playLabel={tCommon("play")}
                                 />
                             </div>
                         ))}

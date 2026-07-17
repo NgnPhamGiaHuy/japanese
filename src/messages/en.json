@@ -6,6 +6,8 @@
         "next": "Next",
         "random": "Random",
         "sequential": "Sequential",
+        "play": "Play",
+        "recallQuiz": "Recall Quiz",
         "deleteDeckTitle": "Delete Deck?",
         "deleteDeckMessage": "Are you sure you want to permanently delete \"{title}\"? This action cannot be undone.",
         "delete": "Delete"
@@ -128,7 +130,6 @@
         "upNextForYou": "Up Next For You",
         "learnCharacters": "Learn Characters",
         "masteredProgress": "{learned} / {total} Mastered",
-        "recallQuiz": "Recall Quiz",
         "dailyReviewReady": "Daily review ready!",
         "practiceAndChallenges": "Practice & Challenges",
         "writing": "Writing",
@@ -140,8 +141,7 @@
         "title": "Character Chart",
         "bothNote": "Hiragana and katakana for the same sounds are grouped by section. Extended loanword katakana appears only under Katakana.",
         "hiragana": "Hiragana",
-        "katakana": "Katakana",
-        "play": "Play"
+        "katakana": "Katakana"
     },
     "KanaLearn": {
         "title": "Learn"
@@ -161,5 +161,74 @@
             "copy": "Step 2: Draw with reference",
             "recall": "Step 3: Draw from memory"
         }
+    },
+    "KanaQuiz": {
+        "subtitle": "How well do you know your kana?",
+        "backToMenu": "Back to quiz menu",
+        "exitQuiz": "Exit quiz",
+        "typeRomajiPlaceholder": "Type romaji",
+        "check": "Check",
+        "perfect": "Perfect!",
+        "done": "Done!",
+        "score": "Score:",
+        "perfectMessage": "You answered all questions correctly!",
+        "keepPractising": "Keep practising!",
+        "modes": {
+            "choice": { "title": "Multiple Choice", "description": "Choose from 4 options" },
+            "type": { "title": "Type the Romaji", "description": "Type the romanization" },
+            "smart": { "title": "Smart Review", "description": "Focus on your weakest characters" }
+        }
+    },
+    "AnswerFeedback": {
+        "announcementCorrect": "Correct. {char} is {romaji}.",
+        "announcementIncorrect": "Incorrect. {char} is {romaji}.",
+        "brilliant": "Brilliant!",
+        "answer": "Answer:",
+        "replayAudio": "Replay audio"
+    },
+    "KanaAudioButton": {
+        "pronunciationUnavailable": "Pronunciation unavailable — tap to retry"
+    },
+    "Survival": {
+        "title": "Survival Mode",
+        "subtitle": "How long can you last?",
+        "modes": {
+            "infinity": { "title": "Infinity", "description": "Survive as long as possible" },
+            "time": {
+                "title": "Time Attack",
+                "description": "Streaks add time — wrong answers cost seconds"
+            },
+            "drop": { "title": "Drop Mode", "description": "Type falling characters" }
+        },
+        "timerDuration": "Timer Duration",
+        "minutesShort": "{minutes}min",
+        "timerNote": "Streaks add up to <bonus>+{bonusSec}s</bonus> per correct — always less than a wrong answer (<penalty>−{penaltySec}s</penalty>), so the clock eventually runs out.",
+        "yourNameLeaderboard": "Your Name (Leaderboard)",
+        "anonymous": "Anonymous",
+        "start": "Start →",
+        "backToMenu": "Back to survival menu",
+        "typingPrefix": "Typing:",
+        "startTypingPrompt": "Start typing to match falling characters",
+        "timeRemaining": "Time remaining",
+        "streakAddsTime": "Streak adds time",
+        "gameOver": "Game Over!",
+        "finalScore": "Final Score:",
+        "backToKana": "Back to Kana"
+    },
+    "Game": {
+        "leaderboard": "Leaderboard",
+        "leaderboardError": "Could not load leaderboard.",
+        "noScoresYet": "No scores yet.",
+        "beFirstOnBoard": "Be the first on the board!",
+        "you": "You",
+        "liveRank": "Live Rank",
+        "best": "Best: {score}",
+        "newBestScore": "🎉 New Best Score!",
+        "toNext": "· {remaining} to next",
+        "playAgain": "Play Again",
+        "changeMode": "Change Mode",
+        "xpEarned": "+{xp} XP",
+        "back": "Back",
+        "play": "Play"
     }
 }

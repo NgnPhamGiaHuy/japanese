@@ -140,7 +140,7 @@ export default function KanaHub() {
                                                 className="md:h-10 md:w-10"
                                             />
                                         }
-                                        title={t("recallQuiz")}
+                                        title={tCommon("recallQuiz")}
                                         subtitle={t("dailyReviewReady")}
                                         badge={
                                             <ChevronRight
@@ -169,7 +169,7 @@ export default function KanaHub() {
                                                 className="md:h-10 md:w-10"
                                             />
                                         }
-                                        title={t("recallQuiz")}
+                                        title={tCommon("recallQuiz")}
                                         primaryBg="bg-both"
                                         primaryBorderB="border-both-strong"
                                         primaryHover="hover:bg-both-strong"

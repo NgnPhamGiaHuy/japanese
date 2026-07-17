@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import { X } from "lucide-react";
 
 import { GameStreakScoreStack, LivesDisplay, MiniLeaderboard } from "@/features/game/components";
@@ -16,6 +18,7 @@ interface SurvivalQuizScreenProps {
 
 /** Playing screen for the Infinity and Time Attack challenge modes (multiple-choice romaji). */
 const SurvivalQuizScreen = ({ game, userId }: SurvivalQuizScreenProps) => {
+    const t = useTranslations("Survival");
     const { question, questionType, options, status } = game.engine;
 
     return (
@@ -30,7 +33,7 @@ const SurvivalQuizScreen = ({ game, userId }: SurvivalQuizScreenProps) => {
                 <ScreenHeaderBackButton
                     onClick={() => game.setPhase("setup")}
                     icon={X}
-                    aria-label="Back to survival menu"
+                    aria-label={t("backToMenu")}
                 />
                 {game.challengeMode === "time" ? (
                     <div className="flex w-full max-w-[min(100%,16rem)] flex-col items-center gap-1.5 md:max-w-xs">
@@ -40,7 +43,7 @@ const SurvivalQuizScreen = ({ game, userId }: SurvivalQuizScreenProps) => {
                             aria-valuenow={game.timeLeft}
                             aria-valuemin={0}
                             aria-valuemax={Math.max(game.timeAttackPeak, 1)}
-                            aria-label="Time remaining"
+                            aria-label={t("timeRemaining")}
                         >
                             <div
                                 className={`h-full rounded-full transition-[width] duration-1000 ease-linear ${game.timeLeft <= 10 ? "bg-danger" : "bg-survival"}`}
@@ -50,7 +53,7 @@ const SurvivalQuizScreen = ({ game, userId }: SurvivalQuizScreenProps) => {
                             />
                         </div>
                         <p className="text-muted text-xs font-bold tracking-wide uppercase md:text-xs">
-                            Streak adds time
+                            {t("streakAddsTime")}
                         </p>
                     </div>
                 ) : (

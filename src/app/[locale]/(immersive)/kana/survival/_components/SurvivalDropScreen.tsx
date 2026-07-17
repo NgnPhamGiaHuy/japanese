@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import { X } from "lucide-react";
 
 import { GameStreakScoreStack, LivesDisplay, MiniLeaderboard } from "@/features/game/components";
@@ -14,6 +16,7 @@ interface SurvivalDropScreenProps {
 
 /** Playing screen for the Drop challenge mode (typing falling characters). */
 const SurvivalDropScreen = ({ game, userId, inputRef }: SurvivalDropScreenProps) => {
+    const t = useTranslations("Survival");
     const state = game.dropState.current;
     const activeWord = state.words.find((w) => w.id === state.activeId);
 
@@ -34,7 +37,7 @@ const SurvivalDropScreen = ({ game, userId, inputRef }: SurvivalDropScreenProps)
                 <ScreenHeaderBackButton
                     onClick={() => game.setPhase("setup")}
                     icon={X}
-                    aria-label="Back to survival menu"
+                    aria-label={t("backToMenu")}
                     className="text-muted hover:text-text hover:bg-gray-100"
                 />
                 <LivesDisplay lives={game.lives} />
@@ -72,10 +75,11 @@ const SurvivalDropScreen = ({ game, userId, inputRef }: SurvivalDropScreenProps)
             <div className="text-muted z-10 p-4 text-center text-sm font-bold">
                 {activeWord ? (
                     <>
-                        Typing: <span className="text-survival font-black">{activeWord.typed}</span>
+                        {t("typingPrefix")}{" "}
+                        <span className="text-survival font-black">{activeWord.typed}</span>
                     </>
                 ) : (
-                    "Start typing to match falling characters"
+                    t("startTypingPrompt")
                 )}
             </div>
         </div>

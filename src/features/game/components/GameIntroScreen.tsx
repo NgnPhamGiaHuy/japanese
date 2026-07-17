@@ -8,6 +8,8 @@
 
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import { X } from "lucide-react";
 import { m } from "motion/react";
 
@@ -53,7 +55,7 @@ export function GameIntroScreen({
     iconBorder,
     bestScore,
     tierInfo,
-    startButtonText = "Play",
+    startButtonText,
     startButtonColor = "purple",
     startDisabled = false,
     children,
@@ -61,13 +63,15 @@ export function GameIntroScreen({
     onBack,
     onStart,
 }: GameIntroScreenProps) {
+    const t = useTranslations("Game");
+
     return (
         <div className="bg-bg fixed inset-0 flex flex-col items-center justify-center p-6">
             <Button
                 variant="ghost"
                 size="icon"
                 onClick={onBack}
-                aria-label="Back"
+                aria-label={t("back")}
                 className="absolute top-4 left-4"
                 icon={X}
             />
@@ -94,7 +98,9 @@ export function GameIntroScreen({
                         {tierInfo.label}
                     </span>
                     <span className="text-muted text-sm font-bold">·</span>
-                    <span className="text-text text-sm font-black">Best: {bestScore}</span>
+                    <span className="text-text text-sm font-black">
+                        {t("best", { score: bestScore })}
+                    </span>
                 </div>
             )}
 
@@ -108,7 +114,7 @@ export function GameIntroScreen({
                 loading={loading}
                 className="w-full max-w-sm py-5 text-xl"
             >
-                {startButtonText}
+                {startButtonText ?? t("play")}
             </Button>
         </div>
     );

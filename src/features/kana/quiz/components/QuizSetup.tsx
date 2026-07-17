@@ -7,6 +7,8 @@
 
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import { Eye, Keyboard, Shuffle } from "lucide-react";
 
 import { ScreenHeader } from "@/shared/components/layout";
@@ -15,11 +17,13 @@ import { ModeSelectionCard } from "@/shared/components/ui";
 import type { QuizSetupProps } from "../types";
 
 export function QuizSetup({ alphabet, themeColor, onStartQuiz }: QuizSetupProps) {
+    const t = useTranslations("KanaQuiz");
+    const tCommon = useTranslations("Common");
     const displayChar = alphabet === "both" ? "あ" : alphabet === "hiragana" ? "あ" : "ア";
 
     return (
         <div className="bg-bg fixed inset-0 z-50 flex flex-col overflow-y-auto">
-            <ScreenHeader title="Recall Quiz" backHref="/kana" />
+            <ScreenHeader title={tCommon("recallQuiz")} backHref="/kana" />
             <div className="flex flex-1 flex-col items-center justify-start px-4 py-6">
                 <div className="w-full max-w-md">
                     <div
@@ -28,17 +32,15 @@ export function QuizSetup({ alphabet, themeColor, onStartQuiz }: QuizSetupProps)
                     >
                         {displayChar}
                     </div>
-                    <p className="text-muted mb-8 text-lg font-bold">
-                        How well do you know your kana?
-                    </p>
+                    <p className="text-muted mb-8 text-lg font-bold">{t("subtitle")}</p>
                     <div className="space-y-3">
                         <ModeSelectionCard
                             id="quiz-mode-choice"
                             icon={Eye}
                             iconBgColor="bg-[#faeaff]"
                             iconColor="text-both"
-                            title="Multiple Choice"
-                            description="Choose from 4 options"
+                            title={t("modes.choice.title")}
+                            description={t("modes.choice.description")}
                             onClick={() => onStartQuiz("choice")}
                         />
                         <ModeSelectionCard
@@ -46,8 +48,8 @@ export function QuizSetup({ alphabet, themeColor, onStartQuiz }: QuizSetupProps)
                             icon={Keyboard}
                             iconBgColor="bg-[#e5f5ff]"
                             iconColor="text-katakana"
-                            title="Type the Romaji"
-                            description="Type the romanization"
+                            title={t("modes.type.title")}
+                            description={t("modes.type.description")}
                             onClick={() => onStartQuiz("type")}
                         />
                         <ModeSelectionCard
@@ -55,8 +57,8 @@ export function QuizSetup({ alphabet, themeColor, onStartQuiz }: QuizSetupProps)
                             icon={Shuffle}
                             iconBgColor="bg-[#fff5e6]"
                             iconColor="text-survival"
-                            title="Smart Review"
-                            description="Focus on your weakest characters"
+                            title={t("modes.smart.title")}
+                            description={t("modes.smart.description")}
                             onClick={() => onStartQuiz("smart")}
                         />
                     </div>

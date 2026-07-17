@@ -8,6 +8,7 @@
 
 "use client";
 
+import { useTranslations } from "next-intl";
 import Confetti from "react-confetti";
 
 import { m } from "motion/react";
@@ -69,6 +70,7 @@ export function GameResultsScreen({
     onPlayAgain,
     onCollectXP,
 }: GameResultsScreenProps) {
+    const t = useTranslations("Game");
     const prefersReducedMotion = usePrefersReducedMotion();
     const isNewBest = score > bestScore;
     const calculatedXP = xpEarned ?? Math.round(score / 10);
@@ -107,7 +109,7 @@ export function GameResultsScreen({
                         animate={{ opacity: 1, y: 0 }}
                         className="text-survival mb-3 rounded-xl bg-[#fff8e8] px-4 py-1.5 text-xs font-black tracking-wide uppercase"
                     >
-                        🎉 New Best Score!
+                        {t("newBestScore")}
                     </m.div>
                 )}
 
@@ -128,7 +130,7 @@ export function GameResultsScreen({
                         </span>
                         {tierInfo.nextThreshold && (
                             <span className="text-muted text-xs font-bold">
-                                · {tierInfo.nextThreshold - score} to next
+                                {t("toNext", { remaining: tierInfo.nextThreshold - score })}
                             </span>
                         )}
                     </div>
@@ -145,7 +147,7 @@ export function GameResultsScreen({
                         onClick={onPlayAgain}
                         className="flex-1 py-4"
                     >
-                        Play Again
+                        {t("playAgain")}
                     </Button>
                     <Button
                         variant="primary"
@@ -153,7 +155,7 @@ export function GameResultsScreen({
                         onClick={onCollectXP}
                         className="flex-1 py-4"
                     >
-                        +{calculatedXP} XP
+                        {t("xpEarned", { xp: calculatedXP })}
                     </Button>
                 </div>
 

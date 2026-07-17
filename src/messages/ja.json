@@ -6,6 +6,8 @@
         "next": "次へ",
         "random": "ランダム",
         "sequential": "順番",
+        "play": "再生",
+        "recallQuiz": "復習クイズ",
         "deleteDeckTitle": "デッキを削除しますか？",
         "deleteDeckMessage": "「{title}」を完全に削除してもよろしいですか？この操作は取り消せません。",
         "delete": "削除"
@@ -128,7 +130,6 @@
         "upNextForYou": "次のステップ",
         "learnCharacters": "文字を学ぶ",
         "masteredProgress": "{learned} / {total} 習得済み",
-        "recallQuiz": "復習クイズ",
         "dailyReviewReady": "今日の復習の準備ができました！",
         "practiceAndChallenges": "練習とチャレンジ",
         "writing": "書き取り",
@@ -140,8 +141,7 @@
         "title": "文字一覧表",
         "bothNote": "同じ発音のひらがなとカタカナはセクションごとにまとめて表示されます。拡張カタカナ（外来語用）はカタカナにのみ表示されます。",
         "hiragana": "ひらがな",
-        "katakana": "カタカナ",
-        "play": "再生"
+        "katakana": "カタカナ"
     },
     "KanaLearn": {
         "title": "学習"
@@ -161,5 +161,74 @@
             "copy": "ステップ2: 見本を見て書きましょう",
             "recall": "ステップ3: 記憶を頼りに書きましょう"
         }
+    },
+    "KanaQuiz": {
+        "subtitle": "かなをどれくらい覚えているかな？",
+        "backToMenu": "クイズメニューに戻る",
+        "exitQuiz": "クイズを終了",
+        "typeRomajiPlaceholder": "ローマ字を入力",
+        "check": "確認",
+        "perfect": "パーフェクト！",
+        "done": "終了！",
+        "score": "スコア:",
+        "perfectMessage": "すべての問題に正解しました！",
+        "keepPractising": "練習を続けましょう！",
+        "modes": {
+            "choice": { "title": "選択式", "description": "4つの選択肢から選ぶ" },
+            "type": { "title": "ローマ字入力", "description": "ローマ字を入力する" },
+            "smart": { "title": "スマート復習", "description": "苦手な文字を集中的に復習" }
+        }
+    },
+    "AnswerFeedback": {
+        "announcementCorrect": "正解。{char}は{romaji}です。",
+        "announcementIncorrect": "不正解。{char}は{romaji}です。",
+        "brilliant": "正解！",
+        "answer": "答え:",
+        "replayAudio": "音声を再生"
+    },
+    "KanaAudioButton": {
+        "pronunciationUnavailable": "発音を再生できません — タップして再試行"
+    },
+    "Survival": {
+        "title": "サバイバルモード",
+        "subtitle": "どれだけ長く生き残れるか？",
+        "modes": {
+            "infinity": { "title": "インフィニティ", "description": "できるだけ長く生き残ろう" },
+            "time": {
+                "title": "タイムアタック",
+                "description": "連続正解で時間が増え、誤答で時間が減る"
+            },
+            "drop": { "title": "ドロップモード", "description": "落ちてくる文字を入力しよう" }
+        },
+        "timerDuration": "制限時間",
+        "minutesShort": "{minutes}分",
+        "timerNote": "連続正解ごとに最大<bonus>+{bonusSec}秒</bonus>が加算されますが、誤答のペナルティ（<penalty>−{penaltySec}秒</penalty>）より必ず少なく設定されているため、いずれ時間切れになります。",
+        "yourNameLeaderboard": "名前（リーダーボード用）",
+        "anonymous": "匿名",
+        "start": "スタート →",
+        "backToMenu": "サバイバルメニューに戻る",
+        "typingPrefix": "入力中:",
+        "startTypingPrompt": "落ちてくる文字に合わせて入力しよう",
+        "timeRemaining": "残り時間",
+        "streakAddsTime": "連続正解で時間が増える",
+        "gameOver": "ゲームオーバー！",
+        "finalScore": "最終スコア:",
+        "backToKana": "かなに戻る"
+    },
+    "Game": {
+        "leaderboard": "リーダーボード",
+        "leaderboardError": "リーダーボードを読み込めませんでした。",
+        "noScoresYet": "まだスコアがありません。",
+        "beFirstOnBoard": "最初のスコアを登録しよう！",
+        "you": "あなた",
+        "liveRank": "リアルタイム順位",
+        "best": "ベスト: {score}",
+        "newBestScore": "🎉 自己ベスト更新！",
+        "toNext": "・次のランクまであと{remaining}",
+        "playAgain": "もう一度プレイ",
+        "changeMode": "モードを変更",
+        "xpEarned": "+{xp} XP",
+        "back": "戻る",
+        "play": "プレイ"
     }
 }

@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import { Trophy } from "lucide-react";
 
 import { scoreToTier, TIER_INFO } from "@/features/game/domain";
@@ -30,6 +32,7 @@ const Skeleton = () => (
 );
 
 const Leaderboard = ({ gameMode, currentUserId, accentColor = "#ff9600" }: LeaderboardProps) => {
+    const t = useTranslations("Game");
     const { entries, loading, error } = useLeaderboard(gameMode);
 
     return (
@@ -40,13 +43,13 @@ const Leaderboard = ({ gameMode, currentUserId, accentColor = "#ff9600" }: Leade
                     className="text-sm font-black tracking-widest uppercase"
                     style={{ color: accentColor }}
                 >
-                    Leaderboard
+                    {t("leaderboard")}
                 </span>
             </div>
 
             {error && (
                 <p className="text-muted rounded-2xl bg-white px-4 py-3 text-center text-sm font-bold">
-                    Could not load leaderboard.
+                    {t("leaderboardError")}
                 </p>
             )}
 
@@ -54,10 +57,8 @@ const Leaderboard = ({ gameMode, currentUserId, accentColor = "#ff9600" }: Leade
 
             {!loading && !error && entries.length === 0 && (
                 <div className="rounded-2xl bg-white px-4 py-6 text-center">
-                    <p className="text-muted text-sm font-bold">No scores yet.</p>
-                    <p className="mt-0.5 text-xs font-bold text-[#c8c8c8]">
-                        Be the first on the board!
-                    </p>
+                    <p className="text-muted text-sm font-bold">{t("noScoresYet")}</p>
+                    <p className="mt-0.5 text-xs font-bold text-[#c8c8c8]">{t("beFirstOnBoard")}</p>
                 </div>
             )}
 
@@ -95,7 +96,7 @@ const Leaderboard = ({ gameMode, currentUserId, accentColor = "#ff9600" }: Leade
                                         {entry.displayName}
                                         {isMe && (
                                             <span className="ml-1 text-xs font-bold opacity-50">
-                                                (you)
+                                                ({t("you")})
                                             </span>
                                         )}
                                     </span>

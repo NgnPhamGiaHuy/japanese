@@ -7,6 +7,8 @@
 
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import { Button } from "@/shared/components/ui";
 
 import type { QuizResultsProps } from "../types";
@@ -19,6 +21,8 @@ export function QuizResults({
     onPlayAgain,
     onChangeMode,
 }: QuizResultsProps) {
+    const t = useTranslations("KanaQuiz");
+    const tGame = useTranslations("Game");
     const isPerfect = score >= targetScore;
 
     return (
@@ -31,15 +35,15 @@ export function QuizResults({
                     {isPerfect ? "🏆" : "✓"}
                 </div>
                 <h2 className="text-text mb-1 text-4xl font-black">
-                    {isPerfect ? "Perfect!" : "Done!"}
+                    {isPerfect ? t("perfect") : t("done")}
                 </h2>
                 <p className="text-muted mb-1 text-xl font-bold">
-                    Score:{" "}
+                    {t("score")}{" "}
                     <span className={`mx-1 text-3xl font-black ${themeColor.text}`}>{score}</span>
                     <span className="text-muted text-base">/ {targetScore}</span>
                 </p>
                 <p className="text-muted mb-6 text-sm font-bold">
-                    {isPerfect ? "You answered all questions correctly!" : "Keep practising!"}
+                    {isPerfect ? t("perfectMessage") : t("keepPractising")}
                 </p>
 
                 <div className="mb-6 w-full space-y-3">
@@ -48,14 +52,14 @@ export function QuizResults({
                         onClick={onPlayAgain}
                         className="w-full py-5 text-xl"
                     >
-                        Play Again
+                        {tGame("playAgain")}
                     </Button>
                     <Button
                         variant="outline"
                         onClick={onChangeMode}
                         className="w-full py-4 text-lg"
                     >
-                        Change Mode
+                        {tGame("changeMode")}
                     </Button>
                 </div>
             </div>
