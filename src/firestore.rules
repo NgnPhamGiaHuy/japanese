@@ -129,6 +129,24 @@ service cloud.firestore {
         }
       }
 
+      // ─── PER-CARD SRS PROGRESS ─────────────────────────────────────────────
+      // Sibling of users/{userId}, not nested under it — progress.service.ts's
+      // userProgressCardDoc()/dailyStatsDoc() write here. Always private to the
+      // learner: even when grading a card in a shared deck, the learner's own
+      // SRS state lives under their own uid here, never the deck owner's — so,
+      // unlike lessons/cards above, there is no public/role-based read case.
+      match /userProgress/{userId} {
+        allow read, write: if isOwner(userId);
+
+        match /lessons/{lessonId}/cards/{cardId} {
+          allow read, write: if isOwner(userId);
+        }
+
+        match /studyStats/{statId} {
+          allow read, write: if isOwner(userId);
+        }
+      }
+
       // ─── PENDING NOTIFICATIONS (Pre-login invites) ────────────────────────
       
       match /pendingNotifications/{email}/items/{id} {

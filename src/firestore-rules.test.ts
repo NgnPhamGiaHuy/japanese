@@ -1,6 +1,7 @@
 /**
  * @file firestore-rules.test.ts
- * Security-rules tests for the notification paths.
+ * Security-rules tests for the notification paths, plus the per-card SRS
+ * progress path (artifacts/{appId}/userProgress/{userId}/...).
  *
  * GATED: requires the Firestore emulator + @firebase/rules-unit-testing. Runs
  * via `npm run test:emu` (vitest.emu.config.ts), never in the default unit run.
@@ -13,6 +14,12 @@
  *   - immutable fields (senderId/type/createdAt/userId) are frozen on update
  *   - notifications cannot be hard-deleted (soft-delete via isDeleted only)
  *   - pending-notification creates are sender-bound; reads are email-scoped
+ *
+ * Also asserts userProgress/{userId}/... (SRS grading state, written by
+ * progress.service.ts) is readable/writable only by its owner, and rejected
+ * for everyone else — this collection had NO rule at all until this pass,
+ * so every real user's card grading was silently denied by Firestore's
+ * default-deny (discovered while live-testing E17-T1 against seeded data).
  */
 
 import { assertFails, assertSucceeds } from "@firebase/rules-unit-testing";
@@ -23,6 +30,7 @@ import {
     authedDb,
     clearData,
     teardown,
+    unauthedDb,
     withAdmin,
 } from "./features/notifications/__tests__/harness";
 
@@ -157,6 +165,97 @@ d("pending-notification rules", () => {
         const stranger = await authedDb("user_stranger", "stranger@example.com");
         await assertSucceeds(getDoc(doc(invitee, ...pendingPath("invitee@example.com", "p2"))));
         await assertFails(getDoc(doc(stranger, ...pendingPath("invitee@example.com", "p2"))));
+    });
+});
+
+d("userProgress rules (per-card SRS state)", () => {
+    afterEach(() => clearData());
+    afterAll(() => teardown());
+
+    function progressCardPath(uid: string, lessonId: string, cardId: string) {
+        return [
+            "artifacts",
+            APP,
+            "userProgress",
+            uid,
+            "lessons",
+            lessonId,
+            "cards",
+            cardId,
+        ] as const;
+    }
+
+    function statsPath(uid: string) {
+        return ["artifacts", APP, "userProgress", uid, "studyStats", "daily"] as const;
+    }
+
+    const progress = {
+        cardId: "card1",
+        lessonId: "lessonA",
+        sourceOwnerId: OWNER,
+        easeFactor: 2.5,
+        interval: 0,
+        repetitions: 0,
+        nextReviewAt: 0,
+        status: "new",
+        lastResult: null,
+        isMistake: false,
+        lastReviewedAt: null,
+        createdAt: 1_700_000_000_000,
+    };
+
+    it("owner can write and read their own card progress", async () => {
+        const db = await authedDb(OWNER);
+        await assertSucceeds(
+            setDoc(doc(db, ...progressCardPath(OWNER, "lessonA", "card1")), progress),
+        );
+        await assertSucceeds(getDoc(doc(db, ...progressCardPath(OWNER, "lessonA", "card1"))));
+    });
+
+    it("another signed-in user cannot read or write someone else's card progress", async () => {
+        await withAdmin(async (db) => {
+            await setDoc(doc(db, ...progressCardPath(OWNER, "lessonA", "card1")), progress);
+        });
+        const other = await authedDb(OTHER);
+        await assertFails(getDoc(doc(other, ...progressCardPath(OWNER, "lessonA", "card1"))));
+        await assertFails(
+            setDoc(doc(other, ...progressCardPath(OWNER, "lessonA", "card1")), {
+                ...progress,
+                isMistake: true,
+            }),
+        );
+    });
+
+    it("an unauthenticated visitor cannot read card progress, even for a public deck's owner", async () => {
+        await withAdmin(async (db) => {
+            await setDoc(doc(db, ...progressCardPath(OWNER, "lessonA", "card1")), progress);
+        });
+        const anon = await unauthedDb();
+        await assertFails(getDoc(doc(anon, ...progressCardPath(OWNER, "lessonA", "card1"))));
+    });
+
+    it("owner can write and read their own daily study stats", async () => {
+        const db = await authedDb(OWNER);
+        await assertSucceeds(
+            setDoc(doc(db, ...statsPath(OWNER)), {
+                date: "2026-07-18",
+                reviewedCount: 3,
+                lastUpdatedAt: 1_700_000_000_000,
+            }),
+        );
+        await assertSucceeds(getDoc(doc(db, ...statsPath(OWNER))));
+    });
+
+    it("another signed-in user cannot read someone else's daily study stats", async () => {
+        await withAdmin(async (db) => {
+            await setDoc(doc(db, ...statsPath(OWNER)), {
+                date: "2026-07-18",
+                reviewedCount: 3,
+                lastUpdatedAt: 1_700_000_000_000,
+            });
+        });
+        const other = await authedDb(OTHER);
+        await assertFails(getDoc(doc(other, ...statsPath(OWNER))));
     });
 });
 
