@@ -56,6 +56,7 @@ function continueTileConfig(t: ReturnType<typeof useTranslations<"HomePage">>) {
 
 export default function HomePage() {
     const t = useTranslations("HomePage");
+    const tCommon = useTranslations("Common");
     const { userData, loading: progressLoading } = useUserProgress();
     const { user } = useAppStore();
     const { lessons, loading: lessonsLoading } = useLessons();
@@ -261,9 +262,9 @@ export default function HomePage() {
                 isOpen={!!deletingLesson}
                 onClose={() => setDeletingLesson(null)}
                 onConfirm={handleDelete}
-                title={t("deleteDeckTitle")}
-                message={t("deleteDeckMessage", { title: deletingLesson?.title ?? "" })}
-                confirmText={t("delete")}
+                title={tCommon("deleteDeckTitle")}
+                message={tCommon("deleteDeckMessage", { title: deletingLesson?.title ?? "" })}
+                confirmText={tCommon("delete")}
                 variant="danger"
                 loading={isDeleting}
             />

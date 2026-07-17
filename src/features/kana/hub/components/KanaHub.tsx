@@ -7,6 +7,8 @@
 
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import { BarChart2, Brain, ChevronRight, Flame, PenTool, Play, Type, Volume2 } from "lucide-react";
 
 import { AlphabetSwitcher } from "@/features/kana/components";
@@ -15,6 +17,8 @@ import { ActionCard, SettingsMenu } from "@/shared/components/ui";
 import { useKanaHubState } from "../hooks/useKanaHubState";
 
 export default function KanaHub() {
+    const t = useTranslations("KanaHub");
+    const tCommon = useTranslations("Common");
     const {
         alphabet,
         setAlphabet,
@@ -52,12 +56,12 @@ export default function KanaHub() {
                         </div>
                         <div>
                             <h1 className="text-text text-lg leading-tight font-black md:text-3xl">
-                                Kana Master
+                                {tCommon("brandName")}
                             </h1>
                             <p className="text-muted text-xs font-bold md:text-sm">
-                                Level:{" "}
+                                {t("levelLabel")}{" "}
                                 <span className={primaryText}>
-                                    {isBeginner ? "Novice" : "Scholar"}
+                                    {isBeginner ? t("novice") : t("scholar")}
                                 </span>
                             </p>
                         </div>
@@ -68,7 +72,7 @@ export default function KanaHub() {
                         onToggle={() => setShowSettings(!showSettings)}
                         primaryBg={primaryBg}
                         audioToggle={{
-                            label: "Autoplay Audio",
+                            label: t("autoplayAudio"),
                             icon: Volume2,
                             value: globalAutoPlay,
                             onChange: () => {
@@ -77,7 +81,7 @@ export default function KanaHub() {
                             },
                         }}
                         displayToggle={{
-                            label: "Handwriting Font",
+                            label: t("handwritingFont"),
                             icon: Type,
                             value: useHandwriting,
                             onChange: () => {
@@ -86,12 +90,12 @@ export default function KanaHub() {
                             },
                         }}
                         dangerAction={{
-                            label: "Reset Progress",
+                            label: t("resetProgress"),
                             showConfirm: showConfirmReset,
                             onRequestConfirm: () => setShowConfirmReset(true),
                             onCancelConfirm: () => setShowConfirmReset(false),
                             onConfirm: handleResetProgress,
-                            confirmText: "Wipe it",
+                            confirmText: t("wipeIt"),
                         }}
                     />
                 </div>
@@ -99,7 +103,7 @@ export default function KanaHub() {
                 <div className="flex w-full flex-col gap-8 pb-6 md:gap-10">
                     <div className="flex flex-col gap-3 md:gap-4">
                         <h2 className="pl-2 text-xs font-black tracking-widest text-gray-600 uppercase md:text-sm">
-                            Up Next For You
+                            {t("upNextForYou")}
                         </h2>
                         <div className="grid grid-cols-1 gap-4 md:grid-cols-3 md:gap-5">
                             <div className="md:col-span-2">
@@ -115,10 +119,13 @@ export default function KanaHub() {
                                                 className="md:h-8 md:w-8"
                                             />
                                         }
-                                        title="Learn Characters"
+                                        title={t("learnCharacters")}
                                         progress={{
                                             value: progressPct,
-                                            label: `${learnedCount} / ${totalChars} Mastered`,
+                                            label: t("masteredProgress", {
+                                                learned: learnedCount,
+                                                total: totalChars,
+                                            }),
                                         }}
                                         {...themeColors}
                                     />
@@ -133,8 +140,8 @@ export default function KanaHub() {
                                                 className="md:h-10 md:w-10"
                                             />
                                         }
-                                        title="Recall Quiz"
-                                        subtitle="Daily review ready!"
+                                        title={t("recallQuiz")}
+                                        subtitle={t("dailyReviewReady")}
                                         badge={
                                             <ChevronRight
                                                 size={28}
@@ -162,7 +169,7 @@ export default function KanaHub() {
                                                 className="md:h-10 md:w-10"
                                             />
                                         }
-                                        title="Recall Quiz"
+                                        title={t("recallQuiz")}
                                         primaryBg="bg-both"
                                         primaryBorderB="border-both-strong"
                                         primaryHover="hover:bg-both-strong"
@@ -180,10 +187,13 @@ export default function KanaHub() {
                                                 className="md:h-8 md:w-8"
                                             />
                                         }
-                                        title="Learn Characters"
+                                        title={t("learnCharacters")}
                                         progress={{
                                             value: progressPct,
-                                            label: `${learnedCount} / ${totalChars} Mastered`,
+                                            label: t("masteredProgress", {
+                                                learned: learnedCount,
+                                                total: totalChars,
+                                            }),
                                         }}
                                         {...themeColors}
                                     />
@@ -194,7 +204,7 @@ export default function KanaHub() {
 
                     <div className="flex flex-col gap-3 md:gap-4">
                         <h2 className="pl-2 text-xs font-black tracking-widest text-gray-600 uppercase md:text-sm">
-                            Practice & Challenges
+                            {t("practiceAndChallenges")}
                         </h2>
                         <div className="grid grid-cols-2 gap-4 md:grid-cols-3 md:gap-5">
                             <Link
@@ -209,7 +219,7 @@ export default function KanaHub() {
                                     />
                                 </div>
                                 <span className="text-text text-sm group-hover:text-black md:text-lg">
-                                    Writing
+                                    {t("writing")}
                                 </span>
                             </Link>
 
@@ -221,11 +231,11 @@ export default function KanaHub() {
                                     <Flame size={28} strokeWidth={2.5} className="md:h-8 md:w-8" />
                                 </div>
                                 <span className="text-text text-sm group-hover:text-black md:text-lg">
-                                    Survival
+                                    {t("survival")}
                                 </span>
                                 {bestInfinity > 0 && (
                                     <span className="bg-survival absolute top-3 right-3 rounded-full px-2 py-0.5 text-xs font-black text-white shadow-sm md:text-xs">
-                                        Inf: {bestInfinity}
+                                        {t("infinityBadge", { count: bestInfinity })}
                                     </span>
                                 )}
                             </Link>
@@ -242,7 +252,7 @@ export default function KanaHub() {
                                     />
                                 </div>
                                 <span className="text-text text-sm group-hover:text-black md:text-lg">
-                                    Reference Chart
+                                    {t("referenceChart")}
                                 </span>
                             </Link>
                         </div>

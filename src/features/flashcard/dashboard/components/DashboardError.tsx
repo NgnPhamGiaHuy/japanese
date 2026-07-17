@@ -2,6 +2,8 @@
  * DashboardError — Error state for dashboard
  */
 
+import { useTranslations } from "next-intl";
+
 import { RefreshCw } from "lucide-react";
 
 import { Button } from "@/shared/components/ui";
@@ -11,6 +13,8 @@ interface DashboardErrorProps {
 }
 
 const DashboardError = ({ error }: DashboardErrorProps) => {
+    const t = useTranslations("FlashcardDashboard");
+
     return (
         <div className="border-danger/30 bg-danger-bg mb-6 flex items-center justify-between rounded-2xl border-2 px-5 py-4">
             <p className="text-danger text-sm font-bold">{error}</p>
@@ -21,7 +25,7 @@ const DashboardError = ({ error }: DashboardErrorProps) => {
                 icon={RefreshCw}
                 iconSize={14}
             >
-                Retry
+                {t("retry")}
             </Button>
         </div>
     );

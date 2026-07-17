@@ -1,3 +1,5 @@
+import { useTranslations } from "next-intl";
+
 import { BookOpen, Plus, Sparkles } from "lucide-react";
 
 import { useRouter } from "@/i18n/navigation";
@@ -8,6 +10,7 @@ interface DashboardEmptyProps {
 }
 
 const DashboardEmpty = ({ activeTab }: DashboardEmptyProps) => {
+    const t = useTranslations("FlashcardDashboard.empty");
     const router = useRouter();
 
     if (activeTab === "discover") {
@@ -16,10 +19,8 @@ const DashboardEmpty = ({ activeTab }: DashboardEmptyProps) => {
                 <div className="border-hiragana-hover bg-hiragana mx-auto mb-6 flex h-24 w-24 -rotate-6 items-center justify-center rounded-4xl border-b-8 text-white shadow-sm">
                     <Sparkles size={48} strokeWidth={3} />
                 </div>
-                <h2 className="text-text mb-2 text-2xl font-black">No public decks yet</h2>
-                <p className="text-muted font-bold">
-                    Public decks from other learners will appear here.
-                </p>
+                <h2 className="text-text mb-2 text-2xl font-black">{t("discoverTitle")}</h2>
+                <p className="text-muted font-bold">{t("discoverDescription")}</p>
             </div>
         );
     }
@@ -30,12 +31,10 @@ const DashboardEmpty = ({ activeTab }: DashboardEmptyProps) => {
                 <BookOpen size={48} strokeWidth={3} />
             </div>
             <h2 className="text-text mb-2 text-2xl font-black">
-                {activeTab === "personal" ? "No decks yet" : "No shared decks"}
+                {activeTab === "personal" ? t("personalTitle") : t("sharedTitle")}
             </h2>
             <p className="text-muted mb-8 font-bold">
-                {activeTab === "personal"
-                    ? "Create your first vocabulary deck to get started!"
-                    : "Shared decks from other students will appear here."}
+                {activeTab === "personal" ? t("personalDescription") : t("sharedDescription")}
             </p>
             {activeTab === "personal" && (
                 <Button
@@ -45,7 +44,7 @@ const DashboardEmpty = ({ activeTab }: DashboardEmptyProps) => {
                     icon={Plus}
                     className="mx-auto px-8 py-5 text-xl"
                 >
-                    Create Deck
+                    {t("createDeck")}
                 </Button>
             )}
         </div>

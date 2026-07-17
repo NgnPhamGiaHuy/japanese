@@ -7,7 +7,6 @@ import type { GameStatEntry } from "@/features/game/services";
 
 export interface DashboardTab {
     id: "personal" | "shared" | "discover";
-    label: string;
     badge?: number;
 }
 

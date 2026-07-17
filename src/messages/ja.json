@@ -1,4 +1,10 @@
 {
+    "Common": {
+        "brandName": "Kana Master",
+        "deleteDeckTitle": "デッキを削除しますか？",
+        "deleteDeckMessage": "「{title}」を完全に削除してもよろしいですか？この操作は取り消せません。",
+        "delete": "削除"
+    },
     "Nav": {
         "home": "ホーム",
         "kana": "かな",
@@ -30,13 +36,9 @@
         "seeAll": "すべて見る →",
         "emptyTitle": "最初のデッキを作成",
         "emptyDescription": "カードを手動で追加、リストを貼り付け、またはAIにデッキを生成させましょう。",
-        "createDeck": "デッキを作成",
-        "deleteDeckTitle": "デッキを削除しますか？",
-        "deleteDeckMessage": "「{title}」を完全に削除してもよろしいですか？この操作は取り消せません。",
-        "delete": "削除"
+        "createDeck": "デッキを作成"
     },
     "LoginPage": {
-        "title": "Kana Master",
         "subtitle": "自信を持って日本語を学ぼう",
         "signingIn": "サインイン中…",
         "continueWithGoogle": "Googleで続ける",
@@ -80,5 +82,53 @@
         "resetTitle": "学習データをリセットしますか？",
         "resetMessage": "習得した文字と正答率の統計がすべて完全に消去されます。この操作は取り消せません。",
         "resetConfirm": "すべてリセット"
+    },
+    "FlashcardDashboard": {
+        "title": "フラッシュカード",
+        "createDeckAria": "デッキを作成",
+        "tabs": {
+            "discover": "発見",
+            "personal": "マイデッキ",
+            "shared": "共有"
+        },
+        "cards": "枚",
+        "view": "見る",
+        "speed": "スピード",
+        "match": "マッチ",
+        "createdBy": "作成者",
+        "youShared": "共有しました",
+        "sharedBy": "共有者",
+        "unknown": "不明",
+        "editDeck": "デッキを編集",
+        "deleteDeck": "デッキを削除",
+        "retry": "再試行",
+        "empty": {
+            "discoverTitle": "公開デッキはまだありません",
+            "discoverDescription": "他の学習者による公開デッキがここに表示されます。",
+            "personalTitle": "デッキがまだありません",
+            "sharedTitle": "共有デッキはありません",
+            "personalDescription": "最初の単語デッキを作成して始めましょう！",
+            "sharedDescription": "他の学習者からの共有デッキがここに表示されます。",
+            "createDeck": "デッキを作成"
+        }
+    },
+    "KanaHub": {
+        "levelLabel": "レベル:",
+        "novice": "初心者",
+        "scholar": "上級者",
+        "autoplayAudio": "音声自動再生",
+        "handwritingFont": "手書き風フォント",
+        "resetProgress": "進捗をリセット",
+        "wipeIt": "消去する",
+        "upNextForYou": "次のステップ",
+        "learnCharacters": "文字を学ぶ",
+        "masteredProgress": "{learned} / {total} 習得済み",
+        "recallQuiz": "復習クイズ",
+        "dailyReviewReady": "今日の復習の準備ができました！",
+        "practiceAndChallenges": "練習とチャレンジ",
+        "writing": "書き取り",
+        "survival": "サバイバル",
+        "referenceChart": "一覧表",
+        "infinityBadge": "無限: {count}"
     }
 }

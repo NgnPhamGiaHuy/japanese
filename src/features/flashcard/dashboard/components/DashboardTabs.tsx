@@ -2,6 +2,8 @@
  * DashboardTabs — Tab switcher for personal/shared/discover decks
  */
 
+import { useTranslations } from "next-intl";
+
 import { Button } from "@/shared/components/ui";
 import { DASHBOARD_TABS } from "../constants";
 
@@ -27,6 +29,7 @@ const DashboardTabs = ({
     publicCount,
     personalCount,
 }: DashboardTabsProps) => {
+    const t = useTranslations("FlashcardDashboard.tabs");
     const sortedTabs = [...DASHBOARD_TABS].sort((a, b) => a.priority - b.priority);
 
     const tabConfig: Record<string, { count: number; color: string }> = {
@@ -45,7 +48,7 @@ const DashboardTabs = ({
                     <Button
                         key={tab.id}
                         variant="ghost"
-                        onClick={() => onTabChange(tab.id as any)}
+                        onClick={() => onTabChange(tab.id)}
                         className={tabClass(isActive)}
                         badge={
                             count > 0 && (
@@ -57,7 +60,7 @@ const DashboardTabs = ({
                             )
                         }
                     >
-                        {tab.label}
+                        {t(tab.id)}
                     </Button>
                 );
             })}

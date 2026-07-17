@@ -10,6 +10,8 @@
 
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import {
     closestCenter,
     DndContext,
@@ -44,6 +46,8 @@ import type { DragEndEvent } from "@dnd-kit/core";
 import type { Lesson } from "@/features/flashcard/types";
 
 const FlashcardDashboard = () => {
+    const t = useTranslations("FlashcardDashboard");
+    const tCommon = useTranslations("Common");
     const router = useRouter();
     const { lessons } = useLessons();
     const {
@@ -91,7 +95,7 @@ const FlashcardDashboard = () => {
     return (
         <div className="bg-bg min-h-dvh pb-28">
             <ScreenHeader
-                title="Flashcards"
+                title={t("title")}
                 backHref="/"
                 right={
                     <Button
@@ -102,7 +106,7 @@ const FlashcardDashboard = () => {
                         className="-mr-2 shadow-none"
                         icon={Plus}
                         iconSize={20}
-                        aria-label="Create deck"
+                        aria-label={t("createDeckAria")}
                     />
                 }
             />
@@ -208,9 +212,9 @@ const FlashcardDashboard = () => {
                 isOpen={!!deletingLesson}
                 onClose={() => setDeletingLesson(null)}
                 onConfirm={handleDelete}
-                title="Delete Deck?"
-                message={`Are you sure you want to permanent delete "${deletingLesson?.title}"? This action cannot be undone.`}
-                confirmText="Delete"
+                title={tCommon("deleteDeckTitle")}
+                message={tCommon("deleteDeckMessage", { title: deletingLesson?.title ?? "" })}
+                confirmText={tCommon("delete")}
                 variant="danger"
                 loading={isDeleting}
             />

@@ -13,6 +13,7 @@ import { Button } from "@/shared/components/ui";
 
 export default function LoginPage() {
     const t = useTranslations("LoginPage");
+    const tCommon = useTranslations("Common");
     const router = useRouter();
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -74,7 +75,7 @@ export default function LoginPage() {
                     あ
                 </div>
                 <div className="text-center">
-                    <h1 className="text-text text-3xl font-black">{t("title")}</h1>
+                    <h1 className="text-text text-3xl font-black">{tCommon("brandName")}</h1>
                     <p className="text-muted mt-1 text-base font-bold">{t("subtitle")}</p>
                 </div>
             </div>

@@ -1,4 +1,10 @@
 {
+    "Common": {
+        "brandName": "Kana Master",
+        "deleteDeckTitle": "Delete Deck?",
+        "deleteDeckMessage": "Are you sure you want to permanently delete \"{title}\"? This action cannot be undone.",
+        "delete": "Delete"
+    },
     "Nav": {
         "home": "Home",
         "kana": "Kana",
@@ -30,13 +36,9 @@
         "seeAll": "See all →",
         "emptyTitle": "Create your first deck",
         "emptyDescription": "Add cards manually, paste a list, or let AI generate a deck for you.",
-        "createDeck": "Create a Deck",
-        "deleteDeckTitle": "Delete Deck?",
-        "deleteDeckMessage": "Are you sure you want to permanently delete \"{title}\"? This action cannot be undone.",
-        "delete": "Delete"
+        "createDeck": "Create a Deck"
     },
     "LoginPage": {
-        "title": "Kana Master",
         "subtitle": "Learn Japanese with confidence",
         "signingIn": "Signing in…",
         "continueWithGoogle": "Continue with Google",
@@ -80,5 +82,53 @@
         "resetTitle": "Reset Progress?",
         "resetMessage": "This will permanently clear all your learned characters and accuracy stats. This action cannot be undone.",
         "resetConfirm": "Reset Everything"
+    },
+    "FlashcardDashboard": {
+        "title": "Flashcards",
+        "createDeckAria": "Create deck",
+        "tabs": {
+            "discover": "Discover",
+            "personal": "My Decks",
+            "shared": "Shared"
+        },
+        "cards": "cards",
+        "view": "View",
+        "speed": "Speed",
+        "match": "Match",
+        "createdBy": "Created by",
+        "youShared": "You shared",
+        "sharedBy": "Shared by",
+        "unknown": "Unknown",
+        "editDeck": "Edit deck",
+        "deleteDeck": "Delete deck",
+        "retry": "Retry",
+        "empty": {
+            "discoverTitle": "No public decks yet",
+            "discoverDescription": "Public decks from other learners will appear here.",
+            "personalTitle": "No decks yet",
+            "sharedTitle": "No shared decks",
+            "personalDescription": "Create your first vocabulary deck to get started!",
+            "sharedDescription": "Shared decks from other students will appear here.",
+            "createDeck": "Create Deck"
+        }
+    },
+    "KanaHub": {
+        "levelLabel": "Level:",
+        "novice": "Novice",
+        "scholar": "Scholar",
+        "autoplayAudio": "Autoplay Audio",
+        "handwritingFont": "Handwriting Font",
+        "resetProgress": "Reset Progress",
+        "wipeIt": "Wipe it",
+        "upNextForYou": "Up Next For You",
+        "learnCharacters": "Learn Characters",
+        "masteredProgress": "{learned} / {total} Mastered",
+        "recallQuiz": "Recall Quiz",
+        "dailyReviewReady": "Daily review ready!",
+        "practiceAndChallenges": "Practice & Challenges",
+        "writing": "Writing",
+        "survival": "Survival",
+        "referenceChart": "Reference Chart",
+        "infinityBadge": "Inf: {count}"
     }
 }

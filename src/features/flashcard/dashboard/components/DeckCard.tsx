@@ -5,6 +5,8 @@
  * Displays deck metadata (title, tags, count) and high score badges.
  * Provides entry points to Study, Speed Quiz, and Match game.
  */
+import { useTranslations } from "next-intl";
+
 import { BookOpen, Edit2, Gamepad2, Trash2, Zap } from "lucide-react";
 
 import { useVisibility, VisibilityLevel } from "@/features/flashcard/hooks/useVisibility";
@@ -26,6 +28,7 @@ const DeckCard = ({
     onDelete,
     onShare,
 }: DeckCardProps) => {
+    const t = useTranslations("FlashcardDashboard");
     const { user } = useAppStore();
     const themeColor = lesson.themeColor || "#1cb0f6";
     const visibility = useVisibility(lesson);
@@ -35,13 +38,14 @@ const DeckCard = ({
     const canShare = resolvedRole === "owner";
     const canDelete = resolvedRole === "owner";
 
-    const createdByName = lesson.ownerName ?? "Unknown";
+    const createdByName = lesson.ownerName ?? t("unknown");
     const createdByAvatar = lesson.ownerAvatar ?? null;
     const shouldShowSharedBy =
         !!lesson.lastSharedBy && (!lesson.ownerId || lesson.lastSharedBy !== lesson.ownerId);
-    const sharedByName = lesson.lastSharedByName ?? "Unknown";
+    const sharedByName = lesson.lastSharedByName ?? t("unknown");
     const sharedByAvatar = lesson.lastSharedByAvatar ?? null;
-    const sharedBySubtitle = user && lesson.lastSharedBy === user.uid ? "You shared" : "Shared by";
+    const sharedBySubtitle =
+        user && lesson.lastSharedBy === user.uid ? t("youShared") : t("sharedBy");
 
     const resolvedShareId =
         lesson.shareId ||
@@ -108,7 +112,7 @@ const DeckCard = ({
                         <UserMeta
                             name={createdByName}
                             avatar={createdByAvatar}
-                            subtitle="Created by"
+                            subtitle={t("createdBy")}
                             className="!gap-2"
                         />
                         {shouldShowSharedBy && (
@@ -148,7 +152,7 @@ const DeckCard = ({
                             {lesson.cardCount}
                         </span>
                     </div>
-                    <span className="text-muted text-xs font-black uppercase">cards</span>
+                    <span className="text-muted text-xs font-black uppercase">{t("cards")}</span>
                 </div>
             </div>
 
@@ -164,7 +168,7 @@ const DeckCard = ({
                             icon={BookOpen}
                             className="w-full flex-col gap-1 px-1 py-2 text-xs md:flex-row md:gap-2 md:px-2 md:py-3 md:text-sm"
                         >
-                            <span className="truncate">View</span>
+                            <span className="truncate">{t("view")}</span>
                         </Button>
                     </Link>
 
@@ -185,7 +189,7 @@ const DeckCard = ({
                                 icon={Zap}
                                 className="w-full flex-col gap-1 px-1 py-2 text-xs md:flex-row md:gap-2 md:px-2 md:py-3 md:text-sm"
                             >
-                                <span className="truncate">Speed</span>
+                                <span className="truncate">{t("speed")}</span>
                             </Button>
                         </Link>
                     </div>
@@ -207,7 +211,7 @@ const DeckCard = ({
                                 icon={Gamepad2}
                                 className="w-full flex-col gap-1 px-1 py-2 text-xs md:flex-row md:gap-2 md:px-2 md:py-3 md:text-sm"
                             >
-                                <span className="truncate">Match</span>
+                                <span className="truncate">{t("match")}</span>
                             </Button>
                         </Link>
                     </div>
@@ -251,7 +255,7 @@ const DeckCard = ({
                                         "transparent";
                                     (e.currentTarget as HTMLElement).style.color = "";
                                 }}
-                                title="Edit deck"
+                                title={t("editDeck")}
                                 icon={Edit2}
                                 iconSize={20}
                             />
@@ -262,7 +266,7 @@ const DeckCard = ({
                             variant="ghost"
                             onClick={() => onDelete?.()}
                             className="hover:!bg-danger-bg hover:!text-danger !flex !h-11 !w-11 !items-center !justify-center !rounded-xl !p-0 !text-gray-300 shadow-none transition-colors hover:shadow-none active:translate-y-0"
-                            title="Delete deck"
+                            title={t("deleteDeck")}
                             icon={Trash2}
                             iconSize={20}
                         />
