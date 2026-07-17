@@ -22,7 +22,7 @@ import Button from "./Button";
 import type { LucideIcon } from "lucide-react";
 
 /** Attributes for rendering a ModeSelectionCard. */
-export interface ModeSelectionCardProps {
+interface ModeSelectionCardProps {
     /** Unique identifier for the card element. */
     id?: string;
     /** The icon to display on the left side. */

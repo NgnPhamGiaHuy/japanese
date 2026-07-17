@@ -22,4 +22,3 @@ export { default as Modal } from "./Modal";
 export { default as NotFoundScreen } from "./NotFoundScreen";
 
 export type { SelectOption } from "./Select";
-export type { ModeSelectionCardProps } from "./ModeSelectionCard";

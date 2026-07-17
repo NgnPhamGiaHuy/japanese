@@ -2,22 +2,18 @@ import {
     addDoc,
     collection,
     doc,
-    increment,
     limit,
     onSnapshot,
     orderBy,
     query,
     runTransaction,
     serverTimestamp,
-    setDoc,
     updateDoc,
 } from "firebase/firestore";
 
-import { scoreToTier } from "@/features/game/domain";
 import { APP_ID, db } from "@/lib/firebase";
 
 import type { Unsubscribe } from "firebase/firestore";
-import type { Tier } from "@/features/game/domain";
 
 // ─── Collection helpers ───────────────────────────────────────────────────────
 
@@ -102,7 +98,6 @@ async function persistBestScore(
                 statsRef,
                 {
                     bestScore: score,
-                    tier: scoreToTier(score),
                     lastUpdated: now,
                 },
                 { merge: true },
@@ -242,15 +237,11 @@ export const subscribePersonalBests = (
 
 export interface GameStatEntry {
     bestScore: number;
-    tier: Tier;
-    totalGames: number;
-    lastPlayedAt: string | null;
 }
 
 /**
- * Records a completed game.
- * Always increments `totalGames` and stamps `lastPlayedAt`.
- * Promotes `bestScore` + `tier` on the leaderboard iff `score` is a new high.
+ * Records a completed game, promoting `bestScore` on the leaderboard iff
+ * `score` is a new high.
  */
 export const recordGameResult = async (
     userId: string,
@@ -258,22 +249,12 @@ export const recordGameResult = async (
     gameMode: string,
     score: number,
 ): Promise<void> => {
-    const now = new Date().toISOString();
-
-    // Always track play count and last-played timestamp
-    await setDoc(
-        personalBestDoc(userId, gameMode),
-        { totalGames: increment(1), lastPlayedAt: now },
-        { merge: true },
-    );
-
-    // ✅ No longer passes currentBest - fetched atomically inside
     await persistBestScore(userId, displayName, gameMode, score);
 };
 
 /**
  * Real-time subscription to full game stats for every mode a user has played.
- * Returns a map of gameMode → { bestScore, tier, totalGames, lastPlayedAt }.
+ * Returns a map of gameMode → { bestScore }.
  */
 export const subscribeGameStats = (
     userId: string,
@@ -283,14 +264,7 @@ export const subscribeGameStats = (
     return onSnapshot(ref, (snap) => {
         const stats: Record<string, GameStatEntry> = {};
         snap.forEach((d) => {
-            const data = d.data();
-            const best = (data.bestScore as number) ?? 0;
-            stats[d.id] = {
-                bestScore: best,
-                tier: (data.tier as Tier | undefined) ?? scoreToTier(best),
-                totalGames: (data.totalGames as number) ?? 0,
-                lastPlayedAt: (data.lastPlayedAt as string | null) ?? null,
-            };
+            stats[d.id] = { bestScore: (d.data().bestScore as number) ?? 0 };
         });
         onUpdate(stats);
     });

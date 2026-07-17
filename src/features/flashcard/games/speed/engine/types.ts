@@ -47,7 +47,6 @@ export interface Question {
 export interface QuestionMetadata {
     difficulty: number;
     timeLimit: number;
-    showHint: boolean;
 }
 
 /**
@@ -59,7 +58,6 @@ export interface AnswerResult {
     responseTimeMs: number;
     newStreak: number;
     comboMultiplier: number;
-    feedbackMessage?: string;
 }
 
 /**
@@ -99,8 +97,6 @@ export interface ScoringParams {
 export interface ScoringResult {
     points: number;
     multiplier: number;
-    speedBonus: number;
-    comboBonus: number;
 }
 
 /**
@@ -112,8 +108,6 @@ export interface ScoringResult {
  */
 export interface GameEngineConfig {
     cards: FlashCard[];
-    userId?: string;
-    displayName?: string;
     onScoreSync: (score: number) => void;
     onSessionEnd: (finalScore: number) => Promise<void>;
     onSFXPlay?: (sfx: "correct" | "wrong" | "click") => void;

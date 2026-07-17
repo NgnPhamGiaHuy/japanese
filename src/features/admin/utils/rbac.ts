@@ -45,5 +45,3 @@ export function hasPermission(
 export function normalizeAdminRole(value: unknown): AdminRole | null {
     return value === "superadmin" || value === "admin" ? value : null;
 }
-
-export { ROLE_PERMISSIONS };

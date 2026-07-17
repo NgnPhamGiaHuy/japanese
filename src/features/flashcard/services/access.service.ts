@@ -6,23 +6,6 @@
  * - Convert pending email invites to permanent collaborator entries on login
  * - Invite users by email (stored as pending until they log in)
  */
-
-/**
- * @file access.service
- * Central access control layer for the flashcard sharing system.
- *
- * Responsibilities:
- * - Convert pending email invites to permanent collaborator entries on login
- * - Invite users by email (stored as pending until they log in)
- */
-/**
- * @file access.service
- * Central access control layer for the flashcard sharing system.
- *
- * Responsibilities:
- * - Convert pending email invites to permanent collaborator entries on login
- * - Invite users by email (stored as pending until they log in)
- */
 import { deleteField, setDoc } from "firebase/firestore";
 
 import { emitNotification, notifyInvite } from "@/features/notifications/services";

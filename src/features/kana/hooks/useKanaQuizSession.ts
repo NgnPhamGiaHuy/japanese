@@ -315,6 +315,5 @@ export function useKanaQuizSession({
         finishQuiz,
         setStatus,
         resetEngine,
-        deckRef,
     };
 }

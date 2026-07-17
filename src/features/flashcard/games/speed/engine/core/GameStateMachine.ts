@@ -7,11 +7,6 @@ import type { GamePhase, PhaseTransition } from "../types";
 
 export class GameStateMachine {
     private phase: GamePhase = "intro";
-    private listeners: Array<(phase: GamePhase) => void> = [];
-
-    getPhase(): GamePhase {
-        return this.phase;
-    }
 
     /**
      * Checks if a transition is valid from the current phase.
@@ -49,7 +44,6 @@ export class GameStateMachine {
         if (nextPhase === this.phase) return false;
 
         this.phase = nextPhase;
-        this.notifyListeners();
         return true;
     }
 
@@ -69,20 +63,5 @@ export class GameStateMachine {
             default:
                 return this.phase;
         }
-    }
-
-    /**
-     * Subscribe to phase changes.
-     * Returns unsubscribe function.
-     */
-    subscribe(listener: (phase: GamePhase) => void): () => void {
-        this.listeners.push(listener);
-        return () => {
-            this.listeners = this.listeners.filter((l) => l !== listener);
-        };
-    }
-
-    private notifyListeners(): void {
-        this.listeners.forEach((listener) => listener(this.phase));
     }
 }

@@ -27,11 +27,12 @@ export function useLeaderboard(
 
     useEffect(() => {
         if (!gameMode) {
-            setEntries([]);
-            setLoading(false);
             return;
         }
 
+        // onSnapshot never fires synchronously, so there's no way to signal
+        // "fetch started" without a synchronous setState here.
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setLoading(true);
         setError(null);
 
@@ -51,8 +52,8 @@ export function useLeaderboard(
         return unsub;
     }, [gameMode, topN]);
 
-    const { leaderboard, userRank, nearbyPlayers } = useMemo(() => {
-        let allEntries = [...entries];
+    const { leaderboard, userRank } = useMemo(() => {
+        const allEntries = gameMode ? [...entries] : [];
 
         if (currentUser && currentScore > 0) {
             const existingIdx = allEntries.findIndex(
@@ -84,14 +85,12 @@ export function useLeaderboard(
         const rank = currentUser
             ? (computed.find((entry) => entry.isCurrentUser)?.rank ?? null)
             : null;
-        const nearby = rank ? computed.filter((entry) => Math.abs(entry.rank - rank) <= 1) : [];
 
         return {
             leaderboard: computed.slice(0, topN),
             userRank: rank,
-            nearbyPlayers: nearby,
         };
     }, [entries, currentUser, currentScore, gameMode, topN]);
 
-    return { entries: leaderboard, userRank, nearbyPlayers, loading, error };
+    return { entries: leaderboard, userRank, loading: gameMode ? loading : false, error };
 }

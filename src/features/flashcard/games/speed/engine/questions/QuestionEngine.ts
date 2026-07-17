@@ -16,6 +16,7 @@ import { CardSelector } from "../memory/CardSelector";
 import { getSpeedQuestionConfig, getSpeedTimeLimit } from "../speedRules";
 
 import type { FlashCard } from "@/features/flashcard/types";
+import type { CardMemoryState } from "../memory/CardMemoryManager";
 import type { Question } from "../types";
 
 export class QuestionEngine {
@@ -72,15 +73,13 @@ export class QuestionEngine {
 
         const { prompt, answer } = buildQuestion(card, questionType);
 
-        const distractors = config.useSmartDistractors
-            ? this.distractorBuilder.buildSmart({
-                  allCards: this.cards,
-                  currentCard: card,
-                  answer,
-                  questionType,
-                  memory: this.cardMemory.getState() as Record<string, any>,
-              })
-            : this.distractorBuilder.buildRandom(this.cards, card, answer, config.distractorCount);
+        const distractors = this.distractorBuilder.buildSmart({
+            allCards: this.cards,
+            currentCard: card,
+            answer,
+            questionType,
+            memory: this.cardMemory.getState() as Record<string, CardMemoryState>,
+        });
 
         const options = shuffleArray([answer, ...distractors]);
 
@@ -94,7 +93,6 @@ export class QuestionEngine {
             metadata: {
                 difficulty: level,
                 timeLimit: getSpeedTimeLimit(level),
-                showHint: level <= 1,
             },
         };
     }
@@ -115,9 +113,5 @@ export class QuestionEngine {
     reset(): void {
         this.recentCardIds = [];
         this.cardMemory.reset();
-    }
-
-    getMemoryState(): Record<string, any> {
-        return this.cardMemory.getState() as Record<string, any>;
     }
 }

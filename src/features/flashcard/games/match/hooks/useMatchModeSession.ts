@@ -300,7 +300,6 @@ export function useMatchModeSession({
 
     return {
         phase,
-        setPhase,
         difficulty,
         setDifficulty,
         config,

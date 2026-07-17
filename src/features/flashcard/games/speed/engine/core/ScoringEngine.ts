@@ -18,8 +18,6 @@ export class ScoringEngine {
         return {
             points,
             multiplier,
-            speedBonus: 0,
-            comboBonus: 0,
         };
     }
 }

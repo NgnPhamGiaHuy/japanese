@@ -105,7 +105,7 @@ const SurvivalSetupScreen = ({ game, bestScores, alphabet, userId }: SurvivalSet
                     )}
 
                     <div className="mb-8">
-                        <p className="text-muted mb-2 text-sm font-black font-bold tracking-widest uppercase">
+                        <p className="text-muted mb-2 text-sm font-black tracking-widest uppercase">
                             {t("yourNameLeaderboard")}
                         </p>
                         <input

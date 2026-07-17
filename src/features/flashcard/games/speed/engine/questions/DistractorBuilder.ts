@@ -109,25 +109,4 @@ export class DistractorBuilder {
 
         return chosen.slice(0, 3);
     }
-
-    /**
-     * Builds random distractors as fallback.
-     *
-     * @remarks
-     * Used when smart distractor generation is disabled or fails.
-     * Simply selects random cards excluding the correct answer.
-     */
-    buildRandom(
-        allCards: FlashCard[],
-        currentCard: FlashCard,
-        answer: string,
-        count: number,
-    ): string[] {
-        const candidates = allCards
-            .filter((c) => c.id !== currentCard.id)
-            .map((c) => c.meaning)
-            .filter((m) => m !== answer);
-
-        return shuffleArray(candidates).slice(0, count);
-    }
 }

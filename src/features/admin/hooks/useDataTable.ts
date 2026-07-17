@@ -56,5 +56,5 @@ export function useDataTable<T>({
         ...(globalFilterFn ? { globalFilterFn } : {}),
     });
 
-    return { table, globalFilter, setGlobalFilter, rowSelection, setRowSelection };
+    return { table, globalFilter, setGlobalFilter, setRowSelection };
 }

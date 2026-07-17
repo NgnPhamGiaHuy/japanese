@@ -242,7 +242,6 @@ export function useMatchScoring({
         comboPopup,
         scoreRef,
         resetScoring,
-        resolveTwo,
         onCellTap,
     };
 }

@@ -21,7 +21,6 @@ export function useKanaDataset() {
             return {
                 primary: "var(--color-both)",
                 border: "var(--color-both-strong)",
-                light: "#faeaff",
                 text: "text-both",
                 bg: "bg-both",
                 primaryLightBg: "bg-[#faeaff]",
@@ -31,7 +30,6 @@ export function useKanaDataset() {
             return {
                 primary: "var(--color-hiragana)",
                 border: "var(--color-hiragana-strong)",
-                light: "#e5f7d8",
                 text: "text-hiragana",
                 bg: "bg-hiragana",
                 primaryLightBg: "bg-[#e5f7d8]",
@@ -40,7 +38,6 @@ export function useKanaDataset() {
         return {
             primary: "var(--color-katakana)",
             border: "var(--color-katakana-strong)",
-            light: "#e5f5ff",
             text: "text-katakana",
             bg: "bg-katakana",
             primaryLightBg: "bg-[#e5f5ff]",

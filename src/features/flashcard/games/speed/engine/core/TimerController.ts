@@ -81,13 +81,6 @@ export class TimerController {
     }
 
     /**
-     * Checks if timer is currently running.
-     */
-    isRunning(): boolean {
-        return this.intervalId !== null;
-    }
-
-    /**
      * Cleanup method to be called when controller is no longer needed.
      */
     destroy(): void {

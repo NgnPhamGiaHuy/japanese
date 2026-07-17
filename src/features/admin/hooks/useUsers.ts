@@ -75,32 +75,6 @@ export function useUsers(pageToken?: string, pageSize = 25) {
         onSuccess: invalidateUsers,
     });
 
-    const bulkSetRoleMutation = useMutation({
-        mutationFn: async ({ uids, grant }: { uids: string[]; grant: boolean }) => {
-            await getAdminIdToken();
-            await Promise.all(
-                uids.map(async (uid) => {
-                    const result = await setAdminRoleAction(uid, grant);
-                    if (!result.ok) throw new Error(result.error);
-                }),
-            );
-        },
-        onSuccess: invalidateUsers,
-    });
-
-    const bulkDeleteMutation = useMutation({
-        mutationFn: async (uids: string[]) => {
-            await getAdminIdToken();
-            await Promise.all(
-                uids.map(async (uid) => {
-                    const result = await deleteUserAction(uid);
-                    if (!result.ok) throw new Error(result.error);
-                }),
-            );
-        },
-        onSuccess: invalidateUsers,
-    });
-
     return {
         users: usersQuery.data?.users ?? ([] as AdminUser[]),
         usersTotal: usersQuery.data?.total ?? 0,
@@ -116,13 +90,5 @@ export function useUsers(pageToken?: string, pageSize = 25) {
         promoteUser: promoteMutation.mutateAsync,
         demoteUser: demoteMutation.mutateAsync,
         removeUser: deleteMutation.mutateAsync,
-        bulkSetRole: bulkSetRoleMutation.mutateAsync,
-        bulkDeleteUsers: bulkDeleteMutation.mutateAsync,
-        isMutating:
-            promoteMutation.isPending ||
-            demoteMutation.isPending ||
-            deleteMutation.isPending ||
-            bulkSetRoleMutation.isPending ||
-            bulkDeleteMutation.isPending,
     };
 }

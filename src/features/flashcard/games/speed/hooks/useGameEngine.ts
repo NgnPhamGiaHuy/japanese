@@ -79,8 +79,6 @@ export function useGameEngine(config: UseGameEngineConfig) {
 
         const engine = new GameEngine({
             cards: config.cards,
-            userId: userIdRef.current,
-            displayName: displayNameRef.current,
             onScoreSync: (score) => {
                 syncScoreRef.current(score);
             },

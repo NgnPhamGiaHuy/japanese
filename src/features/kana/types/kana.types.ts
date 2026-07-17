@@ -1,5 +1,5 @@
 export type AlphabetMode = "hiragana" | "katakana" | "both";
-export type QuestionType = "read" | "reverse" | "listen" | "type";
+export type QuestionType = "read" | "type";
 export type SurvivalPhase = "setup" | "playing" | "gameover" | "leaderboard";
 export type ChallengeMode = "infinity" | "time" | "drop";
 

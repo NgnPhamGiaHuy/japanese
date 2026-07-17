@@ -22,7 +22,7 @@ interface DeckDetailsPanelProps {
  * Slide-over Panel for Deck Content Preview.
  *
  * @remarks Facilitates administrative review of vocabulary items within a specific deck.
- * Uses Framer Motion for smooth transitions and DeckCardItem for word rendering.
+ * Uses DeckCardItem for word rendering.
  */
 const DeckDetailsPanel = ({
     isOpen,

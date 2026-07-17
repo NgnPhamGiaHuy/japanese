@@ -23,60 +23,9 @@ export class ProgressionTracker {
     }
 
     /**
-     * Returns the most recent N answers.
-     */
-    getRecentHistory(count: number): readonly AnswerEvent[] {
-        return this.history.slice(-count);
-    }
-
-    /**
-     * Calculates accuracy over the last N answers.
-     */
-    getRecentAccuracy(count: number): number {
-        const recent = this.getRecentHistory(count);
-        if (recent.length === 0) return 0;
-
-        const correct = recent.filter((answer) => answer.correct).length;
-        return correct / recent.length;
-    }
-
-    /**
-     * Calculates average response time over the last N answers.
-     */
-    getAverageResponseTime(count: number): number {
-        const recent = this.getRecentHistory(count);
-        if (recent.length === 0) return 0;
-
-        const total = recent.reduce((sum, answer) => sum + answer.responseMs, 0);
-        return total / recent.length;
-    }
-
-    /**
      * Resets all tracking data.
      */
     reset(): void {
         this.history = [];
-    }
-
-    /**
-     * Returns total number of recorded answers.
-     */
-    getTotalAnswers(): number {
-        return this.history.length;
-    }
-
-    /**
-     * Returns total number of correct answers.
-     */
-    getTotalCorrect(): number {
-        return this.history.filter((answer) => answer.correct).length;
-    }
-
-    /**
-     * Returns overall accuracy percentage.
-     */
-    getOverallAccuracy(): number {
-        if (this.history.length === 0) return 0;
-        return this.getTotalCorrect() / this.history.length;
     }
 }

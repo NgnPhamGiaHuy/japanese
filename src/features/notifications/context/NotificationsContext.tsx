@@ -60,9 +60,6 @@ interface NotificationsContextValue {
     retry: () => void;
 }
 
-// Exported so useNotifications.ts can re-export it
-export type { NotificationsContextValue as UseNotificationsResult };
-
 const NotificationsContext = createContext<NotificationsContextValue>({
     notifications: [],
     groups: [],

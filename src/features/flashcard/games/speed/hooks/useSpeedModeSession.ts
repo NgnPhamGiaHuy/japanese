@@ -187,17 +187,6 @@ export function useSpeedModeSession({
     }, []);
 
     /**
-     * Dummy setPhase for backward compatibility.
-     *
-     * @remarks
-     * Original hook exposed setPhase but it's not used by components.
-     * Engine manages phase internally, this is a no-op for compatibility.
-     */
-    const setPhase = useCallback(() => {
-        // Phase managed by engine, no-op for compatibility
-    }, []);
-
-    /**
      * Returns interface matching original hook exactly.
      *
      * @remarks
@@ -206,7 +195,6 @@ export function useSpeedModeSession({
      */
     return {
         phase: localPhase,
-        setPhase,
         questionIndex: state?.questionIndex ?? 0,
         score: state?.score ?? 0,
         streak: state?.streak ?? 0,
@@ -217,7 +205,6 @@ export function useSpeedModeSession({
         timerFraction: state?.timerFraction ?? 1,
         currentCard,
         currentQuestion: state?.currentQuestion ?? null,
-        cardQueue: [],
         options: state?.currentQuestion?.options ?? [],
         difficultyConfig,
         ui,
