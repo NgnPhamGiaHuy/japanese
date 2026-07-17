@@ -8,6 +8,7 @@
 
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useRef } from "react";
 
 import { ChevronRight } from "lucide-react";
@@ -20,6 +21,8 @@ import { LearnCard } from "./LearnCard";
 import { LearnProgress } from "./LearnProgress";
 
 export function KanaLearn() {
+    const t = useTranslations("KanaLearn");
+    const tCommon = useTranslations("Common");
     const { dataset, alphabet, themeColor } = useKanaDataset();
     const { markLearned } = useUserProgress();
     const markedThisSession = useRef(new Set<string>());
@@ -42,7 +45,7 @@ export function KanaLearn() {
 
     return (
         <div className="bg-bg min-h-dvh pb-28">
-            <ScreenHeader title="Learn" backHref="/kana" />
+            <ScreenHeader title={t("title")} backHref="/kana" />
             <div className="animate-in fade-in mx-auto max-w-2xl px-4 pt-4 duration-300">
                 <LearnProgress
                     currentIndex={currentIndex}
@@ -62,14 +65,14 @@ export function KanaLearn() {
                         onClick={prev}
                         className="flex-1 py-3.5 text-base md:py-5 md:text-xl"
                     >
-                        Prev
+                        {tCommon("prev")}
                     </Button>
                     <Button
                         alphabet={alphabet}
                         onClick={next}
                         className="flex-1 py-3.5 text-base md:py-5 md:text-xl"
                     >
-                        Next <ChevronRight size={24} strokeWidth={3} />
+                        {tCommon("next")} <ChevronRight size={24} strokeWidth={3} />
                     </Button>
                 </div>
             </div>

@@ -8,6 +8,8 @@
 
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import { Shuffle } from "lucide-react";
 
 import { Button } from "@/shared/components/ui";
@@ -21,6 +23,7 @@ export function LearnProgress({
     isRandom,
     onToggleRandom,
 }: LearnProgressProps) {
+    const t = useTranslations("Common");
     const progressPercent = ((currentIndex + 1) / total) * 100;
 
     return (
@@ -52,7 +55,7 @@ export function LearnProgress({
                         iconClassName={isRandom ? "stroke-[3px]" : "stroke-[2px]"}
                     >
                         <span className="hidden sm:inline">
-                            {isRandom ? "Random" : "Sequential"}
+                            {isRandom ? t("random") : t("sequential")}
                         </span>
                     </Button>
                 </div>

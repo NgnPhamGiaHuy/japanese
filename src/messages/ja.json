@@ -1,6 +1,11 @@
 {
     "Common": {
         "brandName": "Kana Master",
+        "romaji": "ローマ字",
+        "prev": "戻る",
+        "next": "次へ",
+        "random": "ランダム",
+        "sequential": "順番",
         "deleteDeckTitle": "デッキを削除しますか？",
         "deleteDeckMessage": "「{title}」を完全に削除してもよろしいですか？この操作は取り消せません。",
         "delete": "削除"
@@ -130,5 +135,31 @@
         "survival": "サバイバル",
         "referenceChart": "一覧表",
         "infinityBadge": "無限: {count}"
+    },
+    "KanaChart": {
+        "title": "文字一覧表",
+        "bothNote": "同じ発音のひらがなとカタカナはセクションごとにまとめて表示されます。拡張カタカナ（外来語用）はカタカナにのみ表示されます。",
+        "hiragana": "ひらがな",
+        "katakana": "カタカナ",
+        "play": "再生"
+    },
+    "KanaLearn": {
+        "title": "学習"
+    },
+    "KanaPractice": {
+        "draw": "描く:",
+        "unknown": "???",
+        "mode": "モード: {label}",
+        "reference": "見本",
+        "modes": {
+            "trace": "なぞる",
+            "copy": "写す",
+            "recall": "思い出す"
+        },
+        "instructions": {
+            "trace": "ステップ1: 文字をなぞりましょう",
+            "copy": "ステップ2: 見本を見て書きましょう",
+            "recall": "ステップ3: 記憶を頼りに書きましょう"
+        }
     }
 }

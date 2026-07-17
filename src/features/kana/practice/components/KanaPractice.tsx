@@ -8,6 +8,7 @@
 
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 
 import { ChevronRight } from "lucide-react";
@@ -20,6 +21,7 @@ import { PracticeHeader } from "./PracticeHeader";
 import type { PracticeMode } from "../types";
 
 export function KanaPractice() {
+    const t = useTranslations("Common");
     const { dataset, alphabet, themeColor } = useKanaDataset();
     const [practiceMode, setPracticeMode] = useState<PracticeMode>(1);
     const { char, isRandom, next, prev, playCurrent, autoPlayCurrent, toggleRandom } =
@@ -63,14 +65,14 @@ export function KanaPractice() {
                         onClick={prev}
                         className="flex-1 py-2.5 text-sm md:py-4 md:text-lg"
                     >
-                        Prev
+                        {t("prev")}
                     </Button>
                     <Button
                         alphabet={alphabet}
                         onClick={next}
                         className="flex-1 py-2.5 text-sm md:py-4 md:text-lg"
                     >
-                        Next <ChevronRight size={20} strokeWidth={3} />
+                        {t("next")} <ChevronRight size={20} strokeWidth={3} />
                     </Button>
                 </div>
             </div>

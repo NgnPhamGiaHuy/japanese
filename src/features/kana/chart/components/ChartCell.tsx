@@ -15,7 +15,7 @@ import { Button } from "@/shared/components/ui";
 
 import type { ChartCellProps } from "../types";
 
-export function ChartCell({ item, showRomaji, learned, isHiragana }: ChartCellProps) {
+export function ChartCell({ item, showRomaji, learned, isHiragana, playLabel }: ChartCellProps) {
     if (!item) {
         return <div className="aspect-square w-full rounded-xl border-2 border-transparent" />;
     }
@@ -36,7 +36,7 @@ export function ChartCell({ item, showRomaji, learned, isHiragana }: ChartCellPr
             <Button
                 variant="secondary"
                 onClick={() => speak(item.char, { trigger: "user", source: "kana-chart" })}
-                title={`Play ${item.char}`}
+                title={`${playLabel} ${item.char}`}
                 className={`flex! h-full! w-full! flex-col! items-center! justify-center! p-0! shadow-none transition-all! duration-200 ${
                     learned ? learnedBg : "hover:bg-gray-50!"
                 }`}

@@ -8,6 +8,7 @@
 
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 
 import { Eye, EyeOff } from "lucide-react";
@@ -22,6 +23,8 @@ import { ChartSection } from "./ChartSection";
 import { useChartData } from "../hooks";
 
 export function KanaChart() {
+    const t = useTranslations("KanaChart");
+    const tCommon = useTranslations("Common");
     const [showRomaji, setShowRomaji] = useState(true);
     const { alphabet } = useKanaStore();
     const { userData } = useUserProgress();
@@ -33,7 +36,7 @@ export function KanaChart() {
     return (
         <div className="bg-bg min-h-dvh">
             <ScreenHeader
-                title="Character Chart"
+                title={t("title")}
                 backHref="/kana"
                 rightWrapperClassName="flex items-center justify-end min-w-0 shrink-0"
                 right={
@@ -48,7 +51,7 @@ export function KanaChart() {
                         icon={showRomaji ? Eye : EyeOff}
                         iconSize={14}
                     >
-                        <span className="hidden sm:inline">Romaji</span>
+                        <span className="hidden sm:inline">{tCommon("romaji")}</span>
                     </Button>
                 }
             />
@@ -56,8 +59,7 @@ export function KanaChart() {
             <div className="animate-in fade-in mx-auto w-full max-w-2xl px-3 pt-6 pb-28 duration-300 sm:px-4">
                 {isBoth && (
                     <p className="text-muted mx-auto mb-4 max-w-sm text-center text-xs font-bold md:text-xs">
-                        Hiragana and katakana for the same sounds are grouped by section. Extended
-                        loanword katakana appears only under Katakana.
+                        {t("bothNote")}
                     </p>
                 )}
 
@@ -71,6 +73,7 @@ export function KanaChart() {
                                 katakana={katakana}
                                 showRomaji={showRomaji}
                                 isLearned={isLearned}
+                                playLabel={t("play")}
                             />
                         ))}
 
@@ -91,6 +94,7 @@ export function KanaChart() {
                                     isLearned={isLearned}
                                     isHiragana={alphabet === "hiragana"}
                                     blockKeyPrefix={block.title}
+                                    playLabel={t("play")}
                                 />
                             </div>
                         ))}

@@ -25,6 +25,7 @@ describe("ChartCell", () => {
             item: kana,
             learned: false,
             showRomaji: true,
+            playLabel: "Play",
         });
 
         expect(isValidElement(rendered)).toBe(true);

@@ -10,6 +10,8 @@ export interface ChartCellProps {
     showRomaji: boolean;
     learned: boolean;
     isHiragana: boolean;
+    /** Translated "Play" label — passed down rather than resolved via useTranslations() so ChartCell stays callable as a plain function (see ChartCell.test.tsx). */
+    playLabel: string;
 }
 
 export interface ChartBlockGridProps {
@@ -18,6 +20,7 @@ export interface ChartBlockGridProps {
     isLearned: (char: string) => boolean;
     isHiragana: boolean;
     blockKeyPrefix: string;
+    playLabel: string;
 }
 
 export interface ChartSectionProps {
@@ -26,4 +29,5 @@ export interface ChartSectionProps {
     katakana?: ChartBlock;
     showRomaji: boolean;
     isLearned: (char: string) => boolean;
+    playLabel: string;
 }

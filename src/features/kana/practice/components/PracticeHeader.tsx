@@ -7,6 +7,8 @@
 
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import { Brain, Eye, PenTool, Shuffle } from "lucide-react";
 
 import { ScreenHeader } from "@/shared/components/layout";
@@ -23,13 +25,15 @@ export function PracticeHeader({
     onModeChange,
     onRandomToggle,
 }: PracticeHeaderProps) {
-    const config = getModeConfig(mode);
+    const t = useTranslations("KanaPractice");
+    const tCommon = useTranslations("Common");
+    const config = getModeConfig(mode, t);
     const modeIcons = { 1: PenTool, 2: Eye, 3: Brain };
     const ModeIcon = modeIcons[mode];
 
     return (
         <ScreenHeader
-            title={`Draw: ${config.showRomaji ? char.romaji : "???"}`}
+            title={`${t("draw")} ${config.showRomaji ? char.romaji : t("unknown")}`}
             backHref="/kana"
             rightWrapperClassName="flex items-center justify-end gap-1 md:gap-2 shrink-0 min-w-0"
             right={
@@ -41,7 +45,9 @@ export function PracticeHeader({
                         icon={ModeIcon}
                         iconSize={14}
                     >
-                        <span className="hidden sm:inline">Mode: {config.label}</span>
+                        <span className="hidden sm:inline">
+                            {t("mode", { label: config.label })}
+                        </span>
                     </Button>
                     <Button
                         variant="ghost"
@@ -55,7 +61,7 @@ export function PracticeHeader({
                         iconSize={14}
                     >
                         <span className="hidden sm:inline">
-                            {isRandom ? "Random" : "Sequential"}
+                            {isRandom ? tCommon("random") : tCommon("sequential")}
                         </span>
                     </Button>
                 </>

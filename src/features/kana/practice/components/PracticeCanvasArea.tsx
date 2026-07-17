@@ -8,20 +8,25 @@
 
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import { DrawingCanvas, KanaAudioButton, KanaStrokeAnimation } from "@/features/kana/components";
 import { getModeConfig } from "../utils/getModeConfig";
 
 import type { PracticeCanvasAreaProps } from "../types";
 
 export function PracticeCanvasArea({ char, mode, themeColor, onPlay }: PracticeCanvasAreaProps) {
-    const config = getModeConfig(mode);
+    const t = useTranslations("KanaPractice");
+    const config = getModeConfig(mode, t);
 
     return (
         <div className="my-auto flex w-full flex-1 flex-col items-center justify-center px-2">
             <div className="md:rounded-5xl flex w-full max-w-sm shrink-0 flex-col items-center justify-center gap-3 rounded-3xl border-2 border-b-8 border-gray-200 bg-white p-3 shadow-sm md:max-w-3xl md:flex-row md:gap-8 md:p-8">
                 {/* Reference Panel */}
                 <div className="relative flex w-full shrink-0 flex-row items-center gap-3 rounded-xl bg-gray-50 p-2 md:h-[260px] md:w-auto md:flex-col md:justify-center md:rounded-3xl md:p-4">
-                    <span className="text-muted hidden text-xs font-bold md:block">Reference</span>
+                    <span className="text-muted hidden text-xs font-bold md:block">
+                        {t("reference")}
+                    </span>
                     {config.showReference ? (
                         <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-lg border-2 border-gray-100 bg-white shadow-sm md:h-32 md:w-32 md:rounded-2xl">
                             <KanaStrokeAnimation

@@ -1,6 +1,11 @@
 {
     "Common": {
         "brandName": "Kana Master",
+        "romaji": "Romaji",
+        "prev": "Prev",
+        "next": "Next",
+        "random": "Random",
+        "sequential": "Sequential",
         "deleteDeckTitle": "Delete Deck?",
         "deleteDeckMessage": "Are you sure you want to permanently delete \"{title}\"? This action cannot be undone.",
         "delete": "Delete"
@@ -130,5 +135,31 @@
         "survival": "Survival",
         "referenceChart": "Reference Chart",
         "infinityBadge": "Inf: {count}"
+    },
+    "KanaChart": {
+        "title": "Character Chart",
+        "bothNote": "Hiragana and katakana for the same sounds are grouped by section. Extended loanword katakana appears only under Katakana.",
+        "hiragana": "Hiragana",
+        "katakana": "Katakana",
+        "play": "Play"
+    },
+    "KanaLearn": {
+        "title": "Learn"
+    },
+    "KanaPractice": {
+        "draw": "Draw:",
+        "unknown": "???",
+        "mode": "Mode: {label}",
+        "reference": "Reference",
+        "modes": {
+            "trace": "Trace",
+            "copy": "Copy",
+            "recall": "Recall"
+        },
+        "instructions": {
+            "trace": "Step 1: Trace the character",
+            "copy": "Step 2: Draw with reference",
+            "recall": "Step 3: Draw from memory"
+        }
     }
 }

@@ -20,6 +20,7 @@ export function ChartBlockGrid({
     isLearned,
     isHiragana,
     blockKeyPrefix,
+    playLabel,
 }: ChartBlockGridProps) {
     const n = block.headers.length;
 
@@ -53,6 +54,7 @@ export function ChartBlockGrid({
                             showRomaji={showRomaji}
                             learned={cell ? isLearned(cell.char) : false}
                             isHiragana={isHiragana}
+                            playLabel={playLabel}
                         />
                     ))}
                 </Fragment>

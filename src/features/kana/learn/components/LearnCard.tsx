@@ -8,11 +8,14 @@
 
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import { KanaAudioButton, KanaStrokeAnimation } from "@/features/kana/components";
 
 import type { LearnCardProps } from "../types";
 
 export function LearnCard({ char, themeColor, onPlay }: LearnCardProps) {
+    const t = useTranslations("Common");
     const isMulti = char.char.length > 1;
 
     return (
@@ -45,7 +48,7 @@ export function LearnCard({ char, themeColor, onPlay }: LearnCardProps) {
             </div>
             <div className="w-full border-t-2 border-gray-100 pt-4 text-center">
                 <p className="text-muted mb-1 text-xs font-bold tracking-widest uppercase">
-                    Romaji
+                    {t("romaji")}
                 </p>
                 <p className="text-text text-4xl font-black tracking-wider uppercase md:text-6xl">
                     {char.romaji}
