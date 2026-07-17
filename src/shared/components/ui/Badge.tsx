@@ -11,12 +11,17 @@ import { LucideIcon } from "lucide-react";
 
 import type { ReactNode } from "react";
 
+/** Visual theme variant — exported so callers building variant lookup tables
+ *  (e.g. per-log-level/type color registries) can type against it instead
+ *  of re-declaring this same union. */
+export type BadgeVariant = "default" | "primary" | "success" | "warning" | "danger" | "info";
+
 /** Attributes for rendering a Badge. */
 interface BadgeProps {
     /** The content to be displayed within the badge. */
     children: ReactNode;
     /** Visual theme variant. */
-    variant?: "default" | "primary" | "success" | "warning" | "danger" | "info";
+    variant?: BadgeVariant;
     /** Predefined size constraint. */
     size?: "sm" | "md" | "lg";
     /** Additional CSS classes. */

@@ -9,6 +9,10 @@
  */
 
 import type { NotificationKind } from "./events";
+import type { NotificationActor } from "../types";
+
+/** Alias, kept for this module's existing call sites — canonical shape lives in ../types (E11-T6). */
+export type ActorRef = NotificationActor;
 
 /** URL-safe base64 (matches flashcard buildShareId), isomorphic. */
 export function base64UrlSafe(input: string): string {
@@ -57,12 +61,6 @@ export function contentFor(
         default:
             return { title: "Notification", message: `${who} updated "${deck}"` };
     }
-}
-
-export interface ActorRef {
-    uid: string;
-    name?: string | null;
-    photoURL?: string | null;
 }
 
 /**

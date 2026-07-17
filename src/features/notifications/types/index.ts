@@ -4,7 +4,12 @@ import type { NotificationCategory, NotificationPriority } from "../domain/event
 
 export type NotificationType = "invite" | "comment" | "reply" | "role_change";
 
-/** An actor behind a (possibly collapsed) notification — powers avatar stacks. */
+/**
+ * An actor behind a (possibly collapsed) notification — powers avatar
+ * stacks. Canonical definition (E11-T6) — domain/build.ts's ActorRef and
+ * domain/format.ts's DisplayActor were identical copies of this same shape;
+ * both are now type aliases re-exported from here instead.
+ */
 export interface NotificationActor {
     uid: string;
     name?: string | null;

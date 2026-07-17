@@ -4,31 +4,14 @@ import { format } from "date-fns";
 import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 
 import { AdminChartContainer } from "../shared";
+import { LOG_TYPE_META } from "../../domain/logMeta";
 
-import type { LogVolumePoint } from "../../types";
+import type { LogType, LogVolumePoint } from "../../types";
 
 interface LogVolumeChartProps {
     data: LogVolumePoint[];
     onClick?: (type: string) => void;
 }
-
-const TYPE_COLORS: Record<string, string> = {
-    AUTH: "#1cb0f6",
-    USER_ACTION: "#ff9600",
-    ADMIN_ACTION: "#ce82ff",
-    CONTENT: "#58cc02",
-    SYSTEM: "#afafaf",
-    ERROR: "#ea2b2b",
-};
-
-const TYPE_LABELS: Record<string, string> = {
-    AUTH: "Auth",
-    USER_ACTION: "User",
-    ADMIN_ACTION: "Admin",
-    CONTENT: "Content",
-    SYSTEM: "System",
-    ERROR: "Error",
-};
 
 const TOOLTIP_STYLE = {
     borderRadius: "24px",
@@ -50,7 +33,10 @@ const TOOLTIP_STYLE = {
 const LogVolumeChart = ({ data, onClick }: LogVolumeChartProps) => {
     if (!data || data.length === 0) return null;
 
-    const activeTypes = (Object.keys(TYPE_COLORS) as string[]).filter((t) =>
+    const activeTypes = (Object.keys(LOG_TYPE_META) as string[]).filter((t) =>
+        // LogVolumePoint's per-type fields are dynamic (one key per LogType,
+        // spread onto the base {date} shape) — no sound static type here.
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         data.some((d) => (d as any)[t] > 0),
     );
 
@@ -93,9 +79,12 @@ const LogVolumeChart = ({ data, onClick }: LogVolumeChartProps) => {
                                 return v;
                             }
                         }}
+                        // recharts' Tooltip formatter args aren't meaningfully typed upstream.
+                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
                         formatter={(value: any, name: any) => [
                             value ?? 0,
-                            TYPE_LABELS[String(name ?? "")] ?? String(name ?? ""),
+                            LOG_TYPE_META[String(name ?? "") as LogType]?.label ??
+                                String(name ?? ""),
                         ]}
                         cursor={{ fill: "#f8fafc" }}
                     />
@@ -104,7 +93,7 @@ const LogVolumeChart = ({ data, onClick }: LogVolumeChartProps) => {
                             key={type}
                             dataKey={type}
                             stackId="logs"
-                            fill={TYPE_COLORS[type]}
+                            fill={LOG_TYPE_META[type as LogType]?.chartColor}
                             radius={i === activeTypes.length - 1 ? [8, 8, 0, 0] : [0, 0, 0, 0]}
                             maxBarSize={36}
                             animationDuration={1400}
@@ -125,10 +114,10 @@ const LogVolumeChart = ({ data, onClick }: LogVolumeChartProps) => {
                     >
                         <div
                             className="h-2 w-2 rounded-full"
-                            style={{ backgroundColor: TYPE_COLORS[type] }}
+                            style={{ backgroundColor: LOG_TYPE_META[type as LogType]?.chartColor }}
                         />
                         <span className="text-text text-xs font-black tracking-tighter uppercase">
-                            {TYPE_LABELS[type]}
+                            {LOG_TYPE_META[type as LogType]?.label}
                         </span>
                     </button>
                 ))}

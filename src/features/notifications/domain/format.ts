@@ -4,7 +4,7 @@
  * collapsed-notification (avatar-stack) presentation. No React, no Firebase —
  * unit-testable.
  */
-import type { AppNotification, NotificationGroup } from "../types";
+import type { AppNotification, NotificationActor, NotificationGroup } from "../types";
 
 /**
  * Relative timestamp, computed against an injected `now` so it can tick live
@@ -23,11 +23,8 @@ export function formatRelativeTime(ts: number, now: number): string {
     return new Date(ts).toLocaleDateString("en-US", { month: "short", day: "numeric" });
 }
 
-export interface DisplayActor {
-    uid: string;
-    name?: string | null;
-    photoURL?: string | null;
-}
+/** Alias, kept for this module's existing call sites — canonical shape lives in ../types (E11-T6). */
+export type DisplayActor = NotificationActor;
 
 /** Up to `max` actors to show as avatars in a collapsed notification. */
 export function visibleActors(actors: DisplayActor[] | undefined, max = 3): DisplayActor[] {

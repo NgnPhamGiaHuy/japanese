@@ -11,21 +11,12 @@
 "use client";
 
 import { Badge } from "@/shared/components/ui";
+import { LOG_LEVEL_META } from "../../domain/logMeta";
 
 import type { LogLevel } from "../../types";
 
-const LEVEL_CONFIG: Record<
-    LogLevel,
-    { variant: "default" | "primary" | "success" | "warning" | "danger" | "info"; label: string }
-> = {
-    info: { variant: "info", label: "Info" },
-    warn: { variant: "warning", label: "Warn" },
-    error: { variant: "danger", label: "Error" },
-    security: { variant: "primary", label: "Security" },
-};
-
 const LogLevelBadge = ({ level }: { level: LogLevel | string }) => {
-    const safe = LEVEL_CONFIG[level as LogLevel] ?? {
+    const safe = LOG_LEVEL_META[level as LogLevel] ?? {
         variant: "default" as const,
         label: String(level),
     };

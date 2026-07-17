@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { isOnline } from "@/shared/utils";
+import UserIdentityAvatar from "./UserIdentityAvatar";
 
 import type { AdminUser } from "../../types";
 
@@ -15,38 +16,23 @@ interface UserCellProps {
  * Includes a subtle hover transition for a premium feel.
  */
 const UserCell = ({ user }: UserCellProps) => {
-    const lastSeen = user.lastSeenAt ? new Date(user.lastSeenAt).getTime() : 0;
-    const isOnline = Date.now() - lastSeen < 5 * 60 * 1000;
-
-    // Fall back to the initials avatar when a remote photoURL is broken/expired,
-    // instead of rendering a broken-image icon.
-    const [imgFailed, setImgFailed] = useState(false);
+    const online = isOnline(user.lastSeenAt);
 
     return (
         <div className="flex items-center gap-4 pl-4 text-left">
-            <div className="relative flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-gray-100 ring-2 ring-white transition-transform hover:scale-105">
-                {user.photoURL && !imgFailed ? (
-                    <img
-                        src={user.photoURL}
-                        alt={user.displayName ?? "User Avatar"}
-                        className="h-full w-full object-cover"
-                        onError={() => setImgFailed(true)}
-                    />
-                ) : (
-                    <span className="text-sm font-black text-gray-400">
-                        {(user.displayName ?? user.email ?? "?")[0]?.toUpperCase()}
-                    </span>
-                )}
-                {isOnline && (
-                    <div className="bg-hiragana absolute right-0 bottom-0 h-3 w-3 rounded-full border-2 border-white shadow-[0_0_10px_#58cc02]" />
-                )}
-            </div>
+            <UserIdentityAvatar
+                photoURL={user.photoURL}
+                displayName={user.displayName}
+                email={user.email}
+                isOnline={online}
+                size={11}
+            />
             <div className="min-w-0">
                 <div className="flex items-center gap-1.5">
                     <p className="text-text truncate text-[15px] font-black">
                         {user.displayName || "Anonymous User"}
                     </p>
-                    {isOnline && (
+                    {online && (
                         <span className="bg-hiragana flex h-4 animate-pulse items-center rounded-full px-1.5 text-[8px] font-black tracking-widest text-white uppercase shadow-sm shadow-[#58cc02]/20">
                             Live
                         </span>

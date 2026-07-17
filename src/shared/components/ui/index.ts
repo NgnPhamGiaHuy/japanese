@@ -12,6 +12,7 @@ export { default as UserMeta } from "./UserMeta";
 export { default as ActionCard } from "./ActionCard";
 export { default as SettingsMenu } from "./SettingsMenu";
 export { default as Badge } from "./Badge";
+export type { BadgeVariant } from "./Badge";
 export { default as Card } from "./Card";
 export { default as EmptyState } from "./EmptyState";
 export { default as ModeSelectionCard } from "./ModeSelectionCard";

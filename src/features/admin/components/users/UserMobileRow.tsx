@@ -2,7 +2,9 @@
 
 import { flexRender } from "@tanstack/react-table";
 
+import { isOnline } from "@/shared/utils";
 import RoleCell from "./RoleCell";
+import UserIdentityAvatar from "./UserIdentityAvatar";
 
 import type { Row } from "@tanstack/react-table";
 import type { AdminUser } from "../../types";
@@ -21,8 +23,7 @@ interface UserMobileRowProps {
  */
 const UserMobileRow = ({ row }: UserMobileRowProps) => {
     const user = row.original;
-    const lastSeen = user.lastSeenAt ? new Date(user.lastSeenAt).getTime() : 0;
-    const isOnline = Date.now() - lastSeen < 5 * 60 * 1000;
+    const online = isOnline(user.lastSeenAt);
 
     const actionsCell = row.getVisibleCells().find((c) => c.column.id === "actions");
 
@@ -44,23 +45,13 @@ const UserMobileRow = ({ row }: UserMobileRowProps) => {
                 </div>
             )}
 
-            {/* Avatar */}
-            <div className="relative flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-gray-100 ring-2 ring-white">
-                {user.photoURL ? (
-                    <img
-                        src={user.photoURL}
-                        alt={user.displayName ?? "User"}
-                        className="h-full w-full object-cover"
-                    />
-                ) : (
-                    <span className="text-sm font-black text-gray-400">
-                        {(user.displayName ?? user.email ?? "?")[0]?.toUpperCase()}
-                    </span>
-                )}
-                {isOnline && (
-                    <div className="bg-hiragana absolute right-0 bottom-0 h-2.5 w-2.5 rounded-full border-2 border-white" />
-                )}
-            </div>
+            <UserIdentityAvatar
+                photoURL={user.photoURL}
+                displayName={user.displayName}
+                email={user.email}
+                isOnline={online}
+                size={10}
+            />
 
             {/* Info + actions */}
             <div className="min-w-0 flex-1">
@@ -68,7 +59,7 @@ const UserMobileRow = ({ row }: UserMobileRowProps) => {
                     <p className="text-text text-sm font-black">
                         {user.displayName || "Anonymous User"}
                     </p>
-                    {isOnline && (
+                    {online && (
                         <span className="bg-hiragana flex h-4 items-center rounded-full px-1.5 text-[8px] font-black tracking-widest text-white uppercase">
                             Live
                         </span>

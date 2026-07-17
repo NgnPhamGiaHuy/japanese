@@ -11,23 +11,12 @@
 "use client";
 
 import { Badge } from "@/shared/components/ui";
+import { LOG_TYPE_META } from "../../domain/logMeta";
 
 import type { LogType } from "../../types";
 
-const TYPE_CONFIG: Record<
-    LogType,
-    { variant: "default" | "primary" | "success" | "warning" | "danger" | "info"; label: string }
-> = {
-    AUTH: { variant: "info", label: "Auth" },
-    ADMIN_ACTION: { variant: "primary", label: "Admin" },
-    USER_ACTION: { variant: "warning", label: "User" },
-    SYSTEM: { variant: "default", label: "System" },
-    ERROR: { variant: "danger", label: "Error" },
-    CONTENT: { variant: "success", label: "Content" },
-};
-
 const LogTypeBadge = ({ type }: { type: LogType | string }) => {
-    const config = TYPE_CONFIG[type as LogType] ?? {
+    const config = LOG_TYPE_META[type as LogType] ?? {
         variant: "default",
         label: String(type),
     };

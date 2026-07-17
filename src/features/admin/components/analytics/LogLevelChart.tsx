@@ -3,27 +3,14 @@
 import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from "recharts";
 
 import { AdminChartContainer } from "../shared";
+import { LOG_LEVEL_META } from "../../domain/logMeta";
 
-import type { LogLevelPoint } from "../../types";
+import type { LogLevel, LogLevelPoint } from "../../types";
 
 interface LogLevelChartProps {
     data: LogLevelPoint[];
     onClick?: (level: string) => void;
 }
-
-const LEVEL_COLORS: Record<string, string> = {
-    info: "#1cb0f6",
-    warn: "#ff9600",
-    error: "#ea2b2b",
-    security: "#ce82ff",
-};
-
-const LEVEL_LABELS: Record<string, string> = {
-    info: "Info",
-    warn: "Warn",
-    error: "Error",
-    security: "Security",
-};
 
 /**
  * Log Level Distribution — donut chart.
@@ -55,11 +42,18 @@ const LogLevelChart = ({ data, onClick }: LogLevelChartProps) => {
                         cornerRadius={8}
                         stroke="none"
                         animationDuration={1500}
+                        // recharts' Pie onClick payload isn't meaningfully typed upstream.
+                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
                         onClick={(d: any) => onClick?.(d.level ?? d.name ?? "")}
                         className={onClick ? "cursor-pointer" : undefined}
                     >
                         {data.map((entry) => (
-                            <Cell key={entry.level} fill={LEVEL_COLORS[entry.level] ?? "#afafaf"} />
+                            <Cell
+                                key={entry.level}
+                                fill={
+                                    LOG_LEVEL_META[entry.level as LogLevel]?.chartColor ?? "#afafaf"
+                                }
+                            />
                         ))}
                     </Pie>
                     <Tooltip
@@ -69,9 +63,11 @@ const LogLevelChart = ({ data, onClick }: LogLevelChartProps) => {
                             boxShadow: "0 20px 40px -10px rgba(0,0,0,0.1)",
                             padding: "12px 16px",
                         }}
+                        // recharts' Tooltip formatter args aren't meaningfully typed upstream.
+                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
                         formatter={(value: any, name: any) => [
                             `${value} (${Math.round(((Number(value) || 0) / total) * 100)}%)`,
-                            LEVEL_LABELS[String(name)] ?? String(name),
+                            LOG_LEVEL_META[String(name) as LogLevel]?.label ?? String(name),
                         ]}
                     />
                 </PieChart>
@@ -87,10 +83,14 @@ const LogLevelChart = ({ data, onClick }: LogLevelChartProps) => {
                     >
                         <div
                             className="h-2 w-2 rounded-full"
-                            style={{ backgroundColor: LEVEL_COLORS[item.level] ?? "#afafaf" }}
+                            style={{
+                                backgroundColor:
+                                    LOG_LEVEL_META[item.level as LogLevel]?.chartColor ?? "#afafaf",
+                            }}
                         />
                         <span className="text-text text-xs font-black tracking-tighter uppercase">
-                            {LEVEL_LABELS[item.level] ?? item.level}: {item.count}
+                            {LOG_LEVEL_META[item.level as LogLevel]?.label ?? item.level}:{" "}
+                            {item.count}
                         </span>
                     </button>
                 ))}
