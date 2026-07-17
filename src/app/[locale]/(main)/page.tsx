@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 
 import { BookOpen, CheckCircle2, Clock, Flame, Plus, Sparkles, Trophy } from "lucide-react";
@@ -24,34 +25,37 @@ import type { GameStatEntry } from "@/features/game/services";
 const TOTAL_KANA_CHARS = HIRAGANA_DATA.length + KATAKANA_DATA.length;
 
 /** Visual + copy config for the "Continue Studying" tile per recommended action. */
-const CONTINUE_TILE_CONFIG = {
-    continue: {
-        icon: Clock,
-        bg: "bg-katakana",
-        border: "border-katakana-strong",
-        text: "text-katakana",
-        label: "Reviews Due",
-        cta: "Review Now",
-    },
-    learn: {
-        icon: Sparkles,
-        bg: "bg-hiragana",
-        border: "border-hiragana-strong",
-        text: "text-hiragana",
-        label: "New Cards Ready",
-        cta: "Start Learning",
-    },
-    idle: {
-        icon: CheckCircle2,
-        bg: "bg-hiragana",
-        border: "border-hiragana-strong",
-        text: "text-hiragana",
-        label: "All Caught Up",
-        cta: "Keep Practicing",
-    },
-} as const;
+function continueTileConfig(t: ReturnType<typeof useTranslations<"HomePage">>) {
+    return {
+        continue: {
+            icon: Clock,
+            bg: "bg-katakana",
+            border: "border-katakana-strong",
+            text: "text-katakana",
+            label: t("tile.reviewsDue"),
+            cta: t("tile.reviewNow"),
+        },
+        learn: {
+            icon: Sparkles,
+            bg: "bg-hiragana",
+            border: "border-hiragana-strong",
+            text: "text-hiragana",
+            label: t("tile.newCardsReady"),
+            cta: t("tile.startLearning"),
+        },
+        idle: {
+            icon: CheckCircle2,
+            bg: "bg-hiragana",
+            border: "border-hiragana-strong",
+            text: "text-hiragana",
+            label: t("tile.allCaughtUp"),
+            cta: t("tile.keepPracticing"),
+        },
+    } as const;
+}
 
 export default function HomePage() {
+    const t = useTranslations("HomePage");
     const { userData, loading: progressLoading } = useUserProgress();
     const { user } = useAppStore();
     const { lessons, loading: lessonsLoading } = useLessons();
@@ -61,7 +65,7 @@ export default function HomePage() {
 
     const deckStatus = useDeckProgressStatus(topLesson?.id ?? "", topLesson?.cardCount ?? 0);
     const action = recommendedAction(deckStatus);
-    const tile = CONTINUE_TILE_CONFIG[action];
+    const tile = continueTileConfig(t)[action];
     const primaryCount =
         action === "continue"
             ? deckStatus.dueCount
@@ -101,9 +105,9 @@ export default function HomePage() {
                 <header className="flex items-center justify-between">
                     <div>
                         <h1 className="text-text text-3xl font-black tracking-tight">
-                            Konnichiwa!
+                            {t("greeting")}
                         </h1>
-                        <p className="text-muted mt-1 font-bold">Ready to learn Japanese today?</p>
+                        <p className="text-muted mt-1 font-bold">{t("subtitle")}</p>
                     </div>
                     <div className="border-survival-strong bg-survival flex h-16 w-16 rotate-3 transform items-center justify-center rounded-2xl border-b-4 text-2xl font-black text-white shadow-sm">
                         {progressLoading ? "…" : userData.streak}
@@ -115,14 +119,14 @@ export default function HomePage() {
                 <div className="grid grid-cols-2 gap-4">
                     <StatCard
                         icon={<Trophy className="text-survival h-8 w-8" />}
-                        title="Total XP"
+                        title={t("totalXp")}
                         value={userData.xp}
                         loading={progressLoading}
                         index={0}
                     />
                     <StatCard
                         icon={<BookOpen className="text-katakana h-8 w-8" />}
-                        title="Lessons Done"
+                        title={t("lessonsDone")}
                         value={userData.lessonsCompleted}
                         loading={progressLoading}
                         index={1}
@@ -145,8 +149,7 @@ export default function HomePage() {
                             </p>
                             {deckStatus.mistakeCount > 0 && (
                                 <p className="mt-1 text-xs font-bold text-white/70">
-                                    {deckStatus.mistakeCount} card
-                                    {deckStatus.mistakeCount === 1 ? "" : "s"} need extra practice
+                                    {t("mistakeCount", { count: deckStatus.mistakeCount })}
                                 </p>
                             )}
                         </div>
@@ -166,18 +169,21 @@ export default function HomePage() {
 
                 {/* Kana Section — data-driven, mirrors KanaHub's own hero-tile pattern */}
                 <div>
-                    <h2 className={`${SECTION_HEADING} mb-4`}>Kana Practice</h2>
+                    <h2 className={`${SECTION_HEADING} mb-4`}>{t("kanaPractice")}</h2>
                     <ActionCard
                         href="/kana"
                         primary
                         icon={<span className="text-2xl font-black text-white">あ→ア</span>}
-                        title="Master Hiragana & Katakana"
-                        subtitle="Learn · Quiz · Writing · Chart · Survival"
+                        title={t("kanaTitle")}
+                        subtitle={t("kanaSubtitle")}
                         progress={{
                             value: kanaPct,
                             label: progressLoading
-                                ? "Loading progress…"
-                                : `${learnedCount}/${TOTAL_KANA_CHARS} characters mastered`,
+                                ? t("loadingProgress")
+                                : t("charactersMastered", {
+                                      learned: learnedCount,
+                                      total: TOTAL_KANA_CHARS,
+                                  }),
                         }}
                         primaryBg="bg-gradient-to-br from-hiragana to-katakana"
                         primaryBorderB="border-hiragana-hover"
@@ -188,24 +194,24 @@ export default function HomePage() {
                 {/* Flashcard Section */}
                 <div>
                     <div className="mb-4 flex items-end justify-between">
-                        <h2 className={SECTION_HEADING}>Jump Back In</h2>
+                        <h2 className={SECTION_HEADING}>{t("jumpBackIn")}</h2>
                         <Link
                             href="/flashcard"
                             className="text-katakana hover:text-katakana-hover focus-visible:ring-katakana rounded-md text-sm font-black focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
                         >
-                            See all →
+                            {t("seeAll")}
                         </Link>
                     </div>
 
                     {!lessonsLoading && recentLessons.length === 0 ? (
                         <EmptyState
                             icon={Plus}
-                            title="Create your first deck"
-                            description="Add cards manually, paste a list, or let AI generate a deck for you."
+                            title={t("emptyTitle")}
+                            description={t("emptyDescription")}
                             action={
                                 <Link href="/flashcard/create">
                                     <Button variant="primary" color="purple">
-                                        Create a Deck
+                                        {t("createDeck")}
                                     </Button>
                                 </Link>
                             }
@@ -255,9 +261,9 @@ export default function HomePage() {
                 isOpen={!!deletingLesson}
                 onClose={() => setDeletingLesson(null)}
                 onConfirm={handleDelete}
-                title="Delete Deck?"
-                message={`Are you sure you want to permanently delete "${deletingLesson?.title}"? This action cannot be undone.`}
-                confirmText="Delete"
+                title={t("deleteDeckTitle")}
+                message={t("deleteDeckMessage", { title: deletingLesson?.title ?? "" })}
+                confirmText={t("delete")}
                 variant="danger"
                 loading={isDeleting}
             />

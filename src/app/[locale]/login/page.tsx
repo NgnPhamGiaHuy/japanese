@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 
 import {
@@ -11,6 +12,7 @@ import { useRouter } from "@/i18n/navigation";
 import { Button } from "@/shared/components/ui";
 
 export default function LoginPage() {
+    const t = useTranslations("LoginPage");
     const router = useRouter();
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -27,13 +29,13 @@ export default function LoginPage() {
                 if (process.env.NODE_ENV === "development") {
                     console.error("[Login] Google redirect sign-in failed:", { code, message });
                 }
-                if (active) setError(getSignInErrorMessage(code));
+                if (active) setError(getSignInErrorMessage(code, t));
             });
 
         return () => {
             active = false;
         };
-    }, [router]);
+    }, [router, t]);
 
     const handleGoogleSignIn = async () => {
         setLoading(true);
@@ -52,13 +54,13 @@ export default function LoginPage() {
                     return;
                 } catch (redirectErr: unknown) {
                     const redirectCode = (redirectErr as { code?: string }).code;
-                    setError(getSignInErrorMessage(redirectCode));
+                    setError(getSignInErrorMessage(redirectCode, t));
                     setLoading(false);
                     return;
                 }
             }
             if (code !== "auth/popup-closed-by-user" && code !== "auth/cancelled-popup-request") {
-                setError(getSignInErrorMessage(code));
+                setError(getSignInErrorMessage(code, t));
             }
             setLoading(false);
         }
@@ -72,10 +74,8 @@ export default function LoginPage() {
                     あ
                 </div>
                 <div className="text-center">
-                    <h1 className="text-text text-3xl font-black">Kana Master</h1>
-                    <p className="text-muted mt-1 text-base font-bold">
-                        Learn Japanese with confidence
-                    </p>
+                    <h1 className="text-text text-3xl font-black">{t("title")}</h1>
+                    <p className="text-muted mt-1 text-base font-bold">{t("subtitle")}</p>
                 </div>
             </div>
 
@@ -88,13 +88,13 @@ export default function LoginPage() {
                     className="!text-text w-full !py-4 !shadow-sm transition-all duration-200"
                 >
                     {!loading && <GoogleIcon />}
-                    {loading ? "Signing in…" : "Continue with Google"}
+                    {loading ? t("signingIn") : t("continueWithGoogle")}
                 </Button>
 
                 {error && <p className="text-danger mt-4 text-center text-sm font-bold">{error}</p>}
 
                 <p className="text-muted mt-6 text-center text-xs font-bold">
-                    Your progress is saved to your Google account
+                    {t("progressSaved")}
                 </p>
             </div>
         </div>
@@ -107,17 +107,20 @@ function shouldUseRedirectSignIn(code?: string) {
     );
 }
 
-function getSignInErrorMessage(code?: string) {
+function getSignInErrorMessage(
+    code: string | undefined,
+    t: ReturnType<typeof useTranslations<"LoginPage">>,
+) {
     switch (code) {
         case "auth/popup-blocked":
         case "auth/operation-not-supported-in-this-environment":
-            return "This browser blocks popup sign-in, so Google sign-in will continue with a redirect.";
+            return t("errors.popupBlocked");
         case "auth/unauthorized-domain":
-            return "This domain is not authorized for Firebase sign-in.";
+            return t("errors.unauthorizedDomain");
         case "auth/operation-not-allowed":
-            return "Google sign-in is not enabled for this Firebase project.";
+            return t("errors.operationNotAllowed");
         default:
-            return "Sign-in failed. Please try again.";
+            return t("errors.generic");
     }
 }
 

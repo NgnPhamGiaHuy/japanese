@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 
 import { ChevronRight, Info, LogOut, Monitor, ShieldAlert, Volume2 } from "lucide-react";
@@ -16,6 +17,7 @@ import { SPACING } from "@/shared/constants";
 import type { LucideIcon } from "lucide-react";
 
 export default function SettingsPage() {
+    const t = useTranslations("SettingsPage");
     const {
         user,
         useHandwriting,
@@ -38,24 +40,24 @@ export default function SettingsPage() {
 
     return (
         <div className="bg-bg min-h-dvh pb-28">
-            <ScreenHeader title="Settings" backHref="/profile" />
+            <ScreenHeader title={t("title")} backHref="/profile" />
 
             <main className={`mx-auto max-w-2xl ${SPACING.pagePadding} pt-6 pb-12`}>
                 <div className="mb-10 flex flex-col items-center justify-center gap-4 text-center sm:mb-12">
                     <UserMeta
-                        name={user?.displayName || "Guest"}
+                        name={user?.displayName || t("guest")}
                         avatar={user?.photoURL || null}
-                        subtitle="Current Session"
+                        subtitle={t("currentSession")}
                         className="scale-125"
                     />
                 </div>
 
                 <div className="space-y-10">
                     {/* Appearance */}
-                    <SettingsSection title="Appearance" icon={Monitor}>
+                    <SettingsSection title={t("appearance")} icon={Monitor}>
                         <SettingsToggle
-                            label="Handwriting Font"
-                            sub="Use brush-style kana font"
+                            label={t("handwritingFont")}
+                            sub={t("handwritingFontSub")}
                             value={useHandwriting}
                             onToggle={toggleHandwriting}
                             color="purple"
@@ -63,24 +65,24 @@ export default function SettingsPage() {
                     </SettingsSection>
 
                     {/* Audio — three independent controls, so muting one never silences another */}
-                    <SettingsSection title="Audio" icon={Volume2}>
+                    <SettingsSection title={t("audio")} icon={Volume2}>
                         <SettingsToggle
-                            label="Sound Effects"
-                            sub="Answer and tap feedback tones"
+                            label={t("soundEffects")}
+                            sub={t("soundEffectsSub")}
                             value={!sfxMuted}
                             onToggle={toggleSfxMuted}
                             color="orange"
                         />
                         <SettingsToggle
-                            label="Pronunciation"
-                            sub="Japanese audio for characters and words"
+                            label={t("pronunciation")}
+                            sub={t("pronunciationSub")}
                             value={!voiceMuted}
                             onToggle={toggleVoiceMuted}
                             color="green"
                         />
                         <SettingsToggle
-                            label="Auto-Play Pronunciation"
-                            sub="Speak automatically in lessons and games. Tapping a speaker button always plays."
+                            label={t("autoPlay")}
+                            sub={t("autoPlaySub")}
                             value={globalAutoPlay}
                             onToggle={toggleAutoPlay}
                             color="blue"
@@ -88,46 +90,43 @@ export default function SettingsPage() {
                     </SettingsSection>
 
                     {/* Account */}
-                    <SettingsSection title="Account & Security" icon={LogOut}>
+                    <SettingsSection title={t("accountSecurity")} icon={LogOut}>
                         <SettingsAction
-                            label="Sign Out"
-                            sub="Log out of your account"
+                            label={t("signOut")}
+                            sub={t("signOutSub")}
                             onClick={handleSignOut}
                             variant="danger"
                         />
                     </SettingsSection>
 
                     {/* Data */}
-                    <SettingsSection title="Data & Privacy" icon={ShieldAlert}>
+                    <SettingsSection title={t("dataPrivacy")} icon={ShieldAlert}>
                         <SettingsAction
-                            label="Reset Progress Data"
-                            sub="Clear learned characters and accuracy stats"
+                            label={t("resetData")}
+                            sub={t("resetDataSub")}
                             onClick={() => setShowResetConfirm(true)}
                             variant="danger"
                         />
                         <div className="px-6 py-6">
-                            <p className="text-text text-lg font-black">Pronunciation Audio</p>
+                            <p className="text-text text-lg font-black">
+                                {t("pronunciationAudioTitle")}
+                            </p>
                             <p className="text-muted text-sm font-bold">
-                                Japanese text is sent to Google&apos;s text-to-speech service to
-                                generate pronunciation. Turn off Pronunciation above to stop this.
+                                {t("pronunciationAudioDescription")}
                             </p>
                         </div>
                     </SettingsSection>
 
                     {/* About */}
-                    <SettingsSection title="About" icon={Info}>
+                    <SettingsSection title={t("about")} icon={Info}>
                         <div className="px-6 py-6">
-                            <p className="text-text text-xl font-black">
-                                Kana &amp; Nihongo Master
-                            </p>
-                            <p className="text-muted text-sm font-bold">
-                                Unified Japanese learning app · v2.0
-                            </p>
+                            <p className="text-text text-xl font-black">{t("appName")}</p>
+                            <p className="text-muted text-sm font-bold">{t("appVersion")}</p>
                             <div className="mt-6 space-y-1 border-t-2 border-gray-100 pt-6">
+                                <p className="text-muted text-xs font-bold">{t("kanaCredit")}</p>
                                 <p className="text-muted text-xs font-bold">
-                                    Kana data from KanjiVG
+                                    {t("firebaseCredit")}
                                 </p>
-                                <p className="text-muted text-xs font-bold">Powered by Firebase</p>
                             </div>
                         </div>
                     </SettingsSection>
@@ -141,10 +140,10 @@ export default function SettingsPage() {
                     resetProgress();
                     setShowResetConfirm(false);
                 }}
-                title="Reset Progress?"
-                message="This will permanently clear all your learned characters and accuracy stats. This action cannot be undone."
+                title={t("resetTitle")}
+                message={t("resetMessage")}
                 variant="danger"
-                confirmText="Reset Everything"
+                confirmText={t("resetConfirm")}
             />
         </div>
     );
