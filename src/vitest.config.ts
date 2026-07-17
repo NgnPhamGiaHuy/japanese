@@ -28,6 +28,9 @@ export default defineConfig({
                         "**/firestore-rules.test.ts",
                         "**/e2e/**",
                         "**/*.browser.test.{ts,tsx}",
+                        // functions/ is a separate Node package with its own
+                        // vitest.config.ts — tested independently.
+                        "**/functions/**",
                     ],
                 },
             },

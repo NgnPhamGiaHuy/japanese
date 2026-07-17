@@ -30,6 +30,11 @@ export default defineConfig({
     test: {
         environment: "node",
         include: ["**/*.emu.test.ts", "**/firestore-rules.test.ts"],
+        // functions/ is a separate Node package with its own emulator-backed
+        // vitest config (functions/vitest.config.ts, run via
+        // `npm run test:emu` inside functions/) — excluded here so the app's
+        // test:emu doesn't double-run it or trip over its Node-only imports.
+        exclude: ["**/node_modules/**", "**/functions/**"],
         // Emulator round-trips are slower than pure unit tests.
         testTimeout: 20_000,
         hookTimeout: 30_000,

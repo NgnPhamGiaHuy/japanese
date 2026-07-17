@@ -92,6 +92,48 @@ jobs:
       - name: Run emulator-backed rules suite
         run: npm run test:emu
 
+  # Functions stage: the functions/ package (E14-T2) — a separate Node
+  # package (own package.json/tsconfig, deployed independently of the
+  # Next.js app), so it gets its own install/build/lint/test rather than
+  # folding into build-lint-test above. Tests run against the
+  # Firestore/Functions/Storage emulators (not the app's Firestore/Auth
+  # ones) via functions/'s own test:emu script.
+  functions-tests:
+    name: Cloud Functions (Emulator)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: "npm"
+          cache-dependency-path: src/functions/package-lock.json
+
+      - name: Set up JDK (required by the Firestore/Functions emulators)
+        uses: actions/setup-java@v4
+        with:
+          distribution: "temurin"
+          java-version: "21"
+
+      - name: Install dependencies
+        working-directory: src/functions
+        run: npm ci
+
+      - name: Typecheck + build
+        working-directory: src/functions
+        run: npm run build
+
+      - name: Lint
+        working-directory: src/functions
+        run: npm run lint
+
+      - name: Run emulator-backed tests
+        working-directory: src/functions
+        run: npm run test:emu
+
   # Browser stage: Playwright E2E (auth + realtime journeys) AND Vitest
   # Browser Mode component tests share this job — both need the same
   # Chromium install (one download, not two), and both need the JVM for the
@@ -137,3 +179,46 @@ jobs:
           name: playwright-report
           path: src/playwright-report/
           retention-days: 14
+
+  # Deploys functions/ once FIREBASE_PROJECT_ID (repo variable) and
+  # FIREBASE_SERVICE_ACCOUNT (repo secret, a least-privilege deploy-only
+  # service account's JSON key) are configured in this repo's Settings →
+  # Secrets and variables → Actions. Until then this job is a clean skip, not
+  # a failure — deploying real Cloud Functions needs a real Firebase
+  # project's credentials, which this repo doesn't have configured yet (same
+  # "code-complete, activation needs real credentials" pattern as E5-T1's
+  # Sentry / E5-T3's PostHog init).
+  deploy-functions:
+    name: Deploy Functions
+    needs: [functions-tests]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push' && vars.FIREBASE_PROJECT_ID != ''
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: "npm"
+          cache-dependency-path: src/functions/package-lock.json
+
+      - name: Install app dependencies (provides the firebase CLI)
+        run: npm ci
+
+      - name: Install functions dependencies
+        working-directory: src/functions
+        run: npm ci
+
+      - name: Write deploy service account credentials
+        run: echo '${{ secrets.FIREBASE_SERVICE_ACCOUNT }}' > "${{ runner.temp }}/firebase-sa.json"
+
+      - name: Deploy functions
+        run: >
+          npx firebase-tools deploy --only functions
+          --project "${{ vars.FIREBASE_PROJECT_ID }}" --non-interactive
+        env:
+          GOOGLE_APPLICATION_CREDENTIALS: ${{ runner.temp }}/firebase-sa.json

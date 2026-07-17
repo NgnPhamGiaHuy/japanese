@@ -14,6 +14,11 @@ const eslintConfig = defineConfig([
         "out/**",
         "build/**",
         "next-env.d.ts",
+        // functions/ is a separately deployed Node package (own package.json,
+        // own tsconfig, no DOM lib) with its own eslint.config.mjs — linted
+        // independently via `npm run lint` inside functions/, not as part of
+        // the Next.js app's React/browser-flavored ruleset.
+        "functions/**",
     ]),
     {
         // All sound goes through `shared/audio`. Reaching for a browser audio API directly is how
