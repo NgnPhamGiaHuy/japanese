@@ -25,11 +25,6 @@ const ITEM_CLASSES =
     "text-text data-[selected=true]:bg-both/10 flex cursor-pointer items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-bold outline-none";
 
 /**
- * Global ⌘K command palette. Wrapped in the same Base UI Dialog primitive as
- * Modal.tsx (E6-T2) rather than cmdk's own Radix-based Command.Dialog, so it
- * inherits the app's one overlay system instead of a second one.
- */
-/**
  * One palette row. `value` is the localized label so cmdk's fuzzy match runs
  * against what the user actually sees; `keywords` are stored as one
  * comma-separated message per action (a message can't hold an array) and
@@ -53,6 +48,11 @@ const ActionItem = ({ action, onSelect }: { action: CommandAction; onSelect: () 
     );
 };
 
+/**
+ * Global ⌘K command palette. Wrapped in the same Base UI Dialog primitive as
+ * Modal.tsx (E6-T2) rather than cmdk's own Radix-based Command.Dialog, so it
+ * inherits the app's one overlay system instead of a second one.
+ */
 const CommandPalette = ({ open, onOpenChange }: CommandPaletteProps) => {
     const t = useTranslations("CommandPalette");
     const router = useRouter();

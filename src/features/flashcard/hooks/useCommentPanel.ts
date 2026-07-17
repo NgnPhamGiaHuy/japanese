@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useEffect, useRef, useState } from "react";
 
 import { useAlert } from "@/shared/providers";
@@ -16,18 +17,22 @@ import {
 
 import type { Comment } from "../types";
 
-/** Error lookup table used for normalizing Firestore/Logic errors into user-friendly strings. */
-const mapError = (err: unknown, fallback: string): string => {
+/**
+ * Normalizes Firestore/logic errors into user-facing strings. `t` is passed in
+ * rather than read via useTranslations() — this is a plain module function, not
+ * a hook, so it can't call one itself.
+ */
+const mapError = (err: unknown, fallback: string, t: (key: string) => string): string => {
     if (err instanceof CommentError) {
         switch (err.code) {
             case CommentErrorCode.PERMISSION_DENIED:
-                return "You don't have permission to do that.";
+                return t("permissionDenied");
             case CommentErrorCode.INVALID_CONTENT:
                 return err.message;
             case CommentErrorCode.COMMENT_NOT_FOUND:
-                return "Comment not found — it may have been deleted.";
+                return t("commentNotFound");
             case CommentErrorCode.NETWORK_ERROR:
-                return "Network error. Please check your connection.";
+                return t("networkError");
             default:
                 return err.message || fallback;
         }
@@ -58,6 +63,7 @@ export function useCommentPanel({
     currentUserEmail,
     isOwner,
 }: UseCommentPanelParams) {
+    const t = useTranslations("FlashcardComments");
     const { showAlert } = useAlert();
     const [comments, setComments] = useState<Comment[]>([]);
     const [loading, setLoading] = useState(true);
@@ -67,11 +73,17 @@ export function useCommentPanel({
     const listRef = useRef<HTMLDivElement>(null);
     const prevCountRef = useRef(0);
 
-    // Reset loading state whenever the subscription target changes
-    useEffect(() => {
+    // Reset back to loading whenever the subscription target changes. Adjusted
+    // during render rather than in an effect (React's documented pattern for
+    // derived-from-props state) so the stale card's comments never paint for a
+    // frame before the effect below re-subscribes.
+    const target = `${ownerId}/${lessonId}/${cardId}/${retryKey}`;
+    const [prevTarget, setPrevTarget] = useState(target);
+    if (prevTarget !== target) {
+        setPrevTarget(target);
         setLoading(true);
         setComments([]);
-    }, [ownerId, lessonId, cardId, retryKey]);
+    }
 
     /**
      * Real-time Synchronization
@@ -94,7 +106,7 @@ export function useCommentPanel({
                 if (!active) return;
                 console.error("[CommentPanel]", err);
                 setIsNetworkError(true);
-                showAlert("error", "Lost connection to comments. Trying to reconnect...");
+                showAlert("error", t("connectionLost"));
             },
         );
         return () => {
@@ -135,7 +147,7 @@ export function useCommentPanel({
                 showAlert("success", successMsg);
             }
         } catch (err) {
-            const msg = mapError(err, fallback);
+            const msg = mapError(err, fallback, t);
             setIsNetworkError(
                 err instanceof CommentError && err.code === CommentErrorCode.NETWORK_ERROR,
             );
@@ -156,7 +168,7 @@ export function useCommentPanel({
                     currentUserName,
                     currentUserEmail,
                 ).then(() => {}),
-            "Failed to add comment.",
+            t("addCommentFailed"),
         );
 
     const handleReply = (commentId: string, content: string) =>
@@ -172,27 +184,27 @@ export function useCommentPanel({
                     currentUserName,
                     currentUserEmail,
                 ),
-            "Failed to add reply.",
+            t("addReplyFailed"),
         );
 
     const handleResolve = (commentId: string) =>
         wrap(
             () => resolveComment(ownerId, lessonId, cardId, commentId, currentUserId),
-            "Failed to resolve comment.",
-            "Comment resolved",
+            t("resolveCommentFailed"),
+            t("commentResolved"),
         );
 
     const handleEdit = (commentId: string, content: string) =>
         wrap(
             () => updateComment(ownerId, lessonId, cardId, commentId, content, currentUserId),
-            "Failed to edit comment.",
+            t("editCommentFailed"),
         );
 
     const handleDelete = (commentId: string) =>
         wrap(
             () => deleteComment(ownerId, lessonId, cardId, commentId, currentUserId, isOwner),
-            "Failed to delete comment.",
-            "Comment deleted",
+            t("deleteCommentFailed"),
+            t("commentDeleted"),
         );
 
     return {

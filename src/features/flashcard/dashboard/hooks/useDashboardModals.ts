@@ -5,6 +5,7 @@
  * Handles share modal and delete confirmation modal states.
  */
 
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 
 import { useLessons } from "@/features/flashcard/hooks";
@@ -13,6 +14,7 @@ import { useAlert } from "@/shared/providers";
 import type { Lesson } from "@/features/flashcard/types";
 
 export function useDashboardModals() {
+    const t = useTranslations("Common");
     const { deleteLesson, shareLesson, updateLessonRoles } = useLessons();
     const { showAlert } = useAlert();
 
@@ -25,11 +27,11 @@ export function useDashboardModals() {
         setIsDeleting(true);
         try {
             await deleteLesson(deletingLesson.id);
-            showAlert("success", "Deck deleted");
+            showAlert("success", t("deckDeleted"));
             setDeletingLesson(null);
         } catch (err) {
             console.error("[handleDelete] Delete failed:", err);
-            showAlert("error", "Failed to delete deck");
+            showAlert("error", t("deleteDeckFailed"));
         } finally {
             setIsDeleting(false);
         }

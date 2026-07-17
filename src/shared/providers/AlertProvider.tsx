@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import React, { createContext, useCallback, useContext } from "react";
 
 import { toast, Toaster } from "sonner";
@@ -45,6 +46,7 @@ const ALERT_DURATIONS: Record<AlertType, number> = {
  * region, while the visual design stays the existing one.
  */
 export const AlertProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+    const t = useTranslations("NotificationsPage");
     const showAlert = useCallback((type: AlertType, message: string, options?: AlertOptions) => {
         toast.custom(
             (id) => (
@@ -66,7 +68,7 @@ export const AlertProvider: React.FC<{ children: React.ReactNode }> = ({ childre
                 position="bottom-right"
                 visibleToasts={3}
                 gap={12}
-                containerAriaLabel="Notifications"
+                containerAriaLabel={t("toastRegion")}
             />
         </AlertContext.Provider>
     );

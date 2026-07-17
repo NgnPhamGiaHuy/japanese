@@ -86,7 +86,7 @@ export default function FlashcardDetailPage({ params }: { params: Promise<{ id: 
     const handleCopyLink = async () => {
         const shareId = lesson.shareId || buildShareId(user.uid, id);
         await copyLink(`${window.location.origin}/flashcard/shared/${shareId}`);
-        showAlert("success", "Link copied to clipboard");
+        showAlert("success", tCommon("linkCopiedToClipboard"));
     };
 
     return (

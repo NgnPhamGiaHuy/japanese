@@ -26,6 +26,7 @@ import NotificationsVirtualList from "./_components/NotificationsVirtualList";
 
 export default function NotificationsPage() {
     const t = useTranslations("NotificationsPage");
+    const tCommon = useTranslations("Common");
     const { user } = useAppStore();
     const {
         notifications,
@@ -73,17 +74,13 @@ export default function NotificationsPage() {
                 ?.getIdToken()
                 .then((token) => logNotificationsCleared(token, uid, clearedIds.length));
             if (clearedIds.length > 0) {
-                showAlert(
-                    "info",
-                    `Cleared ${clearedIds.length} notification${clearedIds.length === 1 ? "" : "s"}.`,
-                    {
-                        action: {
-                            label: "Undo",
-                            onClick: () => void restoreNotifications(uid, clearedIds),
-                        },
-                        durationMs: 8000,
+                showAlert("info", t("cleared", { count: clearedIds.length }), {
+                    action: {
+                        label: tCommon("undo"),
+                        onClick: () => void restoreNotifications(uid, clearedIds),
                     },
-                );
+                    durationMs: 8000,
+                });
             }
         });
     };

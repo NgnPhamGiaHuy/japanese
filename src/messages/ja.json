@@ -23,7 +23,12 @@
         "deleteDeckMessage": "「{title}」を完全に削除してもよろしいですか？この操作は取り消せません。",
         "delete": "削除",
         "notFound": "見つかりません",
-        "deckNotFound": "デッキが見つかりません"
+        "deckNotFound": "デッキが見つかりません",
+        "linkCopiedToClipboard": "リンクをクリップボードにコピーしました",
+        "deckDeleted": "デッキを削除しました",
+        "deleteDeckFailed": "デッキの削除に失敗しました",
+        "undo": "元に戻す",
+        "dismiss": "閉じる"
     },
     "ErrorScreens": {
         "errorTitle": "問題が発生しました",
@@ -139,7 +144,8 @@
             "personalDescription": "最初の単語デッキを作成して始めましょう！",
             "sharedDescription": "他の学習者からの共有デッキがここに表示されます。",
             "createDeck": "デッキを作成"
-        }
+        },
+        "reorderFailed": "並び替えに失敗しました"
     },
     "KanaHub": {
         "levelLabel": "レベル:",
@@ -302,7 +308,12 @@
         "serviceBusyMessage": "リクエストが集中しています。しばらくしてから再度お試しください。",
         "connectionErrorTitle": "接続エラー",
         "connectionErrorMessage": "デッキを読み込めませんでした。接続を確認して再度お試しください。",
-        "tryAgain": "再試行"
+        "tryAgain": "再試行",
+        "duplicateFailed": "デッキの複製に失敗しました。もう一度お試しください。",
+        "deckCreated": "デッキを作成しました！",
+        "changesSaved": "変更を保存しました",
+        "saveFailed": "変更の保存に失敗しました",
+        "onlyOwnerCanDelete": "このデッキを削除できるのは所有者のみです。"
     },
     "LessonBuilder": {
         "editDeckTitle": "デッキを編集",
@@ -330,7 +341,10 @@
         "multiModalIngestion": "マルチモーダル取り込み",
         "multiModalDescription": "画像から自動で単語を抽出し、ファイルも即座に同期処理します。",
         "analyzing": "解析中...",
-        "processFiles": "{count, plural, other {#件のファイルを処理}}"
+        "processFiles": "{count, plural, other {#件のファイルを処理}}",
+        "atomicViolation": "1枚のカードにつき1語（1フレーズ）という原則に違反しているカードがあります。",
+        "titleRequired": "タイトルは必須です",
+        "deleteDeckConfirm": "このデッキを削除してもよろしいですか？"
     },
     "ShareModal": {
         "peopleWithAccess": "アクセスできる人",
@@ -350,7 +364,21 @@
             "commenter": "このデッキのアイテムにコメントできます。",
             "viewer": "このデッキを学習できますが、編集はできません。"
         },
-        "collaborators": "共同編集者"
+        "collaborators": "共同編集者",
+        "accessRestricted": "アクセスを制限しました",
+        "linkSharingEnabled": "リンク共有を有効にしました",
+        "deckIsPublic": "デッキを公開しました",
+        "privacyUpdateFailed": "プライバシー設定の更新に失敗しました",
+        "defaultRoleSet": "デフォルトの権限を「{role}」に設定しました",
+        "publicRoleFailed": "公開時の権限の更新に失敗しました",
+        "permissionsUpdated": "共同編集者の権限を更新しました",
+        "permissionsFailed": "権限の更新に失敗しました",
+        "inviteSent": "{email}に招待を送信しました",
+        "inviteFailed": "招待の送信に失敗しました",
+        "inviteRevoked": "招待を取り消しました",
+        "revokeFailed": "招待の取り消しに失敗しました",
+        "cannotInviteSelf": "自分自身を招待することはできません。",
+        "sendInviteFailed": "招待の送信に失敗しました。もう一度お試しください。"
     },
     "FlashcardComments": {
         "comments": "コメント",
@@ -375,7 +403,18 @@
         "edit": "編集",
         "delete": "削除",
         "deleteThreadConfirm": "このコメントと返信{count}件を削除しますか？",
-        "cancel": "キャンセル"
+        "cancel": "キャンセル",
+        "connectionLost": "コメントへの接続が切断されました。再接続しています...",
+        "commentResolved": "コメントを解決済みにしました",
+        "commentDeleted": "コメントを削除しました",
+        "permissionDenied": "この操作を行う権限がありません。",
+        "commentNotFound": "コメントが見つかりません。削除された可能性があります。",
+        "networkError": "ネットワークエラーです。接続を確認してください。",
+        "addCommentFailed": "コメントの追加に失敗しました。",
+        "addReplyFailed": "返信の追加に失敗しました。",
+        "resolveCommentFailed": "コメントの解決に失敗しました。",
+        "editCommentFailed": "コメントの編集に失敗しました。",
+        "deleteCommentFailed": "コメントの削除に失敗しました。"
     },
     "ProfilePage": {
         "title": "プロフィール",
@@ -418,7 +457,10 @@
         "unread": "未読",
         "dismiss": "通知を削除",
         "accept": "承認",
-        "decline": "拒否"
+        "decline": "拒否",
+        "cleared": "{count, plural, other {#件の通知を削除しました。}}",
+        "dismissed": "通知を削除しました。",
+        "toastRegion": "通知"
     },
     "CommandPalette": {
         "title": "コマンドパレット",

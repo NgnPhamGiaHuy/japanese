@@ -37,6 +37,7 @@ import type { FlashCard } from "@/features/flashcard/types";
  */
 export default function FlashcardEditPage({ params }: { params: Promise<{ id: string }> }) {
     const t = useTranslations("FlashcardDetail");
+    const tCommon = useTranslations("Common");
     const { id } = use(params);
     const { showAlert } = useAlert();
     const router = useRouter();
@@ -136,25 +137,25 @@ export default function FlashcardEditPage({ params }: { params: Promise<{ id: st
             onSave={async (updatedLesson, updatedCards, isNew) => {
                 try {
                     await saveFullLesson(updatedLesson, updatedCards, isNew);
-                    showAlert("success", isNew ? "Deck created!" : "Changes saved");
+                    showAlert("success", isNew ? t("deckCreated") : t("changesSaved"));
                     handleBack();
                 } catch (err) {
                     console.error("[EditPage] Save failed:", err);
-                    showAlert("error", "Failed to save changes");
+                    showAlert("error", t("saveFailed"));
                 }
             }}
             onDelete={async () => {
                 if (!isSharedEdit) {
                     try {
                         await deleteLesson(id);
-                        showAlert("success", "Deck deleted");
+                        showAlert("success", tCommon("deckDeleted"));
                         handleBack();
                     } catch (err) {
                         console.error("[EditPage] Delete failed:", err);
-                        showAlert("error", "Failed to delete deck");
+                        showAlert("error", tCommon("deleteDeckFailed"));
                     }
                 } else {
-                    showAlert("error", "Only the owner can delete this deck.");
+                    showAlert("error", t("onlyOwnerCanDelete"));
                 }
             }}
             onClose={handleBack}

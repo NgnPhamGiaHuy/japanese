@@ -1,7 +1,19 @@
+import { NextIntlClientProvider } from "next-intl";
+
 import { describe, expect, test, vi } from "vitest";
 import { render } from "vitest-browser-react";
 
+import messages from "@/messages/en.json";
 import { AlertProvider, useAlert } from "./AlertProvider";
+
+/** AlertProvider translates its toast-region aria-label, so it needs locale context. */
+function withIntl(children: React.ReactNode) {
+    return (
+        <NextIntlClientProvider locale="en" messages={messages}>
+            {children}
+        </NextIntlClientProvider>
+    );
+}
 
 function Trigger() {
     const { showAlert } = useAlert();
@@ -36,9 +48,11 @@ function TriggerWithAction({ onAction }: { onAction: () => void }) {
 describe("AlertProvider (sonner)", () => {
     test("showAlert renders the message via sonner's toast container", async () => {
         const screen = await render(
-            <AlertProvider>
-                <Trigger />
-            </AlertProvider>,
+            withIntl(
+                <AlertProvider>
+                    <Trigger />
+                </AlertProvider>,
+            ),
         );
 
         await screen.getByRole("button", { name: "Trigger" }).click();
@@ -49,9 +63,11 @@ describe("AlertProvider (sonner)", () => {
     test("the inline action fires its callback and dismisses the toast", async () => {
         const onAction = vi.fn();
         const screen = await render(
-            <AlertProvider>
-                <TriggerWithAction onAction={onAction} />
-            </AlertProvider>,
+            withIntl(
+                <AlertProvider>
+                    <TriggerWithAction onAction={onAction} />
+                </AlertProvider>,
+            ),
         );
 
         await screen.getByRole("button", { name: "Trigger" }).click();
@@ -65,9 +81,11 @@ describe("AlertProvider (sonner)", () => {
 
     test("the close button dismisses the toast", async () => {
         const screen = await render(
-            <AlertProvider>
-                <Trigger />
-            </AlertProvider>,
+            withIntl(
+                <AlertProvider>
+                    <Trigger />
+                </AlertProvider>,
+            ),
         );
 
         await screen.getByRole("button", { name: "Trigger" }).click();

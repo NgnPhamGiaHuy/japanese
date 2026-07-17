@@ -212,6 +212,7 @@ export function NotificationRow({
     onRefresh: () => void;
 }) {
     const t = useTranslations("NotificationsPage");
+    const tCommon = useTranslations("Common");
     const router = useRouter();
     const { showAlert } = useAlert();
     const [isDeleting, startDeleteTransition] = useTransition();
@@ -253,8 +254,11 @@ export function NotificationRow({
                     ),
                 );
             // Offer Undo — the doc is only soft-deleted, so restore is instant.
-            showAlert("info", "Notification dismissed.", {
-                action: { label: "Undo", onClick: () => void restoreNotifications(userId, [id]) },
+            showAlert("info", t("dismissed"), {
+                action: {
+                    label: tCommon("undo"),
+                    onClick: () => void restoreNotifications(userId, [id]),
+                },
                 durationMs: 6000,
             });
         });

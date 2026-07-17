@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useForm } from "react-hook-form";
 
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -23,6 +24,7 @@ interface UseShareInvitesParams {
  * invite/revoke service calls — so the component stays UI-only.
  */
 export function useShareInvites({ lesson, setSaving }: UseShareInvitesParams) {
+    const t = useTranslations("ShareModal");
     const { user } = useAppStore();
     const { showAlert } = useAlert();
     const form = useForm<ShareInvite>({
@@ -34,7 +36,7 @@ export function useShareInvites({ lesson, setSaving }: UseShareInvitesParams) {
     const handleInvite = handleSubmit(async (data) => {
         // Don't invite the owner
         if (data.email === user?.email?.toLowerCase()) {
-            setError("email", { message: "You can't invite yourself." });
+            setError("email", { message: t("cannotInviteSelf") });
             return;
         }
 
@@ -52,11 +54,11 @@ export function useShareInvites({ lesson, setSaving }: UseShareInvitesParams) {
                 lesson.title,
             );
             reset({ email: "", role: data.role });
-            showAlert("success", `Invitation sent to ${data.email}`);
+            showAlert("success", t("inviteSent", { email: data.email }));
         } catch (err) {
             console.error("[ShareModal] handleInvite failed:", err);
-            setError("email", { message: "Failed to send invite. Please try again." });
-            showAlert("error", "Invitation failed");
+            setError("email", { message: t("sendInviteFailed") });
+            showAlert("error", t("inviteFailed"));
         } finally {
             setSaving(false);
         }
@@ -68,10 +70,10 @@ export function useShareInvites({ lesson, setSaving }: UseShareInvitesParams) {
         setSaving(true);
         try {
             await revokeEmailInvite(ownerId, lesson.id, email);
-            showAlert("success", "Invitation revoked");
+            showAlert("success", t("inviteRevoked"));
         } catch (err) {
             console.error("[ShareModal] handleRevokeEmailInvite failed:", err);
-            showAlert("error", "Failed to revoke invitation");
+            showAlert("error", t("revokeFailed"));
         } finally {
             setSaving(false);
         }

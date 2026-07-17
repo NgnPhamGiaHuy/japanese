@@ -217,7 +217,7 @@ export default function SharedLessonPageClient({
             router.back();
         } catch (err) {
             console.error("[SharedLessonPage] Duplicate failed:", err);
-            showAlert("error", "Failed to duplicate deck. Please try again.");
+            showAlert("error", t("duplicateFailed"));
         } finally {
             setSaving(false);
         }
@@ -225,7 +225,7 @@ export default function SharedLessonPageClient({
 
     const handleCopyLink = async () => {
         await copyLink(window.location.href);
-        showAlert("success", "Link copied to clipboard");
+        showAlert("success", tCommon("linkCopiedToClipboard"));
     };
 
     return (

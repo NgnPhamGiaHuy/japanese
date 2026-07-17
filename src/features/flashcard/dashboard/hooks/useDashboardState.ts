@@ -6,6 +6,7 @@
  * Supports three tabs: personal, shared, and discover (public decks from all users).
  */
 
+import { useTranslations } from "next-intl";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 
@@ -25,6 +26,7 @@ import type { GameStatEntry } from "@/features/game/services";
 type ActiveTab = "personal" | "shared" | "discover";
 
 export function useDashboardState() {
+    const t = useTranslations("FlashcardDashboard");
     const { lessons, sharedLessons, loading, error, reorderLessons } = useLessons();
     const { publicLessons, loading: publicLoading, error: publicError } = usePublicLessons();
     const { user } = useAppStore();
@@ -34,7 +36,7 @@ export function useDashboardState() {
 
     const tabParam = searchParams.get("tab") as ActiveTab | null;
     const activeTab: ActiveTab =
-        tabParam && DASHBOARD_TABS.some((t) => t.id === tabParam) ? tabParam : DEFAULT_TAB_ID;
+        tabParam && DASHBOARD_TABS.some((tab) => tab.id === tabParam) ? tabParam : DEFAULT_TAB_ID;
 
     const handleTabChange = (tab: ActiveTab) => {
         router.replace(`/flashcard?tab=${tab}`, { scroll: false });
@@ -92,7 +94,7 @@ export function useDashboardState() {
         } catch (err) {
             console.error("[handleLessonsReorder] Reorder failed:", err);
             setOrderedLessons(lessons);
-            showAlert("error", "Reorder failed");
+            showAlert("error", t("reorderFailed"));
         }
     };
 

@@ -1,3 +1,4 @@
+import { useTranslations } from "next-intl";
 import { useMemo, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 
@@ -77,6 +78,8 @@ export function useLessonBuilder({
     );
     const [saving, setSaving] = useState(false);
 
+    const t = useTranslations("LessonBuilder");
+    const tCommon = useTranslations("Common");
     const aiCard = useAICard();
     const { user } = useAppStore();
     const { showAlert } = useAlert();
@@ -192,29 +195,25 @@ export function useLessonBuilder({
                     deleteCardImage(path).catch(() => {});
                 clearedImagePathsRef.current = [];
             } catch (err) {
-                if (err instanceof CardValidationError)
-                    showAlert(
-                        "error",
-                        "Some cards violate atomic principle (one word/phrase per card).",
-                    );
+                if (err instanceof CardValidationError) showAlert("error", t("atomicViolation"));
                 else console.error(err);
             } finally {
                 setSaving(false);
             }
         },
-        () => showAlert("warning", formState.errors.title?.message ?? "Title is required"),
+        () => showAlert("warning", formState.errors.title?.message ?? t("titleRequired")),
     );
 
     const handleDelete = async () => {
         if (!onDelete || !initialLesson?.id) return;
-        if (!confirm("Are you sure you want to delete this deck?")) return;
+        if (!confirm(t("deleteDeckConfirm"))) return;
         setSaving(true);
         try {
             await onDelete(initialLesson.id);
             onClose();
         } catch (err) {
             console.error(err);
-            showAlert("error", "Failed to delete deck");
+            showAlert("error", tCommon("deleteDeckFailed"));
         } finally {
             setSaving(false);
         }

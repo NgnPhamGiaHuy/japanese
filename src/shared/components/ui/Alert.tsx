@@ -10,6 +10,8 @@
  * @example
  * <Alert type="success" message="File saved!" onClose={handleDismiss} />
  */
+import { useTranslations } from "next-intl";
+
 import { AlertCircle, CheckCircle, Info, X, XCircle } from "lucide-react";
 
 import Button from "./Button";
@@ -70,6 +72,7 @@ const CONFIG: Record<
 };
 
 const Alert = ({ type, message, onClose, action }: AlertProps) => {
+    const t = useTranslations("Common");
     const { icon, bg, border, text, iconColor } = CONFIG[type];
 
     return (
@@ -97,7 +100,7 @@ const Alert = ({ type, message, onClose, action }: AlertProps) => {
             <Button
                 variant="ghost"
                 onClick={onClose}
-                aria-label="Dismiss"
+                aria-label={t("dismiss")}
                 className="!p-1.5 opacity-40 transition-all hover:opacity-100"
                 icon={X}
             />

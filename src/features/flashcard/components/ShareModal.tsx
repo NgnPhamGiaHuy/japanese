@@ -163,7 +163,7 @@ const ShareModal = ({ lesson, onShareLink, onUpdateRoles, onClose }: ShareModalP
     const handleCopy = async () => {
         if (!shareLink) return;
         await copyLink(shareLink);
-        showAlert("success", "Link copied to clipboard");
+        showAlert("success", tCommon("linkCopiedToClipboard"));
     };
 
     /** Handles privacy mode change — persists to Firestore immediately. */
@@ -181,15 +181,15 @@ const ShareModal = ({ lesson, onShareLink, onUpdateRoles, onClose }: ShareModalP
                 isPublic: newIsPublic,
             });
             const labels: Record<PrivacyMode, string> = {
-                restricted: "Access restricted",
-                link: "Link sharing enabled",
-                public: "Deck is now public",
+                restricted: t("accessRestricted"),
+                link: t("linkSharingEnabled"),
+                public: t("deckIsPublic"),
             };
             showAlert("success", labels[mode]);
         } catch (err) {
             console.error("[ShareModal] handleSavePrivacyMode failed:", err);
             setPrivacyMode(prev);
-            showAlert("error", "Failed to update privacy settings");
+            showAlert("error", t("privacyUpdateFailed"));
         } finally {
             setSaving(false);
         }
@@ -202,10 +202,10 @@ const ShareModal = ({ lesson, onShareLink, onUpdateRoles, onClose }: ShareModalP
         try {
             await onShareLink(allowLinkAccess, role, isPublicMode);
             auditClient(ActivityAction.SHARE_PRIVACY_UPDATED, { publicRole: role });
-            showAlert("success", `Default role set to ${role}`);
+            showAlert("success", t("defaultRoleSet", { role: tDetail(`roleName.${role}`) }));
         } catch (err) {
             console.error("[ShareModal] handleSavePublicRole failed:", err);
-            showAlert("error", "Failed to update public role");
+            showAlert("error", t("publicRoleFailed"));
         } finally {
             setSaving(false);
         }
@@ -226,12 +226,12 @@ const ShareModal = ({ lesson, onShareLink, onUpdateRoles, onClose }: ShareModalP
             auditClient(ActivityAction.SHARE_ROLES_UPDATED, {
                 collaboratorCount: newCollaborators.length,
             });
-            showAlert("success", "Collaborator permissions updated");
+            showAlert("success", t("permissionsUpdated"));
             return true;
         } catch (err) {
             console.error("[ShareModal] commitRolesUpdate failed:", err);
             setRoles(lesson.roles || {});
-            showAlert("error", "Failed to update permissions");
+            showAlert("error", t("permissionsFailed"));
             return false;
         } finally {
             setSaving(false);
