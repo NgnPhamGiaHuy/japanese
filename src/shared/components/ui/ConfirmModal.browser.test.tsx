@@ -1,8 +1,19 @@
+import { NextIntlClientProvider } from "next-intl";
+
 import { describe, expect, test, vi } from "vitest";
 import { render } from "vitest-browser-react";
 import { userEvent } from "vitest/browser";
 
+import messages from "@/messages/en.json";
 import ConfirmModal from "./ConfirmModal";
+
+function withIntl(children: React.ReactNode) {
+    return (
+        <NextIntlClientProvider locale="en" messages={messages}>
+            {children}
+        </NextIntlClientProvider>
+    );
+}
 
 /**
  * Real-browser test — mirrors Modal.browser.test.tsx as the safety net for
@@ -14,13 +25,15 @@ describe("ConfirmModal", () => {
         const onClose = vi.fn();
         const onConfirm = vi.fn();
         const screen = await render(
-            <ConfirmModal
-                isOpen
-                onClose={onClose}
-                onConfirm={onConfirm}
-                title="Delete Deck?"
-                message="This action is irreversible."
-            />,
+            withIntl(
+                <ConfirmModal
+                    isOpen
+                    onClose={onClose}
+                    onConfirm={onConfirm}
+                    title="Delete Deck?"
+                    message="This action is irreversible."
+                />,
+            ),
         );
 
         const dialog = screen.getByRole("dialog");
@@ -42,13 +55,15 @@ describe("ConfirmModal", () => {
         const onClose = vi.fn();
         const onConfirm = vi.fn();
         await render(
-            <ConfirmModal
-                isOpen
-                onClose={onClose}
-                onConfirm={onConfirm}
-                title="Delete Deck?"
-                message="This action is irreversible."
-            />,
+            withIntl(
+                <ConfirmModal
+                    isOpen
+                    onClose={onClose}
+                    onConfirm={onConfirm}
+                    title="Delete Deck?"
+                    message="This action is irreversible."
+                />,
+            ),
         );
 
         await expect.poll(() => document.activeElement?.tagName).not.toBe("BODY");
@@ -58,13 +73,15 @@ describe("ConfirmModal", () => {
         const onClose = vi.fn();
         const onConfirm = vi.fn();
         await render(
-            <ConfirmModal
-                isOpen
-                onClose={onClose}
-                onConfirm={onConfirm}
-                title="Delete Deck?"
-                message="This action is irreversible."
-            />,
+            withIntl(
+                <ConfirmModal
+                    isOpen
+                    onClose={onClose}
+                    onConfirm={onConfirm}
+                    title="Delete Deck?"
+                    message="This action is irreversible."
+                />,
+            ),
         );
 
         await userEvent.keyboard("{Escape}");
@@ -75,14 +92,16 @@ describe("ConfirmModal", () => {
         const onClose = vi.fn();
         const onConfirm = vi.fn();
         await render(
-            <ConfirmModal
-                isOpen
-                loading
-                onClose={onClose}
-                onConfirm={onConfirm}
-                title="Delete Deck?"
-                message="This action is irreversible."
-            />,
+            withIntl(
+                <ConfirmModal
+                    isOpen
+                    loading
+                    onClose={onClose}
+                    onConfirm={onConfirm}
+                    title="Delete Deck?"
+                    message="This action is irreversible."
+                />,
+            ),
         );
 
         await userEvent.keyboard("{Escape}");
@@ -93,16 +112,18 @@ describe("ConfirmModal", () => {
         const onClose = vi.fn();
         const onConfirm = vi.fn();
         const screen = await render(
-            <div>
-                <button type="button">Outside button (must never receive focus)</button>
-                <ConfirmModal
-                    isOpen
-                    onClose={onClose}
-                    onConfirm={onConfirm}
-                    title="Delete Deck?"
-                    message="This action is irreversible."
-                />
-            </div>,
+            withIntl(
+                <div>
+                    <button type="button">Outside button (must never receive focus)</button>
+                    <ConfirmModal
+                        isOpen
+                        onClose={onClose}
+                        onConfirm={onConfirm}
+                        title="Delete Deck?"
+                        message="This action is irreversible."
+                    />
+                </div>,
+            ),
         );
 
         const dialog = screen.getByRole("dialog").element();

@@ -6,6 +6,7 @@
 
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 
 import { CheckCircle, Circle, Edit2, MessageSquare, Trash2 } from "lucide-react";
@@ -13,6 +14,7 @@ import { CheckCircle, Circle, Edit2, MessageSquare, Trash2 } from "lucide-react"
 import { Button } from "@/shared/components/ui";
 import CommentInput from "./CommentInput";
 
+import type { ReactNode } from "react";
 import type { Comment, Reply } from "../types/flashcard.types";
 
 export interface CommentItemProps {
@@ -92,11 +94,15 @@ const CommentItem = ({
     onEdit,
     onDelete,
 }: CommentItemProps) => {
+    const t = useTranslations("FlashcardComments");
+    const tCommon = useTranslations("Common");
     const [isEditing, setIsEditing] = useState(false);
     const [isReplying, setIsReplying] = useState(false);
 
     const isAuthor = comment.userId === currentUserId;
-    const displayName = isAuthor ? "You" : comment.authorName || comment.authorEmail || "Unknown";
+    const displayName = isAuthor
+        ? tCommon("you")
+        : comment.authorName || comment.authorEmail || tCommon("unknown");
     const initial = isAuthor
         ? "Y"
         : (comment.authorName?.[0] ?? comment.authorEmail?.[0] ?? "?").toUpperCase();
@@ -148,11 +154,13 @@ const CommentItem = ({
                         <span className="text-xs text-gray-400">
                             {relativeTime(comment.createdAt)}
                         </span>
-                        {isEdited && <span className="text-xs text-gray-400 italic">(edited)</span>}
+                        {isEdited && (
+                            <span className="text-xs text-gray-400 italic">{t("edited")}</span>
+                        )}
                         {resolved && (
                             <span className="flex items-center gap-0.5 text-xs font-bold text-emerald-600">
                                 <CheckCircle size={11} />
-                                resolved
+                                {t("resolved")}
                             </span>
                         )}
                     </div>
@@ -161,7 +169,7 @@ const CommentItem = ({
                     {isEditing ? (
                         <div className="mb-1">
                             <CommentInput
-                                placeholder="Edit your comment…"
+                                placeholder={t("editCommentPlaceholder")}
                                 onSubmit={handleEditSave}
                                 onCancel={() => setIsEditing(false)}
                                 initialValue={comment.content}
@@ -182,7 +190,7 @@ const CommentItem = ({
                             {canReply && !isReplying && (
                                 <ActionBtn
                                     icon={<MessageSquare size={12} />}
-                                    label="Reply"
+                                    label={t("reply")}
                                     onClick={() => setIsReplying(true)}
                                 />
                             )}
@@ -191,7 +199,7 @@ const CommentItem = ({
                                     icon={
                                         resolved ? <Circle size={12} /> : <CheckCircle size={12} />
                                     }
-                                    label={resolved ? "Unresolve" : "Resolve"}
+                                    label={resolved ? t("unresolve") : t("resolve")}
                                     onClick={onResolve!}
                                     color="text-emerald-600 hover:text-emerald-700"
                                 />
@@ -199,7 +207,7 @@ const CommentItem = ({
                             {canEdit && (
                                 <ActionBtn
                                     icon={<Edit2 size={12} />}
-                                    label="Edit"
+                                    label={t("edit")}
                                     onClick={() => setIsEditing(true)}
                                     color="text-blue-500 hover:text-blue-700"
                                 />
@@ -207,7 +215,7 @@ const CommentItem = ({
                             {canDelete && (
                                 <ActionBtn
                                     icon={<Trash2 size={12} />}
-                                    label="Delete"
+                                    label={t("delete")}
                                     onClick={onDelete!}
                                     color="text-red-400 hover:text-red-600"
                                 />
@@ -219,7 +227,7 @@ const CommentItem = ({
                     {isReplying && (
                         <div className="mt-2">
                             <CommentInput
-                                placeholder="Write a reply…"
+                                placeholder={t("writeReplyPlaceholder")}
                                 onSubmit={handleReplySave}
                                 onCancel={() => setIsReplying(false)}
                                 themeColor={themeColor}
@@ -239,7 +247,7 @@ const ActionBtn = ({
     onClick,
     color,
 }: {
-    icon: any;
+    icon: ReactNode;
     label: string;
     onClick: () => void;
     color?: string;

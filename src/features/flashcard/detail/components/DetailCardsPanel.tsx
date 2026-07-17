@@ -8,6 +8,7 @@
 
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 
 import {
@@ -37,6 +38,7 @@ const DetailCardsPanel = ({
     onSelectCard,
     onReorderCard,
 }: DetailCardsPanelProps) => {
+    const t = useTranslations("FlashcardDetail");
     const { lesson, cards, ownerId, lessonId, role } = ctx;
     const themeHex = lesson.themeColor || "#1cb0f6";
     const canEdit = role === "owner" || role === "editor";
@@ -82,7 +84,7 @@ const DetailCardsPanel = ({
     return (
         <main className="flex flex-col">
             <h2 className="text-text mb-4 border-b-2 border-gray-200 pb-2 text-xl font-black">
-                Preview ({orderedCards.length} Cards)
+                {t("cardsPreview", { count: orderedCards.length })}
             </h2>
             <div className="grid gap-4 sm:grid-cols-2">
                 <DndContext

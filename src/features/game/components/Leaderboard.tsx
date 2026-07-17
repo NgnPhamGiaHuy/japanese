@@ -33,6 +33,7 @@ const Skeleton = () => (
 
 const Leaderboard = ({ gameMode, currentUserId, accentColor = "#ff9600" }: LeaderboardProps) => {
     const t = useTranslations("Game");
+    const tCommon = useTranslations("Common");
     const { entries, loading, error } = useLeaderboard(gameMode);
 
     return (
@@ -96,7 +97,7 @@ const Leaderboard = ({ gameMode, currentUserId, accentColor = "#ff9600" }: Leade
                                         {entry.displayName}
                                         {isMe && (
                                             <span className="ml-1 text-xs font-bold opacity-50">
-                                                ({t("you")})
+                                                ({tCommon("you")})
                                             </span>
                                         )}
                                     </span>

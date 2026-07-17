@@ -8,6 +8,8 @@
 
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { GripVertical } from "lucide-react";
@@ -25,6 +27,7 @@ const SortableCardItem = ({
     lessonId,
     canReorder,
 }: SortableCardItemProps) => {
+    const t = useTranslations("FlashcardDetail");
     const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
         id: card.id,
         disabled: !canReorder,
@@ -53,7 +56,7 @@ const SortableCardItem = ({
                     {...attributes}
                     {...listeners}
                     className="focus-visible:ring-katakana absolute top-3 right-3 z-10 flex h-9 w-9 cursor-pointer items-center justify-center rounded-full bg-gray-100 text-gray-400 transition-colors hover:bg-gray-200 hover:text-gray-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 active:cursor-grabbing"
-                    aria-label="Reorder card"
+                    aria-label={t("reorderCard")}
                     onClick={(e) => e.stopPropagation()}
                 >
                     <GripVertical size={18} />

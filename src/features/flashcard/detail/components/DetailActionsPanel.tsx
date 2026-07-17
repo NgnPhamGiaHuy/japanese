@@ -9,6 +9,8 @@
 
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import { BookOpen, Copy, CopyPlus, Edit2, Globe2, Info, Loader2, Lock } from "lucide-react";
 
 import { Link } from "@/i18n/navigation";
@@ -26,6 +28,8 @@ const DetailActionsPanel = ({
     onManageAccess,
     saving = false,
 }: DetailActionsPanelProps) => {
+    const t = useTranslations("FlashcardDetail");
+    const tCommon = useTranslations("Common");
     const { lesson, role, isOwner } = ctx;
     const themeHex = lesson.themeColor || "#1cb0f6";
     const canEdit = role === "owner" || role === "editor";
@@ -40,8 +44,8 @@ const DetailActionsPanel = ({
                     <ActionRow
                         icon={Edit2}
                         iconWrapperStyle={themedIconStyle}
-                        title="Edit Deck"
-                        subtitle="Add, remove, or update cards"
+                        title={t("editDeck")}
+                        subtitle={t("editDeckSubtitle")}
                         onClick={onEdit}
                     />
                 )}
@@ -55,19 +59,15 @@ const DetailActionsPanel = ({
                         }
                         title={
                             <span className="flex items-center gap-2">
-                                <span>{isShared ? "Manage Access" : "Share Deck"}</span>
+                                <span>{isShared ? t("manageAccess") : tCommon("shareDeck")}</span>
                                 {isShared && (
                                     <span className="text-hiragana rounded-lg bg-[#ebf8e6] px-2 py-0.5 text-xs font-black tracking-wider uppercase">
-                                        Public
+                                        {t("publicBadge")}
                                     </span>
                                 )}
                             </span>
                         }
-                        subtitle={
-                            isShared
-                                ? "Control who can view or comment"
-                                : "Enable link sharing for this deck"
-                        }
+                        subtitle={isShared ? t("manageAccessSubtitle") : t("shareDeckSubtitle")}
                         onClick={onManageAccess}
                     />
                 )}
@@ -77,8 +77,8 @@ const DetailActionsPanel = ({
                     <ActionRow
                         icon={Copy}
                         iconWrapperClassName="bg-gray-100 text-gray-600"
-                        title={linkCopied ? "Link Copied!" : "Copy Share Link"}
-                        subtitle="Share this deck with others"
+                        title={linkCopied ? t("linkCopied") : t("copyShareLink")}
+                        subtitle={t("copyShareLinkSubtitle")}
                         onClick={onCopyLink}
                     />
                 )}
@@ -107,9 +107,9 @@ const DetailActionsPanel = ({
                         className="text-xs font-black tracking-widest uppercase"
                         style={{ color: themeHex }}
                     >
-                        Your Role
+                        {t("yourRole")}
                     </p>
-                    <p className="text-text font-black capitalize">{role}</p>
+                    <p className="text-text font-black capitalize">{t(`roleName.${role}`)}</p>
                 </div>
             </div>
 
@@ -127,28 +127,15 @@ const DetailActionsPanel = ({
                         )}
                     </div>
                     <div>
-                        <p className="text-text font-black">
-                            {role === "editor"
-                                ? "Editor Access"
-                                : role === "commenter"
-                                  ? "Commenter Access"
-                                  : "Viewer Access"}
-                        </p>
+                        <p className="text-text font-black">{t(`roleAccessTitle.${role}`)}</p>
                         <p className="text-muted mt-0.5 text-xs font-bold">
-                            {canEdit
-                                ? "You have edit rights to this deck."
-                                : role === "commenter"
-                                  ? "You can comment but not edit cards."
-                                  : "View only — no editing or commenting."}
+                            {t(`roleAccessSubtitle.${role}`)}
                         </p>
                     </div>
                 </div>
                 <div className="flex items-start gap-3 bg-gray-50 p-4">
                     <Info size={16} className="text-survival mt-0.5 shrink-0" />
-                    <p className="text-xs font-bold text-gray-500">
-                        Your game progress and learning data is strictly separate from the
-                        owner&apos;s original metrics.
-                    </p>
+                    <p className="text-xs font-bold text-gray-500">{t("progressSeparateNote")}</p>
                 </div>
             </div>
 
@@ -158,8 +145,8 @@ const DetailActionsPanel = ({
                     <ActionRow
                         icon={Edit2}
                         iconWrapperStyle={themedIconStyle}
-                        title="Edit Deck Content"
-                        subtitle="Modify for all users"
+                        title={t("editDeckContent")}
+                        subtitle={t("editDeckContentSubtitle")}
                         onClick={onEdit}
                     />
                 )}
@@ -168,8 +155,8 @@ const DetailActionsPanel = ({
                         icon={saving ? Loader2 : CopyPlus}
                         iconClassName={saving ? "animate-spin" : undefined}
                         iconWrapperClassName="bg-gray-100 text-gray-600"
-                        title={saving ? "Duplicating..." : "Duplicate Deck"}
-                        subtitle="Save a copy to your collection"
+                        title={saving ? t("duplicating") : t("duplicateDeck")}
+                        subtitle={t("duplicateDeckSubtitle")}
                         onClick={onDuplicate}
                         disabled={saving}
                     />
@@ -178,8 +165,8 @@ const DetailActionsPanel = ({
                         <ActionRow
                             icon={CopyPlus}
                             iconWrapperClassName="bg-gray-100 text-gray-600"
-                            title="Log in to Duplicate"
-                            subtitle="Sign in to save this deck"
+                            title={t("logInToDuplicate")}
+                            subtitle={t("signInToSave")}
                         />
                     </Link>
                 ) : null}
@@ -187,8 +174,8 @@ const DetailActionsPanel = ({
                     <ActionRow
                         icon={Copy}
                         iconWrapperClassName="bg-gray-100 text-gray-600"
-                        title={linkCopied ? "Link Copied!" : "Copy Share Link"}
-                        subtitle="Share this deck with others"
+                        title={linkCopied ? t("linkCopied") : t("copyShareLink")}
+                        subtitle={t("copyShareLinkSubtitle")}
                         onClick={onCopyLink}
                     />
                 )}

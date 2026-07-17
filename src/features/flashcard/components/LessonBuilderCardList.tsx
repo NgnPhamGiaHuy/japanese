@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import React from "react";
 
 import {
@@ -52,6 +53,7 @@ const LessonBuilderCardList: React.FC<LessonBuilderCardListProps> = ({
     onAIFill,
     onImageClear,
 }) => {
+    const t = useTranslations("LessonBuilder");
     const sensors = useSensors(
         useSensor(MouseSensor, { activationConstraint: { distance: 8 } }),
         useSensor(TouchSensor, { activationConstraint: { delay: 250, tolerance: 5 } }),
@@ -73,7 +75,7 @@ const LessonBuilderCardList: React.FC<LessonBuilderCardListProps> = ({
         <div className="space-y-6">
             <div className="flex items-center justify-between px-2">
                 <h3 className="text-text text-xl font-black sm:text-2xl">
-                    Cards <span className="text-gray-300">({cards.length})</span>
+                    {t("cards")} <span className="text-gray-300">({cards.length})</span>
                 </h3>
                 <Button
                     variant="ghost"
@@ -91,7 +93,7 @@ const LessonBuilderCardList: React.FC<LessonBuilderCardListProps> = ({
                     }}
                     className="!text-xs !font-black tracking-widest !text-[var(--theme-color)] !uppercase hover:bg-[var(--theme-color)]/5 sm:!text-xs"
                 >
-                    Add Card
+                    {t("addCard")}
                 </Button>
             </div>
 
@@ -146,7 +148,7 @@ const LessonBuilderCardList: React.FC<LessonBuilderCardListProps> = ({
                     className="flex w-full items-center justify-center gap-3 rounded-3xl p-6 text-xs font-black tracking-widest text-gray-400 uppercase transition-all group-hover:text-[var(--theme-color)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-color)] focus-visible:ring-offset-2 sm:rounded-4xl sm:p-8 sm:text-sm"
                 >
                     <Plus size={18} className="sm:size-5" />
-                    Add New Flashcard
+                    {t("addNewFlashcard")}
                 </button>
             </m.div>
         </div>

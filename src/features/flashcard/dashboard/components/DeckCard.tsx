@@ -29,6 +29,7 @@ const DeckCard = ({
     onShare,
 }: DeckCardProps) => {
     const t = useTranslations("FlashcardDashboard");
+    const tCommon = useTranslations("Common");
     const { user } = useAppStore();
     const themeColor = lesson.themeColor || "#1cb0f6";
     const visibility = useVisibility(lesson);
@@ -38,14 +39,14 @@ const DeckCard = ({
     const canShare = resolvedRole === "owner";
     const canDelete = resolvedRole === "owner";
 
-    const createdByName = lesson.ownerName ?? t("unknown");
+    const createdByName = lesson.ownerName ?? tCommon("unknown");
     const createdByAvatar = lesson.ownerAvatar ?? null;
     const shouldShowSharedBy =
         !!lesson.lastSharedBy && (!lesson.ownerId || lesson.lastSharedBy !== lesson.ownerId);
-    const sharedByName = lesson.lastSharedByName ?? t("unknown");
+    const sharedByName = lesson.lastSharedByName ?? tCommon("unknown");
     const sharedByAvatar = lesson.lastSharedByAvatar ?? null;
     const sharedBySubtitle =
-        user && lesson.lastSharedBy === user.uid ? t("youShared") : t("sharedBy");
+        user && lesson.lastSharedBy === user.uid ? t("youShared") : tCommon("sharedBy");
 
     const resolvedShareId =
         lesson.shareId ||
@@ -112,7 +113,7 @@ const DeckCard = ({
                         <UserMeta
                             name={createdByName}
                             avatar={createdByAvatar}
-                            subtitle={t("createdBy")}
+                            subtitle={tCommon("createdBy")}
                             className="!gap-2"
                         />
                         {shouldShowSharedBy && (
@@ -189,7 +190,7 @@ const DeckCard = ({
                                 icon={Zap}
                                 className="w-full flex-col gap-1 px-1 py-2 text-xs md:flex-row md:gap-2 md:px-2 md:py-3 md:text-sm"
                             >
-                                <span className="truncate">{t("speed")}</span>
+                                <span className="truncate">{tCommon("speed")}</span>
                             </Button>
                         </Link>
                     </div>
@@ -211,7 +212,7 @@ const DeckCard = ({
                                 icon={Gamepad2}
                                 className="w-full flex-col gap-1 px-1 py-2 text-xs md:flex-row md:gap-2 md:px-2 md:py-3 md:text-sm"
                             >
-                                <span className="truncate">{t("match")}</span>
+                                <span className="truncate">{tCommon("match")}</span>
                             </Button>
                         </Link>
                     </div>

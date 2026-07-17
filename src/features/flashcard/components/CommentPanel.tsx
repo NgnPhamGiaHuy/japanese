@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import { MessageSquare, SlidersHorizontal } from "lucide-react";
 
 import { Button } from "@/shared/components/ui";
@@ -53,6 +55,7 @@ const CommentPanel = ({
     isOwner,
     themeColor,
 }: CommentPanelProps) => {
+    const t = useTranslations("FlashcardComments");
     const {
         comments,
         loading,
@@ -94,7 +97,7 @@ const CommentPanel = ({
             <div className="flex shrink-0 items-center justify-between border-b border-gray-100 px-4 py-3">
                 <div className="flex items-center gap-2">
                     <MessageSquare size={15} style={{ color: themeColor }} />
-                    <span className="text-text text-[13px] font-black">Comments</span>
+                    <span className="text-text text-[13px] font-black">{t("comments")}</span>
                     {comments.length > 0 && (
                         <span className="rounded-full bg-gray-100 px-1.5 py-px text-xs font-black text-gray-500">
                             {sorted.length}
@@ -111,11 +114,17 @@ const CommentPanel = ({
                                 ? "!bg-gray-100 !text-gray-700"
                                 : "!text-gray-400 hover:!text-gray-600"
                         }`}
-                        title={showResolved ? "Hide resolved" : `Show ${resolvedCount} resolved`}
+                        title={
+                            showResolved
+                                ? t("hideResolved")
+                                : t("showResolvedCount", { count: resolvedCount })
+                        }
                         icon={SlidersHorizontal}
                         iconSize={11}
                     >
-                        {showResolved ? "Hide resolved" : `${resolvedCount} resolved`}
+                        {showResolved
+                            ? t("hideResolved")
+                            : t("resolvedCount", { count: resolvedCount })}
                     </Button>
                 )}
             </div>
@@ -129,19 +138,17 @@ const CommentPanel = ({
                                 className="h-6 w-6 animate-spin rounded-full border-2 border-t-transparent"
                                 style={{ borderColor: themeColor, borderTopColor: "transparent" }}
                             />
-                            <p className="text-[12px] font-bold text-gray-400">Loading…</p>
+                            <p className="text-[12px] font-bold text-gray-400">{t("loading")}</p>
                         </div>
                     </div>
                 ) : sorted.length === 0 ? (
                     <div className="flex h-full flex-col items-center justify-center gap-2 py-8 text-center">
                         <MessageSquare size={28} className="text-gray-200" />
                         <p className="text-[13px] font-bold text-gray-400">
-                            {showResolved ? "No comments yet" : "No open comments"}
+                            {showResolved ? t("noCommentsYet") : t("noOpenComments")}
                         </p>
                         <p className="text-xs text-gray-300">
-                            {showResolved
-                                ? "Be the first to start a discussion"
-                                : "All threads are resolved"}
+                            {showResolved ? t("beFirstToDiscuss") : t("allThreadsResolved")}
                         </p>
                     </div>
                 ) : (
@@ -167,7 +174,7 @@ const CommentPanel = ({
             {/* ── Sticky input ───────────────────────────────────────────── */}
             <div className="shrink-0 border-t border-gray-100 bg-white px-3 py-3">
                 <CommentInput
-                    placeholder="Add a comment… (⌘↵ to send)"
+                    placeholder={t("addCommentPlaceholder")}
                     onSubmit={handleAdd}
                     themeColor={themeColor}
                     maxLength={2000}

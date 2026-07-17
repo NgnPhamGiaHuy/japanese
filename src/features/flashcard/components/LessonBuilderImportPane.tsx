@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import React, { useState } from "react";
 
 import { FileUp, Sparkles } from "lucide-react";
@@ -11,15 +12,17 @@ import ImportDropzone from "./ImportDropzone";
 import ImportPasteArea from "./ImportPasteArea";
 import ImportPreview from "./ImportPreview";
 
+import type { ImportRow } from "./ImportPreview";
+
 interface LessonBuilderImportPaneProps {
     inputMode: "ai" | "manual" | "paste" | "uploads";
     setInputMode: (mode: "ai" | "manual" | "paste" | "uploads") => void;
-    previewRows: any[] | null;
-    setPreviewRows: (rows: any[] | null) => void;
+    previewRows: ImportRow[] | null;
+    setPreviewRows: (rows: ImportRow[] | null) => void;
     pasteText: string;
     setPasteText: (text: string) => void;
     handleLiveSync: (text: string) => void;
-    handleImportConfirm: (rows: any[]) => void;
+    handleImportConfirm: (rows: ImportRow[]) => void;
     themeHex: string;
     existingWords: string[];
     saving: boolean;
@@ -40,6 +43,7 @@ const LessonBuilderImportPane: React.FC<LessonBuilderImportPaneProps> = ({
     saving,
     onAISuccess,
 }) => {
+    const t = useTranslations("LessonBuilder");
     const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
     const imageAI = useAIImageDeck();
 
@@ -51,14 +55,23 @@ const LessonBuilderImportPane: React.FC<LessonBuilderImportPaneProps> = ({
             const { parseCSV } = await import("../utils/parser");
             const res = await parseCSV(others[0]);
             setPreviewRows([
-                ...res.valid.map((r, i) => ({
-                    id: `v_${Date.now()}_${i}`,
-                    ...r,
-                    isInvalid: false,
-                })),
+                // res.valid rows only land here once validateAtomicCard has already
+                // confirmed a non-empty primary/meaning — ParseResult's Partial<FlashCard>
+                // typing doesn't encode that invariant, hence the cast.
+                ...res.valid.map(
+                    (r, i) =>
+                        ({
+                            id: `v_${Date.now()}_${i}`,
+                            ...r,
+                            isInvalid: false,
+                        }) as ImportRow,
+                ),
                 ...res.invalid.map((r, i) => ({
                     id: `i_${Date.now()}_${i}`,
                     primary: r.row,
+                    alternatives: [],
+                    meaning: "",
+                    example: "",
                     errorMsg: r.error,
                     isInvalid: true,
                 })),
@@ -109,13 +122,13 @@ const LessonBuilderImportPane: React.FC<LessonBuilderImportPaneProps> = ({
                         style={inputMode === mode ? { backgroundColor: themeHex } : {}}
                         icon={mode === "ai" ? Sparkles : mode === "uploads" ? FileUp : undefined}
                     >
-                        {mode === "ai" ? "TOPIC" : mode === "uploads" ? "UPLOADS" : mode}
+                        {t(`tabs.${mode}`)}
                     </Button>
                 ))}
             </div>
 
             {imageAI.loading && (
-                <LoadingSpinner color={themeHex} label="Analyzing visual content..." />
+                <LoadingSpinner color={themeHex} label={t("analyzingVisualContent")} />
             )}
 
             {inputMode === "uploads" && (
@@ -128,14 +141,13 @@ const LessonBuilderImportPane: React.FC<LessonBuilderImportPaneProps> = ({
                                     style={{ backgroundColor: `${themeHex}1a`, color: themeHex }}
                                 >
                                     <Sparkles size={10} className="sm:size-3" />
-                                    Advanced Processing
+                                    {t("advancedProcessing")}
                                 </span>
                                 <h3 className="text-text text-lg font-black sm:text-xl">
-                                    Multi-modal Ingestion
+                                    {t("multiModalIngestion")}
                                 </h3>
                                 <p className="text-muted max-w-md text-xs leading-relaxed font-bold sm:text-sm">
-                                    Our vision engine automatically extracts vocabulary from images
-                                    while handling raw flat-files for instant synchronization.
+                                    {t("multiModalDescription")}
                                 </p>
                             </div>
                             <div className="flex gap-2.5 sm:gap-3">
@@ -177,8 +189,8 @@ const LessonBuilderImportPane: React.FC<LessonBuilderImportPaneProps> = ({
                             icon={Sparkles}
                         >
                             {imageAI.loading
-                                ? "Analyzing..."
-                                : `Process ${selectedFiles.length} files`}
+                                ? t("analyzing")
+                                : t("processFiles", { count: selectedFiles.length })}
                         </Button>
                     )}
                 </div>

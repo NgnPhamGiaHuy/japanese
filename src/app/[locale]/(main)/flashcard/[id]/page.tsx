@@ -6,6 +6,7 @@
 
 "use client";
 
+import { useTranslations } from "next-intl";
 import { use, useState } from "react";
 
 import ShareModal from "@/features/flashcard/components/ShareModal";
@@ -29,6 +30,8 @@ import type { DeckContext } from "@/features/flashcard/detail";
  * It delegates the UI rendering to `FlashcardDetailLayout` with a "owner" role context.
  */
 export default function FlashcardDetailPage({ params }: { params: Promise<{ id: string }> }) {
+    const t = useTranslations("FlashcardDetail");
+    const tCommon = useTranslations("Common");
     const { id } = use(params);
     const { showAlert } = useAlert();
     const router = useRouter();
@@ -56,12 +59,10 @@ export default function FlashcardDetailPage({ params }: { params: Promise<{ id: 
                 <div className="mb-6 flex h-24 w-24 items-center justify-center rounded-3xl border-b-8 border-gray-200 bg-white shadow-sm">
                     <span className="text-4xl">🔒</span>
                 </div>
-                <h1 className="text-text mb-2 text-2xl font-black">Deck Not Found</h1>
-                <p className="text-muted mb-8 font-bold">
-                    This deck doesn&apos;t exist or you don&apos;t have access.
-                </p>
+                <h1 className="text-text mb-2 text-2xl font-black">{t("deckNotFoundTitle")}</h1>
+                <p className="text-muted mb-8 font-bold">{t("deckNotFoundOwnMessage")}</p>
                 <Button onClick={() => router.back()} variant="secondary">
-                    Go Back
+                    {tCommon("goBack")}
                 </Button>
             </div>
         );

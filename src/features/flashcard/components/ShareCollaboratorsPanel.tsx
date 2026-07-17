@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { Controller } from "react-hook-form";
 
 import { Mail } from "lucide-react";
@@ -65,6 +66,8 @@ const ShareCollaboratorsPanel = ({
     onUpdateUserRole,
     onRemoveUser,
 }: ShareCollaboratorsPanelProps) => {
+    const t = useTranslations("ShareModal");
+    const tCommon = useTranslations("Common");
     const { user } = useAppStore();
 
     return (
@@ -75,7 +78,7 @@ const ShareCollaboratorsPanel = ({
                     <Input
                         type="email"
                         variant="default"
-                        placeholder="Invite by email address"
+                        placeholder={t("inviteByEmail")}
                         onKeyDown={(e) => {
                             if (e.key === "Enter") onInvite();
                         }}
@@ -106,7 +109,7 @@ const ShareCollaboratorsPanel = ({
                         color="blue"
                         className="h-12 px-6"
                     >
-                        Invite
+                        {t("invite")}
                     </Button>
                 </div>
                 {inviteError && (
@@ -123,14 +126,14 @@ const ShareCollaboratorsPanel = ({
             {/* Collaborators List */}
             <div className="mb-6">
                 <h3 className="text-text mb-3 text-xs font-black tracking-widest uppercase">
-                    People with access
+                    {t("peopleWithAccess")}
                 </h3>
                 <div className="flex flex-col gap-2">
                     {Object.entries(roles).map(([uid, r]) => {
                         const meta = lesson.collaboratorMeta?.[uid];
                         const isCurrentUser = uid === user?.uid;
                         const displayName = isCurrentUser
-                            ? "You"
+                            ? tCommon("you")
                             : meta?.displayName ||
                               meta?.email?.split("@")[0] ||
                               `User ${uid.substring(0, 6)}`;
@@ -180,7 +183,7 @@ const ShareCollaboratorsPanel = ({
                                             ? () => onRemoveUser(uid)
                                             : undefined
                                     }
-                                    removeLabel="Remove access"
+                                    removeLabel={t("removeAccess")}
                                     disabled={saving || r === "owner"}
                                     themeHex={themeHex}
                                     variant="compact"
@@ -194,7 +197,7 @@ const ShareCollaboratorsPanel = ({
                 {lesson.invitedEmails && Object.keys(lesson.invitedEmails).length > 0 && (
                     <div className="mt-4">
                         <h4 className="mb-2 text-xs font-black tracking-wider text-gray-400 uppercase">
-                            Pending invites
+                            {t("pendingInvites")}
                         </h4>
                         <div className="flex flex-col gap-2">
                             {Object.entries(lesson.invitedEmails).map(([email, invite]) => (
@@ -209,7 +212,7 @@ const ShareCollaboratorsPanel = ({
                                         <div>
                                             <div className="text-text font-black">{email}</div>
                                             <div className="text-xs font-bold text-amber-500">
-                                                Invite pending · {invite.role}
+                                                {t("invitePending")} · {invite.role}
                                             </div>
                                         </div>
                                     </div>
@@ -219,7 +222,7 @@ const ShareCollaboratorsPanel = ({
                                         disabled={saving}
                                         className="!p-1 !text-xs !font-bold text-gray-400 transition-colors hover:bg-red-50 hover:text-red-500"
                                     >
-                                        Revoke
+                                        {t("revoke")}
                                     </Button>
                                 </div>
                             ))}

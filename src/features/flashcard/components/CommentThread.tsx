@@ -6,6 +6,7 @@
 
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 
 import { AlertTriangle } from "lucide-react";
@@ -44,6 +45,7 @@ const CommentThread = ({
     onEdit,
     onDelete,
 }: CommentThreadProps) => {
+    const t = useTranslations("FlashcardComments");
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
     const hasReplies = comment.replies.length > 0;
 
@@ -81,8 +83,7 @@ const CommentThread = ({
                     <AlertTriangle size={14} className="mt-0.5 shrink-0 text-red-500" />
                     <div className="flex-1">
                         <p className="mb-2 text-[12px] font-bold text-red-700">
-                            Delete this comment and {comment.replies.length}{" "}
-                            {comment.replies.length === 1 ? "reply" : "replies"}?
+                            {t("deleteThreadConfirm", { count: comment.replies.length })}
                         </p>
                         <div className="flex gap-2">
                             <Button
@@ -94,14 +95,14 @@ const CommentThread = ({
                                 }}
                                 className="!rounded-lg !px-3 !py-1 !text-xs !font-black shadow-none hover:shadow-none active:translate-y-0"
                             >
-                                Delete
+                                {t("delete")}
                             </Button>
                             <Button
                                 variant="ghost"
                                 onClick={() => setShowDeleteConfirm(false)}
                                 className="!rounded-lg border border-gray-200 bg-white !px-3 !py-1 !text-xs !font-black !text-gray-600 shadow-none hover:!bg-gray-50 hover:shadow-none active:translate-y-0"
                             >
-                                Cancel
+                                {t("cancel")}
                             </Button>
                         </div>
                     </div>

@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import React from "react";
 
 import { Save, X } from "lucide-react";
@@ -28,6 +29,8 @@ const LessonBuilder: React.FC<LessonBuilderProps> = ({
     onDelete,
     onClose,
 }) => {
+    const t = useTranslations("LessonBuilder");
+    const tCommon = useTranslations("Common");
     const builder = useLessonBuilder({
         initialLesson: editingLesson,
         initialCards,
@@ -49,10 +52,10 @@ const LessonBuilder: React.FC<LessonBuilderProps> = ({
                     onClick={onClose}
                     icon={X}
                     disabled={saving}
-                    aria-label="Close"
+                    aria-label={tCommon("close")}
                 />
                 <h2 className="text-text text-lg font-black sm:text-xl">
-                    {editingLesson ? "Edit Deck" : "New Deck"}
+                    {editingLesson ? t("editDeckTitle") : t("newDeckTitle")}
                 </h2>
                 <Button
                     variant="primary"
@@ -61,7 +64,7 @@ const LessonBuilder: React.FC<LessonBuilderProps> = ({
                     icon={Save}
                     className="!py-2 !text-xs shadow-lg sm:!py-3 sm:!text-sm"
                 >
-                    {saving ? "Saving..." : "Save"}
+                    {saving ? t("saving") : t("save")}
                 </Button>
             </header>
             <main className="mx-auto w-full max-w-3xl space-y-8 p-4 pt-8 pb-32 sm:space-y-12 sm:p-8 lg:max-w-5xl">
@@ -110,7 +113,7 @@ const LessonBuilder: React.FC<LessonBuilderProps> = ({
                             onClick={handleDelete}
                             className="w-full !rounded-2xl !py-4 text-lg font-black"
                         >
-                            Delete Deck
+                            {t("deleteDeck")}
                         </Button>
                     </div>
                 )}

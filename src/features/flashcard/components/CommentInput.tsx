@@ -6,6 +6,7 @@
 
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useEffect, useRef, useState } from "react";
 
 import { CornerDownLeft, X } from "lucide-react";
@@ -38,6 +39,7 @@ const CommentInput = ({
     maxLength = 2000,
     compact = false,
 }: CommentInputProps) => {
+    const t = useTranslations("FlashcardComments");
     const [content, setContent] = useState(initialValue);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -138,7 +140,7 @@ const CommentInput = ({
                             {isSubmitting ? (
                                 <span className="h-3 w-3 animate-spin rounded-full border-2 border-white border-t-transparent" />
                             ) : null}
-                            {isSubmitting ? "Sending" : "Send"}
+                            {isSubmitting ? t("sending") : t("send")}
                         </Button>
                     </div>
                 </div>

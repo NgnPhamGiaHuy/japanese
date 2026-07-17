@@ -1,3 +1,4 @@
+import { NextIntlClientProvider } from "next-intl";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 
@@ -6,6 +7,7 @@ import { describe, expect, test } from "vitest";
 import { render } from "vitest-browser-react";
 import { userEvent } from "vitest/browser";
 
+import messages from "@/messages/en.json";
 import { lessonMetadataSchema } from "@/shared/schemas";
 import LessonBuilderMeta from "./LessonBuilderMeta";
 
@@ -32,35 +34,37 @@ function Harness() {
     const onSubmit = form.handleSubmit(() => {});
 
     return (
-        <div>
-            <button type="button" onClick={onSubmit}>
-                Submit
-            </button>
-            <LessonBuilderMeta
-                register={form.register}
-                formErrors={form.formState.errors}
-                setFormValue={form.setValue}
-                categories={categories}
-                tagInput={tagInput}
-                setTagInput={setTagInput}
-                addTag={(val) => {
-                    const trimmed = val.trim().toLowerCase();
-                    const current = form.getValues("categories") || [];
-                    if (trimmed && current.length < 3) {
-                        form.setValue("categories", [...current, trimmed]);
-                        setTagInput("");
+        <NextIntlClientProvider locale="en" messages={messages}>
+            <div>
+                <button type="button" onClick={onSubmit}>
+                    Submit
+                </button>
+                <LessonBuilderMeta
+                    register={form.register}
+                    formErrors={form.formState.errors}
+                    setFormValue={form.setValue}
+                    categories={categories}
+                    tagInput={tagInput}
+                    setTagInput={setTagInput}
+                    addTag={(val) => {
+                        const trimmed = val.trim().toLowerCase();
+                        const current = form.getValues("categories") || [];
+                        if (trimmed && current.length < 3) {
+                            form.setValue("categories", [...current, trimmed]);
+                            setTagInput("");
+                        }
+                    }}
+                    removeCategory={(cat) =>
+                        form.setValue(
+                            "categories",
+                            (form.getValues("categories") || []).filter((c) => c !== cat),
+                        )
                     }
-                }}
-                removeCategory={(cat) =>
-                    form.setValue(
-                        "categories",
-                        (form.getValues("categories") || []).filter((c) => c !== cat),
-                    )
-                }
-                themeHex={themeHex}
-                saving={false}
-            />
-        </div>
+                    themeHex={themeHex}
+                    saving={false}
+                />
+            </div>
+        </NextIntlClientProvider>
     );
 }
 

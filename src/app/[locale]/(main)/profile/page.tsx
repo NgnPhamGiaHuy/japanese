@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import Image from "next/image";
 
 import { BookOpen, ChevronRight, Flame, LogOut, Settings, Trophy, Zap } from "lucide-react";
@@ -16,13 +17,14 @@ import { Badge, Button, Card, StatCard } from "@/shared/components/ui";
 import { SPACING } from "@/shared/constants";
 
 export default function ProfilePage() {
+    const t = useTranslations("ProfilePage");
     const { userData } = useUserProgress();
     const { lessons } = useLessons();
     const { role } = useAdminRole();
     const user = useAppStore((s) => s.user);
     const router = useRouter();
 
-    const displayName = user?.displayName ?? "Learner";
+    const displayName = user?.displayName ?? t("learnerFallback");
     const photoURL = user?.photoURL ?? null;
 
     const level = Math.floor(userData.xp / 500) + 1;
@@ -41,12 +43,12 @@ export default function ProfilePage() {
     return (
         <div className="bg-bg min-h-dvh pb-28">
             <ScreenHeader
-                title="Profile"
+                title={t("title")}
                 right={
                     <Link
                         href="/settings"
                         className={SCREEN_HEADER_BACK_BUTTON_CLASS}
-                        aria-label="Settings"
+                        aria-label={t("settingsAria")}
                     >
                         <Settings size={22} strokeWidth={2.5} />
                     </Link>
@@ -83,12 +85,12 @@ export default function ProfilePage() {
                                 <h2 className="text-text text-3xl font-black">{displayName}</h2>
                                 {role && (
                                     <Badge variant="danger" size="md" className="tracking-wider">
-                                        {role === "superadmin" ? "Staff+" : "Staff"}
+                                        {role === "superadmin" ? t("staffPlus") : t("staff")}
                                     </Badge>
                                 )}
                             </div>
                             <p className="text-muted text-base font-bold">
-                                Learning Japanese since {new Date().getFullYear()}
+                                {t("learningSince", { year: new Date().getFullYear() })}
                             </p>
                         </div>
 
@@ -97,7 +99,7 @@ export default function ProfilePage() {
                             <div className="mb-2 flex items-end justify-between px-1">
                                 <div className="text-left">
                                     <p className="text-muted text-xs font-black tracking-widest uppercase">
-                                        Current Progress
+                                        {t("currentProgress")}
                                     </p>
                                     <p className="text-katakana text-sm font-black">
                                         {xpInLevel} / {xpToNext} XP
@@ -126,27 +128,27 @@ export default function ProfilePage() {
                         <div className="flex items-center gap-2 px-2">
                             <Trophy size={14} className="text-muted" />
                             <h3 className="text-muted text-xs font-black tracking-widest uppercase">
-                                Statistics
+                                {t("statistics")}
                             </h3>
                         </div>
                         <div className="grid grid-cols-1 gap-4 sm:grid-cols-3 md:gap-6">
                             <StatCard
                                 icon={<Flame className="text-survival h-7 w-7" />}
-                                title="Day Streak"
+                                title={t("dayStreak")}
                                 value={userData.streak}
                                 color="#ff9600"
                                 index={1}
                             />
                             <StatCard
                                 icon={<Zap className="text-both h-7 w-7" />}
-                                title="Total XP"
+                                title={t("totalXp")}
                                 value={userData.xp}
                                 color="#ce82ff"
                                 index={2}
                             />
                             <StatCard
                                 icon={<BookOpen className="text-katakana h-7 w-7" />}
-                                title="Kana Known"
+                                title={t("kanaKnown")}
                                 value={userData.learnedChars?.length || 0}
                                 color="#1cb0f6"
                                 index={3}
@@ -159,25 +161,25 @@ export default function ProfilePage() {
                         <div className="flex items-center gap-2 px-2">
                             <Zap size={14} className="text-muted" />
                             <h3 className="text-muted text-xs font-black tracking-widest uppercase">
-                                Recent Activity
+                                {t("recentActivity")}
                             </h3>
                         </div>
                         <Card padding="none" className="overflow-hidden border-b-8">
                             <div className="divide-y-2 divide-gray-100">
                                 <ActivityRow
-                                    label="Learning Decks"
+                                    label={t("learningDecks")}
                                     value={lessons.length}
-                                    sub="Custom collections created"
+                                    sub={t("learningDecksSub")}
                                 />
                                 <ActivityRow
-                                    label="Lessons Finished"
+                                    label={t("lessonsFinished")}
                                     value={userData.lessonsCompleted}
-                                    sub="Successful study sessions"
+                                    sub={t("lessonsFinishedSub")}
                                 />
                                 <ActivityRow
-                                    label="Perfect Matches"
+                                    label={t("perfectMatches")}
                                     value={accuracy !== null ? `${accuracy}%` : "—"}
-                                    sub="Overall accuracy rate"
+                                    sub={t("perfectMatchesSub")}
                                 />
                             </div>
                         </Card>
@@ -192,7 +194,7 @@ export default function ProfilePage() {
                             onClick={handleSignOut}
                             className="w-full !rounded-4xl border-b-8 py-5 text-lg"
                         >
-                            Sign Out
+                            {t("signOut")}
                         </Button>
                     </div>
                 </div>

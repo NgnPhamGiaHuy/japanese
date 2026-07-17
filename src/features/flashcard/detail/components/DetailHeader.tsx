@@ -8,6 +8,7 @@
 
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useEffect } from "react";
 
 import { ArrowLeft, BookOpen, Gamepad2, Zap } from "lucide-react";
@@ -18,14 +19,16 @@ import { Button, UserMeta } from "@/shared/components/ui";
 import type { DetailHeaderProps } from "../types";
 
 const DetailHeader = ({ ctx, onEdit }: DetailHeaderProps) => {
+    const t = useTranslations("FlashcardDetail");
+    const tCommon = useTranslations("Common");
     const { lesson, cards, isOwner, basePath, lessonId, role } = ctx;
     const themeHex = lesson.themeColor || "#1cb0f6";
     const canPlay = cards.length >= 4;
 
-    const createdByName = lesson.ownerName ?? "Unknown";
+    const createdByName = lesson.ownerName ?? tCommon("unknown");
     const createdByAvatar = lesson.ownerAvatar ?? null;
 
-    const sharedByName = lesson.lastSharedByName ?? "Unknown";
+    const sharedByName = lesson.lastSharedByName ?? tCommon("unknown");
     const shouldShowSharedBy =
         !!lesson.lastSharedBy && (!lesson.ownerId || lesson.lastSharedBy !== lesson.ownerId);
 
@@ -49,7 +52,7 @@ const DetailHeader = ({ ctx, onEdit }: DetailHeaderProps) => {
                         variant="ghost"
                         size="icon"
                         className="!text-text shadow-none hover:!bg-black/5 hover:shadow-none active:translate-y-0"
-                        title="Back to Decks"
+                        title={t("backToDecks")}
                         icon={ArrowLeft}
                         iconSize={24}
                     />
@@ -68,11 +71,11 @@ const DetailHeader = ({ ctx, onEdit }: DetailHeaderProps) => {
                                     borderColor: `${themeHex}40`,
                                 }}
                             >
-                                {role.charAt(0).toUpperCase() + role.slice(1)}
+                                {t(`roleName.${role}`)}
                             </span>
                         )}
                         <span className="flex items-center justify-center rounded-xl border-2 border-gray-200 bg-gray-100 px-3 py-1 text-xs font-black tracking-widest text-gray-400 uppercase">
-                            {lesson.cardCount} Cards
+                            {t("cardCountBadge", { count: lesson.cardCount })}
                         </span>
                     </div>
 
@@ -88,13 +91,13 @@ const DetailHeader = ({ ctx, onEdit }: DetailHeaderProps) => {
                         <UserMeta
                             name={createdByName}
                             avatar={createdByAvatar}
-                            subtitle="Created by"
+                            subtitle={tCommon("createdBy")}
                         />
                         {shouldShowSharedBy && (
                             <UserMeta
                                 name={sharedByName}
                                 avatar={lesson.lastSharedByAvatar ?? null}
-                                subtitle="Shared by"
+                                subtitle={tCommon("sharedBy")}
                             />
                         )}
                     </div>
@@ -133,7 +136,7 @@ const DetailHeader = ({ ctx, onEdit }: DetailHeaderProps) => {
                             icon={BookOpen}
                             iconSize={24}
                         >
-                            Start Study
+                            {t("startStudy")}
                         </Button>
                     </Link>
 
@@ -150,7 +153,7 @@ const DetailHeader = ({ ctx, onEdit }: DetailHeaderProps) => {
                                 icon={Gamepad2}
                                 iconSize={18}
                             >
-                                Match
+                                {tCommon("match")}
                             </Button>
                         </Link>
                         <Link
@@ -165,7 +168,7 @@ const DetailHeader = ({ ctx, onEdit }: DetailHeaderProps) => {
                                 icon={Zap}
                                 iconSize={18}
                             >
-                                Speed
+                                {tCommon("speed")}
                             </Button>
                         </Link>
                     </div>

@@ -1,3 +1,4 @@
+import { NextIntlClientProvider } from "next-intl";
 import { useForm } from "react-hook-form";
 
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -5,6 +6,7 @@ import { describe, expect, test, vi } from "vitest";
 import { render } from "vitest-browser-react";
 import { userEvent } from "vitest/browser";
 
+import messages from "@/messages/en.json";
 import { shareInviteSchema } from "@/shared/schemas";
 import ShareCollaboratorsPanel from "./ShareCollaboratorsPanel";
 
@@ -32,19 +34,21 @@ function Harness({ onInvite }: { onInvite: (data: ShareInvite) => void }) {
     const submit = form.handleSubmit(onInvite);
 
     return (
-        <ShareCollaboratorsPanel
-            lesson={baseLesson}
-            roles={{ "owner-uid": "owner" }}
-            saving={false}
-            themeHex="#1cb0f6"
-            registerInvite={form.register}
-            inviteControl={form.control}
-            inviteError={form.formState.errors.email?.message ?? null}
-            onInvite={submit}
-            onRevokeInvite={() => {}}
-            onUpdateUserRole={() => {}}
-            onRemoveUser={() => {}}
-        />
+        <NextIntlClientProvider locale="en" messages={messages}>
+            <ShareCollaboratorsPanel
+                lesson={baseLesson}
+                roles={{ "owner-uid": "owner" }}
+                saving={false}
+                themeHex="#1cb0f6"
+                registerInvite={form.register}
+                inviteControl={form.control}
+                inviteError={form.formState.errors.email?.message ?? null}
+                onInvite={submit}
+                onRevokeInvite={() => {}}
+                onUpdateUserRole={() => {}}
+                onRemoveUser={() => {}}
+            />
+        </NextIntlClientProvider>
     );
 }
 

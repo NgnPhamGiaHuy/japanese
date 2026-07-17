@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import React from "react";
 
 import { X } from "lucide-react";
@@ -35,6 +36,7 @@ const LessonBuilderMeta: React.FC<LessonBuilderMetaProps> = ({
     themeHex,
     saving,
 }) => {
+    const t = useTranslations("LessonBuilder");
     return (
         <m.div
             initial={{ opacity: 0, y: 10 }}
@@ -45,7 +47,7 @@ const LessonBuilderMeta: React.FC<LessonBuilderMetaProps> = ({
                 <Input
                     variant="underline"
                     type="text"
-                    placeholder="Deck Title ✱ (e.g. JLPT N5 Verbs)"
+                    placeholder={t("titlePlaceholder")}
                     className="text-2xl sm:text-3xl"
                     disabled={saving}
                     aria-invalid={!!formErrors.title}
@@ -60,7 +62,7 @@ const LessonBuilderMeta: React.FC<LessonBuilderMetaProps> = ({
             </div>
             <Textarea
                 variant="underline"
-                placeholder="Describe what this deck is about..."
+                placeholder={t("descriptionPlaceholder")}
                 className="h-16 sm:h-20"
                 disabled={saving}
                 aria-invalid={!!formErrors.description}
@@ -110,7 +112,7 @@ const LessonBuilderMeta: React.FC<LessonBuilderMetaProps> = ({
                 <div className="space-y-4">
                     <div className="flex flex-col gap-2 px-1 sm:flex-row sm:items-center">
                         <span className="text-xs font-black tracking-widest text-gray-300 uppercase sm:text-xs">
-                            Suggestions:
+                            {t("suggestions")}
                         </span>
                         <div className="flex flex-wrap gap-1.5">
                             {["Vocabulary", "Grammar", "Kanji"].map((sug) => (
@@ -130,7 +132,7 @@ const LessonBuilderMeta: React.FC<LessonBuilderMetaProps> = ({
                     <div className="relative">
                         <input
                             type="text"
-                            placeholder='Type "Kanji" or custom tags...'
+                            placeholder={t("tagInputPlaceholder")}
                             value={tagInput}
                             className="text-text w-full rounded-xl border-2 border-b-4 border-gray-100 bg-gray-50/50 px-4 py-3 text-sm font-bold placeholder-gray-300 transition-all outline-none focus:border-[var(--theme-color)] focus:bg-white focus:ring-4 focus:ring-[var(--theme-color)]/5 sm:rounded-2xl sm:px-5 sm:py-3.5"
                             onChange={(e) => setTagInput(e.target.value)}
@@ -138,7 +140,7 @@ const LessonBuilderMeta: React.FC<LessonBuilderMetaProps> = ({
                             disabled={saving}
                         />
                         <div className="absolute top-1/2 right-4 -translate-y-1/2 text-xs font-black tracking-widest text-gray-400 uppercase sm:right-5 sm:text-xs">
-                            ENTER TO ADD
+                            {t("enterToAdd")}
                         </div>
                     </div>
                 </div>
@@ -146,7 +148,7 @@ const LessonBuilderMeta: React.FC<LessonBuilderMetaProps> = ({
                 {/* Theme Picker */}
                 <div className="mt-6 border-t-2 border-gray-100 pt-6">
                     <label className="mb-3 block text-xs font-black tracking-wider text-gray-400 uppercase sm:text-xs">
-                        Theme Color
+                        {t("themeColor")}
                     </label>
                     <div className="flex flex-wrap gap-2.5 sm:gap-3">
                         {["#1cb0f6", "#58cc02", "#ff9600", "#ce82ff", "#ea2b2b", "#ff66bb"].map(

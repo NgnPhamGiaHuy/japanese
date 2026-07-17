@@ -1,3 +1,5 @@
+import { useTranslations } from "next-intl";
+
 import { BellOff, Check } from "lucide-react";
 
 export function SkeletonRows() {
@@ -22,6 +24,7 @@ export function SkeletonRows() {
 }
 
 export function NotificationsEmptyState({ filter }: { filter: "all" | "unread" }) {
+    const t = useTranslations("NotificationsPage");
     return (
         <div className="flex flex-col items-center justify-center py-20 text-center">
             <div className="mb-4 flex h-20 w-20 items-center justify-center rounded-4xl bg-gray-100">
@@ -32,12 +35,10 @@ export function NotificationsEmptyState({ filter }: { filter: "all" | "unread" }
                 )}
             </div>
             <h2 className="text-text mb-1 text-xl font-black">
-                {filter === "unread" ? "You're all caught up! 🎉" : "No notifications yet"}
+                {filter === "unread" ? t("emptyUnreadTitle") : t("emptyAllTitle")}
             </h2>
             <p className="text-muted max-w-xs font-bold">
-                {filter === "unread"
-                    ? "No unread notifications right now."
-                    : "Invites, comments, and replies will appear here."}
+                {filter === "unread" ? t("emptyUnreadMessage") : t("emptyAllMessage")}
             </p>
         </div>
     );

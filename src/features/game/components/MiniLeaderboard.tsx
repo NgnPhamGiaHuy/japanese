@@ -21,7 +21,8 @@ const MiniLeaderboard = ({
     currentUserName,
     currentScore = 0,
 }: MiniLeaderboardProps) => {
-    const t = useTranslations("Game");
+    const t = useTranslations("Common");
+    const tGame = useTranslations("Game");
     const { entries, userRank } = useLeaderboard(
         gameMode,
         5,
@@ -72,7 +73,7 @@ const MiniLeaderboard = ({
             <div className="mb-1 flex items-center gap-2 border-b border-gray-100 pb-1">
                 <Trophy size={14} className="text-survival" />
                 <span className="text-xs font-bold tracking-wider text-gray-400 uppercase">
-                    {t("liveRank")}
+                    {tGame("liveRank")}
                 </span>
             </div>
 

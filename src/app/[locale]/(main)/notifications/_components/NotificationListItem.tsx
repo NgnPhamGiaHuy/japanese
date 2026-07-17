@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useTransition } from "react";
 
 import { Bell, Check, Copy, MessageSquare, Shield, Trash2, UserPlus, X } from "lucide-react";
@@ -93,6 +94,7 @@ function InviteActions({
     userId: string;
     onDone: () => void;
 }) {
+    const t = useTranslations("NotificationsPage");
     const router = useRouter();
     const [isPending, startTransition] = useTransition();
     const link = resolveLink(notification);
@@ -148,7 +150,7 @@ function InviteActions({
                 icon={Check}
                 iconSize={13}
             >
-                Accept
+                {t("accept")}
             </Button>
             <Button
                 onClick={handleDecline}
@@ -158,7 +160,7 @@ function InviteActions({
                 icon={X}
                 iconSize={13}
             >
-                Decline
+                {t("decline")}
             </Button>
         </div>
     );
@@ -209,6 +211,7 @@ export function NotificationRow({
     now: number;
     onRefresh: () => void;
 }) {
+    const t = useTranslations("NotificationsPage");
     const router = useRouter();
     const { showAlert } = useAlert();
     const [isDeleting, startDeleteTransition] = useTransition();
@@ -266,7 +269,7 @@ export function NotificationRow({
             {/* Unread dot */}
             {unread && (
                 <span className="bg-katakana absolute top-4 left-1.5 h-2 w-2 rounded-full">
-                    <span className="sr-only">Unread</span>
+                    <span className="sr-only">{t("unread")}</span>
                 </span>
             )}
 
@@ -313,7 +316,7 @@ export function NotificationRow({
                 <Button
                     variant="ghost"
                     onClick={handleDelete}
-                    aria-label="Dismiss notification"
+                    aria-label={t("dismiss")}
                     className="hover:!text-danger !mt-0.5 !shrink-0 !rounded-lg !p-1.5 !text-gray-300 opacity-100 shadow-none transition-all hover:!bg-red-50 hover:shadow-none active:translate-y-0 sm:opacity-0 sm:group-hover:opacity-100 sm:focus:opacity-100"
                     icon={Trash2}
                     iconSize={15}

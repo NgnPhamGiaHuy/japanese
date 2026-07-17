@@ -6,6 +6,7 @@
 
 "use client";
 
+import { useTranslations } from "next-intl";
 import { use, useState } from "react";
 
 import { RefreshCw } from "lucide-react";
@@ -53,6 +54,8 @@ export default function SharedLessonPageClient({
     shareId,
     previewPromise,
 }: SharedLessonPageClientProps) {
+    const t = useTranslations("FlashcardDetail");
+    const tCommon = useTranslations("Common");
     const preview = use(previewPromise);
     const router = useRouter();
     const { user } = useAppStore();
@@ -113,12 +116,10 @@ export default function SharedLessonPageClient({
                     <span className="text-4xl">{isQuota ? "⏳" : "📡"}</span>
                 </div>
                 <h1 className="text-text mb-2 text-2xl font-black">
-                    {isQuota ? "Service Busy" : "Connection Error"}
+                    {isQuota ? t("serviceBusyTitle") : t("connectionErrorTitle")}
                 </h1>
                 <p className="text-muted mb-8 font-bold">
-                    {isQuota
-                        ? "Too many requests right now. Please try again in a moment."
-                        : "Couldn't load this deck. Check your connection and try again."}
+                    {isQuota ? t("serviceBusyMessage") : t("connectionErrorMessage")}
                 </p>
                 <div className="flex gap-3">
                     <Button
@@ -127,10 +128,10 @@ export default function SharedLessonPageClient({
                         color="blue"
                         icon={RefreshCw}
                     >
-                        Try Again
+                        {t("tryAgain")}
                     </Button>
                     <Button onClick={() => router.back()} variant="secondary">
-                        Go Back
+                        {tCommon("goBack")}
                     </Button>
                 </div>
             </div>
@@ -144,12 +145,10 @@ export default function SharedLessonPageClient({
                 <div className="mb-6 flex h-24 w-24 items-center justify-center rounded-3xl border-b-8 border-gray-200 bg-white shadow-sm">
                     <span className="text-4xl">🔒</span>
                 </div>
-                <h1 className="text-text mb-2 text-2xl font-black">Deck Not Found</h1>
-                <p className="text-muted mb-8 font-bold">
-                    This deck may be restricted, deleted, or the link is invalid.
-                </p>
+                <h1 className="text-text mb-2 text-2xl font-black">{t("deckNotFoundTitle")}</h1>
+                <p className="text-muted mb-8 font-bold">{t("deckNotFoundSharedMessage")}</p>
                 <Button onClick={() => router.back()} variant="secondary">
-                    Go Back
+                    {tCommon("goBack")}
                 </Button>
             </div>
         );

@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import { Dialog } from "@base-ui/react/dialog";
 import { AlertTriangle, Info, Trash2, X } from "lucide-react";
 
@@ -75,11 +77,12 @@ const ConfirmModal = ({
     onConfirm,
     title,
     message,
-    confirmText = "Confirm",
-    cancelText = "Cancel",
+    confirmText,
+    cancelText,
     variant = "danger",
     loading = false,
 }: ConfirmModalProps) => {
+    const t = useTranslations("Common");
     const v = VARIANTS[variant];
     const Icon = v.icon;
 
@@ -139,7 +142,7 @@ const ConfirmModal = ({
                                     loading={loading}
                                     className="w-full !py-4 !text-base"
                                 >
-                                    {confirmText}
+                                    {confirmText ?? t("confirm")}
                                 </Button>
                                 <Button
                                     variant="ghost"
@@ -147,7 +150,7 @@ const ConfirmModal = ({
                                     disabled={loading}
                                     className="!text-muted w-full !py-4 !text-base !font-black hover:!bg-gray-50 active:translate-y-0"
                                 >
-                                    {cancelText}
+                                    {cancelText ?? t("cancel")}
                                 </Button>
                             </div>
                         </div>

@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
 
 import { Dialog } from "@base-ui/react/dialog";
@@ -64,6 +65,9 @@ interface ShareModalProps {
     onClose: () => void;
 }
 const ShareModal = ({ lesson, onShareLink, onUpdateRoles, onClose }: ShareModalProps) => {
+    const t = useTranslations("ShareModal");
+    const tCommon = useTranslations("Common");
+    const tDetail = useTranslations("FlashcardDetail");
     const { user } = useAppStore();
     const { showAlert } = useAlert();
 
@@ -292,7 +296,7 @@ const ShareModal = ({ lesson, onShareLink, onUpdateRoles, onClose }: ShareModalP
                         {/* Header */}
                         <div className="flex shrink-0 items-center justify-between border-b-2 border-gray-100 p-6">
                             <Dialog.Title className="text-text text-2xl font-black">
-                                Share Deck
+                                {tCommon("shareDeck")}
                             </Dialog.Title>
                             <Button
                                 variant="ghost"
@@ -300,7 +304,7 @@ const ShareModal = ({ lesson, onShareLink, onUpdateRoles, onClose }: ShareModalP
                                 onClick={onClose}
                                 icon={X}
                                 disabled={saving}
-                                aria-label="Close"
+                                aria-label={tCommon("close")}
                             />
                         </div>
 
@@ -354,14 +358,14 @@ const ShareModal = ({ lesson, onShareLink, onUpdateRoles, onClose }: ShareModalP
                                         </div>
                                         <div>
                                             <p className="text-text font-black capitalize">
-                                                {currentRole || "Viewer"} Access
+                                                {tDetail(
+                                                    `roleAccessTitle.${currentRole === "editor" || currentRole === "commenter" ? currentRole : "viewer"}`,
+                                                )}
                                             </p>
                                             <p className="text-muted text-sm font-bold">
-                                                {currentRole === "editor"
-                                                    ? "You can edit this deck's content, but only the owner can modify sharing settings."
-                                                    : currentRole === "commenter"
-                                                      ? "You can comment on items in this deck."
-                                                      : "You can study this deck but cannot edit it."}
+                                                {t(
+                                                    `nonOwnerRoleAccessSubtitle.${currentRole === "editor" || currentRole === "commenter" ? currentRole : "viewer"}`,
+                                                )}
                                             </p>
                                         </div>
                                     </div>
@@ -369,7 +373,7 @@ const ShareModal = ({ lesson, onShareLink, onUpdateRoles, onClose }: ShareModalP
                                     {/* Collaborator overview for non-owners */}
                                     <div className="rounded-2xl border-2 border-gray-100 p-4">
                                         <h4 className="text-muted mb-2 text-xs font-black tracking-widest uppercase">
-                                            Collaborators
+                                            {t("collaborators")}
                                         </h4>
                                         <div className="flex -space-x-2">
                                             {Object.entries(roles)
@@ -407,7 +411,7 @@ const ShareModal = ({ lesson, onShareLink, onUpdateRoles, onClose }: ShareModalP
                                     }`}
                                     disabled={saving}
                                 >
-                                    {copied ? "Link copied" : "Copy link"}
+                                    {copied ? t("linkCopied") : t("copyLink")}
                                 </Button>
 
                                 <Button
@@ -417,7 +421,7 @@ const ShareModal = ({ lesson, onShareLink, onUpdateRoles, onClose }: ShareModalP
                                     className="h-12 px-10 text-sm"
                                     disabled={saving}
                                 >
-                                    Done
+                                    {t("done")}
                                 </Button>
                             </div>
                         </div>

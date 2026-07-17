@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useState, useTransition } from "react";
 
 import { CheckCheck, Trash2 } from "lucide-react";
@@ -24,6 +25,7 @@ import { NotificationsEmptyState, SkeletonRows } from "./_components/Notificatio
 import NotificationsVirtualList from "./_components/NotificationsVirtualList";
 
 export default function NotificationsPage() {
+    const t = useTranslations("NotificationsPage");
     const { user } = useAppStore();
     const {
         notifications,
@@ -93,7 +95,7 @@ export default function NotificationsPage() {
     return (
         <div className="bg-bg min-h-dvh pb-28">
             <ScreenHeader
-                title="Notifications"
+                title={t("title")}
                 backHref="/"
                 right={
                     <div className="flex items-center gap-1">
@@ -103,11 +105,11 @@ export default function NotificationsPage() {
                                 onClick={handleMarkAllRead}
                                 loading={isMarkingAll}
                                 className="!text-katakana !flex !items-center !gap-1 !rounded-xl !px-2.5 !py-2 !text-xs !font-black shadow-none transition-colors hover:!bg-blue-50 hover:shadow-none active:translate-y-0"
-                                title="Mark all as read"
+                                title={t("markAllRead")}
                                 icon={CheckCheck}
                                 iconSize={15}
                             >
-                                <span className="hidden sm:inline">All read</span>
+                                <span className="hidden sm:inline">{t("allRead")}</span>
                             </Button>
                         )}
                         {notifications.length > 0 && (
@@ -116,11 +118,11 @@ export default function NotificationsPage() {
                                 onClick={handleClearAll}
                                 loading={isClearingAll}
                                 className="hover:!text-danger !flex !items-center !gap-1 !rounded-xl !px-2.5 !py-2 !text-xs !font-black !text-gray-400 shadow-none transition-colors hover:!bg-red-50 hover:shadow-none active:translate-y-0"
-                                title="Clear all notifications"
+                                title={t("clearAllTitle")}
                                 icon={Trash2}
                                 iconSize={15}
                             >
-                                <span className="hidden sm:inline">Clear</span>
+                                <span className="hidden sm:inline">{t("clear")}</span>
                             </Button>
                         )}
                     </div>
@@ -142,7 +144,7 @@ export default function NotificationsPage() {
                                     isActive ? "" : "!bg-white !text-gray-500 hover:!bg-gray-100"
                                 }`}
                             >
-                                {f}
+                                {t(`filters.${f}`)}
                                 {f === "unread" && unreadCount > 0 && (
                                     <span
                                         className={`ml-1.5 rounded-full px-1.5 py-px text-xs ${
@@ -160,15 +162,13 @@ export default function NotificationsPage() {
                 {/* Content */}
                 {error && !loading ? (
                     <div className="flex flex-col items-center gap-3 rounded-2xl bg-white px-6 py-12 text-center">
-                        <p className="text-sm font-bold text-gray-500">
-                            Couldn&apos;t load your notifications.
-                        </p>
+                        <p className="text-sm font-bold text-gray-500">{t("loadError")}</p>
                         <Button
                             variant="ghost"
                             onClick={retry}
                             className="!text-katakana !rounded-xl !px-4 !py-2 !text-sm !font-black"
                         >
-                            Try again
+                            {t("tryAgain")}
                         </Button>
                     </div>
                 ) : loading ? (
@@ -197,7 +197,7 @@ export default function NotificationsPage() {
                                     loading={loadingMore}
                                     className="!rounded-xl !px-6 !py-2.5 !text-sm !font-black"
                                 >
-                                    Load more
+                                    {t("loadMore")}
                                 </Button>
                             </div>
                         )}

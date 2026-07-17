@@ -1,6 +1,9 @@
+import { NextIntlClientProvider } from "next-intl";
+
 import { describe, expect, test, vi } from "vitest";
 import { render } from "vitest-browser-react";
 
+import messages from "@/messages/en.json";
 import { AlertProvider } from "@/shared/providers";
 import NotificationsVirtualList from "./NotificationsVirtualList";
 
@@ -94,9 +97,11 @@ const settle = () => new Promise((r) => setTimeout(r, 100));
 // AlertProvider ancestor, even though this test never triggers that toast.
 async function renderList(groups: NotificationGroup[]) {
     const screen = await render(
-        <AlertProvider>
-            <NotificationsVirtualList groups={groups} userId="u1" onRefresh={() => {}} />
-        </AlertProvider>,
+        <NextIntlClientProvider locale="en" messages={messages}>
+            <AlertProvider>
+                <NotificationsVirtualList groups={groups} userId="u1" onRefresh={() => {}} />
+            </AlertProvider>
+        </NextIntlClientProvider>,
     );
     await settle();
     return screen;

@@ -8,6 +8,8 @@
 
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import { CommentPanel } from "@/features/flashcard/components";
 
 import type { DetailCommentsPanelProps } from "../types";
@@ -19,6 +21,7 @@ const DetailCommentsPanel = ({
     currentUserName,
     currentUserEmail,
 }: DetailCommentsPanelProps) => {
+    const t = useTranslations("FlashcardDetail");
     const { lesson, ownerId, lessonId, role, isOwner } = ctx;
     const themeHex = lesson.themeColor || "#1cb0f6";
     const canComment = role === "owner" || role === "editor" || role === "commenter";
@@ -29,10 +32,8 @@ const DetailCommentsPanel = ({
         return (
             <aside className="hidden lg:sticky lg:top-4 lg:block lg:h-[calc(100vh-6rem)]">
                 <div className="rounded-2xl border-2 border-gray-200 bg-white p-6 shadow-sm">
-                    <h3 className="text-text mb-2 text-lg font-black">Comments</h3>
-                    <p className="text-muted text-sm font-bold">
-                        Sign in to view and add comments.
-                    </p>
+                    <h3 className="text-text mb-2 text-lg font-black">{t("comments")}</h3>
+                    <p className="text-muted text-sm font-bold">{t("signInToComment")}</p>
                 </div>
             </aside>
         );
@@ -42,10 +43,8 @@ const DetailCommentsPanel = ({
         return (
             <aside className="hidden lg:sticky lg:top-4 lg:block lg:h-[calc(100vh-6rem)]">
                 <div className="rounded-2xl border-2 border-gray-200 bg-white p-6 shadow-sm">
-                    <h3 className="text-text mb-2 text-lg font-black">Comments</h3>
-                    <p className="text-muted text-sm font-bold">
-                        Select a card to view its comments.
-                    </p>
+                    <h3 className="text-text mb-2 text-lg font-black">{t("comments")}</h3>
+                    <p className="text-muted text-sm font-bold">{t("selectCardForComments")}</p>
                 </div>
             </aside>
         );

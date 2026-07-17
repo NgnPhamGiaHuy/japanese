@@ -6,6 +6,7 @@
 
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useSearchParams } from "next/navigation";
 import { use } from "react";
 
@@ -35,6 +36,7 @@ import type { FlashCard } from "@/features/flashcard/types";
  *    Firestore namespace using `isSharedEdit` logic.
  */
 export default function FlashcardEditPage({ params }: { params: Promise<{ id: string }> }) {
+    const t = useTranslations("FlashcardDetail");
     const { id } = use(params);
     const { showAlert } = useAlert();
     const router = useRouter();
@@ -118,7 +120,7 @@ export default function FlashcardEditPage({ params }: { params: Promise<{ id: st
     if (!lesson) {
         return (
             <div className="bg-bg fixed inset-0 flex items-center justify-center">
-                <p className="font-bold text-gray-400">Deck not found.</p>
+                <p className="font-bold text-gray-400">{t("deckNotFoundMessage")}</p>
             </div>
         );
     }

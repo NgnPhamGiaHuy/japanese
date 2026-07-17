@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import { Check, ChevronDown } from "lucide-react";
 
 import { ROLE_CONFIG } from "@/features/flashcard/utils/rbac";
@@ -56,6 +58,7 @@ const SharePrivacyPicker = ({
     onChangePrivacyMode,
     onChangePublicRole,
 }: SharePrivacyPickerProps) => {
+    const t = useTranslations("ShareModal");
     const currentLevel =
         privacyMode === "public"
             ? VisibilityLevel.PUBLIC
@@ -67,7 +70,7 @@ const SharePrivacyPicker = ({
     return (
         <>
             <h3 className="text-text mb-4 border-t-2 border-gray-100 pt-6 text-xs font-black tracking-wider uppercase">
-                General access
+                {t("generalAccess")}
             </h3>
 
             <div className="mb-6 flex flex-col gap-4 rounded-2xl border-2 border-gray-100 p-4">
@@ -169,7 +172,7 @@ const SharePrivacyPicker = ({
                 {/* Role picker — shown for link and public modes, capped at commenter */}
                 {privacyMode !== "restricted" && (
                     <div className="relative ml-14 flex items-center justify-between border-t-2 border-gray-100 pt-3">
-                        <span className="text-sm font-bold text-gray-400">Default role</span>
+                        <span className="text-sm font-bold text-gray-400">{t("defaultRole")}</span>
                         <Select
                             value={publicRole || "viewer"}
                             options={publicRoleOptions}
