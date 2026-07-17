@@ -19,7 +19,6 @@ import FlashcardAudioButton from "./FlashcardAudioButton";
 import GradeButtons from "./GradeButtons";
 import McChoiceGrid from "./McChoiceGrid";
 import { useRevealPronunciation } from "../hooks/useRevealPronunciation";
-import { gradeCard } from "../services";
 import { getAudioText, reinsertCard, resolveCardFaces } from "../utils";
 
 import type { CardWithProgress, Grade } from "../domain";
@@ -38,8 +37,6 @@ import type { Lesson, StudyStats } from "../types";
 interface FlashcardMistakeReviewProps {
     /** The deck metadata */
     lesson: Lesson;
-    /** The userId of the authenticated user */
-    userId: string;
     /** The subset of missed cards */
     cards: CardWithProgress[];
     /** Manual exit handler */
@@ -54,11 +51,10 @@ interface FlashcardMistakeReviewProps {
  * FlashcardMistakeReview Component
  *
  * @example
- * <FlashcardMistakeReview lesson={deck} cards={fails} userId={uid} onComplete={handleRedeem} />
+ * <FlashcardMistakeReview lesson={deck} cards={fails} onComplete={handleRedeem} />
  */
 const FlashcardMistakeReview = ({
     lesson,
-    userId,
     cards,
     onClose,
     onAnswer,
@@ -155,7 +151,6 @@ const FlashcardMistakeReview = ({
             }
         }
 
-        void gradeCard(userId, card.id, card, grade, card.lessonId, userId).catch(() => {});
         void onAnswer(card, grade).catch(() => {});
     };
 

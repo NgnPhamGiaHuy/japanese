@@ -17,7 +17,6 @@ import { hexToThemeColor } from "@/shared/utils";
 import FlashcardAudioButton from "./FlashcardAudioButton";
 import GradeButtons from "./GradeButtons";
 import { useRevealPronunciation } from "../hooks/useRevealPronunciation";
-import { gradeCard } from "../services";
 import { getAudioText, reinsertCard, resolveCardFaces } from "../utils";
 
 import type { CardWithProgress, Grade } from "../domain";
@@ -25,21 +24,13 @@ import type { Lesson, StudyStats } from "../types";
 
 interface FlashcardLearnProps {
     lesson: Lesson;
-    userId: string;
     cards: CardWithProgress[];
     onClose: () => void;
     onAnswer: (card: CardWithProgress, grade: Grade) => Promise<void>;
     onComplete: (stats: StudyStats) => void;
 }
 
-const FlashcardLearn = ({
-    lesson,
-    userId,
-    cards,
-    onClose,
-    onAnswer,
-    onComplete,
-}: FlashcardLearnProps) => {
+const FlashcardLearn = ({ lesson, cards, onClose, onAnswer, onComplete }: FlashcardLearnProps) => {
     const themeHex = lesson.themeColor || "#1cb0f6";
 
     /** Local queue state — initialized from cards prop, supports Again re-insertion */
@@ -113,7 +104,6 @@ const FlashcardLearn = ({
             }
         }
 
-        void gradeCard(userId, card.id, card, grade, card.lessonId, userId).catch(() => {});
         void onAnswer(card, grade).catch(() => {});
     };
 

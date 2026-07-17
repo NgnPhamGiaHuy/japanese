@@ -74,7 +74,6 @@ const StudySession = ({ data }: StudySessionProps) => {
             {mode === "learn" && (
                 <FlashcardLearn
                     lesson={data.lesson}
-                    userId={user?.uid ?? ""}
                     cards={session.queue}
                     onClose={handleClose}
                     onAnswer={handleAnswer}
@@ -96,7 +95,6 @@ const StudySession = ({ data }: StudySessionProps) => {
             {mode === "mistake-review" && (
                 <FlashcardMistakeReview
                     lesson={data.lesson}
-                    userId={user?.uid ?? ""}
                     cards={session.queue}
                     onClose={handleClose}
                     onAnswer={handleAnswer}

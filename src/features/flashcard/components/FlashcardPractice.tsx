@@ -18,7 +18,7 @@ import FlashcardAudioButton from "./FlashcardAudioButton";
 import GradeButtons from "./GradeButtons";
 import McChoiceGrid from "./McChoiceGrid";
 import { useRevealPronunciation } from "../hooks/useRevealPronunciation";
-import { getDailyProgress, gradeCard } from "../services";
+import { getDailyProgress } from "../services";
 import { getAudioText, reinsertCard, resolveCardFaces } from "../utils";
 
 import type { CardWithProgress, Grade } from "../domain";
@@ -172,8 +172,6 @@ const FlashcardPractice = ({
             }
         }
 
-        // Persist to Firestore in the background — never blocks card advance
-        void gradeCard(userId, card.id, card, grade, card.lessonId, lesson.ownerId).catch(() => {});
         void onAnswer(card, grade).catch(() => {});
     };
 
