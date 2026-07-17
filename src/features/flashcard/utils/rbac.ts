@@ -44,18 +44,22 @@ import type { DeckAccessRole, Lesson } from "../types";
 
 // ─── Role configuration (SSoT for UI) ──────────────────────────────────────────
 
+/**
+ * Icon + colour only. The display name lives in FlashcardDetail.roleName.*,
+ * resolved by the rendering component — a plain data module can't call
+ * useTranslations(). Note `none` deliberately presents as "Viewer".
+ */
 export interface RoleConfig {
-    label: string;
     icon: LucideIcon;
     color: string;
 }
 
 export const ROLE_CONFIG: Record<DeckAccessRole, RoleConfig> = {
-    owner: { label: "Owner", icon: ShieldCheck, color: "#1cb0f6" },
-    editor: { label: "Editor", icon: Edit2, color: "#ce82ff" },
-    commenter: { label: "Commenter", icon: MessageSquare, color: "#ff9600" },
-    viewer: { label: "Viewer", icon: Eye, color: "#afafaf" },
-    none: { label: "Viewer", icon: Eye, color: "#afafaf" },
+    owner: { icon: ShieldCheck, color: "#1cb0f6" },
+    editor: { icon: Edit2, color: "#ce82ff" },
+    commenter: { icon: MessageSquare, color: "#ff9600" },
+    viewer: { icon: Eye, color: "#afafaf" },
+    none: { icon: Eye, color: "#afafaf" },
 };
 
 // ─── Role ordering ────────────────────────────────────────────────────────────

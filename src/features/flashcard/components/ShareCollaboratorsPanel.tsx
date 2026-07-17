@@ -17,26 +17,8 @@ import type { Lesson } from "../types";
 
 type Role = DeckAccessRole;
 
-const sharingOptions: SelectOption<Role>[] = [
-    {
-        value: "viewer",
-        label: ROLE_CONFIG.viewer.label,
-        icon: ROLE_CONFIG.viewer.icon,
-        color: ROLE_CONFIG.viewer.color,
-    },
-    {
-        value: "commenter",
-        label: ROLE_CONFIG.commenter.label,
-        icon: ROLE_CONFIG.commenter.icon,
-        color: ROLE_CONFIG.commenter.color,
-    },
-    {
-        value: "editor",
-        label: ROLE_CONFIG.editor.label,
-        icon: ROLE_CONFIG.editor.icon,
-        color: ROLE_CONFIG.editor.color,
-    },
-];
+/** Assignable collaborator roles, lowest → highest privilege. */
+const SHARING_ROLES: readonly Role[] = ["viewer", "commenter", "editor"] as const;
 
 interface ShareCollaboratorsPanelProps {
     lesson: Lesson;
@@ -68,7 +50,15 @@ const ShareCollaboratorsPanel = ({
 }: ShareCollaboratorsPanelProps) => {
     const t = useTranslations("ShareModal");
     const tCommon = useTranslations("Common");
+    const tDetail = useTranslations("FlashcardDetail");
     const { user } = useAppStore();
+
+    const sharingOptions: SelectOption<Role>[] = SHARING_ROLES.map((role) => ({
+        value: role,
+        label: tDetail(`roleName.${role}`),
+        icon: ROLE_CONFIG[role].icon,
+        color: ROLE_CONFIG[role].color,
+    }));
 
     return (
         <>

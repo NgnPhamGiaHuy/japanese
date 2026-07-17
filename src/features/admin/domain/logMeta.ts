@@ -1,7 +1,7 @@
 /**
  * @file logMeta
  * Single source of truth for log-level and log-type presentation — badge
- * variant, display label, chart hex color, and the summary-header chip
+ * variant, chart hex color, and the summary-header chip
  * classes — collapsing what were 7 independently-declared, partially
  * duplicated maps across LogLevelChart.tsx, LogVolumeChart.tsx,
  * LogLevelBadge.tsx, LogTypeBadge.tsx, and LogsSummaryHeader.tsx (E11-T6).
@@ -19,7 +19,6 @@ import type { BadgeVariant } from "@/shared/components/ui";
 import type { LogLevel, LogType } from "../types";
 
 export interface LogLevelMeta {
-    label: string;
     variant: BadgeVariant;
     chartColor: string;
     text: string;
@@ -29,7 +28,6 @@ export interface LogLevelMeta {
 
 export const LOG_LEVEL_META: Record<LogLevel, LogLevelMeta> = {
     info: {
-        label: "Info",
         variant: "info",
         chartColor: "#1cb0f6",
         text: "text-katakana",
@@ -37,7 +35,6 @@ export const LOG_LEVEL_META: Record<LogLevel, LogLevelMeta> = {
         dot: "bg-katakana",
     },
     warn: {
-        label: "Warn",
         variant: "warning",
         chartColor: "#ff9600",
         text: "text-orange-500",
@@ -45,7 +42,6 @@ export const LOG_LEVEL_META: Record<LogLevel, LogLevelMeta> = {
         dot: "bg-orange-400",
     },
     error: {
-        label: "Error",
         variant: "danger",
         chartColor: "#ea2b2b",
         text: "text-danger",
@@ -53,7 +49,6 @@ export const LOG_LEVEL_META: Record<LogLevel, LogLevelMeta> = {
         dot: "bg-danger",
     },
     security: {
-        label: "Security",
         variant: "primary",
         chartColor: "#ce82ff",
         text: "text-both",
@@ -63,7 +58,6 @@ export const LOG_LEVEL_META: Record<LogLevel, LogLevelMeta> = {
 };
 
 export interface LogTypeMeta {
-    label: string;
     variant: BadgeVariant;
     chartColor: string;
     bg: string;
@@ -73,7 +67,6 @@ export interface LogTypeMeta {
 
 export const LOG_TYPE_META: Record<LogType, LogTypeMeta> = {
     AUTH: {
-        label: "Auth",
         variant: "info",
         chartColor: "#1cb0f6",
         bg: "bg-katakana/10 hover:bg-katakana/20",
@@ -81,7 +74,6 @@ export const LOG_TYPE_META: Record<LogType, LogTypeMeta> = {
         activeBg: "bg-katakana text-white",
     },
     ADMIN_ACTION: {
-        label: "Admin",
         variant: "primary",
         chartColor: "#ce82ff",
         bg: "bg-both/10 hover:bg-both/20",
@@ -89,7 +81,6 @@ export const LOG_TYPE_META: Record<LogType, LogTypeMeta> = {
         activeBg: "bg-both text-white",
     },
     USER_ACTION: {
-        label: "User",
         variant: "warning",
         chartColor: "#ff9600",
         bg: "bg-survival/10 hover:bg-survival/20",
@@ -97,7 +88,6 @@ export const LOG_TYPE_META: Record<LogType, LogTypeMeta> = {
         activeBg: "bg-survival text-white",
     },
     CONTENT: {
-        label: "Content",
         variant: "success",
         chartColor: "#58cc02",
         bg: "bg-hiragana/10 hover:bg-hiragana/20",
@@ -105,7 +95,6 @@ export const LOG_TYPE_META: Record<LogType, LogTypeMeta> = {
         activeBg: "bg-hiragana text-white",
     },
     SYSTEM: {
-        label: "System",
         variant: "default",
         chartColor: "#afafaf",
         bg: "bg-gray-100 hover:bg-gray-200",
@@ -113,7 +102,6 @@ export const LOG_TYPE_META: Record<LogType, LogTypeMeta> = {
         activeBg: "bg-gray-600 text-white",
     },
     ERROR: {
-        label: "Error",
         variant: "danger",
         chartColor: "#ea2b2b",
         bg: "bg-danger-bg hover:bg-[#ffc8c9]",

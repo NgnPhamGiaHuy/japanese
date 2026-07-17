@@ -162,7 +162,8 @@
             "sharedDescription": "Shared decks from other students will appear here.",
             "createDeck": "Create Deck"
         },
-        "reorderFailed": "Reorder failed"
+        "reorderFailed": "Reorder failed",
+        "rolePermissions": "You have {role} permissions"
     },
     "KanaHub": {
         "levelLabel": "Level:",
@@ -273,7 +274,14 @@
         "changeMode": "Change Mode",
         "xpEarned": "+{xp} XP",
         "back": "Back",
-        "play": "Play"
+        "play": "Play",
+        "tier": {
+            "bronze": "Bronze",
+            "silver": "Silver",
+            "gold": "Gold",
+            "platinum": "Platinum",
+            "diamond": "Diamond"
+        }
     },
     "FlashcardDetail": {
         "backToDecks": "Back to Decks",
@@ -290,9 +298,11 @@
         "copyShareLinkSubtitle": "Share this deck with others",
         "yourRole": "Your Role",
         "roleName": {
+            "owner": "Owner",
             "editor": "Editor",
             "commenter": "Commenter",
-            "viewer": "Viewer"
+            "viewer": "Viewer",
+            "none": "Viewer"
         },
         "roleAccessTitle": {
             "editor": "Editor Access",
@@ -395,7 +405,21 @@
         "inviteRevoked": "Invitation revoked",
         "revokeFailed": "Failed to revoke invitation",
         "cannotInviteSelf": "You can't invite yourself.",
-        "sendInviteFailed": "Failed to send invite. Please try again."
+        "sendInviteFailed": "Failed to send invite. Please try again.",
+        "visibility": {
+            "PRIVATE": {
+                "label": "Restricted",
+                "description": "Only invited people can open"
+            },
+            "SHARED": {
+                "label": "Anyone with the link",
+                "description": "Anyone with the link can view"
+            },
+            "PUBLIC": {
+                "label": "Public",
+                "description": "Visible to everyone — no link required"
+            }
+        }
     },
     "FlashcardComments": {
         "comments": "Comments",
@@ -739,7 +763,21 @@
         "copyEntityId": "Copy entity ID",
         "copyLogId": "Copy log ID",
         "userAgent": "User Agent",
-        "copy": "Copy"
+        "copy": "Copy",
+        "logLevel": {
+            "info": "Info",
+            "warn": "Warn",
+            "error": "Error",
+            "security": "Security"
+        },
+        "logType": {
+            "AUTH": "Auth",
+            "ADMIN_ACTION": "Admin",
+            "USER_ACTION": "User",
+            "CONTENT": "Content",
+            "SYSTEM": "System",
+            "ERROR": "Error"
+        }
     },
     "AdminSettings": {
         "title": "Settings",

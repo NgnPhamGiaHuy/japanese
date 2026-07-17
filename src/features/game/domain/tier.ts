@@ -23,7 +23,9 @@ export function scoreToTier(score: number): Tier {
 }
 
 export interface TierInfo {
-    label: string;
+    /** Key into the Game.tier.* messages — the display label is resolved by the
+     *  rendering component, since a plain data module can't call useTranslations(). */
+    id: Tier;
     color: string;
     bg: string;
     border: string;
@@ -33,7 +35,7 @@ export interface TierInfo {
 
 export const TIER_INFO: Record<Tier, TierInfo> = {
     bronze: {
-        label: "Bronze",
+        id: "bronze",
         color: "#cd7f32",
         bg: "#fdf3e8",
         border: "#e8a87c",
@@ -41,7 +43,7 @@ export const TIER_INFO: Record<Tier, TierInfo> = {
         nextThreshold: 500,
     },
     silver: {
-        label: "Silver",
+        id: "silver",
         color: "#9e9e9e",
         bg: "#f5f5f5",
         border: "#bdbdbd",
@@ -49,7 +51,7 @@ export const TIER_INFO: Record<Tier, TierInfo> = {
         nextThreshold: 1000,
     },
     gold: {
-        label: "Gold",
+        id: "gold",
         color: "#ff9600",
         bg: "#fff8e8",
         border: "#ffd166",
@@ -57,7 +59,7 @@ export const TIER_INFO: Record<Tier, TierInfo> = {
         nextThreshold: 2000,
     },
     platinum: {
-        label: "Platinum",
+        id: "platinum",
         color: "#1cb0f6",
         bg: "#e8f8ff",
         border: "#7dd8fa",
@@ -65,7 +67,7 @@ export const TIER_INFO: Record<Tier, TierInfo> = {
         nextThreshold: 4000,
     },
     diamond: {
-        label: "Diamond",
+        id: "diamond",
         color: "#ce82ff",
         bg: "#f8f0ff",
         border: "#ce82ff",

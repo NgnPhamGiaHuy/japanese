@@ -30,6 +30,8 @@ const DeckCard = ({
 }: DeckCardProps) => {
     const t = useTranslations("FlashcardDashboard");
     const tCommon = useTranslations("Common");
+    const tDetail = useTranslations("FlashcardDetail");
+    const tShare = useTranslations("ShareModal");
     const { user } = useAppStore();
     const themeColor = lesson.themeColor || "#1cb0f6";
     const visibility = useVisibility(lesson);
@@ -85,10 +87,12 @@ const DeckCard = ({
                                     backgroundColor: `${roleInfo.color}15`,
                                 }}
                                 className="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-black tracking-tight uppercase"
-                                title={`You have ${roleInfo.label} permissions`}
+                                title={t("rolePermissions", {
+                                    role: tDetail(`roleName.${resolvedRole}`),
+                                })}
                             >
                                 <roleInfo.icon size={10} />
-                                {roleInfo.label}
+                                {tDetail(`roleName.${resolvedRole}`)}
                             </span>
                         )}
                         {!isShared && visibility.level !== VisibilityLevel.PRIVATE && (
@@ -100,7 +104,7 @@ const DeckCard = ({
                                 className="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-black tracking-tight uppercase"
                             >
                                 <visibility.icon size={10} />
-                                {visibility.label}
+                                {tShare(`visibility.${visibility.level}.label`)}
                             </span>
                         )}
                     </div>
@@ -236,7 +240,7 @@ const DeckCard = ({
                                 (e.currentTarget as HTMLElement).style.backgroundColor =
                                     "transparent";
                             }}
-                            title={visibility.description}
+                            title={tShare(`visibility.${visibility.level}.description`)}
                             icon={isShared ? roleInfo.icon : visibility.icon}
                             iconSize={20}
                         />

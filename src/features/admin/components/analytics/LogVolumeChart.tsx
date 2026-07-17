@@ -34,6 +34,7 @@ const TOOLTIP_STYLE = {
  */
 const LogVolumeChart = ({ data, onClick }: LogVolumeChartProps) => {
     const t = useTranslations("AdminAnalytics");
+    const tReports = useTranslations("AdminReports");
     if (!data || data.length === 0) return null;
 
     const activeTypes = (Object.keys(LOG_TYPE_META) as string[]).filter((t) =>
@@ -86,8 +87,9 @@ const LogVolumeChart = ({ data, onClick }: LogVolumeChartProps) => {
                         // eslint-disable-next-line @typescript-eslint/no-explicit-any
                         formatter={(value: any, name: any) => [
                             value ?? 0,
-                            LOG_TYPE_META[String(name ?? "") as LogType]?.label ??
-                                String(name ?? ""),
+                            LOG_TYPE_META[String(name ?? "") as LogType]
+                                ? tReports(`logType.${String(name)}`)
+                                : String(name ?? ""),
                         ]}
                         cursor={{ fill: "#f8fafc" }}
                     />
@@ -120,7 +122,7 @@ const LogVolumeChart = ({ data, onClick }: LogVolumeChartProps) => {
                             style={{ backgroundColor: LOG_TYPE_META[type as LogType]?.chartColor }}
                         />
                         <span className="text-text text-xs font-black tracking-tighter uppercase">
-                            {LOG_TYPE_META[type as LogType]?.label}
+                            {tReports(`logType.${type}`)}
                         </span>
                     </button>
                 ))}

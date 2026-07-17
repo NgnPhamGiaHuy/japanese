@@ -95,7 +95,7 @@ export function GameIntroScreen({
                 >
                     <span className="text-lg">{tierInfo.emoji}</span>
                     <span className="text-sm font-black" style={{ color: tierInfo.color }}>
-                        {tierInfo.label}
+                        {t(`tier.${tierInfo.id}`)}
                     </span>
                     <span className="text-muted text-sm font-bold">·</span>
                     <span className="text-text text-sm font-black">

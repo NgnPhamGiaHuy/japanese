@@ -15,11 +15,14 @@ export enum VisibilityLevel {
     PUBLIC = "PUBLIC",
 }
 
+/**
+ * Icon/variant/colour only. The label and description live in
+ * ShareModal.visibility.*, keyed by `level`, and are resolved by the rendering
+ * component — a plain data module can't call useTranslations().
+ */
 export interface VisibilityConfig {
     level: VisibilityLevel;
     icon: LucideIcon;
-    label: string;
-    description: string;
     variant: "default" | "success" | "warning";
     color?: string;
 }
@@ -28,24 +31,18 @@ export const VISIBILITY_MAPPINGS: Record<VisibilityLevel, VisibilityConfig> = {
     [VisibilityLevel.PRIVATE]: {
         level: VisibilityLevel.PRIVATE,
         icon: Lock,
-        label: "Restricted",
-        description: "Only invited people can open",
         variant: "default",
         color: "#afafaf",
     },
     [VisibilityLevel.SHARED]: {
         level: VisibilityLevel.SHARED,
         icon: Globe2,
-        label: "Anyone with the link",
-        description: "Anyone with the link can view",
         variant: "warning",
         color: "#1cb0f6", // Will be overridden by themeHex in many places, but this is the default
     },
     [VisibilityLevel.PUBLIC]: {
         level: VisibilityLevel.PUBLIC,
         icon: Sparkles,
-        label: "Public",
-        description: "Visible to everyone — no link required",
         variant: "success",
         color: "#ffc800", // Vibrant Gold for 'Featured/Community' discovery
     },

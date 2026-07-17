@@ -124,8 +124,11 @@ const LogsSummaryHeader = ({
                     </div>
                     <div className="flex flex-wrap gap-1.5 sm:gap-2">
                         {activeTypes.map((type) => {
-                            const s = LOG_TYPE_META[type] ?? {
-                                label: type,
+                            // countsByType comes from raw Firestore data, so it may
+                            // carry a type we have no meta or translation for —
+                            // fall back to the raw value, as before.
+                            const known = LOG_TYPE_META[type];
+                            const s = known ?? {
                                 bg: "bg-gray-100 hover:bg-gray-200",
                                 text: "text-gray-600",
                                 activeBg: "bg-gray-600 text-white",
@@ -142,7 +145,7 @@ const LogsSummaryHeader = ({
                                         onTypeClick ? "cursor-pointer" : "cursor-default",
                                     )}
                                 >
-                                    {s.label}
+                                    {known ? tr(`logType.${type}`) : type}
                                     <span className="font-mono">{countsByType[type]}</span>
                                 </button>
                             );

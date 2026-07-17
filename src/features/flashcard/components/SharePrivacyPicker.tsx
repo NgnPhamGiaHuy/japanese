@@ -19,20 +19,7 @@ import type { PrivacyMode } from "./ShareModal";
  * Options for the public/link "Default role" picker.
  * Editor is intentionally excluded — public access is capped at commenter.
  */
-const publicRoleOptions: SelectOption<"viewer" | "commenter">[] = [
-    {
-        value: "viewer",
-        label: ROLE_CONFIG.viewer.label,
-        icon: ROLE_CONFIG.viewer.icon,
-        color: ROLE_CONFIG.viewer.color,
-    },
-    {
-        value: "commenter",
-        label: ROLE_CONFIG.commenter.label,
-        icon: ROLE_CONFIG.commenter.icon,
-        color: ROLE_CONFIG.commenter.color,
-    },
-];
+const PUBLIC_ROLES: readonly ("viewer" | "commenter")[] = ["viewer", "commenter"] as const;
 
 interface SharePrivacyPickerProps {
     privacyMode: PrivacyMode;
@@ -59,6 +46,15 @@ const SharePrivacyPicker = ({
     onChangePublicRole,
 }: SharePrivacyPickerProps) => {
     const t = useTranslations("ShareModal");
+    const tDetail = useTranslations("FlashcardDetail");
+
+    const publicRoleOptions: SelectOption<"viewer" | "commenter">[] = PUBLIC_ROLES.map((role) => ({
+        value: role,
+        label: tDetail(`roleName.${role}`),
+        icon: ROLE_CONFIG[role].icon,
+        color: ROLE_CONFIG[role].color,
+    }));
+
     const currentLevel =
         privacyMode === "public"
             ? VisibilityLevel.PUBLIC
@@ -97,7 +93,7 @@ const SharePrivacyPicker = ({
                             onClick={onTogglePrivacyMenu}
                             disabled={saving}
                         >
-                            {currentVisibility.label}
+                            {t(`visibility.${currentVisibility.level}.label`)}
                             <ChevronDown
                                 size={20}
                                 className={`text-gray-400 transition-transform ${openPrivacyMenu ? "rotate-180" : ""}`}
@@ -138,10 +134,10 @@ const SharePrivacyPicker = ({
                                                 />
                                                 <div className="flex-1 text-left">
                                                     <div className="text-text font-black">
-                                                        {v.label}
+                                                        {t(`visibility.${v.level}.label`)}
                                                     </div>
                                                     <div className="text-xs font-bold text-gray-400">
-                                                        {v.description}
+                                                        {t(`visibility.${v.level}.description`)}
                                                     </div>
                                                 </div>
                                                 {isSelected && (
@@ -164,7 +160,7 @@ const SharePrivacyPicker = ({
                         )}
 
                         <p className="text-muted mt-1 text-sm font-bold">
-                            {currentVisibility.description}
+                            {t(`visibility.${currentVisibility.level}.description`)}
                         </p>
                     </div>
                 </div>

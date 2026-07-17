@@ -126,7 +126,7 @@ export function GameResultsScreen({
                     >
                         <span className="text-base">{tierInfo.emoji}</span>
                         <span className="text-sm font-black" style={{ color: tierInfo.color }}>
-                            {tierInfo.label}
+                            {t(`tier.${tierInfo.id}`)}
                         </span>
                         {tierInfo.nextThreshold && (
                             <span className="text-muted text-xs font-bold">

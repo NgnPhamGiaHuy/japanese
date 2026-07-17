@@ -162,7 +162,8 @@
             "sharedDescription": "他の学習者からの共有デッキがここに表示されます。",
             "createDeck": "デッキを作成"
         },
-        "reorderFailed": "並び替えに失敗しました"
+        "reorderFailed": "並び替えに失敗しました",
+        "rolePermissions": "「{role}」の権限があります"
     },
     "KanaHub": {
         "levelLabel": "レベル:",
@@ -273,7 +274,14 @@
         "changeMode": "モードを変更",
         "xpEarned": "+{xp} XP",
         "back": "戻る",
-        "play": "プレイ"
+        "play": "プレイ",
+        "tier": {
+            "bronze": "ブロンズ",
+            "silver": "シルバー",
+            "gold": "ゴールド",
+            "platinum": "プラチナ",
+            "diamond": "ダイヤモンド"
+        }
     },
     "FlashcardDetail": {
         "backToDecks": "デッキ一覧に戻る",
@@ -290,9 +298,11 @@
         "copyShareLinkSubtitle": "このデッキを他の人と共有",
         "yourRole": "あなたの役割",
         "roleName": {
+            "owner": "所有者",
             "editor": "編集者",
             "commenter": "コメント可",
-            "viewer": "閲覧者"
+            "viewer": "閲覧者",
+            "none": "閲覧者"
         },
         "roleAccessTitle": {
             "editor": "編集権限",
@@ -395,7 +405,21 @@
         "inviteRevoked": "招待を取り消しました",
         "revokeFailed": "招待の取り消しに失敗しました",
         "cannotInviteSelf": "自分自身を招待することはできません。",
-        "sendInviteFailed": "招待の送信に失敗しました。もう一度お試しください。"
+        "sendInviteFailed": "招待の送信に失敗しました。もう一度お試しください。",
+        "visibility": {
+            "PRIVATE": {
+                "label": "制限付き",
+                "description": "招待された人のみ開けます"
+            },
+            "SHARED": {
+                "label": "リンクを知っている全員",
+                "description": "リンクを知っている人が閲覧できます"
+            },
+            "PUBLIC": {
+                "label": "公開",
+                "description": "リンクなしで誰でも閲覧できます"
+            }
+        }
     },
     "FlashcardComments": {
         "comments": "コメント",
@@ -760,7 +784,21 @@
         "copyEntityId": "エンティティIDをコピー",
         "copyLogId": "ログIDをコピー",
         "userAgent": "ユーザーエージェント",
-        "copy": "コピー"
+        "copy": "コピー",
+        "logLevel": {
+            "info": "情報",
+            "warn": "警告",
+            "error": "エラー",
+            "security": "セキュリティ"
+        },
+        "logType": {
+            "AUTH": "認証",
+            "ADMIN_ACTION": "管理操作",
+            "USER_ACTION": "ユーザー操作",
+            "CONTENT": "コンテンツ",
+            "SYSTEM": "システム",
+            "ERROR": "エラー"
+        }
     },
     "AdminSettings": {
         "title": "設定",

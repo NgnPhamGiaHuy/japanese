@@ -22,6 +22,7 @@ interface LogLevelChartProps {
  */
 const LogLevelChart = ({ data, onClick }: LogLevelChartProps) => {
     const t = useTranslations("AdminAnalytics");
+    const tReports = useTranslations("AdminReports");
     if (!data || data.length === 0) return null;
 
     const total = data.reduce((s, d) => s + d.count, 0);
@@ -70,7 +71,9 @@ const LogLevelChart = ({ data, onClick }: LogLevelChartProps) => {
                         // eslint-disable-next-line @typescript-eslint/no-explicit-any
                         formatter={(value: any, name: any) => [
                             `${value} (${Math.round(((Number(value) || 0) / total) * 100)}%)`,
-                            LOG_LEVEL_META[String(name) as LogLevel]?.label ?? String(name),
+                            LOG_LEVEL_META[String(name) as LogLevel]
+                                ? tReports(`logLevel.${String(name)}`)
+                                : String(name),
                         ]}
                     />
                 </PieChart>
@@ -92,8 +95,10 @@ const LogLevelChart = ({ data, onClick }: LogLevelChartProps) => {
                             }}
                         />
                         <span className="text-text text-xs font-black tracking-tighter uppercase">
-                            {LOG_LEVEL_META[item.level as LogLevel]?.label ?? item.level}:{" "}
-                            {item.count}
+                            {LOG_LEVEL_META[item.level as LogLevel]
+                                ? tReports(`logLevel.${item.level}`)
+                                : item.level}
+                            : {item.count}
                         </span>
                     </button>
                 ))}
