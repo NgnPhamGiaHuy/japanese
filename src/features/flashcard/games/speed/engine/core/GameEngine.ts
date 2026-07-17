@@ -77,18 +77,24 @@ export class GameEngine {
      * Submits user's answer for evaluation.
      *
      * @remarks
-     * Stops timer, evaluates correctness, updates score/streak, records outcome
-     * for adaptive learning, and transitions to feedback phase. Auto-advances
-     * after 1.1s feedback delay.
+     * Evaluates correctness (reading elapsed/remaining time from the still-running
+     * timer), updates score/streak, records outcome for adaptive learning, THEN
+     * stops the timer, and transitions to feedback phase. Auto-advances after
+     * 1.1s feedback delay.
+     *
+     * Evaluation must happen before the timer stops — TimerController's
+     * getElapsed()/getRemaining() both key off `intervalId`, which stopping
+     * clears, so evaluating after stop() silently reads 0 elapsed / full
+     * remaining regardless of actual response time.
      */
     submitAnswer(answer: string): void {
         if (!this.stateMachine.transition("ANSWER_SUBMITTED")) return;
         if (!this.state.currentQuestion) return;
 
-        this.timer.stop();
         this.state.selectedAnswer = answer;
 
         const result = this.evaluateAnswer(answer);
+        this.timer.stop();
         this.applyAnswerResult(result);
 
         this.state.phase = "feedback";
