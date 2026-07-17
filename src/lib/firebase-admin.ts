@@ -3,10 +3,12 @@ import "server-only";
 import { cert, getApp, getApps, initializeApp } from "firebase-admin/app";
 import { getAuth } from "firebase-admin/auth";
 import { getFirestore } from "firebase-admin/firestore";
+import { getRemoteConfig } from "firebase-admin/remote-config";
 
 import type { App } from "firebase-admin/app";
 import type { Auth } from "firebase-admin/auth";
 import type { Firestore } from "firebase-admin/firestore";
+import type { RemoteConfig } from "firebase-admin/remote-config";
 
 /**
  * Initializes the Admin SDK app, reusing an existing instance if present.
@@ -47,6 +49,7 @@ function getAdminApp(): App {
 
 let authInstance: Auth | undefined;
 let dbInstance: Firestore | undefined;
+let remoteConfigInstance: RemoteConfig | undefined;
 
 /**
  * Wraps a lazily-resolved SDK singleton in a Proxy so consumers keep the
@@ -68,3 +71,6 @@ function lazyProxy<T extends object>(resolve: () => T): T {
 
 export const adminAuth: Auth = lazyProxy(() => (authInstance ??= getAuth(getAdminApp())));
 export const adminDb: Firestore = lazyProxy(() => (dbInstance ??= getFirestore(getAdminApp())));
+export const adminRemoteConfig: RemoteConfig = lazyProxy(
+    () => (remoteConfigInstance ??= getRemoteConfig(getAdminApp())),
+);

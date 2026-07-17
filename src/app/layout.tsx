@@ -2,8 +2,10 @@ import type { Metadata } from "next";
 
 import "./globals.css";
 
+import { getFlags } from "@/lib/flags";
 import { fontVariables } from "@/lib/fonts";
 import { Providers } from "@/lib/providers";
+import MaintenanceScreen from "./_components/MaintenanceScreen";
 import { ReactScan } from "./_components/ReactScan";
 
 // TODO(E3-T5/ADR-10): no hosting platform decision has been recorded yet
@@ -28,12 +30,14 @@ export const metadata: Metadata = {
     ],
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+    const flags = await getFlags();
+
     return (
         <html lang="en" className={fontVariables}>
             <body suppressHydrationWarning>
                 <ReactScan />
-                <Providers>{children}</Providers>
+                {flags.maintenance_mode ? <MaintenanceScreen /> : <Providers>{children}</Providers>}
             </body>
         </html>
     );
