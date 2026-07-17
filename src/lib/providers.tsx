@@ -1,5 +1,6 @@
 "use client";
 
+import { usePathname } from "next/navigation";
 import { useState } from "react";
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -13,10 +14,19 @@ import { FontSyncer } from "@/lib/FontSyncer";
 import { PostHogProvider } from "@/lib/PostHogProvider";
 import { AlertProvider } from "@/shared/providers";
 
+// Public/crawlable routes that must render immediately, never behind the
+// client-only auth-ready splash — otherwise their server-rendered content
+// (e.g. the shared-deck SEO preview) never reaches a non-JS crawler, since
+// isAuthReady can never be true during SSR. Mirrors proxy.ts's public-path
+// allowlist; every other route keeps the existing splash-until-ready gate.
+const PUBLIC_ROUTE_PATTERNS = [/^\/flashcard\/shared\/[^/]+$/];
+
 function AuthGate({ children }: { children: React.ReactNode }) {
     const isAuthReady = useAppStore((s) => s.isAuthReady);
+    const pathname = usePathname();
+    const isPublicRoute = PUBLIC_ROUTE_PATTERNS.some((re) => re.test(pathname));
 
-    if (!isAuthReady) {
+    if (!isAuthReady && !isPublicRoute) {
         return (
             <div className="bg-bg fixed inset-0 flex items-center justify-center">
                 <div className="flex flex-col items-center gap-4">

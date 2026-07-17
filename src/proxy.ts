@@ -2,7 +2,13 @@ import { NextResponse } from "next/server";
 
 import type { NextRequest } from "next/server";
 
-const PUBLIC_PATHS = ["/login"];
+const PUBLIC_PATHS = ["/login", "/sitemap.xml", "/robots.txt"];
+
+// Public/social/crawler-facing surface under a dynamic segment — matched by
+// pattern rather than prefix so only the exact landing page (or a same-segment
+// SEO asset, e.g. opengraph-image) is public, never its study/match/speed
+// sub-routes, which need a signed-in user for progress tracking.
+const PUBLIC_PATH_PATTERNS = [/^\/flashcard\/shared\/[^/]+(?:\/opengraph-image)?$/];
 
 const POSTHOG_INGEST_HOST = "us.i.posthog.com";
 const POSTHOG_ASSETS_HOST = "us-assets.i.posthog.com";
@@ -35,7 +41,9 @@ export function proxy(request: NextRequest) {
 
     const token = request.cookies.get("auth-token")?.value;
 
-    const isPublic = PUBLIC_PATHS.some((p) => pathname.startsWith(p));
+    const isPublic =
+        PUBLIC_PATHS.some((p) => pathname.startsWith(p)) ||
+        PUBLIC_PATH_PATTERNS.some((re) => re.test(pathname));
 
     if (!token && !isPublic) {
         const url = request.nextUrl.clone();

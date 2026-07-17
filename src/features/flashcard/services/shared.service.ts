@@ -7,6 +7,7 @@ import { doc, getDoc, getDocs, limit, query, startAfter, where } from "firebase/
 
 import { APP_ID, db } from "@/lib/firebase";
 import { sortByOrder } from "@/shared/utils/reorder";
+import { decodeShareId } from "@/shared/utils/shareToken";
 import { syncInviteToCollaborator } from "./access.service";
 import { cardsCol } from "./card.service";
 import { normalizeLesson } from "./lesson.service";
@@ -16,38 +17,11 @@ import { resolveRole } from "../utils/rbac";
 
 import type { User } from "firebase/auth";
 import type { DocumentSnapshot } from "firebase/firestore";
-import type { CardWithProgress, UserCardProgress } from "../domain"; // ─── Decode helper ─────────────────────────────────────────────────────────────
+import type { CardWithProgress, UserCardProgress } from "../domain";
 import type { DeckAccessRole, FlashCard, Lesson, SharedLessonViewModel } from "../types";
 
-// ─── Decode helper ─────────────────────────────────────────────────────────────
-
-export interface ShareIdPayload {
-    ownerId: string;
-    lessonId: string;
-}
-
-/**
- * Decodes a URL-safe Base64 shareId back to { ownerId, lessonId }.
- *
- * @remarks
- * Uses a deterministic token format `ownerId:lessonId`.
- * Encoded with a URL-safe Base64 implementation to prevent issues in routing.
- *
- * @param shareId - The token from the URL.
- * @returns Resolved payload or null if the token is invalid/tampered.
- */
-export function decodeShareId(shareId: string): ShareIdPayload | null {
-    try {
-        let base64 = decodeURIComponent(shareId).replace(/-/g, "+").replace(/_/g, "/");
-        while (base64.length % 4) base64 += "=";
-        const decoded = atob(base64);
-        const [ownerId, lessonId] = decoded.split(":");
-        if (!ownerId || !lessonId) return null;
-        return { ownerId, lessonId };
-    } catch {
-        return null;
-    }
-}
+export { decodeShareId };
+export type { ShareIdPayload } from "@/shared/utils/shareToken";
 
 // ─── Error types ──────────────────────────────────────────────────────────────
 
