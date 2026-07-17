@@ -24,6 +24,7 @@ import { generateNKeysBetween } from "fractional-indexing";
 import { APP_ID, db } from "@/lib/firebase";
 import { lessonMetadataSchema } from "@/shared/schemas";
 import { sortByOrder } from "@/shared/utils";
+import { encodeShareId as buildShareId } from "@/shared/utils/shareToken";
 import { cardDoc, cardsCol } from "./card.service";
 import { deleteCardImage } from "./image.service";
 import { CardValidationError, validateAtomicCard } from "../utils/card.validator";
@@ -49,15 +50,7 @@ export function lessonDoc(userId: string, lessonId: string) {
 
 // ─── Share ID helper ───────────────────────────────────────────────────────
 
-/**
- * Deterministically encodes `userId:lessonId` as a URL-safe Base64 token.
- * The encoded token is the shareId — it acts as both the URL slug and the
- * pointer to the lesson's owner + ID, so no extra collection is needed.
- */
-export function buildShareId(userId: string, lessonId: string): string {
-    const raw = btoa(`${userId}:${lessonId}`);
-    return raw.replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
-}
+export { buildShareId };
 
 // ─── Schema normalization (safe read-healing) ──────────────────────────────
 

@@ -59,6 +59,16 @@
                     "order": "ASCENDING"
                 }
             ]
+        },
+        {
+            "collectionGroup": "lessons",
+            "fieldPath": "isPublic",
+            "indexes": [
+                {
+                    "queryScope": "COLLECTION_GROUP",
+                    "order": "ASCENDING"
+                }
+            ]
         }
     ]
 }

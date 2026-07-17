@@ -20,9 +20,14 @@ import "server-only";
 import { cache } from "react";
 
 import { adminDb } from "@/lib/firebase-admin";
-import { decodeShareId } from "@/shared/utils/shareToken";
+import { decodeShareId, encodeShareId } from "@/shared/utils/shareToken";
 
 const APP_ID = process.env.NEXT_PUBLIC_APP_ID ?? "kana-nihongo-master";
+
+// Sitemaps are an explicit "please index/list this" signal — capped well
+// under the 50k-URL-per-sitemap protocol limit; a sitemap INDEX (multiple
+// files) would only be worth the added complexity past this scale.
+const SITEMAP_DECK_LIMIT = 1000;
 
 export interface PublicSharedLessonPreview {
     title: string;
@@ -83,3 +88,51 @@ export const getPublicSharedLessonPreview = cache(async function getPublicShared
         return null;
     }
 });
+
+export interface PublicSharedLessonUrl {
+    shareId: string;
+    lastModified: Date;
+}
+
+/**
+ * Lists shareIds for the sitemap.
+ *
+ * @remarks
+ * Deliberately scoped to `isPublic === true` only — NOT `allowLinkAccess`.
+ * "Anyone with the link" is an unlisted-sharing tier (the link still
+ * unfurls fine when pasted anywhere, via getPublicSharedLessonPreview
+ * above); a sitemap is an explicit "please index and list this" signal,
+ * which only the "Public" tier's owner actually opted into.
+ */
+export async function listPublicSharedLessonUrls(): Promise<PublicSharedLessonUrl[]> {
+    try {
+        const snap = await adminDb
+            .collectionGroup("lessons")
+            .where("isPublic", "==", true)
+            .limit(SITEMAP_DECK_LIMIT)
+            .get();
+
+        return snap.docs.flatMap((doc) => {
+            const ownerId = doc.ref.parent.parent?.id;
+            if (!ownerId) return [];
+
+            const data = doc.data();
+            const lastModifiedMs =
+                typeof data.lastSharedAt === "number"
+                    ? data.lastSharedAt
+                    : typeof data.createdAt === "number"
+                      ? data.createdAt
+                      : Date.now();
+
+            return [
+                {
+                    shareId: encodeShareId(ownerId, doc.id),
+                    lastModified: new Date(lastModifiedMs),
+                },
+            ];
+        });
+    } catch (err) {
+        console.error("[listPublicSharedLessonUrls] error:", err);
+        return [];
+    }
+}

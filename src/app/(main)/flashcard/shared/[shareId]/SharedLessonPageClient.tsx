@@ -20,9 +20,12 @@ import { Button } from "@/shared/components/ui";
 import { useCopyToClipboard } from "@/shared/hooks";
 import { useAlert } from "@/shared/providers";
 
+import type { LearningResource, WithContext } from "schema-dts";
 import type { DeckContext } from "@/features/flashcard/detail";
 import type { PublicSharedLessonPreview } from "@/features/flashcard/services/shared-preview.service";
 import type { FlashCard } from "@/features/flashcard/types";
+
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
 
 interface SharedLessonPageClientProps {
     shareId: string;
@@ -63,9 +66,31 @@ export default function SharedLessonPageClient({
     const { copied: linkCopied, copy: copyLink } = useCopyToClipboard();
     const [sharingLesson, setSharingLesson] = useState(false);
 
+    const jsonLd: WithContext<LearningResource> | null = preview
+        ? {
+              "@context": "https://schema.org",
+              "@type": "LearningResource",
+              name: preview.title,
+              description: preview.description || undefined,
+              url: `${SITE_URL}/flashcard/shared/${shareId}`,
+              learningResourceType: "Flashcard deck",
+              inLanguage: "ja",
+              ...(preview.ownerName
+                  ? { author: { "@type": "Person" as const, name: preview.ownerName } }
+                  : {}),
+          }
+        : null;
+    const jsonLdScript = jsonLd && (
+        <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
+    );
+
     if (status === "loading") {
         return (
             <div className="bg-bg fixed inset-0 flex flex-col items-center justify-center gap-6 p-6 text-center">
+                {jsonLdScript}
                 {preview && (
                     <div className="max-w-md">
                         <h1 className="text-text mb-2 text-2xl font-black">{preview.title}</h1>
@@ -84,6 +109,7 @@ export default function SharedLessonPageClient({
         const isQuota = error?.code === "quota-exceeded";
         return (
             <div className="bg-bg flex min-h-screen flex-col items-center justify-center p-6 text-center">
+                {jsonLdScript}
                 <div className="mb-6 flex h-24 w-24 items-center justify-center rounded-3xl border-b-8 border-gray-200 bg-white shadow-sm">
                     <span className="text-4xl">{isQuota ? "⏳" : "📡"}</span>
                 </div>
@@ -115,6 +141,7 @@ export default function SharedLessonPageClient({
     if (status !== "ready" || !result) {
         return (
             <div className="bg-bg flex min-h-screen flex-col items-center justify-center p-6 text-center">
+                {jsonLdScript}
                 <div className="mb-6 flex h-24 w-24 items-center justify-center rounded-3xl border-b-8 border-gray-200 bg-white shadow-sm">
                     <span className="text-4xl">🔒</span>
                 </div>
@@ -205,6 +232,7 @@ export default function SharedLessonPageClient({
 
     return (
         <>
+            {jsonLdScript}
             <FlashcardDetailLayout
                 ctx={ctx}
                 currentUserId={user?.uid}

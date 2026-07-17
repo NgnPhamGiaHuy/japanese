@@ -15,6 +15,16 @@ export interface ShareIdPayload {
 }
 
 /**
+ * Deterministically encodes `ownerId:lessonId` as a URL-safe Base64 token.
+ * The encoded token is the shareId — it acts as both the URL slug and the
+ * pointer to the lesson's owner + ID, so no extra collection is needed.
+ */
+export function encodeShareId(ownerId: string, lessonId: string): string {
+    const raw = btoa(`${ownerId}:${lessonId}`);
+    return raw.replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+}
+
+/**
  * Decodes a URL-safe Base64 shareId back to { ownerId, lessonId }.
  *
  * @remarks
