@@ -8,7 +8,7 @@
 
 "use client";
 
-import { motion } from "framer-motion";
+import { m } from "motion/react";
 
 import { speak } from "@/shared/audio";
 import { Button } from "@/shared/components/ui";
@@ -28,7 +28,7 @@ export function ChartCell({ item, showRomaji, learned, isHiragana }: ChartCellPr
         : "border-[#1cb0f6]/30! bg-katakana/10! hover:bg-katakana/20!";
 
     return (
-        <motion.div
+        <m.div
             whileHover={{ scale: 1.06, y: -2 }}
             whileTap={{ scale: 0.94 }}
             className="aspect-square w-full"
@@ -64,6 +64,6 @@ export function ChartCell({ item, showRomaji, learned, isHiragana }: ChartCellPr
                     </span>
                 )}
             </Button>
-        </motion.div>
+        </m.div>
     );
 }

@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from "react";
 
-import { AnimatePresence, motion } from "framer-motion";
 import { Trophy } from "lucide-react";
+import { AnimatePresence, m } from "motion/react";
 
 import { useLeaderboard } from "@/features/game/hooks";
 
@@ -32,7 +32,10 @@ const MiniLeaderboard = ({
     const [prevRank, setPrevRank] = useState<number | null>(userRank);
     const [rankAnim, setRankAnim] = useState<"up" | "down" | null>(null);
 
-    useEffect(() => {
+    // Adjusted during render (not an effect): userRank changing IS the signal,
+    // so deriving rankAnim here reacts in the same render instead of a
+    // schedule-then-rerun round trip.
+    if (userRank !== prevRank) {
         if (prevRank !== null && userRank !== null) {
             if (userRank < prevRank) {
                 setRankAnim("up");
@@ -41,10 +44,16 @@ const MiniLeaderboard = ({
             }
         }
         setPrevRank(userRank);
+    }
 
+    // The auto-clear timer is a genuine external-system subscription, so it
+    // stays in an effect — scoped to rankAnim so it only schedules once an
+    // animation actually starts, not on every unrelated rank sync.
+    useEffect(() => {
+        if (rankAnim === null) return;
         const timeout = setTimeout(() => setRankAnim(null), 2000);
         return () => clearTimeout(timeout);
-    }, [userRank, prevRank]);
+    }, [rankAnim]);
 
     if (!gameMode || entries.length === 0) return null;
 
@@ -67,7 +76,7 @@ const MiniLeaderboard = ({
 
             <AnimatePresence mode="popLayout">
                 {displayEntries.map((entry) => (
-                    <motion.div
+                    <m.div
                         layout
                         key={entry.userId}
                         initial={{ opacity: 0, x: 20 }}
@@ -90,17 +99,17 @@ const MiniLeaderboard = ({
                         <div className="flex items-center gap-1 font-bold">
                             {entry.score}
                             {entry.isCurrentUser && rankAnim === "up" && (
-                                <motion.span
+                                <m.span
                                     initial={{ opacity: 0, y: 5 }}
                                     animate={{ opacity: 1, y: 0 }}
                                     exit={{ opacity: 0 }}
                                     className="text-xs text-green-500"
                                 >
                                     +1
-                                </motion.span>
+                                </m.span>
                             )}
                         </div>
-                    </motion.div>
+                    </m.div>
                 ))}
             </AnimatePresence>
         </div>

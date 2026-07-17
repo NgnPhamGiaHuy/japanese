@@ -4,6 +4,7 @@ import { usePathname } from "next/navigation";
 import { useState } from "react";
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { LazyMotion } from "motion/react";
 
 import AdminProvider from "@/features/admin/context/AdminContext";
 import { NotificationsProvider } from "@/features/notifications/context/NotificationsContext";
@@ -65,17 +66,30 @@ export function Providers({ children }: { children: React.ReactNode }) {
     );
 
     return (
-        <QueryClientProvider client={queryClient}>
-            <AlertProvider>
-                <FontSyncer />
-                <AudioProvider />
-                <PostHogProvider />
-                <AuthGate>
-                    <AdminProvider>
-                        <NotificationsProvider>{children}</NotificationsProvider>
-                    </AdminProvider>
-                </AuthGate>
-            </AlertProvider>
-        </QueryClientProvider>
+        // features is a dynamic import() (not a static top-level import of
+        // lib/motionFeatures) so the bundler code-splits domMax into its own
+        // chunk, fetched only once LazyMotion mounts client-side — the
+        // synchronous `features={domMax}` form measured byte-identical to the
+        // unshaken `motion.*` import under Turbopack (E11-T1's commit
+        // message), since it still bundles domMax into this same chunk.
+        // strict: throws if a bare `motion.*` component renders here instead
+        // of `m.*` — a guardrail against reintroducing that unshaken import.
+        <LazyMotion
+            features={() => import("@/lib/motionFeatures").then((mod) => mod.default)}
+            strict
+        >
+            <QueryClientProvider client={queryClient}>
+                <AlertProvider>
+                    <FontSyncer />
+                    <AudioProvider />
+                    <PostHogProvider />
+                    <AuthGate>
+                        <AdminProvider>
+                            <NotificationsProvider>{children}</NotificationsProvider>
+                        </AdminProvider>
+                    </AuthGate>
+                </AlertProvider>
+            </QueryClientProvider>
+        </LazyMotion>
     );
 }

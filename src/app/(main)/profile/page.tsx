@@ -4,8 +4,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
-import { motion } from "framer-motion";
 import { BookOpen, ChevronRight, Flame, LogOut, Settings, Trophy, Zap } from "lucide-react";
+import { m } from "motion/react";
 
 import { useAdminRole } from "@/features/admin/context/AdminContext";
 import { useLessons } from "@/features/flashcard/hooks";
@@ -109,7 +109,7 @@ export default function ProfilePage() {
                                 </p>
                             </div>
                             <div className="h-4 overflow-hidden rounded-full border-2 border-white bg-gray-200 shadow-inner">
-                                <motion.div
+                                <m.div
                                     initial={{ width: 0 }}
                                     animate={{ width: `${(xpInLevel / xpToNext) * 100}%` }}
                                     transition={{ duration: 1, ease: "easeOut" }}

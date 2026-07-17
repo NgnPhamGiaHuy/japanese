@@ -10,7 +10,7 @@
 
 import Confetti from "react-confetti";
 
-import { motion } from "framer-motion";
+import { m } from "motion/react";
 
 import { Button } from "@/shared/components/ui";
 import { usePrefersReducedMotion } from "@/shared/hooks";
@@ -91,7 +91,7 @@ export function GameResultsScreen({
                 />
             )}
             <div className="mx-auto flex w-full max-w-md flex-col items-center px-6 py-10">
-                <motion.div
+                <m.div
                     initial={{ scale: 0, rotate: -20 }}
                     animate={{ scale: 1, rotate: -6 }}
                     transition={{ type: "spring", stiffness: 300, damping: 14 }}
@@ -99,16 +99,16 @@ export function GameResultsScreen({
                     style={{ borderColor: iconBorder }}
                 >
                     <Icon size={44} strokeWidth={2.5} />
-                </motion.div>
+                </m.div>
 
                 {isNewBest && (
-                    <motion.div
+                    <m.div
                         initial={{ opacity: 0, y: 8 }}
                         animate={{ opacity: 1, y: 0 }}
                         className="text-survival mb-3 rounded-xl bg-[#fff8e8] px-4 py-1.5 text-xs font-black tracking-wide uppercase"
                     >
                         🎉 New Best Score!
-                    </motion.div>
+                    </m.div>
                 )}
 
                 <h2 className="text-text mb-1 text-4xl font-black">{title}</h2>

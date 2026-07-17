@@ -2,8 +2,8 @@
 
 import { isValidElement } from "react";
 
-import { motion } from "framer-motion";
 import { LucideIcon } from "lucide-react";
+import { m } from "motion/react";
 
 import type { ReactElement } from "react";
 
@@ -56,7 +56,7 @@ const StatCard = ({
               return <Icon size={24} style={{ color }} />;
           })();
     return (
-        <motion.div
+        <m.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: index * 0.05 }}
@@ -90,7 +90,7 @@ const StatCard = ({
                     </h2>
                 </div>
             </div>
-        </motion.div>
+        </m.div>
     );
 };
 

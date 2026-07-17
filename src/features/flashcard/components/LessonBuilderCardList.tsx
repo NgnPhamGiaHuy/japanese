@@ -17,8 +17,8 @@ import {
     sortableKeyboardCoordinates,
     verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
-import { motion } from "framer-motion";
 import { Plus } from "lucide-react";
+import { m } from "motion/react";
 import { v4 as uuidv4 } from "uuid";
 
 import { Button } from "@/shared/components/ui";
@@ -125,7 +125,7 @@ const LessonBuilderCardList: React.FC<LessonBuilderCardListProps> = ({
                 </SortableContext>
             </DndContext>
 
-            <motion.div
+            <m.div
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 className="group relative"
@@ -148,7 +148,7 @@ const LessonBuilderCardList: React.FC<LessonBuilderCardListProps> = ({
                     <Plus size={18} className="sm:size-5" />
                     Add New Flashcard
                 </button>
-            </motion.div>
+            </m.div>
         </div>
     );
 };

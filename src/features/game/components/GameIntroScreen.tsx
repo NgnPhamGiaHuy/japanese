@@ -8,8 +8,8 @@
 
 "use client";
 
-import { motion } from "framer-motion";
 import { X } from "lucide-react";
+import { m } from "motion/react";
 
 import { Button } from "@/shared/components/ui";
 
@@ -72,14 +72,14 @@ export function GameIntroScreen({
                 icon={X}
             />
 
-            <motion.div
+            <m.div
                 initial={{ scale: 0.8, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
                 className={`mb-6 flex h-20 w-20 -rotate-3 items-center justify-center rounded-[1.75rem] border-b-8 text-white shadow-sm ${iconBg}`}
                 style={{ borderColor: iconBorder }}
             >
                 <Icon size={44} strokeWidth={2.5} />
-            </motion.div>
+            </m.div>
 
             <h1 className="text-text mb-1 text-3xl font-black">{title}</h1>
             <p className="text-muted mb-2 max-w-sm text-center text-sm font-bold">{description}</p>

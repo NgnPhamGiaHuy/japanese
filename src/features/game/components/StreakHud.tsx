@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from "react";
 
-import { motion, useAnimation } from "framer-motion";
+import { m, useAnimation } from "motion/react";
 
 import { comboMultiplier } from "@/features/game/domain";
 
@@ -63,7 +63,7 @@ const StreakComboBadge = ({
     if (variant === "compact") {
         return (
             <div className="flex min-h-[36px] w-full items-center justify-end">
-                <motion.div
+                <m.div
                     animate={controls}
                     className={`inline-flex min-w-19 items-center justify-center gap-1 px-2.5 py-1.5 ${STREAK_PILL} transition-opacity duration-200 ${
                         streak === 0 ? "opacity-30" : "opacity-100"
@@ -75,14 +75,14 @@ const StreakComboBadge = ({
                     <span className="text-base font-black text-white tabular-nums md:text-lg">
                         {streak}
                     </span>
-                </motion.div>
+                </m.div>
             </div>
         );
     }
 
     return (
         <div className={STREAK_SLOT}>
-            <motion.div
+            <m.div
                 animate={controls}
                 className={`inline-flex w-full max-w-full items-center justify-center gap-0.5 px-1.5 py-1.5 md:gap-1 md:px-2.5 md:py-2 lg:px-3 ${STREAK_PILL} ${
                     streak === 0 ? "opacity-30" : "opacity-100"
@@ -102,7 +102,7 @@ const StreakComboBadge = ({
                 >
                     {mult != null ? `${mult}×` : "2×"}
                 </span>
-            </motion.div>
+            </m.div>
         </div>
     );
 };

@@ -2,8 +2,8 @@
 
 import React from "react";
 
-import { AnimatePresence, motion } from "framer-motion";
 import { X } from "lucide-react";
+import { AnimatePresence, m } from "motion/react";
 
 import { Button, Input, Textarea } from "@/shared/components/ui";
 
@@ -36,7 +36,7 @@ const LessonBuilderMeta: React.FC<LessonBuilderMetaProps> = ({
     saving,
 }) => {
     return (
-        <motion.div
+        <m.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             className="space-y-4 rounded-3xl border-2 border-b-8 border-gray-200 bg-white p-4 shadow-sm sm:rounded-4xl sm:p-6"
@@ -77,7 +77,7 @@ const LessonBuilderMeta: React.FC<LessonBuilderMetaProps> = ({
                 <div className="mb-4 flex flex-wrap gap-2 sm:gap-2.5">
                     <AnimatePresence>
                         {categories.map((cat: string) => (
-                            <motion.div
+                            <m.div
                                 key={cat}
                                 initial={{ scale: 0.8, opacity: 0 }}
                                 animate={{ scale: 1, opacity: 1 }}
@@ -102,7 +102,7 @@ const LessonBuilderMeta: React.FC<LessonBuilderMetaProps> = ({
                                     icon={X}
                                     iconSize={12}
                                 />
-                            </motion.div>
+                            </m.div>
                         ))}
                     </AnimatePresence>
                 </div>
@@ -167,7 +167,7 @@ const LessonBuilderMeta: React.FC<LessonBuilderMetaProps> = ({
                     </div>
                 </div>
             </div>
-        </motion.div>
+        </m.div>
     );
 };
 

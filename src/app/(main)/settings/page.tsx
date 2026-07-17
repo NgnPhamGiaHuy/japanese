@@ -3,8 +3,8 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-import { motion } from "framer-motion";
 import { ChevronRight, Info, LogOut, Monitor, ShieldAlert, Volume2 } from "lucide-react";
+import { m } from "motion/react";
 
 import { useUserProgress } from "@/features/user/hooks";
 import { signOut } from "@/features/user/services";
@@ -12,6 +12,8 @@ import { useAppStore } from "@/lib/app-store";
 import { ScreenHeader } from "@/shared/components/layout";
 import { Button, Card, ConfirmModal, UserMeta } from "@/shared/components/ui";
 import { SPACING } from "@/shared/constants";
+
+import type { LucideIcon } from "lucide-react";
 
 export default function SettingsPage() {
     const {
@@ -152,7 +154,7 @@ export default function SettingsPage() {
 
 interface SettingsSectionProps {
     title: string;
-    icon: any;
+    icon: LucideIcon;
     children: React.ReactNode;
 }
 
@@ -208,7 +210,7 @@ function SettingsToggle({
                         : "!border-gray-300 !bg-gray-200 hover:!bg-gray-200 active:!bg-gray-200"
                 }`}
             >
-                <motion.div
+                <m.div
                     animate={{ x: value ? 24 : 0 }}
                     transition={{ type: "spring", stiffness: 500, damping: 30 }}
                     className="absolute top-0.5 left-0.5 h-5 w-5 rounded-full bg-white shadow-sm"

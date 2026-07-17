@@ -61,9 +61,10 @@ export function useDashboardState() {
 
     /**
      * @dnd-kit's DragEndEvent hands us the moved item's id and the id it was
-     * dropped on directly — unlike framer-motion's Reorder, which only gives
-     * an already-reordered array back, forcing the caller to track "which id
-     * is being dragged" separately to reverse-engineer old/new indices.
+     * dropped on directly — unlike motion's (formerly framer-motion) Reorder,
+     * which only gives an already-reordered array back, forcing the caller to
+     * track "which id is being dragged" separately to reverse-engineer old/new
+     * indices.
      */
     const handleLessonsReorder = async (activeId: string, overId: string) => {
         const oldIndex = orderedLessons.findIndex((lesson) => lesson.id === activeId);

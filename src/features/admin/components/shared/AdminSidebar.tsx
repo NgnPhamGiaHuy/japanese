@@ -6,7 +6,6 @@ import { useState } from "react";
 
 import { Dialog } from "@base-ui/react/dialog";
 import { clsx } from "clsx";
-import { motion } from "framer-motion";
 import {
     BarChart3,
     Database,
@@ -17,6 +16,7 @@ import {
     Users,
     X,
 } from "lucide-react";
+import { m } from "motion/react";
 
 import { Button } from "@/shared/components/ui";
 
@@ -68,7 +68,7 @@ const NavLinks = ({ onNavigate }: { onNavigate?: () => void }) => {
                         />
                         {item.label}
                         {isActive && (
-                            <motion.div
+                            <m.div
                                 layoutId="active-sidebar"
                                 className="bg-katakana absolute -left-3 h-8 w-1.5 rounded-r-full"
                                 initial={{ opacity: 0 }}

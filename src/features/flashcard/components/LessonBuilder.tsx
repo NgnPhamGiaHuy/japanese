@@ -2,8 +2,8 @@
 
 import React from "react";
 
-import { AnimatePresence, motion } from "framer-motion";
 import { Save, X } from "lucide-react";
+import { AnimatePresence, m } from "motion/react";
 
 import { Button } from "@/shared/components/ui";
 import LessonBuilderCardList from "./LessonBuilderCardList";
@@ -78,7 +78,7 @@ const LessonBuilder: React.FC<LessonBuilderProps> = ({
                 />
                 <AnimatePresence mode="wait">
                     {(builder.inputMode === "manual" || builder.inputMode === "paste") && (
-                        <motion.div
+                        <m.div
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
                             exit={{ opacity: 0, y: -20 }}
@@ -97,7 +97,7 @@ const LessonBuilder: React.FC<LessonBuilderProps> = ({
                                     builder.clearedImagePathsRef.current.push(path)
                                 }
                             />
-                        </motion.div>
+                        </m.div>
                     )}
                 </AnimatePresence>
 

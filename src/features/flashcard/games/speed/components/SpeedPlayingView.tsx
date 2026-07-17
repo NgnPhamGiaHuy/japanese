@@ -5,8 +5,8 @@
 
 "use client";
 
-import { AnimatePresence, motion } from "framer-motion";
 import { X } from "lucide-react";
+import { AnimatePresence, m } from "motion/react";
 
 import { SPEED_GAME_CONFIG } from "@/features/flashcard/games/speed/config";
 import { MiniLeaderboard } from "@/features/game/components";
@@ -131,7 +131,7 @@ const SpeedPlayingView = ({
             />
 
             <div className="mx-auto flex w-full max-w-md flex-1 flex-col items-center justify-center px-6 pt-6">
-                <motion.div
+                <m.div
                     key={questionIndex}
                     initial={{ opacity: 0, y: 16 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -160,18 +160,18 @@ const SpeedPlayingView = ({
                     <AnimatePresence>
                         {questionIndex === SPEED_GAME_CONFIG.LEVELS[2].threshold &&
                         answerStatus === "idle" ? (
-                            <motion.p
+                            <m.p
                                 initial={{ opacity: 0 }}
                                 animate={{ opacity: 1 }}
                                 exit={{ opacity: 0 }}
                                 className="text-survival mt-2 text-xs font-black"
                             >
                                 ⚠ Hints reduced from here
-                            </motion.p>
+                            </m.p>
                         ) : null}
                         {questionIndex === SPEED_GAME_CONFIG.LEVELS[3].threshold &&
                         answerStatus === "idle" ? (
-                            <motion.p
+                            <m.p
                                 initial={{ opacity: 0 }}
                                 animate={{ opacity: 1 }}
                                 exit={{ opacity: 0 }}
@@ -179,10 +179,10 @@ const SpeedPlayingView = ({
                             >
                                 ⚡ Speed increases — {SPEED_GAME_CONFIG.LEVELS[3].timeLimit} s per
                                 question!
-                            </motion.p>
+                            </m.p>
                         ) : null}
                     </AnimatePresence>
-                </motion.div>
+                </m.div>
 
                 <div className="grid w-full gap-3">
                     {options.map((option, index) => {
@@ -223,7 +223,7 @@ const SpeedPlayingView = ({
             <div className="mx-auto flex h-[110px] w-full max-w-md items-center px-6">
                 <AnimatePresence>
                     {answerStatus !== "idle" && currentCard.meaning ? (
-                        <motion.div
+                        <m.div
                             initial={{ opacity: 0, y: 8 }}
                             animate={{ opacity: 1, y: 0 }}
                             exit={{ opacity: 0 }}
@@ -236,7 +236,7 @@ const SpeedPlayingView = ({
                             <p className="text-text mt-1 text-base font-bold">
                                 {currentCard.meaning}
                             </p>
-                        </motion.div>
+                        </m.div>
                     ) : null}
                 </AnimatePresence>
             </div>

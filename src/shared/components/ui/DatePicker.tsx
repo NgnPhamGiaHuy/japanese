@@ -5,8 +5,8 @@ import { DayPicker } from "react-day-picker";
 
 import { clsx } from "clsx";
 import { format, parseISO } from "date-fns";
-import { AnimatePresence, motion } from "framer-motion";
 import { Calendar as CalendarIcon, ChevronLeft, ChevronRight, X } from "lucide-react";
+import { AnimatePresence, m } from "motion/react";
 
 import Button from "./Button";
 
@@ -114,7 +114,7 @@ const DatePicker = ({
                 {isOpen && (
                     <>
                         <div className="fixed inset-0 z-40" onClick={() => setIsOpen(false)} />
-                        <motion.div
+                        <m.div
                             initial={{ opacity: 0, scale: 0.95, y: 10 }}
                             animate={{ opacity: 1, scale: 1, y: 0 }}
                             exit={{ opacity: 0, scale: 0.95, y: 10 }}
@@ -158,7 +158,7 @@ const DatePicker = ({
                                         "[&>button]:opacity-30 [&>button]:pointer-events-none",
                                 }}
                             />
-                        </motion.div>
+                        </m.div>
                     </>
                 )}
             </AnimatePresence>

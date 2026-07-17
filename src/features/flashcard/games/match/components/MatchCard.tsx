@@ -1,6 +1,6 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { m } from "motion/react";
 
 export type MatchCardSurface = "default" | "selected" | "matched" | "error";
 
@@ -33,7 +33,7 @@ const MatchCard = ({ label, surface, disabled, onPress, tabIndex }: MatchCardPro
     }
 
     return (
-        <motion.button
+        <m.button
             type="button"
             layout
             disabled={disabled}
@@ -50,7 +50,7 @@ const MatchCard = ({ label, surface, disabled, onPress, tabIndex }: MatchCardPro
             <span className={`${fontSizeClass} block w-full overflow-hidden break-words`}>
                 {label}
             </span>
-        </motion.button>
+        </m.button>
     );
 };
 

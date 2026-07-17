@@ -4,8 +4,8 @@
 
 "use client";
 
-import { AnimatePresence, motion } from "framer-motion";
 import { Clock, X } from "lucide-react";
+import { AnimatePresence, m } from "motion/react";
 
 import { LivesDisplay, MiniLeaderboard } from "@/features/game/components";
 import { ScreenHeaderBackButton, ScreenHeaderRow } from "@/shared/components/layout";
@@ -109,7 +109,7 @@ const MatchPlayingView = ({
 
             <AnimatePresence>
                 {comboPopup ? (
-                    <motion.div
+                    <m.div
                         key={comboPopup.id}
                         initial={{ opacity: 0, y: 20, scale: 0.85 }}
                         animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -123,7 +123,7 @@ const MatchPlayingView = ({
                                 +{comboPopup.bonus} bonus pts
                             </div>
                         ) : null}
-                    </motion.div>
+                    </m.div>
                 ) : null}
             </AnimatePresence>
 

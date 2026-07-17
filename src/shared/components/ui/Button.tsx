@@ -2,8 +2,8 @@
 
 import { forwardRef } from "react";
 
-import { motion } from "framer-motion";
 import { Loader2, LucideIcon } from "lucide-react";
+import { m } from "motion/react";
 
 import { cn } from "@/shared/utils";
 
@@ -213,7 +213,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button(
     }
 
     return (
-        <motion.button
+        <m.button
             ref={ref}
             whileHover={disabled || loading ? {} : { scale: variant === "ghost" ? 1.05 : 1.02 }}
             whileTap={disabled || loading ? {} : { scale: 0.95 }}
@@ -239,7 +239,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button(
             ) : null}
             {children}
             {badge && <div className="ml-2">{badge}</div>}
-        </motion.button>
+        </m.button>
     );
 });
 
