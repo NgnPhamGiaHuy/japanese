@@ -1,6 +1,9 @@
-"use client";
-
 import { AdminReportsPageContent } from "@/features/admin/components";
+
+export const metadata = {
+    title: "Reports | Admin",
+    description: "System logs, user reports, and audit trails.",
+};
 
 /**
  * Admin Reports Page.

@@ -1,6 +1,9 @@
-"use client";
-
 import { AdminAnalyticsPageContent } from "@/features/admin/components";
+
+export const metadata = {
+    title: "Analytics | Admin",
+    description: "Platform usage statistics, user engagement, and system performance.",
+};
 
 /**
  * Admin Analytics Page.

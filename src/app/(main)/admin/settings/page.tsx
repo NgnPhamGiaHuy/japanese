@@ -1,6 +1,9 @@
-"use client";
-
 import { AdminSettingsPageContent } from "@/features/admin/components";
+
+export const metadata = {
+    title: "Settings | Admin",
+    description: "Global administrative configuration.",
+};
 
 /**
  * Admin Settings Page.
