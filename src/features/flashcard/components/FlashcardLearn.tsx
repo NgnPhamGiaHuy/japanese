@@ -10,6 +10,7 @@ import { useRef, useState } from "react";
 
 import { BookOpen, X } from "lucide-react";
 
+import { DEFAULT_DECK_THEME_COLOR } from "@/features/flashcard/types";
 import { StatGrid } from "@/features/game/components";
 import { playSfx, speak } from "@/shared/audio";
 import { Button, EmptyState } from "@/shared/components/ui";
@@ -31,7 +32,7 @@ interface FlashcardLearnProps {
 }
 
 const FlashcardLearn = ({ lesson, cards, onClose, onAnswer, onComplete }: FlashcardLearnProps) => {
-    const themeHex = lesson.themeColor || "#1cb0f6";
+    const themeHex = lesson.themeColor || DEFAULT_DECK_THEME_COLOR;
 
     /** Local queue state — initialized from cards prop, supports Again re-insertion */
     const [queue, setQueue] = useState<CardWithProgress[]>(() => [...cards]);

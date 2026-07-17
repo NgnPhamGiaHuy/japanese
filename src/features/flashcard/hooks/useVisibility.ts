@@ -1,5 +1,6 @@
 import { useMemo } from "react";
 
+import { DEFAULT_DECK_THEME_COLOR } from "@/features/flashcard/types";
 import { getVisibilityConfig, resolveVisibilityColor, VisibilityLevel } from "../utils";
 
 import type { Lesson } from "../types";
@@ -14,7 +15,7 @@ import type { VisibilityConfig } from "../utils";
 export function useVisibility(lesson: Lesson): VisibilityConfig & { effectiveColor: string } {
     return useMemo(() => {
         const config = getVisibilityConfig(lesson);
-        const themeColor = lesson.themeColor || "#1cb0f6";
+        const themeColor = lesson.themeColor || DEFAULT_DECK_THEME_COLOR;
 
         return {
             ...config,

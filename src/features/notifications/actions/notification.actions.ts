@@ -18,6 +18,7 @@
 import { FieldValue } from "firebase-admin/firestore";
 import { z } from "zod";
 
+import { APP_ID } from "@/lib/app-id";
 import { adminDb } from "@/lib/firebase-admin";
 import { actionClient, verifyIdToken } from "@/lib/safe-action";
 import { contentFor, mergeActors, shareLinkFor } from "../domain/build";
@@ -28,7 +29,6 @@ import { emitNotificationInputSchema } from "../schema";
 import type { ActorRef } from "../domain/build";
 import type { NotificationInput } from "../domain/events";
 
-const APP_ID = process.env.NEXT_PUBLIC_APP_ID ?? "kana-nihongo-master";
 const ROLES_WITH_ACCESS = ["owner", "editor", "commenter", "viewer"];
 
 export interface EmitResult {

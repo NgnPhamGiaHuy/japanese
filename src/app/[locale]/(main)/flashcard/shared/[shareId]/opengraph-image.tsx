@@ -6,6 +6,7 @@
 import { ImageResponse } from "next/og";
 
 import { getPublicSharedLessonPreview } from "@/features/flashcard/services/shared-preview.service";
+import { DEFAULT_DECK_THEME_COLOR } from "@/features/flashcard/types";
 
 export const alt = "Shared flashcard deck preview";
 export const size = { width: 1200, height: 630 };
@@ -52,7 +53,7 @@ export default async function Image({ params }: { params: Promise<{ shareId: str
     const title = preview?.title || "Shared Flashcard Deck";
     const description = preview?.description ?? "";
     const cardCount = preview?.cardCount ?? 0;
-    const accent = preview?.themeColor || "#1cb0f6";
+    const accent = preview?.themeColor || DEFAULT_DECK_THEME_COLOR;
 
     const fontData = await loadNotoSansJP(`${title}${description}Kana&NihongoMastercards`);
 

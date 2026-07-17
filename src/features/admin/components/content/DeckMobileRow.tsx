@@ -6,6 +6,8 @@ import { flexRender } from "@tanstack/react-table";
 import { format } from "date-fns";
 import { Calendar, Layers } from "lucide-react";
 
+import { DEFAULT_DECK_THEME_COLOR } from "@/features/flashcard/types";
+
 import type { Row } from "@tanstack/react-table";
 import type { AdminDeck } from "../../types";
 
@@ -32,7 +34,7 @@ const DeckMobileRow = ({ row }: DeckMobileRowProps) => {
             {/* Color swatch */}
             <div
                 className="mt-0.5 h-10 w-1.5 shrink-0 rounded-full"
-                style={{ backgroundColor: deck.themeColor || "#1cb0f6" }}
+                style={{ backgroundColor: deck.themeColor || DEFAULT_DECK_THEME_COLOR }}
             />
 
             {/* Main info */}
@@ -50,8 +52,8 @@ const DeckMobileRow = ({ row }: DeckMobileRowProps) => {
                                 key={cat}
                                 className="rounded-md px-1.5 py-0.5 text-xs font-black tracking-tight uppercase"
                                 style={{
-                                    backgroundColor: `${deck.themeColor || "#1cb0f6"}15`,
-                                    color: deck.themeColor || "#1cb0f6",
+                                    backgroundColor: `${deck.themeColor || DEFAULT_DECK_THEME_COLOR}15`,
+                                    color: deck.themeColor || DEFAULT_DECK_THEME_COLOR,
                                 }}
                             >
                                 {cat}

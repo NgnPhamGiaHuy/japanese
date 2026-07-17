@@ -12,6 +12,7 @@ import { useState } from "react";
 
 import { AlertCircle, BookOpen, RefreshCw, RotateCcw } from "lucide-react";
 
+import { DEFAULT_DECK_THEME_COLOR } from "@/features/flashcard/types";
 import { StatGrid } from "@/features/game/components";
 import { Button, ConfirmModal } from "@/shared/components/ui";
 import ModeButton from "./ModeButton";
@@ -41,7 +42,7 @@ const StudyModeSelector = ({
     const [showResetConfirm, setShowResetConfirm] = useState(false);
     const [resetting, setResetting] = useState(false);
 
-    const themeHex = lesson.themeColor || "#1cb0f6";
+    const themeHex = lesson.themeColor || DEFAULT_DECK_THEME_COLOR;
     const learnCount = status.newCount;
     const practiceCount = status.dueCount;
 

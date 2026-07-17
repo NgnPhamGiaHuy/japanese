@@ -74,6 +74,9 @@ export type EditorCard = Partial<FlashCard> & {
     previewUrl?: string;
 };
 
+/** Fallback for `Lesson.themeColor` wherever a deck hasn't set its own. */
+export const DEFAULT_DECK_THEME_COLOR = "#1cb0f6";
+
 /**
  * Deck container for flashcards, including visibility and collaborative metadata.
  *

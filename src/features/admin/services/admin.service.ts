@@ -5,25 +5,17 @@ import { cookies } from "next/headers";
 
 import { z } from "zod";
 
+import { APP_ID } from "@/lib/app-id";
 import { adminAuth, adminDb } from "@/lib/firebase-admin";
 import { COOKIE_NAME } from "@/shared/utils/cookie";
 import { hasPermission, normalizeAdminRole } from "../utils/rbac";
 
 import type { AdminRole, CallerContext } from "../types";
+import type { PermissionSet } from "../utils/rbac";
 
-export { adminAuth, adminDb };
+export { adminAuth, adminDb, APP_ID };
 
-export const APP_ID = process.env.NEXT_PUBLIC_APP_ID ?? "kana-nihongo-master";
-
-export type PermissionAction =
-    | "canViewDashboard"
-    | "canViewAnalytics"
-    | "canViewReports"
-    | "canManageUsers"
-    | "canDeleteUsers"
-    | "canPromoteUsers"
-    | "canManageContent"
-    | "canChangeSettings";
+export type PermissionAction = keyof PermissionSet;
 
 export function clampLimit(value: number, min = 1, max = 100): number {
     if (!Number.isFinite(value)) return min;

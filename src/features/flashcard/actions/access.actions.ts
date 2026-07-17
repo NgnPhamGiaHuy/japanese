@@ -12,9 +12,8 @@
  */
 import { FieldPath, FieldValue } from "firebase-admin/firestore";
 
+import { APP_ID } from "@/lib/app-id";
 import { adminAuth, adminDb } from "@/lib/firebase-admin";
-
-const APP_ID = process.env.NEXT_PUBLIC_APP_ID ?? "kana-nihongo-master";
 
 export interface DeclineResult {
     ok: boolean;

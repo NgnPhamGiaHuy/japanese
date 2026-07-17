@@ -11,6 +11,7 @@ import { BookOpen, Edit2, Gamepad2, Trash2, Zap } from "lucide-react";
 
 import { useVisibility, VisibilityLevel } from "@/features/flashcard/hooks/useVisibility";
 import { buildShareId } from "@/features/flashcard/services";
+import { DEFAULT_DECK_THEME_COLOR } from "@/features/flashcard/types";
 import { resolveRole, ROLE_CONFIG } from "@/features/flashcard/utils/rbac";
 import { TierBadge } from "@/features/game/components";
 import { Link } from "@/i18n/navigation";
@@ -33,7 +34,7 @@ const DeckCard = ({
     const tDetail = useTranslations("FlashcardDetail");
     const tShare = useTranslations("ShareModal");
     const { user } = useAppStore();
-    const themeColor = lesson.themeColor || "#1cb0f6";
+    const themeColor = lesson.themeColor || DEFAULT_DECK_THEME_COLOR;
     const visibility = useVisibility(lesson);
 
     const resolvedRole = resolveRole({ lesson, userId: user?.uid });

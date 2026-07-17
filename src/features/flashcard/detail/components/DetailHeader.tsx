@@ -13,6 +13,7 @@ import { useEffect } from "react";
 
 import { ArrowLeft, BookOpen, Gamepad2, Zap } from "lucide-react";
 
+import { DEFAULT_DECK_THEME_COLOR } from "@/features/flashcard/types";
 import { Link } from "@/i18n/navigation";
 import { Button, UserMeta } from "@/shared/components/ui";
 
@@ -22,7 +23,7 @@ const DetailHeader = ({ ctx, onEdit }: DetailHeaderProps) => {
     const t = useTranslations("FlashcardDetail");
     const tCommon = useTranslations("Common");
     const { lesson, cards, isOwner, basePath, lessonId, role } = ctx;
-    const themeHex = lesson.themeColor || "#1cb0f6";
+    const themeHex = lesson.themeColor || DEFAULT_DECK_THEME_COLOR;
     const canPlay = cards.length >= 4;
 
     const createdByName = lesson.ownerName ?? tCommon("unknown");

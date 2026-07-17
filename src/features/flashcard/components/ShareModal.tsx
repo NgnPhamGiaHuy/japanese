@@ -7,6 +7,7 @@ import { Dialog } from "@base-ui/react/dialog";
 import { Check, Copy, ShieldAlert, X } from "lucide-react";
 
 import { buildShareId } from "@/features/flashcard/services";
+import { DEFAULT_DECK_THEME_COLOR } from "@/features/flashcard/types";
 import { sanitizePublicRole } from "@/features/flashcard/utils/rbac";
 import { emitNotification } from "@/features/notifications/services";
 import { useAppStore } from "@/lib/app-store";
@@ -157,7 +158,7 @@ const ShareModal = ({ lesson, onShareLink, onUpdateRoles, onClose }: ShareModalP
         handleRevokeEmailInvite,
     } = useShareInvites({ lesson, setSaving });
 
-    const themeHex = lesson.themeColor || "#1cb0f6";
+    const themeHex = lesson.themeColor || DEFAULT_DECK_THEME_COLOR;
     const themeColorStr = hexToThemeColor(themeHex);
 
     const handleCopy = async () => {

@@ -35,6 +35,7 @@ import {
     getUsersPaginated,
     setAdminRole,
 } from "../services/user.service";
+import { USERS_PAGE_SIZE } from "../utils/queryKeys";
 
 /**
  * @file Admin Server Actions — migrated to next-safe-action.
@@ -55,7 +56,7 @@ async function getAuthToken(): Promise<string> {
     return token;
 }
 
-export async function fetchUsersAction(pageToken?: string, pageSize = 25) {
+export async function fetchUsersAction(pageToken?: string, pageSize = USERS_PAGE_SIZE) {
     const result = await adminActionClient
         .metadata({ permission: "canManageUsers" })
         .inputSchema(

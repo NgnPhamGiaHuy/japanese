@@ -6,6 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { v4 as uuidv4 } from "uuid";
 
 import useAICard from "@/features/ai/hooks/useAICard";
+import { DEFAULT_DECK_THEME_COLOR } from "@/features/flashcard/types";
 import { useAppStore } from "@/lib/app-store";
 import { useAlert } from "@/shared/providers";
 import { lessonMetadataSchema } from "@/shared/schemas";
@@ -63,7 +64,7 @@ export function useLessonBuilder({
             description: initialLesson?.description ?? "",
             categories: initialLesson?.categories ?? ["vocabulary"],
             type: initialLesson?.type,
-            themeColor: initialLesson?.themeColor ?? "#1cb0f6",
+            themeColor: initialLesson?.themeColor ?? DEFAULT_DECK_THEME_COLOR,
         },
     });
     const { register, setValue, getValues, handleSubmit, formState } = form;
@@ -85,7 +86,7 @@ export function useLessonBuilder({
     const { showAlert } = useAlert();
     // Narrow watches — only these two rerender the tree on change (swatch click,
     // add/remove tag), unlike title/description which stay uncontrolled via `register`.
-    const themeHex = form.watch("themeColor") || "#1cb0f6";
+    const themeHex = form.watch("themeColor") || DEFAULT_DECK_THEME_COLOR;
     const categories = form.watch("categories") || [];
     const clearedImagePathsRef = useRef<string[]>([]);
 

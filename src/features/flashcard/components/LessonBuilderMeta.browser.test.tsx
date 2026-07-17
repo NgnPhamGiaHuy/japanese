@@ -7,6 +7,7 @@ import { describe, expect, test } from "vitest";
 import { render } from "vitest-browser-react";
 import { userEvent } from "vitest/browser";
 
+import { DEFAULT_DECK_THEME_COLOR } from "@/features/flashcard/types";
 import messages from "@/messages/en.json";
 import { lessonMetadataSchema } from "@/shared/schemas";
 import LessonBuilderMeta from "./LessonBuilderMeta";
@@ -25,12 +26,12 @@ function Harness() {
             title: "",
             description: "",
             categories: ["vocabulary"],
-            themeColor: "#1cb0f6",
+            themeColor: DEFAULT_DECK_THEME_COLOR,
         },
     });
     const [tagInput, setTagInput] = useState("");
     const categories = form.watch("categories") ?? [];
-    const themeHex = form.watch("themeColor") || "#1cb0f6";
+    const themeHex = form.watch("themeColor") || DEFAULT_DECK_THEME_COLOR;
     const onSubmit = form.handleSubmit(() => {});
 
     return (

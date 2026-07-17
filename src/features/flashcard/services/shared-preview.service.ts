@@ -19,10 +19,10 @@ import "server-only";
 
 import { cache } from "react";
 
+import { DEFAULT_DECK_THEME_COLOR } from "@/features/flashcard/types";
+import { APP_ID } from "@/lib/app-id";
 import { adminDb } from "@/lib/firebase-admin";
 import { decodeShareId, encodeShareId } from "@/shared/utils/shareToken";
-
-const APP_ID = process.env.NEXT_PUBLIC_APP_ID ?? "kana-nihongo-master";
 
 // Sitemaps are an explicit "please index/list this" signal — capped well
 // under the 50k-URL-per-sitemap protocol limit; a sitemap INDEX (multiple
@@ -78,7 +78,8 @@ export const getPublicSharedLessonPreview = cache(async function getPublicShared
         return {
             title: typeof data.title === "string" ? data.title : "",
             description: typeof data.description === "string" ? data.description : "",
-            themeColor: typeof data.themeColor === "string" ? data.themeColor : "#1cb0f6",
+            themeColor:
+                typeof data.themeColor === "string" ? data.themeColor : DEFAULT_DECK_THEME_COLOR,
             categories: Array.isArray(data.categories) ? data.categories : [],
             cardCount: typeof data.cardCount === "number" ? data.cardCount : 0,
             ownerName: typeof data.ownerName === "string" ? data.ownerName : null,

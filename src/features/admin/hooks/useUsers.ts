@@ -9,11 +9,11 @@ import {
     fetchUsersAction,
     setAdminRoleAction,
 } from "../actions";
-import { adminQueryKeys } from "../utils/queryKeys";
+import { adminQueryKeys, USERS_PAGE_SIZE } from "../utils/queryKeys";
 
 import type { AdminUser } from "../types";
 
-export function useUsers(pageToken?: string, pageSize = 25) {
+export function useUsers(pageToken?: string, pageSize = USERS_PAGE_SIZE) {
     const getAdminIdToken = useAdminToken();
     const queryClient = useQueryClient();
 

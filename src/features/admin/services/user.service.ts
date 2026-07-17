@@ -1,6 +1,7 @@
 import "server-only";
 
 import { adminAuth, adminDb, APP_ID, clampLimit } from "./admin.service";
+import { USERS_PAGE_SIZE } from "../utils/queryKeys";
 
 import type { ListUsersResult, UserRecord } from "firebase-admin/auth";
 import type { AdminStats, AdminUser, PaginatedUsers } from "../types";
@@ -28,7 +29,7 @@ async function mapUserRecord(record: UserRecord): Promise<AdminUser> {
 
 export async function getUsersPaginated(
     pageToken?: string,
-    pageSize = 25,
+    pageSize = USERS_PAGE_SIZE,
 ): Promise<PaginatedUsers> {
     const safeSize = clampLimit(pageSize, 1, 100);
     const result: ListUsersResult = await adminAuth.listUsers(safeSize, pageToken);

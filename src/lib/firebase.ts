@@ -9,6 +9,8 @@ import {
 } from "firebase/auth";
 import { getStorage } from "firebase/storage";
 
+import { APP_ID } from "./app-id";
+
 const firebaseConfig = {
     apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
     authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
@@ -25,7 +27,7 @@ export const auth = getAuth(app);
 export const db = getFirestore(app);
 export const storage = getStorage(app);
 export const googleProvider = new GoogleAuthProvider();
-export const APP_ID = process.env.NEXT_PUBLIC_APP_ID ?? "kana-nihongo-master";
+export { APP_ID };
 
 // ─── Emulator wiring (E2E only) ────────────────────────────────────────────
 //

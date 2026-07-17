@@ -6,6 +6,7 @@ import { describe, expect, test, vi } from "vitest";
 import { render } from "vitest-browser-react";
 import { userEvent } from "vitest/browser";
 
+import { DEFAULT_DECK_THEME_COLOR } from "@/features/flashcard/types";
 import messages from "@/messages/en.json";
 import { shareInviteSchema } from "@/shared/schemas";
 import ShareCollaboratorsPanel from "./ShareCollaboratorsPanel";
@@ -39,7 +40,7 @@ function Harness({ onInvite }: { onInvite: (data: ShareInvite) => void }) {
                 lesson={baseLesson}
                 roles={{ "owner-uid": "owner" }}
                 saving={false}
-                themeHex="#1cb0f6"
+                themeHex={DEFAULT_DECK_THEME_COLOR}
                 registerInvite={form.register}
                 inviteControl={form.control}
                 inviteError={form.formState.errors.email?.message ?? null}

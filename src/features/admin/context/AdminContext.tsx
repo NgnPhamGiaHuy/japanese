@@ -4,8 +4,10 @@ import { createContext, useContext, useMemo } from "react";
 
 import { useAdminRoleCheck } from "../hooks";
 
+import type { AdminRole } from "../types";
+
 interface AdminContextType {
-    role: "superadmin" | "admin" | null;
+    role: AdminRole | null;
     isLoading: boolean;
 }
 

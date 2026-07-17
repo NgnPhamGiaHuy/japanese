@@ -6,6 +6,7 @@ import { createColumnHelper } from "@tanstack/react-table";
 import { format } from "date-fns";
 import { Calendar, Eye, Layers, Trash2 } from "lucide-react";
 
+import { DEFAULT_DECK_THEME_COLOR } from "@/features/flashcard/types";
 import { Button } from "@/shared/components/ui";
 
 import type { AdminDeck } from "../types";
@@ -53,8 +54,8 @@ export const useDecksTableColumns = ({ onView, onDelete, isDeleting }: ColumnPro
                                     key={cat}
                                     className="rounded-md px-1.5 py-0.5 text-xs font-black tracking-tight uppercase"
                                     style={{
-                                        backgroundColor: `${deck.themeColor || "#1cb0f6"}15`,
-                                        color: deck.themeColor || "#1cb0f6",
+                                        backgroundColor: `${deck.themeColor || DEFAULT_DECK_THEME_COLOR}15`,
+                                        color: deck.themeColor || DEFAULT_DECK_THEME_COLOR,
                                     }}
                                 >
                                     {cat}

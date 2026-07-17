@@ -26,6 +26,7 @@ import {
     sortableKeyboardCoordinates,
 } from "@dnd-kit/sortable";
 
+import { DEFAULT_DECK_THEME_COLOR } from "@/features/flashcard/types";
 import { reorderWithFractionalIndex } from "@/shared/utils/reorder";
 import SortableCardItem from "./SortableCardItem";
 
@@ -40,7 +41,7 @@ const DetailCardsPanel = ({
 }: DetailCardsPanelProps) => {
     const t = useTranslations("FlashcardDetail");
     const { lesson, cards, ownerId, lessonId, role } = ctx;
-    const themeHex = lesson.themeColor || "#1cb0f6";
+    const themeHex = lesson.themeColor || DEFAULT_DECK_THEME_COLOR;
     const canEdit = role === "owner" || role === "editor";
     const [orderedCards, setOrderedCards] = useState(cards);
 

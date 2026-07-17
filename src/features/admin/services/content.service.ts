@@ -1,5 +1,6 @@
 import "server-only";
 
+import { DEFAULT_DECK_THEME_COLOR } from "@/features/flashcard/types";
 import { adminAuth, adminDb } from "./admin.service";
 
 import type { FlashCard } from "@/features/flashcard/types";
@@ -52,7 +53,7 @@ export async function getGlobalContentPaginated(limit = 50): Promise<PaginatedCo
             })(),
             path: doc.ref.path,
             categories: data.categories || [],
-            themeColor: data.themeColor || "#1cb0f6",
+            themeColor: data.themeColor || DEFAULT_DECK_THEME_COLOR,
         };
     });
 

@@ -9,6 +9,7 @@ import { useState } from "react";
 
 import { AlertCircle, CheckCircle2, Trash2 } from "lucide-react";
 
+import { DEFAULT_DECK_THEME_COLOR } from "@/features/flashcard/types";
 import { Button } from "@/shared/components/ui";
 import { hexToThemeColor } from "@/shared/utils";
 
@@ -85,7 +86,7 @@ const ImportPreview = ({
     initialRows,
     onConfirm,
     onCancel,
-    themeColor = "#1cb0f6",
+    themeColor = DEFAULT_DECK_THEME_COLOR,
 }: ImportPreviewProps) => {
     const t = useTranslations("LessonBuilder");
     const tCommon = useTranslations("Common");

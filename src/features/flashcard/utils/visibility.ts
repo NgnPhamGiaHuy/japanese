@@ -1,5 +1,7 @@
 import { Globe2, Lock, Sparkles } from "lucide-react";
 
+import { DEFAULT_DECK_THEME_COLOR } from "@/features/flashcard/types";
+
 import type { LucideIcon } from "lucide-react";
 import type { Lesson } from "../types";
 
@@ -38,7 +40,7 @@ export const VISIBILITY_MAPPINGS: Record<VisibilityLevel, VisibilityConfig> = {
         level: VisibilityLevel.SHARED,
         icon: Globe2,
         variant: "warning",
-        color: "#1cb0f6", // Will be overridden by themeHex in many places, but this is the default
+        color: DEFAULT_DECK_THEME_COLOR, // Overridden by themeHex in many places, but this is the default
     },
     [VisibilityLevel.PUBLIC]: {
         level: VisibilityLevel.PUBLIC,

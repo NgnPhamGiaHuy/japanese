@@ -13,6 +13,7 @@ import { useTranslations } from "next-intl";
 
 import { BookOpen, Copy, CopyPlus, Edit2, Globe2, Info, Loader2, Lock } from "lucide-react";
 
+import { DEFAULT_DECK_THEME_COLOR } from "@/features/flashcard/types";
 import { Link } from "@/i18n/navigation";
 import ActionRow from "./ActionRow";
 
@@ -31,7 +32,7 @@ const DetailActionsPanel = ({
     const t = useTranslations("FlashcardDetail");
     const tCommon = useTranslations("Common");
     const { lesson, role, isOwner } = ctx;
-    const themeHex = lesson.themeColor || "#1cb0f6";
+    const themeHex = lesson.themeColor || DEFAULT_DECK_THEME_COLOR;
     const canEdit = role === "owner" || role === "editor";
     const themedIconStyle = { backgroundColor: `${themeHex}15`, color: themeHex };
 
