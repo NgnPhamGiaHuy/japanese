@@ -1,6 +1,6 @@
-import { usePathname } from "next/navigation";
 import { useEffect, useRef } from "react";
 
+import { usePathname } from "@/i18n/navigation";
 import { useAppStore } from "@/lib/app-store";
 import { updateLastSeen } from "../services/user.service";
 

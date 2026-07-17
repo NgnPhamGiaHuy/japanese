@@ -9,10 +9,9 @@
 
 "use client";
 
-import Link from "next/link";
-
 import { BookOpen, Copy, CopyPlus, Edit2, Globe2, Info, Loader2, Lock } from "lucide-react";
 
+import { Link } from "@/i18n/navigation";
 import ActionRow from "./ActionRow";
 
 import type { DetailActionsPanelProps } from "../types";

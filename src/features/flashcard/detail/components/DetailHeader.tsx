@@ -8,11 +8,11 @@
 
 "use client";
 
-import Link from "next/link";
 import { useEffect } from "react";
 
 import { ArrowLeft, BookOpen, Gamepad2, Zap } from "lucide-react";
 
+import { Link } from "@/i18n/navigation";
 import { Button, UserMeta } from "@/shared/components/ui";
 
 import type { DetailHeaderProps } from "../types";

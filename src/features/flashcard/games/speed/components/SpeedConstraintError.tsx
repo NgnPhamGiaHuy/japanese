@@ -8,10 +8,9 @@
 
 "use client";
 
-import { useRouter } from "next/navigation";
-
 import { Zap } from "lucide-react";
 
+import { useRouter } from "@/i18n/navigation";
 import { Button } from "@/shared/components/ui";
 
 /**

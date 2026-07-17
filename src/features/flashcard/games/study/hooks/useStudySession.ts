@@ -1,6 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useCallback, useMemo, useState } from "react";
 
 import {
@@ -19,6 +18,7 @@ import {
     recommendedAction,
 } from "@/features/flashcard/utils/learningEngine";
 import { useUserProgress } from "@/features/user/hooks";
+import { useRouter } from "@/i18n/navigation";
 import { useAppStore } from "@/lib/app-store";
 
 import type { CardWithProgress, Grade } from "@/features/flashcard/domain";

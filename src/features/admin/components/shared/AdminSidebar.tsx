@@ -1,7 +1,5 @@
 "use client";
 
-import Link from "next/link";
-import { usePathname } from "next/navigation";
 import { useState } from "react";
 
 import { Dialog } from "@base-ui/react/dialog";
@@ -18,6 +16,7 @@ import {
 } from "lucide-react";
 import { m } from "motion/react";
 
+import { Link, usePathname } from "@/i18n/navigation";
 import { Button } from "@/shared/components/ui";
 
 const navItems = [

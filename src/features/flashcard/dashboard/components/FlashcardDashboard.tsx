@@ -10,8 +10,6 @@
 
 "use client";
 
-import { useRouter } from "next/navigation";
-
 import {
     closestCenter,
     DndContext,
@@ -31,6 +29,7 @@ import { Plus } from "lucide-react";
 import ShareModal from "@/features/flashcard/components/ShareModal";
 import { useLessons } from "@/features/flashcard/hooks";
 import { buildShareId } from "@/features/flashcard/services";
+import { useRouter } from "@/i18n/navigation";
 import { ScreenHeader } from "@/shared/components/layout";
 import { Button, ConfirmModal } from "@/shared/components/ui";
 import { SPACING } from "@/shared/constants";

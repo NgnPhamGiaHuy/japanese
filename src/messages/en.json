@@ -1,0 +1,10 @@
+{
+    "Nav": {
+        "home": "Home",
+        "kana": "Kana",
+        "decks": "Decks",
+        "alerts": "Alerts",
+        "admin": "Admin",
+        "profile": "Profile"
+    }
+}

@@ -1,7 +1,6 @@
-import { useRouter } from "next/navigation";
-
 import { BookOpen, Plus, Sparkles } from "lucide-react";
 
+import { useRouter } from "@/i18n/navigation";
 import { Button } from "@/shared/components/ui";
 
 interface DashboardEmptyProps {

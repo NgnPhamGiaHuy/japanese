@@ -1,8 +1,8 @@
 "use client";
 
-import { usePathname } from "next/navigation";
 import { useEffect } from "react";
 
+import { usePathname } from "@/i18n/navigation";
 import { initPostHog, posthog } from "@/lib/posthog";
 
 /** Manual $pageview capture on route change — see posthog.ts for init gating. */

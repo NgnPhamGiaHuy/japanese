@@ -1,6 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import { Dialog } from "@base-ui/react/dialog";
@@ -8,6 +7,7 @@ import { Command } from "cmdk";
 import { Search } from "lucide-react";
 
 import { useAdminRole } from "@/features/admin/context/AdminContext";
+import { useRouter } from "@/i18n/navigation";
 import { ADMIN_ACTIONS, MAIN_ACTIONS } from "../data/actions";
 
 import type { CommandAction } from "../data/actions";

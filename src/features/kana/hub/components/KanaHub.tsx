@@ -7,11 +7,10 @@
 
 "use client";
 
-import Link from "next/link";
-
 import { BarChart2, Brain, ChevronRight, Flame, PenTool, Play, Type, Volume2 } from "lucide-react";
 
 import { AlphabetSwitcher } from "@/features/kana/components";
+import { Link } from "@/i18n/navigation";
 import { ActionCard, SettingsMenu } from "@/shared/components/ui";
 import { useKanaHubState } from "../hooks/useKanaHubState";
 

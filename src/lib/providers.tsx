@@ -1,6 +1,5 @@
 "use client";
 
-import { usePathname } from "next/navigation";
 import { useState } from "react";
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -10,6 +9,7 @@ import AdminProvider from "@/features/admin/context/AdminContext";
 import { CommandPaletteLauncher } from "@/features/command-palette";
 import { NotificationsProvider } from "@/features/notifications/context/NotificationsContext";
 import { useActivityTracker, useFirebaseAuth } from "@/features/user/hooks";
+import { usePathname } from "@/i18n/navigation";
 import { useAppStore } from "@/lib/app-store";
 import { AudioProvider } from "@/lib/AudioProvider";
 import { FontSyncer } from "@/lib/FontSyncer";

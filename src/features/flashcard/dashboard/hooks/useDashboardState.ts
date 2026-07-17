@@ -6,13 +6,14 @@
  * Supports three tabs: personal, shared, and discover (public decks from all users).
  */
 
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 
 import { matchGameMode } from "@/features/flashcard/games/match/config";
 import { speedGameMode } from "@/features/flashcard/games/speed/config";
 import { useLessons, usePublicLessons } from "@/features/flashcard/hooks";
 import { subscribeGameStats } from "@/features/game/services";
+import { useRouter } from "@/i18n/navigation";
 import { useAppStore } from "@/lib/app-store";
 import { useAlert } from "@/shared/providers";
 import { reorderWithFractionalIndex } from "@/shared/utils";

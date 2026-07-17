@@ -9,13 +9,12 @@
 
 "use client";
 
-import { useRouter } from "next/navigation";
-
 import { logSpeedGameCompleted } from "@/features/flashcard/actions/activity-log.actions";
 import { useGameCompletionLogger } from "@/features/flashcard/games/hooks";
 import { useFlashcardGameBestScore } from "@/features/flashcard/hooks/useFlashcardGameBestScore";
 import { scoreToTier, TIER_INFO } from "@/features/game/domain";
 import { useUserProgress } from "@/features/user/hooks";
+import { useRouter } from "@/i18n/navigation";
 import { useAppStore } from "@/lib/app-store";
 import SpeedIntro from "./SpeedIntro";
 import SpeedPlaying from "./SpeedPlaying";

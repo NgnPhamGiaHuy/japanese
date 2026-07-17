@@ -5,14 +5,13 @@
  * Displays deck metadata (title, tags, count) and high score badges.
  * Provides entry points to Study, Speed Quiz, and Match game.
  */
-import Link from "next/link";
-
 import { BookOpen, Edit2, Gamepad2, Trash2, Zap } from "lucide-react";
 
 import { useVisibility, VisibilityLevel } from "@/features/flashcard/hooks/useVisibility";
 import { buildShareId } from "@/features/flashcard/services";
 import { resolveRole, ROLE_CONFIG } from "@/features/flashcard/utils/rbac";
 import { TierBadge } from "@/features/game/components";
+import { Link } from "@/i18n/navigation";
 import { useAppStore } from "@/lib/app-store";
 import { Button, Card, UserMeta } from "@/shared/components/ui";
 import { hexToThemeColor } from "@/shared/utils";

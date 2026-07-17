@@ -1,9 +1,8 @@
 "use client";
 
-import Link from "next/link";
-
 import { Activity, BookOpen, Database, Users, Zap } from "lucide-react";
 
+import { Link } from "@/i18n/navigation";
 import { Button, LoadingSpinner } from "@/shared/components/ui";
 import QuickActionsCard from "./QuickActionsCard";
 import SystemHealthCard from "./SystemHealthCard";

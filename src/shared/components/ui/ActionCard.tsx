@@ -13,7 +13,7 @@
  *   progress={{ value: 50, label: "50% Complete" }}
  * />
  */
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 
 import type { ReactNode } from "react";
 

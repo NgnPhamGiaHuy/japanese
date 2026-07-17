@@ -22,6 +22,11 @@ export default defineConfig({
     plugins: [react()],
     resolve: {
         alias: {
+            // Must precede the "@" alias below (more specific first) — see
+            // i18n/navigation.testshim.ts for why.
+            "@/i18n/navigation": fileURLToPath(
+                new URL("./i18n/navigation.testshim.ts", import.meta.url),
+            ),
             "@": fileURLToPath(new URL(".", import.meta.url)),
         },
     },
