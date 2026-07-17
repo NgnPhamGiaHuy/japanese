@@ -9,6 +9,9 @@
  * - `useGameSession` — Firestore session lifecycle (start, sync, end)
  * - `recordGameResult` — leaderboard persistence
  * - `DIFFICULTY_CONFIG` / scoring helpers — from the shared modes config
+ * - `useMatchScoring` (E11-T4 split) — pair resolution, score/streak/combo
+ *   state, and tap handling
+ * - `buildGridItems` (matchGrid.ts, E11-T4 split) — pure grid setup
  *
  * Grid state lives in `useMatchGameStore` (Zustand) so the playing view can
  * subscribe to tile selections without prop-drilling through this hook.
@@ -22,23 +25,15 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 
 import { generateMatchDistractors } from "@/features/ai/services/gemini.service";
-import {
-    calcMatchPoints,
-    calcTimeBonus,
-    comboLabel,
-    DIFFICULTY_CONFIG,
-    WRONG_PENALTY,
-} from "@/features/flashcard/games/match/config";
+import { calcTimeBonus, DIFFICULTY_CONFIG } from "@/features/flashcard/games/match/config";
 import { useGameSession } from "@/features/game/hooks";
 import { recordGameResult } from "@/features/game/services";
-import { playSfx, sequence } from "@/shared/audio";
 import { shuffleArray } from "@/shared/utils";
+import { buildGridItems } from "./matchGrid";
+import { useMatchScoring } from "./useMatchScoring";
 import { useMatchGameStore } from "../../../hooks";
-import { gradeCard } from "../../../services/card.service";
-import { getAudioText } from "../../../utils/displayEngine";
 
 import type { MatchDifficulty } from "@/features/flashcard/games/match/config";
-import type { MatchItem } from "../../../hooks";
 import type { FlashCard } from "../../../types";
 
 type MatchPhase = "intro" | "playing" | "results";
@@ -57,57 +52,13 @@ interface UseMatchModeSessionParams {
 }
 
 /**
- * Builds the shuffled grid of tiles from a card pool and optional AI distractors.
- *
- * @remarks
- * Each card produces two tiles: primary (-a) and meaning (-b).
- * Distractor labels are deduplicated against occupied values to prevent
- * accidental matches. A guard loop prevents infinite loops on collision.
- *
- * @param pool - Cards selected for this round.
- * @param distractorLabels - AI-generated decoy strings.
- * @returns Shuffled flat array of MatchItem tiles.
- */
-function buildGridItems(pool: FlashCard[], distractorLabels: string[]): MatchItem[] {
-    const clean = (s: string) => s.split(/[/(,]/)[0].trim();
-    const nl = (s: string) => s.trim().toLowerCase();
-    const items: MatchItem[] = [];
-    const occupied = new Set<string>();
-
-    for (const card of pool) {
-        const pairId = card.id;
-        const valA = clean(card.primary);
-        const valB = clean(card.meaning);
-        items.push({ id: `${pairId}-a`, pairId, value: valA, isDistractor: false });
-        items.push({ id: `${pairId}-b`, pairId, value: valB, isDistractor: false });
-        occupied.add(nl(valA));
-        occupied.add(nl(valB));
-    }
-
-    for (let i = 0; i < distractorLabels.length; i++) {
-        let text = distractorLabels[i]?.trim() ?? "";
-        let guard = 0;
-        // Fallback to numeric label when text collides with an existing tile value.
-        while (guard < 40 && (!text || occupied.has(nl(text)))) {
-            text = `${i + 1}${guard ? `(${guard})` : ""}`;
-            guard++;
-        }
-        occupied.add(nl(text));
-        const id = `dist-${i}-${Math.random().toString(36).slice(2, 9)}`;
-        items.push({ id, value: text, isDistractor: true });
-    }
-
-    return shuffleArray(items);
-}
-
-/**
  * Match Mode session controller.
  *
  * @remarks
  * Manages the full lifecycle of a pair-matching game session:
  * - Difficulty selection and grid preparation
  * - Countdown timer with lives/timeout end conditions
- * - Pair resolution: scoring, combo popups, SRS grading, audio
+ * - Pair resolution, scoring, and tap handling (delegated to useMatchScoring)
  * - Session persistence via useGameSession + recordGameResult
  *
  * Grid tile state (selection, shake, matched) is owned by useMatchGameStore
@@ -124,28 +75,14 @@ export function useMatchModeSession({
     const [phase, setPhase] = useState<MatchPhase>("intro");
     const [difficulty, setDifficulty] = useState<MatchDifficulty>(2);
     const [prepLoading, setPrepLoading] = useState(false);
-    const [score, setScore] = useState(0);
-    const [streak, setStreak] = useState(0);
-    const [maxStreak, setMaxStreak] = useState(0);
-    const [wrongAttempts, setWrongAttempts] = useState(0);
     const [timeLeft, setTimeLeft] = useState(-1);
     const [livesLeft, setLivesLeft] = useState(0);
     const [pairCount, setPairCount] = useState(0);
-    const [comboPopup, setComboPopup] = useState<{
-        id: number;
-        text: string;
-        bonus: number;
-    } | null>(null);
 
-    const comboIdRef = useRef(0);
     const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
     const savedRef = useRef(false);
     const finalScoreRef = useRef(0);
     const livesModeRef = useRef(false);
-
-    // scoreRef mirrors score state so the end-game RAF reads the latest value
-    // without needing score in its dependency array.
-    const scoreRef = useRef(0);
 
     const config = DIFFICULTY_CONFIG[difficulty];
     const gameCfg = config.game;
@@ -181,7 +118,24 @@ export function useMatchModeSession({
         userIdRef.current = userId;
         displayNameRef.current = displayName;
         gameModeRef.current = gameMode;
-        scoreRef.current = score;
+    });
+
+    const {
+        score,
+        setScore,
+        streak,
+        maxStreak,
+        wrongAttempts,
+        comboPopup,
+        scoreRef,
+        resetScoring,
+        onCellTap,
+    } = useMatchScoring({
+        cards,
+        userIdRef,
+        syncScoreRef,
+        livesModeRef,
+        setLivesLeft,
     });
 
     /**
@@ -208,170 +162,6 @@ export function useMatchModeSession({
             if (timerRef.current) clearInterval(timerRef.current);
         };
     }, [phase, timeUnlimited]);
-
-    /**
-     * Resolves a two-tile selection against the current grid state.
-     *
-     * @remarks
-     * Reads grid state imperatively from the Zustand store to avoid stale
-     * closures — the store is the single source of truth for tile state.
-     *
-     * Match path: award points, update streak/combo, grade card for SRS,
-     * play audio, mark pair as matched.
-     *
-     * Miss path: deduct points, reset streak, shake tiles, decrement lives.
-     *
-     * @param idA - ID of the first selected tile.
-     * @param idB - ID of the second selected tile.
-     */
-    const resolveTwo = useCallback(
-        (idA: string, idB: string) => {
-            const store = useMatchGameStore.getState();
-            const a = store.grid.find((c) => c.id === idA);
-            const b = store.grid.find((c) => c.id === idB);
-
-            if (!a || !b) {
-                store.setProcessing(false);
-                return;
-            }
-
-            const isMatch =
-                !a.isDistractor && !b.isDistractor && a.pairId != null && a.pairId === b.pairId;
-
-            if (isMatch) {
-                playSfx("correct");
-
-                setStreak((prev) => {
-                    const newStreak = prev + 1;
-                    const points = calcMatchPoints(newStreak);
-
-                    setScore((s) => {
-                        const next = s + points;
-                        syncScoreRef.current(next);
-                        return next;
-                    });
-
-                    setMaxStreak((m) => Math.max(m, newStreak));
-
-                    const label = comboLabel(newStreak);
-                    if (label) {
-                        const popupId = ++comboIdRef.current;
-                        setComboPopup({ id: popupId, text: label, bonus: points - 100 });
-                        setTimeout(() => {
-                            setComboPopup((cur) => (cur?.id === popupId ? null : cur));
-                        }, 1400);
-                    }
-
-                    return newStreak;
-                });
-
-                useMatchGameStore.getState().addMatchedPairId(a.pairId!);
-
-                // SRS grading + audio — fire-and-forget, must not block UI.
-                const uid = userIdRef.current;
-                if (uid && a.pairId) {
-                    const card = cards.find((c) => c.id === a.pairId);
-                    if (card) {
-                        // Write to userProgress — works for both owner and shared users.
-                        void gradeCard(uid, a.pairId, card, "Good", card.lessonId, uid).catch(
-                            () => {},
-                        );
-
-                        // The cue already fired; wait out its tail, then speak. Consecutive matches
-                        // QUEUE rather than replace, so a fast player hears each matched word in
-                        // full instead of a string of clipped first syllables. Input is not gated
-                        // on the audio — the queue absorbs the pace, and overflows are dropped.
-                        void sequence(
-                            "match-feedback",
-                            [
-                                { waitForTail: "correct" },
-                                {
-                                    speak: {
-                                        text: getAudioText(card),
-                                        options: { trigger: "auto", source: "match" },
-                                    },
-                                },
-                            ],
-                            { policy: "queue", queueDepth: 2 },
-                        );
-                    }
-                }
-
-                setTimeout(() => useMatchGameStore.getState().setProcessing(false), 400);
-                return;
-            }
-
-            // Wrong match — penalise score, shake tiles, decrement lives if active.
-            playSfx("wrong");
-            setStreak(0);
-            setWrongAttempts((prev) => prev + 1);
-            setScore((prev) => {
-                const next = Math.max(0, prev - WRONG_PENALTY);
-                syncScoreRef.current(next);
-                return next;
-            });
-
-            if (livesModeRef.current) {
-                setLivesLeft((l) => Math.max(0, l - 1));
-            }
-
-            useMatchGameStore.getState().setShake([idA, idB]);
-            setTimeout(() => {
-                useMatchGameStore.getState().clearShake();
-                useMatchGameStore.getState().setSelected([]);
-                useMatchGameStore.getState().setProcessing(false);
-            }, 720);
-        },
-        [cards],
-    );
-
-    /**
-     * Handles a tile tap from the playing view.
-     *
-     * @remarks
-     * First tap selects the tile. Second tap on a different tile triggers
-     * pair resolution after a 120ms delay (allows selection animation to render).
-     * Tapping the same tile twice deselects it.
-     *
-     * @param id - ID of the tapped tile.
-     */
-    const onCellTap = useCallback(
-        (id: string) => {
-            const current = useMatchGameStore.getState();
-            if (current.processing) return;
-
-            const tile = current.grid.find((x) => x.id === id);
-            if (!tile) return;
-
-            // Skip already-matched real pairs.
-            if (
-                !tile.isDistractor &&
-                tile.pairId != null &&
-                current.matchedPairIds.includes(tile.pairId)
-            ) {
-                return;
-            }
-
-            if (current.selectedIds.length === 0) {
-                playSfx("click");
-                current.setSelected([id]);
-                return;
-            }
-
-            if (current.selectedIds.length === 1) {
-                const first = current.selectedIds[0];
-                if (first === id) {
-                    current.setSelected([]);
-                    return;
-                }
-                playSfx("click");
-                current.setSelected([first, id]);
-                current.setProcessing(true);
-                setTimeout(() => resolveTwo(first, id), 120);
-            }
-        },
-        [resolveTwo],
-    );
 
     /**
      * Prepares and starts a new game round.
@@ -413,17 +203,13 @@ export function useMatchModeSession({
             useMatchGameStore.getState().initGrid(buildGridItems(pool, distractorLabels));
 
             setPhase("playing");
-            setScore(0);
-            setStreak(0);
-            setMaxStreak(0);
-            setWrongAttempts(0);
-            setComboPopup(null);
+            resetScoring();
             setTimeLeft(gameCfg.timePressure ? config.timeLimit : -1);
             void startSession();
         } finally {
             setPrepLoading(false);
         }
-    }, [cards, config, gameCfg.timePressure, startSession]);
+    }, [cards, config, gameCfg.timePressure, startSession, resetScoring]);
 
     const matchedLen = useMatchGameStore((s) => s.matchedPairIds.length);
 
@@ -460,7 +246,16 @@ export function useMatchModeSession({
         });
 
         return () => cancelAnimationFrame(raf);
-    }, [phase, matchedLen, timeLeft, gameCfg.timePressure, livesLeft, pairCount]);
+    }, [
+        phase,
+        matchedLen,
+        timeLeft,
+        gameCfg.timePressure,
+        livesLeft,
+        pairCount,
+        scoreRef,
+        setScore,
+    ]);
 
     /**
      * Persists session results when the results phase is entered.
