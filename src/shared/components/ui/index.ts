@@ -5,6 +5,7 @@ export { default as Input } from "./Input";
 export { default as Textarea } from "./Textarea";
 export { default as ConfirmModal } from "./ConfirmModal";
 export { default as DatePicker } from "./DatePicker";
+export { default as Drawer } from "./Drawer";
 export { default as Select } from "./Select";
 export { default as StatCard } from "./StatCard";
 export { default as UserAvatar } from "./UserAvatar";
