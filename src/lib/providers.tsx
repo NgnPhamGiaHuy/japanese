@@ -7,6 +7,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { LazyMotion } from "motion/react";
 
 import AdminProvider from "@/features/admin/context/AdminContext";
+import { CommandPaletteLauncher } from "@/features/command-palette";
 import { NotificationsProvider } from "@/features/notifications/context/NotificationsContext";
 import { useActivityTracker, useFirebaseAuth } from "@/features/user/hooks";
 import { useAppStore } from "@/lib/app-store";
@@ -85,7 +86,10 @@ export function Providers({ children }: { children: React.ReactNode }) {
                     <PostHogProvider />
                     <AuthGate>
                         <AdminProvider>
-                            <NotificationsProvider>{children}</NotificationsProvider>
+                            <NotificationsProvider>
+                                {children}
+                                <CommandPaletteLauncher />
+                            </NotificationsProvider>
                         </AdminProvider>
                     </AuthGate>
                 </AlertProvider>
