@@ -1,5 +1,6 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { useState } from "react";
 
 import { BarChart3, Calendar, Download } from "lucide-react";
@@ -7,17 +8,56 @@ import { BarChart3, Calendar, Download } from "lucide-react";
 import { Button, LoadingSpinner } from "@/shared/components/ui";
 import AnalyticsDetailModal from "./AnalyticsDetailModal";
 import AnalyticsExportModal from "./AnalyticsExportModal";
-import ContentDistributionChart from "./ContentDistributionChart";
-import EngagementChart from "./EngagementChart";
-import ErrorTrendChart from "./ErrorTrendChart";
-import LogLevelChart from "./LogLevelChart";
-import LogVolumeChart from "./LogVolumeChart";
-import RetentionChart from "./RetentionChart";
-import TopActionsChart from "./TopActionsChart";
-import GrowthChart from "../dashboard/GrowthChart";
-import RoleChart from "../dashboard/RoleChart";
-import { AdminEmptyState, AdminErrorState, AdminPageHeader, AdminPageLayout } from "../shared";
+import {
+    AdminEmptyState,
+    AdminErrorState,
+    AdminPageHeader,
+    AdminPageLayout,
+    ChartSkeleton,
+} from "../shared";
 import { useAnalytics, useAnalyticsDrilldown } from "../../hooks";
+
+// recharts (~141KB gz) is only needed on this route — dynamic-imported per
+// chart (rather than a single combined import) so the bundler can still
+// split/parallelize the fetch, keeping it out of the common bundle every
+// other route pays for (E11-T2). ssr: false — recharts' ResponsiveContainer
+// measures the DOM and renders nothing meaningful server-side anyway.
+const GrowthChart = dynamic(() => import("../dashboard/GrowthChart"), {
+    ssr: false,
+    loading: ChartSkeleton,
+});
+const RoleChart = dynamic(() => import("../dashboard/RoleChart"), {
+    ssr: false,
+    loading: ChartSkeleton,
+});
+const EngagementChart = dynamic(() => import("./EngagementChart"), {
+    ssr: false,
+    loading: ChartSkeleton,
+});
+const ContentDistributionChart = dynamic(() => import("./ContentDistributionChart"), {
+    ssr: false,
+    loading: ChartSkeleton,
+});
+const RetentionChart = dynamic(() => import("./RetentionChart"), {
+    ssr: false,
+    loading: ChartSkeleton,
+});
+const ErrorTrendChart = dynamic(() => import("./ErrorTrendChart"), {
+    ssr: false,
+    loading: ChartSkeleton,
+});
+const LogVolumeChart = dynamic(() => import("./LogVolumeChart"), {
+    ssr: false,
+    loading: ChartSkeleton,
+});
+const LogLevelChart = dynamic(() => import("./LogLevelChart"), {
+    ssr: false,
+    loading: ChartSkeleton,
+});
+const TopActionsChart = dynamic(() => import("./TopActionsChart"), {
+    ssr: false,
+    loading: ChartSkeleton,
+});
 
 /**
  * Admin Analytics Dashboard Page.

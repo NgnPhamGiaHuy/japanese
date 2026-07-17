@@ -13,5 +13,6 @@ export { default as DataTableMobileList } from "./DataTableMobileList";
 export { default as AdminBulkActionsBar } from "./AdminBulkActionsBar";
 export { default as AdminDateRangeFilter } from "./AdminDateRangeFilter";
 export { default as AdminChartContainer } from "./AdminChartContainer";
+export { default as ChartSkeleton } from "./ChartSkeleton";
 export { default as AdminCard } from "./AdminCard";
 export { default as AdminConfirmModal } from "./AdminConfirmModal";
