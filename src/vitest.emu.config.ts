@@ -38,5 +38,24 @@ export default defineConfig({
         // Emulator round-trips are slower than pure unit tests.
         testTimeout: 20_000,
         hookTimeout: 30_000,
+        // Some *.emu.test.ts files (e.g. user.service.emu.test.ts) exercise a
+        // client-SDK service that transitively imports @/lib/firebase, whose
+        // module-level getAuth(app) throws auth/invalid-api-key the instant
+        // NEXT_PUBLIC_FIREBASE_API_KEY is unset — which it always is here,
+        // since this config (deliberately) never loads .env/.env.local. These
+        // tests only ever talk to the local emulator via their own
+        // rules-unit-testing context, so placeholder values are enough to
+        // satisfy the SDK's eager validation; NEXT_PUBLIC_USE_FIREBASE_EMULATOR
+        // additionally points the imported (otherwise-unused) auth/db bindings
+        // at the same emulator this script boots.
+        env: {
+            NEXT_PUBLIC_FIREBASE_API_KEY: "test-api-key",
+            NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN: "demo-emu-test.firebaseapp.com",
+            NEXT_PUBLIC_FIREBASE_PROJECT_ID: "demo-emu-test",
+            NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET: "demo-emu-test.firebasestorage.app",
+            NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID: "0",
+            NEXT_PUBLIC_FIREBASE_APP_ID: "1:0:web:0",
+            NEXT_PUBLIC_USE_FIREBASE_EMULATOR: "true",
+        },
     },
 });
