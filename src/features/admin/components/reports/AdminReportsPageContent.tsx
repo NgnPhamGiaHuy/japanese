@@ -16,17 +16,11 @@ import { useMemo, useState } from "react";
 
 import { ChevronLeft, ChevronRight, FileText, RefreshCw } from "lucide-react";
 
-import { Button, LoadingSpinner } from "@/shared/components/ui";
+import { Button, EmptyState, LoadingSpinner } from "@/shared/components/ui";
 import LogsFilters from "./LogsFilters";
 import LogsSummaryHeader from "./LogsSummaryHeader";
 import LogsVirtualList from "./LogsVirtualList";
-import {
-    AdminEmptyState,
-    AdminErrorState,
-    AdminPageHeader,
-    AdminPageLayout,
-    AdminTableShell,
-} from "../shared";
+import { AdminErrorState, AdminPageHeader, AdminPageLayout, AdminTableShell } from "../shared";
 import { useCursorPagination, useLogs } from "../../hooks";
 
 import type { AdminLogFilters, LogLevel, LogType } from "../../types";
@@ -193,7 +187,7 @@ const AdminReportsPageContent = () => {
             {isLoading && <LoadingSpinner fullScreen={false} label={t("loadingLogs")} />}
             {error && <AdminErrorState message={error.message} onRetry={() => refetch()} />}
             {isEmpty && (
-                <AdminEmptyState
+                <EmptyState
                     title={t("noLogsMatch")}
                     description={t("noLogsMatchDescription")}
                     icon={FileText}

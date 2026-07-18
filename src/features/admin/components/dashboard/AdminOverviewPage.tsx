@@ -5,13 +5,12 @@ import { useTranslations } from "next-intl";
 import { Activity, BookOpen, Database, Users, Zap } from "lucide-react";
 
 import { Link } from "@/i18n/navigation";
-import { Button, LoadingSpinner } from "@/shared/components/ui";
+import { Button, EmptyState, LoadingSpinner } from "@/shared/components/ui";
 import QuickActionsCard from "./QuickActionsCard";
 import SystemHealthCard from "./SystemHealthCard";
 import { LogRow } from "../reports";
 import {
     AdminCard,
-    AdminEmptyState,
     AdminErrorState,
     AdminPageHeader,
     AdminPageLayout,
@@ -115,7 +114,7 @@ const AdminOverviewPage = () => {
                         {recentActivity.length > 0 ? (
                             recentActivity.map((log) => <LogRow key={log.id} log={log} />)
                         ) : (
-                            <AdminEmptyState
+                            <EmptyState
                                 title={t("noRecentActivity")}
                                 description={t("noRecentActivityDescription")}
                                 icon={Activity}

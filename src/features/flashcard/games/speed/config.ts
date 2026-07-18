@@ -23,7 +23,7 @@ export const SPEED_GAME_CONFIG = {
 
     /**
      * Level definitions and escalation thresholds.
-     * No `label` field — SpeedIntroView resolves "Level N" via
+     * No `label` field — SpeedIntro resolves "Level N" via
      * useTranslations("SpeedGame") keyed by the level number, since a plain
      * config module can't call useTranslations() itself.
      */

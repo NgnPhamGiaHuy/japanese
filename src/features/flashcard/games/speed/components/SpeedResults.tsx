@@ -1,21 +1,78 @@
 /**
- * SpeedResults — Results View Wrapper
- *
- * @remarks
- * Thin wrapper around existing SpeedResultsView component.
- * Maintains backward compatibility while establishing feature boundary.
+ * @file SpeedResults
+ * Game Over / Summary Screen for Speed Mode.
  */
 
 "use client";
 
-import SpeedResultsView from "./SpeedResultsView";
+import { useTranslations } from "next-intl";
 
-import type { ComponentProps } from "react";
+import { Zap } from "lucide-react";
 
-type SpeedResultsProps = ComponentProps<typeof SpeedResultsView>;
+import { GameResultsScreen } from "@/features/game/components";
 
-const SpeedResults = (props: SpeedResultsProps) => {
-    return <SpeedResultsView {...props} />;
+import type { TierInfo } from "@/features/game/domain";
+
+interface SpeedResultsProps {
+    score: number;
+    bestScore: number;
+    correctCount: number;
+    totalQuestions: number;
+    maxStreak: number;
+    tierInfo: TierInfo;
+    gameMode: string;
+    currentUserId?: string;
+    onPlayAgain: () => void;
+    onCollectXP: () => void;
+}
+
+const SpeedResults = ({
+    score,
+    bestScore,
+    correctCount,
+    totalQuestions,
+    maxStreak,
+    tierInfo,
+    gameMode,
+    currentUserId,
+    onPlayAgain,
+    onCollectXP,
+}: SpeedResultsProps) => {
+    const t = useTranslations("SpeedGame");
+    const tGame = useTranslations("Game");
+    const accuracy = totalQuestions > 0 ? Math.round((correctCount / totalQuestions) * 100) : 0;
+
+    return (
+        <GameResultsScreen
+            title={t("resultsTitle")}
+            icon={Zap}
+            iconBg="bg-survival"
+            iconBorder="var(--color-survival-strong)"
+            score={score}
+            bestScore={bestScore}
+            tierInfo={tierInfo}
+            stats={[
+                { value: correctCount, label: tGame("correct"), color: "var(--color-hiragana)" },
+                {
+                    value: Math.max(0, totalQuestions - correctCount),
+                    label: tGame("wrong"),
+                    color: "var(--color-danger)",
+                },
+                { value: maxStreak, label: tGame("streak"), color: "var(--color-survival)" },
+                {
+                    value: `${accuracy}%`,
+                    label: tGame("accuracy"),
+                    color: "var(--color-katakana)",
+                },
+            ]}
+            gameMode={gameMode}
+            currentUserId={currentUserId}
+            accentColor="#ff9600"
+            primaryColor="orange"
+            onPlayAgain={onPlayAgain}
+            onCollectXP={onCollectXP}
+        />
+    );
 };
 
 export default SpeedResults;

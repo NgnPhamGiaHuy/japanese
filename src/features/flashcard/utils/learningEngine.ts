@@ -11,10 +11,15 @@
  * 3. **Mistake Recovery**: Per-session memory management for immediate feedback loops.
  */
 import { shuffleArray } from "@/shared/utils";
+import { getDueCards, getMistakeCards, getNewCards, reinsertCard } from "../domain/srs";
 import { redistributeOverdueCards } from "../services/progress.service";
 
 import type { CardWithProgress } from "../domain";
 import type { StudyMode } from "../types";
+
+// Re-exported so existing call sites that import these from learningEngine
+// keep working — the implementations now live in domain/srs.ts.
+export { getDueCards, getMistakeCards, getNewCards, reinsertCard };
 
 // ─── Anti-Burnout: validated cap state ────────────────────────────────────
 
@@ -54,28 +59,6 @@ export interface BuildSessionOptions {
     /** Lesson ID required for Catch-Up_Mode Firestore batch write. */
     lessonId?: string;
 }
-
-/**
- * Filters for cards the user has never studied (zero repetitions found).
- */
-export const getNewCards = (cards: CardWithProgress[]): CardWithProgress[] =>
-    cards.filter((c) => c.repetitions === 0);
-
-/**
- * Filters for cards whose calculated review epoch has passed.
- */
-export const getDueCards = (cards: CardWithProgress[]): CardWithProgress[] =>
-    cards.filter((c) => c.nextReviewAt <= Date.now() && c.repetitions > 0);
-
-/**
- * Filters for cards flagged as mistakes via the persisted isMistake field.
- *
- * @remarks
- * isMistake is written to Firestore on every grade, so this survives refresh.
- * It is set true on Again/Hard, cleared on Good/Easy.
- */
-export const getMistakeCards = (cards: CardWithProgress[]): CardWithProgress[] =>
-    cards.filter((c) => c.isMistake);
 
 /**
  * Core factory for generating a study segment based on mode and state.
@@ -170,42 +153,6 @@ async function _redistributeOverflow(
     } catch (err) {
         console.error("[learningEngine] Catch-Up_Mode batch write failed:", err);
     }
-}
-
-// ─── Again Re-insertion ────────────────────────────────────────────────────
-
-/**
- * Pure function — returns a new queue with the card at `fromIndex` re-inserted
- * at `fromIndex + offset` where `offset ∈ [3, 5]` (random), clamped to the
- * last valid index.
- *
- * @remarks
- * Edge cases:
- * - Queue of length 1: re-inserts at index 0 (same position).
- * - Short queues (length < 4): insertion index is clamped to `queue.length - 1`.
- *
- * @param queue - Current session card queue.
- * @param fromIndex - Index of the card to re-insert (the card that received `Again`).
- * @returns A new array with the card repositioned.
- */
-export function reinsertCard(queue: CardWithProgress[], fromIndex: number): CardWithProgress[] {
-    if (queue.length <= 1) {
-        // Nothing to reorder — return a shallow copy.
-        return [...queue];
-    }
-
-    // Remove the card from its current position.
-    const newQueue = [...queue];
-    const [card] = newQueue.splice(fromIndex, 1);
-
-    // Random offset in [3, 5].
-    const offset = 3 + Math.floor(Math.random() * 3); // 3, 4, or 5
-
-    // Insertion index relative to the post-removal array, clamped to last valid index.
-    const insertAt = Math.min(fromIndex + offset, newQueue.length);
-
-    newQueue.splice(insertAt, 0, card);
-    return newQueue;
 }
 
 export interface DeckStatus {

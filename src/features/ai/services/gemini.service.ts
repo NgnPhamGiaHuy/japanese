@@ -11,8 +11,8 @@ import { splitAtomicPrimary, validateAtomicCard } from "@/shared/utils";
 import { dedupeDeckCards, normalizeToken } from "./gemini-dedup";
 import { AIServiceError, classifyError, parseCard, parseCardArray } from "./gemini-parsing";
 import { extractJSON, generateContent, generateMultimodalContent } from "./gemini-transport";
-import { getCardGenerationPrompt, getDeckGenerationPrompt } from "./prompt-builder";
 import { AI_CONFIG } from "../config";
+import { buildCardPrompt, buildDeckPrompt } from "../prompts";
 
 import type { GeneratedCard, JLPTLevel } from "../types";
 
@@ -32,7 +32,7 @@ export const generateCardData = async (word: string): Promise<GeneratedCard> => 
     if (cached) return cached;
 
     try {
-        const text = await generateContent(AI_CONFIG.models.card, getCardGenerationPrompt(trimmed));
+        const text = await generateContent(AI_CONFIG.models.card, buildCardPrompt(trimmed));
         const card = parseCard(JSON.parse(extractJSON(text)));
 
         // Validate atomic card principle; if violated, split and return first atomic card
@@ -76,7 +76,7 @@ export const generateDeck = async (
     try {
         const text = await generateContent(
             AI_CONFIG.models.deck,
-            getDeckGenerationPrompt(trimmed, safeCnt, level, normalizedExclusions),
+            buildDeckPrompt(trimmed, safeCnt, level, normalizedExclusions),
         );
         const rawCards = parseCardArray(JSON.parse(extractJSON(text)));
 
@@ -111,8 +111,8 @@ export const generateDeckFromImages = async (
 ): Promise<{ title: string; description: string; cards: GeneratedCard[] }> => {
     if (files.length === 0) throw new AIServiceError("No images provided", "api_error");
 
-    const { getDeckFromImagesPrompt } = await import("./prompt-builder");
-    const prompt = getDeckFromImagesPrompt(context);
+    const { generateDeckFromImagesPrompt } = await import("../prompts");
+    const prompt = generateDeckFromImagesPrompt(context);
 
     try {
         const text = await generateMultimodalContent(AI_CONFIG.models.deck, prompt, files);

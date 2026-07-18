@@ -2,7 +2,7 @@
 
 import { useTranslations } from "next-intl";
 
-import { AdminConfirmModal } from "../shared";
+import { ConfirmModal } from "@/shared/components/ui";
 
 interface UsersActionConfirmModalProps {
     pendingAction: { type: "delete" | "promote" | "demote"; uids: string[] } | null;
@@ -15,7 +15,6 @@ interface UsersActionConfirmModalProps {
  * Specialized Confirmation Modal for User Management.
  *
  * @remarks Handles bulk and individual permission/deletion confirmations.
- * Reuses the AdminConfirmModal as the single source of truth for admin actions.
  */
 const UsersActionConfirmModal = ({
     pendingAction,
@@ -32,7 +31,7 @@ const UsersActionConfirmModal = ({
     );
 
     return (
-        <AdminConfirmModal
+        <ConfirmModal
             isOpen={!!pendingAction}
             onClose={onClose}
             onConfirm={onConfirm}
@@ -49,7 +48,7 @@ const UsersActionConfirmModal = ({
                     : t("confirmBulkAction", { action: actionLabel, count: uids.length })
             }
             variant={type === "delete" ? "danger" : "info"}
-            isLoading={isProcessing}
+            loading={isProcessing}
         />
     );
 };

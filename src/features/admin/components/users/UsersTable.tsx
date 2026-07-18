@@ -4,18 +4,12 @@ import { useTranslations } from "next-intl";
 
 import { Users as UsersIcon } from "lucide-react";
 
-import { Button } from "@/shared/components/ui";
+import { Button, EmptyState } from "@/shared/components/ui";
 import UserMobileRow from "./UserMobileRow";
 import UsersActionConfirmModal from "./UsersActionConfirmModal";
 import UsersTablePagination from "./UsersTablePagination";
 import UsersTableToolbar from "./UsersTableToolbar";
-import {
-    AdminEmptyState,
-    AdminTable,
-    DataTableBody,
-    DataTableHeader,
-    DataTableMobileList,
-} from "../shared";
+import { AdminTable, DataTableBody, DataTableHeader, DataTableMobileList } from "../shared";
 import { useUsersTable } from "../../hooks";
 
 import type { AdminUser } from "../../types";
@@ -131,7 +125,7 @@ const UsersTable = (props: UsersTableProps) => {
                     </>
                 ) : (
                     <div className="col-span-full">
-                        <AdminEmptyState
+                        <EmptyState
                             title={globalFilter ? t("noUsersMatchSearch") : t("noUsersFound")}
                             description={
                                 globalFilter

@@ -5,18 +5,11 @@ import { useMemo, useState } from "react";
 
 import { Database, Filter } from "lucide-react";
 
-import { Button, LoadingSpinner } from "@/shared/components/ui";
+import { Button, ConfirmModal, EmptyState, LoadingSpinner } from "@/shared/components/ui";
 import { ContentOverviewStats } from "./ContentOverviewStats";
 import DeckDetailsPanel from "./DeckDetailsPanel";
 import DecksTable from "./DecksTable";
-import {
-    AdminConfirmModal,
-    AdminEmptyState,
-    AdminErrorState,
-    AdminPageHeader,
-    AdminPageLayout,
-    AdminSearchInput,
-} from "../shared";
+import { AdminErrorState, AdminPageHeader, AdminPageLayout, AdminSearchInput } from "../shared";
 import { useGlobalContent } from "../../hooks";
 
 /**
@@ -112,7 +105,7 @@ const AdminContentPageContent = () => {
                     isDeleting={isDeleting}
                 />
             ) : (
-                <AdminEmptyState
+                <EmptyState
                     title={searchTerm ? t("noResultsFound") : t("noDecksAvailable")}
                     description={
                         searchTerm
@@ -138,14 +131,14 @@ const AdminContentPageContent = () => {
                 isLoading={isLoadingCards}
             />
 
-            <AdminConfirmModal
+            <ConfirmModal
                 isOpen={!!deckToDelete}
                 onClose={() => setDeckToDelete(null)}
                 onConfirm={handleDelete}
                 title={t("deleteDeckTitle")}
                 message={t("deleteDeckMessage")}
                 variant="danger"
-                isLoading={isDeleting}
+                loading={isDeleting}
             />
         </AdminPageLayout>
     );

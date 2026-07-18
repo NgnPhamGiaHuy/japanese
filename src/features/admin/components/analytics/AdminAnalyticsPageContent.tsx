@@ -6,16 +6,10 @@ import { useState } from "react";
 
 import { BarChart3, Calendar, Download } from "lucide-react";
 
-import { Button, LoadingSpinner } from "@/shared/components/ui";
+import { Button, EmptyState, LoadingSpinner } from "@/shared/components/ui";
 import AnalyticsDetailModal from "./AnalyticsDetailModal";
 import AnalyticsExportModal from "./AnalyticsExportModal";
-import {
-    AdminEmptyState,
-    AdminErrorState,
-    AdminPageHeader,
-    AdminPageLayout,
-    ChartSkeleton,
-} from "../shared";
+import { AdminErrorState, AdminPageHeader, AdminPageLayout, ChartSkeleton } from "../shared";
 import { useAnalytics, useAnalyticsDrilldown } from "../../hooks";
 
 // recharts (~141KB gz) is only needed on this route — dynamic-imported per
@@ -113,7 +107,7 @@ const AdminAnalyticsPageContent = () => {
                     description={t("descriptionShort")}
                     icon={BarChart3}
                 />
-                <AdminEmptyState
+                <EmptyState
                     title={t("noAnalyticsData")}
                     description={t("noAnalyticsDataDescription")}
                     icon={BarChart3}

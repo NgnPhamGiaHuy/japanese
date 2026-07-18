@@ -133,7 +133,7 @@ export function useSpeedModeSession({
      *
      * @remarks
      * Original hook exposed full config object. Rebuild from engine's adaptive level.
-     * Includes the bare `level` number alongside `color` since SpeedPlayingView
+     * Includes the bare `level` number alongside `color` since SpeedPlaying
      * resolves the label text itself via useTranslations("SpeedGame").
      */
     const difficultyConfig = useMemo(() => {

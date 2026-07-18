@@ -26,7 +26,7 @@ export interface MatchGameConfig {
 export type MatchDifficulty = 1 | 2 | 3 | 4;
 
 /**
- * No `label`/`sub` fields — MatchIntroView resolves those via
+ * No `label`/`sub` fields — MatchIntro resolves those via
  * useTranslations("MatchGame") keyed by difficulty number, since a plain
  * config module can't call useTranslations() itself.
  */
