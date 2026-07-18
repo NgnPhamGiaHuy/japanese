@@ -5,6 +5,7 @@ import {
     formatRelativeTime,
     isCollapsed,
     overflowCount,
+    resolveNotificationLink,
     visibleActors,
 } from "./format";
 import { makeNotification } from "../__tests__/fixtures";
@@ -65,6 +66,23 @@ describe("collapsed-notification display", () => {
         expect(isCollapsed(1)).toBe(false);
         expect(isCollapsed(undefined)).toBe(false);
         expect(isCollapsed(3)).toBe(true);
+    });
+});
+
+describe("resolveNotificationLink", () => {
+    it("prefers data.shareLink when present", () => {
+        const n = makeNotification({ data: { shareLink: "/flashcard/shared/xyz" } });
+        expect(resolveNotificationLink(n)).toBe("/flashcard/shared/xyz");
+    });
+
+    it("falls back to the notification's own link", () => {
+        const n = makeNotification({ data: undefined, link: "/flashcard/deck1" });
+        expect(resolveNotificationLink(n)).toBe("/flashcard/deck1");
+    });
+
+    it("falls back to /flashcard when neither is present", () => {
+        const n = makeNotification({ data: undefined, link: undefined });
+        expect(resolveNotificationLink(n)).toBe("/flashcard");
     });
 });
 

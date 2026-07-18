@@ -4,6 +4,7 @@ export * from "./useCardsWithProgress";
 export * from "./useCommentCount";
 export * from "./useCommentPanel";
 export * from "./useDeckProgressStatus";
+export * from "./useEditableLesson";
 export * from "./useFlashcardGameBestScore";
 export * from "./useLessons";
 export * from "./useMatchGameStore";

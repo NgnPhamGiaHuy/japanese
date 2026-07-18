@@ -3,167 +3,29 @@
 import { useTranslations } from "next-intl";
 import { useTransition } from "react";
 
-import { Bell, Check, Copy, MessageSquare, Shield, Trash2, UserPlus, X } from "lucide-react";
+import { Trash2 } from "lucide-react";
 
-import { declineInviteAction } from "@/features/flashcard/actions/access.actions";
-import {
-    logNotificationDeleted,
-    logNotificationRead,
-} from "@/features/notifications/actions/activity-log.actions";
+import { useRouter } from "@/i18n/navigation";
+import { Button } from "@/shared/components/ui";
+import { useAlert } from "@/shared/providers";
+import InviteActions from "./InviteActions";
+import NotificationIcon from "./NotificationIcon";
+import { withFreshToken } from "./withFreshToken";
+import { logNotificationDeleted, logNotificationRead } from "../actions/activity-log.actions";
 import {
     formatRelativeTime,
     isCollapsed,
     overflowCount,
+    resolveNotificationLink,
     visibleActors,
-} from "@/features/notifications/domain/format";
-import {
-    deleteNotification,
-    markNotificationRead,
-    restoreNotifications,
-} from "@/features/notifications/services";
-import { isUnread } from "@/features/notifications/types";
-import { useRouter } from "@/i18n/navigation";
-import { auth } from "@/lib/firebase";
-import { Button } from "@/shared/components/ui";
-import { useAlert } from "@/shared/providers";
+} from "../domain/format";
+import { deleteNotification, markNotificationRead, restoreNotifications } from "../services";
+import { isUnread } from "../types";
 
-import type { AppNotification } from "@/features/notifications/types";
-
-function resolveLink(n: AppNotification): string {
-    return n.data?.shareLink ?? n.link ?? "/flashcard";
-}
-
-function NotificationIcon({ type }: { type: string }) {
-    const base = "flex h-10 w-10 shrink-0 items-center justify-center rounded-full";
-    switch (type) {
-        case "invite":
-        case "invite_accepted":
-            return (
-                <div className={`${base} bg-blue-100 text-blue-600`}>
-                    <UserPlus size={18} />
-                </div>
-            );
-        case "comment":
-        case "comment_resolved":
-            return (
-                <div className={`${base} bg-purple-100 text-purple-600`}>
-                    <MessageSquare size={18} />
-                </div>
-            );
-        case "reply":
-            return (
-                <div className={`${base} bg-green-100 text-green-600`}>
-                    <MessageSquare size={18} />
-                </div>
-            );
-        case "role_change":
-        case "access_revoked":
-            return (
-                <div className={`${base} bg-amber-100 text-amber-600`}>
-                    <Shield size={18} />
-                </div>
-            );
-        case "deck_duplicated":
-            return (
-                <div className={`${base} bg-teal-100 text-teal-600`}>
-                    <Copy size={18} />
-                </div>
-            );
-        case "content_removed":
-            return (
-                <div className={`${base} bg-red-100 text-red-600`}>
-                    <Trash2 size={18} />
-                </div>
-            );
-        default:
-            return (
-                <div className={`${base} bg-gray-100 text-gray-500`}>
-                    <Bell size={18} />
-                </div>
-            );
-    }
-}
-
-/** Accept / Decline buttons for invite notifications. */
-function InviteActions({
-    notification,
-    userId,
-}: {
-    notification: AppNotification;
-    userId: string;
-}) {
-    const t = useTranslations("NotificationsPage");
-    const router = useRouter();
-    const [isPending, startTransition] = useTransition();
-    const link = resolveLink(notification);
-
-    const handleAccept = () => {
-        startTransition(async () => {
-            await markNotificationRead(userId, notification.id);
-            void auth.currentUser
-                ?.getIdToken()
-                .then((token) =>
-                    logNotificationRead(
-                        token,
-                        userId,
-                        notification.id,
-                        notification.type,
-                        notification.title,
-                    ),
-                );
-            router.push(link);
-        });
-    };
-
-    const handleDecline = () => {
-        startTransition(async () => {
-            const ownerId = notification.data?.inviterId;
-            const lessonId = notification.data?.lessonId;
-            await deleteNotification(userId, notification.id);
-            const token = await auth.currentUser?.getIdToken();
-            if (token) {
-                void logNotificationDeleted(
-                    token,
-                    userId,
-                    notification.id,
-                    notification.type,
-                    notification.title,
-                );
-                // Actually revoke the pending invite so it can't
-                // silently re-convert to access on the next share-link visit.
-                if (ownerId && lessonId) void declineInviteAction(token, ownerId, lessonId);
-            }
-        });
-    };
-
-    return (
-        <div className="mt-3 flex gap-2">
-            <Button
-                onClick={handleAccept}
-                loading={isPending}
-                variant="primary"
-                className="!flex-1 !rounded-xl !px-3 !py-2 !text-xs !font-black"
-                icon={Check}
-                iconSize={13}
-            >
-                {t("accept")}
-            </Button>
-            <Button
-                onClick={handleDecline}
-                loading={isPending}
-                variant="secondary"
-                className="!flex-1 !rounded-xl !border-gray-300 !px-3 !py-2 !text-xs !font-black"
-                icon={X}
-                iconSize={13}
-            >
-                {t("decline")}
-            </Button>
-        </div>
-    );
-}
+import type { AppNotification } from "../types";
 
 /** Overlapping avatar stack + "+N" for a collapsed notification. */
-function CollapsedActors({ notification }: { notification: AppNotification }) {
+const CollapsedActors = ({ notification }: { notification: AppNotification }) => {
     if (!isCollapsed(notification.count)) return null;
     const shown = visibleActors(notification.actors, 3);
     if (shown.length === 0) return null;
@@ -193,7 +55,7 @@ function CollapsedActors({ notification }: { notification: AppNotification }) {
             {extra > 0 && <span className="text-[11px] font-bold text-gray-400">+{extra}</span>}
         </div>
     );
-}
+};
 
 /** Single notification row — icon, text content, delete button, and invite actions if applicable. */
 export function NotificationRow({
@@ -211,22 +73,20 @@ export function NotificationRow({
     const { showAlert } = useAlert();
     const [isDeleting, startDeleteTransition] = useTransition();
     const unread = isUnread(notification);
-    const link = resolveLink(notification);
+    const link = resolveNotificationLink(notification);
 
     const handleContentClick = () => {
         if (unread) {
             void markNotificationRead(userId, notification.id);
-            void auth.currentUser
-                ?.getIdToken()
-                .then((token) =>
-                    logNotificationRead(
-                        token,
-                        userId,
-                        notification.id,
-                        notification.type,
-                        notification.title,
-                    ),
-                );
+            void withFreshToken((token) =>
+                logNotificationRead(
+                    token,
+                    userId,
+                    notification.id,
+                    notification.type,
+                    notification.title,
+                ),
+            );
         }
         router.push(link);
     };
@@ -236,17 +96,9 @@ export function NotificationRow({
         const id = notification.id;
         startDeleteTransition(async () => {
             await deleteNotification(userId, id);
-            void auth.currentUser
-                ?.getIdToken()
-                .then((token) =>
-                    logNotificationDeleted(
-                        token,
-                        userId,
-                        id,
-                        notification.type,
-                        notification.title,
-                    ),
-                );
+            void withFreshToken((token) =>
+                logNotificationDeleted(token, userId, id, notification.type, notification.title),
+            );
             // Offer Undo — the doc is only soft-deleted, so restore is instant.
             showAlert("info", t("dismissed"), {
                 action: {

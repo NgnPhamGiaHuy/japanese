@@ -51,6 +51,11 @@ export function isCollapsed(count: number | undefined): boolean {
     return (count ?? 1) > 1;
 }
 
+/** Where clicking a notification (or accepting an invite) should navigate to. */
+export function resolveNotificationLink(n: AppNotification): string {
+    return n.data?.shareLink ?? n.link ?? "/flashcard";
+}
+
 /**
  * One row of a virtualized, time-grouped notification list: each
  * group's sticky-label header and its notification rows are flattened into a

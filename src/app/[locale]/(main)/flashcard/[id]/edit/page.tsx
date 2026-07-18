@@ -10,21 +10,11 @@ import { useTranslations } from "next-intl";
 import { useSearchParams } from "next/navigation";
 import { use } from "react";
 
-import { useCollectionQuery, useDocumentQuery } from "@tanstack-query-firebase/react/firestore";
-import { query, where } from "firebase/firestore";
-
 import LessonBuilder from "@/features/flashcard/components/LessonBuilder";
-import { useCards } from "@/features/flashcard/hooks";
-import { useLessons } from "@/features/flashcard/hooks/useLessons";
-import { lessonDoc, normalizeLesson } from "@/features/flashcard/services";
-import { cardsCol } from "@/features/flashcard/services/card.service";
+import { useEditableLesson } from "@/features/flashcard/hooks";
 import { useRouter } from "@/i18n/navigation";
-import { useAppStore } from "@/lib/app-store";
 import { LoadingSpinner } from "@/shared/components/ui";
 import { useAlert } from "@/shared/providers";
-import { sortByOrder } from "@/shared/utils";
-
-import type { FlashCard } from "@/features/flashcard/types";
 
 /**
  * Flashcard Edit View
@@ -43,7 +33,6 @@ export default function FlashcardEditPage({ params }: { params: Promise<{ id: st
     const { showAlert } = useAlert();
     const router = useRouter();
     const searchParams = useSearchParams();
-    const { user } = useAppStore();
 
     /**
      * ownerId param is set when editing a shared lesson (editor role).
@@ -51,10 +40,9 @@ export default function FlashcardEditPage({ params }: { params: Promise<{ id: st
      */
     const ownerId = searchParams.get("ownerId");
     const returnTo = searchParams.get("returnTo");
-    const isSharedEdit = !!ownerId && ownerId !== user?.uid;
 
-    const { lessons, saveFullLesson, deleteLesson } = useLessons();
-    const { cards: ownCards } = useCards(id);
+    const { lesson, cards, loading, isSharedEdit, saveFullLesson, deleteLesson } =
+        useEditableLesson(id, ownerId);
 
     /**
      * Returns to the `returnTo` param when present (e.g. shared-edit mode,
@@ -68,48 +56,6 @@ export default function FlashcardEditPage({ params }: { params: Promise<{ id: st
         }
         router.back();
     };
-
-    /**
-     * Cross-User Data Fetching (bridged via @tanstack-query-firebase/react)
-     * Fetches the original lesson and cards from the owner's Firestore paths —
-     * a genuine one-shot read never covered by an onSnapshot listener (the
-     * app's realtime hooks only ever watch the *current* user's own lessons/
-     * cards), so this is exactly the case the query bridge exists for: cached
-     * for the app's default staleTime and deduped across remounts of this
-     * route, instead of refetched unconditionally on every mount.
-     *
-     * `enabled` gates both queries off entirely outside shared-edit mode; the
-     * `|| "_disabled_"` fallback keeps the ref/query construction itself
-     * valid (a real DocumentReference/Query object is still required even
-     * when disabled) without ever letting a disabled query actually run.
-     */
-    const sharedLessonQuery = useDocumentQuery(lessonDoc(ownerId || "_disabled_", id), {
-        queryKey: ["shared-edit-lesson", ownerId, id],
-        enabled: isSharedEdit && !!ownerId,
-    });
-    const sharedCardsQuery = useCollectionQuery(
-        query(cardsCol(ownerId || "_disabled_"), where("lessonId", "==", id)),
-        { queryKey: ["shared-edit-cards", ownerId, id], enabled: isSharedEdit && !!ownerId },
-    );
-
-    const sharedLessonSnap = sharedLessonQuery.data;
-    const sharedLesson =
-        sharedLessonSnap && sharedLessonSnap.exists()
-            ? normalizeLesson({
-                  ...sharedLessonSnap.data(),
-                  id: sharedLessonSnap.id,
-                  __ownerIdFallback: ownerId,
-              })
-            : null;
-    const sharedCards = sortByOrder(
-        (sharedCardsQuery.data?.docs ?? []).map((d) => ({ ...d.data(), id: d.id }) as FlashCard),
-    );
-    const loadingShared =
-        isSharedEdit && (sharedLessonQuery.isLoading || sharedCardsQuery.isLoading);
-
-    const lesson = isSharedEdit ? sharedLesson : lessons.find((l) => l.id === id);
-    const cards = isSharedEdit ? sharedCards : ownCards;
-    const loading = isSharedEdit ? loadingShared : !lesson;
 
     if (loading) {
         return <LoadingSpinner />;
