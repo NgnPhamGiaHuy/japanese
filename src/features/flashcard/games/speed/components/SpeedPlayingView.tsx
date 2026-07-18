@@ -6,6 +6,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
+import { useState } from "react";
 
 import { X } from "lucide-react";
 import { AnimatePresence, m } from "motion/react";
@@ -74,6 +75,20 @@ const SpeedPlayingView = ({
     const t = useTranslations("SpeedGame");
     const tGame = useTranslations("Game");
     const tCommon = useTranslations("Common");
+
+    // Detect real difficultyConfig.level transitions (adjusted during render, not
+    // an Effect, so it lands in the same render as the new question) instead of
+    // announcing level-ups off a fixed question-index schedule — the schedule
+    // previously fired even on questions where the live adaptive level (already
+    // shown in the header above) hadn't actually changed.
+    const [prevQuestionIndex, setPrevQuestionIndex] = useState(questionIndex);
+    const [prevLevel, setPrevLevel] = useState(difficultyConfig.level);
+    const [justLeveledTo, setJustLeveledTo] = useState<number | null>(null);
+    if (questionIndex !== prevQuestionIndex) {
+        setJustLeveledTo(difficultyConfig.level > prevLevel ? difficultyConfig.level : null);
+        setPrevLevel(difficultyConfig.level);
+        setPrevQuestionIndex(questionIndex);
+    }
 
     return (
         <div className="bg-bg fixed inset-0 z-50 flex flex-col">
@@ -164,8 +179,7 @@ const SpeedPlayingView = ({
                     })()}
 
                     <AnimatePresence>
-                        {questionIndex === SPEED_GAME_CONFIG.LEVELS[2].threshold &&
-                        answerStatus === "idle" ? (
+                        {justLeveledTo === 2 && answerStatus === "idle" ? (
                             <m.p
                                 initial={{ opacity: 0 }}
                                 animate={{ opacity: 1 }}
@@ -175,8 +189,7 @@ const SpeedPlayingView = ({
                                 ⚠ {t("hintsReducedFromHere")}
                             </m.p>
                         ) : null}
-                        {questionIndex === SPEED_GAME_CONFIG.LEVELS[3].threshold &&
-                        answerStatus === "idle" ? (
+                        {justLeveledTo === 3 && answerStatus === "idle" ? (
                             <m.p
                                 initial={{ opacity: 0 }}
                                 animate={{ opacity: 1 }}

@@ -14,7 +14,7 @@ import { useEffect, useRef } from "react";
 import { ArrowLeft, X } from "lucide-react";
 
 import { gameQuizStreakColumnClassName, StreakComboBadge } from "@/features/game/components";
-import { AnswerFeedback, KanaAudioButton } from "@/features/kana/components";
+import { AnswerFeedback, KanaAudioButton, KanaMCOptionsGrid } from "@/features/kana/components";
 import { speak } from "@/shared/audio";
 import { ScreenHeaderBackButton, ScreenHeaderRow } from "@/shared/components/layout";
 import { Button } from "@/shared/components/ui";
@@ -135,30 +135,12 @@ export function QuizPlaying({
                             </Button>
                         </div>
                     ) : (
-                        <div className="grid w-full grid-cols-2 gap-3">
-                            {options.map((opt, i) => {
-                                let state =
-                                    "bg-white text-text border-gray-200 hover:bg-gray-50 hover:-translate-y-1 hover:shadow-md hover:border-gray-300";
-                                if (status !== "idle") {
-                                    if (opt.romaji === question.romaji)
-                                        state =
-                                            "bg-hiragana text-white border-hiragana-strong translate-y-[2px] border-b-2";
-                                    else
-                                        state = "bg-white border-gray-200 text-gray-300 opacity-50";
-                                }
-                                return (
-                                    <Button
-                                        key={i}
-                                        variant="ghost"
-                                        onClick={() => onMCAnswer(opt)}
-                                        disabled={status !== "idle"}
-                                        className={`h-[72px]! rounded-2xl! border-2! border-b-4! text-xl! font-black! shadow-none transition-all duration-150 select-none hover:shadow-none active:translate-y-0 ${state}`}
-                                    >
-                                        {opt.romaji}
-                                    </Button>
-                                );
-                            })}
-                        </div>
+                        <KanaMCOptionsGrid
+                            options={options}
+                            correctRomaji={question.romaji}
+                            status={status}
+                            onSelect={onMCAnswer}
+                        />
                     )}
 
                     <AnswerFeedback

@@ -5,10 +5,9 @@ import { useTranslations } from "next-intl";
 import { X } from "lucide-react";
 
 import { GameStreakScoreStack, LivesDisplay, MiniLeaderboard } from "@/features/game/components";
-import { AnswerFeedback } from "@/features/kana/components";
+import { AnswerFeedback, KanaMCOptionsGrid } from "@/features/kana/components";
 import { useSurvivalGame } from "@/features/kana/hooks";
 import { ScreenHeaderBackButton, ScreenHeaderRow } from "@/shared/components/layout";
-import { Button } from "@/shared/components/ui";
 import { formatTime } from "@/shared/utils";
 
 interface SurvivalQuizScreenProps {
@@ -86,32 +85,12 @@ const SurvivalQuizScreen = ({ game, userId }: SurvivalQuizScreenProps) => {
                                 {question.char}
                             </span>
                         </div>
-                        <div className="grid w-full grid-cols-2 gap-3">
-                            {options.map((opt, i) => {
-                                let state =
-                                    "bg-white text-text border-gray-200 hover:bg-gray-50 hover:-translate-y-1 hover:shadow-md hover:border-gray-300";
-                                if (status !== "idle") {
-                                    if (opt.romaji === question.romaji)
-                                        state =
-                                            "bg-hiragana text-white border-hiragana-strong translate-y-[2px] border-b-2";
-                                    else
-                                        state = "bg-white border-gray-200 text-gray-300 opacity-50";
-                                }
-                                return (
-                                    <Button
-                                        key={i}
-                                        variant="ghost"
-                                        disabled={status !== "idle"}
-                                        onClick={() =>
-                                            game.handleAnswer(opt.romaji === question.romaji)
-                                        }
-                                        className={`!h-[72px] !rounded-2xl !border-2 !border-b-4 !text-xl !font-black shadow-none transition-all duration-150 select-none hover:shadow-none active:translate-y-0 ${state}`}
-                                    >
-                                        {opt.romaji}
-                                    </Button>
-                                );
-                            })}
-                        </div>
+                        <KanaMCOptionsGrid
+                            options={options}
+                            correctRomaji={question.romaji}
+                            status={status}
+                            onSelect={(opt) => game.handleAnswer(opt.romaji === question.romaji)}
+                        />
                         <AnswerFeedback
                             status={status}
                             question={question}
