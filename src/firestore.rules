@@ -127,6 +127,14 @@ service cloud.firestore {
           // Only the viewer who owns this progress document may read or write it.
           allow read, write: if isOwner(userId);
         }
+
+        // Per-mode best scores (Speed/Match/Survival) — stats.service.ts's
+        // subscribePersonalBests/recordGameResult/subscribeGameStats and the
+        // shared persist-best-score.ts helper all read/write only the caller's
+        // own uid, so this is owner-only like sharedProgress above.
+        match /stats/{gameMode} {
+          allow read, write: if isOwner(userId);
+        }
       }
 
       // ─── PER-CARD SRS PROGRESS ─────────────────────────────────────────────
@@ -145,6 +153,25 @@ service cloud.firestore {
         match /studyStats/{statId} {
           allow read, write: if isOwner(userId);
         }
+      }
+
+      // ─── PUBLIC GAME DATA (Sessions + Leaderboards) ─────────────────────────
+      // Sibling of users/{userId}, not nested under it — session.service.ts's
+      // sessionsCol() and leaderboard.service.ts's lbDoc()/subscribeLeaderboard
+      // read/write here. Session docs are private bookkeeping the client never
+      // reads back (score is also tracked locally); leaderboard entries are the
+      // public ranking every player's MiniLeaderboard subscribes to, keyed by
+      // the owner's uid as the document ID.
+      match /public/data/game_sessions/{sessionId} {
+        allow read: if isSignedIn() && resource.data.userId == request.auth.uid;
+        allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
+        allow update: if isSignedIn() && resource.data.userId == request.auth.uid;
+        allow delete: if false;
+      }
+
+      match /public/data/{collectionId}/{userId} {
+        allow read: if collectionId.matches('leaderboard_.*');
+        allow write: if collectionId.matches('leaderboard_.*') && isOwner(userId);
       }
 
       // ─── PENDING NOTIFICATIONS (Pre-login invites) ────────────────────────

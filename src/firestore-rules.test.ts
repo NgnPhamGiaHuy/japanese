@@ -1,7 +1,9 @@
 /**
  * @file firestore-rules.test.ts
  * Security-rules tests for the notification paths, plus the per-card SRS
- * progress path (artifacts/{appId}/userProgress/{userId}/...).
+ * progress path (artifacts/{appId}/userProgress/{userId}/...) and the game
+ * session/leaderboard/stats paths session.service.ts/leaderboard.service.ts/
+ * stats.service.ts write to.
  *
  * GATED: requires the Firestore emulator + @firebase/rules-unit-testing. Runs
  * via `npm run test:emu` (vitest.emu.config.ts), never in the default unit run.
@@ -20,6 +22,12 @@
  * for everyone else — this collection had NO rule at all until this pass,
  * so every real user's card grading was silently denied by Firestore's
  * default-deny (discovered while live-testing E17-T1 against seeded data).
+ *
+ * Also asserts game_sessions/leaderboard_{mode}/users/{uid}/stats — three
+ * more paths discovered completely unruled (same default-deny class of bug
+ * as userProgress above) while Chrome-verifying E17-T6: sessions and stats
+ * are owner-only, leaderboard entries are publicly readable but writable
+ * only by the entry's own owner (doc id == uid).
  */
 
 import { assertFails, assertSucceeds } from "@firebase/rules-unit-testing";
@@ -256,6 +264,146 @@ d("userProgress rules (per-card SRS state)", () => {
         });
         const other = await authedDb(OTHER);
         await assertFails(getDoc(doc(other, ...statsPath(OWNER))));
+    });
+});
+
+d("game session rules (E17-T6 follow-up: was completely unruled)", () => {
+    afterEach(() => clearData());
+    afterAll(() => teardown());
+
+    function sessionPath(sessionId: string) {
+        return ["artifacts", APP, "public", "data", "game_sessions", sessionId] as const;
+    }
+
+    const session = {
+        userId: OWNER,
+        userName: "Owner",
+        gameMode: "flashcard_speed_deckA",
+        score: 0,
+        status: "playing",
+    };
+
+    it("owner can create their own session", async () => {
+        const db = await authedDb(OWNER);
+        await assertSucceeds(setDoc(doc(db, ...sessionPath("s1")), session));
+    });
+
+    it("cannot create a session forging someone else's userId", async () => {
+        const other = await authedDb(OTHER);
+        await assertFails(setDoc(doc(other, ...sessionPath("s2")), session));
+    });
+
+    it("owner can update their own session; another user cannot", async () => {
+        await withAdmin(async (db) => {
+            await setDoc(doc(db, ...sessionPath("s3")), session);
+        });
+        const owner = await authedDb(OWNER);
+        const other = await authedDb(OTHER);
+        await assertSucceeds(updateDoc(doc(owner, ...sessionPath("s3")), { score: 120 }));
+        await assertFails(updateDoc(doc(other, ...sessionPath("s3")), { score: 999 }));
+    });
+
+    it("owner can read their own session; another user cannot", async () => {
+        await withAdmin(async (db) => {
+            await setDoc(doc(db, ...sessionPath("s4")), session);
+        });
+        const owner = await authedDb(OWNER);
+        const other = await authedDb(OTHER);
+        await assertSucceeds(getDoc(doc(owner, ...sessionPath("s4"))));
+        await assertFails(getDoc(doc(other, ...sessionPath("s4"))));
+    });
+
+    it("nobody can delete a session, not even the owner", async () => {
+        await withAdmin(async (db) => {
+            await setDoc(doc(db, ...sessionPath("s5")), session);
+        });
+        const owner = await authedDb(OWNER);
+        await assertFails(deleteDoc(doc(owner, ...sessionPath("s5"))));
+    });
+});
+
+d("leaderboard rules (E17-T6 follow-up: was completely unruled)", () => {
+    afterEach(() => clearData());
+    afterAll(() => teardown());
+
+    function lbPath(gameMode: string, uid: string) {
+        return ["artifacts", APP, "public", "data", `leaderboard_${gameMode}`, uid] as const;
+    }
+
+    const entry = {
+        userId: OWNER,
+        displayName: "Owner",
+        score: 500,
+        gameMode: "flashcard_speed_deckA",
+        timestamp: "2026-07-18T00:00:00.000Z",
+    };
+
+    it("anyone signed in can read a leaderboard entry", async () => {
+        await withAdmin(async (db) => {
+            await setDoc(doc(db, ...lbPath("flashcard_speed_deckA", OWNER)), entry);
+        });
+        const other = await authedDb(OTHER);
+        await assertSucceeds(getDoc(doc(other, ...lbPath("flashcard_speed_deckA", OWNER))));
+    });
+
+    it("an unauthenticated visitor can also read the public leaderboard", async () => {
+        await withAdmin(async (db) => {
+            await setDoc(doc(db, ...lbPath("flashcard_speed_deckA", OWNER)), entry);
+        });
+        const anon = await unauthedDb();
+        await assertSucceeds(getDoc(doc(anon, ...lbPath("flashcard_speed_deckA", OWNER))));
+    });
+
+    it("owner can write their own leaderboard entry (doc id == uid)", async () => {
+        const db = await authedDb(OWNER);
+        await assertSucceeds(setDoc(doc(db, ...lbPath("flashcard_speed_deckA", OWNER)), entry));
+    });
+
+    it("cannot write to another user's leaderboard entry", async () => {
+        const other = await authedDb(OTHER);
+        await assertFails(
+            setDoc(doc(other, ...lbPath("flashcard_speed_deckA", OWNER)), {
+                ...entry,
+                userId: OTHER,
+            }),
+        );
+    });
+});
+
+d("game stats rules — personal bests (E17-T6 follow-up: was completely unruled)", () => {
+    afterEach(() => clearData());
+    afterAll(() => teardown());
+
+    function statsPath(uid: string, gameMode: string) {
+        return ["artifacts", APP, "users", uid, "stats", gameMode] as const;
+    }
+
+    it("owner can write and read their own best score", async () => {
+        const db = await authedDb(OWNER);
+        await assertSucceeds(
+            setDoc(doc(db, ...statsPath(OWNER, "flashcard_speed_deckA")), {
+                bestScore: 500,
+                lastUpdated: "2026-07-18T00:00:00.000Z",
+            }),
+        );
+        await assertSucceeds(getDoc(doc(db, ...statsPath(OWNER, "flashcard_speed_deckA"))));
+    });
+
+    it("another signed-in user cannot read or write someone else's best score", async () => {
+        await withAdmin(async (db) => {
+            await setDoc(doc(db, ...statsPath(OWNER, "flashcard_speed_deckA")), {
+                bestScore: 500,
+                lastUpdated: "2026-07-18T00:00:00.000Z",
+            });
+        });
+        const other = await authedDb(OTHER);
+        await assertFails(getDoc(doc(other, ...statsPath(OWNER, "flashcard_speed_deckA"))));
+        await assertFails(
+            setDoc(doc(other, ...statsPath(OWNER, "flashcard_speed_deckA")), {
+                bestScore: 999,
+                lastUpdated: "2026-07-18T00:00:01.000Z",
+            }),
+        );
     });
 });
 
