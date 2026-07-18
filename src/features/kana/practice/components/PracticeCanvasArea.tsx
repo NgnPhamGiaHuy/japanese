@@ -55,7 +55,7 @@ export function PracticeCanvasArea({ char, mode, themeColor, onPlay }: PracticeC
                     </span>
                     <DrawingCanvas
                         char={char.char}
-                        showGuide={mode === 1}
+                        showGuide={mode === "trace"}
                         stepKey={mode}
                         strokeColor={themeColor.primary}
                     />

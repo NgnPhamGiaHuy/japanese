@@ -13,22 +13,22 @@ export function getModeConfig(
     t: ReturnType<typeof useTranslations<"KanaPractice">>,
 ): PracticeModeConfig {
     const configs: Record<PracticeMode, PracticeModeConfig> = {
-        1: {
-            mode: 1,
+        trace: {
+            mode: "trace",
             label: t("modes.trace"),
             instruction: t("instructions.trace"),
             showReference: true,
             showRomaji: true,
         },
-        2: {
-            mode: 2,
+        copy: {
+            mode: "copy",
             label: t("modes.copy"),
             instruction: t("instructions.copy"),
             showReference: true,
             showRomaji: true,
         },
-        3: {
-            mode: 3,
+        recall: {
+            mode: "recall",
             label: t("modes.recall"),
             instruction: t("instructions.recall"),
             showReference: false,

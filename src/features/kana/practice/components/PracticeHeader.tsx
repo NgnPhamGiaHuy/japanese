@@ -15,7 +15,10 @@ import { ScreenHeader } from "@/shared/components/layout";
 import { Button } from "@/shared/components/ui";
 import { getModeConfig } from "../utils/getModeConfig";
 
-import type { PracticeHeaderProps } from "../types";
+import type { LucideIcon } from "lucide-react";
+import type { PracticeHeaderProps, PracticeMode } from "../types";
+
+const MODE_ICONS: Record<PracticeMode, LucideIcon> = { trace: PenTool, copy: Eye, recall: Brain };
 
 export function PracticeHeader({
     mode,
@@ -28,8 +31,7 @@ export function PracticeHeader({
     const t = useTranslations("KanaPractice");
     const tCommon = useTranslations("Common");
     const config = getModeConfig(mode, t);
-    const modeIcons = { 1: PenTool, 2: Eye, 3: Brain };
-    const ModeIcon = modeIcons[mode];
+    const ModeIcon = MODE_ICONS[mode];
 
     return (
         <ScreenHeader
@@ -39,9 +41,10 @@ export function PracticeHeader({
             right={
                 <>
                     <Button
-                        variant="ghost"
+                        variant="plain"
+                        size="auto"
                         onClick={onModeChange}
-                        className="flex! shrink-0! items-center! gap-1! rounded-lg! border-2! border-gray-200! bg-white! px-2! py-1.5! text-xs! font-bold! text-gray-500! shadow-none transition-all hover:bg-gray-50! hover:shadow-none active:translate-y-0 md:rounded-xl! md:px-3! md:py-2! md:text-xs!"
+                        className="flex shrink-0 items-center gap-1 rounded-lg border-2 border-gray-200 bg-white px-2 py-1.5 text-xs font-bold text-gray-500 shadow-none transition-all hover:bg-gray-50 hover:shadow-none active:translate-y-0 md:rounded-xl md:px-3 md:py-2 md:text-xs"
                         icon={ModeIcon}
                         iconSize={14}
                     >
@@ -50,12 +53,13 @@ export function PracticeHeader({
                         </span>
                     </Button>
                     <Button
-                        variant="ghost"
+                        variant="plain"
+                        size="auto"
                         onClick={onRandomToggle}
-                        className={`flex! shrink-0! items-center! gap-1! rounded-lg! border-2! px-2! py-1.5! text-xs! font-bold! shadow-none transition-all hover:shadow-none active:translate-y-0 md:rounded-xl! md:px-3! md:py-2! md:text-xs! ${
+                        className={`flex shrink-0 items-center gap-1 rounded-lg border-2 px-2 py-1.5 text-xs font-bold shadow-none transition-all hover:shadow-none active:translate-y-0 md:rounded-xl md:px-3 md:py-2 md:text-xs ${
                             isRandom
-                                ? `${themeColor.primaryLightBg}! ${themeColor.text}! ${themeColor.primaryBorder}! shadow-sm`
-                                : "border-gray-200! bg-white! text-gray-500! hover:bg-gray-50!"
+                                ? `${themeColor.primaryLightBg} ${themeColor.text} ${themeColor.primaryBorder} shadow-sm`
+                                : "border-gray-200 bg-white text-gray-500 hover:bg-gray-50"
                         }`}
                         icon={Shuffle}
                         iconSize={14}

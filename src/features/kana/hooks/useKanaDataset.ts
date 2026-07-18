@@ -16,11 +16,20 @@ export function useKanaDataset() {
         return alphabet === "hiragana" ? HIRAGANA_DATA : KATAKANA_DATA;
     }, [alphabet]);
 
+    /**
+     * The one alphabet→theme-color mapping for Kana — every consumer (Learn,
+     * Quiz, Chart, Practice, and the Hub via useKanaHubState) reads from this
+     * single object instead of each re-deriving its own copy of the same
+     * three-way alphabet switch (previously duplicated, with a second,
+     * incompatible set of keys, in useKanaHubState.ts).
+     */
     const themeColor = useMemo(() => {
         if (alphabet === "both")
             return {
                 primary: "var(--color-both)",
                 border: "var(--color-both-strong)",
+                borderStrong: "border-both-strong",
+                hoverBg: "hover:bg-both-strong",
                 text: "text-both",
                 bg: "bg-both",
                 primaryLightBg: "bg-[#faeaff]",
@@ -30,6 +39,8 @@ export function useKanaDataset() {
             return {
                 primary: "var(--color-hiragana)",
                 border: "var(--color-hiragana-strong)",
+                borderStrong: "border-hiragana-strong",
+                hoverBg: "hover:bg-hiragana-hover",
                 text: "text-hiragana",
                 bg: "bg-hiragana",
                 primaryLightBg: "bg-[#e5f7d8]",
@@ -38,6 +49,8 @@ export function useKanaDataset() {
         return {
             primary: "var(--color-katakana)",
             border: "var(--color-katakana-strong)",
+            borderStrong: "border-katakana-strong",
+            hoverBg: "hover:bg-katakana-hover",
             text: "text-katakana",
             bg: "bg-katakana",
             primaryLightBg: "bg-[#e5f5ff]",

@@ -17,26 +17,28 @@ import { useKanaDataset, useKanaPlayDeck } from "@/features/kana/hooks";
 import { Button } from "@/shared/components/ui";
 import { PracticeCanvasArea } from "./PracticeCanvasArea";
 import { PracticeHeader } from "./PracticeHeader";
+import { PRACTICE_MODES } from "../types";
 
 import type { PracticeMode } from "../types";
 
 export function KanaPractice() {
     const t = useTranslations("Common");
     const { dataset, alphabet, themeColor } = useKanaDataset();
-    const [practiceMode, setPracticeMode] = useState<PracticeMode>(1);
+    const [practiceMode, setPracticeMode] = useState<PracticeMode>("trace");
     const { char, isRandom, next, prev, playCurrent, autoPlayCurrent, toggleRandom } =
         useKanaPlayDeck({
             dataset,
             alphabet,
-            // Mode 3 is listen-and-write, so navigation speaks. The learner's auto-play setting is
-            // enforced downstream by the audio manager.
-            speakOnNavigate: practiceMode === 3,
+            // Recall mode is listen-and-write, so navigation speaks. The learner's auto-play
+            // setting is enforced downstream by the audio manager.
+            speakOnNavigate: practiceMode === "recall",
         });
 
     const cycleMode = () => {
-        const nextMode = practiceMode >= 3 ? 1 : ((practiceMode + 1) as PracticeMode);
+        const nextIndex = (PRACTICE_MODES.indexOf(practiceMode) + 1) % PRACTICE_MODES.length;
+        const nextMode = PRACTICE_MODES[nextIndex];
         setPracticeMode(nextMode);
-        if (nextMode === 3) autoPlayCurrent();
+        if (nextMode === "recall") autoPlayCurrent();
     };
 
     if (!char) return null;

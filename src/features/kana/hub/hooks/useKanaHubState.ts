@@ -12,7 +12,7 @@ import { useBestScores, useUserProgress } from "@/features/user/hooks";
 import { useAppStore } from "@/lib/app-store";
 
 export function useKanaHubState() {
-    const { dataset, alphabet, setAlphabet } = useKanaDataset();
+    const { dataset, alphabet, setAlphabet, themeColor } = useKanaDataset();
     const { userData, resetProgress } = useUserProgress();
     const { bestScores } = useBestScores();
     const { useHandwriting, globalAutoPlay, toggleHandwriting, toggleAutoPlay } = useAppStore();
@@ -26,23 +26,15 @@ export function useKanaHubState() {
     const progressPct = Math.min(Math.round((learnedCount / totalChars) * 100), 100);
     const isBeginner = progressPct < 80;
 
-    const isH = alphabet === "hiragana";
     const isBoth = alphabet === "both";
 
+    /** ActionCard's own prop-naming contract, mapped from useKanaDataset's single canonical theme-color source. */
     const themeColors = {
-        primaryBg: isBoth ? "bg-both" : isH ? "bg-hiragana" : "bg-katakana",
-        primaryBorderB: isBoth
-            ? "border-both-strong"
-            : isH
-              ? "border-hiragana-strong"
-              : "border-katakana-strong",
-        primaryHover: isBoth
-            ? "hover:bg-both-strong"
-            : isH
-              ? "hover:bg-hiragana-hover"
-              : "hover:bg-katakana-hover",
-        primaryText: isBoth ? "text-both" : isH ? "text-hiragana" : "text-katakana",
-        primaryBgLight: isBoth ? "bg-both/10" : isH ? "bg-hiragana/10" : "bg-katakana/10",
+        primaryBg: themeColor.bg,
+        primaryBorderB: themeColor.borderStrong,
+        primaryHover: themeColor.hoverBg,
+        primaryText: themeColor.text,
+        primaryBgLight: themeColor.primaryLightBg,
     };
 
     const bestInfinity = bestScores[`infinity_${alphabet}`] ?? 0;

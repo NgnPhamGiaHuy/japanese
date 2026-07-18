@@ -10,7 +10,8 @@ import KanaStrokeAnimation from "./KanaStrokeAnimation";
 interface DrawingCanvasProps {
     char: string;
     showGuide?: boolean;
-    stepKey?: number;
+    /** Bumping this (any value change) clears the canvas — purely a dependency-array trigger. */
+    stepKey?: string | number;
     strokeColor?: string;
 }
 
