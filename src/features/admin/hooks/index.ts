@@ -4,6 +4,7 @@ export * from "./useAdminToken";
 export * from "./useAnalytics";
 export * from "./useAnalyticsDrilldown";
 export * from "./useAnalyticsExport";
+export * from "./useCursorPagination";
 export * from "./useDataTable";
 export * from "./useDecksTableColumns";
 export * from "./useGlobalContent";

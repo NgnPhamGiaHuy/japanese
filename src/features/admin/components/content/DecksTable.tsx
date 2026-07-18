@@ -23,10 +23,23 @@ interface DecksTableProps {
  * table implementation with Users instead of a hand-rolled `<table>`.
  * No sorting/selection existed here before this migration and none is
  * added; every column is a display column for exactly that reason.
+ *
+ * `items` arrives pre-filtered from `AdminContentPageContent` (title/
+ * description/ownerEmail search happens upstream of this table, not via a
+ * `globalFilterFn`) so its own empty-state can distinguish "no decks at
+ * all" from "no results for this search" without reaching into a row
+ * model. `enableFiltering`/`enableSorting` are both off here since neither
+ * is wired to anything — leaving them on would build row models no caller
+ * ever reads.
  */
 const DecksTable = ({ items, onDelete, onView, isDeleting }: DecksTableProps) => {
     const columns = useDecksTableColumns({ onView, onDelete, isDeleting });
-    const { table } = useDataTable<AdminDeck>({ data: items, columns });
+    const { table } = useDataTable<AdminDeck>({
+        data: items,
+        columns,
+        enableFiltering: false,
+        enableSorting: false,
+    });
 
     return (
         <AdminTable

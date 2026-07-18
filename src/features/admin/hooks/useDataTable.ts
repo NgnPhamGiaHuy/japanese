@@ -21,6 +21,19 @@ interface UseDataTableProps<T> {
     /** Row selection is opt-in per caller (e.g. gated on a permission), matching the prior Users table. */
     enableRowSelection?: boolean;
     globalFilterFn?: FilterFn<T>;
+    /**
+     * Skip building the filtered row model for tables with no search UI
+     * wired to the engine (e.g. Content, which filters upstream of
+     * `useDataTable` so its own empty-state can distinguish "no items at
+     * all" from "no results for this search"). Defaults to true.
+     */
+    enableFiltering?: boolean;
+    /**
+     * Skip building the sorted row model for tables with no sortable
+     * columns (e.g. Content, whose columns are all display-only — see
+     * `useDecksTableColumns.tsx`). Defaults to true.
+     */
+    enableSorting?: boolean;
 }
 
 /**
@@ -38,6 +51,8 @@ export function useDataTable<T>({
     columns,
     enableRowSelection = false,
     globalFilterFn,
+    enableFiltering = true,
+    enableSorting = true,
 }: UseDataTableProps<T>) {
     const [globalFilter, setGlobalFilter] = useState("");
     const [sorting, setSorting] = useState<SortingState>([]);
@@ -50,8 +65,8 @@ export function useDataTable<T>({
         onSortingChange: setSorting,
         onRowSelectionChange: setRowSelection,
         getCoreRowModel: getCoreRowModel(),
-        getSortedRowModel: getSortedRowModel(),
-        getFilteredRowModel: getFilteredRowModel(),
+        ...(enableSorting ? { getSortedRowModel: getSortedRowModel() } : {}),
+        ...(enableFiltering ? { getFilteredRowModel: getFilteredRowModel() } : {}),
         enableRowSelection,
         ...(globalFilterFn ? { globalFilterFn } : {}),
     });

@@ -27,15 +27,22 @@ import {
     AdminPageLayout,
     AdminTableShell,
 } from "../shared";
-import { useLogs } from "../../hooks";
+import { useCursorPagination, useLogs } from "../../hooks";
 
 import type { AdminLogFilters, LogLevel, LogType } from "../../types";
 
 const AdminReportsPageContent = () => {
     const t = useTranslations("AdminReports");
     const [filters, setFilters] = useState<AdminLogFilters>({});
-    const [pageTokens, setPageTokens] = useState<(string | undefined)[]>([undefined]);
-    const [currentPage, setCurrentPage] = useState(0);
+    const {
+        currentPage,
+        currentPageToken,
+        totalDiscoveredPages,
+        hasPreviousPage,
+        goToNextPage,
+        goToPreviousPage,
+        reset: resetPagination,
+    } = useCursorPagination();
 
     // Reset pagination whenever filters change — adjusted during render (not
     // an Effect) so the reset lands in the same render as the filter change.
@@ -43,8 +50,7 @@ const AdminReportsPageContent = () => {
     const [prevFiltersKey, setPrevFiltersKey] = useState(filtersKey);
     if (filtersKey !== prevFiltersKey) {
         setPrevFiltersKey(filtersKey);
-        setPageTokens([undefined]);
-        setCurrentPage(0);
+        resetPagination();
     }
 
     const {
@@ -58,15 +64,13 @@ const AdminReportsPageContent = () => {
         refetch,
         createTestLog,
         isCreatingTestLog,
-    } = useLogs(filters, pageTokens[currentPage]);
+    } = useLogs(filters, currentPageToken);
 
     const isEmpty = useMemo(() => !isLoading && logs.length === 0, [isLoading, logs.length]);
     const isRefreshing = isFetching && !isLoading;
 
     const activeFilterCount = Object.values(filters).filter(Boolean).length;
-    const totalPages = pageTokens.length;
     const hasNextPage = !!nextPageToken;
-    const hasPreviousPage = currentPage > 0;
 
     // Summary chip handlers — toggle filter on/off
     const handleTypeClick = (type: LogType) => {
@@ -75,13 +79,6 @@ const AdminReportsPageContent = () => {
     const handleLevelClick = (level: LogLevel) => {
         setFilters((f) => ({ ...f, level: f.level === level ? undefined : level }));
     };
-
-    const goToNextPage = () => {
-        if (!nextPageToken) return;
-        setPageTokens((prev) => (prev.includes(nextPageToken) ? prev : [...prev, nextPageToken]));
-        setCurrentPage((p) => p + 1);
-    };
-    const goToPreviousPage = () => setCurrentPage((p) => Math.max(0, p - 1));
 
     return (
         <AdminPageLayout>
@@ -149,10 +146,10 @@ const AdminReportsPageContent = () => {
                             <div className="flex flex-col gap-3 border-t-2 border-gray-50 bg-gray-50/20 px-4 py-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between sm:gap-2 sm:px-6">
                                 <div className="flex items-center gap-3">
                                     <span className="text-muted text-xs font-black tracking-widest uppercase">
-                                        {totalPages > 1
+                                        {totalDiscoveredPages > 1
                                             ? t("pageOfTotal", {
                                                   current: currentPage + 1,
-                                                  total: totalPages,
+                                                  total: totalDiscoveredPages,
                                               })
                                             : t("pageOf", { current: currentPage + 1 })}
                                     </span>
@@ -176,7 +173,7 @@ const AdminReportsPageContent = () => {
                                         title={t("previousPage")}
                                     />
                                     <Button
-                                        onClick={goToNextPage}
+                                        onClick={() => goToNextPage(nextPageToken ?? undefined)}
                                         disabled={!hasNextPage}
                                         variant="secondary"
                                         icon={ChevronRight}

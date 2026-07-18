@@ -1,7 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { useState, useSyncExternalStore } from "react";
+import { useSyncExternalStore } from "react";
 
 import { Users as UsersIcon } from "lucide-react";
 
@@ -9,7 +9,7 @@ import { LoadingSpinner } from "@/shared/components/ui";
 import UsersTable from "./UsersTable";
 import { AdminErrorState, AdminPageHeader, AdminPageLayout } from "../shared";
 import { useAdminRole } from "../../context/AdminContext";
-import { useUsers } from "../../hooks";
+import { useCursorPagination, useUsers } from "../../hooks";
 import { hasPermission } from "../../utils/rbac";
 
 const emptySubscribe = () => () => {};
@@ -29,8 +29,15 @@ const AdminUsersPageContent = () => {
         () => false,
     );
     const { role } = useAdminRole();
-    const [pageTokens, setPageTokens] = useState<(string | undefined)[]>([undefined]);
-    const [currentPage, setCurrentPage] = useState(0);
+    const {
+        currentPage,
+        currentPageToken,
+        totalDiscoveredPages,
+        hasPreviousPage,
+        goToNextPage,
+        goToPreviousPage,
+        goToPage,
+    } = useCursorPagination();
 
     const {
         users,
@@ -42,16 +49,10 @@ const AdminUsersPageContent = () => {
         promoteUser,
         demoteUser,
         removeUser,
-    } = useUsers(pageTokens[currentPage]);
+    } = useUsers(currentPageToken);
 
     const canDelete = hasPermission(role, "canDeleteUsers");
     const canPromote = hasPermission(role, "canPromoteUsers");
-
-    const goToPage = (pageIndex: number) => {
-        if (pageIndex >= 0 && pageIndex < pageTokens.length) {
-            setCurrentPage(pageIndex);
-        }
-    };
 
     if (!mounted || isLoadingUsers)
         return (
@@ -75,21 +76,11 @@ const AdminUsersPageContent = () => {
                 loading={isLoadingUsers}
                 currentPage={currentPage}
                 hasNextPage={!!nextPageToken}
-                hasPrevPage={currentPage > 0}
-                onNextPage={() => {
-                    if (!nextPageToken) return;
-                    // Only add if not already in the tokens list (prevent dupes on refetch)
-                    setPageTokens((prev) => {
-                        if (prev.includes(nextPageToken)) return prev;
-                        return [...prev, nextPageToken];
-                    });
-                    setCurrentPage((p) => p + 1);
-                }}
-                onPrevPage={() => {
-                    setCurrentPage((p) => Math.max(0, p - 1));
-                }}
+                hasPrevPage={hasPreviousPage}
+                onNextPage={() => goToNextPage(nextPageToken ?? undefined)}
+                onPrevPage={goToPreviousPage}
                 onGoToPage={goToPage}
-                maxDiscoveredPage={pageTokens.length}
+                maxDiscoveredPage={totalDiscoveredPages}
                 canDelete={canDelete}
                 canPromote={canPromote}
                 onPromote={promoteUser}
