@@ -1,7 +1,7 @@
 "use server";
 
 import { ActivityAction } from "@/lib/logging/actions.enum";
-import { logUserActionServer } from "@/lib/logging/user-actions";
+import { logActivity } from "@/lib/logging/activity";
 
 // ─── Kana Quiz ─────────────────────────────────────────────────────────────────
 
@@ -19,14 +19,14 @@ export async function logKanaQuizCompleted(
     alphabet: string,
     stats: { score: number; total: number; mode: string },
 ): Promise<void> {
-    await logUserActionServer(idToken, {
-        action: ActivityAction.KANA_QUIZ_COMPLETED,
-        entityType: "study",
-        entityId: `kana_quiz_${alphabet}`,
-        level: "info",
+    await logActivity(
+        idToken,
         userId,
-        metadata: { logType: "USER_ACTION", alphabet, ...stats },
-    });
+        ActivityAction.KANA_QUIZ_COMPLETED,
+        "study",
+        `kana_quiz_${alphabet}`,
+        { alphabet, ...stats },
+    );
 }
 
 // ─── Kana Survival ─────────────────────────────────────────────────────────────
@@ -47,12 +47,12 @@ export async function logKanaSurvivalCompleted(
     challengeMode: string,
     stats: { score: number; modeKey: string },
 ): Promise<void> {
-    await logUserActionServer(idToken, {
-        action: ActivityAction.KANA_SURVIVAL_COMPLETED,
-        entityType: "study",
-        entityId: `kana_survival_${challengeMode}_${alphabet}`,
-        level: "info",
+    await logActivity(
+        idToken,
         userId,
-        metadata: { logType: "USER_ACTION", alphabet, challengeMode, ...stats },
-    });
+        ActivityAction.KANA_SURVIVAL_COMPLETED,
+        "study",
+        `kana_survival_${challengeMode}_${alphabet}`,
+        { alphabet, challengeMode, ...stats },
+    );
 }

@@ -3,7 +3,7 @@
 import { z } from "zod";
 
 import { ActivityAction } from "@/lib/logging/actions.enum";
-import { logUserActionServer } from "@/lib/logging/user-actions";
+import { logActivity } from "@/lib/logging/activity";
 import { actionClient } from "@/lib/safe-action";
 
 /**
@@ -11,10 +11,10 @@ import { actionClient } from "@/lib/safe-action";
  * next-safe-action. Each action now validates its input via
  * `.inputSchema()` (previously untyped positional strings/numbers with no
  * validation at all). Auth stays exactly as before: `idToken` (bind arg #1)
- * flows straight through to `logUserActionServer`, which does its own
+ * flows straight through to `logActivity`, which does its own
  * `verifyIdToken` + "can't log on behalf of another user" check — that
- * function is shared with features/kana's activity-log actions (out of scope
- * here), so its signature is intentionally untouched.
+ * helper is shared with every other feature's activity-log actions (out of
+ * scope here), so its signature is intentionally untouched.
  *
  * External contract (`Promise<void>`, errors always swallowed) is unchanged:
  * every call site is a fire-and-forget `void ...getIdToken().then(...)` that
@@ -49,18 +49,14 @@ export async function logNotificationRead(
         .bindArgsSchemas([z.string()])
         .inputSchema(notificationIdInput)
         .action(async ({ parsedInput, bindArgsParsedInputs }) => {
-            await logUserActionServer(bindArgsParsedInputs[0], {
-                action: ActivityAction.NOTIFICATION_READ,
-                entityType: "notification",
-                entityId: parsedInput.notificationId,
-                level: "info",
-                userId: parsedInput.userId,
-                metadata: {
-                    logType: "USER_ACTION",
-                    type: parsedInput.type,
-                    title: parsedInput.title,
-                },
-            });
+            await logActivity(
+                bindArgsParsedInputs[0],
+                parsedInput.userId,
+                ActivityAction.NOTIFICATION_READ,
+                "notification",
+                parsedInput.notificationId,
+                { type: parsedInput.type, title: parsedInput.title },
+            );
         })(idToken, { userId, notificationId, type, title });
 }
 
@@ -78,18 +74,14 @@ export async function logNotificationDeleted(
         .bindArgsSchemas([z.string()])
         .inputSchema(notificationIdInput)
         .action(async ({ parsedInput, bindArgsParsedInputs }) => {
-            await logUserActionServer(bindArgsParsedInputs[0], {
-                action: ActivityAction.NOTIFICATION_DELETED,
-                entityType: "notification",
-                entityId: parsedInput.notificationId,
-                level: "info",
-                userId: parsedInput.userId,
-                metadata: {
-                    logType: "USER_ACTION",
-                    type: parsedInput.type,
-                    title: parsedInput.title,
-                },
-            });
+            await logActivity(
+                bindArgsParsedInputs[0],
+                parsedInput.userId,
+                ActivityAction.NOTIFICATION_DELETED,
+                "notification",
+                parsedInput.notificationId,
+                { type: parsedInput.type, title: parsedInput.title },
+            );
         })(idToken, { userId, notificationId, type, title });
 }
 
@@ -105,14 +97,14 @@ export async function logNotificationsReadAll(
         .bindArgsSchemas([z.string()])
         .inputSchema(countInput)
         .action(async ({ parsedInput, bindArgsParsedInputs }) => {
-            await logUserActionServer(bindArgsParsedInputs[0], {
-                action: ActivityAction.NOTIFICATION_READ_ALL,
-                entityType: "notification",
-                entityId: "all",
-                level: "info",
-                userId: parsedInput.userId,
-                metadata: { logType: "USER_ACTION", count: parsedInput.count },
-            });
+            await logActivity(
+                bindArgsParsedInputs[0],
+                parsedInput.userId,
+                ActivityAction.NOTIFICATION_READ_ALL,
+                "notification",
+                "all",
+                { count: parsedInput.count },
+            );
         })(idToken, { userId, count });
 }
 
@@ -128,14 +120,14 @@ export async function logNotificationsCleared(
         .bindArgsSchemas([z.string()])
         .inputSchema(countInput)
         .action(async ({ parsedInput, bindArgsParsedInputs }) => {
-            await logUserActionServer(bindArgsParsedInputs[0], {
-                action: ActivityAction.NOTIFICATIONS_CLEARED,
-                entityType: "notification",
-                entityId: "all",
-                level: "info",
-                userId: parsedInput.userId,
-                metadata: { logType: "USER_ACTION", count: parsedInput.count },
-            });
+            await logActivity(
+                bindArgsParsedInputs[0],
+                parsedInput.userId,
+                ActivityAction.NOTIFICATIONS_CLEARED,
+                "notification",
+                "all",
+                { count: parsedInput.count },
+            );
         })(idToken, { userId, count });
 }
 
@@ -151,13 +143,13 @@ export async function logNotificationsDelivered(
         .bindArgsSchemas([z.string()])
         .inputSchema(countInput)
         .action(async ({ parsedInput, bindArgsParsedInputs }) => {
-            await logUserActionServer(bindArgsParsedInputs[0], {
-                action: ActivityAction.NOTIFICATIONS_DELIVERED,
-                entityType: "notification",
-                entityId: "batch",
-                level: "info",
-                userId: parsedInput.userId,
-                metadata: { logType: "USER_ACTION", count: parsedInput.count },
-            });
+            await logActivity(
+                bindArgsParsedInputs[0],
+                parsedInput.userId,
+                ActivityAction.NOTIFICATIONS_DELIVERED,
+                "notification",
+                "batch",
+                { count: parsedInput.count },
+            );
         })(idToken, { userId, count });
 }

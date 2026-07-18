@@ -1,7 +1,7 @@
 "use server";
 
 import { ActivityAction } from "@/lib/logging/actions.enum";
-import { logUserActionServer } from "@/lib/logging/user-actions";
+import { logActivity } from "@/lib/logging/activity";
 
 // ─── Deck actions ─────────────────────────────────────────────────────────────
 
@@ -11,14 +11,7 @@ export async function logDeckCreated(
     deckId: string,
     title: string,
 ): Promise<void> {
-    await logUserActionServer(idToken, {
-        action: ActivityAction.DECK_CREATED,
-        entityType: "deck",
-        entityId: deckId,
-        level: "info",
-        userId,
-        metadata: { logType: "USER_ACTION", title },
-    });
+    await logActivity(idToken, userId, ActivityAction.DECK_CREATED, "deck", deckId, { title });
 }
 
 export async function logDeckUpdated(
@@ -27,14 +20,7 @@ export async function logDeckUpdated(
     deckId: string,
     title: string,
 ): Promise<void> {
-    await logUserActionServer(idToken, {
-        action: ActivityAction.DECK_UPDATED,
-        entityType: "deck",
-        entityId: deckId,
-        level: "info",
-        userId,
-        metadata: { logType: "USER_ACTION", title },
-    });
+    await logActivity(idToken, userId, ActivityAction.DECK_UPDATED, "deck", deckId, { title });
 }
 
 export async function logDeckDeleted(
@@ -43,14 +29,15 @@ export async function logDeckDeleted(
     deckId: string,
     title: string,
 ): Promise<void> {
-    await logUserActionServer(idToken, {
-        action: ActivityAction.DECK_DELETED,
-        entityType: "deck",
-        entityId: deckId,
-        level: "warn",
+    await logActivity(
+        idToken,
         userId,
-        metadata: { logType: "USER_ACTION", title },
-    });
+        ActivityAction.DECK_DELETED,
+        "deck",
+        deckId,
+        { title },
+        "warn",
+    );
 }
 
 // ─── Study session actions ────────────────────────────────────────────────────
@@ -62,13 +49,9 @@ export async function logStudySessionCompleted(
     deckTitle: string,
     stats: { correct: number; total: number; mode: string },
 ): Promise<void> {
-    await logUserActionServer(idToken, {
-        action: ActivityAction.STUDY_SESSION_COMPLETED,
-        entityType: "study",
-        entityId: deckId,
-        level: "info",
-        userId,
-        metadata: { logType: "USER_ACTION", deckTitle, ...stats },
+    await logActivity(idToken, userId, ActivityAction.STUDY_SESSION_COMPLETED, "study", deckId, {
+        deckTitle,
+        ...stats,
     });
 }
 
@@ -78,14 +61,15 @@ export async function logStudyProgressReset(
     deckId: string,
     deckTitle: string,
 ): Promise<void> {
-    await logUserActionServer(idToken, {
-        action: ActivityAction.STUDY_PROGRESS_RESET,
-        entityType: "study",
-        entityId: deckId,
-        level: "warn",
+    await logActivity(
+        idToken,
         userId,
-        metadata: { logType: "USER_ACTION", deckTitle },
-    });
+        ActivityAction.STUDY_PROGRESS_RESET,
+        "study",
+        deckId,
+        { deckTitle },
+        "warn",
+    );
 }
 
 // ─── Game mode actions ────────────────────────────────────────────────────────
@@ -97,13 +81,9 @@ export async function logMatchGameCompleted(
     deckTitle: string,
     stats: { score: number; timeMs: number; tier: string },
 ): Promise<void> {
-    await logUserActionServer(idToken, {
-        action: ActivityAction.MATCH_GAME_COMPLETED,
-        entityType: "study",
-        entityId: deckId,
-        level: "info",
-        userId,
-        metadata: { logType: "USER_ACTION", deckTitle, ...stats },
+    await logActivity(idToken, userId, ActivityAction.MATCH_GAME_COMPLETED, "study", deckId, {
+        deckTitle,
+        ...stats,
     });
 }
 
@@ -114,12 +94,8 @@ export async function logSpeedGameCompleted(
     deckTitle: string,
     stats: { score: number; timeMs: number; tier: string },
 ): Promise<void> {
-    await logUserActionServer(idToken, {
-        action: ActivityAction.SPEED_GAME_COMPLETED,
-        entityType: "study",
-        entityId: deckId,
-        level: "info",
-        userId,
-        metadata: { logType: "USER_ACTION", deckTitle, ...stats },
+    await logActivity(idToken, userId, ActivityAction.SPEED_GAME_COMPLETED, "study", deckId, {
+        deckTitle,
+        ...stats,
     });
 }

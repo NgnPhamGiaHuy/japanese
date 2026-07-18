@@ -7,6 +7,7 @@ import {
     systemLogToAdminView,
 } from "@/lib/logging/public";
 import { persistSystemLog } from "@/lib/logging/server";
+import { verifyIdToken } from "@/lib/safe-action";
 import { adminAuth, adminDb } from "./admin.service";
 import { applyLogFilters } from "../utils/filters";
 
@@ -178,7 +179,8 @@ export async function logAdminAction(
     metadata: Record<string, unknown> = {},
 ): Promise<void> {
     try {
-        const decoded = await adminAuth.verifyIdToken(idToken);
+        const { uid, decoded } = await verifyIdToken(idToken);
+        if (uid !== callerUid) return;
         await recordLog({
             action,
             level: "info",

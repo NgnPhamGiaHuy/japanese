@@ -1,8 +1,9 @@
 "use server";
 
-import { adminAuth, adminDb } from "@/lib/firebase-admin";
+import { adminDb } from "@/lib/firebase-admin";
 import { ActivityAction } from "@/lib/logging/actions.enum";
 import { persistSystemLog } from "@/lib/logging/server";
+import { verifyIdToken } from "@/lib/safe-action";
 
 const LOGIN_SESSION_COLLECTION = "login_sessions";
 const SESSION_DURATION_MS = 30 * 60 * 1000; // 30 minutes
@@ -22,8 +23,8 @@ interface LoginMetadata {
 export async function logUserLogout(idToken: string, uid: string): Promise<{ logged: boolean }> {
     try {
         // Verify token
-        const decoded = await adminAuth.verifyIdToken(idToken);
-        if (decoded.uid !== uid) {
+        const { uid: tokenUid } = await verifyIdToken(idToken);
+        if (tokenUid !== uid) {
             return { logged: false };
         }
 
@@ -83,8 +84,8 @@ export async function logUserLogin(
 ): Promise<{ logged: boolean }> {
     try {
         // Verify token
-        const decoded = await adminAuth.verifyIdToken(idToken);
-        if (decoded.uid !== metadata.uid) {
+        const { uid: tokenUid } = await verifyIdToken(idToken);
+        if (tokenUid !== metadata.uid) {
             return { logged: false };
         }
 
