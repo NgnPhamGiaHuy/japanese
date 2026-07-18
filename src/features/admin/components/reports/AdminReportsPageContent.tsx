@@ -28,27 +28,39 @@ import type { AdminLogFilters, LogLevel, LogType } from "../../types";
 const AdminReportsPageContent = () => {
     const t = useTranslations("AdminReports");
     const [filters, setFilters] = useState<AdminLogFilters>({});
+    const [pageTokens, setPageTokens] = useState<(string | undefined)[]>([undefined]);
+    const [currentPage, setCurrentPage] = useState(0);
+
+    // Reset pagination whenever filters change — adjusted during render (not
+    // an Effect) so the reset lands in the same render as the filter change.
+    const filtersKey = JSON.stringify(filters);
+    const [prevFiltersKey, setPrevFiltersKey] = useState(filtersKey);
+    if (filtersKey !== prevFiltersKey) {
+        setPrevFiltersKey(filtersKey);
+        setPageTokens([undefined]);
+        setCurrentPage(0);
+    }
 
     const {
         logs,
+        nextPageToken,
         countsByLevel,
         countsByType,
         isLoading,
-        isRefreshing,
+        isFetching,
         error,
-        currentPage,
-        totalPages,
-        goToNextPage,
-        goToPreviousPage,
-        hasNextPage,
-        hasPreviousPage,
-        refresh,
-        createManualLog,
-    } = useLogs(filters);
+        refetch,
+        createTestLog,
+        isCreatingTestLog,
+    } = useLogs(filters, pageTokens[currentPage]);
 
     const isEmpty = useMemo(() => !isLoading && logs.length === 0, [isLoading, logs.length]);
+    const isRefreshing = isFetching && !isLoading;
 
     const activeFilterCount = Object.values(filters).filter(Boolean).length;
+    const totalPages = pageTokens.length;
+    const hasNextPage = !!nextPageToken;
+    const hasPreviousPage = currentPage > 0;
 
     // Summary chip handlers — toggle filter on/off
     const handleTypeClick = (type: LogType) => {
@@ -57,6 +69,13 @@ const AdminReportsPageContent = () => {
     const handleLevelClick = (level: LogLevel) => {
         setFilters((f) => ({ ...f, level: f.level === level ? undefined : level }));
     };
+
+    const goToNextPage = () => {
+        if (!nextPageToken) return;
+        setPageTokens((prev) => (prev.includes(nextPageToken) ? prev : [...prev, nextPageToken]));
+        setCurrentPage((p) => p + 1);
+    };
+    const goToPreviousPage = () => setCurrentPage((p) => Math.max(0, p - 1));
 
     return (
         <AdminPageLayout>
@@ -69,7 +88,7 @@ const AdminReportsPageContent = () => {
                     <div className="flex items-center gap-2">
                         <Button
                             variant="secondary"
-                            onClick={refresh}
+                            onClick={() => void refetch()}
                             loading={isRefreshing}
                             icon={RefreshCw}
                             iconSize={16}
@@ -78,7 +97,8 @@ const AdminReportsPageContent = () => {
                         />
                         <Button
                             variant="secondary"
-                            onClick={() => void createManualLog()}
+                            onClick={() => void createTestLog()}
+                            loading={isCreatingTestLog}
                             className="!rounded-xl !px-3 !py-2 !text-xs sm:!px-4 sm:!py-2 sm:!text-sm"
                         >
                             {t("emitTestLog")}
@@ -170,7 +190,7 @@ const AdminReportsPageContent = () => {
             )}
 
             {isLoading && <LoadingSpinner fullScreen={false} label={t("loadingLogs")} />}
-            {error && <AdminErrorState message={error.message} />}
+            {error && <AdminErrorState message={error.message} onRetry={() => refetch()} />}
             {isEmpty && (
                 <AdminEmptyState
                     title={t("noLogsMatch")}

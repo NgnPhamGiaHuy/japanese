@@ -1,99 +1,51 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useMemo } from "react";
+
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { useAdminToken } from "./useAdminToken";
 import { createTestLogAction, fetchLogsAction } from "../actions";
+import { adminQueryKeys } from "../utils/queryKeys";
 
-import type { AdminLog, AdminLogFilters } from "../types";
+import type { AdminLogFilters } from "../types";
 
 /**
- * Paginated system logs hook.
+ * Paginated system logs — one page per call, cursor-based.
  *
  * @remarks
- * - Cursor-based pagination: each page token is stored so back-navigation is O(1).
- * - Filters reset the cursor stack and re-fetch from page 0.
- * - `refresh` re-fetches the current page without resetting pagination.
+ * Mirrors useUsers.ts's split: cursor bookkeeping (which tokens have been
+ * discovered so far, which page is current) lives in the calling page
+ * component, not here — this hook just fetches whichever single cursorId
+ * it's given for the current filters.
  */
-export function useLogs(filters: AdminLogFilters) {
-    const [logs, setLogs] = useState<AdminLog[]>([]);
-    const [pageTokens, setPageTokens] = useState<(string | null)[]>([null]);
-    const [currentPage, setCurrentPage] = useState(0);
-    const [isLoading, setIsLoading] = useState(true);
-    const [isRefreshing, setIsRefreshing] = useState(false);
-    const [error, setError] = useState<Error | null>(null);
-    const getToken = useAdminToken();
+export function useLogs(filters: AdminLogFilters, cursorId?: string) {
+    const getAdminIdToken = useAdminToken();
+    const queryClient = useQueryClient();
 
-    const fetchPage = useCallback(
-        async (cursorId: string | null, pageIdx: number, silent = false) => {
-            if (silent) {
-                setIsRefreshing(true);
-            } else {
-                setIsLoading(true);
-            }
-            setError(null);
-            try {
-                await getToken();
-                const result = await fetchLogsAction(filters, cursorId);
-                if (!result.ok) throw new Error(result.error);
-
-                setLogs(result.data.logs);
-                setCurrentPage(pageIdx);
-
-                if (result.data.nextPageToken) {
-                    setPageTokens((prev) => {
-                        if (prev[pageIdx + 1] === result.data.nextPageToken) return prev;
-                        const next = prev.slice(0, pageIdx + 1);
-                        next.push(result.data.nextPageToken);
-                        return next;
-                    });
-                } else {
-                    setPageTokens((prev) => prev.slice(0, pageIdx + 1));
-                }
-            } catch (err) {
-                setError(err instanceof Error ? err : new Error(String(err)));
-            } finally {
-                setIsLoading(false);
-                setIsRefreshing(false);
-            }
+    const logsQuery = useQuery({
+        queryKey: adminQueryKeys.logs(filters, cursorId),
+        queryFn: async () => {
+            await getAdminIdToken();
+            const result = await fetchLogsAction(filters, cursorId);
+            if (!result.ok) throw new Error(result.error);
+            return result.data;
         },
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-        [JSON.stringify(filters), getToken],
-    );
+    });
 
-    // Reset and re-fetch when filters change
-    useEffect(() => {
-        setPageTokens([null]);
-        setCurrentPage(0);
-        fetchPage(null, 0);
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [JSON.stringify(filters)]);
+    const createTestLogMutation = useMutation({
+        mutationFn: async () => {
+            await getAdminIdToken();
+            const result = await createTestLogAction();
+            if (!result.ok) throw new Error(result.error);
+            return result.data;
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: [...adminQueryKeys.all, "logs"] });
+        },
+    });
 
-    const goToNextPage = useCallback(() => {
-        const nextToken = pageTokens[currentPage + 1];
-        if (nextToken !== undefined) {
-            fetchPage(nextToken, currentPage + 1);
-        }
-    }, [currentPage, pageTokens, fetchPage]);
-
-    const goToPreviousPage = useCallback(() => {
-        if (currentPage > 0) {
-            fetchPage(pageTokens[currentPage - 1]!, currentPage - 1);
-        }
-    }, [currentPage, pageTokens, fetchPage]);
-
-    /** Re-fetch the current page without resetting pagination state. */
-    const refresh = useCallback(() => {
-        fetchPage(pageTokens[currentPage] ?? null, currentPage, true);
-    }, [currentPage, pageTokens, fetchPage]);
-
-    const createManualLog = useCallback(async () => {
-        await getToken();
-        const result = await createTestLogAction();
-        if (!result.ok) throw new Error(result.error);
-        // Refresh current page so the new log appears
-        fetchPage(pageTokens[currentPage] ?? null, currentPage, true);
-    }, [getToken, currentPage, pageTokens, fetchPage]);
+    const logs = useMemo(() => logsQuery.data?.logs ?? [], [logsQuery.data]);
 
     const { countsByLevel, countsByType } = useMemo(() => {
         const levelMap: Record<string, number> = {};
@@ -109,18 +61,14 @@ export function useLogs(filters: AdminLogFilters) {
 
     return {
         logs,
+        nextPageToken: logsQuery.data?.nextPageToken ?? null,
         countsByLevel,
         countsByType,
-        isLoading,
-        isRefreshing,
-        error,
-        currentPage,
-        totalPages: pageTokens.length,
-        goToNextPage,
-        goToPreviousPage,
-        hasNextPage: pageTokens.length > currentPage + 1,
-        hasPreviousPage: currentPage > 0,
-        refresh,
-        createManualLog,
+        isLoading: logsQuery.isLoading,
+        isFetching: logsQuery.isFetching,
+        error: logsQuery.error as Error | null,
+        refetch: logsQuery.refetch,
+        createTestLog: createTestLogMutation.mutateAsync,
+        isCreatingTestLog: createTestLogMutation.isPending,
     };
 }

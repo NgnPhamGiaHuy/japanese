@@ -11,6 +11,6 @@ export const adminQueryKeys = {
         [...adminQueryKeys.all, "users", pageToken ?? null, pageSize] as const,
     stats: () => [...adminQueryKeys.all, "stats"] as const,
     content: () => [...adminQueryKeys.all, "content"] as const,
-    logs: (filters: AdminLogFilters, startTime?: string) =>
-        [...adminQueryKeys.all, "logs", filters, startTime ?? null] as const,
+    logs: (filters: AdminLogFilters, cursorId?: string) =>
+        [...adminQueryKeys.all, "logs", filters, cursorId ?? null] as const,
 };
