@@ -90,7 +90,13 @@ const CommentInput = ({
         <div className="flex flex-col gap-1.5">
             <div
                 className="relative rounded-xl border-2 bg-white transition-colors"
-                style={{ borderColor: isOver ? "#ff4b4b" : content ? themeColor : "#e5e7eb" }}
+                style={{
+                    borderColor: isOver
+                        ? "var(--color-danger)"
+                        : content
+                          ? themeColor
+                          : "var(--color-border)",
+                }}
             >
                 <textarea
                     ref={textareaRef}
@@ -108,7 +114,7 @@ const CommentInput = ({
                 <div className="flex items-center justify-between border-t border-gray-100 px-3 py-1.5">
                     <span
                         className={`text-xs font-bold tabular-nums ${
-                            isOver ? "text-[#ff4b4b]" : isWarn ? "text-[#ffc800]" : "text-gray-300"
+                            isOver ? "text-danger" : isWarn ? "text-survival" : "text-gray-300"
                         }`}
                     >
                         {remaining}

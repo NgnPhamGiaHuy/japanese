@@ -68,8 +68,8 @@ const McChoiceGrid = ({
                     } else if (isSelected) {
                         variant = "primary";
                         style = {
-                            backgroundColor: "#ff4b4b",
-                            borderBottomColor: "var(--color-danger)",
+                            backgroundColor: "var(--color-danger)",
+                            borderBottomColor: "var(--color-danger-strong)",
                         };
                     } else {
                         style = {
