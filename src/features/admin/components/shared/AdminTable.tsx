@@ -1,6 +1,6 @@
 "use client";
 
-import { Card } from "@/shared/components/ui";
+import AdminTableShell from "./AdminTableShell";
 
 interface AdminTableProps {
     children: React.ReactNode;
@@ -10,32 +10,19 @@ interface AdminTableProps {
 }
 
 /**
- * Standardized Shell for Admin Tables.
+ * Standardized `<table>`-based shell for admin data grids.
  *
- * @remarks Provides the consistent Card container, border treatments,
- * and overflow handling for all administrative data grids.
- * Pass `mobileList` to render a card-based list on small screens instead
- * of the scrollable table.
+ * @remarks Composes AdminTableShell (the Card container, border treatments,
+ * and toolbar/pagination/mobileList chrome shared by every admin data
+ * surface) with the `<table>` element itself. Use AdminTableShell directly
+ * for non-table content that still wants the same chrome (e.g. Reports'
+ * virtualized log list).
  */
 const AdminTable = ({ children, mobileList, toolbar, pagination }: AdminTableProps) => {
     return (
-        <Card
-            variant="default"
-            padding="none"
-            className="overflow-hidden border-2 border-b-8 border-gray-100 bg-white"
-        >
-            {toolbar && <div className="border-b-2 border-gray-100">{toolbar}</div>}
-
-            {/* Desktop: scrollable table */}
-            <div className={`overflow-x-auto ${mobileList ? "hidden md:block" : ""}`}>
-                <table className="w-full border-collapse text-left">{children}</table>
-            </div>
-
-            {/* Mobile: card list */}
-            {mobileList && <div className="md:hidden">{mobileList}</div>}
-
-            {pagination && pagination}
-        </Card>
+        <AdminTableShell mobileList={mobileList} toolbar={toolbar} pagination={pagination}>
+            <table className="w-full border-collapse text-left">{children}</table>
+        </AdminTableShell>
     );
 };
 

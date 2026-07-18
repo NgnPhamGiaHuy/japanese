@@ -16,11 +16,17 @@ import { useMemo, useState } from "react";
 
 import { ChevronLeft, ChevronRight, FileText, RefreshCw } from "lucide-react";
 
-import { Button, Card, LoadingSpinner } from "@/shared/components/ui";
+import { Button, LoadingSpinner } from "@/shared/components/ui";
 import LogsFilters from "./LogsFilters";
 import LogsSummaryHeader from "./LogsSummaryHeader";
 import LogsVirtualList from "./LogsVirtualList";
-import { AdminEmptyState, AdminErrorState, AdminPageHeader, AdminPageLayout } from "../shared";
+import {
+    AdminEmptyState,
+    AdminErrorState,
+    AdminPageHeader,
+    AdminPageLayout,
+    AdminTableShell,
+} from "../shared";
 import { useLogs } from "../../hooks";
 
 import type { AdminLogFilters, LogLevel, LogType } from "../../types";
@@ -125,67 +131,65 @@ const AdminReportsPageContent = () => {
                         activeLevel={filters.level}
                     />
 
-                    <Card
-                        padding="none"
-                        className="overflow-hidden border-2 border-b-8 border-gray-100 bg-white"
-                    >
-                        {/* Table header */}
-                        <div className="flex items-center justify-between border-b-2 border-gray-50 bg-gray-50/40 px-6 py-3">
-                            <h2 className="text-text text-xs font-black tracking-widest uppercase">
-                                {t("auditTrail")}
-                            </h2>
-                            {isRefreshing && (
-                                <span className="text-katakana flex items-center gap-1.5 text-xs font-black tracking-wider uppercase">
-                                    <RefreshCw size={10} className="animate-spin" />
-                                    {t("refreshing")}
-                                </span>
-                            )}
-                        </div>
-
-                        <LogsVirtualList logs={logs} />
-
-                        {/* Pagination footer */}
-                        <div className="flex flex-col gap-3 border-t-2 border-gray-50 bg-gray-50/20 px-4 py-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between sm:gap-2 sm:px-6">
-                            <div className="flex items-center gap-3">
-                                <span className="text-muted text-xs font-black tracking-widest uppercase">
-                                    {totalPages > 1
-                                        ? t("pageOfTotal", {
-                                              current: currentPage + 1,
-                                              total: totalPages,
-                                          })
-                                        : t("pageOf", { current: currentPage + 1 })}
-                                </span>
-                                {activeFilterCount > 0 && (
-                                    <button
-                                        onClick={() => setFilters({})}
-                                        className="text-danger focus-visible:ring-katakana rounded-md text-xs font-black tracking-wider uppercase transition-opacity hover:opacity-70 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
-                                    >
-                                        {t("clearFilter", { count: activeFilterCount })}
-                                    </button>
+                    <AdminTableShell
+                        toolbar={
+                            <div className="flex items-center justify-between bg-gray-50/40 px-6 py-3">
+                                <h2 className="text-text text-xs font-black tracking-widest uppercase">
+                                    {t("auditTrail")}
+                                </h2>
+                                {isRefreshing && (
+                                    <span className="text-katakana flex items-center gap-1.5 text-xs font-black tracking-wider uppercase">
+                                        <RefreshCw size={10} className="animate-spin" />
+                                        {t("refreshing")}
+                                    </span>
                                 )}
                             </div>
-                            <div className="flex items-center gap-2">
-                                <Button
-                                    onClick={goToPreviousPage}
-                                    disabled={!hasPreviousPage}
-                                    variant="secondary"
-                                    icon={ChevronLeft}
-                                    iconSize={16}
-                                    className="!rounded-xl !p-2"
-                                    title={t("previousPage")}
-                                />
-                                <Button
-                                    onClick={goToNextPage}
-                                    disabled={!hasNextPage}
-                                    variant="secondary"
-                                    icon={ChevronRight}
-                                    iconSize={16}
-                                    className="!rounded-xl !p-2"
-                                    title={t("nextPage")}
-                                />
+                        }
+                        pagination={
+                            <div className="flex flex-col gap-3 border-t-2 border-gray-50 bg-gray-50/20 px-4 py-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between sm:gap-2 sm:px-6">
+                                <div className="flex items-center gap-3">
+                                    <span className="text-muted text-xs font-black tracking-widest uppercase">
+                                        {totalPages > 1
+                                            ? t("pageOfTotal", {
+                                                  current: currentPage + 1,
+                                                  total: totalPages,
+                                              })
+                                            : t("pageOf", { current: currentPage + 1 })}
+                                    </span>
+                                    {activeFilterCount > 0 && (
+                                        <button
+                                            onClick={() => setFilters({})}
+                                            className="text-danger focus-visible:ring-katakana rounded-md text-xs font-black tracking-wider uppercase transition-opacity hover:opacity-70 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
+                                        >
+                                            {t("clearFilter", { count: activeFilterCount })}
+                                        </button>
+                                    )}
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <Button
+                                        onClick={goToPreviousPage}
+                                        disabled={!hasPreviousPage}
+                                        variant="secondary"
+                                        icon={ChevronLeft}
+                                        iconSize={16}
+                                        className="!rounded-xl !p-2"
+                                        title={t("previousPage")}
+                                    />
+                                    <Button
+                                        onClick={goToNextPage}
+                                        disabled={!hasNextPage}
+                                        variant="secondary"
+                                        icon={ChevronRight}
+                                        iconSize={16}
+                                        className="!rounded-xl !p-2"
+                                        title={t("nextPage")}
+                                    />
+                                </div>
                             </div>
-                        </div>
-                    </Card>
+                        }
+                    >
+                        <LogsVirtualList logs={logs} />
+                    </AdminTableShell>
                 </div>
             )}
 
