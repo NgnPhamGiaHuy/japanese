@@ -1,9 +1,8 @@
 "use client";
 
 import { Dialog } from "@base-ui/react/dialog";
-import { X } from "lucide-react";
 
-import Button from "./Button";
+import { DIALOG_BACKDROP_CLASSNAME, DialogCloseButton } from "./DialogChrome";
 
 /** Attributes for rendering a Drawer component. */
 interface DrawerProps {
@@ -41,7 +40,7 @@ const Drawer = ({ isOpen, onClose, title, children, side = "right" }: DrawerProp
     return (
         <Dialog.Root open={isOpen} onOpenChange={(open) => !open && onClose()}>
             <Dialog.Portal>
-                <Dialog.Backdrop className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm transition-opacity duration-200 data-[ending-style]:opacity-0 data-[starting-style]:opacity-0" />
+                <Dialog.Backdrop className={DIALOG_BACKDROP_CLASSNAME} />
                 <Dialog.Popup
                     aria-modal="true"
                     aria-label={title ? undefined : "Dialog"}
@@ -53,17 +52,7 @@ const Drawer = ({ isOpen, onClose, title, children, side = "right" }: DrawerProp
                                 {title}
                             </Dialog.Title>
                         )}
-                        <Dialog.Close
-                            render={
-                                <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    className="rounded-full shadow-none hover:bg-black/5"
-                                    icon={X}
-                                    iconSize={20}
-                                />
-                            }
-                        />
+                        <DialogCloseButton />
                     </div>
                     <div className="flex-1 overflow-y-auto p-6">{children}</div>
                 </Dialog.Popup>

@@ -1,9 +1,8 @@
 "use client";
 
 import { Dialog } from "@base-ui/react/dialog";
-import { X } from "lucide-react";
 
-import Button from "./Button";
+import { DIALOG_BACKDROP_CLASSNAME, DialogCloseButton } from "./DialogChrome";
 
 /** Attributes for rendering a Modal component. */
 interface ModalProps {
@@ -45,7 +44,7 @@ const Modal = ({ isOpen, onClose, title, children, maxWidth = "md" }: ModalProps
         <Dialog.Root open={isOpen} onOpenChange={(open) => !open && onClose()}>
             <Dialog.Portal>
                 {/* Backdrop */}
-                <Dialog.Backdrop className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm transition-opacity duration-200 data-[ending-style]:opacity-0 data-[starting-style]:opacity-0" />
+                <Dialog.Backdrop className={DIALOG_BACKDROP_CLASSNAME} />
 
                 {/* Centering layer — pointer-events pass through to the backdrop except over the modal itself */}
                 <div className="pointer-events-none fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
@@ -61,17 +60,7 @@ const Modal = ({ isOpen, onClose, title, children, maxWidth = "md" }: ModalProps
                                     {title}
                                 </Dialog.Title>
                             )}
-                            <Dialog.Close
-                                render={
-                                    <Button
-                                        variant="ghost"
-                                        size="icon"
-                                        className="rounded-full shadow-none hover:bg-black/5"
-                                        icon={X}
-                                        iconSize={20}
-                                    />
-                                }
-                            />
+                            <DialogCloseButton />
                         </div>
 
                         {/* Content */}

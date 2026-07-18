@@ -92,11 +92,12 @@ const Select = <T extends string | number>({
                 className={className}
                 render={
                     <Button
-                        variant="ghost"
+                        variant="plain"
+                        size="auto"
                         className={`group ${
                             isCompact
-                                ? "!flex !items-center !gap-1 !rounded-lg !px-2 !py-1 !text-sm !font-bold !text-gray-500 shadow-none transition-colors hover:bg-gray-200 hover:shadow-none"
-                                : "!text-text !flex !h-12 !items-center !gap-2 !rounded-xl border-2 border-gray-200 bg-gray-50 !px-4 !text-sm !font-bold shadow-none transition-colors hover:bg-gray-100 hover:shadow-none"
+                                ? "flex items-center gap-1 rounded-lg px-2 py-1 text-sm font-bold text-gray-500 shadow-none transition-colors hover:bg-gray-200 hover:shadow-none"
+                                : "text-text flex h-12 items-center gap-2 rounded-xl border-2 border-gray-200 bg-gray-50 px-4 text-sm font-bold shadow-none transition-colors hover:bg-gray-100 hover:shadow-none"
                         }`}
                     />
                 }

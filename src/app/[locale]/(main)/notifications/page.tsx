@@ -97,10 +97,11 @@ export default function NotificationsPage() {
                     <div className="flex items-center gap-1">
                         {unreadCount > 0 && (
                             <Button
-                                variant="ghost"
+                                variant="plain"
+                                size="auto"
                                 onClick={handleMarkAllRead}
                                 loading={isMarkingAll}
-                                className="!text-katakana !flex !items-center !gap-1 !rounded-xl !px-2.5 !py-2 !text-xs !font-black shadow-none transition-colors hover:!bg-blue-50 hover:shadow-none active:translate-y-0"
+                                className="text-katakana flex items-center gap-1 rounded-xl px-2.5 py-2 text-xs font-black shadow-none transition-colors hover:bg-blue-50 hover:shadow-none active:translate-y-0"
                                 title={t("markAllRead")}
                                 icon={CheckCheck}
                                 iconSize={15}
@@ -110,10 +111,11 @@ export default function NotificationsPage() {
                         )}
                         {notifications.length > 0 && (
                             <Button
-                                variant="ghost"
+                                variant="plain"
+                                size="auto"
                                 onClick={handleClearAll}
                                 loading={isClearingAll}
-                                className="hover:!text-danger !flex !items-center !gap-1 !rounded-xl !px-2.5 !py-2 !text-xs !font-black !text-gray-400 shadow-none transition-colors hover:!bg-red-50 hover:shadow-none active:translate-y-0"
+                                className="hover:text-danger flex items-center gap-1 rounded-xl px-2.5 py-2 text-xs font-black text-gray-400 shadow-none transition-colors hover:bg-red-50 hover:shadow-none active:translate-y-0"
                                 title={t("clearAllTitle")}
                                 icon={Trash2}
                                 iconSize={15}
@@ -160,9 +162,10 @@ export default function NotificationsPage() {
                     <div className="flex flex-col items-center gap-3 rounded-2xl bg-white px-6 py-12 text-center">
                         <p className="text-sm font-bold text-gray-500">{t("loadError")}</p>
                         <Button
-                            variant="ghost"
+                            variant="plain"
+                            size="auto"
                             onClick={retry}
-                            className="!text-katakana !rounded-xl !px-4 !py-2 !text-sm !font-black"
+                            className="text-katakana rounded-xl px-4 py-2 text-sm font-black hover:bg-gray-100 active:bg-gray-200"
                         >
                             {t("tryAgain")}
                         </Button>

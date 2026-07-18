@@ -88,21 +88,23 @@ const Alert = ({ type, message, onClose, action }: AlertProps) => {
             <div className="flex-1 text-sm leading-relaxed font-bold">{message}</div>
             {action && (
                 <Button
-                    variant="ghost"
+                    variant="plain"
+                    size="auto"
                     onClick={() => {
                         action.onClick();
                         onClose();
                     }}
-                    className="!shrink-0 !rounded-lg !px-2.5 !py-1 !text-xs !font-black underline underline-offset-2 shadow-none hover:!bg-white/50 hover:shadow-none active:translate-y-0"
+                    className="shrink-0 rounded-lg px-2.5 py-1 text-xs font-black underline underline-offset-2 shadow-none hover:bg-white/50 hover:shadow-none active:translate-y-0"
                 >
                     {action.label}
                 </Button>
             )}
             <Button
-                variant="ghost"
+                variant="plain"
+                size="auto"
                 onClick={onClose}
                 aria-label={t("dismiss")}
-                className="!p-1.5 opacity-40 transition-all hover:opacity-100"
+                className="rounded-xl p-1.5 text-gray-500 opacity-40 transition-all hover:bg-gray-100 hover:opacity-100 active:bg-gray-200"
                 icon={X}
             />
         </div>

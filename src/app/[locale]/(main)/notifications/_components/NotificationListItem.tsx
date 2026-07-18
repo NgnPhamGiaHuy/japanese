@@ -312,10 +312,11 @@ export function NotificationRow({
                 {/* Delete button — sibling of content div, never nested inside it.
                     Always visible on touch (no hover); hover-revealed on ≥sm. */}
                 <Button
-                    variant="ghost"
+                    variant="plain"
+                    size="auto"
                     onClick={handleDelete}
                     aria-label={t("dismiss")}
-                    className="hover:!text-danger !mt-0.5 !shrink-0 !rounded-lg !p-1.5 !text-gray-300 opacity-100 shadow-none transition-all hover:!bg-red-50 hover:shadow-none active:translate-y-0 sm:opacity-0 sm:group-hover:opacity-100 sm:focus:opacity-100"
+                    className="hover:text-danger mt-0.5 shrink-0 rounded-lg p-1.5 text-gray-300 opacity-100 shadow-none transition-all hover:bg-red-50 hover:shadow-none active:translate-y-0 sm:opacity-0 sm:group-hover:opacity-100 sm:focus:opacity-100"
                     icon={Trash2}
                     iconSize={15}
                 />

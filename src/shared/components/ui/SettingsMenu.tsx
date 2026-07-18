@@ -17,6 +17,7 @@
  * pronunciation, and auto-play, each independent — lives on the Settings page.
  */
 import { Menu } from "@base-ui/react/menu";
+import { Switch } from "@base-ui/react/switch";
 import { Settings, Trash2, Volume2 } from "lucide-react";
 
 import Button from "./Button";
@@ -70,6 +71,24 @@ interface SettingsMenuProps {
 const MENU_ITEM_CLASS =
     "text-text flex w-full cursor-pointer items-center justify-between rounded-xl px-3 py-3 text-left text-sm font-bold shadow-none transition-colors hover:bg-gray-50 data-[highlighted]:bg-gray-50 hover:shadow-none active:translate-y-0";
 
+/**
+ * Visual-only switch indicator for a toggle row — the row itself (a
+ * `Menu.CheckboxItem`) already owns the click/keyboard interaction and menu
+ * roving-tabindex navigation, so this renders `Switch.Root`/`Switch.Thumb`
+ * purely for their `role="switch"` semantics and thumb animation, not as an
+ * independently interactive control (`pointer-events-none` + `tabIndex={-1}`
+ * so clicks pass through to the row underneath).
+ */
+const ToggleSwitch = ({ checked, activeBg }: { checked: boolean; activeBg: string }) => (
+    <Switch.Root
+        checked={checked}
+        tabIndex={-1}
+        className={`pointer-events-none flex h-6 w-10 shrink-0 items-center rounded-full px-1 transition-colors ${checked ? activeBg : "bg-gray-200"}`}
+    >
+        <Switch.Thumb className="h-4 w-4 rounded-full bg-white transition-transform data-[checked]:translate-x-4 data-[unchecked]:translate-x-0" />
+    </Switch.Root>
+);
+
 const SettingsMenu = ({
     isOpen,
     onToggle,
@@ -116,13 +135,10 @@ const SettingsMenu = ({
                                         <audioToggle.icon size={16} className="text-gray-500" />{" "}
                                         {audioToggle.label}
                                     </span>
-                                    <div
-                                        className={`flex h-6 w-10 items-center rounded-full px-1 transition-colors ${audioToggle.value ? primaryBg : "bg-gray-200"}`}
-                                    >
-                                        <div
-                                            className={`h-4 w-4 rounded-full bg-white transition-transform ${audioToggle.value ? "translate-x-4" : "translate-x-0"}`}
-                                        />
-                                    </div>
+                                    <ToggleSwitch
+                                        checked={audioToggle.value}
+                                        activeBg={primaryBg}
+                                    />
                                 </Menu.CheckboxItem>
                             </>
                         )}
@@ -142,13 +158,10 @@ const SettingsMenu = ({
                                         <displayToggle.icon size={16} className="text-gray-500" />{" "}
                                         {displayToggle.label}
                                     </span>
-                                    <div
-                                        className={`flex h-6 w-10 items-center rounded-full px-1 transition-colors ${displayToggle.value ? primaryBg : "bg-gray-200"}`}
-                                    >
-                                        <div
-                                            className={`h-4 w-4 rounded-full bg-white transition-transform ${displayToggle.value ? "translate-x-4" : "translate-x-0"}`}
-                                        />
-                                    </div>
+                                    <ToggleSwitch
+                                        checked={displayToggle.value}
+                                        activeBg={primaryBg}
+                                    />
                                 </Menu.CheckboxItem>
                             </>
                         )}

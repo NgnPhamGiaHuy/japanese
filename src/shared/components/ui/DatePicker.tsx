@@ -3,10 +3,10 @@
 import { useMemo, useState } from "react";
 import { DayPicker } from "react-day-picker";
 
+import { Popover } from "@base-ui/react/popover";
 import { clsx } from "clsx";
 import { format, parseISO } from "date-fns";
 import { Calendar as CalendarIcon, ChevronLeft, ChevronRight, X } from "lucide-react";
-import { AnimatePresence, m } from "motion/react";
 
 import Button from "./Button";
 
@@ -78,48 +78,48 @@ const DatePicker = ({
                     {label}
                 </span>
             )}
-            <div className="group relative">
-                <Button
-                    variant="ghost"
-                    onClick={() => setIsOpen(!isOpen)}
-                    disabled={disabled}
-                    className="!text-text !flex !h-12 !w-full !items-center !justify-start !gap-4 !rounded-2xl border-2 border-gray-100 bg-gray-50/50 !px-4 !text-sm !font-black shadow-none transition-all hover:border-gray-200 hover:bg-white"
-                >
-                    <CalendarIcon
-                        className={clsx(
-                            "text-gray-400 transition-colors",
-                            isOpen ? "text-katakana" : "group-hover:text-katakana",
-                        )}
-                        size={16}
-                    />
-                    <span className={clsx(!value && "text-muted font-bold")}>{displayValue}</span>
-                </Button>
-
-                {value && !disabled && (
-                    <button
-                        type="button"
-                        onClick={(e) => {
-                            e.stopPropagation();
-                            onChange(undefined);
-                        }}
-                        className="hover:text-danger focus-visible:ring-katakana absolute top-1/2 right-3 z-10 flex h-6 w-6 -translate-y-1/2 items-center justify-center rounded-lg text-gray-400 transition-all hover:bg-red-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
-                        title="Clear date"
+            <Popover.Root open={isOpen} onOpenChange={setIsOpen}>
+                <div className="group relative">
+                    <Popover.Trigger
+                        disabled={disabled}
+                        render={
+                            <Button
+                                variant="plain"
+                                size="auto"
+                                className="text-text flex h-12 w-full items-center justify-start gap-4 rounded-2xl border-2 border-gray-100 bg-gray-50/50 px-4 text-sm font-black shadow-none transition-all hover:border-gray-200 hover:bg-white"
+                            />
+                        }
                     >
-                        <X size={14} />
-                    </button>
-                )}
-            </div>
+                        <CalendarIcon
+                            className={clsx(
+                                "text-gray-400 transition-colors",
+                                isOpen ? "text-katakana" : "group-hover:text-katakana",
+                            )}
+                            size={16}
+                        />
+                        <span className={clsx(!value && "text-muted font-bold")}>
+                            {displayValue}
+                        </span>
+                    </Popover.Trigger>
 
-            <AnimatePresence>
-                {isOpen && (
-                    <>
-                        <div className="fixed inset-0 z-40" onClick={() => setIsOpen(false)} />
-                        <m.div
-                            initial={{ opacity: 0, scale: 0.95, y: 10 }}
-                            animate={{ opacity: 1, scale: 1, y: 0 }}
-                            exit={{ opacity: 0, scale: 0.95, y: 10 }}
-                            className="absolute top-full right-0 z-50 mt-2 w-72 overflow-hidden rounded-4xl border-2 border-gray-100 bg-white p-4 shadow-2xl"
+                    {value && !disabled && (
+                        <button
+                            type="button"
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                onChange(undefined);
+                            }}
+                            className="hover:text-danger focus-visible:ring-katakana absolute top-1/2 right-3 z-10 flex h-6 w-6 -translate-y-1/2 items-center justify-center rounded-lg text-gray-400 transition-all hover:bg-red-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
+                            title="Clear date"
                         >
+                            <X size={14} />
+                        </button>
+                    )}
+                </div>
+
+                <Popover.Portal>
+                    <Popover.Positioner side="bottom" align="end" sideOffset={8} className="z-50">
+                        <Popover.Popup className="w-72 overflow-hidden rounded-4xl border-2 border-gray-100 bg-white p-4 shadow-2xl transition-[opacity,transform] duration-200 outline-none data-[ending-style]:scale-95 data-[ending-style]:opacity-0 data-[starting-style]:scale-95 data-[starting-style]:opacity-0">
                             <DayPicker
                                 mode="single"
                                 selected={selectedDate}
@@ -158,10 +158,10 @@ const DatePicker = ({
                                         "[&>button]:opacity-30 [&>button]:pointer-events-none",
                                 }}
                             />
-                        </m.div>
-                    </>
-                )}
-            </AnimatePresence>
+                        </Popover.Popup>
+                    </Popover.Positioner>
+                </Popover.Portal>
+            </Popover.Root>
         </div>
     );
 };

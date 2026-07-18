@@ -23,10 +23,16 @@ export type ThemeColor =
     | (string & {});
 
 /** Visual variants for different action hierarchies. */
-type Variant = "primary" | "secondary" | "outline" | "ghost";
+type Variant = "primary" | "secondary" | "outline" | "ghost" | "plain";
 
-/** Button footprint: "md" for labeled buttons, "icon" for a square icon-only button, "icon-sm" for a denser icon-only button (compact table rows/nav bars). */
-type Size = "md" | "icon" | "icon-sm";
+/**
+ * Button footprint: "md" for labeled buttons, "icon" for a square icon-only
+ * button, "icon-sm" for a denser icon-only button (compact table rows/nav
+ * bars), "auto" for no padding/height opinion at all (pairs with
+ * `variant="plain"` when a call site needs to fully own its own sizing
+ * instead of fighting "md"'s padding with `!` overrides).
+ */
+type Size = "md" | "icon" | "icon-sm" | "auto";
 
 const ALPHABET_MAP: Record<AlphabetMode, ThemeColor> = {
     hiragana: "green",
@@ -183,19 +189,23 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button(
     const t = isStandardTheme ? THEMES[resolvedColor as string] : THEMES.blue;
 
     const base =
-        "flex items-center justify-center gap-2 rounded-2xl font-extrabold transition-all duration-200 select-none cursor-pointer disabled:opacity-50 disabled:pointer-events-none focus:outline-none focus-visible:ring-2 focus-visible:ring-katakana focus-visible:ring-offset-2";
+        "flex items-center justify-center gap-2 font-extrabold transition-all duration-200 select-none cursor-pointer disabled:opacity-50 disabled:pointer-events-none focus:outline-none focus-visible:ring-2 focus-visible:ring-katakana focus-visible:ring-offset-2";
 
     const sizes: Record<Size, string> = {
         md: "px-4 py-3 md:px-6 md:py-4",
         icon: "h-10 w-10 p-0",
         "icon-sm": "h-9 w-9 p-0",
+        auto: "",
     };
 
     const variants: Record<Variant, string> = {
-        primary: `${isStandardTheme ? t.bg : ""} text-white border-b-4 ${isStandardTheme ? t.border : ""} ${isStandardTheme ? t.hover : ""} hover:-translate-y-1 hover:shadow-lg active:border-b-0 active:translate-y-[4px]`,
-        secondary: `bg-white ${isStandardTheme ? t.text : ""} border-2 border-b-4 border-gray-200 hover:bg-gray-50 hover:border-gray-300 hover:-translate-y-1 hover:shadow-md active:border-b-2 active:translate-y-[2px]`,
-        outline: `bg-transparent text-gray-500 border-2 border-b-4 border-gray-200 hover:bg-gray-50 hover:border-gray-300 hover:-translate-y-1 active:border-b-2 active:translate-y-[2px]`,
+        primary: `rounded-2xl ${isStandardTheme ? t.bg : ""} text-white border-b-4 ${isStandardTheme ? t.border : ""} ${isStandardTheme ? t.hover : ""} hover:-translate-y-1 hover:shadow-lg active:border-b-0 active:translate-y-[4px]`,
+        secondary: `rounded-2xl bg-white ${isStandardTheme ? t.text : ""} border-2 border-b-4 border-gray-200 hover:bg-gray-50 hover:border-gray-300 hover:-translate-y-1 hover:shadow-md active:border-b-2 active:translate-y-[2px]`,
+        outline: `rounded-2xl bg-transparent text-gray-500 border-2 border-b-4 border-gray-200 hover:bg-gray-50 hover:border-gray-300 hover:-translate-y-1 active:border-b-2 active:translate-y-[2px]`,
         ghost: `text-gray-500 hover:text-text hover:bg-gray-100 active:bg-gray-200 rounded-xl`,
+        // No color/hover/rounding opinion at all — the caller's className supplies
+        // everything, so nothing needs a `!` override to win against this variant.
+        plain: "",
     };
 
     // Forced active state for toggle buttons or tabs

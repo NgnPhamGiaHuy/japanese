@@ -194,10 +194,10 @@ function SettingsToggle({
     color: "blue" | "green" | "purple" | "orange";
 }) {
     const colors = {
-        blue: "!bg-katakana !border-katakana-strong",
-        green: "!bg-hiragana !border-hiragana-strong",
-        purple: "!bg-both !border-both-strong",
-        orange: "!bg-survival !border-survival-strong",
+        blue: "bg-katakana border-katakana-strong",
+        green: "bg-hiragana border-hiragana-strong",
+        purple: "bg-both border-both-strong",
+        orange: "bg-survival border-survival-strong",
     };
 
     return (
@@ -207,15 +207,16 @@ function SettingsToggle({
                 <div className="text-muted text-sm font-bold">{sub}</div>
             </div>
             <Button
-                variant="ghost"
+                variant="plain"
+                size="auto"
                 onClick={onToggle}
                 role="switch"
                 aria-checked={value}
                 aria-label={label}
-                className={`!relative !h-8 !w-14 !shrink-0 !rounded-full !border-2 !border-b-4 !p-0 shadow-none transition-all duration-200 hover:shadow-none active:translate-y-[2px] ${
+                className={`relative h-8 w-14 shrink-0 rounded-full border-2 border-b-4 p-0 shadow-none transition-all duration-200 hover:shadow-none active:translate-y-[2px] ${
                     value
                         ? colors[color]
-                        : "!border-gray-300 !bg-gray-200 hover:!bg-gray-200 active:!bg-gray-200"
+                        : "border-gray-300 bg-gray-200 hover:bg-gray-200 active:bg-gray-200"
                 }`}
             >
                 <m.div
@@ -243,10 +244,11 @@ function SettingsAction({
 
     return (
         <Button
-            variant="ghost"
+            variant="plain"
+            size="auto"
             onClick={onClick}
-            className={`!flex !w-full !items-center !justify-between !rounded-none !px-6 !py-6 !text-left shadow-none transition-colors hover:shadow-none active:translate-y-0 ${
-                isDanger ? "hover:!bg-red-50" : "hover:!bg-gray-50"
+            className={`flex w-full items-center justify-between rounded-none px-6 py-6 text-left shadow-none transition-colors hover:shadow-none active:translate-y-0 ${
+                isDanger ? "hover:bg-red-50" : "hover:bg-gray-50"
             }`}
         >
             <div className="min-w-0 flex-1 pr-6">

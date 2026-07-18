@@ -36,9 +36,10 @@ const NotFoundScreen = ({ title, description, buttonText, onBack }: NotFoundScre
             <h1 className="text-text mb-4 text-2xl font-black">{title ?? t("notFound")}</h1>
             {description && <p className="text-muted mb-6 font-bold">{description}</p>}
             <Button
-                variant="ghost"
+                variant="plain"
+                size="auto"
                 onClick={onBack}
-                className="text-katakana! font-bold! shadow-none hover:shadow-none active:translate-y-0"
+                className="text-katakana font-bold shadow-none hover:shadow-none active:translate-y-0"
             >
                 {buttonText ?? t("goBack")}
             </Button>

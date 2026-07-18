@@ -3,10 +3,11 @@
 import { useTranslations } from "next-intl";
 
 import { Dialog } from "@base-ui/react/dialog";
-import { AlertTriangle, Info, Trash2, X } from "lucide-react";
+import { AlertTriangle, Info, Trash2 } from "lucide-react";
 
 import { SEMANTIC_STATUS } from "@/shared/utils";
 import Button from "./Button";
+import { DIALOG_BACKDROP_CLASSNAME, DialogCloseButton } from "./DialogChrome";
 
 /** Supported visual variants for the confirmation modal. */
 export type ConfirmVariant = "danger" | "warning" | "info";
@@ -91,7 +92,7 @@ const ConfirmModal = ({
         <Dialog.Root open={isOpen} onOpenChange={(open) => !open && !loading && onClose()}>
             <Dialog.Portal>
                 {/* Backdrop */}
-                <Dialog.Backdrop className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm transition-opacity duration-200 data-[ending-style]:opacity-0 data-[starting-style]:opacity-0" />
+                <Dialog.Backdrop className={DIALOG_BACKDROP_CLASSNAME} />
 
                 {/* Centering layer — pointer-events pass through to the backdrop except over the modal itself */}
                 <div className="pointer-events-none fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
@@ -101,19 +102,7 @@ const ConfirmModal = ({
                     >
                         {/* Close button */}
                         <div className="absolute top-4 right-4 z-10">
-                            <Dialog.Close
-                                disabled={loading}
-                                render={
-                                    <Button
-                                        variant="ghost"
-                                        size="icon"
-                                        className="rounded-full shadow-none hover:bg-black/5"
-                                        icon={X}
-                                        iconSize={20}
-                                        disabled={loading}
-                                    />
-                                }
-                            />
+                            <DialogCloseButton disabled={loading} />
                         </div>
 
                         <div className="p-8 pt-10">
@@ -141,15 +130,17 @@ const ConfirmModal = ({
                                     color={v.color}
                                     onClick={onConfirm}
                                     loading={loading}
-                                    className="w-full !py-4 !text-base"
+                                    size="auto"
+                                    className="w-full px-4 py-4 text-base md:px-6"
                                 >
                                     {confirmText ?? t("confirm")}
                                 </Button>
                                 <Button
-                                    variant="ghost"
+                                    variant="plain"
+                                    size="auto"
                                     onClick={onClose}
                                     disabled={loading}
-                                    className="!text-muted w-full !py-4 !text-base !font-black hover:!bg-gray-50 active:translate-y-0"
+                                    className="text-muted hover:text-text w-full rounded-xl px-4 py-4 text-base font-black hover:bg-gray-50 active:translate-y-0 md:px-6"
                                 >
                                     {cancelText ?? t("cancel")}
                                 </Button>

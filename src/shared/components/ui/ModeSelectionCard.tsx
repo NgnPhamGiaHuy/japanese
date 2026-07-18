@@ -54,9 +54,10 @@ const ModeSelectionCard = ({
     return (
         <Button
             id={id}
-            variant="ghost"
+            variant="plain"
+            size="auto"
             onClick={onClick}
-            className="flex! w-full! items-center! justify-start! rounded-2xl! border-2! border-b-4! border-gray-200! bg-white! p-5! text-left! shadow-none transition-all hover:-translate-y-1! hover:shadow-md hover:shadow-none active:translate-y-0"
+            className="flex w-full items-center justify-start rounded-2xl border-2 border-b-4 border-gray-200 bg-white p-5 text-left shadow-none transition-all hover:-translate-y-1 hover:shadow-md hover:shadow-none active:translate-y-0"
         >
             <div className={`mr-4 rounded-xl p-3 ${iconBgColor}`}>
                 <Icon size={24} className={iconColor} />
