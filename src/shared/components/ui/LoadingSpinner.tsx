@@ -8,6 +8,10 @@
  * @example
  * <LoadingSpinner label="Saving progress..." fullScreen={false} />
  */
+"use client";
+
+import { useTranslations } from "next-intl";
+
 import { Loader2 } from "lucide-react";
 
 /** Attributes for rendering a LoadingSpinner. */
@@ -28,6 +32,7 @@ const LoadingSpinner = ({
     fullScreen = true,
     label,
 }: LoadingSpinnerProps) => {
+    const t = useTranslations("Common");
     const spinner = (
         <div className="flex flex-col items-center justify-center gap-4">
             <div className="relative flex items-center justify-center">
@@ -41,7 +46,7 @@ const LoadingSpinner = ({
                 <div className="flex flex-col items-center gap-1">
                     <p className="text-text text-lg font-black tracking-tight">{label}</p>
                     <p className="text-muted text-xs font-bold tracking-widest uppercase">
-                        Crunching latest platform data
+                        {t("loadingSubtitle")}
                     </p>
                 </div>
             )}

@@ -29,7 +29,8 @@
         "deleteDeckFailed": "Failed to delete deck",
         "undo": "Undo",
         "dismiss": "Dismiss",
-        "player": "Player"
+        "player": "Player",
+        "loadingSubtitle": "Crunching latest platform data"
     },
     "Metadata": {
         "siteTitle": "Kana & Nihongo Master",

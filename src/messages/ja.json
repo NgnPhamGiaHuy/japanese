@@ -29,7 +29,8 @@
         "deleteDeckFailed": "デッキの削除に失敗しました",
         "undo": "元に戻す",
         "dismiss": "閉じる",
-        "player": "プレイヤー"
+        "player": "プレイヤー",
+        "loadingSubtitle": "最新データを集計中"
     },
     "Metadata": {
         "siteTitle": "Kana & Nihongo Master",
