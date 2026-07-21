@@ -322,10 +322,16 @@ Each is scheduled into a wave but is **NOT READY** until its question answers. E
 
 #### T-103b — Extend the boundary lint to forbid `lib → features`
 
-**Size** S · **Wave** 1 · **Status** Ready
-**Traces to** ADR-103 (AD-03) · W-2, RC-12, P-1 · cluster **C3** · `assess/03`, `/11`
-**Description.** Make the absolute rule mechanically checkable, with the composition root as the single allowlisted file, so a second back-edge cannot re-establish the pattern that RC-12 warns would make the layering rule uncheckable by grep.
-**Acceptance criteria**
+**Size** S · **Wave** 1 · **Status** ✅ **DONE** (Sprint 4) — _was: Ready_
+
+> **Delivered.** A third `import/no-restricted-paths` zone: `target: "./lib"`, `from: "./features"`, no zone-level `except` at all — this is the absolute rule RC-12 calls for, not a narrower one with carve-outs. The single sanctioned edge, `lib/providers.tsx`, is excluded at the config-file-matching layer (`ignores`) rather than zone-excepted, so "exactly one entry" is enforced by not checking that file, matching how test/story files are already handled for the T-101c rules.
+>
+> **Verified by experiment:** a synthetic `lib/__t103b_probe.ts` importing even the _bare_ barrel `@/features/home` fails, with a message naming ADR-103; `lib/providers.tsx` itself — which imports 5 feature barrels — lints clean; the full existing codebase is unaffected (0 errors, same as before this change). Probe created, tested, deleted; tree confirmed clean.
+>
+> No ledger row needed: like T-103a, this is a direct, single-step completion with no future stage — ADR-103's back-edge is closed and mechanically checkable, full stop.
+> **Traces to** ADR-103 (AD-03) · W-2, RC-12, P-1 · cluster **C3** · `assess/03`, `/11`
+> **Description.** Make the absolute rule mechanically checkable, with the composition root as the single allowlisted file, so a second back-edge cannot re-establish the pattern that RC-12 warns would make the layering rule uncheckable by grep.
+> **Acceptance criteria**
 
 - A synthetic `lib → features` import fails lint.
 - The allowlist contains exactly one entry: `lib/providers.tsx`.

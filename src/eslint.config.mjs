@@ -153,6 +153,36 @@ const eslintConfig = defineConfig([
                     ],
                 },
             },
+            {
+                // lib/ never imports features/ — not even a feature's public
+                // entry points (ADR-103). Shared infrastructure depending on a
+                // feature cannot be reasoned about or extracted without it, and
+                // is how the admin <-> lib/logging cycle formed (T-103a). The
+                // one sanctioned exception is the composition root, excluded
+                // from this rule entirely rather than zone-excepted: providers.tsx
+                // legitimately imports several features' bare barrels to mount
+                // their providers, so "no exceptions" is enforced by not
+                // checking that one file, not by carving out per-feature paths.
+                files: ["lib/**/*.{ts,tsx}"],
+                ignores: ["lib/providers.tsx", ...TEST_AND_STORY_FILES],
+                rules: {
+                    "import/no-restricted-paths": [
+                        "error",
+                        {
+                            zones: [
+                                {
+                                    target: "./lib",
+                                    from: "./features",
+                                    message:
+                                        "lib/ may not import from features/ — only the composition " +
+                                        "root (lib/providers.tsx) may. See ADR-103 " +
+                                        "(architecture-decision/03-Architecture-Decisions.md).",
+                                },
+                            ],
+                        },
+                    ],
+                },
+            },
         ];
     })(),
 
