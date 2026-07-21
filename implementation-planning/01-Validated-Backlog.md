@@ -139,7 +139,8 @@ Each is scheduled into a wave but is **NOT READY** until its question answers. E
 **Rollback** Revert the ledger rows; the gated code is untouched by this task.
 
 #### T-120c — Fix the docs ADR index omission and record the ADR process note
-**Size** S · **Wave** 1 · **Status** Ready
+**Size** S · **Wave** 1 · **Status** ✅ **DONE** (Sprint 1) — *was: Ready*
+**Delivered** `docs/README.md`: ADR 003 added (index now 3 entries ↔ 3 files on disk, verified by scripted count), a completeness rule stating the index must name every file in `adr/`, the ADRs-001–003-remain-in-force record, and the ADR-vs-ledger process note as a comparison table.
 **Traces to** ADR-120 (AD-20) · W-21(d), TD-13, S-20 · cluster **C16** · `assess/07`, `/03`
 **Description.** The in-repo ADR series (`docs/adr/001`, `002`, `003`) is real and cross-referenced from code, but the docs index omits ADR-003 — a small, concrete instance of the standards-decay the whole decision set is guarding against. Restore index completeness and write the process note distinguishing ADRs (immutable decisions) from the ledger (mutable stage tracking).
 **Acceptance criteria**
