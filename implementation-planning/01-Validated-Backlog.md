@@ -459,7 +459,8 @@ Each is scheduled into a wave but is **NOT READY** until its question answers. E
 
 #### T-117e — Baseline coverage for the four zero-coverage features
 
-**Size** L · **Wave** 2 · **Status** Ready
+**Size** L · **Wave** 2 · **Status** ✅ **DONE** (Sprint 5) — _was: Ready_
+**Delivered** `game`: `combo.test.ts` + `tier.test.ts` (18 tests) for the named shared scoring/tier engine. `ai`: `gemini-dedup.test.ts`, `gemini-parsing.test.ts`, `gemini-distractors.test.ts` (26 tests) covering deck-generation dedup, output-parsing/error-classification, and Match-mode distractor generation (transport mocked, real filtering/clamping/fallback logic exercised). `command-palette`: `actions.test.ts` (5 tests) — this feature's only real "domain logic" is its static route/icon data's own consistency (cmdk owns the actual fuzzy-search). `home`: `useHomeState.browser.test.tsx` (10 tests, new `renderHook`-from-`vitest-browser-react` pattern for this repo) covering the hook's real derivation logic (primaryCount's action-based branch, recentLessons ordering, kanaPct rounding/capping) with every dependency mocked at the module boundary.
 **Traces to** ADR-117 (AD-17) · OP-23, W-16, TD-2 · cluster **C8** · `assess/02`, `/09`
 **Description.** `ai`, `game`, `home` and `command-palette` have zero test files. ADR-117 sets the floor that every feature has unit coverage of its domain logic; this task establishes that floor for the four features that have none.
 **Acceptance criteria**
