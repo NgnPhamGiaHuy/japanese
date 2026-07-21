@@ -219,7 +219,9 @@ Each is scheduled into a wave but is **NOT READY** until its question answers. E
 ### ADR-101 — Feature public APIs are enforced (P1)
 
 #### T-101a — Define and publish root barrels as the public API for all 9 features
-**Size** M · **Wave** 1 · **Status** Ready
+**Size** M · **Wave** 1 · **Status** ✅ **DONE** (Sprint 2) — *was: Ready*
+**Delivered** 7 new curated root barrels (admin, ai, flashcard, game, kana, notifications, user); `command-palette` and `home` already had one. All **110** cross-boundary symbols are covered, verified by script. Additive only — no import site migrated (that is T-101b), so deep imports still resolve and this is a stable intermediate state.
+**AC4 finding (feeds T-101b / T-104a).** Exactly **one** sub-barrel qualifies for retirement: `features/admin/components/content` — single consumer `app/[locale]/(main)/admin/content/page.tsx`, zero internal consumers. A first pass suggested 20 candidates, but that count only measured `@/`-alias imports; re-run with relative-path resolution, **50 sub-barrels have internal consumers and must stay**. Acting on the uncorrected list would have deleted barrels still in use.
 **Traces to** ADR-101 (AD-01) · W-3, S-1, CX-4, TD-4 · cluster **C3** · `assess/03`, `/02`, `/11`; `disc/08`, `/10`
 **Description.** Only 2 of 9 features expose a root barrel, so "feature boundary" is a directory name rather than a contract. Each feature gains exactly one root barrel that is a **curated** export list — the single legal cross-feature import surface. This is the prerequisite for the migration (T-101b) and the lint rule (T-101c).
 **Acceptance criteria**

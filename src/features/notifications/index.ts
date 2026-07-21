@@ -1,0 +1,35 @@
+/**
+ * Notifications Feature — Public API
+ *
+ * @remarks
+ * A headless feature: a realtime context, a server-authoritative write path,
+ * and the row renderer the inbox composes. Cross-user writes are never done by
+ * the caller — `emitNotification` and friends route through server actions that
+ * derive the recipient server-side.
+ *
+ * This feature must not import from `flashcard`. The invite-action seam
+ * (T-102a/b) exists so cross-feature callbacks are injected rather than
+ * imported, keeping the dependency one-way.
+ */
+
+// Realtime context — mounted once in the provider composition root.
+export { NotificationsProvider, useNotifications } from "./context/NotificationsContext";
+
+// Inbox rendering.
+export { NotificationRow } from "./components";
+export { flattenNotificationGroups } from "./domain/format";
+
+// Write path. Server-authoritative: the caller supplies intent, not a recipient.
+export {
+    deleteAllNotifications,
+    deliverPendingNotifications,
+    emitNotification,
+    markAllNotificationsRead,
+    notifyInvite,
+    restoreNotifications,
+} from "./services";
+export { notifySystemEvent } from "./actions/notification.actions";
+export { logNotificationsCleared, logNotificationsReadAll } from "./actions/activity-log.actions";
+
+export { isUnread } from "./types";
+export type { AppNotification, NotificationGroup } from "./types";
