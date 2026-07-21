@@ -39,13 +39,18 @@ jobs:
         run: npm ci
 
       - name: Lint
-        # Report-only for now: the repo has pre-existing lint errors (unrelated
-        # to CI setup) that predate this workflow, since lint was never wired
-        # into pre-commit or CI before. Do not flip this to blocking (remove
-        # continue-on-error) until that backlog is paid down. Build and test
-        # above, and the emulator suite below, ARE fully blocking already.
+        # BLOCKING as of Sprint 0. Previously report-only (continue-on-error)
+        # because 12 files carried error-level violations predating this
+        # workflow. Those exact files are now pinned to "warn" by the ratchet
+        # baseline in src/eslint.config.mjs, so this step fails only on NEW
+        # error-level violations — including the ADR-001 audio boundary and the
+        # import-boundary rules arriving with T-101c.
+        #
+        # Architecture-boundary enforcement (ADR-101/102/103) is defined as
+        # "the rule is set to error and the build fails". Without this step
+        # blocking, that second half was never true.
+        # See execution-readiness/06 §G-1.
         run: npm run lint
-        continue-on-error: true
 
       - name: Build (includes TypeScript typecheck)
         run: npm run build

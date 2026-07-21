@@ -65,6 +65,59 @@ const eslintConfig = defineConfig([
             "max-lines": ["warn", { max: 200 }],
         },
     },
+
+    // ─── Lint ratchet baseline (Sprint 0) ──────────────────────────────────────
+    //
+    // CI lint is BLOCKING (.github/workflows/ci.yml). It could not be flipped
+    // while these files carried error-level violations that predate the gate, so
+    // each is pinned to "warn" below — still reported on every run, no longer
+    // able to fail the build for a pre-existing reason.
+    //
+    // This list is a RATCHET: it may only shrink, never grow. A violation of any
+    // error-level rule anywhere else — including the audio boundary above and the
+    // import-boundary rules arriving with T-101c — now fails CI. That property is
+    // what ADR-101/102/103 enforcement depends on and did not have before
+    // (execution-readiness/06 §G-1).
+    //
+    // Removing a file from these lists is part of "done" for the task that fixes
+    // it: T-116a owns the react-hooks entries, T-109a the no-explicit-any ones.
+    {
+        files: [
+            "features/admin/hooks/useAdminRoleCheck.ts",
+            "features/ai/hooks/useAIExplanation.ts",
+            "features/flashcard/hooks/useDeckProgressStatus.ts",
+            "features/flashcard/hooks/useSharedLesson.ts",
+            "features/user/hooks/useBestScores.ts",
+            "features/user/hooks/useUserProgress.ts",
+        ],
+        rules: {
+            "react-hooks/set-state-in-effect": "warn",
+        },
+    },
+    {
+        files: [
+            "features/admin/utils/export.utils.ts",
+            "features/ai/hooks/useAIImageDeck.ts",
+            "features/flashcard/games/speed/engine/memory/CardSelector.ts",
+            "features/flashcard/utils/parser.ts",
+            "features/kana/quiz/hooks/useQuizState.ts",
+        ],
+        rules: {
+            "@typescript-eslint/no-explicit-any": "warn",
+        },
+    },
+    {
+        files: ["features/flashcard/loaders/useFlashcardLoader.ts"],
+        rules: {
+            "react-hooks/immutability": "warn",
+        },
+    },
+    {
+        files: ["features/flashcard/utils/parser.ts"],
+        rules: {
+            "prefer-const": "warn",
+        },
+    },
     ...storybook.configs["flat/recommended"],
 ]);
 
