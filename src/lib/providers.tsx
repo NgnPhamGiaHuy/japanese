@@ -7,6 +7,7 @@ import { LazyMotion } from "motion/react";
 
 import AdminProvider from "@/features/admin/context/AdminContext";
 import { CommandPaletteLauncher } from "@/features/command-palette";
+import { registerFlashcardNotificationActions } from "@/features/flashcard/notifications";
 import { NotificationsProvider } from "@/features/notifications/context/NotificationsContext";
 import { useActivityTracker, useFirebaseAuth } from "@/features/user/hooks";
 import { usePathname } from "@/i18n/navigation";
@@ -16,6 +17,13 @@ import { FontSyncer } from "@/lib/FontSyncer";
 import { PostHogProvider } from "@/lib/PostHogProvider";
 import { isPublicForRender } from "@/shared/constants/public-routes";
 import { AlertProvider } from "@/shared/providers";
+
+// Producing features register their notification action handlers here, at
+// module scope, so registration is complete before any inbox render can look
+// one up. This is the composition root ADR-102's seam expects; the inbox
+// itself never imports a producing feature. A kind whose handler is missing
+// degrades visibly and reports — see the registry's resolve path.
+registerFlashcardNotificationActions();
 
 function AuthGate({ children }: { children: React.ReactNode }) {
     const isAuthReady = useAppStore((s) => s.isAuthReady);

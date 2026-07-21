@@ -317,7 +317,8 @@ Each is scheduled into a wave but is **NOT READY** until its question answers. E
 **Rollback** The seam is additive; revert leaves the direct import in place and working.
 
 #### T-102b — Rewire `InviteActions` off flashcard access actions onto the seam
-**Size** M · **Wave** 1 · **Status** Ready
+**Size** M · **Wave** 1 · **Status** ✅ **DONE** (Sprint 3, re-sequenced) — *was: Ready*
+**Delivered** `features/flashcard/notifications.ts` registers flashcard's invite-decline handler on the seam; `lib/providers.tsx` calls it once at module scope so registration precedes any inbox render; `InviteActions` resolves handlers through the registry and names no feature. **`features/notifications` now imports zero features** — the repository's only feature-level value-import cycle is closed, which unblocks the T-101b retry (`LDG-17`).
 **Traces to** ADR-102 (AD-02) · W-1, RC-1 · cluster **C3** · `assess/03`, `/04`; `disc/08`
 **Description.** Close the repository's only feature-level value-import cycle by moving the one back-edge — notifications' `InviteActions` importing flashcard's `declineInviteAction` — onto the seam built in T-102a. Flashcard registers its invite accept/decline handlers; the inbox renders them through the registry.
 **Acceptance criteria**

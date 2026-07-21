@@ -5,11 +5,11 @@ import { useTransition } from "react";
 
 import { Check, X } from "lucide-react";
 
-import { declineInviteAction } from "@/features/flashcard/actions/access.actions";
 import { useRouter } from "@/i18n/navigation";
 import { Button } from "@/shared/components/ui";
 import { withFreshToken } from "./withFreshToken";
 import { logNotificationDeleted, logNotificationRead } from "../actions/activity-log.actions";
+import { resolveNotificationActions } from "../domain/action-registry";
 import { resolveNotificationLink } from "../domain/format";
 import { deleteNotification, markNotificationRead } from "../services";
 
@@ -46,8 +46,6 @@ const InviteActions = ({
 
     const handleDecline = () => {
         startTransition(async () => {
-            const ownerId = notification.data?.inviterId;
-            const lessonId = notification.data?.lessonId;
             await deleteNotification(userId, notification.id);
             await withFreshToken((token) => {
                 void logNotificationDeleted(
@@ -57,9 +55,22 @@ const InviteActions = ({
                     notification.type,
                     notification.title,
                 );
-                // Actually revoke the pending invite so it can't
-                // silently re-convert to access on the next share-link visit.
-                if (ownerId && lessonId) void declineInviteAction(token, ownerId, lessonId);
+                // Revoking the pending invite is the producing feature's work,
+                // not the inbox's — this component must not know which feature
+                // issued the invite. The handler is registered through the seam
+                // at the composition root (ADR-102); if none is registered the
+                // decline still removes the notification and the gap is
+                // reported rather than silently skipped.
+                // Reported to the console rather than the client audit log: a
+                // missing registration is a wiring defect, its audience is a
+                // developer, and it must surface immediately. Routing it
+                // through `lib/logging/browser` would also pull that module's
+                // `server-only` transitive import into this client component
+                // and break its browser test.
+                const handlers = resolveNotificationActions(notification.type, (message) => {
+                    console.error(`[notifications] ${message}`);
+                });
+                void handlers?.onDecline?.({ idToken: token, notification, userId });
             });
         });
     };
