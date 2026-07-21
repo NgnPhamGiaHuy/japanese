@@ -443,7 +443,8 @@ Each is scheduled into a wave but is **NOT READY** until its question answers. E
 
 #### T-117d — Rules-suite coverage for the uncovered collections
 
-**Size** L · **Wave** 2 · **Status** Ready
+**Size** L · **Wave** 2 · **Status** ✅ **DONE** (Sprint 5) — _was: Ready_
+**Delivered** 44 new tests appended to `firestore-rules.test.ts` (root): lessons (owner CRUD, stranger deny, public read, editor-vs-viewer update), cards (owner/editor write, viewer deny, public-lesson read), comments (role-gated create, author/editor update-delete), `admins` (self-read only; **no client write path exists at all — self-grant is provably impossible**), `system_logs` (admin-only read; zero client writes, even for admins), `sharedProgress` (owner-only). **Second production bug found:** the cards `write` rule's editor clause dereferences `resource.data.lessonId`, which is `null` on a CREATE — an invited editor can update existing cards but cannot add a new one; only the owner can. Pinned as a labeled discovered-gap test, not silently worked around. **3 collection-group-read tests written and correct but `.skip()`-gated** on a confirmed local tooling limitation: `cloud-firestore-emulator-v1.20.4` throws on any `collectionGroup("lessons")` query under this rule regardless of data shape, reproduced 3 ways (rules-unit-testing, the ambient real connection, zero-filter query) — not a rules defect.
 **Traces to** ADR-117 (AD-17) · OP-24, W-16, TD-2 · cluster **C8** · `assess/09`, `/03`, `/11`
 **Description.** The Firestore rules suite covers a minority of the rules surface. The uncovered blocks are exactly the ones later waves modify: lessons/cards/comments sharing, `admins`, `system_logs`, `sharedProgress`, and the collection-group read. Without them, ADR-114 and ADR-115 rules changes are unverifiable.
 **Acceptance criteria**
