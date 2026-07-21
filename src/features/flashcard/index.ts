@@ -18,7 +18,7 @@ export { FlashcardDashboard } from "./dashboard";
 export { default as DeckCard } from "./dashboard/components/DeckCard";
 export { useDashboardModals } from "./dashboard/hooks";
 export { FlashcardDetailLayout } from "./detail";
-export type { DeckContext } from "./detail";
+export type { DeckContext, DeckRole } from "./detail";
 
 export { default as LessonBuilder } from "./components/LessonBuilder";
 export { default as ShareModal } from "./components/ShareModal";
@@ -41,17 +41,22 @@ export {
 export { useFlashcardLoader } from "./loaders";
 
 // ─── Sharing ─────────────────────────────────────────────────────────────────
-// The public preview path is Admin-SDK-backed and deliberately bypasses rules,
-// so it is exported for the server-rendered share route only.
 export { buildShareId } from "./services";
-export {
-    getPublicSharedLessonPreview,
-    listPublicSharedLessonUrls,
-} from "./services/shared-preview.service";
-export type { PublicSharedLessonPreview } from "./services/shared-preview.service";
 export { declineInviteAction } from "./actions/access.actions";
+
+// Called once by the composition root to register this feature's handlers on
+// notifications' act-side seam (ADR-102). Public because the composition root
+// is its only legitimate caller.
+export { registerFlashcardNotificationActions } from "./notifications";
+
+// The Admin-SDK preview functions live in `./server` (ADR-101 Amendment 1):
+// `shared-preview.service` carries `import "server-only"`, and re-exporting its
+// VALUES here would pull firebase-admin into every client bundle that imports
+// this barrel. The TYPE is safe — type-only exports are erased and create no
+// runtime edge — so client components can still describe the preview shape.
+export type { PublicSharedLessonPreview } from "./services/shared-preview.service";
 
 // ─── Domain ──────────────────────────────────────────────────────────────────
 export { recommendedAction } from "./utils/learningEngine";
 export { DEFAULT_DECK_THEME_COLOR } from "./types";
-export type { FlashCard } from "./types";
+export type { FlashCard, Lesson } from "./types";

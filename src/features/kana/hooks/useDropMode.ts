@@ -14,7 +14,7 @@
 
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 
-import { comboMultiplier } from "@/features/game/domain";
+import { comboMultiplier } from "@/features/game";
 import { auth } from "@/lib/firebase";
 import { playSfx, sequence } from "@/shared/audio";
 import { getValidRomaji } from "@/shared/utils";

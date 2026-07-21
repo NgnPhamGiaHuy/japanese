@@ -16,8 +16,7 @@
 import { useTranslations } from "next-intl";
 import { use } from "react";
 
-import { SpeedConstraintError, SpeedGame } from "@/features/flashcard/games/speed";
-import { useFlashcardLoader } from "@/features/flashcard/loaders";
+import { SpeedConstraintError, SpeedGame, useFlashcardLoader } from "@/features/flashcard";
 import { useRouter } from "@/i18n/navigation";
 import { LoadingSpinner, NotFoundScreen } from "@/shared/components/ui";
 

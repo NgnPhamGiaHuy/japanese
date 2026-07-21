@@ -6,7 +6,7 @@ import { flexRender } from "@tanstack/react-table";
 import { format } from "date-fns";
 import { Calendar, Layers } from "lucide-react";
 
-import { DEFAULT_DECK_THEME_COLOR } from "@/features/flashcard/types";
+import { DEFAULT_DECK_THEME_COLOR } from "@/features/flashcard";
 
 import type { Row } from "@tanstack/react-table";
 import type { AdminDeck } from "../../types";

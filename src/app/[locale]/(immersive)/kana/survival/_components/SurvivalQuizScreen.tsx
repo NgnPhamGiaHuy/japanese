@@ -4,9 +4,8 @@ import { useTranslations } from "next-intl";
 
 import { X } from "lucide-react";
 
-import { GameStreakScoreStack, LivesDisplay, MiniLeaderboard } from "@/features/game/components";
-import { AnswerFeedback, KanaMCOptionsGrid } from "@/features/kana/components";
-import { useSurvivalGame } from "@/features/kana/hooks";
+import { GameStreakScoreStack, LivesDisplay, MiniLeaderboard } from "@/features/game";
+import { AnswerFeedback, KanaMCOptionsGrid, useSurvivalGame } from "@/features/kana";
 import { ScreenHeaderBackButton, ScreenHeaderRow } from "@/shared/components/layout";
 import { formatTime } from "@/shared/utils";
 

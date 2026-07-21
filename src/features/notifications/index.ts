@@ -39,8 +39,14 @@ export {
     notifyInvite,
     restoreNotifications,
 } from "./services";
-export { notifySystemEvent } from "./actions/notification.actions";
 export { logNotificationsCleared, logNotificationsReadAll } from "./actions/activity-log.actions";
+
+// notifySystemEvent lives on ./server only (ADR-101 Amendment 1). Its sole
+// consumer (features/admin) is server-side, and — independent of that —
+// importing it here would put an Admin-SDK-backed "use server" action in the
+// same module as NotificationsProvider, which Vitest's browser-mode transform
+// cannot load (it does not strip "use server" into an RPC stub the way a real
+// Next.js build does), breaking every browser test that touches this barrel.
 
 export { isUnread } from "./types";
 export type { AppNotification, NotificationGroup } from "./types";

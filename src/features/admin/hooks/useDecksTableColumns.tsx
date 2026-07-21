@@ -6,7 +6,7 @@ import { createColumnHelper } from "@tanstack/react-table";
 import { format } from "date-fns";
 import { Calendar, Eye, Layers, Trash2 } from "lucide-react";
 
-import { DEFAULT_DECK_THEME_COLOR } from "@/features/flashcard/types";
+import { DEFAULT_DECK_THEME_COLOR } from "@/features/flashcard";
 import { Button } from "@/shared/components/ui";
 
 import type { AdminDeck } from "../types";

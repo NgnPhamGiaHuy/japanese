@@ -10,8 +10,7 @@ import { useTranslations } from "next-intl";
 import { useSearchParams } from "next/navigation";
 import { use } from "react";
 
-import LessonBuilder from "@/features/flashcard/components/LessonBuilder";
-import { useEditableLesson } from "@/features/flashcard/hooks";
+import { LessonBuilder, useEditableLesson } from "@/features/flashcard";
 import { useRouter } from "@/i18n/navigation";
 import { LoadingSpinner } from "@/shared/components/ui";
 import { useAlert } from "@/shared/providers";

@@ -16,7 +16,7 @@
 import { getTranslations } from "next-intl/server";
 import { Suspense } from "react";
 
-import { getPublicSharedLessonPreview } from "@/features/flashcard/services/shared-preview.service";
+import { getPublicSharedLessonPreview } from "@/features/flashcard/server";
 import { routing } from "@/i18n/routing";
 import { LoadingSpinner } from "@/shared/components/ui";
 import SharedLessonPageClient from "./SharedLessonPageClient";

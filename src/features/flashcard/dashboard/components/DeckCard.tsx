@@ -13,7 +13,7 @@ import { useVisibility, VisibilityLevel } from "@/features/flashcard/hooks/useVi
 import { buildShareId } from "@/features/flashcard/services";
 import { DEFAULT_DECK_THEME_COLOR } from "@/features/flashcard/types";
 import { resolveRole, ROLE_CONFIG } from "@/features/flashcard/utils/rbac";
-import { TierBadge } from "@/features/game/components";
+import { TierBadge } from "@/features/game";
 import { Link } from "@/i18n/navigation";
 import { useAppStore } from "@/lib/app-store";
 import { Button, Card, UserMeta } from "@/shared/components/ui";

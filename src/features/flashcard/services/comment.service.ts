@@ -26,7 +26,7 @@ import {
     updateDoc,
 } from "firebase/firestore";
 
-import { emitNotification } from "@/features/notifications/services";
+import { emitNotification } from "@/features/notifications";
 import { CommentError, CommentErrorCode, mapFirestoreCommentError } from "./comment-errors";
 import { commentDoc, commentsCol } from "./comment-paths";
 import { sanitizeCommentContent, validateCommentContent } from "./comment-validation";

@@ -10,11 +10,11 @@ import { useTranslations } from "next-intl";
 import { CheckCircle2, Gamepad2 } from "lucide-react";
 
 import { DIFFICULTY_CONFIG } from "@/features/flashcard/games/match/config";
-import { GameIntroScreen } from "@/features/game/components";
+import { GameIntroScreen } from "@/features/game";
 import { Button } from "@/shared/components/ui";
 
 import type { MatchDifficulty } from "@/features/flashcard/games/match/config";
-import type { TierInfo } from "@/features/game/domain";
+import type { TierInfo } from "@/features/game";
 
 interface MatchIntroProps {
     bestScore: number;

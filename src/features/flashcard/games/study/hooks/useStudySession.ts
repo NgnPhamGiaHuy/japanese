@@ -17,7 +17,7 @@ import {
     getMistakeCards,
     recommendedAction,
 } from "@/features/flashcard/utils/learningEngine";
-import { useUserProgress } from "@/features/user/hooks";
+import { useUserProgress } from "@/features/user";
 import { useRouter } from "@/i18n/navigation";
 import { useAppStore } from "@/lib/app-store";
 

@@ -18,7 +18,7 @@
 
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 
-import { useGameSession } from "@/features/game/hooks";
+import { useGameSession } from "@/features/game";
 import { auth } from "@/lib/firebase";
 import { useDropMode } from "./useDropMode";
 import { useKanaQuizSession } from "./useKanaQuizSession";

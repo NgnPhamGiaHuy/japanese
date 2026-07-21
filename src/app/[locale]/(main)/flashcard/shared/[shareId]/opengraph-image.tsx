@@ -5,8 +5,10 @@
 
 import { ImageResponse } from "next/og";
 
-import { getPublicSharedLessonPreview } from "@/features/flashcard/services/shared-preview.service";
-import { DEFAULT_DECK_THEME_COLOR } from "@/features/flashcard/types";
+import {
+    DEFAULT_DECK_THEME_COLOR,
+    getPublicSharedLessonPreview,
+} from "@/features/flashcard/server";
 
 export const alt = "Shared flashcard deck preview";
 export const size = { width: 1200, height: 630 };

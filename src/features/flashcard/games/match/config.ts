@@ -7,7 +7,7 @@
  * Scoring: base per match + combo, optional time bonus when the clock is on.
  */
 
-import { comboBonusAdditive } from "@/features/game/domain";
+import { comboBonusAdditive } from "@/features/game";
 
 export const MATCH_GAME_MODE = "flashcard_match";
 

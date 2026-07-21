@@ -13,7 +13,7 @@ import { useState } from "react";
 import { AlertCircle, BookOpen, RefreshCw, RotateCcw } from "lucide-react";
 
 import { DEFAULT_DECK_THEME_COLOR } from "@/features/flashcard/types";
-import { StatGrid } from "@/features/game/components";
+import { StatGrid } from "@/features/game";
 import { Button, ConfirmModal } from "@/shared/components/ui";
 import ModeButton from "./ModeButton";
 

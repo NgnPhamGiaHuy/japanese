@@ -5,7 +5,7 @@ import React, { useState } from "react";
 
 import { FileUp, Sparkles } from "lucide-react";
 
-import { useAIImageDeck } from "@/features/ai/hooks/useAIImageDeck";
+import { useAIImageDeck } from "@/features/ai";
 import { Button, LoadingSpinner } from "@/shared/components/ui";
 import AIBulkPanel from "./AIBulkPanel";
 import ImportDropzone from "./ImportDropzone";

@@ -16,8 +16,7 @@
 import { useTranslations } from "next-intl";
 import { use } from "react";
 
-import { StudySession } from "@/features/flashcard/games/study";
-import { useFlashcardLoader } from "@/features/flashcard/loaders";
+import { StudySession, useFlashcardLoader } from "@/features/flashcard";
 import { useRouter } from "@/i18n/navigation";
 import { LoadingSpinner, NotFoundScreen } from "@/shared/components/ui";
 

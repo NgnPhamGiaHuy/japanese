@@ -10,9 +10,9 @@ import { useTranslations } from "next-intl";
 import { Zap } from "lucide-react";
 
 import { SPEED_GAME_CONFIG } from "@/features/flashcard/games/speed/config";
-import { GameIntroScreen } from "@/features/game/components";
+import { GameIntroScreen } from "@/features/game";
 
-import type { TierInfo } from "@/features/game/domain";
+import type { TierInfo } from "@/features/game";
 
 interface SpeedIntroProps {
     bestScore: number;

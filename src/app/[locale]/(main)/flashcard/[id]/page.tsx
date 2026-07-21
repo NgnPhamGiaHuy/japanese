@@ -9,17 +9,20 @@
 import { useTranslations } from "next-intl";
 import { use, useState } from "react";
 
-import ShareModal from "@/features/flashcard/components/ShareModal";
-import { FlashcardDetailLayout } from "@/features/flashcard/detail";
-import { useCards, useLessons } from "@/features/flashcard/hooks";
-import { buildShareId } from "@/features/flashcard/services";
+import {
+    buildShareId,
+    FlashcardDetailLayout,
+    ShareModal,
+    useCards,
+    useLessons,
+} from "@/features/flashcard";
 import { useRouter } from "@/i18n/navigation";
 import { useAppStore } from "@/lib/app-store";
 import { Button, LoadingSpinner } from "@/shared/components/ui";
 import { useCopyToClipboard } from "@/shared/hooks";
 import { useAlert } from "@/shared/providers";
 
-import type { DeckContext } from "@/features/flashcard/detail";
+import type { DeckContext } from "@/features/flashcard";
 
 /**
  * Deck Detail Page (Personal)

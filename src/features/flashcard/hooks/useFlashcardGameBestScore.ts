@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 
-import { subscribeGameStats } from "@/features/game/services";
+import { subscribeGameStats } from "@/features/game";
 
 /**
  * Subscribes to real-time personal best scores for a specific game mode.

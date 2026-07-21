@@ -4,11 +4,10 @@ import { useLayoutEffect, useMemo, useRef, useState } from "react";
 
 import { useWindowVirtualizer } from "@tanstack/react-virtual";
 
-import { NotificationRow } from "@/features/notifications/components";
-import { flattenNotificationGroups } from "@/features/notifications/domain/format";
+import { flattenNotificationGroups, NotificationRow } from "@/features/notifications";
 import { useNow } from "@/shared/hooks";
 
-import type { NotificationGroup } from "@/features/notifications/types";
+import type { NotificationGroup } from "@/features/notifications";
 
 interface NotificationsVirtualListProps {
     groups: NotificationGroup[];

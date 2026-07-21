@@ -4,10 +4,7 @@ import { useTranslations } from "next-intl";
 
 import { BookOpen, CheckCircle2, Clock, Flame, Plus, Sparkles, Trophy } from "lucide-react";
 
-import ShareModal from "@/features/flashcard/components/ShareModal";
-import DeckCard from "@/features/flashcard/dashboard/components/DeckCard";
-import { matchGameMode } from "@/features/flashcard/games/match/config";
-import { speedGameMode } from "@/features/flashcard/games/speed/config";
+import { DeckCard, matchGameMode, ShareModal, speedGameMode } from "@/features/flashcard";
 import { Link } from "@/i18n/navigation";
 import { ActionCard, Button, ConfirmModal, EmptyState, StatCard } from "@/shared/components/ui";
 import { SECTION_HEADING, SPACING } from "@/shared/constants";

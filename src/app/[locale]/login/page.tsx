@@ -7,7 +7,7 @@ import {
     completeGoogleRedirectSignIn,
     signInWithGoogle,
     signInWithGoogleRedirect,
-} from "@/features/user/services";
+} from "@/features/user";
 import { useRouter } from "@/i18n/navigation";
 import { Button } from "@/shared/components/ui";
 

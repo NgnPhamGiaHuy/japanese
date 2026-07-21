@@ -5,11 +5,11 @@ import { useState } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { LazyMotion } from "motion/react";
 
-import AdminProvider from "@/features/admin/context/AdminContext";
+import { AdminProvider } from "@/features/admin";
 import { CommandPaletteLauncher } from "@/features/command-palette";
-import { registerFlashcardNotificationActions } from "@/features/flashcard/notifications";
-import { NotificationsProvider } from "@/features/notifications/context/NotificationsContext";
-import { useActivityTracker, useFirebaseAuth } from "@/features/user/hooks";
+import { registerFlashcardNotificationActions } from "@/features/flashcard";
+import { NotificationsProvider } from "@/features/notifications";
+import { useActivityTracker, useFirebaseAuth } from "@/features/user";
 import { usePathname } from "@/i18n/navigation";
 import { useAppStore } from "@/lib/app-store";
 import { AudioProvider } from "@/lib/AudioProvider";

@@ -6,10 +6,9 @@ import Image from "next/image";
 import { BookOpen, ChevronRight, Flame, LogOut, Settings, Trophy, Zap } from "lucide-react";
 import { m } from "motion/react";
 
-import { useAdminRole } from "@/features/admin/context/AdminContext";
-import { useLessons } from "@/features/flashcard/hooks";
-import { useUserProgress } from "@/features/user/hooks";
-import { signOut } from "@/features/user/services";
+import { useAdminRole } from "@/features/admin";
+import { useLessons } from "@/features/flashcard";
+import { signOut, useUserProgress } from "@/features/user";
 import { Link, useRouter } from "@/i18n/navigation";
 import { useAppStore } from "@/lib/app-store";
 import { SCREEN_HEADER_BACK_BUTTON_CLASS, ScreenHeader } from "@/shared/components/layout";

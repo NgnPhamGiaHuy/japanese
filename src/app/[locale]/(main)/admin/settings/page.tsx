@@ -1,6 +1,6 @@
 import { getTranslations } from "next-intl/server";
 
-import { AdminSettingsPageContent } from "@/features/admin/components";
+import { AdminSettingsPageContent } from "@/features/admin";
 
 import type { Metadata } from "next";
 

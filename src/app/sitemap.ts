@@ -1,4 +1,4 @@
-import { listPublicSharedLessonUrls } from "@/features/flashcard/services/shared-preview.service";
+import { listPublicSharedLessonUrls } from "@/features/flashcard/server";
 import { routing } from "@/i18n/routing";
 import { SITE_URL } from "@/lib/site";
 

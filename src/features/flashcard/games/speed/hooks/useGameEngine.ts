@@ -4,8 +4,7 @@ import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 
 import { getAudioText } from "@/features/flashcard/utils/displayEngine";
-import { useGameSession } from "@/features/game/hooks/useGameSession";
-import { recordGameResult } from "@/features/game/services";
+import { recordGameResult, useGameSession } from "@/features/game";
 import { playSfx, sequence } from "@/shared/audio";
 import { GameEngine } from "../engine/core/GameEngine";
 

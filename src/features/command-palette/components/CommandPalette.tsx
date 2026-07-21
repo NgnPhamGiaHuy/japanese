@@ -7,7 +7,7 @@ import { Dialog } from "@base-ui/react/dialog";
 import { Command } from "cmdk";
 import { Search } from "lucide-react";
 
-import { useAdminRole } from "@/features/admin/context/AdminContext";
+import { useAdminRole } from "@/features/admin";
 import { useRouter } from "@/i18n/navigation";
 import { ADMIN_ACTIONS, MAIN_ACTIONS } from "../data/actions";
 

@@ -9,9 +9,9 @@ import { useTranslations } from "next-intl";
 
 import { Zap } from "lucide-react";
 
-import { GameResultsScreen } from "@/features/game/components";
+import { GameResultsScreen } from "@/features/game";
 
-import type { TierInfo } from "@/features/game/domain";
+import type { TierInfo } from "@/features/game";
 
 interface SpeedResultsProps {
     score: number;

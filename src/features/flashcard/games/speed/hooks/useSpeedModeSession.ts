@@ -24,7 +24,7 @@
 import { useCallback, useMemo } from "react";
 
 import { SPEED_GAME_CONFIG, timerColor } from "@/features/flashcard/games/speed/config";
-import { comboMultiplier } from "@/features/game/domain";
+import { comboMultiplier } from "@/features/game";
 import { useGameEngine } from "./useGameEngine";
 
 import type { FlashCard } from "../../../types";

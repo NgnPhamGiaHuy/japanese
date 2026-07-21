@@ -9,7 +9,7 @@ import { Check, Copy, ShieldAlert, X } from "lucide-react";
 import { buildShareId } from "@/features/flashcard/services";
 import { DEFAULT_DECK_THEME_COLOR } from "@/features/flashcard/types";
 import { sanitizePublicRole } from "@/features/flashcard/utils/rbac";
-import { emitNotification } from "@/features/notifications/services";
+import { emitNotification } from "@/features/notifications";
 import { useAppStore } from "@/lib/app-store";
 import { ActivityAction } from "@/lib/logging/actions.enum";
 import { enqueueClientLog } from "@/lib/logging/browser";

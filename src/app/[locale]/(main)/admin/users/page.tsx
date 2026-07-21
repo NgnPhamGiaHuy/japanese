@@ -1,4 +1,4 @@
-import { AdminUsersPageContent } from "@/features/admin/components";
+import { AdminUsersPageContent } from "@/features/admin";
 
 /**
  * Admin Users Management Page.

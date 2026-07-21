@@ -9,7 +9,7 @@ import { useTranslations } from "next-intl";
 import { Clock, X } from "lucide-react";
 import { AnimatePresence, m } from "motion/react";
 
-import { LivesDisplay, MiniLeaderboard } from "@/features/game/components";
+import { LivesDisplay, MiniLeaderboard } from "@/features/game";
 import { ScreenHeaderBackButton, ScreenHeaderRow } from "@/shared/components/layout";
 import MatchGrid from "./MatchGrid";
 import { COMBO_STEP } from "../config";

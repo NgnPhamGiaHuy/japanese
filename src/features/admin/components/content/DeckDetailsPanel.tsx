@@ -8,7 +8,7 @@ import { Book, X } from "lucide-react";
 import { Button, LoadingSpinner } from "@/shared/components/ui";
 import { DeckCardItem } from "./DeckCardItem";
 
-import type { FlashCard } from "@/features/flashcard/types";
+import type { FlashCard } from "@/features/flashcard";
 
 interface DeckDetailsPanelProps {
     isOpen: boolean;

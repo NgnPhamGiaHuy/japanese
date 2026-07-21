@@ -1,4 +1,4 @@
-import { AdminOverviewPage } from "@/features/admin/components";
+import { AdminOverviewPage } from "@/features/admin";
 
 /**
  * Main entry point for the Admin Dashboard.

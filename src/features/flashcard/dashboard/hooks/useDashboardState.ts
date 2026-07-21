@@ -13,7 +13,7 @@ import { useEffect, useState } from "react";
 import { matchGameMode } from "@/features/flashcard/games/match/config";
 import { speedGameMode } from "@/features/flashcard/games/speed/config";
 import { useLessons, usePublicLessons } from "@/features/flashcard/hooks";
-import { subscribeGameStats } from "@/features/game/services";
+import { subscribeGameStats } from "@/features/game";
 import { useRouter } from "@/i18n/navigation";
 import { useAppStore } from "@/lib/app-store";
 import { useAlert } from "@/shared/providers";
@@ -21,7 +21,7 @@ import { reorderWithFractionalIndex } from "@/shared/utils";
 import { DASHBOARD_TABS, DEFAULT_TAB_ID } from "../constants";
 
 import type { Lesson } from "@/features/flashcard/types";
-import type { GameStatEntry } from "@/features/game/services";
+import type { GameStatEntry } from "@/features/game";
 
 type ActiveTab = "personal" | "shared" | "discover";
 

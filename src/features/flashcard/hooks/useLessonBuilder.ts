@@ -5,7 +5,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { v4 as uuidv4 } from "uuid";
 
-import useAICard from "@/features/ai/hooks/useAICard";
+import { useAICard } from "@/features/ai";
 import { DEFAULT_DECK_THEME_COLOR } from "@/features/flashcard/types";
 import { useAppStore } from "@/lib/app-store";
 import { useAlert } from "@/shared/providers";

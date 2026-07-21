@@ -11,7 +11,7 @@
  * single source of truth in ../config — this module only implements behavior.
  */
 
-import { comboMultiplier } from "@/features/game/domain";
+import { comboMultiplier } from "@/features/game";
 import { SPEED_GAME_CONFIG } from "../config";
 
 import type { AnswerEvent, QuestionGenerationConfig, ScoringParams } from "./types";

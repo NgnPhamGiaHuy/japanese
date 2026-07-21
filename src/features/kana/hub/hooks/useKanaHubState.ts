@@ -8,7 +8,7 @@
 import { useState } from "react";
 
 import { useKanaDataset } from "@/features/kana/hooks";
-import { useBestScores, useUserProgress } from "@/features/user/hooks";
+import { useBestScores, useUserProgress } from "@/features/user";
 import { useAppStore } from "@/lib/app-store";
 
 export function useKanaHubState() {

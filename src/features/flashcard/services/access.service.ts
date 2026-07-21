@@ -8,7 +8,7 @@
  */
 import { deleteField, setDoc } from "firebase/firestore";
 
-import { emitNotification, notifyInvite } from "@/features/notifications/services";
+import { emitNotification, notifyInvite } from "@/features/notifications";
 import { buildShareId, lessonDoc } from "./lesson.service";
 
 import type { User } from "firebase/auth";

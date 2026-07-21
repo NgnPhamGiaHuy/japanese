@@ -4,8 +4,8 @@ import { useTranslations } from "next-intl";
 
 import { X } from "lucide-react";
 
-import { GameStreakScoreStack, LivesDisplay, MiniLeaderboard } from "@/features/game/components";
-import { useSurvivalGame } from "@/features/kana/hooks";
+import { GameStreakScoreStack, LivesDisplay, MiniLeaderboard } from "@/features/game";
+import { useSurvivalGame } from "@/features/kana";
 import { ScreenHeaderBackButton, ScreenHeaderRow } from "@/shared/components/layout";
 
 interface SurvivalDropScreenProps {

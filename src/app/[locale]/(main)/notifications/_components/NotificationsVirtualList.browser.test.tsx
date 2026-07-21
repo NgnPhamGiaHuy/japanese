@@ -7,7 +7,7 @@ import messages from "@/messages/en.json";
 import { AlertProvider } from "@/shared/providers";
 import NotificationsVirtualList from "./NotificationsVirtualList";
 
-import type { AppNotification, NotificationGroup } from "@/features/notifications/types";
+import type { AppNotification, NotificationGroup } from "@/features/notifications";
 
 // NotificationRow calls next/navigation's useRouter() unconditionally — there's
 // no Next.js App Router tree in Vitest Browser Mode, so the real hook throws
@@ -63,10 +63,24 @@ vi.mock("@/lib/firebase", () => ({
 // verifyIdToken (Admin SDK), the same google-auth-library/jws/util.inherits
 // chain worked around above for the other action imports. Mocking the barrel
 // directly with just what NotificationRow calls sidesteps notify.ts entirely.
+//
+// Every export of the module is stubbed, not just the three this file calls
+// directly: this same module is also what NotificationsProvider imports, and
+// the type import from "@/features/notifications" above pulls that
+// provider's module graph in transitively (a consequence of the feature now
+// having one client barrel, T-101b). vi.mock replaces the whole module, so a
+// partial mock silently breaks whatever else the module graph touches.
 vi.mock("@/features/notifications/services", () => ({
+    createPendingNotification: vi.fn(),
+    deleteAllNotifications: vi.fn(),
     deleteNotification: vi.fn(),
+    deliverPendingNotifications: vi.fn(),
+    emitNotification: vi.fn(),
+    markAllNotificationsRead: vi.fn(),
     markNotificationRead: vi.fn(),
+    notifyInvite: vi.fn(),
     restoreNotifications: vi.fn(),
+    subscribeNotifications: vi.fn(() => () => {}),
 }));
 
 let seq = 0;

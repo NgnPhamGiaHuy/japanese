@@ -6,7 +6,7 @@ import { Image as ImageIcon, MessageSquare } from "lucide-react";
 
 import { Badge, Card } from "@/shared/components/ui";
 
-import type { FlashCard } from "@/features/flashcard/types";
+import type { FlashCard } from "@/features/flashcard";
 
 interface DeckCardItemProps {
     card: FlashCard & { path: string };

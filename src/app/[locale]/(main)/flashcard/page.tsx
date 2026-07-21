@@ -10,7 +10,7 @@
 
 "use client";
 
-import { FlashcardDashboard } from "@/features/flashcard/dashboard";
+import { FlashcardDashboard } from "@/features/flashcard";
 
 export default function FlashcardIndexPage() {
     return <FlashcardDashboard />;

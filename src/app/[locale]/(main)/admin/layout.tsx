@@ -1,4 +1,4 @@
-import { AdminGuard, AdminSidebar } from "@/features/admin/components";
+import { AdminGuard, AdminSidebar } from "@/features/admin";
 
 /**
  * Layout component for the Admin dashboard section.

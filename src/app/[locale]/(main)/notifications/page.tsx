@@ -6,16 +6,14 @@ import { useMemo, useState, useTransition } from "react";
 import { CheckCheck, Trash2 } from "lucide-react";
 
 import {
+    deleteAllNotifications,
+    isUnread,
     logNotificationsCleared,
     logNotificationsReadAll,
-} from "@/features/notifications/actions/activity-log.actions";
-import { useNotifications } from "@/features/notifications/context/NotificationsContext";
-import {
-    deleteAllNotifications,
     markAllNotificationsRead,
     restoreNotifications,
-} from "@/features/notifications/services";
-import { isUnread } from "@/features/notifications/types";
+    useNotifications,
+} from "@/features/notifications";
 import { useAppStore } from "@/lib/app-store";
 import { auth } from "@/lib/firebase";
 import { ScreenHeader } from "@/shared/components/layout";

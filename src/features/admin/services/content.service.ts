@@ -1,9 +1,9 @@
 import "server-only";
 
-import { DEFAULT_DECK_THEME_COLOR } from "@/features/flashcard/types";
+import { DEFAULT_DECK_THEME_COLOR } from "@/features/flashcard/server";
 import { adminAuth, adminDb } from "./admin.service";
 
-import type { FlashCard } from "@/features/flashcard/types";
+import type { FlashCard } from "@/features/flashcard/server";
 import type { AdminDeck, PaginatedContent } from "../types";
 
 export async function getGlobalContentPaginated(limit = 50): Promise<PaginatedContent> {

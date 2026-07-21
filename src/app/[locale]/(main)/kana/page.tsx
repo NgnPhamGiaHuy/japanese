@@ -10,7 +10,7 @@
 
 "use client";
 
-import KanaHub from "@/features/kana/hub";
+import { KanaHub } from "@/features/kana";
 
 export default function KanaHubPage() {
     return <KanaHub />;

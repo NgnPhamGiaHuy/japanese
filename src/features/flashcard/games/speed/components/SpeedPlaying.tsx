@@ -12,7 +12,7 @@ import { X } from "lucide-react";
 import { AnimatePresence, m } from "motion/react";
 
 import { SPEED_GAME_CONFIG } from "@/features/flashcard/games/speed/config";
-import { MiniLeaderboard } from "@/features/game/components";
+import { MiniLeaderboard } from "@/features/game";
 import { ScreenHeaderBackButton, ScreenHeaderRow } from "@/shared/components/layout";
 import { Button } from "@/shared/components/ui";
 

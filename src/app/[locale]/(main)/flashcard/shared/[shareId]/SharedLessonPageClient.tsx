@@ -11,10 +11,13 @@ import { use, useState } from "react";
 
 import { RefreshCw } from "lucide-react";
 
-import ShareModal from "@/features/flashcard/components/ShareModal";
-import { FlashcardDetailLayout } from "@/features/flashcard/detail";
-import { useLessons, useSharedLesson } from "@/features/flashcard/hooks";
-import { emitNotification } from "@/features/notifications/services";
+import {
+    FlashcardDetailLayout,
+    ShareModal,
+    useLessons,
+    useSharedLesson,
+} from "@/features/flashcard";
+import { emitNotification } from "@/features/notifications";
 import { useRouter } from "@/i18n/navigation";
 import { useAppStore } from "@/lib/app-store";
 import { SITE_URL } from "@/lib/site";
@@ -23,9 +26,7 @@ import { useCopyToClipboard } from "@/shared/hooks";
 import { useAlert } from "@/shared/providers";
 
 import type { LearningResource, WithContext } from "schema-dts";
-import type { DeckContext } from "@/features/flashcard/detail";
-import type { PublicSharedLessonPreview } from "@/features/flashcard/services/shared-preview.service";
-import type { FlashCard } from "@/features/flashcard/types";
+import type { DeckContext, FlashCard, PublicSharedLessonPreview } from "@/features/flashcard";
 
 interface SharedLessonPageClientProps {
     shareId: string;
@@ -159,11 +160,11 @@ export default function SharedLessonPageClient({
     const isOwner = meta.viewerRole === "owner";
     const role = (
         meta.viewerRole === "none" ? "viewer" : meta.viewerRole
-    ) as import("@/features/flashcard/detail").DeckRole;
+    ) as import("@/features/flashcard").DeckRole;
 
     const ctx: DeckContext = {
-        lesson: lesson as unknown as import("@/features/flashcard/types").Lesson,
-        cards: cards as import("@/features/flashcard/types").FlashCard[],
+        lesson: lesson as unknown as import("@/features/flashcard").Lesson,
+        cards: cards as import("@/features/flashcard").FlashCard[],
         ownerId: meta.sourceUserId,
         lessonId: meta.sourceLessonId,
         role,
@@ -199,7 +200,7 @@ export default function SharedLessonPageClient({
                 nextReviewAt: 0,
             }));
             await saveFullLesson(
-                cleanLesson as unknown as import("@/features/flashcard/types").Lesson,
+                cleanLesson as unknown as import("@/features/flashcard").Lesson,
                 cleanCards,
                 true,
             );

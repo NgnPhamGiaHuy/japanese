@@ -5,8 +5,8 @@ import { useMemo } from "react";
 
 import { Bell, BookOpen, Gamepad2, Shield } from "lucide-react";
 
-import { useAdminRole } from "@/features/admin/context/AdminContext";
-import { useNotifications } from "@/features/notifications/context/NotificationsContext";
+import { useAdminRole } from "@/features/admin";
+import { useNotifications } from "@/features/notifications";
 import { Link, usePathname } from "@/i18n/navigation";
 import { useAppStore } from "@/lib/app-store";
 import { UserAvatar } from "@/shared/components/ui";

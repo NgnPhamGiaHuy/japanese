@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from "react";
 
-import { scoreToTier } from "@/features/game/domain";
+import { scoreToTier } from "@/features/game";
 
 import type { User } from "firebase/auth";
 

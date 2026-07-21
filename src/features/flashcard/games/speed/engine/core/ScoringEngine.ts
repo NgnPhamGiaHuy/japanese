@@ -2,7 +2,7 @@
  * Scoring engine — score calculation, combo tracking, and bonus computation.
  */
 
-import { comboMultiplier } from "@/features/game/domain";
+import { comboMultiplier } from "@/features/game";
 import { calculateSpeedPoints, getSpeedComboThreshold } from "../speedRules";
 
 import type { ScoringParams, ScoringResult } from "../types";

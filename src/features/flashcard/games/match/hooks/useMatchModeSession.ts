@@ -25,10 +25,9 @@
 import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 
-import { generateMatchDistractors } from "@/features/ai/services/gemini.service";
+import { generateMatchDistractors } from "@/features/ai";
 import { calcTimeBonus, DIFFICULTY_CONFIG } from "@/features/flashcard/games/match/config";
-import { useGameSession } from "@/features/game/hooks";
-import { recordGameResult } from "@/features/game/services";
+import { recordGameResult, useGameSession } from "@/features/game";
 import { shuffleArray } from "@/shared/utils";
 import { buildGridItems } from "./matchGrid";
 import { useMatchScoring } from "./useMatchScoring";

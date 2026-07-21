@@ -4,7 +4,7 @@ import { cookies } from "next/headers";
 
 import { z } from "zod";
 
-import { notifySystemEvent } from "@/features/notifications/actions/notification.actions";
+import { notifySystemEvent } from "@/features/notifications/server";
 import { ActivityAction } from "@/lib/logging/actions.enum";
 import { toActionResult } from "@/lib/safe-action";
 import { COOKIE_NAME } from "@/shared/utils/cookie";

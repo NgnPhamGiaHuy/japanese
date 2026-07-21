@@ -9,15 +9,18 @@
 
 import { useEffect, useState } from "react";
 
-import { useDashboardModals } from "@/features/flashcard/dashboard/hooks";
-import { useDeckProgressStatus, useLessons } from "@/features/flashcard/hooks";
-import { recommendedAction } from "@/features/flashcard/utils/learningEngine";
-import { subscribeGameStats } from "@/features/game/services";
-import { HIRAGANA_DATA, KATAKANA_DATA } from "@/features/kana/data";
-import { useUserProgress } from "@/features/user/hooks";
+import {
+    recommendedAction,
+    useDashboardModals,
+    useDeckProgressStatus,
+    useLessons,
+} from "@/features/flashcard";
+import { subscribeGameStats } from "@/features/game";
+import { HIRAGANA_DATA, KATAKANA_DATA } from "@/features/kana";
+import { useUserProgress } from "@/features/user";
 import { useAppStore } from "@/lib/app-store";
 
-import type { GameStatEntry } from "@/features/game/services";
+import type { GameStatEntry } from "@/features/game";
 
 const TOTAL_KANA_CHARS = HIRAGANA_DATA.length + KATAKANA_DATA.length;
 

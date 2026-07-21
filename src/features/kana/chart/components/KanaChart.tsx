@@ -15,7 +15,7 @@ import { Eye, EyeOff } from "lucide-react";
 
 import { useKanaDataset } from "@/features/kana/hooks";
 import { useKanaStore } from "@/features/kana/store";
-import { useUserProgress } from "@/features/user/hooks";
+import { useUserProgress } from "@/features/user";
 import { ScreenHeader } from "@/shared/components/layout";
 import { Button } from "@/shared/components/ui";
 import { ChartBlockGrid } from "./ChartBlockGrid";

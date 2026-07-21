@@ -1,11 +1,11 @@
 "use client";
 
-import { StatGrid } from "@/features/game/components";
+import { StatGrid } from "@/features/game";
 import { Button } from "@/shared/components/ui";
 import { hexToThemeColor } from "@/shared/utils";
 
 import type { LucideIcon } from "lucide-react";
-import type { StatItem } from "@/features/game/components";
+import type { StatItem } from "@/features/game";
 
 interface StudySummaryScreenProps {
     icon: LucideIcon;

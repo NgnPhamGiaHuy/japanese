@@ -2,8 +2,8 @@
 
 import { useEffect, useRef } from "react";
 
-import { useKanaDataset, useSurvivalGame } from "@/features/kana/hooks";
-import { useBestScores } from "@/features/user/hooks";
+import { useKanaDataset, useSurvivalGame } from "@/features/kana";
+import { useBestScores } from "@/features/user";
 import { useRouter } from "@/i18n/navigation";
 import { useAppStore } from "@/lib/app-store";
 import SurvivalDropScreen from "./_components/SurvivalDropScreen";

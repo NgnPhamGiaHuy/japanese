@@ -6,8 +6,7 @@
 
 "use client";
 
-import LessonBuilder from "@/features/flashcard/components/LessonBuilder";
-import { useLessons } from "@/features/flashcard/hooks/useLessons";
+import { LessonBuilder, useLessons } from "@/features/flashcard";
 import { useRouter } from "@/i18n/navigation";
 
 /**

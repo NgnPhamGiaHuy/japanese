@@ -16,8 +16,7 @@
 import { notFound } from "next/navigation";
 import { use } from "react";
 
-import { MatchGame } from "@/features/flashcard/games/match";
-import { useFlashcardLoader } from "@/features/flashcard/loaders";
+import { MatchGame, useFlashcardLoader } from "@/features/flashcard";
 import { LoadingSpinner } from "@/shared/components/ui";
 
 export default function MatchModePage({ params }: { params: Promise<{ id: string }> }) {

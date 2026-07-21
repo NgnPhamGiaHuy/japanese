@@ -13,7 +13,7 @@ import { useEffect, useRef } from "react";
 
 import { ArrowLeft, X } from "lucide-react";
 
-import { gameQuizStreakColumnClassName, StreakComboBadge } from "@/features/game/components";
+import { gameQuizStreakColumnClassName, StreakComboBadge } from "@/features/game";
 import { AnswerFeedback, KanaAudioButton, KanaMCOptionsGrid } from "@/features/kana/components";
 import { speak } from "@/shared/audio";
 import { ScreenHeaderBackButton, ScreenHeaderRow } from "@/shared/components/layout";

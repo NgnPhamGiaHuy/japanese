@@ -4,8 +4,8 @@ import { useTranslations } from "next-intl";
 
 import { Trophy } from "lucide-react";
 
-import { Leaderboard } from "@/features/game/components";
-import { useSurvivalGame } from "@/features/kana/hooks";
+import { Leaderboard } from "@/features/game";
+import { useSurvivalGame } from "@/features/kana";
 import { Button } from "@/shared/components/ui";
 
 interface SurvivalGameOverScreenProps {

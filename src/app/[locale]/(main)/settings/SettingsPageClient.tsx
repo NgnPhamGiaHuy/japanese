@@ -6,8 +6,7 @@ import { useState } from "react";
 import { ChevronRight, Info, Languages, LogOut, Monitor, ShieldAlert, Volume2 } from "lucide-react";
 import { m } from "motion/react";
 
-import { useUserProgress } from "@/features/user/hooks";
-import { signOut } from "@/features/user/services";
+import { signOut, useUserProgress } from "@/features/user";
 import { usePathname, useRouter } from "@/i18n/navigation";
 import { routing } from "@/i18n/routing";
 import { useAppStore } from "@/lib/app-store";

@@ -10,7 +10,7 @@ import { useMemo, useState } from "react";
 
 import { AlertCircle, Brain, Check, Lightbulb, Loader2 } from "lucide-react";
 
-import useAIExplanation from "@/features/ai/hooks/useAIExplanation";
+import { useAIExplanation } from "@/features/ai";
 import { DEFAULT_DECK_THEME_COLOR } from "@/features/flashcard/types";
 import { playSfx, sequence, speak } from "@/shared/audio";
 import { Button, EmptyState } from "@/shared/components/ui";

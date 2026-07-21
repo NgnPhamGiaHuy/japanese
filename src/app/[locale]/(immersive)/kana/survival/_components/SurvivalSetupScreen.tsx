@@ -4,16 +4,16 @@ import { useTranslations } from "next-intl";
 
 import { Clock, Flame, Sword } from "lucide-react";
 
-import { Leaderboard } from "@/features/game/components";
+import { Leaderboard } from "@/features/game";
 import {
     TIME_ATTACK_MAX_STREAK_BONUS_SEC,
     TIME_ATTACK_WRONG_PENALTY_SEC,
     useSurvivalGame,
-} from "@/features/kana/hooks";
+} from "@/features/kana";
 import { ScreenHeader } from "@/shared/components/layout";
 import { Button } from "@/shared/components/ui";
 
-import type { AlphabetMode } from "@/features/kana/types";
+import type { AlphabetMode } from "@/features/kana";
 
 interface SurvivalSetupScreenProps {
     game: ReturnType<typeof useSurvivalGame>;
