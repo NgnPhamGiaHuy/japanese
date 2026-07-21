@@ -189,7 +189,8 @@ Each is scheduled into a wave but is **NOT READY** until its question answers. E
 **Rollback** Restore the second env var read; because the old variable retires only after Q-6 confirms production agreement, both remain readable during the transition.
 
 #### T-118c — Add `.env.example` documenting the ~30 referenced env vars
-**Size** S · **Wave** 1 · **Status** Ready
+**Size** S · **Wave** 1 · **Status** ✅ **DONE** (Sprint 2) — *was: Ready*
+**Delivered** `src/.env.example` documenting all **31** source-referenced variables in 8 groups, each with purpose and observable degradation; `src/.gitignore` gains `!.env.example` (the `.env*` rule would otherwise have excluded the file from the repo); `src/env-contract.test.ts` asserts completeness and absence of credential material. **AC4 is PARTIAL** — its "plus the README" clause references a README that does not exist in the repo; no task in the backlog creates one.
 **Traces to** ADR-118 (AD-18) · TD-13, W-20(c), W-6 · clusters **C14**, **C9** · `assess/07`, `/11`
 **Description.** The required environment is discoverable only by grepping source, and misconfiguration is silent by design because the integrations are env-gated no-ops. A checked-in `.env.example` documents each variable's name, purpose, and what degrades silently without it — directly mitigating the bus-factor-1 amplifier where bootstrap knowledge lives in one person's untracked `.env`.
 **Acceptance criteria**

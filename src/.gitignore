@@ -40,6 +40,9 @@ yarn-error.log*
 
 # env files (can opt-in for committing if needed)
 .env*
+# ...except the checked-in contract, which holds names and defaults only and
+# must be committed for a clean checkout to be stand-up-able (T-118c).
+!.env.example
 
 # vercel
 .vercel
