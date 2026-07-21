@@ -1,6 +1,10 @@
 import { z } from "zod";
 
-export const logSourceSchema = z.enum(["client", "server", "cloud_function"]);
+import { LOG_SOURCES } from "./log-types";
+
+// Derived, not restated: the accepted values and the `LogSource` union come
+// from the same tuple, so they cannot drift apart.
+export const logSourceSchema = z.enum(LOG_SOURCES);
 export const canonicalLevelSchema = z.enum(["info", "warn", "error"]);
 
 export const systemLogInputSchema = z.object({

@@ -1,4 +1,4 @@
-import type { AdminLog, LogLevel, LogSource, LogType } from "@/features/admin/types";
+import type { AdminLog, LogLevel, LogSource, LogType } from "./log-types";
 
 /** Firestore collection name for canonical audit logs. */
 export const SYSTEM_LOGS_COLLECTION = "system_logs";

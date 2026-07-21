@@ -264,7 +264,9 @@ Each is scheduled into a wave but is **NOT READY** until its question answers. E
 ### ADR-103 — `lib` never imports `features` (P2)
 
 #### T-103a — Relocate the admin log types consumed by `lib/logging/public.ts`; remove the back-edge
-**Size** S · **Wave** 1 · **Status** Ready
+**Size** S · **Wave** 1 · **Status** ✅ **DONE** (Sprint 2) — *was: Ready*
+**Delivered** `lib/logging/log-types.ts` (new) is the single declaration site for `AdminLog`/`LogLevel`/`LogType`/`LogSource`; `LOG_SOURCES` is a const tuple from which both the union and `logSourceSchema` derive. `features/admin/types/log.types.ts` re-exports the vocabulary and keeps only its own `AdminLogFilters`/`PaginatedLogs`, so admin's 22 consuming files were untouched. Cycle B is gone: `lib/logging → features/admin` is now **0** imports, `features/admin → lib/logging` is 5.
+**Observed, not fixed (out of AC scope):** `canonicalLevelSchema` in `lib/logging/schema.ts` still restates `CanonicalLogLevel` from `public.ts` — the same hand-synced-pair defect AC3 fixed for `LogSource`, but confined within `lib/` so it is not a boundary issue. Candidate for a future tidy.
 **Traces to** ADR-103 (AD-03) · W-2, RC-12, S-1 · cluster **C3** · `assess/03`, `/04`, `/11`
 **Description.** The shared infrastructure layer imports its canonical log vocabulary (`AdminLog`, `LogLevel`, `LogSource`, `LogType`) from `features/admin/types` — infrastructure owning its vocabulary from a consumer. Relocate the types to the layer that owns the pipeline and merge the lib-side zod duplicate into one declaration.
 **Acceptance criteria**

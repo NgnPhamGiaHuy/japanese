@@ -26,6 +26,7 @@ export { default as AdminContentPageContent } from "./components/content/AdminCo
 // Role context — mounted once in the provider composition root.
 export { default as AdminProvider, useAdminRole } from "./context/AdminContext";
 
-// Log vocabulary. Shared with lib/logging, which currently imports it across
-// the layer boundary — the back-edge T-103a removes.
+// Log vocabulary. Declared in lib/logging (the layer that owns the pipeline)
+// and re-exported through ./types, so admin's consumers keep one import site
+// while the dependency runs features -> lib, never back.
 export type { AdminLog, LogLevel, LogSource, LogType } from "./types";

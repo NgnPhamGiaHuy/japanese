@@ -1,25 +1,21 @@
-export type LogLevel = "info" | "warn" | "error" | "security";
-export type LogType = "AUTH" | "ADMIN_ACTION" | "SYSTEM" | "ERROR" | "CONTENT" | "USER_ACTION";
+/**
+ * @file log.types.ts
+ * Admin-side log types.
+ *
+ * @remarks
+ * The shared vocabulary — `LogLevel`, `LogType`, `LogSource`, `AdminLog` — is
+ * declared in `lib/logging/log-types.ts` and re-exported here so that
+ * `@/features/admin/types` remains the one place admin code looks for its
+ * types. It used to be declared here and imported *upward* by
+ * `lib/logging/public.ts`, which made shared infrastructure depend on this
+ * feature (ADR-103, cycle B of TD-4).
+ *
+ * Only the filter and pagination shapes below are genuinely admin's own —
+ * they describe the reports UI, not the log pipeline.
+ */
+import type { AdminLog, LogLevel, LogType } from "@/lib/logging/log-types";
 
-export type LogSource = "client" | "server" | "cloud_function";
-
-export interface AdminLog {
-    id: string;
-    timestamp: string;
-    timestampMs?: number;
-    level: LogLevel;
-    type: LogType;
-    action: string;
-    userId: string;
-    userName: string;
-    userEmail: string;
-    metadata: Record<string, unknown>;
-    ip?: string;
-    userAgent?: string;
-    entityType?: string;
-    entityId?: string;
-    source?: LogSource;
-}
+export type { AdminLog, LogLevel, LogSource, LogType } from "@/lib/logging/log-types";
 
 export interface AdminLogFilters {
     level?: LogLevel;
