@@ -111,7 +111,8 @@ Each is scheduled into a wave but is **NOT READY** until its question answers. E
 ### ADR-120 — Every staged change records its completion state (P1, highest leverage)
 
 #### T-120a — Create the in-repo migration ledger
-**Size** S · **Wave** 1 · **Status** Ready
+**Size** S · **Wave** 1 · **Status** ✅ **DONE** (Sprint 1) — *was: Ready*
+**Delivered** `docs/migrations-ledger.md` (new) + `docs/README.md` index entry. All four acceptance criteria verified. The `Rows` table is deliberately empty — backfilling it is T-120b.
 **Traces to** ADR-120 (AD-20) · RC-2/3/5/6/7/10 (cross-cutting), CX-7, W-21, TD-13 · cluster **C16** · `assess/04`, `/05`, `/11`
 **Description.** Establish the ledger artifact itself: its in-repo location, its format, and the four required fields every row carries — intended end state, current stage, owner, review-by date. This is the structural fix for the corpus's meta-finding, that six of twelve root causes reduce to staged work whose later steps had no recorded status.
 **Acceptance criteria**
