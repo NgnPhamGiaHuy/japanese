@@ -60,6 +60,30 @@
 
 **Status.** Accepted. **Priority.** P1.
 
+### Amendment 1 — a feature has two entry points, not one (accepted during T-101b)
+
+**What forced it.** The first attempt at T-101b migrated 151 import statements onto root barrels. It type-checked clean and then failed the production build in four distinct ways, because **a barrel is a single module: importing it pulls the whole feature's graph**, and `flashcard` legitimately contains client components, client-only hooks, and Admin-SDK server code at once.
+
+1. A client component importing the barrel pulled `shared-preview.service` (`import "server-only"`) → `firebase-admin` → `child_process` into the browser bundle.
+2. Routing both directions of the `flashcard ↔ notifications` cycle through barrels turned a tolerated file-level cycle into a barrel-level one that Turbopack rejects.
+3. A Server Component (`opengraph-image.tsx`) importing the barrel for one constant pulled in client-only hooks calling `useEffect`.
+4. Fixing (3) at one entry point surfaced four more. The exceptions were multiplying, not converging.
+
+The original decision anticipated an over-broad barrel becoming *"everything is public"*. It did not anticipate that the same breadth **breaks the server/client fence** — a build failure, not a style problem. The `server-only` fencing (S-3) and a single all-purpose barrel cannot both hold.
+
+**Decision.** A feature exposes **two** entry points, and both are curated public API:
+
+| Entry point | Contains | May be imported by |
+|---|---|---|
+| `@/features/<f>` | Client-safe surface: components, hooks, client services, types, constants | Anything |
+| `@/features/<f>/server` | Server-only surface: Admin-SDK services and anything carrying `import "server-only"` | Server Components, route handlers, server actions |
+
+A feature with no server-only surface has no `server.ts`, and most will not. Type-only re-exports may stay in the client barrel regardless of where the type is declared — they are erased at compile time and create no runtime edge. This is the same split Next.js itself uses (`next` vs `next/server`) and it keeps the fence where the framework enforces it.
+
+**Consequence for the boundary rule (ADR-101/T-101c).** The rule permits exactly these two specifiers per feature and continues to forbid deeper paths. Splitting the entry point does not weaken the boundary — it is still two reviewed contracts rather than an open directory.
+
+**Consequence for sequencing.** Failure (2) is not addressed by this amendment: it is the real `flashcard ↔ notifications` cycle. **T-102a/b must land before T-101b is retried.** The original plan treated them as independent; they are not. Recorded as ledger row `LDG-17`.
+
 ---
 
 ## ADR-102 — Dependency direction is one-way: flashcard → notifications, never back

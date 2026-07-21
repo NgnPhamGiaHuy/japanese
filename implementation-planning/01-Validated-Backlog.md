@@ -234,7 +234,15 @@ Each is scheduled into a wave but is **NOT READY** until its question answers. E
 **Rollback** Delete the added barrels; no import site depends on them until T-101b.
 
 #### T-101b — Migrate the 43 deep-import sites onto barrel imports
-**Size** L · **Wave** 1 · **Status** Ready
+**Size** L · **Wave** 1 · **Status** ⏸️ **DEFERRED — blocked on T-102a/b** — *was: Ready*
+
+> **Attempted and reverted** (Sprint 3). 151 statements across 88 files migrated and type-checked clean, then the production build failed in four ways. Reverted to `776c844`; the T-101a barrels remain committed and harmless, exactly as this task's own rollback note anticipated. Recorded as ledger row `LDG-17`.
+>
+> **Resolution (owner decision):** adopt **ADR-101 Amendment 1** — two entry points per feature, `@/features/<f>` (client-safe) and `@/features/<f>/server` (server-only) — which addresses three of the four failures; and **sequence T-102a/b before retrying**, which addresses the fourth.
+>
+> **Corrected dependency:** T-101b **depends on T-102a/b**. The plan placed T-101b in Sprint 3 and T-102 in Sprint 4 as independent work. They are not: routing both directions of the `flashcard ↔ notifications` cycle through barrels creates a barrel-level cycle Turbopack rejects. T-102a/b removes the back-edge that makes the migration possible.
+>
+> **Measurement correction:** the real inventory is **151** cross-boundary import statements (73 app→feature, 72 feature→feature, 3 other) plus 4 inline `import()` type refs — not "43 sites". The 43 figure counted files referencing `@/features/flashcard/types`, of which **0** are external; the 35 that exist are flashcard importing its own types via the absolute alias, which is a style inconsistency rather than a boundary violation.
 **Traces to** ADR-101 (AD-01) · W-3, CX-4, TD-4 · cluster **C3** · `assess/03`, `/11`; `disc/08`
 **Description.** Move every cross-feature deep import onto the owning feature's root barrel — the 43 sites into `flashcard/types`, the 9 into `flashcard/games/match/config`, the 4 into `flashcard/utils/rbac`, and the 4 into the single file `ShareModal`. This is the mechanical migration that makes the boundary rule enforceable without a permanent exception list.
 **Acceptance criteria**

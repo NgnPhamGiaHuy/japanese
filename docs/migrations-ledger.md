@@ -49,7 +49,7 @@ Read that row as a sentence: _the end state is one reader; we are at two; Jane d
 
 ## Rows
 
-16 open rows, grouped by the decision that governs them. Owner for every row is **NgnPhamGiaHuy**, who holds all three answering roles (product intent, GCP/ops console, hosting) — recorded in the Sprint 0 completion record. Review-by follows the wave in which each gate first bites: Wave 1 → Sprint 5, Wave 3 → Sprint 9, Wave 4 → Sprint 14, Wave 5 → Sprint 19, Wave 6 → Sprint 26.
+17 open rows, grouped by the decision that governs them. Owner for every row is **NgnPhamGiaHuy**, who holds all three answering roles (product intent, GCP/ops console, hosting) — recorded in the Sprint 0 completion record. Review-by follows the wave in which each gate first bites: Wave 1 → Sprint 5, Wave 3 → Sprint 9, Wave 4 → Sprint 14, Wave 5 → Sprint 19, Wave 6 → Sprint 26.
 
 Every stage claim below was verified against the working tree at `f3951e8`, not inherited from the planning documents — a row that misstates its stage is worse than no row at all.
 
@@ -112,6 +112,14 @@ Every stage claim below was verified against the working tree at `f3951e8`, not 
 | `LDG-16` | Lint ratchet baseline (Sprint 0) | The baseline list is empty and every error-level rule applies everywhere | **12 files pinned to `warn`** in `src/eslint.config.mjs` so CI lint could become blocking without fixing unrelated code | NgnPhamGiaHuy | Sprint 14 | None — owner-driven; entries retire with T-116a and T-109a |
 
 `LDG-16` is this ledger's own first test case. It was landed in Sprint 0, one commit before the ledger existed, and would otherwise have become exactly the kind of untracked staged state the ledger exists to prevent.
+
+### Boundary migration (in progress)
+
+| ID       | Change                                               | Intended end state                                                                                                                                                    | Current stage                                                                                                                                                                                                                             | Owner         | Review-by | Gate                                                                              |
+| -------- | ---------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------- | --------- | --------------------------------------------------------------------------------- |
+| `LDG-17` | Route cross-feature imports through barrels (T-101b) | No cross-feature import reaches a path deeper than `@/features/<f>` or `@/features/<f>/server`; the boundary lint rule is `error` with only the enumerated exceptions | **Barrels published (T-101a, `cbf210a`); migration attempted and reverted.** Routing both cycle directions through barrels turned the `flashcard ↔ notifications` file-level cycle into a barrel-level one that fails the Turbopack build | NgnPhamGiaHuy | Sprint 6  | **T-102a/b** must land first (not a question — a task dependency the plan missed) |
+
+`LDG-17` records a dependency the plan did not have: T-101b cannot complete until T-102a/b removes the `notifications → flashcard` back-edge. The barrels themselves are sound and remain committed; only the migration is deferred. ADR-101 Amendment 1 (two entry points per feature) addresses the three _other_ failures found in the same attempt.
 
 ## Code markers cross-reference
 
