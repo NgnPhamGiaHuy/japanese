@@ -411,7 +411,8 @@ Each is scheduled into a wave but is **NOT READY** until its question answers. E
 
 #### T-117b — Unit tests for the sharing-RBAC `resolveRole` engine
 
-**Size** M · **Wave** 2 · **Status** Ready
+**Size** M · **Wave** 2 · **Status** ✅ **DONE** (Sprint 5) — _was: Ready_
+**Delivered** 28 tests in `utils/rbac.test.ts` against `rbac.ts`'s real engine (not `shared.service.ts`'s divergent copy). Covers all 5 role-resolution steps in priority order, the exact `ownerId ?? userId` owner semantics (including the legacy-fallback and ownerId-wins-over-stale-userId cases), the public-link editor cap, and deny-by-default. Discrimination verified: reverting the `ownerId ?? userId` order to `userId ?? ownerId` broke exactly the dedicated divergence test.
 **Traces to** ADR-117 (AD-17) · W-16, TD-2, OP-23, OP-5 · clusters **C8**, **C11** · `assess/02`, `/03`, `/09`, `/11`
 **Description.** `resolveRole` is pure, security-relevant, has 9 consumers, and zero tests — and it is the convergence target of ADR-115. ADR-117 names it a test-floor priority **precisely so the T-115a convergence lands against a net**. This task must therefore complete before T-115a.
 **Acceptance criteria**
