@@ -1,21 +1,11 @@
 import createMiddleware from "next-intl/middleware";
 import { NextResponse } from "next/server";
 
+import { isPublicAtEdge } from "@/shared/constants/public-routes";
 import { COOKIE_NAME } from "@/shared/utils/cookie";
 import { routing } from "./i18n/routing";
 
 import type { NextRequest } from "next/server";
-
-const PUBLIC_PATHS = ["/login", "/sitemap.xml", "/robots.txt"];
-
-// Public/social/crawler-facing surface under a dynamic segment — matched by
-// pattern rather than prefix so only the exact landing page (or a same-segment
-// SEO asset, e.g. opengraph-image) is public, never its study/match/speed
-// sub-routes, which need a signed-in user for progress tracking. Next.js
-// serves file-convention image routes with a build-generated hash suffix
-// (e.g. opengraph-image-nnv7ce), hence the trailing (-[a-z0-9]+)? — the hash
-// itself isn't stable across builds, so it can't be matched literally.
-const PUBLIC_PATH_PATTERNS = [/^\/flashcard\/shared\/[^/]+(?:\/opengraph-image(?:-[a-z0-9]+)?)?$/];
 
 const POSTHOG_INGEST_HOST = "us.i.posthog.com";
 const POSTHOG_ASSETS_HOST = "us-assets.i.posthog.com";
@@ -80,11 +70,7 @@ export function proxy(request: NextRequest) {
     const { path, canonicalPrefix } = splitLocale(pathname);
     const token = request.cookies.get(COOKIE_NAME)?.value;
 
-    const isPublic =
-        PUBLIC_PATHS.some((p) => path.startsWith(p)) ||
-        PUBLIC_PATH_PATTERNS.some((re) => re.test(path));
-
-    if (!token && !isPublic) {
+    if (!token && !isPublicAtEdge(path)) {
         const url = request.nextUrl.clone();
         url.pathname = `${canonicalPrefix}/login`;
         return NextResponse.redirect(url);
