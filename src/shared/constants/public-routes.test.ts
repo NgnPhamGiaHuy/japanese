@@ -146,4 +146,26 @@ describe("public-routes — single source", () => {
         expect(proxySource).not.toContain("PUBLIC_PATHS");
         expect(proxySource).not.toContain("PUBLIC_PATH_PATTERNS");
     });
+
+    it("is the only public-path list — the AuthGate holds none of its own", () => {
+        const providersSource = readFileSync(
+            new URL("../../lib/providers.tsx", import.meta.url),
+            "utf8",
+        );
+        expect(providersSource).toContain("isPublicForRender");
+        // The local regex list this consumer used to maintain is gone; a
+        // reintroduced one is the exact defect T-118a fixed.
+        expect(providersSource).not.toContain("PUBLIC_ROUTE_PATTERNS");
+    });
+
+    it("makes adding a public route a one-place change both consumers honor", () => {
+        // Not a mock: both consumers call into these two derivations, asserted
+        // by the two source checks above. A new `page` entry is therefore
+        // admitted at the edge AND rendered without the splash, with no second
+        // file to edit — which is the property that failed before.
+        const pageIds = PUBLIC_ROUTES.filter((r) => r.kind === "page").map((r) => r.id);
+        const assetIds = PUBLIC_ROUTES.filter((r) => r.kind === "asset").map((r) => r.id);
+        expect(pageIds).toEqual(["login", "shared-deck"]);
+        expect(assetIds).toEqual(["sitemap", "robots", "shared-deck-og"]);
+    });
 });

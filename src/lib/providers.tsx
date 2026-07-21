@@ -14,19 +14,37 @@ import { useAppStore } from "@/lib/app-store";
 import { AudioProvider } from "@/lib/AudioProvider";
 import { FontSyncer } from "@/lib/FontSyncer";
 import { PostHogProvider } from "@/lib/PostHogProvider";
+import { isPublicForRender } from "@/shared/constants/public-routes";
 import { AlertProvider } from "@/shared/providers";
-
-// Public/crawlable routes that must render immediately, never behind the
-// client-only auth-ready splash — otherwise their server-rendered content
-// (e.g. the shared-deck SEO preview) never reaches a non-JS crawler, since
-// isAuthReady can never be true during SSR. Mirrors proxy.ts's public-path
-// allowlist; every other route keeps the existing splash-until-ready gate.
-const PUBLIC_ROUTE_PATTERNS = [/^\/flashcard\/shared\/[^/]+$/];
 
 function AuthGate({ children }: { children: React.ReactNode }) {
     const isAuthReady = useAppStore((s) => s.isAuthReady);
     const pathname = usePathname();
-    const isPublicRoute = PUBLIC_ROUTE_PATTERNS.some((re) => re.test(pathname));
+
+    // Public routes render immediately rather than behind the client-only
+    // auth-ready splash — otherwise server-rendered content (e.g. the
+    // shared-deck SEO preview) never reaches a non-JS crawler, since
+    // isAuthReady can never be true during SSR.
+    //
+    // This used to be a local regex list whose comment claimed to mirror
+    // proxy.ts. It did not: the proxy admitted /login, sitemap, robots and the
+    // OG-image pattern, this list admitted only the shared-deck landing page.
+    // Both now derive from one source (T-118a), so the claim is structural
+    // rather than aspirational.
+    //
+    // Reconciliation of the two previously-unequal sets:
+    //   /login              → NOW HONORED HERE. The one page guaranteed to be
+    //                         viewed signed-out no longer flashes the splash
+    //                         first. Safe because the login page manages its
+    //                         own redirect and never reads isAuthReady.
+    //   /sitemap.xml        → not applicable: never rendered through React.
+    //   /robots.txt         → not applicable: never rendered through React.
+    //   .../opengraph-image → not applicable: file-convention image route.
+    //   shared-deck landing → unchanged; both consumers already admitted it.
+    // The three "not applicable" entries are excluded by the `asset` kind in
+    // the shared list — by design, not by omission. Nothing else moves between
+    // public, splash-gated and redirected.
+    const isPublicRoute = isPublicForRender(pathname);
 
     if (!isAuthReady && !isPublicRoute) {
         return (

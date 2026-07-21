@@ -156,7 +156,8 @@ Each is scheduled into a wave but is **NOT READY** until its question answers. E
 ### ADR-118 — Configuration is single-sourced (P1; hosting Open)
 
 #### T-118a — One module owns the public-path allowlist; proxy and AuthGate both consume it
-**Size** M · **Wave** 1 · **Status** Ready
+**Size** M · **Wave** 1 · **Status** ✅ **DONE** (Sprint 1) — *was: Ready*
+**Delivered** `src/shared/constants/public-routes.ts` (new, single source) + 36 tests, consumed by `proxy.ts` (PR-1.4, neutral — `b3ac2de`) and the AuthGate in `lib/providers.tsx` (PR-1.5, behavioral). The live divergence is closed: `/login` is now honored by both consumers. Reconciliation adjudicated in-code at the AuthGate; assets (`sitemap`/`robots`/OG-image) excluded by the `asset` kind, by design rather than omission.
 **Traces to** ADR-118 (AD-18) · W-20(a), CX-6, NQ-2 (resolved-by-decision) · cluster **C14** · `assess/03`, `/07`, `/11`
 **Description.** The public-route allowlist exists twice and is **already unequal** — the proxy admits `/login`, sitemap/robots and the OG-image pattern; the AuthGate regex admits only the deck landing page, while its comment claims to mirror the proxy. **This fixes a live divergence defect**, not a stylistic duplication. One module becomes the single source; each consumer keeps its own duty (edge redirect vs render splash), expressed as an explicit derivation.
 **Acceptance criteria**
