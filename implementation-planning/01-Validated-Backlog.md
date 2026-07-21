@@ -278,10 +278,18 @@ Each is scheduled into a wave but is **NOT READY** until its question answers. E
 
 #### T-101c — Add the ESLint import-boundary rule and set it to error
 
-**Size** S · **Wave** 1 · **Status** Ready
-**Traces to** ADR-101 (AD-01) · W-3, S-1, S-15, P-1 · cluster **C3** · `assess/03`, `/02`
-**Description.** Convert the boundary from convention into enforcement, using the mechanism the repo has already proven — the audio boundary is an ESLint _error_ with a teaching message, installed after a real incident. Also folds in the stale standards-count correction (UR-4).
-**Acceptance criteria**
+**Size** S · **Wave** 1 · **Status** ✅ **DONE** (Sprint 4) — _was: Ready_
+
+> **Delivered.** `import/no-restricted-paths` (already available via `eslint-config-next`, no new dependency) configured as 10 zones — one per feature (may import own internals + every feature's `index.ts`/`server.ts`, never another feature's internals) plus one for `app/` (may only mount the two sanctioned entry points). Same uniform exception list reused across all zones; no feature-specific carve-outs. Test/story files exempted via flat-config `ignores` — a `vi.mock()` naming a cross-feature path is not a runtime coupling.
+>
+> **Deliberately out of scope:** `lib/**` is untouched by this rule. That boundary (`lib` importing `features`) is ADR-103's concern and lands separately as **T-103b**; `lib/providers.tsx` needs no exception here since it already imports only bare feature barrels post-T-101b.
+>
+> **Verified by experiment, not inspection** (same discipline as the Sprint 0 CI-lint proof): injected a probe importing a genuine deep path (fails, with a message naming ADR-101), a `/server` path (passes), and a bare barrel (passes) — from both a feature and from `app/`; a same-feature deep self-import (passes); a test-file cross-feature mock (passes). Full existing codebase: **0 errors** — the T-101b migration left nothing for this rule to catch. `LDG-17` closes: its stated end state (migration complete **and** rule at `error`) is now fully reached.
+>
+> Also corrects the stale line comment ("~46 pre-existing files") to the freshly re-verified count of **47** (grown from the earlier ~44 during this session's work; cross-checked against ESLint's own `max-lines` output, not just `wc -l`).
+> **Traces to** ADR-101 (AD-01) · W-3, S-1, S-15, P-1 · cluster **C3** · `assess/03`, `/02`
+> **Description.** Convert the boundary from convention into enforcement, using the mechanism the repo has already proven — the audio boundary is an ESLint _error_ with a teaching message, installed after a real incident. Also folds in the stale standards-count correction (UR-4).
+> **Acceptance criteria**
 
 - Introducing a deep cross-feature import fails `lint` locally with a message **naming this ADR** (matching the audio rule's teaching-message precedent).
 - The rule is severity `error`, not `warn`.

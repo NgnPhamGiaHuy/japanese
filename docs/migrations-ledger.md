@@ -49,7 +49,7 @@ Read that row as a sentence: _the end state is one reader; we are at two; Jane d
 
 ## Rows
 
-17 open rows, grouped by the decision that governs them. Owner for every row is **NgnPhamGiaHuy**, who holds all three answering roles (product intent, GCP/ops console, hosting) — recorded in the Sprint 0 completion record. Review-by follows the wave in which each gate first bites: Wave 1 → Sprint 5, Wave 3 → Sprint 9, Wave 4 → Sprint 14, Wave 5 → Sprint 19, Wave 6 → Sprint 26.
+16 open rows (`LDG-17` closed below), grouped by the decision that governs them. Owner for every row is **NgnPhamGiaHuy**, who holds all three answering roles (product intent, GCP/ops console, hosting) — recorded in the Sprint 0 completion record. Review-by follows the wave in which each gate first bites: Wave 1 → Sprint 5, Wave 3 → Sprint 9, Wave 4 → Sprint 14, Wave 5 → Sprint 19, Wave 6 → Sprint 26.
 
 Every stage claim below was verified against the working tree at `f3951e8`, not inherited from the planning documents — a row that misstates its stage is worse than no row at all.
 
@@ -113,13 +113,7 @@ Every stage claim below was verified against the working tree at `f3951e8`, not 
 
 `LDG-16` is this ledger's own first test case. It was landed in Sprint 0, one commit before the ledger existed, and would otherwise have become exactly the kind of untracked staged state the ledger exists to prevent.
 
-### Boundary migration (in progress)
-
-| ID       | Change                                                 | Intended end state                                                                                                                                                    | Current stage                                                                                                                                                                                                                                                                                                                                                                                                | Owner         | Review-by | Gate                                       |
-| -------- | ------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------- | --------- | ------------------------------------------ |
-| `LDG-17` | Route cross-feature imports through barrels (T-101b/c) | No cross-feature import reaches a path deeper than `@/features/<f>` or `@/features/<f>/server`; the boundary lint rule is `error` with only the enumerated exceptions | **Migration complete; lint rule not yet enabled.** T-101b retried successfully: 152 statements + 4 inline refs across 89 files migrated, production build green. Zero cross-boundary imports deeper than the two sanctioned entry points remain. **Remaining:** T-101c must add and enable the ESLint rule before this row closes — until then the boundary is migration-clean but not mechanically enforced | NgnPhamGiaHuy | Sprint 6  | None — T-101c is the next task in sequence |
-
-`LDG-17` records a dependency the plan did not have: T-101b could not complete until T-102a/b removed the `notifications → flashcard` back-edge, and ADR-101 Amendment 1 (two entry points per feature) was required to fix the three other failures found in the first attempt. Both are done. The row stays open because its own stated end state bundles the lint rule, which is separate work (T-101c).
+`LDG-17` (route cross-feature imports through barrels, T-101b/c) closed below — its full stated end state is now reached.
 
 ## Code markers cross-reference
 
@@ -133,8 +127,6 @@ Every deprecation marker and "reconcile later" comment in the tree maps to a row
 
 ## Closed rows
 
-_None yet._
-
-| ID  | Change | Closed | Commit | Notes |
-| --- | ------ | ------ | ------ | ----- |
-| —   | —      | —      | —      | —     |
+| ID       | Change                                                 | Closed     | Commit   | Notes                                                                                                                                                                                                                                                                                                                                                                                                  |
+| -------- | ------------------------------------------------------ | ---------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `LDG-17` | Route cross-feature imports through barrels (T-101b/c) | 2026-07-21 | (T-101c) | End state reached in two stages: T-101b's retry (152 statements + 4 inline refs across 89 files) reduced deep cross-boundary imports to zero; T-101c added `import/no-restricted-paths` (9 feature zones + 1 app zone, uniform exception list of every feature's `index.ts`/`server.ts`) as `error`, verified to both fire on injected violations and pass the entire existing codebase with 0 errors. |

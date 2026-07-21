@@ -58,13 +58,103 @@ const eslintConfig = defineConfig([
     },
     {
         // Self-imposed 200-line ceiling (architecture.rule.md). Introduced as a
-        // WARNING first, not an error — the repo has ~46 pre-existing files over
-        // the limit; tighten to "error" per file as they're split (see R31/E11).
+        // WARNING first, not an error — the repo has 47 pre-existing files over
+        // the limit (verified count, not the earlier "~46" estimate); tighten to
+        // "error" per file as they're split (see R31/E11).
         files: ["**/*.{ts,tsx}"],
         rules: {
             "max-lines": ["warn", { max: 200 }],
         },
     },
+
+    // ─── Cross-feature import boundary (ADR-101, T-101c) ───────────────────────
+    //
+    // A feature's public API is its root barrel (`@/features/<f>`) or, for
+    // server-only code, `@/features/<f>/server` (ADR-101 Amendment 1). Reaching
+    // past either into a feature's internals — from another feature or from the
+    // route layer — is how the repo's only value-import cycle formed (W-1) and
+    // is exactly the openness T-101a/b just closed. This makes it a build-time
+    // error instead of a convention, the same way the audio rule above does for
+    // `shared/audio` after a real incident (S-15).
+    //
+    // Deliberately does NOT restrict lib/**: that back-edge (lib/logging used to
+    // import from features/admin) is ADR-103's concern, landing separately as
+    // T-103b, with lib/providers.tsx as its own composition-root exception.
+    // Nothing here needs to name providers.tsx — it already imports only bare
+    // feature barrels (post-T-101b), so it violates no zone below.
+    //
+    // Test and story files are exempt: mocking a cross-feature module by its
+    // real specifier (`vi.mock("@/features/x/actions/y")`) is not a runtime
+    // coupling — the whole point of a mock is to replace what it names.
+    ...(() => {
+        // One entry per feature — every feature has these two names whether or
+        // not `server.ts` exists for it; an except pointing at a file that
+        // doesn't exist just never matches, harmlessly.
+        const FEATURES = [
+            "admin",
+            "ai",
+            "command-palette",
+            "flashcard",
+            "game",
+            "home",
+            "kana",
+            "notifications",
+            "user",
+        ];
+        const PUBLIC_ENTRY_POINTS = FEATURES.flatMap((f) => [`${f}/index.ts`, `${f}/server.ts`]);
+        const MESSAGE =
+            "Import the owning feature's public API instead — `@/features/<feature>` " +
+            "or, for server-only code, `@/features/<feature>/server`. See ADR-101 " +
+            "(architecture-decision/03-Architecture-Decisions.md) and its Amendment 1.";
+        const TEST_AND_STORY_FILES = [
+            "**/*.test.{ts,tsx}",
+            "**/*.browser.test.{ts,tsx}",
+            "**/*.stories.tsx",
+        ];
+
+        return [
+            {
+                // features/<F> may import its OWN internals freely, and every
+                // feature's public entry points — never another feature's internals.
+                files: ["features/*/**/*.{ts,tsx}"],
+                ignores: TEST_AND_STORY_FILES,
+                rules: {
+                    "import/no-restricted-paths": [
+                        "error",
+                        {
+                            zones: FEATURES.map((f) => ({
+                                target: `./features/${f}`,
+                                from: "./features",
+                                except: [f, ...PUBLIC_ENTRY_POINTS],
+                                message: MESSAGE,
+                            })),
+                        },
+                    ],
+                },
+            },
+            {
+                // The route layer may only mount a feature's public entry
+                // points — never reach into its internals directly.
+                files: ["app/**/*.{ts,tsx}"],
+                ignores: TEST_AND_STORY_FILES,
+                rules: {
+                    "import/no-restricted-paths": [
+                        "error",
+                        {
+                            zones: [
+                                {
+                                    target: "./app",
+                                    from: "./features",
+                                    except: PUBLIC_ENTRY_POINTS,
+                                    message: MESSAGE,
+                                },
+                            ],
+                        },
+                    ],
+                },
+            },
+        ];
+    })(),
 
     // ─── Lint ratchet baseline (Sprint 0) ──────────────────────────────────────
     //
