@@ -11,6 +11,9 @@ import { useEffect, useMemo, useState } from "react";
 import { Check, Lightbulb, RefreshCw } from "lucide-react";
 
 import { DEFAULT_DECK_THEME_COLOR } from "@/features/flashcard/types";
+import { auth } from "@/lib/firebase";
+import { ActivityAction } from "@/lib/logging/actions.enum";
+import { enqueueClientLog } from "@/lib/logging/browser";
 import { playSfx, sequence, speak } from "@/shared/audio";
 import { Button, EmptyState } from "@/shared/components/ui";
 import { shuffleArray } from "@/shared/utils";
@@ -144,7 +147,16 @@ const FlashcardPractice = ({
         setMcSelected(null);
         submitGrade(grade, { playCue });
 
-        void onAnswer(card, grade).catch(() => {});
+        void onAnswer(card, grade).catch((err) => {
+            console.error("[FlashcardPractice] onAnswer failed:", err);
+            enqueueClientLog(() => auth.currentUser!.getIdToken(), {
+                action: ActivityAction.SRS_WRITE_FAILED,
+                entityType: "study",
+                entityId: card.id,
+                level: "error",
+                metadata: { reason: "FlashcardPractice.onAnswer", error: String(err) },
+            });
+        });
     };
 
     const handleMCSelect = (choice: string) => {

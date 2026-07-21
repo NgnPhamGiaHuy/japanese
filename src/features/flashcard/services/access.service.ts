@@ -9,6 +9,9 @@
 import { deleteField, setDoc } from "firebase/firestore";
 
 import { emitNotification, notifyInvite } from "@/features/notifications";
+import { auth } from "@/lib/firebase";
+import { ActivityAction } from "@/lib/logging/actions.enum";
+import { enqueueClientLog } from "@/lib/logging/browser";
 import { buildShareId, lessonDoc } from "./lesson.service";
 
 import type { User } from "firebase/auth";
@@ -132,7 +135,16 @@ export async function inviteByEmail(
         deckTitle,
         shareLink: `/flashcard/shared/${shareId}`,
         role,
-    }).catch(() => {});
+    }).catch((err) => {
+        console.error("[access.service] notifyInvite failed:", err);
+        enqueueClientLog(() => auth.currentUser!.getIdToken(), {
+            action: ActivityAction.NOTIFICATION_DELIVERY_FAILED,
+            entityType: "share",
+            entityId: lessonId,
+            level: "error",
+            metadata: { toEmail: normalizedEmail, error: String(err) },
+        });
+    });
 }
 
 /**

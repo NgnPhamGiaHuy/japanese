@@ -11,7 +11,9 @@ import {
     writeBatch,
 } from "firebase/firestore";
 
-import { APP_ID, db } from "@/lib/firebase";
+import { APP_ID, auth, db } from "@/lib/firebase";
+import { ActivityAction } from "@/lib/logging/actions.enum";
+import { enqueueClientLog } from "@/lib/logging/browser";
 import { sortByOrder } from "@/shared/utils";
 import {
     gradeCardForUser,
@@ -85,7 +87,16 @@ function assertCardSchema(userId: string, card: FlashCard): FlashCard {
     if (card.alternatives === undefined) {
         // Legacy docs may not have alternatives yet; normalize and heal once.
         card.alternatives = [];
-        void updateDoc(cardDoc(userId, card.id), { alternatives: [] }).catch(() => {});
+        void updateDoc(cardDoc(userId, card.id), { alternatives: [] }).catch((err) => {
+            console.error("[card.service] alternatives schema-heal failed:", err);
+            enqueueClientLog(() => auth.currentUser!.getIdToken(), {
+                action: ActivityAction.CARD_SCHEMA_HEAL_FAILED,
+                entityType: "card",
+                entityId: card.id,
+                level: "warn",
+                metadata: { error: String(err) },
+            });
+        });
     }
     if (!Array.isArray(card.alternatives)) {
         throw new Error(`[card.service] Invalid card ${card.id}: alternatives must be an array`);

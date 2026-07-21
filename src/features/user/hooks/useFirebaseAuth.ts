@@ -8,6 +8,8 @@ import { deliverPendingNotifications } from "@/features/notifications";
 import { logUserLogin } from "@/features/user/services/auth-logging.service";
 import { useAppStore } from "@/lib/app-store";
 import { auth } from "@/lib/firebase";
+import { ActivityAction } from "@/lib/logging/actions.enum";
+import { enqueueClientLog } from "@/lib/logging/browser";
 import { clearAuthCookie, setAuthCookie } from "@/shared/utils";
 
 /**
@@ -62,12 +64,30 @@ export function useFirebaseAuth() {
                         displayName: user.displayName ?? undefined,
                         email: user.email ?? undefined,
                         provider: user.providerData[0]?.providerId ?? "unknown",
-                    }).catch(() => {});
+                    }).catch((err) => {
+                        console.error("[useFirebaseAuth] logUserLogin failed:", err);
+                        enqueueClientLog(() => user.getIdToken(), {
+                            action: ActivityAction.LOGIN_LOG_FAILED,
+                            entityType: "auth",
+                            entityId: user.uid,
+                            level: "error",
+                            metadata: { source: "onIdTokenChanged", error: String(err) },
+                        });
+                    });
                 }
 
                 // Deliver pending notifications
                 if (user.email) {
-                    deliverPendingNotifications(user.uid, user.email).catch(() => {});
+                    deliverPendingNotifications(user.uid, user.email).catch((err) => {
+                        console.error("[useFirebaseAuth] deliverPendingNotifications failed:", err);
+                        enqueueClientLog(() => user.getIdToken(), {
+                            action: ActivityAction.NOTIFICATION_DELIVERY_FAILED,
+                            entityType: "notification",
+                            entityId: user.uid,
+                            level: "error",
+                            metadata: { error: String(err) },
+                        });
+                    });
                 }
             } else {
                 // User logged out (handled by signOut() function)

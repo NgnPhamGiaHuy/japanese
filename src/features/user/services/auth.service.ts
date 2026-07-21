@@ -6,6 +6,8 @@ import {
 } from "firebase/auth";
 
 import { auth, googleProvider } from "@/lib/firebase";
+import { ActivityAction } from "@/lib/logging/actions.enum";
+import { enqueueClientLog } from "@/lib/logging/browser";
 import { clearAuthCookie, setAuthCookie } from "@/shared/utils";
 import { logUserLogin, logUserLogout } from "./auth-logging.service";
 
@@ -24,7 +26,16 @@ async function persistSignedInUser(user: User): Promise<User> {
         displayName: user.displayName ?? undefined,
         email: user.email ?? undefined,
         provider: user.providerData[0]?.providerId ?? "google.com",
-    }).catch(() => {});
+    }).catch((err) => {
+        console.error("[auth.service] logUserLogin failed:", err);
+        enqueueClientLog(() => user.getIdToken(), {
+            action: ActivityAction.LOGIN_LOG_FAILED,
+            entityType: "auth",
+            entityId: user.uid,
+            level: "error",
+            metadata: { source: "signInWithGoogle", error: String(err) },
+        });
+    });
 
     return user;
 }

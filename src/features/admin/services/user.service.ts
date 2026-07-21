@@ -1,5 +1,7 @@
 import "server-only";
 
+import { ActivityAction } from "@/lib/logging/actions.enum";
+import { persistSystemLog } from "@/lib/logging/server";
 import { adminAuth, adminDb, APP_ID, clampLimit } from "./admin.service";
 import { USERS_PAGE_SIZE } from "../utils/queryKeys";
 
@@ -148,5 +150,16 @@ export async function deleteUser(targetUid: string, callerUid: string): Promise<
         .collection("admins")
         .doc(targetUid)
         .delete()
-        .catch(() => {});
+        .catch((err) => {
+            console.error("[admin.user.service] admins doc cleanup after deleteUser failed:", err);
+            void persistSystemLog({
+                action: ActivityAction.ADMIN_CLEANUP_FAILED,
+                entityType: "admin",
+                entityId: targetUid,
+                userId: callerUid,
+                level: "error",
+                source: "server",
+                metadata: { reason: "admins_doc_cleanup_after_delete", error: String(err) },
+            });
+        });
 }

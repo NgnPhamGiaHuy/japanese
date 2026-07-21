@@ -52,4 +52,15 @@ export const ActivityAction = {
     ADMIN_USER_DELETED: "admin.user_deleted",
     ADMIN_CONTENT_DELETED: "admin.content_deleted",
     ADMIN_TEST_LOG: "admin.test_log",
+
+    // ── Report-then-handle: below-boundary failures on real state (T-116a) ────
+    // Each covers a class of write that a previous swallow-catch (`.catch(() =>
+    // {})`) hid entirely. These are best-effort reports on an already-failed
+    // operation, not the operation's own action log.
+    SRS_WRITE_FAILED: "study.srs_write_failed",
+    STORAGE_CLEANUP_FAILED: "storage.cleanup_failed",
+    LOGIN_LOG_FAILED: "user.login_log_failed",
+    NOTIFICATION_DELIVERY_FAILED: "notification.delivery_failed",
+    CARD_SCHEMA_HEAL_FAILED: "card.schema_heal_failed",
+    ADMIN_CLEANUP_FAILED: "admin.cleanup_failed",
 } as const;

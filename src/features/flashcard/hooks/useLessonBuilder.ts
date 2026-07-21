@@ -8,6 +8,8 @@ import { v4 as uuidv4 } from "uuid";
 import { useAICard } from "@/features/ai";
 import { DEFAULT_DECK_THEME_COLOR } from "@/features/flashcard/types";
 import { useAppStore } from "@/lib/app-store";
+import { ActivityAction } from "@/lib/logging/actions.enum";
+import { enqueueClientLog } from "@/lib/logging/browser";
 import { useAlert } from "@/shared/providers";
 import { lessonMetadataSchema } from "@/shared/schemas";
 import { deleteCardImage, uploadCardImage } from "../services";
@@ -178,7 +180,19 @@ export function useLessonBuilder({
                     const { imageFile, ...base } = c;
                     if (imageFile && user) {
                         const res = await uploadCardImage(imageFile, user.uid, base.id);
-                        if (base.imagePath) deleteCardImage(base.imagePath).catch(() => {});
+                        if (base.imagePath) {
+                            const staleImagePath = base.imagePath;
+                            deleteCardImage(staleImagePath).catch((err) => {
+                                console.error("[useLessonBuilder] deleteCardImage failed:", err);
+                                enqueueClientLog(() => user.getIdToken(), {
+                                    action: ActivityAction.STORAGE_CLEANUP_FAILED,
+                                    entityType: "card",
+                                    entityId: base.id,
+                                    level: "error",
+                                    metadata: { imagePath: staleImagePath, error: String(err) },
+                                });
+                            });
+                        }
                         processed.push({
                             ...base,
                             imageUrl: res.imageUrl,
@@ -192,8 +206,17 @@ export function useLessonBuilder({
                     createdAt: initialLesson?.createdAt ?? Date.now(),
                 } as Lesson;
                 await onSave(mergedLesson, processed, !initialLesson);
-                for (const path of clearedImagePathsRef.current)
-                    deleteCardImage(path).catch(() => {});
+                for (const path of clearedImagePathsRef.current) {
+                    deleteCardImage(path).catch((err) => {
+                        console.error("[useLessonBuilder] deleteCardImage (cleared) failed:", err);
+                        enqueueClientLog(() => user!.getIdToken(), {
+                            action: ActivityAction.STORAGE_CLEANUP_FAILED,
+                            entityType: "card",
+                            level: "error",
+                            metadata: { imagePath: path, error: String(err) },
+                        });
+                    });
+                }
                 clearedImagePathsRef.current = [];
             } catch (err) {
                 if (err instanceof CardValidationError) showAlert("error", t("atomicViolation"));

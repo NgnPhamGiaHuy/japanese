@@ -29,7 +29,9 @@ import {
     writeBatch,
 } from "firebase/firestore";
 
-import { APP_ID, db } from "@/lib/firebase";
+import { APP_ID, auth, db } from "@/lib/firebase";
+import { ActivityAction } from "@/lib/logging/actions.enum";
+import { enqueueClientLog } from "@/lib/logging/browser";
 import { computeNextSRS } from "../domain/srs";
 import { FRESH_SRS_STATE } from "../domain/types";
 
@@ -153,8 +155,19 @@ export async function gradeCardForUser(
         await updateDoc(ref, progressDoc);
     }
 
-    // Increment daily review count (fire-and-forget)
-    void incrementDailyReviewCount(userId).catch(() => {});
+    // Increment daily review count (fire-and-forget) — report-then-handle:
+    // the SRS write above already landed, so this failure is a stats-only
+    // gap, not a lost review; still worth surfacing rather than vanishing.
+    void incrementDailyReviewCount(userId).catch((err) => {
+        console.error("[progress.service] incrementDailyReviewCount failed:", err);
+        enqueueClientLog(() => auth.currentUser!.getIdToken(), {
+            action: ActivityAction.SRS_WRITE_FAILED,
+            entityType: "study",
+            entityId: userId,
+            level: "error",
+            metadata: { reason: "incrementDailyReviewCount", error: String(err) },
+        });
+    });
 }
 
 /**

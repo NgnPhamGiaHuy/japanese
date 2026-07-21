@@ -2,6 +2,9 @@
 
 import { useState } from "react";
 
+import { auth } from "@/lib/firebase";
+import { ActivityAction } from "@/lib/logging/actions.enum";
+import { enqueueClientLog } from "@/lib/logging/browser";
 import { playSfx } from "@/shared/audio";
 import { reinsertCard } from "../utils";
 
@@ -77,7 +80,16 @@ export function useCardSessionState(
             setShowSummary(true);
         }
 
-        void onAnswer(card, grade).catch(() => {});
+        void onAnswer(card, grade).catch((err) => {
+            console.error("[useCardSessionState] onAnswer failed:", err);
+            enqueueClientLog(() => auth.currentUser!.getIdToken(), {
+                action: ActivityAction.SRS_WRITE_FAILED,
+                entityType: "study",
+                entityId: card.id,
+                level: "error",
+                metadata: { reason: "useCardSessionState.onAnswer", error: String(err) },
+            });
+        });
     };
 
     return { queue, card, currentIndex, progress, stats, showSummary, submitGrade };

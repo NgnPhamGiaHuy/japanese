@@ -17,7 +17,9 @@
  */
 import { getDocs, query, setDoc, updateDoc, where, writeBatch } from "firebase/firestore";
 
-import { db } from "@/lib/firebase";
+import { auth, db } from "@/lib/firebase";
+import { ActivityAction } from "@/lib/logging/actions.enum";
+import { enqueueClientLog } from "@/lib/logging/browser";
 import { cardsCol } from "./card.service";
 import { deleteCardImage } from "./image.service";
 import { buildShareId, lessonDoc } from "./lesson-paths";
@@ -130,6 +132,15 @@ export async function deleteLessonWithCards(userId: string, lessonId: string): P
     await batch.commit();
 
     for (const path of imagesToDelete) {
-        deleteCardImage(path).catch(() => {});
+        deleteCardImage(path).catch((err) => {
+            console.error("[lesson.service] deleteCardImage failed:", err);
+            enqueueClientLog(() => auth.currentUser!.getIdToken(), {
+                action: ActivityAction.STORAGE_CLEANUP_FAILED,
+                entityType: "deck",
+                entityId: lessonId,
+                level: "error",
+                metadata: { imagePath: path, error: String(err) },
+            });
+        });
     }
 }

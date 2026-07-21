@@ -49,7 +49,7 @@ Read that row as a sentence: _the end state is one reader; we are at two; Jane d
 
 ## Rows
 
-16 open rows (`LDG-17` closed below), grouped by the decision that governs them. Owner for every row is **NgnPhamGiaHuy**, who holds all three answering roles (product intent, GCP/ops console, hosting) — recorded in the Sprint 0 completion record. Review-by follows the wave in which each gate first bites: Wave 1 → Sprint 5, Wave 3 → Sprint 9, Wave 4 → Sprint 14, Wave 5 → Sprint 19, Wave 6 → Sprint 26.
+17 open rows (`LDG-17` closed below), grouped by the decision that governs them. Owner for every row is **NgnPhamGiaHuy**, who holds all three answering roles (product intent, GCP/ops console, hosting) — recorded in the Sprint 0 completion record. Review-by follows the wave in which each gate first bites: Wave 1 → Sprint 5, Wave 3 → Sprint 9, Wave 4 → Sprint 14, Wave 5 → Sprint 19, Wave 6 → Sprint 26.
 
 Every stage claim below was verified against the working tree at `f3951e8`, not inherited from the planning documents — a row that misstates its stage is worse than no row at all.
 
@@ -104,6 +104,12 @@ Every stage claim below was verified against the working tree at `f3951e8`, not 
 | ID       | Change                           | Intended end state                                                                   | Current stage                                                                                                                                                              | Owner         | Review-by | Gate   |
 | -------- | -------------------------------- | ------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------- | --------- | ------ |
 | `LDG-15` | Align admin-authority predicates | One predicate answers "is this user an admin", consulted by app, rules and functions | **Three divergent predicates.** The app server, the Firestore rules' `isSystemAdmin` (existence-only), and the functions-side check disagree on what constitutes authority | NgnPhamGiaHuy | Sprint 14 | `Q-10` |
+
+### Observability activation (ADR-116)
+
+| ID       | Change                       | Intended end state                                                                                                             | Current stage                                                                                                                                                                                                          | Owner         | Review-by | Gate  |
+| -------- | ----------------------------- | -------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------- | --------- | ----- |
+| `LDG-18` | Sentry/PostHog activation (T-116b/T-116c) | Either live with confirmed production credentials and project ownership, or explicitly retired — never left ambiguously wired | **Report-then-handle (T-116a) landed and is unconditional**: below-boundary failures on real state (SRS writes, Storage cleanup, login logging, invite delivery, admin cleanup) now report into the in-repo `system_logs` pipeline via `enqueueClientLog`/`persistSystemLog`, regardless of this gate. Sentry/PostHog activation itself is **not started** — no production DSN/API-key ownership has been confirmed in-repo (ADR-116 explicitly rejects deleting the existing wiring while this is unknown) | NgnPhamGiaHuy | Sprint 5  | `Q-4` |
 
 ### Landed in stages without a row (backfilled)
 

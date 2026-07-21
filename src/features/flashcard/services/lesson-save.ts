@@ -10,7 +10,9 @@
 import { doc, getDocs, query, where, writeBatch } from "firebase/firestore";
 import { generateNKeysBetween } from "fractional-indexing";
 
-import { db } from "@/lib/firebase";
+import { auth, db } from "@/lib/firebase";
+import { ActivityAction } from "@/lib/logging/actions.enum";
+import { enqueueClientLog } from "@/lib/logging/browser";
 import { lessonMetadataSchema } from "@/shared/schemas";
 import { cardDoc, cardsCol } from "./card.service";
 import { deleteCardImage } from "./image.service";
@@ -112,7 +114,17 @@ export async function saveLessonWithCards(
                 // Card was removed — delete from Firestore + Storage
                 batch.delete(cardDoc(userId, existing.id));
                 if (existing.imagePath) {
-                    deleteCardImage(existing.imagePath).catch(() => {});
+                    const orphanedImagePath = existing.imagePath;
+                    deleteCardImage(orphanedImagePath).catch((err) => {
+                        console.error("[lesson-save] deleteCardImage (removed card) failed:", err);
+                        enqueueClientLog(() => auth.currentUser!.getIdToken(), {
+                            action: ActivityAction.STORAGE_CLEANUP_FAILED,
+                            entityType: "card",
+                            entityId: existing.id,
+                            level: "error",
+                            metadata: { imagePath: orphanedImagePath, error: String(err) },
+                        });
+                    });
                 }
             }
         }
@@ -122,7 +134,17 @@ export async function saveLessonWithCards(
             if (!card.id || card.id.startsWith("c_")) continue;
             const existing = existingById.get(card.id);
             if (existing?.imagePath && !card.imagePath) {
-                deleteCardImage(existing.imagePath).catch(() => {});
+                const clearedImagePath = existing.imagePath;
+                deleteCardImage(clearedImagePath).catch((err) => {
+                    console.error("[lesson-save] deleteCardImage (cleared image) failed:", err);
+                    enqueueClientLog(() => auth.currentUser!.getIdToken(), {
+                        action: ActivityAction.STORAGE_CLEANUP_FAILED,
+                        entityType: "card",
+                        entityId: existing.id,
+                        level: "error",
+                        metadata: { imagePath: clearedImagePath, error: String(err) },
+                    });
+                });
             }
         }
     }

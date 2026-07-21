@@ -16,6 +16,9 @@ import {
     comboLevel,
     WRONG_PENALTY,
 } from "@/features/flashcard/games/match/config";
+import { auth } from "@/lib/firebase";
+import { ActivityAction } from "@/lib/logging/actions.enum";
+import { enqueueClientLog } from "@/lib/logging/browser";
 import { playSfx, sequence } from "@/shared/audio";
 import { useMatchGameStore } from "../../../hooks";
 import { gradeCard } from "../../../services/card.service";
@@ -134,7 +137,16 @@ export function useMatchScoring({
                     if (card) {
                         // Write to userProgress — works for both owner and shared users.
                         void gradeCard(uid, a.pairId, card, "Good", card.lessonId, uid).catch(
-                            () => {},
+                            (err) => {
+                                console.error("[useMatchScoring] gradeCard failed:", err);
+                                enqueueClientLog(() => auth.currentUser!.getIdToken(), {
+                                    action: ActivityAction.SRS_WRITE_FAILED,
+                                    entityType: "study",
+                                    entityId: a.pairId,
+                                    level: "error",
+                                    metadata: { reason: "match_gradeCard", error: String(err) },
+                                });
+                            },
                         );
 
                         // The cue already fired; wait out its tail, then speak. Consecutive matches
