@@ -427,7 +427,8 @@ Each is scheduled into a wave but is **NOT READY** until its question answers. E
 
 #### T-117c — Tests for the flashcard data services
 
-**Size** L · **Wave** 2 · **Status** Ready
+**Size** L · **Wave** 2 · **Status** ✅ **DONE** (Sprint 5) — _was: Ready_
+**Delivered** Emulator-tier coverage for `lesson-save` (create/update/delete/reorder/no-op diffs, 10 tests), `card.service` (CRUD + batch reorder, 5 tests), `comment.service` (CRUD + notification-skip, 11 tests), `access.service` (invite lifecycle, 6 tests), `shared.service` (`getSharedLesson`'s access gate + field-stripping, 7 tests), plus a unit-tier `comment-validation.test.ts` (5 tests) for the pure sanitize/validate helpers. New shared harness (`services/__tests__/emu-auth.ts`) signs the ambient client SDK into the Auth emulator via a minted custom token, since none of these services accept an injectable `db`. **Two production bugs found and pinned as labeled regression tests, not silently fixed:** (1) `syncInviteToCollaborator`'s client-side write is rejected by `firestore.rules` for every first-time invite acceptance (the rule only allows the owner or an existing editor to update a lesson doc); (2) `getSharedLesson` masks that same failure as a plain 404 via its blanket `permission-denied → null` catch.
 **Traces to** ADR-117 (AD-17) · W-16, TD-2, OP-23 · cluster **C8** · `assess/02`, `/03`, `/07`, `/09`
 **Description.** All flashcard data services are unguarded: `lesson-save`'s diff-based batch writer, `card`, `comment`, `access` and `shared` services. These are the paths ADR-106, ADR-109 and ADR-115 rewrite, so this is the regression net for Waves 3–5.
 **Acceptance criteria**
