@@ -125,7 +125,8 @@ Each is scheduled into a wave but is **NOT READY** until its question answers. E
 **Rollback** Delete the file; no code depends on it.
 
 #### T-120b — Backfill ledger entries for all in-flight staged work
-**Size** M · **Wave** 1 · **Status** Ready
+**Size** M · **Wave** 1 · **Status** ✅ **DONE** (Sprint 1) — *was: Ready*
+**Delivered** 16 rows (`LDG-01`…`LDG-16`) in `docs/migrations-ledger.md`, grouped by governing ADR, every stage claim verified against the working tree rather than inherited from the planning documents. Covers all six ADRs named in the criteria, plus ADR-115's Q-10 predicate divergence and the Sprint 0 lint ratchet (which had been landed in stages one commit before the ledger existed). All five code markers cross-referenced.
 **Traces to** ADR-120 (AD-20) · RC-3, CX-1, TD-1, W-21 · cluster **C16** · `assess/04`, `/05`, `/07`
 **Description.** Populate the ledger with the staged work already in flight, so the plan's own gated dispositions stop being unrecorded assumptions. ADR-120 names these as the ledger's initial entries: ADR-108's removal gate, ADR-109's per-schema Q-12 disposition, ADR-110's Drawer/NQ-3, ADR-114's Q-9 analytics, ADR-119's five delete-unless-claimed gates, and ADR-118's Open hosting.
 **Acceptance criteria**

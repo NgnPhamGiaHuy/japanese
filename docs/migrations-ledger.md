@@ -49,11 +49,79 @@ Read that row as a sentence: _the end state is one reader; we are at two; Jane d
 
 ## Rows
 
-_No rows yet. Backfilling the ledger with the program's in-flight staged work — the notification migration, the gated schema dispositions, the dead-surface gates, and the open hosting decision — is **T-120b**, the next task in Sprint 1._
+16 open rows, grouped by the decision that governs them. Owner for every row is **NgnPhamGiaHuy**, who holds all three answering roles (product intent, GCP/ops console, hosting) — recorded in the Sprint 0 completion record. Review-by follows the wave in which each gate first bites: Wave 1 → Sprint 5, Wave 3 → Sprint 9, Wave 4 → Sprint 14, Wave 5 → Sprint 19, Wave 6 → Sprint 26.
 
-| ID  | Change | Intended end state | Current stage | Owner | Review-by | Gate |
-| --- | ------ | ------------------ | ------------- | ----- | --------- | ---- |
-| —   | —      | —                  | —             | —     | —         | —    |
+Every stage claim below was verified against the working tree at `f3951e8`, not inherited from the planning documents — a row that misstates its stage is worse than no row at all.
+
+### Notification migration (ADR-108)
+
+| ID       | Change                           | Intended end state                                                                                                               | Current stage                                                                                                                                                                                  | Owner         | Review-by | Gate           |
+| -------- | -------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------- | --------- | -------------- |
+| `LDG-01` | Retire the legacy document shape | No document is read through `isUnread()`'s legacy branch; the four `@deprecated` fields are deleted; the legacy index is dropped | **Dual-read shipped and frozen.** `deckId`, `deckTitle`, `link`, `read` all live (`features/notifications/types/index.ts:71-81`); `isUnread()` still branches on the legacy shape (`:104-109`) | NgnPhamGiaHuy | Sprint 19 | `Q-5` + `NQ-1` |
+| `LDG-02` | Reconcile the type vocabulary    | `NotificationType` describes exactly the set of values writers actually write                                                    | **Drifted, target unrecorded.** The union declares 4 values; writers emit 10 (incl. `digest`). `domain/events.ts:14` says the two "are reconciled as producers migrate" and names no end state | NgnPhamGiaHuy | Sprint 19 | `Q-7`          |
+
+`LDG-01` is the template row ADR-120 calls for: it names its gate, and its stage is a fact about the code rather than an intention. Its two gates are distinct — `Q-5` asks what shape production data is actually in, `NQ-1` asks whether the supporting index/rules deploy the runbook flags as _"NOT yet deployed"_ has since happened. Neither is answerable from the repository.
+
+### Schema enforcement (ADR-109)
+
+| ID       | Change                          | Intended end state                                                        | Current stage                                                                                                             | Owner         | Review-by | Gate   |
+| -------- | ------------------------------- | ------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- | ------------- | --------- | ------ |
+| `LDG-03` | `cardContentSchema` disposition | Enforced at the card write boundary, or deleted — not declared and unused | **Declared, zero non-test consumers** (verified by grep); its header claims it is "the single validation source of truth" | NgnPhamGiaHuy | Sprint 14 | `Q-12` |
+| `LDG-04` | `privacyModeSchema` disposition | Enforced at its write boundary, or deleted                                | **Declared, zero non-test consumers** (verified by grep)                                                                  | NgnPhamGiaHuy | Sprint 14 | `Q-12` |
+| `LDG-05` | `publicRoleSchema` disposition  | Enforced at its write boundary, or deleted                                | **Declared, zero non-test consumers** (verified by grep)                                                                  | NgnPhamGiaHuy | Sprint 14 | `Q-12` |
+
+### Dialog primitive (ADR-110)
+
+| ID       | Change               | Intended end state                                                                 | Current stage                                                                                                                                                                                | Owner         | Review-by | Gate                                                 |
+| -------- | -------------------- | ---------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------- | --------- | ---------------------------------------------------- |
+| `LDG-06` | `Drawer` disposition | `Drawer` is deleted, or adopted by the two bespoke slide-panels that exist instead | **Shipped with zero render sites.** Both `<Drawer` matches in the tree are inside its own definition — a type annotation and a doc-comment example (`shared/components/ui/Drawer.tsx:21,35`) | NgnPhamGiaHuy | Sprint 26 | `NQ-3` (default: **delete**; owner veto window open) |
+
+### Analytics pipeline (ADR-114)
+
+| ID       | Change                                        | Intended end state                                                                                                       | Current stage                                                                                                                                                                | Owner         | Review-by | Gate  |
+| -------- | --------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------- | --------- | ----- |
+| `LDG-07` | `analytics_daily` + `metadata/counters` reads | Both collections have a real writer, or their read paths are removed and every surface renders absent data **as absent** | **Read by admin, written by nothing in-repo.** The dashboard substitutes zeros and the CSV export synthesizes hardcoded-zero rows, both indistinguishable from measured data | NgnPhamGiaHuy | Sprint 9  | `Q-9` |
+
+### Configuration and hosting (ADR-118)
+
+| ID       | Change                               | Intended end state                                                      | Current stage                                                                                                                                                                                                                                                 | Owner         | Review-by | Gate  |
+| -------- | ------------------------------------ | ----------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------- | --------- | ----- |
+| `LDG-08` | Canonical deployment origin          | A production origin is recorded as an ADR and `SITE_URL` resolves to it | **OPEN — no decision exists.** `SITE_URL` falls back to `http://localhost:3000` (`src/lib/site.ts:5`), and that fallback silently feeds sitemap, robots, `metadataBase`, OG images and every share URL. **Standing hazard: nothing errors when it is wrong.** | NgnPhamGiaHuy | Sprint 5  | `Q-2` |
+| `LDG-09` | One `APP_ID` derivation (**T-118b**) | One derivation consumed by both the app and the functions package       | **BLOCKED, not started.** Satisfying it _is_ a tenant repartition if the two production env vars disagree: reads and writes move to a different `artifacts/{APP_ID}` root, nothing errors, and no code revert reunites the data                               | NgnPhamGiaHuy | Sprint 5  | `Q-6` |
+
+### Dead surfaces (ADR-119)
+
+| ID       | Change                                                     | Intended end state                                                                                            | Current stage                                                                                                                       | Owner         | Review-by | Gate   |
+| -------- | ---------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- | ------------- | --------- | ------ |
+| `LDG-10` | 7 dormant `NotificationKind`s                              | Each kind has a producer, or is deleted from the registry and its schema                                      | **Declared with zero producers** — 7 of 16 kinds; the registry, emit schema, collapse logic and rendering all carry weight for them | NgnPhamGiaHuy | Sprint 19 | `Q-8`  |
+| `LDG-11` | 8 dormant `ActivityAction`s + `cloud_function` `LogSource` | Each is emitted somewhere, or deleted — including a decision on the kana-practice logging gap                 | **Declared with zero emitters.** Kana practice completes without logging while its quiz/survival siblings log                       | NgnPhamGiaHuy | Sprint 19 | `Q-11` |
+| `LDG-12` | Inert admin controls                                       | Each control is wired, or removed — including the Settings stub and the orphan `canChangeSettings` permission | **Shipped and inert.** Three Quick Action buttons have no handler; the permission is granted to no surface                          | NgnPhamGiaHuy | Sprint 19 | `Q-13` |
+| `LDG-13` | `fanOutNotifications` callable                             | Wired into a request path, or deleted from the functions package                                              | **Deployed-but-untriggered by its own docblock.** No in-repo caller exists                                                          | NgnPhamGiaHuy | Sprint 19 | `Q-6`  |
+| `LDG-14` | Storybook toolchain                                        | Adopted with stories that justify it, or removed with its 8 devDependencies and unreferenced scaffold SVGs    | **8 devDependencies supporting 1 story file**                                                                                       | NgnPhamGiaHuy | Sprint 19 | `Q-17` |
+
+### Admin authority (ADR-115)
+
+| ID       | Change                           | Intended end state                                                                   | Current stage                                                                                                                                                              | Owner         | Review-by | Gate   |
+| -------- | -------------------------------- | ------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------- | --------- | ------ |
+| `LDG-15` | Align admin-authority predicates | One predicate answers "is this user an admin", consulted by app, rules and functions | **Three divergent predicates.** The app server, the Firestore rules' `isSystemAdmin` (existence-only), and the functions-side check disagree on what constitutes authority | NgnPhamGiaHuy | Sprint 14 | `Q-10` |
+
+### Landed in stages without a row (backfilled)
+
+| ID       | Change                           | Intended end state                                                       | Current stage                                                                                                           | Owner         | Review-by | Gate                                                       |
+| -------- | -------------------------------- | ------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------- | ------------- | --------- | ---------------------------------------------------------- |
+| `LDG-16` | Lint ratchet baseline (Sprint 0) | The baseline list is empty and every error-level rule applies everywhere | **12 files pinned to `warn`** in `src/eslint.config.mjs` so CI lint could become blocking without fixing unrelated code | NgnPhamGiaHuy | Sprint 14 | None — owner-driven; entries retire with T-116a and T-109a |
+
+`LDG-16` is this ledger's own first test case. It was landed in Sprint 0, one commit before the ledger existed, and would otherwise have become exactly the kind of untracked staged state the ledger exists to prevent.
+
+## Code markers cross-reference
+
+Every deprecation marker and "reconcile later" comment in the tree maps to a row that names its removal condition. This list is the check ADR-120 asks for; if a new marker appears without a row, the check fails.
+
+| Marker                                               | Location                                            | Row      |
+| ---------------------------------------------------- | --------------------------------------------------- | -------- |
+| `@deprecated deckId` · `deckTitle` · `link` · `read` | `features/notifications/types/index.ts:71,73,75,78` | `LDG-01` |
+| `isUnread()` legacy fallback branch                  | `features/notifications/types/index.ts:104-109`     | `LDG-01` |
+| _"the two are reconciled as producers migrate"_      | `features/notifications/domain/events.ts:14`        | `LDG-02` |
 
 ## Closed rows
 
