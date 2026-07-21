@@ -303,7 +303,8 @@ Each is scheduled into a wave but is **NOT READY** until its question answers. E
 ### ADR-102 — One-way flashcard → notifications (P1)
 
 #### T-102a — Introduce the notifications injection/registry seam for cross-feature actions
-**Size** M · **Wave** 1 · **Status** Ready
+**Size** M · **Wave** 1 · **Status** ✅ **DONE** (Sprint 3, re-sequenced) — *was: Ready*
+**Delivered** `features/notifications/domain/action-registry.ts` — a kind → handlers seam, dependency-free and Firebase-free, exposed on the notifications public API. The degraded path is the point: an unregistered kind returns `undefined` (the inbox renders without the action, never crashes) and reports **once per kind** through an injected reporter, naming the kind and the fix. 8 unit tests cover it. Additive — `InviteActions` still holds its direct import until T-102b.
 **Traces to** ADR-102 (AD-02) · W-1, RC-1, TD-4, S-9 · cluster **C3** · `assess/03`, `/04`, `/07`, `/11`; `disc/08`
 **Description.** The notifications platform has a write-side inversion point (registry + `emitNotification` facade) but no render/act-side equivalent, so the inbox must import each kind's action handler directly from its producing feature. Build the missing half: a seam on notifications' public API mapping notification kinds to action handlers, registered by producing features at composition time.
 **Acceptance criteria**

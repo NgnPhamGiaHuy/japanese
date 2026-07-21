@@ -19,6 +19,17 @@ export { NotificationsProvider, useNotifications } from "./context/Notifications
 export { NotificationRow } from "./components";
 export { flattenNotificationGroups } from "./domain/format";
 
+// Act-side seam. Producing features register their own handlers here at the
+// composition root; the inbox renders whatever is registered and never imports
+// a feature. This is a public-API obligation of notifications, not an internal
+// detail — adding an actionable kind must not require a new import into this
+// feature, which is what keeps the dependency one-way (ADR-102).
+export { hasNotificationActions, registerNotificationActions } from "./domain/action-registry";
+export type {
+    NotificationActionContext,
+    NotificationActionHandlers,
+} from "./domain/action-registry";
+
 // Write path. Server-authoritative: the caller supplies intent, not a recipient.
 export {
     deleteAllNotifications,
