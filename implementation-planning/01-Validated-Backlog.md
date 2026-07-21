@@ -395,7 +395,8 @@ Each is scheduled into a wave but is **NOT READY** until its question answers. E
 
 #### T-117a — Unit tests for the SRS math (`domain/srs`)
 
-**Size** M · **Wave** 2 · **Status** Ready
+**Size** M · **Wave** 2 · **Status** ✅ **DONE** (Sprint 5) — _was: Ready_
+**Delivered** 33 tests in `domain/srs.test.ts` covering `deriveStatus`, all four `computeNextSRS` grade branches, `nextReviewAt` scheduling, and the new/due/mistake card selectors. Discrimination verified empirically: an injected off-by-one in Hard's interval math broke exactly 2 tests, confirmed, then the source was reverted (`git diff --stat` clean).
 **Traces to** ADR-117 (AD-17) · W-16, TD-2, OP-23, S-10 · cluster **C8** · `assess/02`, `/03`, `/07`, `/09`
 **Description.** `progress.service`'s SRS logic is the highest-consequence untested unit in the repository — scheduling math whose regressions are user-data-affecting and hard to notice. It is also a named allocation priority in ADR-117 and sits under paths that later waves rewrite.
 **Acceptance criteria**
