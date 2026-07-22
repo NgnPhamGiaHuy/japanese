@@ -14,9 +14,9 @@ import Confetti from "react-confetti";
 import { m } from "motion/react";
 
 import { Button } from "@/shared/components/ui";
-import { usePrefersReducedMotion } from "@/shared/hooks";
 import Leaderboard from "./Leaderboard";
 import { StatGrid } from "./StatGrid";
+import { usePrefersReducedMotion } from "../hooks";
 
 import type { LucideIcon } from "lucide-react";
 import type { TierInfo } from "@/features/game/domain";
