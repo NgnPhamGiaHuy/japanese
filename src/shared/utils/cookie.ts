@@ -1,25 +1,19 @@
+/**
+ * @file shared/utils/cookie
+ * The auth cookie's name — the one fact both the client and the server need
+ * to agree on.
+ *
+ * @remarks
+ * Pre-ADR-107, this file also read/wrote the cookie directly via
+ * `document.cookie`, because the cookie held a JS-readable raw ID token. It
+ * now holds an httpOnly, server-minted session cookie (`lib/auth-session.ts`)
+ * — client JS cannot read or write it at all, by design. Setting, clearing,
+ * and verifying it are exclusively server-side concerns now: see
+ * `features/user/actions/session.actions.ts` (mint/revoke) and
+ * `features/admin/services/admin.service.ts` (verify, for admin actions).
+ * `proxy.ts`'s edge gate still reads this cookie's *presence* via
+ * `request.cookies` — that works regardless of httpOnly, since the
+ * restriction is on JavaScript's `document.cookie`, not on the server
+ * reading the raw `Cookie` request header.
+ */
 export const COOKIE_NAME = "auth-token";
-const MAX_AGE = 60 * 60 * 24 * 7; // 7 days
-
-export function setAuthCookie(token: string): void {
-    // `Secure` only over HTTPS — omitted on http://localhost so local dev still sets the cookie.
-    // Intentionally not httpOnly: the Firebase client SDK refreshes this token (see proxy.ts).
-    const isSecure = typeof location !== "undefined" && location.protocol === "https:";
-    document.cookie = [
-        `${COOKIE_NAME}=${encodeURIComponent(token)}`,
-        "path=/",
-        `max-age=${MAX_AGE}`,
-        "SameSite=Lax",
-        ...(isSecure ? ["Secure"] : []),
-    ].join("; ");
-}
-
-export function clearAuthCookie(): void {
-    document.cookie = `${COOKIE_NAME}=; path=/; max-age=0; SameSite=Lax`;
-}
-
-export function getAuthCookie(): string | null {
-    if (typeof document === "undefined") return null;
-    const match = document.cookie.match(new RegExp(`(?:^|; )${COOKIE_NAME}=([^;]*)`));
-    return match ? decodeURIComponent(match[1]) : null;
-}

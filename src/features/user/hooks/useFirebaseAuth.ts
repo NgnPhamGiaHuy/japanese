@@ -10,7 +10,7 @@ import { useAppStore } from "@/lib/app-store";
 import { auth } from "@/lib/firebase";
 import { ActivityAction } from "@/lib/logging/actions.enum";
 import { enqueueClientLog } from "@/lib/logging/browser";
-import { clearAuthCookie, setAuthCookie } from "@/shared/utils";
+import { createSessionAction, revokeSessionAction } from "../actions/session.actions";
 
 /**
  * Firebase Auth integration hook.
@@ -50,9 +50,22 @@ export function useFirebaseAuth() {
                 let token: string | null = null;
                 try {
                     token = await user.getIdToken();
-                    setAuthCookie(token);
-                } catch {
-                    clearAuthCookie();
+                    const result = await createSessionAction(token);
+                    if (!result.ok) {
+                        console.error(
+                            "[useFirebaseAuth] createSessionAction failed:",
+                            result.error,
+                        );
+                        enqueueClientLog(() => user.getIdToken(), {
+                            action: ActivityAction.SESSION_MINT_FAILED,
+                            entityType: "auth",
+                            entityId: user.uid,
+                            level: "error",
+                            metadata: { source: "onIdTokenChanged", error: result.error },
+                        });
+                    }
+                } catch (err) {
+                    console.error("[useFirebaseAuth] session mint round-trip failed:", err);
                 }
                 setUser(user);
 
@@ -90,8 +103,10 @@ export function useFirebaseAuth() {
                     });
                 }
             } else {
-                // User logged out (handled by signOut() function)
-                clearAuthCookie();
+                // User logged out (handled by signOut() function, which already
+                // revokes the session — this is a defensive, idempotent backstop
+                // in case onIdTokenChanged fires user:null via some other path).
+                void revokeSessionAction();
                 setUser(null);
             }
             setAuthReady(true);

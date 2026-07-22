@@ -63,4 +63,7 @@ export const ActivityAction = {
     NOTIFICATION_DELIVERY_FAILED: "notification.delivery_failed",
     CARD_SCHEMA_HEAL_FAILED: "card.schema_heal_failed",
     ADMIN_CLEANUP_FAILED: "admin.cleanup_failed",
+
+    // ── Session cookie lifecycle (ADR-107, T-107a) ────────────────────────────
+    SESSION_MINT_FAILED: "session.mint_failed",
 } as const;

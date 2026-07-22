@@ -8,17 +8,29 @@ import {
 import { auth, googleProvider } from "@/lib/firebase";
 import { ActivityAction } from "@/lib/logging/actions.enum";
 import { enqueueClientLog } from "@/lib/logging/browser";
-import { clearAuthCookie, setAuthCookie } from "@/shared/utils";
 import { logUserLogin, logUserLogout } from "./auth-logging.service";
+import { createSessionAction, revokeSessionAction } from "../actions/session.actions";
 
 import type { User } from "firebase/auth";
 
 /**
- * Persists the signed-in Firebase user in the route-guard cookie.
+ * Mints the httpOnly session cookie (ADR-107) for the signed-in Firebase
+ * user via a server round-trip — the client never writes this cookie
+ * directly (it can't; httpOnly cookies aren't reachable from page JS).
  */
 async function persistSignedInUser(user: User): Promise<User> {
     const token = await user.getIdToken();
-    setAuthCookie(token);
+    const result = await createSessionAction(token);
+    if (!result.ok) {
+        console.error("[auth.service] createSessionAction failed:", result.error);
+        enqueueClientLog(() => user.getIdToken(), {
+            action: ActivityAction.SESSION_MINT_FAILED,
+            entityType: "auth",
+            entityId: user.uid,
+            level: "error",
+            metadata: { source: "persistSignedInUser", error: result.error },
+        });
+    }
 
     // Explicitly log login (in addition to hook listener for immediate feedback)
     logUserLogin(token, {
@@ -41,9 +53,10 @@ async function persistSignedInUser(user: User): Promise<User> {
 }
 
 /**
- * Opens the Google OAuth popup and persists the ID token in a cookie.
+ * Opens the Google OAuth popup and mints the server-side session cookie.
  * Firebase handles session persistence in localStorage/IndexedDB;
- * the cookie is used exclusively by Next.js `proxy` for route protection.
+ * the httpOnly cookie is used by Next.js `proxy` for route protection
+ * (presence only) and by admin actions (real, server-side verification).
  *
  * Login logging is handled by useFirebaseAuth hook via onIdTokenChanged listener.
  */
@@ -63,8 +76,9 @@ export async function completeGoogleRedirectSignIn(): Promise<User | null> {
 }
 
 /**
- * Signs the current user out and removes the auth cookie so the proxy
- * redirects immediately on the next navigation.
+ * Signs the current user out: revokes the session server-side (so a copied
+ * cookie value stops verifying immediately, not merely on natural expiry)
+ * and clears the cookie, so the proxy redirects on the next navigation.
  * Logs the logout event before clearing the session.
  */
 export async function signOut(): Promise<void> {
@@ -78,6 +92,6 @@ export async function signOut(): Promise<void> {
             // Non-blocking
         }
     }
-    clearAuthCookie();
+    await revokeSessionAction();
     await firebaseSignOut(auth);
 }
