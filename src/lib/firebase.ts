@@ -52,9 +52,10 @@ if (
     // popup, which E2E can't drive reliably. e2e/helpers/emulator-auth.ts
     // mints a custom token via the Admin SDK against the SAME Auth emulator;
     // the test calls this to sign in, exercising the real onIdTokenChanged →
-    // setAuthCookie → proxy.ts pipeline exactly as a real sign-in would,
-    // without needing real Google credentials. Only ever defined inside this
-    // already double-gated block.
+    // createSessionAction (mints the httpOnly session cookie, ADR-107) →
+    // proxy.ts pipeline exactly as a real sign-in would, without needing real
+    // Google credentials. Only ever defined inside this already double-gated
+    // block.
     if (typeof window !== "undefined") {
         (
             window as typeof window & { __e2eSignIn?: (customToken: string) => Promise<void> }
