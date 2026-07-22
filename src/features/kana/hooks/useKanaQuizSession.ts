@@ -23,7 +23,7 @@ import { comboMultiplier, useGameSession } from "@/features/game";
 import { useUserProgress } from "@/features/user";
 import { playSfx, sequence } from "@/shared/audio";
 import { shuffleArray } from "@/shared/utils";
-import { VISUAL_GROUPS } from "../data";
+import { buildDistractors } from "./kanaDistractors";
 
 import type { KanaChar, QuestionType } from "../types";
 
@@ -49,37 +49,6 @@ interface UseKanaQuizSessionParams {
     /** Optional callback fired after each correct answer with points and new streak. */
     onCorrectCombo?: (info: { points: number; streak: number }) => void;
     session?: InjectedSession;
-}
-
-/**
- * Builds visually and phonetically similar distractors for a target character.
- *
- * @remarks
- * Prioritises characters from the same visual group and phonetic group.
- * Falls back to random dataset characters when the pool is too small.
- */
-function buildDistractors(target: KanaChar, dataset: KanaChar[]): KanaChar[] {
-    const visualMatch = VISUAL_GROUPS.find((g) => g.includes(target.char)) ?? [];
-    const phoneticMatch = dataset.filter((i) => i.group === target.group).map((i) => i.char);
-
-    let pool = dataset.filter(
-        (i) =>
-            i.char !== target.char &&
-            i.romaji !== target.romaji &&
-            (visualMatch.includes(i.char) || phoneticMatch.includes(i.char)),
-    );
-
-    if (pool.length < 3) {
-        const remaining = dataset.filter(
-            (i) =>
-                i.char !== target.char &&
-                i.romaji !== target.romaji &&
-                !pool.some((p) => p.char === i.char),
-        );
-        pool = [...pool, ...shuffleArray(remaining)];
-    }
-
-    return shuffleArray(pool).slice(0, 3);
 }
 
 /**
