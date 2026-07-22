@@ -49,7 +49,7 @@ Read that row as a sentence: _the end state is one reader; we are at two; Jane d
 
 ## Rows
 
-19 open rows (`LDG-10`, `LDG-17` closed below), grouped by the decision that governs them. Owner for every row is **NgnPhamGiaHuy**, who holds all three answering roles (product intent, GCP/ops console, hosting) — recorded in the Sprint 0 completion record. Review-by follows the wave in which each gate first bites: Wave 1 → Sprint 5, Wave 3 → Sprint 9, Wave 4 → Sprint 14, Wave 5 → Sprint 19, Wave 6 → Sprint 26.
+18 open rows (`LDG-02`, `LDG-10`, `LDG-17` closed below), grouped by the decision that governs them. Owner for every row is **NgnPhamGiaHuy**, who holds all three answering roles (product intent, GCP/ops console, hosting) — recorded in the Sprint 0 completion record. Review-by follows the wave in which each gate first bites: Wave 1 → Sprint 5, Wave 3 → Sprint 9, Wave 4 → Sprint 14, Wave 5 → Sprint 19, Wave 6 → Sprint 26.
 
 Every stage claim below was verified against the working tree at `f3951e8`, not inherited from the planning documents — a row that misstates its stage is worse than no row at all.
 
@@ -58,9 +58,10 @@ Every stage claim below was verified against the working tree at `f3951e8`, not 
 | ID       | Change                           | Intended end state                                                                                                               | Current stage                                                                                                                                                                                  | Owner         | Review-by | Gate           |
 | -------- | -------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------- | --------- | -------------- |
 | `LDG-01` | Retire the legacy document shape | No document is read through `isUnread()`'s legacy branch; the four `@deprecated` fields are deleted; the legacy index is dropped | **Dual-read shipped and frozen.** `deckId`, `deckTitle`, `link`, `read` all live (`features/notifications/types/index.ts:71-81`); `isUnread()` still branches on the legacy shape (`:104-109`) | NgnPhamGiaHuy | Sprint 19 | `Q-5` + `NQ-1` |
-| `LDG-02` | Reconcile the type vocabulary    | `NotificationType` describes exactly the set of values writers actually write                                                    | **Drifted, target unrecorded.** The union declares 4 values; writers emit 10 (incl. `digest`). `domain/events.ts:14` says the two "are reconciled as producers migrate" and names no end state | NgnPhamGiaHuy | Sprint 19 | `Q-7`          |
 
 `LDG-01` is the template row ADR-120 calls for: it names its gate, and its stage is a fact about the code rather than an intention. Its two gates are distinct — `Q-5` asks what shape production data is actually in, `NQ-1` asks whether the supporting index/rules deploy the runbook flags as _"NOT yet deployed"_ has since happened. Neither is answerable from the repository.
+
+`LDG-02` (reconcile the type vocabulary) closed below — T-108a reached its full stated end state.
 
 ### Schema enforcement (ADR-109)
 
@@ -136,9 +137,8 @@ Every deprecation marker and "reconcile later" comment in the tree maps to a row
 
 | Marker                                               | Location                                            | Row      |
 | ---------------------------------------------------- | --------------------------------------------------- | -------- |
-| `@deprecated deckId` · `deckTitle` · `link` · `read` | `features/notifications/types/index.ts:71,73,75,78` | `LDG-01` |
-| `isUnread()` legacy fallback branch                  | `features/notifications/types/index.ts:104-109`     | `LDG-01` |
-| _"the two are reconciled as producers migrate"_      | `features/notifications/domain/events.ts:14`        | `LDG-02` |
+| `@deprecated deckId` · `deckTitle` · `link` · `read` | `features/notifications/types/index.ts:81,83,85,88` | `LDG-01` |
+| `isUnread()` legacy fallback branch                  | `features/notifications/types/index.ts:114-119`     | `LDG-01` |
 
 ## Closed rows
 
@@ -146,3 +146,4 @@ Every deprecation marker and "reconcile later" comment in the tree maps to a row
 | -------- | ------------------------------------------------------ | ---------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `LDG-17` | Route cross-feature imports through barrels (T-101b/c) | 2026-07-21 | (T-101c) | End state reached in two stages: T-101b's retry (152 statements + 4 inline refs across 89 files) reduced deep cross-boundary imports to zero; T-101c added `import/no-restricted-paths` (9 feature zones + 1 app zone, uniform exception list of every feature's `index.ts`/`server.ts`) as `error`, verified to both fire on injected violations and pass the entire existing codebase with 0 errors. |
 | `LDG-10` | 7 dormant `NotificationKind`s (T-119a) | 2026-07-22 | (T-119a) | Q-8's standing fallback applied: all 7 zero-producer kinds (`invite_declined`, `deck_updated`, `deck_deleted`, `privacy_changed`, `overtaken`, `leaderboard_top3`, `achievement`) deleted from the union and the registry, plus 2 now-dead `NotificationInput` fields (`gameMode`, `achievementKind`) whose only consumers were 3 of the deleted kinds. The emit schema and rendering carried zero kind-specific code for any of the 7 — a smaller real footprint than originally audited. |
+| `LDG-02` | Reconcile the type vocabulary (T-108a) | 2026-07-22 | (T-108a) | `NotificationType` is now `NotificationKind \| "digest"` — a self-maintaining alias, not a hand-listed literal union — verified via `check-vocabulary-agreement.mjs`'s `NotificationType` target flipped from `report-only` to `enforce` and passing (`agrees (10 values)`). Sequenced after T-119a (shrinking `NotificationKind` to its 9 active members first) so the alias needed no exclusion list. `NotificationIcon.tsx` made genuinely exhaustive (an `assertNever` fallback, not a silent `default`), satisfying ADR-108's own success criterion that a non-exhaustive switch must fail typecheck. |

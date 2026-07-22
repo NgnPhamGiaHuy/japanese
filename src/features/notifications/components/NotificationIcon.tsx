@@ -1,8 +1,21 @@
 import { Bell, Copy, MessageSquare, Shield, Trash2, UserPlus } from "lucide-react";
 
+import type { NotificationType } from "../types";
+
 const ICON_BASE = "flex h-10 w-10 shrink-0 items-center justify-center rounded-full";
 
-const NotificationIcon = ({ type }: { type: string }) => {
+/**
+ * Compile-time exhaustiveness check (ADR-108/T-108a): if `NotificationType`
+ * ever grows a value this switch doesn't handle, `type` narrows to something
+ * other than `never` here and TypeScript rejects the call — the widening's
+ * whole point was to stop a missing case from silently falling through to
+ * the generic icon below.
+ */
+function assertNever(type: never): never {
+    throw new Error(`NotificationIcon: unhandled notification type "${String(type)}"`);
+}
+
+const NotificationIcon = ({ type }: { type: NotificationType }) => {
     switch (type) {
         case "invite":
         case "invite_accepted":
@@ -43,12 +56,14 @@ const NotificationIcon = ({ type }: { type: string }) => {
                     <Trash2 size={18} />
                 </div>
             );
-        default:
+        case "digest":
             return (
                 <div className={`${ICON_BASE} bg-gray-100 text-gray-500`}>
                     <Bell size={18} />
                 </div>
             );
+        default:
+            return assertNever(type);
     }
 };
 

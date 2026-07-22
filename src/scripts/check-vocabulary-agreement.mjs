@@ -77,8 +77,17 @@ export function parseTsLiterals(source, exportName) {
     throw new Error(`[${exportName}] no union type or const tuple found`);
 }
 
-function extractTsLiterals({ file, exportName }) {
-    return parseTsLiterals(readSrc(file), exportName);
+/**
+ * `extraLiterals` covers a vocabulary declared as `OtherType | "literal"`
+ * rather than a self-contained union — `parseTsLiterals`'s regex resolves
+ * only same-file string literals, so a referenced type from another file
+ * (e.g. `NotificationType = NotificationKind | "digest"`) is pointed at that
+ * other type's own file/export instead, with the extra literal(s) the alias
+ * adds on top named explicitly here rather than silently dropped.
+ */
+function extractTsLiterals({ file, exportName, extraLiterals }) {
+    const literals = parseTsLiterals(readSrc(file), exportName);
+    return extraLiterals ? [...literals, ...extraLiterals] : literals;
 }
 
 /** Extracts every literal a firestore.rules condition compares the vocabulary's field against, given already-read source text. Pure. */
@@ -143,12 +152,19 @@ const VOCABULARIES = [
     },
     {
         name: "NotificationType",
-        // Report-only: RC-2 already documents the union (4 values) as
-        // narrower than what's actually written (10 values, incl. "digest").
-        // T-108a (Wave 5) widens the union; enforcing here would fail CI on
-        // a divergence that's already tracked and scheduled to be fixed.
-        mode: "report-only",
-        ts: { file: "features/notifications/types/index.ts", exportName: "NotificationType" },
+        // Enforce (T-108a, Wave 5): the union now widens to every value ever
+        // written. Declared as `NotificationKind | "digest"` — a type alias,
+        // not a self-contained literal union — so `ts` resolves the 9
+        // NotificationKind literals from their real declaration
+        // (domain/events.ts) and `extraLiterals` adds the one value outside
+        // that vocabulary ("digest", written directly by the Cloud Function
+        // digest sweep, which bypasses NotificationKind's producer pipeline).
+        mode: "enforce",
+        ts: {
+            file: "features/notifications/domain/events.ts",
+            exportName: "NotificationKind",
+            extraLiterals: ["digest"],
+        },
         rules: {
             file: "firestore.rules",
             pattern: /isValidNotificationType\(t\)\s*\{\s*return t in \[([^\]]+)\]/,

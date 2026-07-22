@@ -67,10 +67,20 @@ const InviteActions = ({
                 // through `lib/logging/browser` would also pull that module's
                 // `server-only` transitive import into this client component
                 // and break its browser test.
-                const handlers = resolveNotificationActions(notification.type, (message) => {
-                    console.error(`[notifications] ${message}`);
-                });
-                void handlers?.onDecline?.({ idToken: token, notification, userId });
+                //
+                // Narrowed explicitly (not just for the type-checker): this
+                // component only ever renders for `type === "invite"`
+                // (NotificationRow's own gate), but `notification.type` is the
+                // full `NotificationType` — which, since T-108a, includes
+                // `"digest"`, not a valid `NotificationKind` the act-side
+                // registry can key on. Guarding here documents that invariant
+                // rather than asserting past it.
+                if (notification.type === "invite") {
+                    const handlers = resolveNotificationActions(notification.type, (message) => {
+                        console.error(`[notifications] ${message}`);
+                    });
+                    void handlers?.onDecline?.({ idToken: token, notification, userId });
+                }
             });
         });
     };

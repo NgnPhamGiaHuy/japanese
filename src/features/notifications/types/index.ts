@@ -1,8 +1,22 @@
 import { startOfDay, subDays } from "date-fns";
 
-import type { NotificationCategory, NotificationPriority } from "../domain/events";
+import type {
+    NotificationCategory,
+    NotificationKind,
+    NotificationPriority,
+} from "../domain/events";
 
-export type NotificationType = "invite" | "comment" | "reply" | "role_change";
+/**
+ * The stored `AppNotification.type` vocabulary (ADR-108, T-108a) — every
+ * `NotificationKind` a producer can emit, plus `"digest"`: the one value
+ * written directly by `functions/src/digest.ts`'s scheduled sweep, which
+ * bypasses the `NotificationInput`/registry/`collapseId` pipeline entirely
+ * and so was never a `NotificationKind` member. This union is now the
+ * complete, closed set of every runtime-written value — see
+ * `check-vocabulary-agreement.mjs`'s `NotificationType` target (`enforce`
+ * mode as of this task) for the automated proof.
+ */
+export type NotificationType = NotificationKind | "digest";
 
 /**
  * An actor behind a (possibly collapsed) notification — powers avatar
