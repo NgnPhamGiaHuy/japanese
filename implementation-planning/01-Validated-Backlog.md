@@ -530,7 +530,8 @@ Each is scheduled into a wave but is **NOT READY** until its question answers. E
 
 #### T-107a — Introduce httpOnly session-cookie issuance and server verification
 
-**Size** L · **Wave** 3 · **Status** Ready
+**Size** L · **Wave** 3 · **Status** ✅ **DONE** (Sprint 9) — _was: Ready_
+**Delivered** `lib/auth-session.ts` (mint/verify/revoke via `adminAuth.createSessionCookie`/`verifySessionCookie(checkRevoked=true)`/`revokeRefreshTokens`), `features/user/actions/session.actions.ts` (`createSessionAction`/`revokeSessionAction` setting/clearing an httpOnly+secure(prod)+sameSite=lax cookie via `next/headers`). `admin.service.ts`'s `assertAdminAction` now verifies the cookie via `verifySessionCookie` instead of the old `verifyIdToken`. 5 emu tests (`lib/auth-session.emu.test.ts`) prove mint→verify round-trip, forged/empty-cookie rejection, revocation (with a deliberate delay to dodge a same-second mint/revoke timestamp tie), and uid fidelity — this harness intentionally skips the `GCLOUD_PROJECT` override other emu tests use, since the emulator stamps its own project onto session cookies regardless of client override. Verified green across unit/browser/emu/E2E. Deliberately did not add a legacy-insecure rollback toggle — re-introducing the exact XSS-bearer-token exposure this task closes is worse than a git revert.
 **Traces to** ADR-107 (AD-07) · W-15, R-11, TD-15, RC-4 · cluster **C7** · `assess/03`, `/08`, `/07`, `/04`, `/11`
 **Description.** The auth cookie currently carries the raw Firebase ID token and is deliberately **not** httpOnly so the client SDK can refresh it, so any XSS anywhere exfiltrates a live bearer token — for an admin's browser, every admin action. Introduce a server-minted, httpOnly session credential with real server-side verification.
 **Acceptance criteria**
@@ -545,7 +546,8 @@ Each is scheduled into a wave but is **NOT READY** until its question answers. E
 
 #### T-107b — Migrate client auth plumbing off the raw ID-token cookie
 
-**Size** M · **Wave** 3 · **Status** Ready
+**Size** M · **Wave** 3 · **Status** ✅ **DONE** (Sprint 9) — _was: Ready_
+**Delivered** `shared/utils/cookie.ts` now exports only `COOKIE_NAME`, with a docblock explaining the httpOnly migration; every client-side `setAuthCookie`/`clearAuthCookie`/`getAuthCookie` is deleted. `useFirebaseAuth.ts`/`auth.service.ts` call the T-107a server actions (`createSessionAction`/`revokeSessionAction`) instead. A repo-wide search confirms zero remaining client reads of the session credential from `document.cookie`.
 **Traces to** ADR-107 (AD-07) · W-15, R-11, RC-4 · cluster **C7** · `assess/03`, `/07`, `/04`
 **Description.** Remove every client-side dependency on reading the credential from `document.cookie`, so the cookie stops being a JS-reachable bearer token. The client SDK keeps its own in-memory token — this narrows, not eliminates, token exposure to page JS, which is the honest scope of ADR-107.
 **Acceptance criteria**
@@ -559,7 +561,8 @@ Each is scheduled into a wave but is **NOT READY** until its question answers. E
 
 #### T-107c — Align cookie lifetime to session semantics; make the edge gate routing-only by contract
 
-**Size** S · **Wave** 3 · **Status** Ready
+**Size** S · **Wave** 3 · **Status** ✅ **DONE** (Sprint 9) — _was: Ready_
+**Delivered** A single `SESSION_COOKIE_MAX_AGE_MS` (5 days) in `lib/auth-session.ts` now drives both the mint call's `expiresIn` and the cookie's own max-age, closing the old 7-day-cookie/1-hour-token mismatch that produced the "loads but every action fails" state. `proxy.ts`'s docblock is rewritten to document the edge gate as routing-UX-only per ADR-107, removing the stale "not httpOnly so the client SDK can refresh it" comment that no longer applied post-T-107a.
 **Traces to** ADR-107 (AD-07) · W-15, RC-4, TD-15 · cluster **C7** · `assess/03`, `/08`
 **Description.** A 7-day cookie currently outlives the 1-hour token inside it, producing the confusing "page loads, all actions fail" state. Align the credential's lifetime to real session semantics, and write down that the edge gate is a routing-UX check only — never a security boundary.
 **Acceptance criteria**
@@ -573,7 +576,8 @@ Each is scheduled into a wave but is **NOT READY** until its question answers. E
 
 #### T-107d — E2E auth regression pass across protected and public routes
 
-**Size** M · **Wave** 3 · **Status** Ready
+**Size** M · **Wave** 3 · **Status** ✅ **DONE** (Sprint 9) — _was: Ready_
+**Delivered** Full `npx playwright test` pass confirmed green across the protected/public route matrix. Found and fixed a real latent bug this migration would otherwise have introduced: `e2e/helpers/sign-in.ts` polled `document.cookie.includes("auth-token=")`, which would hang forever once the cookie became httpOnly (page JS can no longer read it); replaced with a `waitForSessionCookie` helper that polls Playwright's own `page.context().cookies()` API, which does see httpOnly cookies.
 **Traces to** ADR-117 (test tier) applied to ADR-107 (AD-07) · W-15, R-11, S-10 · clusters **C7**, **C8** · `assess/03`, `/02`, `/08`
 **Description.** The auth change touches the one subsystem with no cheap unit-level oracle. This is the Playwright-tier regression net for the whole ADR-107 sequence, exercising the protected/public route matrix that T-118a's single allowlist now defines.
 **Acceptance criteria**
@@ -592,7 +596,8 @@ Each is scheduled into a wave but is **NOT READY** until its question answers. E
 
 #### T-113a — Centralize `useUserProgress` into one shared subscription
 
-**Size** L · **Wave** 3 · **Status** Ready
+**Size** L · **Wave** 3 · **Status** ✅ **DONE** (Sprint 9) — _was: Ready_
+**Delivered** `UserProgressContext.tsx` (Context+Provider, mirroring the pre-existing `NotificationsContext` pattern), mounted once in `lib/providers.tsx`. `useUserProgress.ts`'s read half (`userData`, `loading`) now delegates to the context; all 6 write actions (`addXP`, `completedLesson`, `markLearned`, `recordCharStat`, `resetProgress`) are unchanged. A browser test proves the invariant directly: mounting 3 consumers opens exactly 1 `subscribeUserProgress` call, with correct teardown-on-unmount and simultaneous update propagation to all consumers.
 **Traces to** ADR-113 (AD-13) · R-1, S-14, PC-16, R-10 · `assess/02`, `/08`, `/06`; `disc/07`, `/09`
 **Description.** `useUserProgress` opens one `onSnapshot` listener **per consuming component** across 10 mount sites, in explicit contrast to the single centralized notifications listener the same codebase already runs. Converge it onto one shared per-entity subscription using the pattern that already exists in-repo.
 **Acceptance criteria**
@@ -607,7 +612,8 @@ Each is scheduled into a wave but is **NOT READY** until its question answers. E
 
 #### T-113b — Audit remaining per-mount listeners and centralize per entity
 
-**Size** M · **Wave** 3 · **Status** Ready
+**Size** M · **Wave** 3 · **Status** ✅ **DONE** (Sprint 9) — _was: Ready_
+**Delivered** `LessonsContext.tsx` (same Context+Provider pattern) for `lessons`/`sharedLessons`, mounted alongside `UserProgressProvider` in `lib/providers.tsx`. This found a genuine, real 3× listener duplication on `FlashcardDashboard`: the component itself, `useDashboardState`, and `useDashboardModals` each independently called `useLessons()`, opening 3 separate subscription pairs for the same data — now 1. A browser test proves exactly 1 subscription pair for 3 mounted consumers. Also audited `useLeaderboard` (not centralized — phase-exclusive game screens never mount concurrently, so there is no real duplication) and `useCardsWithProgress` (a genuine duplication between `useFlashcardLoader`/`useStudySession`, but an **intentional, already-documented** design split per `useStudySession`'s own docblock explaining why Study mode needs a live subscription distinct from Match/Speed's static snapshot) — both deliberately left as design questions for the owner rather than mechanically merged, to avoid introducing a regression the corpus already reasoned through once.
 **Traces to** ADR-113 (AD-13) · R-1, R-10, S-14, PC-14 · `assess/02`, `/08`; `disc/07`, `/09`
 **Description.** Extend the centralization rule beyond progress: identify every other per-entity realtime subscription that is opened per consumer rather than once, and converge each. Also confirm ADR-002's four-tier model remains the documented state architecture — the P3 affirmation leg.
 **Acceptance criteria**
@@ -626,7 +632,8 @@ Each is scheduled into a wave but is **NOT READY** until its question answers. E
 
 #### T-114a — Add explicit bounds to unbounded listeners
 
-**Size** M · **Wave** 3 · **Status** Ready
+**Size** M · **Wave** 3 · **Status** ✅ **DONE** (Sprint 9) — _was: Ready_
+**Delivered** `subscribePublicLessons` now runs `where("isPublic","==",true)` + `orderBy("createdAt","desc")` + `limit(pageSize)`, backed by a new composite index in `firestore.indexes.json`. `usePublicLessons()` grows the window via resubscribe (`loadMore`/`hasMore`/`loadingMore`) — the same grow-window mechanism `NotificationsContext` already uses for its bounded realtime channel, per the AC's "not a third [mechanism]." A new "Load more" button appears on the discover tab. A dedicated browser test proves the bound (exact `pageSize` argument on every call), the grow-window behavior, and the page-size reset when the signed-in user changes. Verified empirically against the real Firestore emulator (with the new index) that the bounded query executes correctly — this doubles as confirmation that T-117d's rules-suite collection-group read test's known emulator-version limitation is unrelated to query shape. Found and ledgered (`LDG-19`) that the new composite index is declared but not yet deployed to the production Firebase project — deploying `firestore.indexes.json` changes to a shared production project is an infrastructure action outside agent scope; flagged for the owner to run `firebase deploy --only firestore:indexes`.
 **Traces to** ADR-114 (AD-14) · R-2, NQ-6, R-19 · cluster **C6** · `assess/03`, `/04`, `/08`, `/11`
 **Description.** `subscribePublicLessons` runs a live `collectionGroup` query over all public lessons with no `limit()`, mounted on the flashcard dashboard — every viewer streams the entire public-deck corpus into an un-virtualized grid, with cost growing linearly and unboundedly. Add explicit bounds to it and to every other unbounded listener.
 **Acceptance criteria**
