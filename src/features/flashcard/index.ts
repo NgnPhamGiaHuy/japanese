@@ -44,10 +44,8 @@ export { ShareModal } from "./sharing";
 
 // ─── Study modes ─────────────────────────────────────────────────────────────
 export { StudySession } from "./games/study";
-export { MatchGame } from "./games/match";
-export { matchGameMode } from "./games/match/config";
-export { SpeedConstraintError, SpeedGame } from "./games/speed";
-export { speedGameMode } from "./games/speed/config";
+export { MatchGame, matchGameMode } from "./games/match";
+export { SpeedConstraintError, SpeedGame, speedGameMode } from "./games/speed";
 
 // ─── Data access ─────────────────────────────────────────────────────────────
 export {

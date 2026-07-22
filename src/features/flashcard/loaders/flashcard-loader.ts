@@ -6,8 +6,8 @@
  * Abstracts away the differences between data sources.
  */
 
-import { matchGameMode } from "@/features/flashcard/games/match/config";
-import { speedGameMode } from "@/features/flashcard/games/speed/config";
+import { matchGameMode } from "@/features/flashcard/games/match";
+import { speedGameMode } from "@/features/flashcard/games/speed";
 import { getSharedLesson } from "../services";
 
 import type { User } from "firebase/auth";

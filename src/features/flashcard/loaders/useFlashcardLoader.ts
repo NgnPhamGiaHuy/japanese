@@ -4,8 +4,8 @@ import { useMemo } from "react";
 
 import { useQuery } from "@tanstack/react-query";
 
-import { matchGameMode } from "@/features/flashcard/games/match/config";
-import { speedGameMode } from "@/features/flashcard/games/speed/config";
+import { matchGameMode } from "@/features/flashcard/games/match";
+import { speedGameMode } from "@/features/flashcard/games/speed";
 import { useAppStore } from "@/lib/app-store";
 import { loadFlashcardData } from "./flashcard-loader";
 import { useCardsWithProgress } from "../hooks/useCardsWithProgress";

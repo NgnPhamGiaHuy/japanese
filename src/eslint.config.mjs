@@ -110,22 +110,106 @@ const eslintConfig = defineConfig([
             "**/*.stories.tsx",
         ];
 
+        // ─── Flashcard internal sub-module boundaries (ADR-104, T-104b) ────────
+        //
+        // Flashcard stays one feature (ADR-104) but its internal sub-modules
+        // (dashboard, detail, games/match, games/speed, games/study, sharing,
+        // builder — T-104a) get the same barrel discipline the rule above gives
+        // features: reach a sub-module through its own `index.ts`, never past
+        // it. Layered as EXTRA zones on the same `features/*/**/*.{ts,tsx}`
+        // rule invocation above (not a separate config block) — a second
+        // `import/no-restricted-paths` config for the same files would
+        // silently replace the feature-level zones instead of adding to them,
+        // since flat-config rule values don't merge across config objects.
+        //
+        // Cross-sub-module infrastructure (hooks/, services/, domain/, types/,
+        // utils/, actions/, context/, loaders/, plus the root index.ts/
+        // server.ts/notifications.ts) stays freely reachable — it was
+        // deliberately kept at the feature root, not folded into any one
+        // sub-module (see features/flashcard/index.ts's own docblock on the
+        // contested progress/study/dashboard seam) — so it is excepted for
+        // every zone below, not just the sub-module's own name.
+        const FLASHCARD_SUB_MODULES = [
+            "dashboard",
+            "detail",
+            "games/match",
+            "games/speed",
+            "games/study",
+            "sharing",
+            "builder",
+        ];
+        const FLASHCARD_SUB_MODULE_ENTRY_POINTS = FLASHCARD_SUB_MODULES.map((m) => `${m}/index.ts`);
+        const FLASHCARD_SHARED_ROOT = [
+            "hooks",
+            "services",
+            "domain",
+            "types",
+            "utils",
+            "actions",
+            "context",
+            "loaders",
+            "index.ts",
+            "server.ts",
+            "notifications.ts",
+        ];
+        const FLASHCARD_MESSAGE =
+            "Import the owning sub-module's public API instead — " +
+            "`@/features/flashcard/<sub-module>` (e.g. `sharing`, `builder`, " +
+            "`games/study`). See ADR-104 (architecture-decision/03-Architecture-Decisions.md).";
+        // Directories only (not the root's loose files) — each gets its own zone
+        // below so shared-root code (e.g. loaders/, which unifies personal/shared
+        // data across all 3 game modes) can reach another shared-root dir or any
+        // sub-module's barrel freely, but not a sub-module's internals directly.
+        // Closes the same gap the sub-module zones above close, one level out —
+        // a deep import bypasses a sub-module's barrel exactly as much whether
+        // it comes from a sibling sub-module or from root-level infrastructure.
+        const FLASHCARD_ROOT_DIRS = FLASHCARD_SHARED_ROOT.filter((d) => !d.endsWith(".ts"));
+
         return [
             {
                 // features/<F> may import its OWN internals freely, and every
                 // feature's public entry points — never another feature's internals.
+                // Flashcard additionally gets its own internal sub-module zones
+                // (T-104b) appended below, in the same rule invocation.
                 files: ["features/*/**/*.{ts,tsx}"],
                 ignores: TEST_AND_STORY_FILES,
                 rules: {
                     "import/no-restricted-paths": [
                         "error",
                         {
-                            zones: FEATURES.map((f) => ({
-                                target: `./features/${f}`,
-                                from: "./features",
-                                except: [f, ...PUBLIC_ENTRY_POINTS],
-                                message: MESSAGE,
-                            })),
+                            zones: [
+                                ...FEATURES.map((f) => ({
+                                    target: `./features/${f}`,
+                                    from: "./features",
+                                    except: [f, ...PUBLIC_ENTRY_POINTS],
+                                    message: MESSAGE,
+                                })),
+                                ...FLASHCARD_SUB_MODULES.map((m) => ({
+                                    target: `./features/flashcard/${m}`,
+                                    from: "./features/flashcard",
+                                    except: [
+                                        m,
+                                        ...FLASHCARD_SUB_MODULE_ENTRY_POINTS,
+                                        ...FLASHCARD_SHARED_ROOT,
+                                        // games/hooks is shared between the match and
+                                        // speed sub-modules (useFlashcardGameBestScore,
+                                        // useGameCompletionLogger) — not itself one of
+                                        // the seven protected sub-modules, so it needs
+                                        // its own exception wherever it's reachable.
+                                        ...(m.startsWith("games/") ? ["games/hooks"] : []),
+                                    ],
+                                    message: FLASHCARD_MESSAGE,
+                                })),
+                                ...FLASHCARD_ROOT_DIRS.map((d) => ({
+                                    target: `./features/flashcard/${d}`,
+                                    from: "./features/flashcard",
+                                    except: [
+                                        ...FLASHCARD_SHARED_ROOT,
+                                        ...FLASHCARD_SUB_MODULE_ENTRY_POINTS,
+                                    ],
+                                    message: FLASHCARD_MESSAGE,
+                                })),
+                            ],
                         },
                     ],
                 },

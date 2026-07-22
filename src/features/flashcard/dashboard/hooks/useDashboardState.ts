@@ -10,8 +10,8 @@ import { useTranslations } from "next-intl";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 
-import { matchGameMode } from "@/features/flashcard/games/match/config";
-import { speedGameMode } from "@/features/flashcard/games/speed/config";
+import { matchGameMode } from "@/features/flashcard/games/match";
+import { speedGameMode } from "@/features/flashcard/games/speed";
 import { useLessons, usePublicLessons } from "@/features/flashcard/hooks";
 import { subscribeGameStats } from "@/features/game";
 import { useRouter } from "@/i18n/navigation";

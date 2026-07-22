@@ -8,3 +8,4 @@
 
 export { default as SpeedConstraintError } from "./components/SpeedConstraintError";
 export { default as SpeedGame } from "./components/SpeedGame";
+export { speedGameMode } from "./config";

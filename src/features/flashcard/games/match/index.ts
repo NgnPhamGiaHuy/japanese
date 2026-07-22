@@ -7,3 +7,4 @@
  */
 
 export { default as MatchGame } from "./components/MatchGame";
+export { matchGameMode } from "./config";
