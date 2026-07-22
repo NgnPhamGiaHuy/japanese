@@ -80,6 +80,20 @@ type LessonRoleFields = Pick<
     "ownerId" | "userId" | "roles" | "allowLinkAccess" | "isPublic" | "publicRole" | "invitedEmails"
 >;
 
+/**
+ * Whether a lesson is reachable via its public share link, independent of
+ * any per-user role. SDK-neutral (no Firebase import) so the Admin-SDK
+ * preview path (`shared-preview.service.ts`) can import this one predicate
+ * directly instead of re-deriving the same boolean inline — the predicate
+ * exists once; the file split (client engine vs. Admin-SDK I/O wrapper)
+ * stays for its own, legitimate bundle-isolation reason (ADR-115).
+ */
+export function isPubliclyAccessible(
+    lesson: Pick<Lesson, "allowLinkAccess" | "isPublic">,
+): boolean {
+    return !!(lesson.allowLinkAccess || lesson.isPublic);
+}
+
 interface ResolveRoleParams {
     lesson: LessonRoleFields;
     /** Firebase Auth UID of the current user. Null/undefined = anonymous. */
@@ -120,7 +134,7 @@ export function resolveRole(params: ResolveRoleParams): DeckAccessRole {
     }
 
     // 4. Public link access — hard cap at "commenter".
-    if (lesson.allowLinkAccess || lesson.isPublic) {
+    if (isPubliclyAccessible(lesson)) {
         const pr = lesson.publicRole;
         // publicRole is typed as "viewer" | "commenter" — but guard against
         // legacy Firestore documents that may still have "editor" stored.

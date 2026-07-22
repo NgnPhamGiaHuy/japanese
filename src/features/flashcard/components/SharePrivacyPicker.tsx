@@ -13,7 +13,7 @@ import {
 import { Button, Select } from "@/shared/components/ui";
 
 import type { SelectOption } from "@/shared/components/ui";
-import type { PrivacyMode } from "./ShareModal";
+import type { PrivacyMode } from "../hooks/useShareModal";
 
 /**
  * Options for the public/link "Default role" picker.

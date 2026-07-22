@@ -12,6 +12,7 @@ import { useTranslations } from "next-intl";
 
 import { CommentPanel } from "@/features/flashcard/components";
 import { DEFAULT_DECK_THEME_COLOR } from "@/features/flashcard/types";
+import { canComment as canCommentRole } from "@/features/flashcard/utils/rbac";
 
 import type { DetailCommentsPanelProps } from "../types";
 
@@ -25,7 +26,7 @@ const DetailCommentsPanel = ({
     const t = useTranslations("FlashcardDetail");
     const { lesson, ownerId, lessonId, role, isOwner } = ctx;
     const themeHex = lesson.themeColor || DEFAULT_DECK_THEME_COLOR;
-    const canComment = role === "owner" || role === "editor" || role === "commenter";
+    const canComment = canCommentRole(role);
 
     if (!canComment) return null;
 

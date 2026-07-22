@@ -107,6 +107,30 @@ d("getSharedLesson", () => {
         expect(result!.cards[0].primary).toBe("cat");
     });
 
+    it("grants the owner access when the stored roles map has no self-entry — normalizeLesson heals it before the gate runs", async () => {
+        // OP-5 named shared.service.ts's old roles[uid]==="owner" gate as
+        // divergent from the engine's ownerId ?? userId check. Empirically
+        // (verified by temporarily reverting the T-115a fix and re-running
+        // this exact scenario), that divergence is NOT reachable through
+        // getSharedLesson specifically: normalizeLesson (lesson-normalize.ts)
+        // already back-fills {[ownerId]: "owner"} into the roles map at
+        // read time, before either the old or new gate ever sees it. The
+        // resolveRole() convergence here is defense-in-depth and ADR-115
+        // hygiene (one predicate, not a hand-rolled duplicate that could
+        // drift if normalizeLesson's healing is ever changed) — not a fix
+        // for a live bug in this specific caller.
+        await seedLesson({ roles: {} });
+        await seedCard();
+        const shareId = encodeShareId(OWNER, LESSON_ID);
+        await signInAs(OWNER, "shared-service-owner@example.com");
+
+        const result = await getSharedLesson(shareId, OWNER);
+
+        expect(result).not.toBeNull();
+        expect(result!.meta.viewerRole).toBe("owner");
+        expect(result!.cards).toHaveLength(1);
+    });
+
     it("strips roles/collaborators/invitedEmails/collaboratorMeta from the returned lesson view model", async () => {
         await seedLesson({
             invitedEmails: { "someone@example.com": { role: "viewer", invitedAt: 0 } },

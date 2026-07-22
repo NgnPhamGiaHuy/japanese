@@ -12,6 +12,7 @@ import { use, useState } from "react";
 import { RefreshCw } from "lucide-react";
 
 import {
+    canEdit,
     FlashcardDetailLayout,
     ShareModal,
     useLessons,
@@ -243,7 +244,7 @@ export default function SharedLessonPageClient({
                 onCopyLink={handleCopyLink}
                 onManageAccess={isOwner ? () => setSharingLesson(true) : undefined}
                 onEdit={
-                    role === "owner" || role === "editor"
+                    canEdit(role)
                         ? () =>
                               router.push(
                                   isOwner

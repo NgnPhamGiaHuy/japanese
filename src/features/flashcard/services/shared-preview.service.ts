@@ -23,6 +23,7 @@ import { DEFAULT_DECK_THEME_COLOR } from "@/features/flashcard/types";
 import { APP_ID } from "@/lib/app-id";
 import { adminDb } from "@/lib/firebase-admin";
 import { decodeShareId, encodeShareId } from "@/shared/utils/shareToken";
+import { isPubliclyAccessible } from "../utils/rbac";
 
 // Sitemaps are an explicit "please index/list this" signal — capped well
 // under the 50k-URL-per-sitemap protocol limit; a sitemap INDEX (multiple
@@ -73,7 +74,7 @@ export const getPublicSharedLessonPreview = cache(async function getPublicShared
         if (!snap.exists) return null;
 
         const data = snap.data() ?? {};
-        if (!data.allowLinkAccess && !data.isPublic) return null;
+        if (!isPubliclyAccessible(data)) return null;
 
         return {
             title: typeof data.title === "string" ? data.title : "",

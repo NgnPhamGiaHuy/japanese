@@ -12,7 +12,7 @@ import { BookOpen, Edit2, Gamepad2, Trash2, Zap } from "lucide-react";
 import { useVisibility, VisibilityLevel } from "@/features/flashcard/hooks/useVisibility";
 import { buildShareId } from "@/features/flashcard/services";
 import { DEFAULT_DECK_THEME_COLOR } from "@/features/flashcard/types";
-import { resolveRole, ROLE_CONFIG } from "@/features/flashcard/utils/rbac";
+import { canEdit as canEditRole, resolveRole, ROLE_CONFIG } from "@/features/flashcard/utils/rbac";
 import { TierBadge } from "@/features/game";
 import { Link } from "@/i18n/navigation";
 import { useAppStore } from "@/lib/app-store";
@@ -38,7 +38,7 @@ const DeckCard = ({
     const visibility = useVisibility(lesson);
 
     const resolvedRole = resolveRole({ lesson, userId: user?.uid });
-    const canEdit = resolvedRole === "owner" || resolvedRole === "editor";
+    const canEdit = canEditRole(resolvedRole);
     const canShare = resolvedRole === "owner";
     const canDelete = resolvedRole === "owner";
 

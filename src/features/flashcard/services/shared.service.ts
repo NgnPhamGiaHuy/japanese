@@ -177,15 +177,22 @@ export async function getSharedLesson(
             }
         }
 
-        // RBAC: owner → explicit role → pending invite → public link access
-        const isOwner = lesson.roles?.[currentUserId ?? ""] === "owner";
-        const hasExplicitRole = !!(currentUserId && lesson.roles?.[currentUserId]);
-        const hasPendingInvite = !!(
-            currentUser?.email && lesson.invitedEmails?.[currentUser.email.trim().toLowerCase()]
-        );
-        const linkAccess = lesson.allowLinkAccess || lesson.isPublic;
+        // RBAC gate — resolved once via the canonical engine (ADR-115) and
+        // reused below as viewerRole, rather than a separately re-derived
+        // isOwner/hasExplicitRole/hasPendingInvite/linkAccess check. That
+        // duplicate's isOwner read `roles[uid] === "owner"` directly, which
+        // in principle disagrees with the engine's `ownerId ?? userId` — in
+        // practice `lesson` here is always normalizeLesson's output, which
+        // already back-fills the owner's roles entry, so the two checks
+        // happened to agree at this call site. Converging on one predicate
+        // removes that incidental (and easily broken) coupling.
+        const viewerRole = resolveRole({
+            lesson,
+            userId: currentUserId,
+            userEmail: currentUser?.email ?? null,
+        });
 
-        if (!isOwner && !hasExplicitRole && !hasPendingInvite && !linkAccess) {
+        if (viewerRole === "none") {
             return null;
         }
 
@@ -217,13 +224,6 @@ export async function getSharedLesson(
                     lastReviewedAt: null,
                 } as CardWithProgress;
             }
-        });
-
-        // Resolve role while lesson.roles is still intact
-        const viewerRole = resolveRole({
-            lesson,
-            userId: currentUserId,
-            userEmail: currentUser?.email ?? null,
         });
 
         return {

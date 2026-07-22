@@ -11,5 +11,6 @@ export * from "./useLessons";
 export * from "./useMatchGameStore";
 export * from "./useRevealPronunciation";
 export * from "./useShareInvites";
+export * from "./useShareModal";
 export * from "./useSharedLesson";
 export * from "./useVisibility";

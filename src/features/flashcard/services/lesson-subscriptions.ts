@@ -73,7 +73,12 @@ export function subscribeSharedLessons(
                         __ownerIdFallback: extractOwnerIdFromPath(d.ref.path),
                     });
                 })
-                .filter((l) => l.roles?.[userId] !== "owner"),
+                // Exclude the viewer's own lessons — checked directly against
+                // ownerId ?? userId (ADR-115's owner semantics) rather than
+                // roles[userId], which normalizeLesson above already heals to
+                // include the owner anyway; this avoids depending on that
+                // healing behavior for correctness.
+                .filter((l) => (l.ownerId ?? l.userId) !== userId),
             newestFirst,
         );
         onUpdate(lessons);

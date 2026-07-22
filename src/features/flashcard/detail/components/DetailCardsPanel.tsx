@@ -27,6 +27,7 @@ import {
 } from "@dnd-kit/sortable";
 
 import { DEFAULT_DECK_THEME_COLOR } from "@/features/flashcard/types";
+import { canEdit as canEditRole } from "@/features/flashcard/utils/rbac";
 import { reorderWithFractionalIndex } from "@/shared/utils/reorder";
 import SortableCardItem from "./SortableCardItem";
 
@@ -42,7 +43,7 @@ const DetailCardsPanel = ({
     const t = useTranslations("FlashcardDetail");
     const { lesson, cards, ownerId, lessonId, role } = ctx;
     const themeHex = lesson.themeColor || DEFAULT_DECK_THEME_COLOR;
-    const canEdit = role === "owner" || role === "editor";
+    const canEdit = canEditRole(role);
     const [orderedCards, setOrderedCards] = useState(cards);
 
     // Render-time reset: sync orderedCards whenever a new `cards` value

@@ -1,25 +1,16 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { useMemo, useState } from "react";
 
 import { Dialog } from "@base-ui/react/dialog";
 import { Check, Copy, ShieldAlert, X } from "lucide-react";
 
-import { buildShareId } from "@/features/flashcard/services";
 import { DEFAULT_DECK_THEME_COLOR } from "@/features/flashcard/types";
-import { sanitizePublicRole } from "@/features/flashcard/utils/rbac";
-import { emitNotification } from "@/features/notifications";
-import { useAppStore } from "@/lib/app-store";
-import { ActivityAction } from "@/lib/logging/actions.enum";
-import { enqueueClientLog } from "@/lib/logging/browser";
 import { Button } from "@/shared/components/ui";
-import { useCopyToClipboard } from "@/shared/hooks";
-import { useAlert } from "@/shared/providers";
 import { hexToThemeColor } from "@/shared/utils";
 import ShareCollaboratorsPanel from "./ShareCollaboratorsPanel";
 import SharePrivacyPicker from "./SharePrivacyPicker";
-import { useShareInvites } from "../hooks";
+import { useShareModal } from "../hooks/useShareModal";
 
 import type { DeckAccessRole } from "@/features/flashcard/types";
 import type { Lesson } from "../types";
@@ -28,7 +19,9 @@ import type { Lesson } from "../types";
  * Collaborative Access Controller (Share Modal)
  *
  * @remarks
- * Orchestrates a "Google Docs" style permissions model. Manages:
+ * Renders a "Google Docs" style permissions model. All role derivation,
+ * privacy/role edit state, and persistence live in `useShareModal` — this
+ * component is UI-only (CS-2, T-115a):
  * 1. Public Access: Three modes — Restricted, Link-only, Fully Public.
  * 2. Targeted Invites: Email-based invitations with explicit RBAC.
  * 3. Role Life-cycle: Updating and revoking existing collaborator access.
@@ -39,14 +32,6 @@ import type { Lesson } from "../types";
 
 /** Access levels defining what actions a user can perform on a shared deck. */
 export type Role = DeckAccessRole;
-
-/**
- * Three-tier privacy model:
- * - restricted: only explicitly invited users
- * - link: anyone with the share link (not discoverable)
- * - public: fully public, discoverable without a link
- */
-export type PrivacyMode = "restricted" | "link" | "public";
 
 interface ShareModalProps {
     /** The deck being shared */
@@ -65,214 +50,36 @@ interface ShareModalProps {
     /** Close logic */
     onClose: () => void;
 }
+
 const ShareModal = ({ lesson, onShareLink, onUpdateRoles, onClose }: ShareModalProps) => {
     const t = useTranslations("ShareModal");
     const tCommon = useTranslations("Common");
     const tDetail = useTranslations("FlashcardDetail");
-    const { user } = useAppStore();
-    const { showAlert } = useAlert();
-
-    const auditClient = (action: string, extra: Record<string, unknown>) => {
-        if (!user) return;
-        enqueueClientLog(() => user.getIdToken(), {
-            action,
-            entityType: "share",
-            entityId: lesson.id,
-            level: "info",
-            metadata: {
-                logType: "USER_ACTION",
-                userName: user.displayName ?? undefined,
-                userEmail: user.email ?? undefined,
-                lessonTitle: lesson.title,
-                ...extra,
-            },
-        });
-    };
-
-    // ── Role derivation (Logic Orchestration) ──────────────────────────────────
-    /**
-     * Finds the user's effective role.
-     * Priority: Explicit Firestore Role > Public Role (if link access enabled) > Viewer.
-     */
-    let currentRole = user ? lesson.roles?.[user.uid] : null;
-    if (!currentRole && (lesson.allowLinkAccess || lesson.isPublic)) {
-        currentRole = lesson.publicRole || "viewer";
-    }
-
-    const isOwner = currentRole === "owner";
-
-    /** Permission guard: Only owners can invite or change roles of others */
-    const canManageRoles = isOwner;
-
-    /**
-     * Deterministic Share Link
-     * Generated from userId + lessonId via buildShareId utility.
-     */
-    const shareLink = useMemo(() => {
-        const ownerId = lesson.ownerId ?? lesson.userId;
-        if (typeof window === "undefined" || !ownerId) return "";
-        const id = buildShareId(ownerId, lesson.id);
-        return `${window.location.origin}/flashcard/shared/${id}`;
-    }, [lesson.ownerId, lesson.userId, lesson.id]);
-
-    // ── Local edit state ──────────────────────────────────────────────────
-    const derivePrivacyMode = (): PrivacyMode => {
-        if (lesson.isPublic) return "public";
-        if (lesson.allowLinkAccess) return "link";
-        return "restricted";
-    };
-
-    const [privacyMode, setPrivacyMode] = useState<PrivacyMode>(derivePrivacyMode);
-    const [publicRole, setPublicRole] = useState<"viewer" | "commenter">(
-        sanitizePublicRole(lesson.publicRole),
-    );
-
-    // Derived booleans from privacyMode for service calls.
-    const allowLinkAccess = privacyMode !== "restricted";
-    const isPublicMode = privacyMode === "public";
-
-    const [roles, setRoles] = useState<Record<string, Role>>(lesson.roles || {});
-
-    // Sync when the lesson prop changes (for real-time consistency) — adjusted
-    // directly during render (React's documented pattern for "reset state
-    // when a prop changes") rather than in an effect, since a following
-    // effect would flash the previous lesson's values for one extra render.
-    const [syncedLesson, setSyncedLesson] = useState(lesson);
-    if (syncedLesson !== lesson) {
-        setSyncedLesson(lesson);
-        setPrivacyMode(derivePrivacyMode());
-        setPublicRole(sanitizePublicRole(lesson.publicRole));
-        setRoles(lesson.roles || {});
-    }
-
-    // ── UI state ──────────────────────────────────────────────────────
-    const [openPrivacyMenu, setOpenPrivacyMenu] = useState(false);
-    const { copied, copy: copyLink } = useCopyToClipboard();
-    const [saving, setSaving] = useState(false);
 
     const {
-        register: registerInvite,
-        control: inviteControl,
+        currentRole,
+        canManageRoles,
+        privacyMode,
+        publicRole,
+        roles,
+        openPrivacyMenu,
+        setOpenPrivacyMenu,
+        copied,
+        saving,
+        registerInvite,
+        inviteControl,
         inviteError,
         handleInvite,
         handleRevokeEmailInvite,
-    } = useShareInvites({ lesson, setSaving });
+        handleCopy,
+        handleSavePrivacyMode,
+        handleSavePublicRole,
+        handleUpdateUserRole,
+        handleRemoveUser,
+    } = useShareModal({ lesson, onShareLink, onUpdateRoles });
 
     const themeHex = lesson.themeColor || DEFAULT_DECK_THEME_COLOR;
     const themeColorStr = hexToThemeColor(themeHex);
-
-    const handleCopy = async () => {
-        if (!shareLink) return;
-        await copyLink(shareLink);
-        showAlert("success", tCommon("linkCopiedToClipboard"));
-    };
-
-    /** Handles privacy mode change — persists to Firestore immediately. */
-    const handleSavePrivacyMode = async (mode: PrivacyMode) => {
-        const prev = privacyMode;
-        setPrivacyMode(mode);
-        setSaving(true);
-        try {
-            const newAllowLink = mode !== "restricted";
-            const newIsPublic = mode === "public";
-            await onShareLink(newAllowLink, publicRole, newIsPublic);
-            auditClient(ActivityAction.SHARE_PRIVACY_UPDATED, {
-                mode,
-                allowLinkAccess: newAllowLink,
-                isPublic: newIsPublic,
-            });
-            const labels: Record<PrivacyMode, string> = {
-                restricted: t("accessRestricted"),
-                link: t("linkSharingEnabled"),
-                public: t("deckIsPublic"),
-            };
-            showAlert("success", labels[mode]);
-        } catch (err) {
-            console.error("[ShareModal] handleSavePrivacyMode failed:", err);
-            setPrivacyMode(prev);
-            showAlert("error", t("privacyUpdateFailed"));
-        } finally {
-            setSaving(false);
-        }
-    };
-
-    /** Handles the default role for public/link visitors — capped at commenter. */
-    const handleSavePublicRole = async (role: "viewer" | "commenter") => {
-        setPublicRole(role);
-        setSaving(true);
-        try {
-            await onShareLink(allowLinkAccess, role, isPublicMode);
-            auditClient(ActivityAction.SHARE_PRIVACY_UPDATED, { publicRole: role });
-            showAlert("success", t("defaultRoleSet", { role: tDetail(`roleName.${role}`) }));
-        } catch (err) {
-            console.error("[ShareModal] handleSavePublicRole failed:", err);
-            showAlert("error", t("publicRoleFailed"));
-        } finally {
-            setSaving(false);
-        }
-    };
-
-    // ── Role Management ───────────────────────────────────────────────
-
-    /**
-     * Orchestrator for persisting role changes.
-     * Computes the new collaborators list (keys of roles object) and calls parent handler.
-     */
-    const commitRolesUpdate = async (newRoles: Record<string, Role>): Promise<boolean> => {
-        setRoles(newRoles);
-        const newCollaborators = Object.keys(newRoles);
-        setSaving(true);
-        try {
-            await onUpdateRoles(newRoles, newCollaborators);
-            auditClient(ActivityAction.SHARE_ROLES_UPDATED, {
-                collaboratorCount: newCollaborators.length,
-            });
-            showAlert("success", t("permissionsUpdated"));
-            return true;
-        } catch (err) {
-            console.error("[ShareModal] commitRolesUpdate failed:", err);
-            setRoles(lesson.roles || {});
-            showAlert("error", t("permissionsFailed"));
-            return false;
-        } finally {
-            setSaving(false);
-        }
-    };
-
-    // The owner manages sharing on their own deck, so lesson.ownerId (or the
-    // current user) is the authoritative owner the server writer expects.
-    const deckOwnerId = lesson.ownerId ?? lesson.userId ?? user?.uid;
-
-    const handleUpdateUserRole = async (targetId: string, newRole: Role) => {
-        if (roles[targetId] === "owner" || targetId === user?.uid) return;
-        const newRoles = { ...roles, [targetId]: newRole };
-        const okUpdate = await commitRolesUpdate(newRoles);
-        // Notify the affected collaborator (server verifies owner + target).
-        if (okUpdate && deckOwnerId) {
-            void emitNotification({
-                kind: "role_change",
-                ownerId: deckOwnerId,
-                lessonId: lesson.id,
-                targetUserId: targetId,
-                newRole,
-            });
-        }
-    };
-
-    const handleRemoveUser = async (targetId: string) => {
-        if (roles[targetId] === "owner" || targetId === user?.uid) return;
-        const newRoles = { ...roles };
-        delete newRoles[targetId];
-        const okRemove = await commitRolesUpdate(newRoles);
-        if (okRemove && deckOwnerId) {
-            void emitNotification({
-                kind: "access_revoked",
-                ownerId: deckOwnerId,
-                lessonId: lesson.id,
-                targetUserId: targetId,
-            });
-        }
-    };
 
     return (
         <Dialog.Root
@@ -404,7 +211,7 @@ const ShareModal = ({ lesson, onShareLink, onUpdateRoles, onClose }: ShareModalP
                                     variant="secondary"
                                     color={copied ? "green" : "gray"}
                                     icon={copied ? Check : Copy}
-                                    onClick={handleCopy}
+                                    onClick={() => void handleCopy()}
                                     className={`h-12 rounded-2xl border-2 px-6 text-sm font-bold transition-colors ${
                                         copied
                                             ? "text-hiragana border-[#58cc02] bg-[#f2fbf0]"

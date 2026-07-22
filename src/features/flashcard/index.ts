@@ -60,5 +60,6 @@ export type { PublicSharedLessonPreview } from "./services/shared-preview.servic
 
 // ─── Domain ──────────────────────────────────────────────────────────────────
 export { recommendedAction } from "./utils/learningEngine";
+export { canEdit } from "./utils/rbac";
 export { DEFAULT_DECK_THEME_COLOR } from "./types";
 export type { FlashCard, Lesson } from "./types";
