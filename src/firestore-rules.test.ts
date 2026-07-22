@@ -677,6 +677,33 @@ d("comments rules (nested under cards)", () => {
         );
     });
 
+    it("rejects a create whose content exceeds 2000 chars — the app-layer schema had no server-side backstop (T-109a)", async () => {
+        await seedLessonWithRoles({ [OWNER]: "owner", user_commenter: "commenter" });
+        const commenter = await authedDb("user_commenter");
+
+        await assertSucceeds(
+            setDoc(doc(commenter, ...commentPath(OWNER, "cml1", "c1", "cm_ok")), {
+                cardId: "c1",
+                userId: "user_commenter",
+                content: "a".repeat(2000),
+                createdAt: 0,
+                resolved: false,
+                replies: [],
+            }),
+        );
+
+        await assertFails(
+            setDoc(doc(commenter, ...commentPath(OWNER, "cml1", "c1", "cm_toolong")), {
+                cardId: "c1",
+                userId: "user_commenter",
+                content: "a".repeat(2001),
+                createdAt: 0,
+                resolved: false,
+                replies: [],
+            }),
+        );
+    });
+
     it("a comment's own author can update/delete it; another non-editor viewer cannot", async () => {
         await seedLessonWithRoles({
             [OWNER]: "owner",

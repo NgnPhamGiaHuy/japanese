@@ -30,6 +30,15 @@ service cloud.firestore {
       return lessonData.isPublic == true || lessonData.allowLinkAccess == true;
     }
 
+    // The app-layer commentContentSchema (shared/schemas/comment.schema.ts)
+    // caps comments at 2000 chars, but that's a client-JS-only check — a
+    // caller writing directly with a valid auth token had no server-side
+    // backstop at all (T-109a). Rules can't import the TS constant, so this
+    // number is a structurally-unavoidable second copy, kept in step by hand.
+    function withinCommentSizeLimits(data) {
+      return data.content is string && data.content.size() > 0 && data.content.size() <= 2000;
+    }
+
     // ─── NOTIFICATION VALIDATION (Epic 3 — Stage 2) ─────────────────────────
     // Cross-user notification creation is server-only (Admin SDK bypasses
     // rules); clients may only create in their OWN inbox. The helpers below
@@ -83,9 +92,14 @@ service cloud.firestore {
                         || isPublicLesson(getLesson(appId, userId, lessonId))
                         || (isSignedIn() && getLesson(appId, userId, lessonId).roles[request.auth.uid] != null);
             
-            allow create: if isOwner(userId)
-                          || (isSignedIn() && getLesson(appId, userId, lessonId).roles[request.auth.uid] in ['owner', 'editor', 'commenter']);
-            
+            // Size limit only on create — enforcing it on update too could
+            // block an unrelated edit (e.g. resolving a comment) on any
+            // already-stored comment that predates this check, which this
+            // repo cannot verify doesn't exist (no production data access).
+            allow create: if withinCommentSizeLimits(request.resource.data)
+                          && (isOwner(userId)
+                          || (isSignedIn() && getLesson(appId, userId, lessonId).roles[request.auth.uid] in ['owner', 'editor', 'commenter']));
+
             allow update, delete: if isOwner(userId)
                                   || (isSignedIn() && request.auth.uid == resource.data.userId)
                                   || (isSignedIn() && getLesson(appId, userId, lessonId).roles[request.auth.uid] == 'editor');

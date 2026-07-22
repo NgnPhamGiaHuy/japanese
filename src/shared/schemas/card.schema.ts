@@ -53,6 +53,21 @@ export const atomicPrimarySchema = z
         }
     });
 
+// ─── Cloze deletion marker ──────────────────────────────────────────────────
+//
+// Study mode's displayEngine.ts renders `clozeTemplate` verbatim wherever
+// `cardType === "cloze"` — the blank is the literal `___` substring, not
+// parsed/replaced, so a card missing or mis-counting the token doesn't error,
+// it just silently renders as a plain sentence with no visible blank. Kept as
+// a plain function (not only inline in the schema below) so the real write
+// boundary (lesson-save.ts) can enforce it independent of cardContentSchema's
+// own gated disposition (Q-12, T-109b) — this one invariant doesn't need that
+// gate resolved to be guarded at write time.
+
+export function hasValidClozeToken(clozeTemplate: string): boolean {
+    return (clozeTemplate.match(/___/g) ?? []).length === 1;
+}
+
 // ─── Card content ────────────────────────────────────────────────────────────
 //
 // Covers the user/AI-editable content fields (what LessonBuilder's form
@@ -69,12 +84,9 @@ export const cardContentSchema = z.object({
     usageNote: z.string().max(120).optional(),
     mnemonic: z.string().max(120).optional(),
     difficulty: z.union([z.literal(1), z.literal(2), z.literal(3)]).optional(),
-    // Must contain exactly one ___ token when present (cloze deletion marker).
     clozeTemplate: z
         .string()
-        .refine((v) => (v.match(/___/g) ?? []).length === 1, {
-            message: "clozeTemplate must contain exactly one ___ token",
-        })
+        .refine(hasValidClozeToken, { message: "clozeTemplate must contain exactly one ___ token" })
         .optional(),
     cardType: z.enum(["standard", "cloze"]).optional(),
 });

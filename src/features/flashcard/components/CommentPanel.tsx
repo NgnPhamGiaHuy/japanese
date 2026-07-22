@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { MessageSquare, SlidersHorizontal } from "lucide-react";
 
 import { Button } from "@/shared/components/ui";
+import { COMMENT_MAX_LENGTH } from "@/shared/schemas";
 import CommentInput from "./CommentInput";
 import CommentThread from "./CommentThread";
 import { useCommentPanel } from "../hooks";
@@ -177,7 +178,7 @@ const CommentPanel = ({
                     placeholder={t("addCommentPlaceholder")}
                     onSubmit={handleAdd}
                     themeColor={themeColor}
-                    maxLength={2000}
+                    maxLength={COMMENT_MAX_LENGTH}
                 />
             </div>
         </div>

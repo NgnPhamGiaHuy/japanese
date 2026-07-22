@@ -260,4 +260,36 @@ d("saveLessonWithCards", () => {
         const snap = await adminDb.collection(lessonsPath()).get();
         expect(snap.docs).toHaveLength(0);
     });
+
+    it("rejects a cloze card whose clozeTemplate has no ___ token, writing nothing (T-109a)", async () => {
+        // Study mode's displayEngine.ts renders clozeTemplate verbatim with no
+        // parsing — a missing token would silently render as a plain
+        // sentence rather than error at read time, so this must be caught
+        // here, at the write boundary, independent of cardContentSchema's
+        // own gated (Q-12) disposition.
+        const badCard = card("c_1", "cat", {
+            cardType: "cloze",
+            clozeTemplate: "no blank token here",
+        });
+
+        await expect(saveLessonWithCards(OWNER, baseLesson(), [badCard], true)).rejects.toThrow(
+            /clozeTemplate must contain exactly one ___ token/,
+        );
+
+        const snap = await adminDb.collection(lessonsPath()).get();
+        expect(snap.docs).toHaveLength(0);
+    });
+
+    it("accepts a cloze card whose clozeTemplate has exactly one ___ token", async () => {
+        const goodCard = card("c_1", "cat", {
+            cardType: "cloze",
+            clozeTemplate: "The ___ sat on the mat.",
+        });
+
+        await saveLessonWithCards(OWNER, baseLesson(), [goodCard], true);
+
+        const snap = await adminDb.collection(cardsPath()).get();
+        expect(snap.docs).toHaveLength(1);
+        expect(snap.docs[0].data().clozeTemplate).toBe("The ___ sat on the mat.");
+    });
 });

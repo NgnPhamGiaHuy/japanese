@@ -13,7 +13,7 @@ import { generateNKeysBetween } from "fractional-indexing";
 import { auth, db } from "@/lib/firebase";
 import { ActivityAction } from "@/lib/logging/actions.enum";
 import { enqueueClientLog } from "@/lib/logging/browser";
-import { lessonMetadataSchema } from "@/shared/schemas";
+import { hasValidClozeToken, lessonMetadataSchema } from "@/shared/schemas";
 import { cardDoc, cardsCol } from "./card.service";
 import { deleteCardImage } from "./image.service";
 import { lessonDoc, lessonsCol } from "./lesson-paths";
@@ -66,6 +66,20 @@ export async function saveLessonWithCards(
             "One or more cards violate the Atomic Card principle",
             allViolations,
         );
+    }
+
+    // ── Cloze token invariant — study mode's displayEngine.ts renders
+    // clozeTemplate verbatim, so a missing/miscounted ___ token silently
+    // renders as a plain sentence rather than erroring at read time. Guarded
+    // here independent of cardContentSchema's own gated disposition (T-109a).
+    for (const card of cards) {
+        if (
+            card.cardType === "cloze" &&
+            card.clozeTemplate &&
+            !hasValidClozeToken(card.clozeTemplate)
+        ) {
+            throw new Error(`Card "${card.id}": clozeTemplate must contain exactly one ___ token`);
+        }
     }
 
     const batch = writeBatch(db);

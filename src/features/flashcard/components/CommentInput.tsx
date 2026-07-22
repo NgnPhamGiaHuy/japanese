@@ -12,6 +12,7 @@ import { useEffect, useRef, useState } from "react";
 import { CornerDownLeft, X } from "lucide-react";
 
 import { Button } from "@/shared/components/ui";
+import { COMMENT_MAX_LENGTH } from "@/shared/schemas";
 
 export interface CommentInputProps {
     /** Prompt text when empty */
@@ -36,7 +37,7 @@ const CommentInput = ({
     onCancel,
     initialValue = "",
     themeColor,
-    maxLength = 2000,
+    maxLength = COMMENT_MAX_LENGTH,
     compact = false,
 }: CommentInputProps) => {
     const t = useTranslations("FlashcardComments");
