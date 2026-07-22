@@ -6,6 +6,7 @@ import { Dialog } from "@base-ui/react/dialog";
 import { Book, X } from "lucide-react";
 
 import { Button, LoadingSpinner } from "@/shared/components/ui";
+import { DIALOG_BACKDROP_CLASSNAME } from "@/shared/components/ui/DialogChrome";
 import { DeckCardItem } from "./DeckCardItem";
 
 import type { FlashCard } from "@/features/flashcard";
@@ -37,7 +38,7 @@ const DeckDetailsPanel = ({
         <Dialog.Root open={isOpen} onOpenChange={(open) => !open && onClose()}>
             <Dialog.Portal>
                 {/* Backdrop */}
-                <Dialog.Backdrop className="fixed inset-0 z-50 bg-[#3c3c3c]/30 backdrop-blur-sm transition-opacity duration-200 data-[ending-style]:opacity-0 data-[starting-style]:opacity-0" />
+                <Dialog.Backdrop className={DIALOG_BACKDROP_CLASSNAME} />
 
                 {/* Panel */}
                 <Dialog.Popup

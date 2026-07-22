@@ -9,6 +9,7 @@ import { Search } from "lucide-react";
 
 import { useAdminRole } from "@/features/admin";
 import { useRouter } from "@/i18n/navigation";
+import { DIALOG_BACKDROP_CLASSNAME } from "@/shared/components/ui/DialogChrome";
 import { ADMIN_ACTIONS, MAIN_ACTIONS } from "../data/actions";
 
 import type { CommandAction } from "../data/actions";
@@ -72,7 +73,7 @@ const CommandPalette = ({ open, onOpenChange }: CommandPaletteProps) => {
     return (
         <Dialog.Root open={open} onOpenChange={handleOpenChange}>
             <Dialog.Portal>
-                <Dialog.Backdrop className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm transition-opacity duration-200 data-[ending-style]:opacity-0 data-[starting-style]:opacity-0" />
+                <Dialog.Backdrop className={DIALOG_BACKDROP_CLASSNAME} />
                 <div className="pointer-events-none fixed inset-0 z-50 flex items-start justify-center p-4 pt-[12vh] sm:p-6 sm:pt-[15vh]">
                     <Dialog.Popup
                         aria-modal="true"

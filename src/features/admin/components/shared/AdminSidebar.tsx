@@ -10,6 +10,7 @@ import { m } from "motion/react";
 
 import { Link, usePathname } from "@/i18n/navigation";
 import { Button } from "@/shared/components/ui";
+import { DIALOG_BACKDROP_CLASSNAME } from "@/shared/components/ui/DialogChrome";
 
 const navItems = [
     { id: "dashboard", href: "/admin", icon: LayoutDashboard },
@@ -130,7 +131,7 @@ const AdminSidebar = () => {
             <Dialog.Root open={drawerOpen} onOpenChange={setDrawerOpen}>
                 <Dialog.Portal>
                     {/* Backdrop */}
-                    <Dialog.Backdrop className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm transition-opacity duration-200 data-[ending-style]:opacity-0 data-[starting-style]:opacity-0 lg:hidden" />
+                    <Dialog.Backdrop className={`${DIALOG_BACKDROP_CLASSNAME} lg:hidden`} />
 
                     {/* Drawer panel */}
                     <Dialog.Popup

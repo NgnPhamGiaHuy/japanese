@@ -7,6 +7,7 @@ import { Check, Copy, ShieldAlert, X } from "lucide-react";
 
 import { DEFAULT_DECK_THEME_COLOR } from "@/features/flashcard/types";
 import { Button } from "@/shared/components/ui";
+import { DIALOG_BACKDROP_CLASSNAME } from "@/shared/components/ui/DialogChrome";
 import { hexToThemeColor } from "@/shared/utils";
 import ShareCollaboratorsPanel from "./ShareCollaboratorsPanel";
 import SharePrivacyPicker from "./SharePrivacyPicker";
@@ -96,9 +97,10 @@ const ShareModal = ({ lesson, onShareLink, onUpdateRoles, onClose }: ShareModalP
             }}
         >
             <Dialog.Portal>
+                <Dialog.Backdrop className={DIALOG_BACKDROP_CLASSNAME} />
                 <Dialog.Popup
                     aria-modal="true"
-                    className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black/40 p-4 backdrop-blur-sm outline-none"
+                    className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto p-4 outline-none"
                 >
                     <div className="my-auto flex w-full max-w-lg flex-col rounded-4xl border-2 border-b-8 border-gray-200 bg-white shadow-xl">
                         {/* Header */}
@@ -214,7 +216,7 @@ const ShareModal = ({ lesson, onShareLink, onUpdateRoles, onClose }: ShareModalP
                                     onClick={() => void handleCopy()}
                                     className={`h-12 rounded-2xl border-2 px-6 text-sm font-bold transition-colors ${
                                         copied
-                                            ? "text-hiragana border-[#58cc02] bg-[#f2fbf0]"
+                                            ? "text-hiragana border-hiragana/20 bg-hiragana/10"
                                             : "text-text border-gray-200 hover:bg-gray-50"
                                     }`}
                                     disabled={saving}

@@ -67,10 +67,10 @@ Two subdirectories exist: `ui/` (21 exported components + 1 internal module + ba
 - **Responsibilities**: local-midnight ISO parsing to avoid off-by-one-day (comment, lines 55–58); clear button emits `onChange(undefined)` (lines 105–117); fully custom `classNames` theme for `DayPicker` (lines 137–159).
 
 #### DialogChrome — `shared/components/ui/DialogChrome.tsx` ⬥client (internal, not in barrel)
-- **Purpose** (comments, lines 8, 16): shared chrome for Base-UI-Dialog-based overlays — exports `DIALOG_BACKDROP_CLASSNAME` (backdrop classes) and `DialogCloseButton` (the ghost "X" `Dialog.Close` button).
-- **Props**: `DialogCloseButton({ disabled? })` (lines 12–14).
+- **Purpose** (comments): shared chrome for Base-UI-Dialog-based overlays — exports `DIALOG_BACKDROP_CLASSNAME` (backdrop classes) and `DialogCloseButton` (the ghost "X" `Dialog.Close` button). Documents the two-tier pattern (T-110a): Tier 1 (`Modal`, `ConfirmModal`) renders both exports itself; Tier 2 (bespoke compositions) imports only `DIALOG_BACKDROP_CLASSNAME`, keeping its own close-affordance styling.
+- **Props**: `DialogCloseButton({ disabled? })`.
 - **Depends on**: `@base-ui/react/dialog`, lucide `X`, sibling `Button`.
-- **Used by (3)**: `Modal.tsx`, `Drawer.tsx`, `ConfirmModal.tsx` (all sibling files).
+- **Used by (6)**: Tier 1 — `Modal.tsx`, `ConfirmModal.tsx` (both exports). Tier 2, backdrop only — `features/admin/components/content/DeckDetailsPanel.tsx`, `features/admin/components/shared/AdminSidebar.tsx`, `features/flashcard/sharing/components/ShareModal.tsx`, `features/command-palette/components/CommandPalette.tsx` (converged onto the shared constant, T-110a; previously each hardcoded or duplicated its own backdrop className). `Drawer.tsx` — removed, T-110b.
 
 #### ~~Drawer~~ — removed (T-110b)
 - Formerly `shared/components/ui/Drawer.tsx` — a zero-render-site primitive (CS-1's named counter-example: built ahead of any consumer). NQ-3 resolved to its default, delete; deleted along with its barrel export. See `docs/migrations-ledger.md` `LDG-06` (closed).
@@ -486,7 +486,7 @@ All four survival screens receive the whole game object as `game: ReturnType<typ
 
 ## 4. Cross-cutting observations
 
-- **Dialog stack**: every overlay (Modal, Drawer, ConfirmModal, AdminSidebar's mobile drawer, CommandPalette) is built on `@base-ui/react` Dialog primitives; `DialogChrome.tsx` centralizes the backdrop classes and close button (observed imports).
+- **Dialog stack**: every overlay (Modal, ConfirmModal, DeckDetailsPanel, AdminSidebar's mobile drawer, ShareModal, CommandPalette) is built on `@base-ui/react` Dialog primitives and now shares one backdrop source, `DialogChrome.tsx`'s `DIALOG_BACKDROP_CLASSNAME` (T-110a) — Tier 1 (Modal, ConfirmModal) also shares its close button; Tier 2 (the rest) keeps bespoke close-affordance styling. `Drawer`, a zero-consumer Tier-1 candidate, was removed rather than adopted (T-110b).
 - **Animation**: components rendering `m.*` elements (`Button`, `StatCard`, `LessonBuilder`, others) rely on the single `LazyMotion` mount in `lib/providers.tsx:78` (see `07-Provider-Inventory.md`).
 - **Admin chart loading**: all recharts-based charts are loaded via `next/dynamic` with `ssr: false` from `AdminAnalyticsPageContent.tsx` with `ChartSkeleton` placeholders (observed in file).
 - **Two virtualized lists** exist: `LogsVirtualList` (fixed-height inner scroller) and `NotificationsVirtualList` (`useWindowVirtualizer`, window-scroll) — the difference is documented in NotificationsVirtualList's docblock (lines 23–28).
