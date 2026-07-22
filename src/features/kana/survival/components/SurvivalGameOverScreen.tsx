@@ -5,8 +5,8 @@ import { useTranslations } from "next-intl";
 import { Trophy } from "lucide-react";
 
 import { Leaderboard } from "@/features/game";
-import { useSurvivalGame } from "@/features/kana";
 import { Button } from "@/shared/components/ui";
+import { useSurvivalGame } from "../hooks";
 
 interface SurvivalGameOverScreenProps {
     game: ReturnType<typeof useSurvivalGame>;

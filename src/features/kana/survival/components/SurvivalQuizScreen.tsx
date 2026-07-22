@@ -5,9 +5,10 @@ import { useTranslations } from "next-intl";
 import { X } from "lucide-react";
 
 import { GameStreakScoreStack, LivesDisplay, MiniLeaderboard } from "@/features/game";
-import { AnswerFeedback, KanaMCOptionsGrid, useSurvivalGame } from "@/features/kana";
+import { AnswerFeedback, KanaMCOptionsGrid } from "@/features/kana/components";
 import { ScreenHeaderBackButton, ScreenHeaderRow } from "@/shared/components/layout";
 import { formatTime } from "@/shared/utils";
+import { useSurvivalGame } from "../hooks";
 
 interface SurvivalQuizScreenProps {
     game: ReturnType<typeof useSurvivalGame>;

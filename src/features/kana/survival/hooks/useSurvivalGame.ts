@@ -19,12 +19,13 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 
 import { useGameSession } from "@/features/game";
+import { logKanaSurvivalCompleted } from "@/features/kana/actions";
+import { useKanaQuizSession } from "@/features/kana/hooks";
 import { auth } from "@/lib/firebase";
 import { useDropMode } from "./useDropMode";
-import { useKanaQuizSession } from "./useKanaQuizSession";
-import { logKanaSurvivalCompleted } from "../actions";
 
-import type { ChallengeMode, KanaChar, SurvivalPhase } from "../types";
+import type { KanaChar } from "@/features/kana/types";
+import type { ChallengeMode, SurvivalPhase } from "../types";
 
 /** Seconds removed from the clock on each wrong answer in Time Attack. */
 export const TIME_ATTACK_WRONG_PENALTY_SEC = 10;

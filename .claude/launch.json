@@ -7,13 +7,6 @@
       "runtimeArgs": ["--prefix", "src", "run", "dev"],
       "port": 3000,
       "autoPort": true
-    },
-    {
-      "name": "japanese-app-storybook",
-      "runtimeExecutable": "npm",
-      "runtimeArgs": ["--prefix", "src", "run", "storybook"],
-      "port": 6006,
-      "autoPort": true
     }
   ]
 }

@@ -15,13 +15,14 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 
 import { comboMultiplier } from "@/features/game";
+import { logKanaSurvivalCompleted } from "@/features/kana/actions";
+import { useKanaQuizSession } from "@/features/kana/hooks";
 import { auth } from "@/lib/firebase";
 import { playSfx, sequence } from "@/shared/audio";
 import { getValidRomaji } from "@/shared/utils";
-import { useKanaQuizSession } from "./useKanaQuizSession";
-import { logKanaSurvivalCompleted } from "../actions";
 
-import type { DropWord, KanaChar, SurvivalPhase } from "../types";
+import type { KanaChar } from "@/features/kana/types";
+import type { DropWord, SurvivalPhase } from "../types";
 
 interface UseDropModeParams {
     dataset: KanaChar[];

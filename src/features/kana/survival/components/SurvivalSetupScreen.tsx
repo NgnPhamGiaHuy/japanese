@@ -5,15 +5,15 @@ import { useTranslations } from "next-intl";
 import { Clock, Flame, Sword } from "lucide-react";
 
 import { Leaderboard } from "@/features/game";
+import { ScreenHeader } from "@/shared/components/layout";
+import { Button } from "@/shared/components/ui";
 import {
     TIME_ATTACK_MAX_STREAK_BONUS_SEC,
     TIME_ATTACK_WRONG_PENALTY_SEC,
     useSurvivalGame,
-} from "@/features/kana";
-import { ScreenHeader } from "@/shared/components/layout";
-import { Button } from "@/shared/components/ui";
+} from "../hooks";
 
-import type { AlphabetMode } from "@/features/kana";
+import type { AlphabetMode } from "@/features/kana/types";
 
 interface SurvivalSetupScreenProps {
     game: ReturnType<typeof useSurvivalGame>;
