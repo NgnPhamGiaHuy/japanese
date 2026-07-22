@@ -8,10 +8,11 @@
  * one pure, Firebase-free module makes it unit-testable and the single place new
  * event kinds are declared.
  *
- * NOTE on `NotificationKind` vs the legacy `NotificationType` (types/index.ts):
- * the legacy 4-value union still describes stored documents and drives the
- * existing icon switch. `NotificationKind` is the FORWARD superset the platform
- * is built around; the two are reconciled as producers migrate.
+ * NOTE on `NotificationKind` vs the stored-document `NotificationType`
+ * (types/index.ts, ADR-108/T-108a): the two are reconciled — `NotificationType`
+ * is defined as `NotificationKind | "digest"`, the one value a producer writes
+ * without going through this vocabulary (the Cloud Function digest sweep
+ * writes directly to Firestore, bypassing `NotificationInput` entirely).
  */
 
 /**
@@ -24,23 +25,14 @@ export type NotificationKind =
     // Collaboration
     | "invite"
     | "invite_accepted"
-    | "invite_declined"
     | "role_change"
     | "access_revoked"
     | "comment"
     | "reply"
     | "comment_resolved"
-    | "deck_updated"
-    | "deck_deleted"
     | "deck_duplicated"
-    | "privacy_changed"
     // System
-    | "content_removed"
-    // Social / competitive
-    | "overtaken"
-    | "leaderboard_top3"
-    // Self / progress
-    | "achievement";
+    | "content_removed";
 
 /** Interruption tier. P0 = badge (+ future push); P1 = inbox; P2 = quiet/feed. */
 export type NotificationPriority = "P0" | "P1" | "P2";
@@ -51,8 +43,8 @@ export type NotificationCategory = "collaboration" | "system" | "social" | "achi
 /**
  * The normalized shape a producer emits. Only `kind`, `recipientId`, and
  * `senderId` are always required; the rest scope the collapse key and payload
- * per kind. `senderId === recipientId` is allowed only for self-notifications
- * (achievements).
+ * per kind. `writeNotification`'s caller treats `senderId === recipientId` as
+ * a no-op for every kind (never self-notifies) — see notification.actions.ts.
  */
 export interface NotificationInput {
     kind: NotificationKind;
@@ -65,10 +57,6 @@ export interface NotificationInput {
     cardId?: string;
     /** Comment the event concerns (reply / resolve). */
     commentId?: string;
-    /** Game mode for competitive kinds (overtaken / leaderboard_top3). */
-    gameMode?: string;
-    /** Sub-kind for achievements (new_best / tier_up / level_up / streak / mastered). */
-    achievementKind?: string;
     /** New role label for role_change messages. */
     role?: string;
     /** Optional prebuilt display strings (producers may supply). */

@@ -48,7 +48,7 @@ describe("collapseId — deterministic, collapsing doc IDs", () => {
 
     it("separates different kinds on the same object", () => {
         expect(collapseId(comment({ kind: "comment" }))).not.toBe(
-            collapseId(comment({ kind: "deck_updated" })),
+            collapseId(comment({ kind: "reply" })),
         );
     });
 

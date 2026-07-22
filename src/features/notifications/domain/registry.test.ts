@@ -8,20 +8,13 @@ import type { NotificationInput, NotificationKind } from "./events";
 const ALL_KINDS: NotificationKind[] = [
     "invite",
     "invite_accepted",
-    "invite_declined",
     "role_change",
     "access_revoked",
     "comment",
     "reply",
     "comment_resolved",
-    "deck_updated",
-    "deck_deleted",
     "deck_duplicated",
-    "privacy_changed",
     "content_removed",
-    "overtaken",
-    "leaderboard_top3",
-    "achievement",
 ];
 
 describe("NOTIFICATION_REGISTRY — completeness & shape", () => {
@@ -44,32 +37,9 @@ describe("NOTIFICATION_REGISTRY — completeness & shape", () => {
         }
     });
 
-    it("marks exactly the wired kinds active", () => {
-        const active = ALL_KINDS.filter((k) => NOTIFICATION_REGISTRY[k].active);
-        expect(active).toEqual([
-            "invite",
-            "invite_accepted",
-            "role_change",
-            "access_revoked",
-            "comment",
-            "reply",
-            "comment_resolved",
-            "deck_duplicated",
-            "content_removed",
-        ]);
-    });
-
-    it("leaves not-yet-wired kinds inactive", () => {
-        for (const kind of [
-            "invite_declined",
-            "deck_updated",
-            "deck_deleted",
-            "privacy_changed",
-            "overtaken",
-            "leaderboard_top3",
-            "achievement",
-        ] as NotificationKind[]) {
-            expect(NOTIFICATION_REGISTRY[kind].active).toBe(false);
+    it("marks every declared kind active (T-119a: the 7 dormant kinds are gone, not just unwired)", () => {
+        for (const kind of ALL_KINDS) {
+            expect(NOTIFICATION_REGISTRY[kind].active, `${kind} should be active`).toBe(true);
         }
     });
 
@@ -107,11 +77,5 @@ describe("collapseKeyOf — object-scoped grouping tokens", () => {
     it("invite dedups per lesson (not a grouping kind)", () => {
         expect(policyOf("invite").collapses).toBe(false);
         expect(collapseKeyOf({ ...base, kind: "invite" })).toBe("invite:L1");
-    });
-
-    it("deck_updated collapses per (lesson, actor) so bursts fold per editor", () => {
-        expect(collapseKeyOf({ ...base, kind: "deck_updated", senderId: "editorX" })).toBe(
-            "deck_updated:L1:editorX",
-        );
     });
 });

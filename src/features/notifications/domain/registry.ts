@@ -24,9 +24,11 @@ export interface NotificationPolicy {
     priority: NotificationPriority;
     category: NotificationCategory;
     /**
-     * Whether a producer emits this kind in the CURRENT phase. Planned kinds are
-     * declared (so the registry is complete) but not yet wired — flip to true
-     * when the producer lands.
+     * Whether a producer emits this kind in the CURRENT phase. Always `true`
+     * today (T-119a, ADR-119): a kind with no producer is deleted rather than
+     * declared-but-dormant, so this field currently has no live consumer — kept
+     * on the shape rather than removed, since the moment a genuinely-planned
+     * kind is claimed again this is exactly the flag that reintroduces it.
      */
     active: boolean;
     /**
@@ -59,13 +61,6 @@ export const NOTIFICATION_REGISTRY: Record<NotificationKind, NotificationPolicy>
         active: true, // wired (access.service syncInviteToCollaborator)
         collapses: false,
         collapseKey: (i) => `invite_accepted:${lesson(i)}:${i.senderId}`,
-    },
-    invite_declined: {
-        priority: "P2",
-        category: "collaboration",
-        active: false,
-        collapses: false,
-        collapseKey: (i) => `invite_declined:${lesson(i)}:${i.senderId}`,
     },
     role_change: {
         priority: "P1",
@@ -102,33 +97,12 @@ export const NOTIFICATION_REGISTRY: Record<NotificationKind, NotificationPolicy>
         collapses: false,
         collapseKey: (i) => `comment_resolved:${i.commentId ?? lesson(i)}`,
     },
-    deck_updated: {
-        priority: "P1",
-        category: "collaboration",
-        active: false,
-        collapses: true, // collapse an edit burst per actor per day
-        collapseKey: (i) => `deck_updated:${lesson(i)}:${i.senderId}`,
-    },
-    deck_deleted: {
-        priority: "P1",
-        category: "collaboration",
-        active: false,
-        collapses: false,
-        collapseKey: (i) => `deck_deleted:${lesson(i)}`,
-    },
     deck_duplicated: {
         priority: "P2",
         category: "collaboration",
         active: true, // wired (shared deck duplication)
         collapses: true, // "5 people saved your deck"
         collapseKey: (i) => `deck_duplicated:${lesson(i)}`,
-    },
-    privacy_changed: {
-        priority: "P2",
-        category: "collaboration",
-        active: false,
-        collapses: false,
-        collapseKey: (i) => `privacy_changed:${lesson(i)}`,
     },
     // ─── System ───────────────────────────────────────────────────────────
     content_removed: {
@@ -137,29 +111,6 @@ export const NOTIFICATION_REGISTRY: Record<NotificationKind, NotificationPolicy>
         active: true, // wired (admin deleteGlobalFlashcardAction, server-internal)
         collapses: false,
         collapseKey: (i) => `content_removed:${lesson(i)}`,
-    },
-    // ─── Social / competitive ─────────────────────────────────────────────
-    overtaken: {
-        priority: "P2",
-        category: "social",
-        active: false,
-        collapses: true, // one per game mode per day
-        collapseKey: (i) => `overtaken:${i.gameMode ?? "unknown"}`,
-    },
-    leaderboard_top3: {
-        priority: "P2",
-        category: "social",
-        active: false,
-        collapses: false,
-        collapseKey: (i) => `leaderboard_top3:${i.gameMode ?? "unknown"}`,
-    },
-    // ─── Self / progress ──────────────────────────────────────────────────
-    achievement: {
-        priority: "P1",
-        category: "achievement",
-        active: false,
-        collapses: false,
-        collapseKey: (i) => `achievement:${i.achievementKind ?? "unknown"}`,
     },
 };
 

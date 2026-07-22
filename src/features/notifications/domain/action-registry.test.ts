@@ -103,9 +103,9 @@ describe("notification action registry", () => {
     it("lets a kind register no handlers without being treated as unhandled", () => {
         // Kinds needing only the inbox's own behaviour are legitimately empty.
         const report = vi.fn();
-        registerNotificationActions("deck_updated", {});
+        registerNotificationActions("comment_resolved", {});
 
-        expect(resolveNotificationActions("deck_updated", report)).toEqual({});
+        expect(resolveNotificationActions("comment_resolved", report)).toEqual({});
         expect(report).not.toHaveBeenCalled();
     });
 });
