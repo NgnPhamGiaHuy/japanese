@@ -1,9 +1,6 @@
 import "server-only";
 
-import { createSafeActionClient } from "next-safe-action";
 import { cookies } from "next/headers";
-
-import { z } from "zod";
 
 import { APP_ID } from "@/lib/app-id";
 import { verifySessionCookie } from "@/lib/auth-session";
@@ -84,39 +81,14 @@ export async function assertAdminAction(action: PermissionAction): Promise<Calle
 }
 
 /**
- * Pre-unification client. T-106b migrated its last caller
- * (features/admin/actions/admin.actions.ts) onto `verifiedAdminActionClient`
- * below; this has zero remaining callers and is kept only until T-106d
- * deletes it alongside `lib/safe-action.ts`'s equivalent `actionClient`.
- */
-export const adminActionClient = createSafeActionClient({
-    defineMetadataSchema: () =>
-        z.object({
-            permission: z.enum([
-                "canViewDashboard",
-                "canViewAnalytics",
-                "canViewReports",
-                "canManageUsers",
-                "canDeleteUsers",
-                "canPromoteUsers",
-                "canManageContent",
-                "canChangeSettings",
-            ]),
-        }),
-    handleServerError(e) {
-        return e instanceof Error ? e.message : "An unexpected error occurred";
-    },
-}).use(async ({ next, metadata }) => {
-    const caller = await assertAdminAction(metadata.permission);
-    return next({ ctx: caller });
-});
-
-/**
- * The unified admin surface (ADR-106, T-106a): extends the SHARED
+ * The unified admin surface (ADR-106, T-106a/T-106d): extends the SHARED
  * `verifiedActionClient` base (`lib/safe-action.ts`) — imported here, not
  * re-implemented, since ADR-103 forbids the reverse (`lib/` importing this
- * feature) — with the same cookie-session identity + permission check as
- * the pre-unification client above.
+ * feature) — with cookie-session identity (`assertAdminAction`) + the admin
+ * `PermissionSet` check. The pre-unification `adminActionClient` this
+ * replaced (a second, parallel `createSafeActionClient` with its own
+ * `PermissionAction`-enum metadata schema) is gone — T-106d, its last
+ * caller having migrated in T-106b.
  *
  * `verifiedActionClient`'s metadata schema is a generic `z.string().min(1)`,
  * fixed once at the shared client's creation — next-safe-action has no way

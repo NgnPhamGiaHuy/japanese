@@ -9,7 +9,7 @@ import { adminAuth } from "./firebase-admin";
 import type { DecodedIdToken } from "firebase-admin/auth";
 
 /**
- * @file Server Action safety layer (ADR-106 unification, T-106a/T-106c).
+ * @file Server Action safety layer (ADR-106 unification, T-106a/T-106c/T-106d).
  *
  * @remarks
  * `verifiedActionClient` is the ONE verification/envelope mechanism every
@@ -94,20 +94,16 @@ export async function verifyIdToken(
 }
 
 /**
- * Pre-unification client, retained only for its 6 remaining callers
- * (T-106c migrates them onto `userActionClient`, after which this and its
- * `.useValidated()`-based inline verification are deleted — T-106d).
- */
-export const actionClient = createSafeActionClient({
-    handleServerError(e) {
-        return e instanceof Error ? e.message : "An unexpected error occurred";
-    },
-});
-
-/**
  * Adapts a next-safe-action result to this repo's existing
- * `{ok:true,data}|{ok:false,error}` shape, so callers written against the
- * pre-migration `ActionResult<T>` contract are unaffected.
+ * `{ok:true,data}|{ok:false,error}` shape. NOT a migration-era shim due to
+ * retire on its own: `admin.actions.ts`'s 19 actions (fully on
+ * `verifiedAdminActionClient`, the unified client) still call this to keep
+ * their own external contract unchanged for the hooks/components that
+ * consume them — that consumer need is orthogonal to which safe-action
+ * client backs an action, so it outlives the client-unification migration
+ * itself. See `docs/migrations-ledger.md`'s `LDG-21` for the concrete
+ * finding: M-2's original plan assumed this shim's last caller would
+ * disappear once T-106b/c/d landed; it does not.
  */
 export function toActionResult<T>(result: {
     data?: T;
