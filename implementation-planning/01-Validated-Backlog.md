@@ -716,7 +716,8 @@ Each is scheduled into a wave but is **NOT READY** until its question answers. E
 
 #### T-109b — `cardContentSchema`: enforce or delete
 
-**Size** M · **Wave** 4 · **Status** **Gated Q-12**
+**Size** M · **Wave** 4 · **Status** ⏸️ **RECORDED — still Gated Q-12** (Sprint 14) — _was: Gated Q-12_
+**Delivered** Re-verified by grep: still zero non-test consumers (LessonBuilder's card array is plain `useState`, not wired to a resolver; no server action or write-boundary function imports it; AI/import output validates through the separate `generatedCardSchema` instead). The misleading "single validation source of truth" header is corrected to describe the actual current state (declared, unused, gated on Q-12) rather than an adoption that never happened — satisfying the AC's "misleading header is removed or corrected even while the disposition is pending" independent of the enforce-or-delete answer. `LDG-03` in the ledger already tracked this disposition; left as-is (still accurate). Did not wire or delete the schema itself — Q-12 asks for author intent (was adoption planned but unfinished, or is this overtaken?), which isn't answerable from the repository, and the task's own fallback is explicit: do not guess.
 **Traces to** ADR-109 (AD-09) · W-9, TD-5, RC-6, R-16 · cluster **C5** · `assess/03`, `/07`, `/08`
 **Description.** `cardContentSchema`'s header claims to be "the single validation source of truth shared by client forms, server actions, and runtime parsing of AI/import output" — and it has zero non-test consumers. Its disposition depends on whether adoption was intended and whether production data is compatible.
 **Acceptance criteria**
