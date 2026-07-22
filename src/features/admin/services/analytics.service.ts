@@ -33,22 +33,12 @@ export async function getAdminAnalytics(days = 30): Promise<AnalyticsData> {
 
     const docs = snapshots.docs.map((d) => d.data());
 
-    // In case no snapshots yet, provide a base structure
-    const baseDocs =
-        docs.length > 0
-            ? docs
-            : [
-                  {
-                      date: new Date().toISOString().split("T")[0],
-                      totalUsers: 0,
-                      newUsers: 0,
-                      activeUsers: 0,
-                      errors: 0,
-                  },
-              ];
-
-    // Sort ascending for charts
-    const sorted = [...baseDocs].sort((a, b) => a.date.localeCompare(b.date));
+    // No fabricated placeholder day when the collection is empty (ADR-114) —
+    // an empty `docs` sorts to an empty `sorted`, so growth/activity/
+    // errorTrends below naturally come back as [], letting the page's
+    // isGlobalEmpty / per-chart empty states render honestly instead of a
+    // fake all-zero data point.
+    const sorted = [...docs].sort((a, b) => a.date.localeCompare(b.date));
 
     // Distribution of roles - Dynamically derived from active stats
     const stats = await getAdminStats();

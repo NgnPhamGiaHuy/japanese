@@ -82,6 +82,7 @@ const AdminOverviewPage = () => {
                     value={stats.activeUsersToday}
                     icon={Activity}
                     color="text-hiragana"
+                    noDataLabel={t("noDataSource")}
                 />
                 <AdminStatCard
                     label={t("flashcards")}
@@ -93,6 +94,7 @@ const AdminOverviewPage = () => {
                     value={stats.totalSessions}
                     icon={BookOpen}
                     color="text-both"
+                    noDataLabel={t("noDataSource")}
                 />
             </div>
 

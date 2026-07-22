@@ -8,6 +8,9 @@ interface AdminChartContainerProps {
     subtitle?: string;
     className?: string;
     chartHeight?: number;
+    /** Renders `emptyMessage` in place of `children` — the source has no data (ADR-114), not a true zero. */
+    isEmpty?: boolean;
+    emptyMessage?: string;
 }
 
 /**
@@ -22,6 +25,8 @@ const AdminChartContainer = ({
     subtitle,
     className = "",
     chartHeight = 280,
+    isEmpty = false,
+    emptyMessage,
 }: AdminChartContainerProps) => {
     return (
         <Card className={`border-gray-100 p-6 ${className}`}>
@@ -34,7 +39,13 @@ const AdminChartContainer = ({
                 )}
             </div>
             <div style={{ height: chartHeight }} className="w-full">
-                {children}
+                {isEmpty ? (
+                    <div className="text-muted flex h-full items-center justify-center text-center text-sm font-bold italic">
+                        {emptyMessage}
+                    </div>
+                ) : (
+                    children
+                )}
             </div>
         </Card>
     );

@@ -95,15 +95,16 @@ export async function getAdminStats(): Promise<AdminStats> {
     const activeAdmins = adminSnap.docs.filter((d) => d.data().role === "admin").length;
     const activeSuperAdmins = adminSnap.docs.filter((d) => d.data().role === "superadmin").length;
 
-    // Only use real values from cache — never fabricate activity metrics
+    // Only use real values from cache — never fabricate activity metrics (ADR-114:
+    // absent renders as absent, so the else-branch is `null`, not `0`).
     const activeUsersToday =
         cached !== null && typeof cached.activeUsersToday === "number"
             ? cached.activeUsersToday
-            : 0;
+            : null;
     const totalSessions =
-        cached !== null && typeof cached.totalSessions === "number" ? cached.totalSessions : 0;
+        cached !== null && typeof cached.totalSessions === "number" ? cached.totalSessions : null;
     const errorRate =
-        cached !== null && typeof cached.errorRate === "number" ? cached.errorRate : 0;
+        cached !== null && typeof cached.errorRate === "number" ? cached.errorRate : null;
 
     return {
         totalUsers,

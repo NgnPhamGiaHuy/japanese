@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 
 import { useAppStore } from "@/lib/app-store";
 import { useAdminToken } from "./useAdminToken";
-import { fetchAdminRoleAction } from "../actions";
 
 export interface AdminRoleCheckResult {
     role: "admin" | "superadmin" | null;
@@ -41,6 +40,12 @@ export function useAdminRoleCheck(): AdminRoleCheckResult {
         const checkRole = async () => {
             try {
                 const token = await getAdminIdToken();
+                // Lazy: a static import of "../actions" pulls the whole
+                // server-action chain (firebase-admin/auth →
+                // google-auth-library) into any bundle that imports this
+                // hook, breaking plain browser/unit test runs that have no
+                // Next.js build-time "use server" stubbing.
+                const { fetchAdminRoleAction } = await import("../actions");
                 const result = await fetchAdminRoleAction(token);
                 if (cancelled) return;
                 setRole(result.ok ? result.data.role : null);

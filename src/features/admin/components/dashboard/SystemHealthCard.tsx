@@ -5,7 +5,8 @@ import { useTranslations } from "next-intl";
 import { AdminCard } from "../shared";
 
 interface SystemHealthCardProps {
-    errorRate: number;
+    /** `null` renders a distinct "no data" state instead of a fabricated 0 (ADR-114). */
+    errorRate: number | null;
     activeAdmins: number;
     activeSuperAdmins: number;
 }
@@ -22,6 +23,7 @@ const SystemHealthCard = ({
     activeSuperAdmins,
 }: SystemHealthCardProps) => {
     const t = useTranslations("AdminDashboard");
+    const hasErrorRate = errorRate !== null;
     return (
         <AdminCard title={t("systemHealth")}>
             <div className="space-y-4">
@@ -29,17 +31,23 @@ const SystemHealthCard = ({
                     <span className="text-muted text-xs font-bold">{t("errorRate")}</span>
                     <span
                         className={
-                            errorRate > 2 ? "text-danger font-black" : "text-hiragana font-black"
+                            !hasErrorRate
+                                ? "text-muted font-bold italic"
+                                : errorRate > 2
+                                  ? "text-danger font-black"
+                                  : "text-hiragana font-black"
                         }
                     >
-                        {errorRate}%
+                        {hasErrorRate ? `${errorRate}%` : t("noDataSource")}
                     </span>
                 </div>
                 <div className="h-2 w-full overflow-hidden rounded-full bg-gray-100">
-                    <div
-                        className="bg-danger h-full transition-all"
-                        style={{ width: `${Math.min(errorRate * 10, 100)}%` }}
-                    />
+                    {hasErrorRate && (
+                        <div
+                            className="bg-danger h-full transition-all"
+                            style={{ width: `${Math.min(errorRate * 10, 100)}%` }}
+                        />
+                    )}
                 </div>
                 <div className="flex items-center justify-between">
                     <span className="text-muted text-xs font-bold">{t("activeTeam")}</span>

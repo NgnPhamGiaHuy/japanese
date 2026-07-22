@@ -704,6 +704,8 @@
         "globalSettings": "Global Settings",
         "contentAudit": "Content Audit",
         "securityReview": "Security Review",
+        "noDataSource": "No data",
+        "noChartData": "No data yet",
         "userAcquisitionGrowth": "User Acquisition Growth",
         "totalUsersLegend": "Total Users",
         "newUsersLegend": "New Users",

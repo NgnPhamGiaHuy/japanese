@@ -1,9 +1,12 @@
 export interface AdminStats {
     totalUsers: number;
-    activeUsersToday: number;
+    /** `null` when `metadata/counters` has no cached value — never fabricated as 0 (ADR-114). */
+    activeUsersToday: number | null;
     totalFlashcards: number;
-    totalSessions: number;
-    errorRate: number;
+    /** `null` when `metadata/counters` has no cached value — never fabricated as 0 (ADR-114). */
+    totalSessions: number | null;
+    /** `null` when `metadata/counters` has no cached value — never fabricated as 0 (ADR-114). */
+    errorRate: number | null;
     activeAdmins: number;
     activeSuperAdmins: number;
 }

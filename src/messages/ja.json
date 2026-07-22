@@ -725,6 +725,8 @@
         "globalSettings": "グローバル設定",
         "contentAudit": "コンテンツ監査",
         "securityReview": "セキュリティレビュー",
+        "noDataSource": "データなし",
+        "noChartData": "まだデータがありません",
         "userAcquisitionGrowth": "ユーザー獲得の推移",
         "totalUsersLegend": "総ユーザー数",
         "newUsersLegend": "新規ユーザー数",

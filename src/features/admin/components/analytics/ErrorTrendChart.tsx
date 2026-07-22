@@ -29,7 +29,12 @@ interface ErrorTrendChartProps {
 const ErrorTrendChart = ({ data }: ErrorTrendChartProps) => {
     const t = useTranslations("AdminAnalytics");
     return (
-        <AdminChartContainer title={t("errorTrends")} className="bg-red-50/10">
+        <AdminChartContainer
+            title={t("errorTrends")}
+            className="bg-red-50/10"
+            isEmpty={data.length === 0}
+            emptyMessage={t("noAnalyticsData")}
+        >
             <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={data}>
                     <CartesianGrid strokeDasharray="8 8" vertical={false} stroke="#f0f0f0" />

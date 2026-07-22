@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useMemo } from "react";
 
-import { useAdminRoleCheck } from "../hooks";
+import { useAdminRoleCheck } from "../hooks/useAdminRoleCheck";
 
 import type { AdminRole } from "../types";
 

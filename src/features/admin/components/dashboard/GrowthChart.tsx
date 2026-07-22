@@ -31,7 +31,11 @@ interface GrowthChartProps {
 const GrowthChart = ({ data, onClick }: GrowthChartProps) => {
     const t = useTranslations("AdminDashboard");
     return (
-        <AdminChartContainer title={t("userAcquisitionGrowth")}>
+        <AdminChartContainer
+            title={t("userAcquisitionGrowth")}
+            isEmpty={data.length === 0}
+            emptyMessage={t("noChartData")}
+        >
             <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={data}>
                     <CartesianGrid strokeDasharray="8 8" vertical={false} stroke="#f0f0f0" />
