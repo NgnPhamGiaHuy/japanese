@@ -13,12 +13,13 @@ import { RefreshCw } from "lucide-react";
 
 import {
     canEdit,
+    duplicateLesson,
     FlashcardDetailLayout,
+    logDeckCreated,
     ShareModal,
     useLessons,
     useSharedLesson,
 } from "@/features/flashcard";
-import { emitNotification } from "@/features/notifications";
 import { useRouter } from "@/i18n/navigation";
 import { useAppStore } from "@/lib/app-store";
 import { SITE_URL } from "@/lib/site";
@@ -27,7 +28,7 @@ import { useCopyToClipboard } from "@/shared/hooks";
 import { useAlert } from "@/shared/providers";
 
 import type { LearningResource, WithContext } from "schema-dts";
-import type { DeckContext, FlashCard, PublicSharedLessonPreview } from "@/features/flashcard";
+import type { DeckContext, PublicSharedLessonPreview } from "@/features/flashcard";
 
 interface SharedLessonPageClientProps {
     shareId: string;
@@ -62,7 +63,7 @@ export default function SharedLessonPageClient({
     const router = useRouter();
     const { user } = useAppStore();
     const { showAlert } = useAlert();
-    const { saveFullLesson, shareLesson, updateLessonRoles } = useLessons();
+    const { shareLesson, updateLessonRoles } = useLessons();
 
     const { result, status, error } = useSharedLesson(shareId);
 
@@ -177,43 +178,23 @@ export default function SharedLessonPageClient({
         if (!user) return;
         setSaving(true);
         try {
-            const cleanLesson = {
-                ...lesson,
-                id: "",
-                userId: user.uid,
-                ownerId: user.uid,
-                shareId: undefined,
-                allowLinkAccess: false,
-                isPublic: false,
-                roles: { [user.uid]: "owner" as const },
-                collaborators: [user.uid],
-                createdAt: Date.now(),
+            await duplicateLesson({
+                sourceLesson: lesson,
+                sourceCards: cards,
                 sourceLessonId: meta.sourceLessonId,
                 sourceUserId: meta.sourceUserId,
-            };
-            const cleanCards: FlashCard[] = cards.map((c) => ({
-                ...c,
-                id: `c_${crypto.randomUUID()}`,
-                lessonId: "",
-                easeFactor: 2.5,
-                interval: 0,
-                repetitions: 0,
-                nextReviewAt: 0,
-            }));
-            await saveFullLesson(
-                cleanLesson as unknown as import("@/features/flashcard").Lesson,
-                cleanCards,
-                true,
-            );
+                newOwner: {
+                    uid: user.uid,
+                    displayName: user.displayName,
+                    photoURL: user.photoURL,
+                },
+            });
 
-            // Tell the original owner their deck was saved (server derives the
-            // recipient + skips self).
-            if (meta.sourceUserId && meta.sourceLessonId && meta.sourceUserId !== user.uid) {
-                void emitNotification({
-                    kind: "deck_duplicated",
-                    ownerId: meta.sourceUserId,
-                    lessonId: meta.sourceLessonId,
-                });
+            try {
+                const token = await user.getIdToken();
+                void logDeckCreated(token, user.uid, "", lesson.title);
+            } catch {
+                // Non-blocking — matches saveFullLesson's own activity-log handling.
             }
 
             router.back();
