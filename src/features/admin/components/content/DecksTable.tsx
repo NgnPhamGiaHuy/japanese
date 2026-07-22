@@ -1,7 +1,7 @@
 "use client";
 
 import DeckMobileRow from "./DeckMobileRow";
-import { AdminTable, DataTableBody, DataTableHeader, DataTableMobileList } from "../shared";
+import { AdminTable, DataTableBody, DataTableHeader, DataTableMobileList } from "../table";
 import { useDataTable } from "../../hooks/useDataTable";
 import { useDecksTableColumns } from "../../hooks/useDecksTableColumns";
 

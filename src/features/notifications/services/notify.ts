@@ -14,7 +14,7 @@
 import { auth } from "@/lib/firebase";
 import { emitNotificationAction } from "../actions/notification.actions";
 
-import type { EmitNotificationInput } from "../schema";
+import type { EmitNotificationInput } from "../domain/schema";
 
 export async function emitNotification(input: EmitNotificationInput): Promise<void> {
     try {

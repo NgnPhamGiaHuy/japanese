@@ -7,11 +7,10 @@ import { Check, X } from "lucide-react";
 
 import { useRouter } from "@/i18n/navigation";
 import { Button } from "@/shared/components/ui";
-import { withFreshToken } from "./withFreshToken";
 import { logNotificationDeleted, logNotificationRead } from "../actions/activity-log.actions";
 import { resolveNotificationActions } from "../domain/action-registry";
 import { resolveNotificationLink } from "../domain/format";
-import { deleteNotification, markNotificationRead } from "../services";
+import { deleteNotification, markNotificationRead, withFreshToken } from "../services";
 
 import type { AppNotification } from "../types";
 

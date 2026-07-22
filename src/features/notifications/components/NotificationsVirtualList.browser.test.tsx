@@ -81,6 +81,7 @@ vi.mock("@/features/notifications/services", () => ({
     notifyInvite: vi.fn(),
     restoreNotifications: vi.fn(),
     subscribeNotifications: vi.fn(() => () => {}),
+    withFreshToken: vi.fn(),
 }));
 
 let seq = 0;

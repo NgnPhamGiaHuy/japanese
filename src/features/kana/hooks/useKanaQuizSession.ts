@@ -23,7 +23,7 @@ import { comboMultiplier, useGameSession } from "@/features/game";
 import { useUserProgress } from "@/features/user";
 import { playSfx, sequence } from "@/shared/audio";
 import { shuffleArray } from "@/shared/utils";
-import { buildDistractors } from "./kanaDistractors";
+import { buildDistractors } from "../utils";
 
 import type { KanaChar, QuestionType } from "../types";
 

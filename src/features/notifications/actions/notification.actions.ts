@@ -19,11 +19,11 @@ import { FieldValue } from "firebase-admin/firestore";
 
 import { APP_ID } from "@/lib/app-id";
 import { adminDb } from "@/lib/firebase-admin";
-import { userActionClient, verifyIdToken } from "@/lib/safe-action";
+import { toActionResult, userActionClient, verifyIdToken } from "@/lib/safe-action";
 import { contentFor, mergeActors, shareLinkFor } from "../domain/build";
 import { collapseId } from "../domain/id";
 import { collapseKeyOf, policyOf } from "../domain/registry";
-import { emitNotificationInputSchema } from "../schema";
+import { emitNotificationInputSchema } from "../domain/schema";
 
 import type { ActorRef } from "../domain/build";
 import type { NotificationInput } from "../domain/events";
@@ -112,10 +112,10 @@ export async function emitNotificationAction(
         // rawInput is deliberately `unknown` at this boundary (untrusted
         // external input) — next-safe-action's `.inputSchema()` validates it
         // at runtime regardless of what we claim its type is here.
-        const result = await emitNotificationSafeAction(idToken, rawInput as EmitInput);
-        if (result.serverError) return { ok: false, error: result.serverError };
-        if (result.validationErrors) return { ok: false, error: "invalid-input" };
-        return { ok: true };
+        const result = toActionResult(
+            await emitNotificationSafeAction(idToken, rawInput as EmitInput),
+        );
+        return result.ok ? { ok: true } : result;
     } catch (err) {
         return { ok: false, error: err instanceof Error ? err.message : "unknown" };
     }

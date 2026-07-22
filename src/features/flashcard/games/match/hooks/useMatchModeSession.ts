@@ -29,9 +29,9 @@ import { generateMatchDistractors } from "@/features/ai";
 import { calcTimeBonus, DIFFICULTY_CONFIG } from "@/features/flashcard/games/match/config";
 import { recordGameResult, useGameSession } from "@/features/game";
 import { shuffleArray } from "@/shared/utils";
-import { buildGridItems } from "./matchGrid";
 import { useMatchGameStore } from "./useMatchGameStore";
 import { useMatchScoring } from "./useMatchScoring";
+import { buildGridItems } from "../matchGrid";
 
 import type { MatchDifficulty } from "@/features/flashcard/games/match/config";
 import type { FlashCard } from "../../../types";

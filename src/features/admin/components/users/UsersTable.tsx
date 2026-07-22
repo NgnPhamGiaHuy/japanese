@@ -9,7 +9,7 @@ import UserMobileRow from "./UserMobileRow";
 import UsersActionConfirmModal from "./UsersActionConfirmModal";
 import UsersTablePagination from "./UsersTablePagination";
 import UsersTableToolbar from "./UsersTableToolbar";
-import { AdminTable, DataTableBody, DataTableHeader, DataTableMobileList } from "../shared";
+import { AdminTable, DataTableBody, DataTableHeader, DataTableMobileList } from "../table";
 import { useUsersTable } from "../../hooks";
 
 import type { AdminUser } from "../../types";

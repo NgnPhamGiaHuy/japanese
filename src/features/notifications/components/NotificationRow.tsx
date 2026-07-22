@@ -8,18 +8,22 @@ import { Trash2 } from "lucide-react";
 import { useRouter } from "@/i18n/navigation";
 import { Button } from "@/shared/components/ui";
 import { useAlert } from "@/shared/providers";
+import { formatRelativeTime } from "@/shared/utils";
 import InviteActions from "./InviteActions";
 import NotificationIcon from "./NotificationIcon";
-import { withFreshToken } from "./withFreshToken";
 import { logNotificationDeleted, logNotificationRead } from "../actions/activity-log.actions";
 import {
-    formatRelativeTime,
     isCollapsed,
     overflowCount,
     resolveNotificationLink,
     visibleActors,
 } from "../domain/format";
-import { deleteNotification, markNotificationRead, restoreNotifications } from "../services";
+import {
+    deleteNotification,
+    markNotificationRead,
+    restoreNotifications,
+    withFreshToken,
+} from "../services";
 import { isUnread } from "../types";
 
 import type { AppNotification } from "../types";

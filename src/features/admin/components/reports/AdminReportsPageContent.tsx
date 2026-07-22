@@ -20,7 +20,8 @@ import { Button, EmptyState, LoadingSpinner } from "@/shared/components/ui";
 import LogsFilters from "./LogsFilters";
 import LogsSummaryHeader from "./LogsSummaryHeader";
 import LogsVirtualList from "./LogsVirtualList";
-import { AdminErrorState, AdminPageHeader, AdminPageLayout, AdminTableShell } from "../shared";
+import { AdminErrorState, AdminPageHeader, AdminPageLayout } from "../shared";
+import { AdminTableShell } from "../table";
 import { useCursorPagination, useLogs } from "../../hooks";
 
 import type { AdminLogFilters, LogLevel, LogType } from "../../types";

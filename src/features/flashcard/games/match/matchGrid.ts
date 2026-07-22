@@ -5,8 +5,8 @@
  */
 import { shuffleArray } from "@/shared/utils";
 
-import type { MatchItem } from "./useMatchGameStore";
-import type { FlashCard } from "../../../types";
+import type { MatchItem } from "./hooks/useMatchGameStore";
+import type { FlashCard } from "../../types";
 
 /**
  * Builds the shuffled grid of tiles from a card pool and optional AI distractors.
