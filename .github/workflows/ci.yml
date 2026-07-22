@@ -52,6 +52,14 @@ jobs:
         # See execution-readiness/06 §G-1.
         run: npm run lint
 
+      - name: Vocabulary agreement (ADR-108/ADR-115)
+        # Fails only on an "enforce"-mode mismatch between a TS union, its
+        # firestore.rules list, and its writers (e.g. DeckAccessRole,
+        # LogSource). The notification-type target runs report-only until
+        # T-108a (Wave 5) widens that union — see
+        # scripts/check-vocabulary-agreement.mjs's own docblock.
+        run: npm run check:vocab
+
       - name: Build (includes TypeScript typecheck)
         run: npm run build
         env:

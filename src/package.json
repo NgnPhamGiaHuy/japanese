@@ -13,6 +13,7 @@
         "emulators:start:all": "firebase emulators:start --only firestore,auth,functions,storage",
         "start": "next start",
         "lint": "eslint",
+        "check:vocab": "node scripts/check-vocabulary-agreement.mjs",
         "prepare": "cd .. && husky src/.husky",
         "storybook": "storybook dev -p 6006",
         "build-storybook": "storybook build"
