@@ -209,6 +209,29 @@ const eslintConfig = defineConfig([
                                     ],
                                     message: FLASHCARD_MESSAGE,
                                 })),
+                                // notifications -> any other feature is forbidden outright
+                                // (ADR-102, T-102c) — stricter than the general per-feature
+                                // zone above, which still lets every feature reach any
+                                // OTHER feature's public barrel. notifications is
+                                // feature-agnostic by contract: producing features
+                                // register their own handlers on its act-side seam
+                                // (domain/action-registry.ts, ADR-102) instead of
+                                // notifications importing them. Zero exceptions, not even
+                                // another feature's index.ts/server.ts — this is what
+                                // keeps the W-1 cycle (flashcard <-> notifications) from
+                                // re-forming through a new backward import.
+                                {
+                                    target: "./features/notifications",
+                                    from: "./features",
+                                    except: ["notifications"],
+                                    message:
+                                        "features/notifications may not import any other " +
+                                        "feature, not even its public barrel — notifications " +
+                                        "is feature-agnostic by contract. Producing features " +
+                                        "register their own handlers on its act-side seam " +
+                                        "instead (domain/action-registry.ts). See ADR-102 " +
+                                        "(architecture-decision/03-Architecture-Decisions.md).",
+                                },
                             ],
                         },
                     ],

@@ -377,7 +377,8 @@ Each is scheduled into a wave but is **NOT READY** until its question answers. E
 
 #### T-102c — Lint rule forbidding notifications → flashcard imports
 
-**Size** S · **Wave** 1 · **Status** Ready
+**Size** S · **Wave** 1 · **Status** ✅ **DONE** — _was: Ready_
+**Delivered** Discovered during a post-Wave-6 completeness audit of this backlog: despite T-102a/T-102b (the act-side seam + InviteActions rewiring) landing long ago, this specific lint rule was never actually added — the backlog's own Status line had no Delivered note and no checkmark, and `eslint.config.mjs` had no rule naming ADR-102 for this direction. Confirmed the codebase was already clean (zero pre-existing `features/notifications/**` → other-feature imports) before adding the rule, so no fixes were needed alongside it. Added a dedicated zone to the same `import/no-restricted-paths` invocation the cross-feature rule (T-101c) and the flashcard sub-module rule (T-104b) already share — `target: features/notifications`, `from: features`, `except: [notifications]` only, with **zero** entry-point exceptions (stricter than the general per-feature zones, which still permit any feature to reach another feature's public barrel). Verified the rule fires: an injected probe importing `useLessons` from `@/features/flashcard` (the public barrel, not a deep path) failed lint with the ADR-102-naming message; removed the probe. Full suite green (build, lint 0 errors, 361 unit tests).
 **Traces to** ADR-102 (AD-02) · W-1, RC-1, TD-4, P-1 · cluster **C3** · `assess/03`, `/11`
 **Description.** Encode the one-way direction as a hard rule so the lattice risk RC-1 names — each new actionable kind adding another backward import — cannot materialize silently.
 **Acceptance criteria**
