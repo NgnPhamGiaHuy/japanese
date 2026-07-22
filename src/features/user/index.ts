@@ -9,16 +9,22 @@
  */
 
 // Auth session + progress state
-export { useActivityTracker, useBestScores, useFirebaseAuth, useUserProgress } from "./hooks";
+export {
+    useActivityTracker,
+    useBestScores,
+    useFirebaseAuth,
+    useLoginFlow,
+    useUserProgress,
+} from "./hooks";
 
 // Shared progress subscription — mounted once at the composition root.
 export { UserProgressProvider } from "./context/UserProgressContext";
 
-// Sign-in / sign-out. Both the popup and redirect flows are public because
-// the login screen falls back from one to the other.
-export {
-    completeGoogleRedirectSignIn,
-    signInWithGoogle,
-    signInWithGoogleRedirect,
-    signOut,
-} from "./services";
+// Progression math — level/accuracy rules for the profile screen.
+export { computeAccuracy, levelFromXp } from "./domain";
+export type { LevelProgress } from "./domain";
+
+// Sign-out. Sign-in is internal to useLoginFlow — the login screen is its
+// only caller, so the popup/redirect functions themselves don't need to be
+// public.
+export { signOut } from "./services";
