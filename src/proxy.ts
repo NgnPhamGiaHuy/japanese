@@ -32,10 +32,18 @@ function splitLocale(pathname: string): { path: string; canonicalPrefix: string 
 
 /**
  * Route protection (Next.js 16 `proxy` convention; replaces deprecated `middleware`).
- * Reads the `auth-token` cookie (set by useFirebaseAuth via onIdTokenChanged).
+ * Reads the `auth-token` cookie (an httpOnly, server-minted session cookie —
+ * see lib/auth-session.ts and features/user/actions/session.actions.ts).
  * - Unauthenticated request to a protected path → redirect to /login
  * - Authenticated request to /login → redirect to /
- * The cookie is NOT httpOnly so Firebase client SDK can refresh it seamlessly.
+ *
+ * ADR-107: this check is presence-only, by design — it is routing UX, never
+ * a security boundary. Real verification (`verifySessionCookie`) happens
+ * server-side in admin actions; every other server action re-verifies
+ * identity from the client SDK's own in-memory ID token independently of
+ * this cookie. A future server-rendered protected page must call
+ * `verifySessionCookie` itself rather than inferring anything from having
+ * reached this point.
  *
  * Also reverse-proxies /ingest/* to PostHog so event capture is first-party
  * (same-origin, not ad-blocked) — see src/lib/posthog.ts (api_host: "/ingest").
