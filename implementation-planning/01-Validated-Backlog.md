@@ -941,7 +941,8 @@ Each is scheduled into a wave but is **NOT READY** until its question answers. E
 
 #### T-108c — Legacy-data verdict: retain or remove the 4 `@deprecated` fields
 
-**Size** M · **Wave** 5 · **Status** **Gated Q-5**
+**Size** M · **Wave** 5 · **Status** ⏸️ **RECORDED — still Gated Q-5** — _was: Gated Q-5_
+**Delivered** Re-confirmed Q-5 requires a live production Firestore data sample (does any stored `notifications` document lack `status`, i.e. predate the migration?) that cannot be taken from this session — no production credentials, no console access, and (per T-108b) no repo-level way to even confirm which project would be production. `scripts/backfill-notifications.mjs` (the one-time migration script) still exists in the repo, un-deleted, and `docs/testing-notifications.md` still self-reports it as "NOT yet run" — both consistent with the fields still being load-bearing. Confirmed the 4 fields (`deckId`, `deckTitle`, `link`, `read`) and `isUnread()`'s legacy fallback branch are untouched (`features/notifications/types/index.ts`). Per the task's own fallback: retain everything, nothing removed. The gate stays open and honestly recorded rather than assumed answered.
 **Traces to** ADR-108 (AD-08) · TD-1, RC-3, R-5, OP-15 · clusters **C1**, **C2** · `assess/03`, `/04`, `/07`, `/11`
 **Description.** Four `@deprecated` fields persist as migration-era compatibility. Whether legacy-shaped documents still exist in production, and whether the backfill ever ran, is Q-5 — and cleaning up without that answer would silently hide pre-migration notifications from users.
 **Acceptance criteria**
