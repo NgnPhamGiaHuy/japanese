@@ -3,10 +3,10 @@
 import { useTranslations } from "next-intl";
 
 import { flexRender } from "@tanstack/react-table";
-import { format } from "date-fns";
 import { Calendar, Layers } from "lucide-react";
 
 import { DEFAULT_DECK_THEME_COLOR } from "@/features/flashcard";
+import { formatAdminDate } from "../../utils/date.utils";
 
 import type { Row } from "@tanstack/react-table";
 import type { AdminDeck } from "../../types";
@@ -93,7 +93,7 @@ const DeckMobileRow = ({ row }: DeckMobileRowProps) => {
                     {deck.createdAt && (
                         <div className="flex items-center gap-1">
                             <Calendar size={10} />
-                            {format(new Date(deck.createdAt), "MMM d, yyyy")}
+                            {formatAdminDate(deck.createdAt)}
                         </div>
                     )}
                 </div>

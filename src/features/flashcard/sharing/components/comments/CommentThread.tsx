@@ -19,6 +19,8 @@ import type { Comment } from "../../../types/flashcard.types";
 export interface CommentThreadProps {
     /** The root comment object (contains an array of replies) */
     comment: Comment;
+    /** Live clock (ms) from the panel's single useNow() tick, threaded to every CommentItem */
+    now: number;
     /** Current logged-in user's ID for ownership checks */
     currentUserId: string;
     /** Resolved permission role (owner, editor, commenter, viewer) */
@@ -36,6 +38,7 @@ export interface CommentThreadProps {
 
 const CommentThread = ({
     comment,
+    now,
     currentUserId,
     currentUserRole,
     isOwner,
@@ -66,6 +69,7 @@ const CommentThread = ({
             {/* Root comment */}
             <CommentItem
                 comment={comment}
+                now={now}
                 currentUserId={currentUserId}
                 currentUserRole={currentUserRole}
                 isOwner={isOwner}
@@ -116,6 +120,7 @@ const CommentThread = ({
                         <CommentItem
                             key={reply.id}
                             comment={reply}
+                            now={now}
                             currentUserId={currentUserId}
                             currentUserRole={currentUserRole}
                             isOwner={isOwner}

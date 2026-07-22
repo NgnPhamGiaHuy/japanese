@@ -7,6 +7,7 @@ import { createColumnHelper } from "@tanstack/react-table";
 import ActionsCell from "../components/users/ActionsCell";
 import RoleCell from "../components/users/RoleCell";
 import UserCell from "../components/users/UserCell";
+import { formatAdminDate } from "../utils/date.utils";
 
 import type { AdminUser } from "../types";
 
@@ -95,11 +96,7 @@ export const useUsersTableColumns = ({
                             <span className="text-muted text-xs">{t("never")}</span>
                         ) : (
                             <span className="text-muted text-xs font-bold">
-                                {new Date(raw).toLocaleDateString(undefined, {
-                                    year: "numeric",
-                                    month: "short",
-                                    day: "numeric",
-                                })}
+                                {formatAdminDate(raw)}
                             </span>
                         )}
                     </div>
@@ -122,11 +119,7 @@ export const useUsersTableColumns = ({
                             <span className="text-muted text-xs">{t("unknownDate")}</span>
                         ) : (
                             <span className="text-katakana text-xs font-bold">
-                                {new Date(raw).toLocaleDateString(undefined, {
-                                    year: "numeric",
-                                    month: "short",
-                                    day: "numeric",
-                                })}
+                                {formatAdminDate(raw)}
                             </span>
                         )}
                     </div>

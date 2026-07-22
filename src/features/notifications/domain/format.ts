@@ -1,27 +1,11 @@
 /**
  * @file domain/format.ts
- * Pure display helpers for the inbox UI: live relative timestamps and
- * collapsed-notification (avatar-stack) presentation. No React, no Firebase —
- * unit-testable.
+ * Pure display helpers for the inbox UI: collapsed-notification
+ * (avatar-stack) presentation and link resolution. No React, no Firebase —
+ * unit-testable. Live relative timestamps live in shared/utils/relativeTime —
+ * this feature just consumes them (see NotificationRow.tsx).
  */
 import type { AppNotification, NotificationActor, NotificationGroup } from "../types";
-
-/**
- * Relative timestamp, computed against an injected `now` so it can tick live
- * (see shared/hooks useNow) and be tested deterministically. Preserves the
- * inbox's existing "just now / Xm / Xh / Xd / MMM d" format.
- */
-export function formatRelativeTime(ts: number, now: number): string {
-    const diff = now - ts;
-    const m = Math.floor(diff / 60_000);
-    if (m < 1) return "just now";
-    if (m < 60) return `${m}m ago`;
-    const h = Math.floor(m / 60);
-    if (h < 24) return `${h}h ago`;
-    const d = Math.floor(h / 24);
-    if (d < 7) return `${d}d ago`;
-    return new Date(ts).toLocaleDateString("en-US", { month: "short", day: "numeric" });
-}
 
 /** Alias, kept for this module's existing call sites — canonical shape lives in ../types (E11-T6). */
 export type DisplayActor = NotificationActor;

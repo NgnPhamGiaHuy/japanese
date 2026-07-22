@@ -3,11 +3,11 @@
 import { useTranslations } from "next-intl";
 
 import { createColumnHelper } from "@tanstack/react-table";
-import { format } from "date-fns";
 import { Calendar, Eye, Layers, Trash2 } from "lucide-react";
 
 import { DEFAULT_DECK_THEME_COLOR } from "@/features/flashcard";
 import { Button } from "@/shared/components/ui";
+import { formatAdminDate } from "../utils/date.utils";
 
 import type { AdminDeck } from "../types";
 
@@ -117,9 +117,7 @@ export const useDecksTableColumns = ({ onView, onDelete, isDeleting }: ColumnPro
             cell: ({ row }) => (
                 <div className="text-muted flex items-center gap-2 text-xs font-bold">
                     <Calendar size={12} />
-                    {row.original.createdAt
-                        ? format(new Date(row.original.createdAt), "MMM d, yyyy")
-                        : "—"}
+                    {row.original.createdAt ? formatAdminDate(row.original.createdAt) : "—"}
                 </div>
             ),
         }),

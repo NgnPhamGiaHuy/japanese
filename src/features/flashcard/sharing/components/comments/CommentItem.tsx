@@ -12,6 +12,7 @@ import { useState } from "react";
 import { CheckCircle, Circle, Edit2, MessageSquare, Trash2 } from "lucide-react";
 
 import { Button } from "@/shared/components/ui";
+import { formatRelativeTime } from "@/shared/utils";
 import CommentInput from "./CommentInput";
 
 import type { ReactNode } from "react";
@@ -20,6 +21,8 @@ import type { Comment, Reply } from "../../../types/flashcard.types";
 export interface CommentItemProps {
     /** The comment/reply data object */
     comment: Comment | Reply;
+    /** Live clock (ms) from the panel's single useNow() tick, so timestamps update without a per-item timer */
+    now: number;
     /** Current user's UID */
     currentUserId: string;
     /** Resolved permission role (owner, editor, commenter, viewer) */
@@ -58,19 +61,6 @@ const renderMarkdown = (raw: string): string => {
         .replace(/\n/g, "<br>");
 };
 
-// ─── Relative time ────────────────────────────────────────────────────────────
-const relativeTime = (ts: number): string => {
-    const diff = Date.now() - ts;
-    const m = Math.floor(diff / 60000);
-    if (m < 1) return "just now";
-    if (m < 60) return `${m}m ago`;
-    const h = Math.floor(m / 60);
-    if (h < 24) return `${h}h ago`;
-    const d = Math.floor(h / 24);
-    if (d < 7) return `${d}d ago`;
-    return new Date(ts).toLocaleDateString("en-US", { month: "short", day: "numeric" });
-};
-
 const ROLE_COLORS: Record<string, string> = {
     owner: "bg-purple-100 text-purple-700",
     editor: "bg-blue-100 text-blue-700",
@@ -80,6 +70,7 @@ const ROLE_COLORS: Record<string, string> = {
 
 const CommentItem = ({
     comment,
+    now,
     currentUserId,
     currentUserRole,
     isOwner,
@@ -149,7 +140,7 @@ const CommentItem = ({
                             </span>
                         )}
                         <span className="text-xs text-gray-400">
-                            {relativeTime(comment.createdAt)}
+                            {formatRelativeTime(comment.createdAt, now)}
                         </span>
                         {isEdited && (
                             <span className="text-xs text-gray-400 italic">{t("edited")}</span>
