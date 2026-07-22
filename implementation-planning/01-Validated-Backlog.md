@@ -912,7 +912,8 @@ Each is scheduled into a wave but is **NOT READY** until its question answers. E
 
 #### T-108a — Widen `NotificationType` to the 10 values actually written
 
-**Size** S · **Wave** 5 · **Status** Ready _(Q-7 default in force — see §5.6)_
+**Size** S · **Wave** 5 · **Status** ✅ **DONE** — _was: Ready (Q-7 default in force — see §5.6)_
+**Delivered** Discovered missing during a post-Wave-6 completeness audit: this task was fully implemented in Wave 5 (evidenced by the closed ledger row `LDG-02` and every downstream task that depended on its outcome — T-119a's sequencing, T-115b's vocabulary check, T-108e's ledger note — all already correctly reference it as done), but this exact Status/Delivered field was never filled in at the time. `NotificationType` is now `NotificationKind | "digest"` — a self-maintaining type alias, not a hand-listed literal union — sequenced after T-119a (shrinking `NotificationKind` to its 9 active members first) so the alias needed no exclusion list. `NotificationIcon.tsx` made genuinely exhaustive via an `assertNever` fallback (not a silent `default`), satisfying this task's own acceptance criterion that a non-exhaustive switch must fail typecheck. `check-vocabulary-agreement.mjs`'s `NotificationType` target flipped from `report-only` to `enforce` and passes (`agrees (10 values)`), satisfying the 4th acceptance criterion directly.
 **Traces to** ADR-108 (AD-08) · W-7, RC-2, OP-4 · cluster **C1** · `assess/03`, `/04`, `/07`, `/11`
 **Description.** `AppNotification.type` is a 4-value TS union while the codebase writes 10 distinct runtime values (9 active kinds plus `"digest"` from the Cloud Function) — a compile-time contract the codebase itself contradicts, with correctness currently resting on `NotificationIcon` widening to `string`. The stored vocabulary is authoritative; the union widens to match.
 **Acceptance criteria**
