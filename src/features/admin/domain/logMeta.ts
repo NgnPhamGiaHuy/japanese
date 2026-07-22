@@ -19,6 +19,19 @@
  * LogRow.tsx, the two files that missed the original E11-T6 consolidation —
  * LogRow's warn case previously hardcoded `border-l-amber-400`, which visibly
  * drifted from every other warn-level color here (`#ff9600`/`survival`).
+ *
+ * Raw-hex adjudication (T-111a, UR-3): `ADMIN_ACTION`/`USER_ACTION`/`CONTENT`'s
+ * `text` fields (`#7c3aed`, `#b86800`, `#3d8f00`) and both `ERROR`-family
+ * `bg` hover states (`#ffc8c9`) are deliberately darker/higher-contrast
+ * variants of their row's own token (`both`/`survival`/`hiragana`/
+ * `danger-bg`) — chosen for legible small-badge text and a visible hover
+ * step on top of an already-light 10%-opacity tint, not the token's own
+ * value left un-extracted. None is an exact match for any token in `globals.css`
+ * (verified), so converging them onto `text-both`/`text-survival`/
+ * `text-hiragana` would be a silent nearest-match substitution that visibly
+ * lightens the text — the `#ffc800` phantom-token history is exactly the
+ * failure mode this note exists to avoid repeating. Kept as literal hex,
+ * intentionally, alongside the already-carved-out `chartColor` field.
  */
 import type { BadgeVariant } from "@/shared/components/ui";
 import type { LogLevel, LogType } from "../types";

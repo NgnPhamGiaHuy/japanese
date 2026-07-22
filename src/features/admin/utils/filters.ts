@@ -11,8 +11,13 @@ export const LOG_TYPE_OPTIONS: LogType[] = [
 ];
 
 /**
- * Shared filtering logic for system logs.
- * Used by both the server-side Service and client-side Hook.
+ * Filtering logic for system logs (server-invoked). Kept in its own
+ * server-agnostic module — not inlined into `log.service.ts` — so a future
+ * client-side call path (e.g. a client-driven re-filter of an already-
+ * fetched page) can share the exact same predicate rather than
+ * reimplementing it, without needing to reach into a `"server-only"` file
+ * to do so. Its sole caller today is `log.service.ts`'s `getLogs` (T-111a
+ * re-verified: no client-side call site exists yet).
  */
 export function applyLogFilters(logs: AdminLog[], filters: AdminLogFilters): AdminLog[] {
     let out = logs;

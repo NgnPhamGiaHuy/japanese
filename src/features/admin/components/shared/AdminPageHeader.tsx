@@ -31,7 +31,7 @@ const AdminPageHeader = ({
         <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
             <div className="min-w-0">
                 <div className="flex flex-wrap items-center gap-2 sm:gap-3">
-                    <div className="bg-katakana shrink-0 rounded-2xl p-2 shadow-lg shadow-[#1cb0f6]/20 sm:p-2.5">
+                    <div className="bg-katakana shadow-katakana/20 shrink-0 rounded-2xl p-2 shadow-lg sm:p-2.5">
                         <Icon className="text-white" size={18} />
                     </div>
                     <div className="flex min-w-0 flex-wrap items-center gap-2 sm:gap-3">

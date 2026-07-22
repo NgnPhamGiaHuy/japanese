@@ -34,6 +34,16 @@ interface UseDataTableProps<T> {
      * `useDecksTableColumns.tsx`). Defaults to true.
      */
     enableSorting?: boolean;
+    /**
+     * Stable per-row ID, for callers that key off `row.id` beyond React's own
+     * reconciliation — e.g. Reports' virtualizer caches measured row height
+     * by `row.id` (T-111a), so an index-based default would let a taller/
+     * shorter log at the same index after a page/filter change reuse the
+     * wrong cached height until the next scroll-triggered remeasure.
+     * Unset (the default) keeps every existing caller's current index-based
+     * `row.id` unchanged.
+     */
+    getRowId?: (row: T) => string;
 }
 
 /**
@@ -53,6 +63,7 @@ export function useDataTable<T>({
     globalFilterFn,
     enableFiltering = true,
     enableSorting = true,
+    getRowId,
 }: UseDataTableProps<T>) {
     const [globalFilter, setGlobalFilter] = useState("");
     const [sorting, setSorting] = useState<SortingState>([]);
@@ -69,6 +80,7 @@ export function useDataTable<T>({
         ...(enableFiltering ? { getFilteredRowModel: getFilteredRowModel() } : {}),
         enableRowSelection,
         ...(globalFilterFn ? { globalFilterFn } : {}),
+        ...(getRowId ? { getRowId } : {}),
     });
 
     return { table, globalFilter, setGlobalFilter, setRowSelection };

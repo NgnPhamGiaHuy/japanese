@@ -67,7 +67,7 @@ const AdminDateRangeFilter = ({
                         <Filter size={10} className={hasActiveFilters ? "animate-pulse" : ""} />
                         <span>{t("activeFilters")}</span>
                         {hasActiveFilters && (
-                            <div className="bg-katakana h-2 w-2 rounded-full shadow-sm shadow-[#1cb0f6]/50" />
+                            <div className="bg-katakana shadow-katakana/50 h-2 w-2 rounded-full shadow-sm" />
                         )}
                     </div>
                 </div>
