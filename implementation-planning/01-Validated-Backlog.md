@@ -512,7 +512,8 @@ Each is scheduled into a wave but is **NOT READY** until its question answers. E
 
 #### T-116c — Activate PostHog
 
-**Size** S · **Wave** 2 · **Status** **Gated Q-4**
+**Size** S · **Wave** 2 · **Status** ⏸️ **RECORDED — still Gated Q-4** — _was: Gated Q-4_
+**Delivered** Discovered during a post-Wave-6 completeness audit, same gap as its sibling T-116b: the fallback (defer, record in the ledger) was already correctly applied via `LDG-18`, but this entry's own Status/Delivered fields were never updated. Re-verified Q-4 is still unanswerable: `.env` has `NEXT_PUBLIC_POSTHOG_KEY`/`NEXT_PUBLIC_POSTHOG_UI_HOST` present only as commented-out placeholders. Confirmed the wiring is intact and correctly gated: `initPostHog()` (`lib/posthog.ts`) no-ops outside `NODE_ENV === "production"` and again if `NEXT_PUBLIC_POSTHOG_KEY` is unset, with `autocapture`/`capture_pageview` deliberately off so only the one explicit manual `$pageview` call is ever sent. The analytics-scope half of this gate (what product events to add beyond that) is a product decision, not a repo fact, and was correctly left undecided rather than guessed at.
 **Traces to** ADR-116 (AD-16) · OP-21 · cluster **C13** · `assess/03`, `/09`
 **Description.** PostHog captures exactly one manual `$pageview` despite the wiring promising product events. Activation depends on credentials **and** on the intended analytics scope — a product decision ADR-116 explicitly defers to the owner.
 **Acceptance criteria**
