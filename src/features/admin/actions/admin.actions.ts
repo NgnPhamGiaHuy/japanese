@@ -283,18 +283,27 @@ export async function exportAnalyticsAction() {
             const docs = snapshots.docs.map((d) => d.data());
             if (docs.length > 0) return docs;
 
+            // No analytics_daily snapshots exist — emit one row built from the
+            // live counters we do have, with every field that has no real
+            // source left `null` rather than a fabricated 0 (ADR-114/T-114c).
+            // `newUsers`/`featureUsage` have no live source at all; `sessions`/
+            // `activeUsers`/`errors` depend on the never-written
+            // metadata/counters cache and are already `null` there when absent.
             const stats = await getAdminStats();
             const today = new Date().toISOString().split("T")[0];
             return [
                 {
                     date: today,
                     totalUsers: stats.totalUsers,
-                    newUsers: 0,
+                    newUsers: null,
                     activeUsers: stats.activeUsersToday,
                     sessions: stats.totalSessions,
-                    errors: Math.round(stats.totalSessions * (stats.errorRate / 100)),
+                    errors:
+                        stats.totalSessions !== null && stats.errorRate !== null
+                            ? Math.round(stats.totalSessions * (stats.errorRate / 100))
+                            : null,
                     flashcardsCreated: stats.totalFlashcards,
-                    featureUsage: { flashcards: 0, kana: 0, matching: 0 },
+                    featureUsage: null,
                 },
             ];
         })();

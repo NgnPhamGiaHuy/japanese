@@ -664,7 +664,8 @@ Each is scheduled into a wave but is **NOT READY** until its question answers. E
 
 #### T-114c — Replace hardcoded-zero export rows with absent-data semantics
 
-**Size** S · **Wave** 3 · **Status** Ready
+**Size** S · **Wave** 3 · **Status** ✅ **DONE** (Sprint 9) — _was: Ready_
+**Delivered** `exportAnalyticsAction`'s fallback row (emitted only when `analytics_daily` has zero documents) now sets `newUsers`/`featureUsage` to `null` (neither has any live source at all) and `sessions`/`activeUsers`/`errors` to `null` whenever their underlying `metadata/counters` values are themselves absent, rather than hardcoded zeros. The populated-data path (`docs.length > 0`) is untouched — byte-identical for genuine data. Verified the existing CSV flatten/stringify pipeline (`useAnalyticsExport.ts`, `export.utils.ts`) handles the `null`s safely without a ragged-column risk, since the absent-data case only ever produces a single row.
 **Traces to** ADR-114 (AD-14) · W-11, TD-8, OP-16 · cluster **C6** · `assess/07`, `/09`
 **Description.** The analytics export synthesizes a row with hardcoded zeros, carrying the same fabrication into a file an operator may treat as a record. Same ungated honest-UI policy as T-114b, applied to the export path.
 **Acceptance criteria**
