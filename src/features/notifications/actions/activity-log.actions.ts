@@ -4,17 +4,24 @@ import { z } from "zod";
 
 import { ActivityAction } from "@/lib/logging/actions.enum";
 import { logActivity } from "@/lib/logging/activity";
-import { actionClient } from "@/lib/safe-action";
+import { userActionClient } from "@/lib/safe-action";
 
 /**
- * @file Notification activity-log Server Actions — migrated to
- * next-safe-action. Each action now validates its input via
- * `.inputSchema()` (previously untyped positional strings/numbers with no
- * validation at all). Auth stays exactly as before: `idToken` (bind arg #1)
- * flows straight through to `logActivity`, which does its own
- * `verifyIdToken` + "can't log on behalf of another user" check — that
- * helper is shared with every other feature's activity-log actions (out of
- * scope here), so its signature is intentionally untouched.
+ * @file Notification activity-log Server Actions — on the unified action
+ * client (T-106c, ADR-106). Each action validates its input via
+ * `.inputSchema()` and now declares a `.metadata({permission})` label (the
+ * `ActivityAction` it logs, reused verbatim rather than inventing a parallel
+ * vocabulary) — structurally required by `userActionClient`'s base, though
+ * nothing here consumes it for authorization.
+ *
+ * Auth stays exactly as before: `idToken` (bind arg #1) flows straight
+ * through to `logActivity`, which does its own `verifyIdToken` + "can't log
+ * on behalf of another user" check — that helper is shared with every other
+ * feature's activity-log actions (out of scope here), so its signature is
+ * intentionally untouched. `userActionClient`'s own middleware also verifies
+ * the same token (producing an unused `ctx.uid`) before `logActivity` runs —
+ * a disclosed, harmless double-verification, not a weakening: identity is
+ * checked at least as strongly as before, just redundantly.
  *
  * External contract (`Promise<void>`, errors always swallowed) is unchanged:
  * every call site is a fire-and-forget `void ...getIdToken().then(...)` that
@@ -45,8 +52,8 @@ export async function logNotificationRead(
     type: string,
     title?: string,
 ): Promise<void> {
-    await actionClient
-        .bindArgsSchemas([z.string()])
+    await userActionClient
+        .metadata({ permission: ActivityAction.NOTIFICATION_READ })
         .inputSchema(notificationIdInput)
         .action(async ({ parsedInput, bindArgsParsedInputs }) => {
             await logActivity(
@@ -70,8 +77,8 @@ export async function logNotificationDeleted(
     type: string,
     title?: string,
 ): Promise<void> {
-    await actionClient
-        .bindArgsSchemas([z.string()])
+    await userActionClient
+        .metadata({ permission: ActivityAction.NOTIFICATION_DELETED })
         .inputSchema(notificationIdInput)
         .action(async ({ parsedInput, bindArgsParsedInputs }) => {
             await logActivity(
@@ -93,8 +100,8 @@ export async function logNotificationsReadAll(
     userId: string,
     count: number,
 ): Promise<void> {
-    await actionClient
-        .bindArgsSchemas([z.string()])
+    await userActionClient
+        .metadata({ permission: ActivityAction.NOTIFICATION_READ_ALL })
         .inputSchema(countInput)
         .action(async ({ parsedInput, bindArgsParsedInputs }) => {
             await logActivity(
@@ -116,8 +123,8 @@ export async function logNotificationsCleared(
     userId: string,
     count: number,
 ): Promise<void> {
-    await actionClient
-        .bindArgsSchemas([z.string()])
+    await userActionClient
+        .metadata({ permission: ActivityAction.NOTIFICATIONS_CLEARED })
         .inputSchema(countInput)
         .action(async ({ parsedInput, bindArgsParsedInputs }) => {
             await logActivity(
@@ -139,8 +146,8 @@ export async function logNotificationsDelivered(
     userId: string,
     count: number,
 ): Promise<void> {
-    await actionClient
-        .bindArgsSchemas([z.string()])
+    await userActionClient
+        .metadata({ permission: ActivityAction.NOTIFICATIONS_DELIVERED })
         .inputSchema(countInput)
         .action(async ({ parsedInput, bindArgsParsedInputs }) => {
             await logActivity(

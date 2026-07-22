@@ -16,11 +16,10 @@
  *     `count` + `actors` stack, inside a transaction that preserves createdAt.
  */
 import { FieldValue } from "firebase-admin/firestore";
-import { z } from "zod";
 
 import { APP_ID } from "@/lib/app-id";
 import { adminDb } from "@/lib/firebase-admin";
-import { actionClient, verifyIdToken } from "@/lib/safe-action";
+import { userActionClient, verifyIdToken } from "@/lib/safe-action";
 import { contentFor, mergeActors, shareLinkFor } from "../domain/build";
 import { collapseId } from "../domain/id";
 import { collapseKeyOf, policyOf } from "../domain/registry";
@@ -62,9 +61,18 @@ type EmitInput = ReturnType<typeof emitNotificationInputSchema.parse>;
  * Never throws across the boundary — returns `{ ok, error }` (migrated to
  * next-safe-action; the adapter below preserves this exact
  * return shape so the single call site, services/notify.ts, is unaffected).
+ *
+ * On `userActionClient` (T-106c, ADR-106): `.metadata({permission})` is a
+ * generic `"notifications.emit"` label (the action covers 7 different
+ * `NotificationInput.kind`s, so no single `ActivityAction` fits) —
+ * structurally required, not consumed for authorization here. Its own
+ * middleware verifies the same `idToken` a second time before this body's
+ * explicit `verifyIdToken(bindArgsParsedInputs[0])` runs — a disclosed,
+ * harmless double-verification kept because this body still needs the full
+ * `decoded` claims (name/email) that `ctx.uid` alone doesn't carry.
  */
-const emitNotificationSafeAction = actionClient
-    .bindArgsSchemas([z.string()])
+const emitNotificationSafeAction = userActionClient
+    .metadata({ permission: "notifications.emit" })
     .inputSchema(emitNotificationInputSchema)
     .action(async ({ parsedInput: input, bindArgsParsedInputs }) => {
         const { uid: senderId, decoded } = await verifyIdToken(bindArgsParsedInputs[0]);

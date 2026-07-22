@@ -9,7 +9,7 @@ import { adminAuth } from "./firebase-admin";
 import type { DecodedIdToken } from "firebase-admin/auth";
 
 /**
- * @file Server Action safety layer (ADR-106 unification, T-106a).
+ * @file Server Action safety layer (ADR-106 unification, T-106a/T-106c).
  *
  * @remarks
  * `verifiedActionClient` is the ONE verification/envelope mechanism every
@@ -37,14 +37,16 @@ import type { DecodedIdToken } from "firebase-admin/auth";
  *     permission model belongs to the admin feature, not to generic
  *     infrastructure.
  *
- * `actionClient`/`verifyIdToken`'s old inline `.useValidated()` pattern
- * (see each call site) still applies per-action, since next-safe-action
- * forbids calling `.inputSchema()` after `.useValidated()` and every action
- * has its own input schema:
- *   userActionClient.bindArgsSchemas([z.string()]).inputSchema(mySchema)
- *     .useValidated(async ({ next, bindArgsParsedInputs }) =>
- *       next({ ctx: await verifyIdToken(bindArgsParsedInputs[0]) }))
- *     .action(...)
+ * T-106c migrated all 6 former `actionClient` (pre-unification) call sites
+ * straight onto `userActionClient` — no per-action middleware needed, since
+ * verification now lives once in `userActionClient`'s own `.use()` above.
+ * Two of those call sites still call `verifyIdToken` a second time inside
+ * the action body itself (notification emission needs the full `decoded`
+ * claims — name/email — that `ctx.uid` alone doesn't carry; every
+ * activity-log action delegates to `logActivity`, a shared helper whose
+ * signature was intentionally left untouched). Both are disclosed, harmless
+ * redundancy — identity is checked at least as strongly as before, never
+ * more weakly.
  */
 
 /**
@@ -83,7 +85,7 @@ export const userActionClient = verifiedActionClient
         return next({ ctx: { uid } });
     });
 
-/** Verifies a raw Firebase ID token, returning the middleware ctx shape every idToken-bind-arg action attaches via `.useValidated()`. */
+/** Verifies a raw Firebase ID token into `{uid, decoded}` — called once by `userActionClient`'s own middleware, and again directly by the couple of migrated action bodies that need the full decoded claims beyond just `uid`. */
 export async function verifyIdToken(
     idToken: string,
 ): Promise<{ uid: string; decoded: DecodedIdToken }> {
