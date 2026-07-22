@@ -13,7 +13,7 @@ import { LivesDisplay, MiniLeaderboard } from "@/features/game";
 import { ScreenHeaderBackButton, ScreenHeaderRow } from "@/shared/components/layout";
 import MatchGrid from "./MatchGrid";
 import { COMBO_STEP } from "../config";
-import { useMatchGameStore } from "../../../hooks/useMatchGameStore";
+import { useMatchGameStore } from "../hooks/useMatchGameStore";
 
 interface MatchPlayingProps {
     gameMode: string;

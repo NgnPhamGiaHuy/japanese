@@ -52,7 +52,7 @@ const LessonBuilderImportPane: React.FC<LessonBuilderImportPaneProps> = ({
         const others = selectedFiles.filter((f) => !f.type.startsWith("image/"));
 
         if (others.length > 0) {
-            const { parseCSV } = await import("../utils/parser");
+            const { parseCSV } = await import("../../utils/parser");
             const res = await parseCSV(others[0]);
             setPreviewRows([
                 // res.valid rows only land here once validateAtomicCard has already

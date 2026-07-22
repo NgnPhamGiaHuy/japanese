@@ -13,7 +13,7 @@ import { useCopyToClipboard } from "@/shared/hooks";
 import { useAlert } from "@/shared/providers";
 import { useShareInvites } from "./useShareInvites";
 
-import type { DeckAccessRole, Lesson } from "../types";
+import type { DeckAccessRole, Lesson } from "../../types";
 
 type Role = DeckAccessRole;
 

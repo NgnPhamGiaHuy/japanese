@@ -12,7 +12,7 @@ import LessonBuilderImportPane from "./LessonBuilderImportPane";
 import LessonBuilderMeta from "./LessonBuilderMeta";
 import { useLessonBuilder } from "../hooks/useLessonBuilder";
 
-import type { FlashCard, Lesson } from "../types";
+import type { FlashCard, Lesson } from "../../types";
 
 interface LessonBuilderProps {
     editingLesson?: Lesson;

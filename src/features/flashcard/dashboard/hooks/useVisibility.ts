@@ -1,10 +1,10 @@
 import { useMemo } from "react";
 
 import { DEFAULT_DECK_THEME_COLOR } from "@/features/flashcard/types";
-import { getVisibilityConfig, resolveVisibilityColor, VisibilityLevel } from "../utils";
+import { getVisibilityConfig, resolveVisibilityColor, VisibilityLevel } from "../../utils";
 
-import type { Lesson } from "../types";
-import type { VisibilityConfig } from "../utils";
+import type { Lesson } from "../../types";
+import type { VisibilityConfig } from "../../utils";
 
 /**
  * Hook to resolve and memoize the visibility configuration for a lesson.

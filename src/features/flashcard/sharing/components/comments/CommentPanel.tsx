@@ -8,7 +8,7 @@ import { Button } from "@/shared/components/ui";
 import { COMMENT_MAX_LENGTH } from "@/shared/schemas";
 import CommentInput from "./CommentInput";
 import CommentThread from "./CommentThread";
-import { useCommentPanel } from "../hooks";
+import { useCommentPanel } from "../../hooks";
 
 /**
  * Flashcard Commenting Hub

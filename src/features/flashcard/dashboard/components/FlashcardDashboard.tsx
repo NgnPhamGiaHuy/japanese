@@ -28,9 +28,9 @@ import {
 } from "@dnd-kit/sortable";
 import { Plus } from "lucide-react";
 
-import ShareModal from "@/features/flashcard/components/ShareModal";
 import { useLessons } from "@/features/flashcard/hooks";
 import { buildShareId } from "@/features/flashcard/services";
+import { ShareModal } from "@/features/flashcard/sharing";
 import { useRouter } from "@/i18n/navigation";
 import { ScreenHeader } from "@/shared/components/layout";
 import { Button, ConfirmModal } from "@/shared/components/ui";

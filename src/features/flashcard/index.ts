@@ -2,11 +2,28 @@
  * Flashcard Feature — Public API
  *
  * @remarks
- * The largest feature by a wide margin, spanning six sub-domains: dashboard,
- * detail, study/SRS, the Match and Speed games, sharing, and comments. It stays
- * one feature (ADR-104) with internal sub-module boundaries rather than being
- * split — so this barrel is the outer contract, and the sub-domains keep their
- * own inner ones.
+ * The largest feature by a wide margin, spanning six sub-domains (ADR-104):
+ * dashboard, detail, games (match/speed/study — study/SRS is `games/study/`,
+ * not a flashcard-root sibling: it was already a partial seam nested there,
+ * match/speed/study share `games/hooks/` and an identical phase-router
+ * shape, and pulling it out would be pure churn with no functional gain —
+ * see `games/study/`'s own barrel), sharing + comments (`./sharing`), and
+ * import/AI (`./builder`, named for its most prominent component rather
+ * than the ADR's own phrase — see `builder/index.ts`). It stays one feature
+ * with internal sub-module boundaries rather than being split — so this
+ * barrel is the outer contract, and the sub-domains keep their own inner
+ * ones. The flat `components/` directory this feature once had no longer
+ * exists — every component now lives in the sub-module that owns it.
+ *
+ * Cross-sub-module infrastructure — `domain/` (SRS math, `CardWithProgress`),
+ * `services/` (Firestore I/O), `types/`, `utils/`, `actions/`, `context/`,
+ * `loaders/` — stays at the feature root rather than moving into any one
+ * sub-module: `progress.service.ts` and `domain/` are consumed by study
+ * (heaviest), match (`gradeCard` on every pair), `shared.service.ts`, and
+ * externally by `features/home` (read-only, via `useDeckProgressStatus`) —
+ * genuinely shared, not study-exclusive. This is the "boundary calls at the
+ * contested seams" decision T-104a's acceptance criteria calls for
+ * documenting explicitly, not leaving implicit.
  *
  * Curation matters most here: an `export *` over a 146-file feature would make
  * "everything is public" the contract and defeat the boundary entirely. Only
@@ -22,8 +39,8 @@ export { useDashboardModals } from "./dashboard/hooks";
 export { FlashcardDetailLayout } from "./detail";
 export type { DeckContext, DeckRole } from "./detail";
 
-export { default as LessonBuilder } from "./components/LessonBuilder";
-export { default as ShareModal } from "./components/ShareModal";
+export { LessonBuilder } from "./builder";
+export { ShareModal } from "./sharing";
 
 // ─── Study modes ─────────────────────────────────────────────────────────────
 export { StudySession } from "./games/study";

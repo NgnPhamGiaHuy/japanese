@@ -15,7 +15,7 @@ import { Button } from "@/shared/components/ui";
 import CommentInput from "./CommentInput";
 
 import type { ReactNode } from "react";
-import type { Comment, Reply } from "../types/flashcard.types";
+import type { Comment, Reply } from "../../../types/flashcard.types";
 
 export interface CommentItemProps {
     /** The comment/reply data object */

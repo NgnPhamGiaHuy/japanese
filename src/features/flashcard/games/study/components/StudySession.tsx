@@ -2,11 +2,11 @@
 
 import { useSearchParams } from "next/navigation";
 
-import FlashcardLearn from "@/features/flashcard/components/FlashcardLearn";
-import FlashcardMistakeReview from "@/features/flashcard/components/FlashcardMistakeReview";
-import FlashcardPractice from "@/features/flashcard/components/FlashcardPractice";
 import { useAppStore } from "@/lib/app-store";
 import { ConfirmModal } from "@/shared/components/ui";
+import FlashcardLearn from "./FlashcardLearn";
+import FlashcardMistakeReview from "./FlashcardMistakeReview";
+import FlashcardPractice from "./FlashcardPractice";
 import StudyModeSelector from "./StudyModeSelector";
 import { useStudySession } from "../hooks";
 

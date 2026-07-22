@@ -13,9 +13,9 @@ import {
     resolveComment,
     subscribeToComments,
     updateComment,
-} from "../services/comment.service";
+} from "../../services/comment.service";
 
-import type { Comment } from "../types";
+import type { Comment } from "../../types";
 
 /**
  * Normalizes Firestore/logic errors into user-facing strings. `t` is passed in

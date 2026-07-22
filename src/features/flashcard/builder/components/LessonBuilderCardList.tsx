@@ -26,7 +26,7 @@ import { Button } from "@/shared/components/ui";
 import DraggableCard from "./DraggableCard";
 
 import type { DragEndEvent } from "@dnd-kit/core";
-import type { EditorCard } from "../types";
+import type { EditorCard } from "../../types";
 
 interface LessonBuilderCardListProps {
     cards: EditorCard[];

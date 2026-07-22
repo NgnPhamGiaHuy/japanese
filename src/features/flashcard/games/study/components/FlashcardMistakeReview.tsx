@@ -20,12 +20,11 @@ import GradeButtons from "./GradeButtons";
 import McChoiceGrid from "./McChoiceGrid";
 import StudyProgressHeader from "./StudyProgressHeader";
 import StudySummaryScreen from "./StudySummaryScreen";
-import { useCardSessionState } from "../hooks/useCardSessionState";
-import { useRevealPronunciation } from "../hooks/useRevealPronunciation";
-import { getAudioText, resolveCardFaces } from "../utils";
+import { useCardSessionState, useRevealPronunciation } from "../hooks";
+import { getAudioText, resolveCardFaces } from "../../../utils";
 
-import type { CardWithProgress, Grade } from "../domain";
-import type { Lesson, StudyStats } from "../types";
+import type { CardWithProgress, Grade } from "../../../domain";
+import type { Lesson, StudyStats } from "../../../types";
 
 /**
  * FlashcardMistakeReview — targeted re-exposure with AI-generated explanations.

@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 
-import { subscribeToComments } from "../services/comment.service";
+import { subscribeToComments } from "../../services/comment.service";
 
-import type { Comment } from "../types/flashcard.types";
+import type { Comment } from "../../types/flashcard.types";
 
 interface CommentCountResult {
     totalComments: number;

@@ -20,7 +20,7 @@ import { auth } from "@/lib/firebase";
 import { ActivityAction } from "@/lib/logging/actions.enum";
 import { enqueueClientLog } from "@/lib/logging/browser";
 import { playSfx, sequence } from "@/shared/audio";
-import { useMatchGameStore } from "../../../hooks";
+import { useMatchGameStore } from "./useMatchGameStore";
 import { gradeCard } from "../../../services/card.service";
 import { getAudioText } from "../../../utils/displayEngine";
 

@@ -7,9 +7,9 @@ import { CSS } from "@dnd-kit/utilities";
 import { GripVertical, Image as ImageIcon, Sparkles, Trash2 } from "lucide-react";
 
 import { Button, Input } from "@/shared/components/ui";
-import { joinAlternatives, splitAlternatives } from "../utils/formatting";
+import { joinAlternatives, splitAlternatives } from "../../utils/formatting";
 
-import type { EditorCard } from "../types";
+import type { EditorCard } from "../../types";
 
 interface DraggableCardProps {
     card: EditorCard;

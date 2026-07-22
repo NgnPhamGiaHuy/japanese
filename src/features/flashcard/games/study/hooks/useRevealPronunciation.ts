@@ -3,9 +3,9 @@
 import { useEffect, useRef } from "react";
 
 import { sequence } from "@/shared/audio";
-import { getAudioText } from "../utils/displayEngine";
+import { getAudioText } from "../../../utils/displayEngine";
 
-import type { FlashCard } from "../types";
+import type { FlashCard } from "../../../types";
 
 /**
  * Speaks the card once, on the transition into the revealed state.

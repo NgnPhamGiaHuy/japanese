@@ -12,14 +12,14 @@ import { ActivityAction } from "@/lib/logging/actions.enum";
 import { enqueueClientLog } from "@/lib/logging/browser";
 import { useAlert } from "@/shared/providers";
 import { lessonMetadataSchema } from "@/shared/schemas";
-import { deleteCardImage, uploadCardImage } from "../services";
-import { CardValidationError } from "../utils/card.validator";
-import { joinAlternatives } from "../utils/formatting";
-import { parseText } from "../utils/parser";
+import { deleteCardImage, uploadCardImage } from "../../services";
+import { CardValidationError } from "../../utils/card.validator";
+import { joinAlternatives } from "../../utils/formatting";
+import { parseText } from "../../utils/parser";
 
 import type { LessonMetadata, LessonMetadataInput } from "@/shared/schemas";
 import type { ImportRow } from "../components/ImportPreview";
-import type { EditorCard, FlashCard, Lesson } from "../types";
+import type { EditorCard, FlashCard, Lesson } from "../../types";
 
 export const makeCard = (order = 0): EditorCard => ({
     id: `c_${uuidv4()}`,

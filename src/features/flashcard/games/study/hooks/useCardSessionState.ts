@@ -6,10 +6,10 @@ import { auth } from "@/lib/firebase";
 import { ActivityAction } from "@/lib/logging/actions.enum";
 import { enqueueClientLog } from "@/lib/logging/browser";
 import { playSfx } from "@/shared/audio";
-import { reinsertCard } from "../utils";
+import { reinsertCard } from "../../../utils";
 
-import type { CardWithProgress, Grade } from "../domain";
-import type { StudyStats } from "../types";
+import type { CardWithProgress, Grade } from "../../../domain";
+import type { StudyStats } from "../../../types";
 
 export interface UseCardSessionStateResult {
     /** Working queue — starts as a copy of `cards`, grows when a card is re-inserted after "Again". */

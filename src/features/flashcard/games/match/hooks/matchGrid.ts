@@ -5,7 +5,7 @@
  */
 import { shuffleArray } from "@/shared/utils";
 
-import type { MatchItem } from "../../../hooks";
+import type { MatchItem } from "./useMatchGameStore";
 import type { FlashCard } from "../../../types";
 
 /**

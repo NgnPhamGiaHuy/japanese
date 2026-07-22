@@ -10,7 +10,7 @@
 
 import { useTranslations } from "next-intl";
 
-import { CommentPanel } from "@/features/flashcard/components";
+import { CommentPanel } from "@/features/flashcard/sharing";
 import { DEFAULT_DECK_THEME_COLOR } from "@/features/flashcard/types";
 import { canComment as canCommentRole } from "@/features/flashcard/utils/rbac";
 

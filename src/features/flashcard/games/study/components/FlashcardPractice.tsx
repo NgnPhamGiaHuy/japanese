@@ -22,13 +22,12 @@ import GradeButtons from "./GradeButtons";
 import McChoiceGrid from "./McChoiceGrid";
 import StudyProgressHeader from "./StudyProgressHeader";
 import StudySummaryScreen from "./StudySummaryScreen";
-import { useCardSessionState } from "../hooks/useCardSessionState";
-import { useRevealPronunciation } from "../hooks/useRevealPronunciation";
-import { getDailyProgress } from "../services";
-import { getAudioText, resolveCardFaces } from "../utils";
+import { useCardSessionState, useRevealPronunciation } from "../hooks";
+import { getDailyProgress } from "../../../services";
+import { getAudioText, resolveCardFaces } from "../../../utils";
 
-import type { CardWithProgress, Grade } from "../domain";
-import type { Lesson, StudyStats } from "../types";
+import type { CardWithProgress, Grade } from "../../../domain";
+import type { Lesson, StudyStats } from "../../../types";
 
 /**
  * FlashcardPractice — SRS-integrated mixed-modality session.

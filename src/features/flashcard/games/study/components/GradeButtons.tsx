@@ -10,7 +10,7 @@
  */
 "use client";
 
-import type { Grade } from "../domain";
+import type { Grade } from "../../../domain";
 
 interface GradeButtonsProps {
     onGrade: (grade: Grade) => void;

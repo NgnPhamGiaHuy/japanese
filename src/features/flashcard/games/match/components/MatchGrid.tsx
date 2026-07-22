@@ -5,7 +5,7 @@ import { useMemo } from "react";
 import MatchCard from "./MatchCard";
 
 import type { MatchCardSurface } from "./MatchCard";
-import type { MatchItem } from "../../../hooks/useMatchGameStore";
+import type { MatchItem } from "../hooks/useMatchGameStore";
 
 interface MatchGridProps {
     cells: MatchItem[];

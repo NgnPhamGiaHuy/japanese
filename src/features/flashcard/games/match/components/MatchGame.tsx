@@ -17,8 +17,10 @@
 import { useTranslations } from "next-intl";
 
 import { logMatchGameCompleted } from "@/features/flashcard/actions/activity-log.actions";
-import { useGameCompletionLogger } from "@/features/flashcard/games/hooks";
-import { useFlashcardGameBestScore } from "@/features/flashcard/hooks/useFlashcardGameBestScore";
+import {
+    useFlashcardGameBestScore,
+    useGameCompletionLogger,
+} from "@/features/flashcard/games/hooks";
 import { scoreToTier, TIER_INFO } from "@/features/game";
 import { useUserProgress } from "@/features/user";
 import { useRouter } from "@/i18n/navigation";

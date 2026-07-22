@@ -13,7 +13,7 @@ import type { Control, UseFormRegister } from "react-hook-form";
 import type { DeckAccessRole } from "@/features/flashcard/types";
 import type { SelectOption } from "@/shared/components/ui";
 import type { ShareInvite } from "@/shared/schemas";
-import type { Lesson } from "../types";
+import type { Lesson } from "../../types";
 
 type Role = DeckAccessRole;
 

@@ -13,7 +13,7 @@ import SharePrivacyPicker from "./SharePrivacyPicker";
 import { useShareModal } from "../hooks/useShareModal";
 
 import type { DeckAccessRole } from "@/features/flashcard/types";
-import type { Lesson } from "../types";
+import type { Lesson } from "../../types";
 
 /**
  * Collaborative Access Controller (Share Modal)

@@ -14,7 +14,7 @@ import { AlertTriangle } from "lucide-react";
 import { Button } from "@/shared/components/ui";
 import CommentItem from "./CommentItem";
 
-import type { Comment } from "../types/flashcard.types";
+import type { Comment } from "../../../types/flashcard.types";
 
 export interface CommentThreadProps {
     /** The root comment object (contains an array of replies) */

@@ -12,7 +12,7 @@ import { shareInviteSchema } from "@/shared/schemas";
 import ShareCollaboratorsPanel from "./ShareCollaboratorsPanel";
 
 import type { ShareInvite } from "@/shared/schemas";
-import type { Lesson } from "../types";
+import type { Lesson } from "../../types";
 
 const baseLesson: Lesson = {
     id: "lesson-1",
