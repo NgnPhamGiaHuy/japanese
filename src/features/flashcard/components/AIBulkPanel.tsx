@@ -1,15 +1,15 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { useState } from "react";
 
 import { AlertCircle, Settings2, Sparkles, Zap } from "lucide-react";
 
-import { useAIDeck } from "@/features/ai";
 import { Button, Input } from "@/shared/components/ui";
+import { AI_GENERATE_COUNT_OPTIONS } from "@/shared/schemas";
 import { hexToThemeColor } from "@/shared/utils";
+import { useAIBulkForm } from "../hooks/useAIBulkForm";
 
-import type { AIGenerateMode, JLPTLevel } from "@/features/ai";
+import type { JLPTLevel } from "@/features/ai";
 import type { ImportRow } from "./ImportPreview";
 
 interface AIBulkPanelProps {
@@ -23,8 +23,6 @@ interface AIBulkPanelProps {
  * component, since a plain module-level array can't call useTranslations().
  */
 const LEVEL_VALUES: JLPTLevel[] = ["N5", "N4", "N3", "N2", "General"];
-
-const COUNT_OPTIONS = [8, 12, 16, 20];
 
 const QUICK_DEFAULT_COUNT = 12;
 const QUICK_DEFAULT_LEVEL: JLPTLevel = "N5";
@@ -84,12 +82,20 @@ const ModeChip = ({ active, icon, label, sub, onClick, color }: ModeChipProps) =
 
 const AIBulkPanel = ({ themeColor, onPreview, existingWords = [] }: AIBulkPanelProps) => {
     const t = useTranslations("LessonBuilder");
-    const { status, error, generate } = useAIDeck();
-
-    const [mode, setMode] = useState<AIGenerateMode>("quick");
-    const [topic, setTopic] = useState("");
-    const [count, setCount] = useState(QUICK_DEFAULT_COUNT);
-    const [level, setLevel] = useState<JLPTLevel>(QUICK_DEFAULT_LEVEL);
+    const {
+        mode,
+        setMode,
+        topic,
+        setTopic,
+        count,
+        setCount,
+        level,
+        setLevel,
+        isLoading,
+        error,
+        effectiveCount,
+        handleGenerate,
+    } = useAIBulkForm({ onPreview, existingWords });
 
     const levelOptions = LEVEL_VALUES.map((value) => ({
         value,
@@ -99,26 +105,6 @@ const AIBulkPanel = ({ themeColor, onPreview, existingWords = [] }: AIBulkPanelP
     const topicSuggestions = TOPIC_SUGGESTION_KEYS.map((key) => t(`topicSuggestion.${key}`));
 
     const themeColorStr = hexToThemeColor(themeColor);
-    const isLoading = status === "loading";
-
-    const effectiveCount = mode === "quick" ? QUICK_DEFAULT_COUNT : count;
-    const effectiveLevel = mode === "quick" ? QUICK_DEFAULT_LEVEL : level;
-
-    const handleGenerate = async () => {
-        const cards = await generate(topic, effectiveCount, effectiveLevel, existingWords);
-        if (!cards) return;
-
-        const rows: ImportRow[] = cards.map((c, i) => ({
-            id: `ai_${Date.now()}_${i}`,
-            primary: c.primary ?? "",
-            alternatives: c.alternatives ?? [],
-            meaning: c.meaning ?? "",
-            example: c.example ?? "",
-            isInvalid: !(c.primary?.trim() && (c.meaning || "").trim()),
-        }));
-
-        onPreview(rows);
-    };
 
     return (
         <div className="space-y-6 rounded-3xl border-2 border-b-8 border-gray-200 bg-white p-4 shadow-sm sm:rounded-4xl sm:p-6">
@@ -202,7 +188,7 @@ const AIBulkPanel = ({ themeColor, onPreview, existingWords = [] }: AIBulkPanelP
                             {t("numberOfCards")}
                         </label>
                         <div className="grid grid-cols-4 gap-2">
-                            {COUNT_OPTIONS.map((n) => (
+                            {AI_GENERATE_COUNT_OPTIONS.map((n) => (
                                 <Button
                                     key={n}
                                     onClick={() => setCount(n)}
