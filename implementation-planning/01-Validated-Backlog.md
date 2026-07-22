@@ -733,7 +733,8 @@ Each is scheduled into a wave but is **NOT READY** until its question answers. E
 
 #### T-109c — `privacyModeSchema`: enforce or delete
 
-**Size** S · **Wave** 4 · **Status** **Gated Q-12**
+**Size** S · **Wave** 4 · **Status** ⏸️ **RECORDED — still Gated Q-12** (Sprint 14) — _was: Gated Q-12_
+**Delivered** Re-verified: `privacyModeSchema` still has zero non-test consumers — `ShareModal`/`useShareModal`'s privacy-mode writes take plain strings, not this schema. Corrected the misleading "mirrors ShareModal... enforced by the enum itself" comment to state plainly that neither this nor `publicRoleSchema` has a real consumer today, and that the "editor" cap is actually enforced by `rbac.ts`'s `sanitizePublicRole`, not this enum. `LDG-04` already tracks the disposition. Not wired or deleted — same Q-12 author-intent gate as T-109b, same "do not guess" fallback.
 **Traces to** ADR-109 (AD-09) · W-9, TD-5, RC-6 · cluster **C5** · `assess/03`, `/07`
 **Description.** A zero-consumer schema declaring privacy-mode constraints while real writes bypass it. Same enforce-or-delete rule, smaller surface.
 **Acceptance criteria**
@@ -748,7 +749,8 @@ Each is scheduled into a wave but is **NOT READY** until its question answers. E
 
 #### T-109d — `publicRoleSchema`: enforce or delete
 
-**Size** S · **Wave** 4 · **Status** **Gated Q-12**
+**Size** S · **Wave** 4 · **Status** ⏸️ **RECORDED — still Gated Q-12** (Sprint 14) — _was: Gated Q-12_
+**Delivered** Re-verified: `publicRoleSchema` has zero consumers of any kind — not even its own test file references it, the only one of the three schemas with no test coverage either. Header corrected alongside T-109c's (same file, same comment block). `LDG-05`'s ledger wording updated to reflect this more precise "zero consumers of any kind" finding. Not wired or deleted — same Q-12 gate; if this is later enforced, its vocabulary agreement with the deck-access engine's role set becomes a natural addition to T-115b's checker, not before.
 **Traces to** ADR-109 (AD-09) · W-9, TD-5, RC-6 · cluster **C5** · `assess/03`, `/07`
 **Description.** A zero-consumer schema declaring the public-role vocabulary while real writes bypass it. Same enforce-or-delete rule.
 **Acceptance criteria**

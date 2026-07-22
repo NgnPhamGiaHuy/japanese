@@ -26,9 +26,14 @@ export type LessonMetadataInput = z.input<typeof lessonMetadataSchema>;
 
 // ─── Sharing / privacy ───────────────────────────────────────────────────────
 //
-// Mirrors ShareModal's PrivacyMode ("restricted" | "link" | "public") and the
-// public-role cap (never "editor" via public link — enforced by the enum
-// itself, not just convention).
+// Mirror ShareModal's PrivacyMode ("restricted" | "link" | "public") and the
+// public-role cap (never "editor" via public link) as *declared* vocabulary
+// — but neither schema has a real consumer today: the actual write paths
+// (shareLessonSettings, ShareModal's handlers) take plain strings, and the
+// "editor" cap is enforced separately by rbac.ts's sanitizePublicRole, not
+// by this enum. Disposition (wire into a real write path, or delete) is
+// gated on Q-12 (author intent), tracked as LDG-04/LDG-05 in
+// docs/migrations-ledger.md.
 
 export const privacyModeSchema = z.enum(["restricted", "link", "public"]);
 

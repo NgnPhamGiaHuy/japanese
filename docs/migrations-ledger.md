@@ -68,7 +68,7 @@ Every stage claim below was verified against the working tree at `f3951e8`, not 
 | -------- | ------------------------------- | ------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- | ------------- | --------- | ------ |
 | `LDG-03` | `cardContentSchema` disposition | Enforced at the card write boundary, or deleted — not declared and unused | **Declared, zero non-test consumers** (verified by grep); its header claims it is "the single validation source of truth" | NgnPhamGiaHuy | Sprint 14 | `Q-12` |
 | `LDG-04` | `privacyModeSchema` disposition | Enforced at its write boundary, or deleted                                | **Declared, zero non-test consumers** (verified by grep)                                                                  | NgnPhamGiaHuy | Sprint 14 | `Q-12` |
-| `LDG-05` | `publicRoleSchema` disposition  | Enforced at its write boundary, or deleted                                | **Declared, zero non-test consumers** (verified by grep)                                                                  | NgnPhamGiaHuy | Sprint 14 | `Q-12` |
+| `LDG-05` | `publicRoleSchema` disposition  | Enforced at its write boundary, or deleted                                | **Declared, zero consumers of any kind** — not even its own test file references it (verified by grep; the only zero-consumer schema of the three with no test coverage either) | NgnPhamGiaHuy | Sprint 14 | `Q-12` |
 
 ### Dialog primitive (ADR-110)
 
