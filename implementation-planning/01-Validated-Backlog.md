@@ -496,7 +496,8 @@ Each is scheduled into a wave but is **NOT READY** until its question answers. E
 
 #### T-116b — Activate Sentry
 
-**Size** S · **Wave** 2 · **Status** **Gated Q-4**
+**Size** S · **Wave** 2 · **Status** ⏸️ **RECORDED — still Gated Q-4** — _was: Gated Q-4_
+**Delivered** Discovered during a post-Wave-6 completeness audit: this task's own fallback ("defer activation, record the deferral and its reason in the ledger") was already correctly applied — `docs/migrations-ledger.md`'s `LDG-18` records exactly this deferral — but this backlog entry's Status/Delivered fields were never updated to match. Re-verified Q-4 is still genuinely unanswerable from the repo: `.env` has `SENTRY_DSN`/`NEXT_PUBLIC_SENTRY_DSN` present only as commented-out placeholder lines (no real credentials configured anywhere in-repo). Confirmed the wiring itself is intact and correctly gated, not dead code: `instrumentation-client.ts` only calls `Sentry.init(...)` when `process.env.NODE_ENV === "production" && dsn` both hold, so it safely no-ops in every environment this repo can run in today. Nothing was deleted or force-activated — an unconfirmed credential state cannot be assumed either way.
 **Traces to** ADR-116 (AD-16) · OP-21, W-17, R-6 · cluster **C13** · `assess/03`, `/08`, `/09`
 **Description.** The Sentry wiring is real but double-gated on production credentials and project ownership the repository cannot see. Activation is the conditional leg of ADR-116; the policy leg (T-116a) lands regardless.
 **Acceptance criteria**
