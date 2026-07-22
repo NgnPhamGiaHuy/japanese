@@ -8,7 +8,7 @@ import { m } from "motion/react";
 
 import { useAdminRole } from "@/features/admin";
 import { useLessons } from "@/features/flashcard";
-import { signOut, useUserProgress } from "@/features/user";
+import { computeAccuracy, levelFromXp, signOut, useUserProgress } from "@/features/user";
 import { Link, useRouter } from "@/i18n/navigation";
 import { useAppStore } from "@/lib/app-store";
 import { SCREEN_HEADER_BACK_BUTTON_CLASS, ScreenHeader } from "@/shared/components/layout";
@@ -26,13 +26,8 @@ export default function ProfilePage() {
     const displayName = user?.displayName ?? t("learnerFallback");
     const photoURL = user?.photoURL ?? null;
 
-    const level = Math.floor(userData.xp / 500) + 1;
-    const xpInLevel = userData.xp % 500;
-    const xpToNext = 500;
-
-    const totalAttempts = Object.values(userData.charStats).reduce((acc, s) => acc + s.attempts, 0);
-    const totalCorrect = Object.values(userData.charStats).reduce((acc, s) => acc + s.correct, 0);
-    const accuracy = totalAttempts > 0 ? Math.round((totalCorrect / totalAttempts) * 100) : null;
+    const { level, xpInLevel, xpToNext } = levelFromXp(userData.xp);
+    const accuracy = computeAccuracy(userData.charStats);
 
     const handleSignOut = async () => {
         await signOut();
