@@ -60,6 +60,9 @@ const FlashcardDashboard = () => {
         error,
         handleLessonsReorder,
         getGameStats,
+        publicHasMore,
+        publicLoadingMore,
+        loadMorePublicLessons,
     } = useDashboardState();
 
     const sensors = useSensors(
@@ -182,6 +185,21 @@ const FlashcardDashboard = () => {
                             </div>
                         </SortableContext>
                     </DndContext>
+                )}
+
+                {/* Bounded public-lesson listener (ADR-114, T-114a) — "see
+                    more" grows the live window via resubscribe rather than a
+                    separate one-shot page fetch. */}
+                {!loading && !error && activeTab === "discover" && publicHasMore && (
+                    <div className="mt-4 flex justify-center">
+                        <Button
+                            variant="secondary"
+                            onClick={loadMorePublicLessons}
+                            disabled={publicLoadingMore}
+                        >
+                            {t("loadMoreDecks")}
+                        </Button>
+                    </div>
                 )}
             </div>
 

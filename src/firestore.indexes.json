@@ -55,6 +55,14 @@
                 { "fieldPath": "status", "order": "ASCENDING" },
                 { "fieldPath": "createdAt", "order": "ASCENDING" }
             ]
+        },
+        {
+            "collectionGroup": "lessons",
+            "queryScope": "COLLECTION_GROUP",
+            "fields": [
+                { "fieldPath": "isPublic", "order": "ASCENDING" },
+                { "fieldPath": "createdAt", "order": "DESCENDING" }
+            ]
         }
     ],
     "fieldOverrides": [

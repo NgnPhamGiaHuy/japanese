@@ -173,11 +173,18 @@ export function useLessons() {
     };
 }
 
+const PUBLIC_LESSONS_PAGE_SIZE = 30;
+
 /**
  * Real-time hook for publicly discoverable flashcard decks from all users.
  *
  * @remarks
- * Subscribes to all lessons where `isPublic === true` via a collectionGroup query.
+ * Subscribes to all lessons where `isPublic === true` via a collectionGroup
+ * query, bounded at a growing `limit()` (ADR-114, T-114a) rather than
+ * streaming the entire public-deck corpus. `loadMore()` grows the live
+ * window and resubscribes — the same grow-window mechanism
+ * NotificationsContext already uses for its own bounded realtime channel,
+ * not a new pagination style.
  * Excludes the current user's own decks (they already appear in "My Decks").
  * Safe to call when unauthenticated — returns an empty list.
  */
@@ -185,15 +192,23 @@ export function usePublicLessons() {
     const user = useAppStore((s) => s.user);
     const [publicLessons, setPublicLessons] = useState<Lesson[]>([]);
     const [loading, setLoading] = useState(true);
+    const [loadingMore, setLoadingMore] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [pageSize, setPageSize] = useState(PUBLIC_LESSONS_PAGE_SIZE);
+
+    const loadMore = useCallback(() => {
+        setLoadingMore(true);
+        setPageSize((n) => n + PUBLIC_LESSONS_PAGE_SIZE);
+    }, []);
 
     // Render-time reset: whenever the user identity changes, mark loading
-    // immediately instead of a synchronous setState at the top of the
-    // effect below.
+    // immediately and reset the page size, instead of a synchronous setState
+    // at the top of the effect below.
     const [prevUid, setPrevUid] = useState(user?.uid ?? null);
     if ((user?.uid ?? null) !== prevUid) {
         setPrevUid(user?.uid ?? null);
         setLoading(true);
+        setPageSize(PUBLIC_LESSONS_PAGE_SIZE);
     }
 
     useEffect(() => {
@@ -202,15 +217,23 @@ export function usePublicLessons() {
             (lessons) => {
                 setPublicLessons(lessons);
                 setLoading(false);
+                setLoadingMore(false);
             },
             (err) => {
                 console.error("[usePublicLessons]", err);
                 setError("Failed to load public decks");
                 setLoading(false);
+                setLoadingMore(false);
             },
+            pageSize,
         );
         return unsub;
-    }, [user?.uid]);
+    }, [user?.uid, pageSize]);
 
-    return { publicLessons, loading, error };
+    // A full page came back, so the collection may extend further — a short
+    // page means we've reached the end (mirrors NotificationsContext's
+    // identical heuristic).
+    const hasMore = publicLessons.length >= pageSize;
+
+    return { publicLessons, loading, loadingMore, hasMore, loadMore, error };
 }

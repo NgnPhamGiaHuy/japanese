@@ -165,7 +165,8 @@
             "createDeck": "Create Deck"
         },
         "reorderFailed": "Reorder failed",
-        "rolePermissions": "You have {role} permissions"
+        "rolePermissions": "You have {role} permissions",
+        "loadMoreDecks": "Load more decks"
     },
     "KanaHub": {
         "levelLabel": "Level:",

@@ -3,7 +3,7 @@
  * Real-time lesson listeners (own, shared-with-me, public) — split out of
  * lesson.service.ts (E11-T3).
  */
-import { collectionGroup, onSnapshot, query, where } from "firebase/firestore";
+import { collectionGroup, limit, onSnapshot, orderBy, query, where } from "firebase/firestore";
 
 import { db } from "@/lib/firebase";
 import { sortByOrder } from "@/shared/utils";
@@ -114,15 +114,22 @@ export function subscribeSharedLessons(
  * Real-time subscription to all publicly discoverable lessons across all users.
  *
  * @remarks
- * Uses a collectionGroup query on `isPublic == true`. Requires the Firestore
- * index defined in firestore.indexes.json for collectionGroup "lessons" on isPublic.
- * Results are sorted by creation date descending (newest first).
+ * Uses a collectionGroup query on `isPublic == true`, ordered by `createdAt`
+ * descending and capped at `pageSize` (ADR-114, T-114a) — an unbounded
+ * version of this exact query used to stream the entire public-deck corpus
+ * into an un-virtualized grid, with cost growing linearly and unboundedly
+ * as more decks are published (R-2). `pageSize` grows via a resubscribe
+ * (the "grow-window" mechanism ADR-112 already sanctions for the identical
+ * shape of problem in `subscribeNotifications`), not a new pagination
+ * mechanism. Requires the composite index defined in firestore.indexes.json
+ * for collectionGroup "lessons" on (isPublic, createdAt).
  * Excludes the current user's own decks so they don't see duplicates.
  */
 export function subscribePublicLessons(
     currentUserId: string | null,
     onUpdate: (lessons: Lesson[]) => void,
     onError: (err: Error) => void,
+    pageSize: number,
 ): Unsubscribe {
     const extractOwnerIdFromPath = (docPath: string): string | undefined => {
         const parts = docPath.split("/");
@@ -131,7 +138,12 @@ export function subscribePublicLessons(
         return parts[usersIdx + 1];
     };
 
-    const q = query(collectionGroup(db, "lessons"), where("isPublic", "==", true));
+    const q = query(
+        collectionGroup(db, "lessons"),
+        where("isPublic", "==", true),
+        orderBy("createdAt", "desc"),
+        limit(pageSize),
+    );
 
     return onSnapshot(
         q,
@@ -143,7 +155,7 @@ export function subscribePublicLessons(
                 })
                 // Exclude the viewer's own decks — they already appear in "My Decks".
                 .filter((l) => !currentUserId || l.ownerId !== currentUserId)
-                .sort((a, b) => b.createdAt - a.createdAt);
+                .sort(newestFirst);
             onUpdate(lessons);
         },
         onError,

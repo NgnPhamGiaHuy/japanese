@@ -28,7 +28,14 @@ type ActiveTab = "personal" | "shared" | "discover";
 export function useDashboardState() {
     const t = useTranslations("FlashcardDashboard");
     const { lessons, sharedLessons, loading, error, reorderLessons } = useLessons();
-    const { publicLessons, loading: publicLoading, error: publicError } = usePublicLessons();
+    const {
+        publicLessons,
+        loading: publicLoading,
+        loadingMore: publicLoadingMore,
+        hasMore: publicHasMore,
+        loadMore: loadMorePublicLessons,
+        error: publicError,
+    } = usePublicLessons();
     const { user } = useAppStore();
     const { showAlert } = useAlert();
     const router = useRouter();
@@ -117,5 +124,10 @@ export function useDashboardState() {
         error: activeError,
         handleLessonsReorder,
         getGameStats,
+        // Only meaningful on the discover tab — the bounded public-lesson
+        // listener's grow-window pagination (ADR-114, T-114a).
+        publicHasMore,
+        publicLoadingMore,
+        loadMorePublicLessons,
     };
 }
