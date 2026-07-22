@@ -4,87 +4,28 @@ import { useCallback, useEffect, useState } from "react";
 
 import { useAppStore } from "@/lib/app-store";
 import { logDeckCreated, logDeckDeleted, logDeckUpdated } from "../actions/activity-log.actions";
+import { useLessonsContext } from "../context/LessonsContext";
 import * as LessonService from "../services";
 
 import type { OrderChange } from "@/shared/utils";
 import type { DeckAccessRole, FlashCard, Lesson } from "../types";
 
 /**
- * Internal state for the lessons collection.
- */
-interface LessonsState {
-    /** Array of user's own lesson/deck metadata */
-    lessons: Lesson[];
-    /** Array of lessons shared with the user */
-    sharedLessons: Lesson[];
-    /** True during initial hydration from Firestore */
-    loading: boolean;
-    /** Connectivity or permission error messages */
-    error: string | null;
-}
-
-/**
  * Real-time hook for the current user's flashcard lessons/decks.
  *
  * @remarks
- * Orchestration details:
- * 1. **RT Sync**: Opens `onSnapshot` listeners for both personal and shared decks.
- * 2. **Auto-Cleanup**: Automatically unsubscribes when the UID changes or component unmounts.
- * 3. **Service-Only**: All write operations are delegated to `LessonService`.
+ * The read half (`lessons`, `sharedLessons`, `loading`, `error`) comes from
+ * the single shared subscription in `LessonsProvider` (ADR-113, T-113b) —
+ * mounting this hook N times opens zero additional Firestore listeners. The
+ * write actions below are unchanged: one-shot writes delegated to
+ * `LessonService`, not listeners, so there was never a multiplication cost
+ * to centralize.
  *
  * @returns Metadata-level state and management actions for current user's lessons.
  */
 export function useLessons() {
     const user = useAppStore((s) => s.user);
-
-    const [state, setState] = useState<LessonsState>({
-        lessons: [],
-        sharedLessons: [],
-        loading: !!user,
-        error: null,
-    });
-
-    // Render-time reset: whenever the user identity changes, reset lessons
-    // state immediately instead of a synchronous setState at the top of
-    // the effect below.
-    const [prevUid, setPrevUid] = useState(user?.uid ?? null);
-    if ((user?.uid ?? null) !== prevUid) {
-        setPrevUid(user?.uid ?? null);
-        setState({ lessons: [], sharedLessons: [], loading: !!user, error: null });
-    }
-
-    useEffect(() => {
-        if (!user) return;
-
-        // Subscribe to personal lessons
-        const unsubPersonal = LessonService.subscribeLessons(
-            user.uid,
-            (lessons) => setState((prev) => ({ ...prev, lessons, loading: false, error: null })),
-            (err) => {
-                console.error("[useLessons] Personal lessons error:", err);
-                setState((prev) => ({
-                    ...prev,
-                    loading: false,
-                    error: "Could not load your lessons.",
-                }));
-            },
-        );
-
-        // Subscribe to shared lessons
-        const unsubShared = LessonService.subscribeSharedLessons(
-            user.uid,
-            (sharedLessons) =>
-                setState((prev) => ({ ...prev, sharedLessons, loading: false, error: null })),
-            (err) => {
-                console.error("[useLessons] Shared lessons error:", err);
-            },
-        );
-
-        return () => {
-            unsubPersonal();
-            unsubShared();
-        };
-    }, [user?.uid]);
+    const { lessons, sharedLessons, loading, error } = useLessonsContext();
 
     // ── Write helpers ────────────────────────────────────────────────────
 
@@ -104,7 +45,7 @@ export function useLessons() {
         async (id: string): Promise<void> => {
             if (!user) return;
             // Capture title before deletion for the audit log
-            const lesson = state.lessons.find((l) => l.id === id);
+            const lesson = lessons.find((l) => l.id === id);
             await LessonService.deleteLessonWithCards(user.uid, id);
             try {
                 const token = await user.getIdToken();
@@ -113,7 +54,7 @@ export function useLessons() {
                 // Non-blocking
             }
         },
-        [user, state.lessons],
+        [user, lessons],
     );
 
     /**
@@ -219,7 +160,10 @@ export function useLessons() {
     );
 
     return {
-        ...state,
+        lessons,
+        sharedLessons,
+        loading,
+        error,
         updateLesson,
         deleteLesson,
         saveFullLesson,

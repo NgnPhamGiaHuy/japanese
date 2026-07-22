@@ -15,6 +15,8 @@
 
 // ─── Screen roots — mounted by the /flashcard route segments ─────────────────
 export { FlashcardDashboard } from "./dashboard";
+// Shared lessons subscription — mounted once at the composition root.
+export { LessonsProvider } from "./context/LessonsContext";
 export { default as DeckCard } from "./dashboard/components/DeckCard";
 export { useDashboardModals } from "./dashboard/hooks";
 export { FlashcardDetailLayout } from "./detail";

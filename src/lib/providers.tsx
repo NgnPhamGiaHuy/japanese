@@ -7,7 +7,7 @@ import { LazyMotion } from "motion/react";
 
 import { AdminProvider } from "@/features/admin";
 import { CommandPaletteLauncher } from "@/features/command-palette";
-import { registerFlashcardNotificationActions } from "@/features/flashcard";
+import { LessonsProvider, registerFlashcardNotificationActions } from "@/features/flashcard";
 import { NotificationsProvider } from "@/features/notifications";
 import { useActivityTracker, useFirebaseAuth, UserProgressProvider } from "@/features/user";
 import { usePathname } from "@/i18n/navigation";
@@ -113,10 +113,12 @@ export function Providers({ children }: { children: React.ReactNode }) {
                     <AuthGate>
                         <AdminProvider>
                             <UserProgressProvider>
-                                <NotificationsProvider>
-                                    {children}
-                                    <CommandPaletteLauncher />
-                                </NotificationsProvider>
+                                <LessonsProvider>
+                                    <NotificationsProvider>
+                                        {children}
+                                        <CommandPaletteLauncher />
+                                    </NotificationsProvider>
+                                </LessonsProvider>
                             </UserProgressProvider>
                         </AdminProvider>
                     </AuthGate>
