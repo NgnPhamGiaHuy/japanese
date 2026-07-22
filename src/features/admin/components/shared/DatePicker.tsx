@@ -8,7 +8,7 @@ import { clsx } from "clsx";
 import { format, parseISO } from "date-fns";
 import { Calendar as CalendarIcon, ChevronLeft, ChevronRight, X } from "lucide-react";
 
-import Button from "./Button";
+import { Button } from "@/shared/components/ui";
 
 import "react-day-picker/style.css";
 

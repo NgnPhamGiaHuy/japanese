@@ -13,7 +13,8 @@ import { BarChart2, Brain, ChevronRight, Flame, PenTool, Play, Type, Volume2 } f
 
 import { AlphabetSwitcher } from "@/features/kana/components";
 import { Link } from "@/i18n/navigation";
-import { ActionCard, SettingsMenu } from "@/shared/components/ui";
+import { ActionCard } from "@/shared/components/ui";
+import SettingsMenu from "./SettingsMenu";
 import { useKanaHubState } from "../hooks/useKanaHubState";
 
 export default function KanaHub() {

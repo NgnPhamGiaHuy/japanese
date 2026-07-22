@@ -20,7 +20,7 @@ import { Menu } from "@base-ui/react/menu";
 import { Switch } from "@base-ui/react/switch";
 import { Settings, Trash2, Volume2 } from "lucide-react";
 
-import Button from "./Button";
+import { Button } from "@/shared/components/ui";
 
 /** Configuration for a toggleable setting. */
 interface SettingToggle {

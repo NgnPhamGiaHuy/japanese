@@ -12,7 +12,7 @@ import { useTranslations } from "next-intl";
 import { Eye, Keyboard, Shuffle } from "lucide-react";
 
 import { ScreenHeader } from "@/shared/components/layout";
-import { ModeSelectionCard } from "@/shared/components/ui";
+import ModeSelectionCard from "./ModeSelectionCard";
 
 import type { QuizSetupProps } from "../types";
 

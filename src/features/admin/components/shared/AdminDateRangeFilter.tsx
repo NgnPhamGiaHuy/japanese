@@ -4,7 +4,7 @@ import { useTranslations } from "next-intl";
 
 import { Filter, RotateCcw } from "lucide-react";
 
-import { DatePicker } from "@/shared/components/ui";
+import DatePicker from "./DatePicker";
 
 interface AdminDateRangeFilterProps {
     startDate?: string;

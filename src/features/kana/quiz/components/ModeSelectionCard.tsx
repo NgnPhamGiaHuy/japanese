@@ -17,7 +17,7 @@
  */
 "use client";
 
-import Button from "./Button";
+import { Button } from "@/shared/components/ui";
 
 import type { LucideIcon } from "lucide-react";
 
