@@ -2,12 +2,9 @@
 
 import { useEffect, useState } from "react";
 
-import { onSnapshot } from "firebase/firestore";
-
 import { useAppStore } from "@/lib/app-store";
-import { userProgressLessonCol } from "../services/progress.service";
+import { subscribeLessonProgress } from "../services/progress.service";
 
-import type { UserCardProgress } from "../domain/types";
 import type { DeckStatus } from "../utils/learningEngine";
 
 const EMPTY_STATUS: DeckStatus = { newCount: 0, dueCount: 0, mistakeCount: 0, totalCount: 0 };
@@ -36,16 +33,16 @@ export function useDeckProgressStatus(lessonId: string, cardCount: number): Deck
             return;
         }
 
-        const unsub = onSnapshot(
-            userProgressLessonCol(user.uid, lessonId),
-            (snap) => {
+        const unsub = subscribeLessonProgress(
+            user.uid,
+            lessonId,
+            (progress) => {
                 const now = Date.now();
                 let dueCount = 0;
                 let mistakeCount = 0;
                 let studiedCount = 0;
 
-                snap.docs.forEach((d) => {
-                    const p = d.data() as UserCardProgress;
+                progress.forEach((p) => {
                     if (p.repetitions > 0) {
                         studiedCount++;
                         if (p.nextReviewAt <= now) dueCount++;

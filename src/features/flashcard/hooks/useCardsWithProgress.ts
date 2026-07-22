@@ -18,12 +18,10 @@
 
 import { useEffect, useRef, useState } from "react";
 
-import { onSnapshot } from "firebase/firestore";
-
 import { useAppStore } from "@/lib/app-store";
 import { FRESH_SRS_STATE } from "../domain/types";
 import { subscribeCards } from "../services/card.service";
-import { userProgressLessonCol } from "../services/progress.service";
+import { subscribeLessonProgress } from "../services/progress.service";
 
 import type { CardWithProgress, FlashCardContent, UserCardProgress } from "../domain/types";
 
@@ -122,11 +120,10 @@ export function useCardsWithProgress(lessonId: string, ownerId: string): UseCard
         );
 
         // Stream 2: user progress (real-time)
-        const unsubProgress = onSnapshot(
-            userProgressLessonCol(user.uid, lessonId),
-            (snap) => {
-                const map = new Map<string, UserCardProgress>();
-                snap.docs.forEach((d) => map.set(d.id, d.data() as UserCardProgress));
+        const unsubProgress = subscribeLessonProgress(
+            user.uid,
+            lessonId,
+            (map) => {
                 progressRef.current = map;
                 progressReady = true;
                 merge();

@@ -24,6 +24,7 @@ import {
     getDoc,
     getDocs,
     increment,
+    onSnapshot,
     setDoc,
     updateDoc,
     writeBatch,
@@ -35,7 +36,7 @@ import { enqueueClientLog } from "@/lib/logging/browser";
 import { computeNextSRS } from "../domain/srs";
 import { FRESH_SRS_STATE } from "../domain/types";
 
-import type { CollectionReference, DocumentReference } from "firebase/firestore";
+import type { CollectionReference, DocumentReference, Unsubscribe } from "firebase/firestore";
 import type { Grade } from "../domain/srs";
 import type { DailyStudyStats, UserCardProgress } from "../domain/types";
 
@@ -100,6 +101,34 @@ export async function getUserLessonProgress(
     });
 
     return map;
+}
+
+/**
+ * Subscribes to a user's real-time progress for a lesson.
+ *
+ * @remarks
+ * Single source for the `userProgressLessonCol` listener — every consumer
+ * that needs live per-card progress (merging with content, computing deck
+ * status counts) goes through here instead of hand-rolling its own
+ * `onSnapshot`, so the collection's own IO stays owned by this service.
+ *
+ * @returns Map<cardId, UserCardProgress>, same shape as `getUserLessonProgress`
+ */
+export function subscribeLessonProgress(
+    userId: string,
+    lessonId: string,
+    onUpdate: (progress: Map<string, UserCardProgress>) => void,
+    onError: (err: Error) => void,
+): Unsubscribe {
+    return onSnapshot(
+        userProgressLessonCol(userId, lessonId),
+        (snap) => {
+            const map = new Map<string, UserCardProgress>();
+            snap.docs.forEach((d) => map.set(d.id, d.data() as UserCardProgress));
+            onUpdate(map);
+        },
+        onError,
+    );
 }
 
 // ─── Write Operations ───────────────────────────────────────────────────────
