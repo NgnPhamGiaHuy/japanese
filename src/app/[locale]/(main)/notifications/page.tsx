@@ -11,6 +11,7 @@ import {
     logNotificationsCleared,
     logNotificationsReadAll,
     markAllNotificationsRead,
+    NotificationsVirtualList,
     restoreNotifications,
     useNotifications,
 } from "@/features/notifications";
@@ -20,7 +21,6 @@ import { ScreenHeader } from "@/shared/components/layout";
 import { Button } from "@/shared/components/ui";
 import { useAlert } from "@/shared/providers";
 import { NotificationsEmptyState, SkeletonRows } from "./_components/NotificationsPlaceholders";
-import NotificationsVirtualList from "./_components/NotificationsVirtualList";
 
 export default function NotificationsPage() {
     const t = useTranslations("NotificationsPage");
