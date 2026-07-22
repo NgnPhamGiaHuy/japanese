@@ -6,18 +6,17 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { v4 as uuidv4 } from "uuid";
 
 import { useAICard } from "@/features/ai";
-import { DEFAULT_DECK_THEME_COLOR } from "@/features/flashcard/types";
+import { DEFAULT_DECK_THEME_COLOR, lessonMetadataSchema } from "@/features/flashcard/types";
 import { useAppStore } from "@/lib/app-store";
 import { ActivityAction } from "@/lib/logging/actions.enum";
 import { enqueueClientLog } from "@/lib/logging/browser";
 import { useAlert } from "@/shared/providers";
-import { lessonMetadataSchema } from "@/shared/schemas";
 import { deleteCardImage, uploadCardImage } from "../../services";
 import { CardValidationError } from "../../utils/card.validator";
 import { joinAlternatives } from "../../utils/formatting";
 import { parseText } from "../../utils/parser";
 
-import type { LessonMetadata, LessonMetadataInput } from "@/shared/schemas";
+import type { LessonMetadata, LessonMetadataInput } from "@/features/flashcard/types";
 import type { ImportRow } from "../components/ImportPreview";
 import type { EditorCard, FlashCard, Lesson } from "../../types";
 

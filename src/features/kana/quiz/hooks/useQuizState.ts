@@ -9,8 +9,8 @@
 import { useState } from "react";
 
 import { auth } from "@/lib/firebase";
-import { checkTypedAnswer } from "@/shared/utils";
 import { logKanaQuizCompleted } from "../../actions";
+import { checkTypedAnswer } from "../../utils";
 
 import type { KanaChar } from "@/features/kana/types";
 import type { QuizMode, QuizPhase } from "../types";

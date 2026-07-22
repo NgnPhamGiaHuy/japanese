@@ -10,8 +10,8 @@ import { useState } from "react";
 import { AlertCircle, CheckCircle2, Trash2 } from "lucide-react";
 
 import { DEFAULT_DECK_THEME_COLOR } from "@/features/flashcard/types";
+import { hexToThemeColor } from "@/features/flashcard/utils";
 import { Button } from "@/shared/components/ui";
-import { hexToThemeColor } from "@/shared/utils";
 
 /**
  * Represents a single row of imported data in the staging area.

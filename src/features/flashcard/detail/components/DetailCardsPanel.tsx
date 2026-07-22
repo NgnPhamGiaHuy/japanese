@@ -28,7 +28,7 @@ import {
 
 import { DEFAULT_DECK_THEME_COLOR } from "@/features/flashcard/types";
 import { canEdit as canEditRole } from "@/features/flashcard/utils/rbac";
-import { reorderWithFractionalIndex } from "@/shared/utils/reorder";
+import { reorderWithFractionalIndex } from "@/features/flashcard/utils/reorder";
 import SortableCardItem from "./SortableCardItem";
 
 import type { DragEndEvent } from "@dnd-kit/core";

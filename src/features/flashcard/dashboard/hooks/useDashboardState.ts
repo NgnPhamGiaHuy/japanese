@@ -13,11 +13,11 @@ import { useEffect, useState } from "react";
 import { matchGameMode } from "@/features/flashcard/games/match";
 import { speedGameMode } from "@/features/flashcard/games/speed";
 import { useLessons, usePublicLessons } from "@/features/flashcard/hooks";
+import { reorderWithFractionalIndex } from "@/features/flashcard/utils";
 import { subscribeGameStats } from "@/features/game";
 import { useRouter } from "@/i18n/navigation";
 import { useAppStore } from "@/lib/app-store";
 import { useAlert } from "@/shared/providers";
-import { reorderWithFractionalIndex } from "@/shared/utils";
 import { DASHBOARD_TABS, DEFAULT_TAB_ID } from "../constants";
 
 import type { Lesson } from "@/features/flashcard/types";

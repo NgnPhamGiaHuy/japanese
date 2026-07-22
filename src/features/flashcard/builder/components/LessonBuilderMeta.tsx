@@ -9,7 +9,7 @@ import { AnimatePresence, m } from "motion/react";
 import { Button, Input, Textarea } from "@/shared/components/ui";
 
 import type { FieldErrors, UseFormRegister, UseFormSetValue } from "react-hook-form";
-import type { LessonMetadataInput } from "@/shared/schemas";
+import type { LessonMetadataInput } from "@/features/flashcard/types";
 
 interface LessonBuilderMetaProps {
     register: UseFormRegister<LessonMetadataInput>;

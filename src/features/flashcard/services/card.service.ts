@@ -11,10 +11,10 @@ import {
     writeBatch,
 } from "firebase/firestore";
 
+import { sortByOrder } from "@/features/flashcard/utils";
 import { APP_ID, auth, db } from "@/lib/firebase";
 import { ActivityAction } from "@/lib/logging/actions.enum";
 import { enqueueClientLog } from "@/lib/logging/browser";
-import { sortByOrder } from "@/shared/utils";
 import {
     gradeCardForUser,
     resetCardProgressForUser,
@@ -22,7 +22,7 @@ import {
 } from "./progress.service";
 
 import type { Unsubscribe } from "firebase/firestore";
-import type { OrderChange } from "@/shared/utils";
+import type { OrderChange } from "@/features/flashcard/utils";
 import type { Grade } from "../domain";
 import type { FlashCard } from "../types";
 

@@ -4,9 +4,9 @@ import { useTranslations } from "next-intl";
 
 import { flexRender } from "@tanstack/react-table";
 
-import { isOnline } from "@/shared/utils";
 import RoleCell from "./RoleCell";
 import UserIdentityAvatar from "./UserIdentityAvatar";
+import { formatAdminDate, isOnline } from "../../utils/date.utils";
 
 import type { Row } from "@tanstack/react-table";
 import type { AdminUser } from "../../types";
@@ -78,10 +78,7 @@ const UserMobileRow = ({ row }: UserMobileRowProps) => {
                     {user.lastSeenAt && (
                         <span className="text-katakana text-xs font-bold">
                             {tUsers("activeOn", {
-                                date: new Date(user.lastSeenAt).toLocaleDateString(undefined, {
-                                    month: "short",
-                                    day: "numeric",
-                                }),
+                                date: formatAdminDate(user.lastSeenAt, { includeYear: false }),
                             })}
                         </span>
                     )}

@@ -10,10 +10,11 @@
 import { doc, getDocs, query, where, writeBatch } from "firebase/firestore";
 import { generateNKeysBetween } from "fractional-indexing";
 
+import { lessonMetadataSchema } from "@/features/flashcard/types";
 import { auth, db } from "@/lib/firebase";
 import { ActivityAction } from "@/lib/logging/actions.enum";
 import { enqueueClientLog } from "@/lib/logging/browser";
-import { hasValidClozeToken, lessonMetadataSchema } from "@/shared/schemas";
+import { hasValidClozeToken } from "@/shared/schemas";
 import { cardDoc, cardsCol } from "./card.service";
 import { deleteCardImage } from "./image.service";
 import { lessonDoc, lessonsCol } from "./lesson-paths";

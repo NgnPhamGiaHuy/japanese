@@ -20,8 +20,8 @@ import { query, where } from "firebase/firestore";
 
 import { lessonDoc, normalizeLesson } from "@/features/flashcard/services";
 import { cardsCol } from "@/features/flashcard/services/card.service";
+import { sortByOrder } from "@/features/flashcard/utils";
 import { useAppStore } from "@/lib/app-store";
-import { sortByOrder } from "@/shared/utils";
 import { useCards } from "./useCards";
 import { useLessons } from "./useLessons";
 

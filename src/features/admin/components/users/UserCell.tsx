@@ -2,8 +2,8 @@
 
 import { useTranslations } from "next-intl";
 
-import { isOnline } from "@/shared/utils";
 import UserIdentityAvatar from "./UserIdentityAvatar";
+import { isOnline } from "../../utils/date.utils";
 
 import type { AdminUser } from "../../types";
 

@@ -3,11 +3,11 @@
  * Content validation + XSS sanitization for comment text — split out of
  * comment.service.ts (E11-T3).
  */
-import { commentContentSchema } from "@/shared/schemas";
+import { commentContentSchema } from "./comment.schema";
 
 /**
- * Validates comment content before submission — delegates to the shared
- * zod schema (single source of truth); see shared/schemas/comment.schema.ts.
+ * Validates comment content before submission — delegates to the
+ * zod schema (single source of truth); see comment.schema.ts.
  */
 export function validateCommentContent(content: string): { valid: boolean; error?: string } {
     const result = commentContentSchema.safeParse(content);

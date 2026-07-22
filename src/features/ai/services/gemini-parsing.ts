@@ -4,7 +4,7 @@
  * transport/parse failures into AIServiceError — split out of
  * gemini.service.ts (E11-T3).
  */
-import { generatedCardArraySchema, generatedCardSchema } from "@/shared/schemas";
+import { generatedCardArraySchema, generatedCardSchema } from "../schemas/generated-card.schema";
 
 import type { GeneratedCard } from "../types";
 
@@ -18,7 +18,7 @@ export class AIServiceError extends Error {
     }
 }
 
-/** Parses raw (untrusted) Gemini JSON into a GeneratedCard — see ai-output.schema.ts. */
+/** Parses raw (untrusted) Gemini JSON into a GeneratedCard — see schemas/generated-card.schema.ts. */
 export function parseCard(raw: unknown): GeneratedCard {
     const result = generatedCardSchema.safeParse(raw);
     if (!result.success) {

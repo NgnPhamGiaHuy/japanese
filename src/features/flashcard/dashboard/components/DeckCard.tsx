@@ -11,12 +11,12 @@ import { BookOpen, Edit2, Gamepad2, Trash2, Zap } from "lucide-react";
 
 import { buildShareId } from "@/features/flashcard/services";
 import { DEFAULT_DECK_THEME_COLOR } from "@/features/flashcard/types";
+import { hexToThemeColor } from "@/features/flashcard/utils";
 import { canEdit as canEditRole, resolveRole, ROLE_CONFIG } from "@/features/flashcard/utils/rbac";
 import { TierBadge } from "@/features/game";
 import { Link } from "@/i18n/navigation";
 import { useAppStore } from "@/lib/app-store";
 import { Button, Card, UserMeta } from "@/shared/components/ui";
-import { hexToThemeColor } from "@/shared/utils";
 import { useVisibility, VisibilityLevel } from "../hooks";
 
 import type { DeckCardProps } from "../types";

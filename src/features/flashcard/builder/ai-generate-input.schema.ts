@@ -1,11 +1,11 @@
 /**
  * @file Zod v4 schema for the AI bulk-generation form (AIBulkPanel) —
  * T-109e's second rhf+zodResolver conversion target alongside
- * useLessonBuilder/useShareInvites. `mode`/`level` mirror
- * features/ai/types.ts's AIGenerateMode/JLPTLevel unions exactly (kept as a
- * separate schema, not a re-derivation of those types, since this form's
- * concern — validating what the user typed — is distinct from the AI
- * feature's own domain types).
+ * useLessonBuilder/useShareInvites. `level` mirrors features/ai/types.ts's
+ * JLPTLevel union exactly; `mode` is this form's own "quick"/"guided"
+ * literal (kept as a separate schema, not a re-derivation of AI's domain
+ * types, since this form's concern — validating what the user typed — is
+ * distinct from the AI feature's own domain types).
  */
 import { z } from "zod";
 

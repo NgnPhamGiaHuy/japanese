@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { generatedCardArraySchema, generatedCardSchema } from "./ai-output.schema";
+import { generatedCardArraySchema, generatedCardSchema } from "./generated-card.schema";
 
 describe("generatedCardSchema", () => {
     it("accepts a fully-populated valid card", () => {

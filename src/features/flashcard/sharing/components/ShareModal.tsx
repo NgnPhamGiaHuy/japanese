@@ -6,9 +6,9 @@ import { Dialog } from "@base-ui/react/dialog";
 import { Check, Copy, ShieldAlert, X } from "lucide-react";
 
 import { DEFAULT_DECK_THEME_COLOR } from "@/features/flashcard/types";
+import { hexToThemeColor } from "@/features/flashcard/utils";
 import { Button } from "@/shared/components/ui";
 import { DIALOG_BACKDROP_CLASSNAME } from "@/shared/components/ui/DialogChrome";
-import { hexToThemeColor } from "@/shared/utils";
 import ShareCollaboratorsPanel from "./ShareCollaboratorsPanel";
 import SharePrivacyPicker from "./SharePrivacyPicker";
 import { useShareModal } from "../hooks/useShareModal";

@@ -24,7 +24,7 @@ import { cardsCol } from "./card.service";
 import { deleteCardImage } from "./image.service";
 import { buildShareId, lessonDoc } from "./lesson-paths";
 
-import type { OrderChange } from "@/shared/utils";
+import type { OrderChange } from "@/features/flashcard/utils";
 import type { DeckAccessRole, FlashCard, Lesson } from "../types";
 
 export { buildShareId, lessonDoc, lessonsCol } from "./lesson-paths";

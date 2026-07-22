@@ -5,9 +5,9 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
 import { useAIDeck } from "@/features/ai";
-import { aiGenerateInputSchema } from "@/shared/schemas";
+import { aiGenerateInputSchema } from "../ai-generate-input.schema";
 
-import type { AIGenerateInput } from "@/shared/schemas";
+import type { AIGenerateInput } from "../ai-generate-input.schema";
 import type { ImportRow } from "../components/ImportPreview";
 
 const QUICK_DEFAULT_COUNT = 12;

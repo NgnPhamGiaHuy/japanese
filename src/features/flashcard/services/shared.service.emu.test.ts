@@ -16,9 +16,9 @@
 import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from "vitest";
 
 import { adminDb } from "@/lib/firebase-admin";
-import { encodeShareId } from "@/shared/utils/shareToken";
 import { RUN, signInAs, wipeCollections } from "./__tests__/emu-auth";
 import { getSharedLesson } from "./shared.service";
+import { encodeShareId } from "../utils/shareToken";
 
 vi.mock("@/features/notifications", () => ({
     emitNotification: vi.fn().mockResolvedValue(undefined),

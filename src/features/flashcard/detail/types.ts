@@ -7,7 +7,7 @@
  */
 
 import type { FlashCard, Lesson } from "@/features/flashcard/types";
-import type { OrderChange } from "@/shared/utils";
+import type { OrderChange } from "@/features/flashcard/utils";
 
 /** Roles determining capabilities within a collaborative deck */
 export type DeckRole = "owner" | "editor" | "commenter" | "viewer";

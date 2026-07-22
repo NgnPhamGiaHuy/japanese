@@ -11,8 +11,8 @@ import { useEffect, useRef, useState } from "react";
 
 import { CornerDownLeft, X } from "lucide-react";
 
+import { COMMENT_MAX_LENGTH } from "@/features/flashcard/services/comment.schema";
 import { Button } from "@/shared/components/ui";
-import { COMMENT_MAX_LENGTH } from "@/shared/schemas";
 
 export interface CommentInputProps {
     /** Prompt text when empty */
@@ -135,6 +135,7 @@ const CommentInput = ({
                             variant="primary"
                             onClick={handleSubmit}
                             disabled={isEmpty || isOver || isSubmitting}
+                            loading={isSubmitting}
                             className="!h-7 !px-2.5 !text-xs shadow-none hover:shadow-none active:translate-y-0"
                             style={{
                                 backgroundColor: isEmpty || isOver ? "#d1d5db" : themeColor,
@@ -142,11 +143,8 @@ const CommentInput = ({
                                 borderBottomWidth: 0,
                                 transform: "none",
                             }}
-                            icon={isSubmitting ? undefined : CornerDownLeft}
+                            icon={CornerDownLeft}
                         >
-                            {isSubmitting ? (
-                                <span className="h-3 w-3 animate-spin rounded-full border-2 border-white border-t-transparent" />
-                            ) : null}
                             {isSubmitting ? t("sending") : t("send")}
                         </Button>
                     </div>

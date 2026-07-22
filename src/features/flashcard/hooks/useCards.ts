@@ -5,7 +5,7 @@ import { useCallback, useEffect, useState } from "react";
 import { useAppStore } from "@/lib/app-store";
 import * as CardService from "../services/card.service";
 
-import type { OrderChange } from "@/shared/utils";
+import type { OrderChange } from "@/features/flashcard/utils";
 import type { FlashCard } from "../types";
 
 /**

@@ -7,7 +7,7 @@ import { logDeckCreated, logDeckDeleted, logDeckUpdated } from "../actions/activ
 import { useLessonsContext } from "../context/LessonsContext";
 import * as LessonService from "../services";
 
-import type { OrderChange } from "@/shared/utils";
+import type { OrderChange } from "@/features/flashcard/utils";
 import type { DeckAccessRole, FlashCard, Lesson } from "../types";
 
 /**

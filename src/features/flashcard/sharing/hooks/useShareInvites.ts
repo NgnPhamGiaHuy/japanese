@@ -5,12 +5,12 @@ import { useForm } from "react-hook-form";
 
 import { zodResolver } from "@hookform/resolvers/zod";
 
+import { shareInviteSchema } from "@/features/flashcard/types";
 import { useAppStore } from "@/lib/app-store";
 import { useAlert } from "@/shared/providers";
-import { shareInviteSchema } from "@/shared/schemas";
 import { inviteByEmail, revokeEmailInvite } from "../../services";
 
-import type { ShareInvite } from "@/shared/schemas";
+import type { ShareInvite } from "@/features/flashcard/types";
 import type { Lesson } from "../../types";
 
 interface UseShareInvitesParams {

@@ -5,8 +5,8 @@
  */
 import { collectionGroup, limit, onSnapshot, orderBy, query, where } from "firebase/firestore";
 
+import { sortByOrder } from "@/features/flashcard/utils";
 import { db } from "@/lib/firebase";
-import { sortByOrder } from "@/shared/utils";
 import { newestFirst, normalizeLesson } from "./lesson-normalize";
 import { lessonsCol } from "./lesson-paths";
 

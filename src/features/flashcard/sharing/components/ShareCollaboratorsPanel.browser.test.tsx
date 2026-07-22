@@ -6,12 +6,11 @@ import { describe, expect, test, vi } from "vitest";
 import { render } from "vitest-browser-react";
 import { userEvent } from "vitest/browser";
 
-import { DEFAULT_DECK_THEME_COLOR } from "@/features/flashcard/types";
+import { DEFAULT_DECK_THEME_COLOR, shareInviteSchema } from "@/features/flashcard/types";
 import messages from "@/messages/en.json";
-import { shareInviteSchema } from "@/shared/schemas";
 import ShareCollaboratorsPanel from "./ShareCollaboratorsPanel";
 
-import type { ShareInvite } from "@/shared/schemas";
+import type { ShareInvite } from "@/features/flashcard/types";
 import type { Lesson } from "../../types";
 
 const baseLesson: Lesson = {

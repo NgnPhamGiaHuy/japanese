@@ -19,7 +19,7 @@ import { logKanaSurvivalCompleted } from "@/features/kana/actions";
 import { useKanaQuizSession } from "@/features/kana/hooks";
 import { auth } from "@/lib/firebase";
 import { playSfx, sequence } from "@/shared/audio";
-import { getValidRomaji } from "@/shared/utils";
+import { getValidRomaji } from "../../utils";
 
 import type { KanaChar } from "@/features/kana/types";
 import type { DropWord, SurvivalPhase } from "../types";

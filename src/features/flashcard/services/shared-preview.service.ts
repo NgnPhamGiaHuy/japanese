@@ -22,8 +22,8 @@ import { cache } from "react";
 import { DEFAULT_DECK_THEME_COLOR } from "@/features/flashcard/types";
 import { APP_ID } from "@/lib/app-id";
 import { adminDb } from "@/lib/firebase-admin";
-import { decodeShareId, encodeShareId } from "@/shared/utils/shareToken";
 import { isPubliclyAccessible } from "../utils/rbac";
+import { decodeShareId, encodeShareId } from "../utils/shareToken";
 
 // Sitemaps are an explicit "please index/list this" signal — capped well
 // under the 50k-URL-per-sitemap protocol limit; a sitemap INDEX (multiple

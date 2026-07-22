@@ -7,8 +7,8 @@ import { X } from "lucide-react";
 import { GameStreakScoreStack, LivesDisplay, MiniLeaderboard } from "@/features/game";
 import { AnswerFeedback, KanaMCOptionsGrid } from "@/features/kana/components";
 import { ScreenHeaderBackButton, ScreenHeaderRow } from "@/shared/components/layout";
-import { formatTime } from "@/shared/utils";
 import { useSurvivalGame } from "../hooks";
+import { formatTime } from "../../utils";
 
 interface SurvivalQuizScreenProps {
     game: ReturnType<typeof useSurvivalGame>;

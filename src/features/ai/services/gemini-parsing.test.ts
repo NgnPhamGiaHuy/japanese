@@ -2,7 +2,7 @@
  * @file gemini-parsing.test.ts
  * Unit tests for Gemini output parsing + error classification (T-117e).
  * Field-level schema rules (min lengths, trimming, etc.) already have
- * dedicated coverage in shared/schemas/ai-output.schema.test.ts — these tests
+ * dedicated coverage in features/ai/schemas/generated-card.schema.test.ts — these tests
  * cover what's specific to this file: parseCard/parseCardArray's error
  * wrapping, and classifyError's failure-mode classification.
  */

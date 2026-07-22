@@ -4,9 +4,9 @@ import { useTranslations } from "next-intl";
 
 import { AlertCircle, Settings2, Sparkles, Zap } from "lucide-react";
 
+import { hexToThemeColor } from "@/features/flashcard/utils";
 import { Button, Input } from "@/shared/components/ui";
-import { AI_GENERATE_COUNT_OPTIONS } from "@/shared/schemas";
-import { hexToThemeColor } from "@/shared/utils";
+import { AI_GENERATE_COUNT_OPTIONS } from "../ai-generate-input.schema";
 import { useAIBulkForm } from "../hooks/useAIBulkForm";
 
 import type { JLPTLevel } from "@/features/ai";

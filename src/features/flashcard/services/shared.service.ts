@@ -6,14 +6,14 @@
 import { doc, getDoc, getDocs, limit, query, startAfter, where } from "firebase/firestore";
 
 import { APP_ID, db } from "@/lib/firebase";
-import { sortByOrder } from "@/shared/utils/reorder";
-import { decodeShareId } from "@/shared/utils/shareToken";
 import { syncInviteToCollaborator } from "./access.service";
 import { cardsCol } from "./card.service";
 import { normalizeLesson } from "./lesson.service";
 import { getUserLessonProgress } from "./progress.service";
 import { FRESH_SRS_STATE } from "../domain/types";
 import { resolveRole } from "../utils/rbac";
+import { sortByOrder } from "../utils/reorder";
+import { decodeShareId } from "../utils/shareToken";
 
 import type { User } from "firebase/auth";
 import type { DocumentSnapshot } from "firebase/firestore";
@@ -21,7 +21,7 @@ import type { CardWithProgress, UserCardProgress } from "../domain";
 import type { DeckAccessRole, FlashCard, Lesson, SharedLessonViewModel } from "../types";
 
 export { decodeShareId };
-export type { ShareIdPayload } from "@/shared/utils/shareToken";
+export type { ShareIdPayload } from "../utils/shareToken";
 
 // ─── Error types ──────────────────────────────────────────────────────────────
 

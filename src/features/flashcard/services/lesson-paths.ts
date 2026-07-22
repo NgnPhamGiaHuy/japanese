@@ -6,7 +6,7 @@
 import { collection, doc } from "firebase/firestore";
 
 import { APP_ID, db } from "@/lib/firebase";
-import { encodeShareId as buildShareId } from "@/shared/utils/shareToken";
+import { encodeShareId as buildShareId } from "../utils/shareToken";
 
 export { buildShareId };
 

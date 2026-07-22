@@ -7,12 +7,11 @@ import { describe, expect, test } from "vitest";
 import { render } from "vitest-browser-react";
 import { userEvent } from "vitest/browser";
 
-import { DEFAULT_DECK_THEME_COLOR } from "@/features/flashcard/types";
+import { DEFAULT_DECK_THEME_COLOR, lessonMetadataSchema } from "@/features/flashcard/types";
 import messages from "@/messages/en.json";
-import { lessonMetadataSchema } from "@/shared/schemas";
 import LessonBuilderMeta from "./LessonBuilderMeta";
 
-import type { LessonMetadata, LessonMetadataInput } from "@/shared/schemas";
+import type { LessonMetadata, LessonMetadataInput } from "@/features/flashcard/types";
 
 /**
  * LessonBuilderMeta is a presentational component driven entirely by

@@ -1,8 +1,8 @@
 "use client";
 
+import { hexToThemeColor } from "@/features/flashcard/utils";
 import { StatGrid } from "@/features/game";
 import { Button } from "@/shared/components/ui";
-import { hexToThemeColor } from "@/shared/utils";
 
 import type { LucideIcon } from "lucide-react";
 import type { StatItem } from "@/features/game";
