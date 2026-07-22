@@ -37,10 +37,13 @@ export function firestoreDataToSystemRecord(
     const level: CanonicalLogLevel =
         levelRaw === "warn" || levelRaw === "error" || levelRaw === "info" ? levelRaw : "info";
     const sourceRaw = data.source;
-    const source: LogSource =
-        sourceRaw === "client" || sourceRaw === "server" || sourceRaw === "cloud_function"
-            ? sourceRaw
-            : "server";
+    // "cloud_function" was a declared-but-never-written LogSource value
+    // (T-119b, ADR-119: zero producers, ever) and is now removed from the
+    // union entirely. Any stored value other than "client"/"server" —
+    // including a hypothetical historical "cloud_function" doc, if one ever
+    // existed — falls through to the same "server" normalization every other
+    // unrecognized value already gets, rather than being rejected.
+    const source: LogSource = sourceRaw === "client" ? sourceRaw : "server";
 
     return {
         id,

@@ -13,12 +13,6 @@ export const ActivityAction = {
     DECK_CREATED: "deck.created",
     DECK_UPDATED: "deck.updated",
     DECK_DELETED: "deck.deleted",
-    DECK_SHARED: "deck.shared",
-    DECK_UNSHARED: "deck.unshared",
-
-    CARD_CREATED: "card.created",
-    CARD_UPDATED: "card.updated",
-    CARD_DELETED: "card.deleted",
 
     STUDY_SESSION_COMPLETED: "study.session_completed",
     STUDY_PROGRESS_RESET: "study.progress_reset",
@@ -27,14 +21,16 @@ export const ActivityAction = {
 
     // ── Sharing / Collaboration ───────────────────────────────────────────────
     SHARE_PRIVACY_UPDATED: "share.privacy_updated",
-    SHARE_INVITE_SENT: "share.invite_sent",
-    SHARE_INVITE_REVOKED: "share.invite_revoked",
     SHARE_ROLES_UPDATED: "share.roles_updated",
 
     // ── Kana game modes ───────────────────────────────────────────────────────
+    // Practice mode logs no completion event, unlike its quiz/survival
+    // siblings (T-119b, ADR-119): practice has no session/phase concept at
+    // all (infinite modulo-wrapped navigation, no start/end), so "completion"
+    // isn't a defined moment to log — this asymmetry is recorded as intended,
+    // not a gap, per LDG-11.
     KANA_QUIZ_COMPLETED: "kana.quiz_completed",
     KANA_SURVIVAL_COMPLETED: "kana.survival_completed",
-    KANA_PRACTICE_COMPLETED: "kana.practice_completed",
 
     // ── Notifications ─────────────────────────────────────────────────────────
     NOTIFICATION_READ: "notification.read",

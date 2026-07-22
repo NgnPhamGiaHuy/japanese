@@ -27,7 +27,7 @@
  * unrecognized stored value to `"server"` rather than rejecting the record, so
  * historical documents keep rendering.
  */
-export const LOG_SOURCES = ["client", "server", "cloud_function"] as const;
+export const LOG_SOURCES = ["client", "server"] as const;
 
 export type LogSource = (typeof LOG_SOURCES)[number];
 
