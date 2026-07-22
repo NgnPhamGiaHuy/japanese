@@ -1,38 +1,23 @@
 "use client";
 
-import { useEffect, useState } from "react";
-
 import { useAppStore } from "@/lib/app-store";
-import { subscribeUserProgress, updateUserProgress } from "../services";
-import { INITIAL_USER_DATA } from "../types";
+import { useUserProgressContext } from "../context/UserProgressContext";
+import { updateUserProgress } from "../services";
 
-import type { UserData } from "../types";
-
-/** Manages XP, daily streak, and lesson completion counts strictly synced with Firebase */
+/**
+ * Manages XP, daily streak, and lesson completion counts strictly synced
+ * with Firebase.
+ *
+ * @remarks
+ * The read half (`userData`, `loading`) comes from the single shared
+ * subscription in `UserProgressProvider` (ADR-113, T-113a) — mounting this
+ * hook N times opens zero additional Firestore listeners. The write actions
+ * below are unchanged: one-shot transactional writes, not listeners, so
+ * there was never a multiplication cost to centralize.
+ */
 export function useUserProgress() {
-    const [userData, setUserData] = useState<UserData>(INITIAL_USER_DATA);
-    const [loading, setLoading] = useState(true);
+    const { userData, loading } = useUserProgressContext();
     const { user } = useAppStore();
-
-    useEffect(() => {
-        if (!user) {
-            setUserData(INITIAL_USER_DATA);
-            setLoading(false);
-            return;
-        }
-
-        setLoading(true);
-        const unsub = subscribeUserProgress(
-            user.uid,
-            (data) => {
-                setUserData(data);
-                setLoading(false);
-            },
-            () => setLoading(false),
-        );
-
-        return unsub;
-    }, [user]);
 
     const addXP = async (amount: number) => {
         if (!user) return;

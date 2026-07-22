@@ -9,7 +9,7 @@ import { AdminProvider } from "@/features/admin";
 import { CommandPaletteLauncher } from "@/features/command-palette";
 import { registerFlashcardNotificationActions } from "@/features/flashcard";
 import { NotificationsProvider } from "@/features/notifications";
-import { useActivityTracker, useFirebaseAuth } from "@/features/user";
+import { useActivityTracker, useFirebaseAuth, UserProgressProvider } from "@/features/user";
 import { usePathname } from "@/i18n/navigation";
 import { useAppStore } from "@/lib/app-store";
 import { AudioProvider } from "@/lib/AudioProvider";
@@ -112,10 +112,12 @@ export function Providers({ children }: { children: React.ReactNode }) {
                     <PostHogProvider />
                     <AuthGate>
                         <AdminProvider>
-                            <NotificationsProvider>
-                                {children}
-                                <CommandPaletteLauncher />
-                            </NotificationsProvider>
+                            <UserProgressProvider>
+                                <NotificationsProvider>
+                                    {children}
+                                    <CommandPaletteLauncher />
+                                </NotificationsProvider>
+                            </UserProgressProvider>
                         </AdminProvider>
                     </AuthGate>
                 </AlertProvider>
