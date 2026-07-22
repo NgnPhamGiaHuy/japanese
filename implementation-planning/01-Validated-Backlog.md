@@ -1210,8 +1210,9 @@ Each is scheduled into a wave but is **NOT READY** until its question answers. E
 
 #### T-112a — Record both mechanisms as the sanctioned two; add the review gate against a third
 
-**Size** S · **Wave** 6 · **Status** Ready
+**Size** S · **Wave** 6 · **Status** ✅ **DONE**
 **Traces to** ADR-112 (AD-12) · PC-11, OP-3, W-18(b) · `assess/06`, `/09`
+**Delivered** Confirmed by repo-wide search: zero `useInfiniteQuery` matches, zero offset-pagination patterns (`.offset(`, `page * pageSize`, `OFFSET`) anywhere in `src/`. Both sanctioned mechanisms already carried channel-rationale docstrings at their definitions (`useCursorPagination.ts:5-17`'s sequential-cursor rationale; `notification-subscribe.ts`'s grow-window rationale) — the one gap was that the grow-window comment explained *why not a static cache* without naming the *cost* of the alternative it chose. Closed that gap directly: `notification-subscribe.ts`'s `subscribeNotifications` docblock now states the O(N·page) read-amplification explicitly as a deliberate correctness tradeoff, names it as the ADR-112-sanctioned mechanism, and states the "no third mechanism" constraint inline. Added CS-10 a sixth numbered rule (`architecture-decision/04-Coding-Standards.md`) — "Pagination — pick per channel, no third mechanism" — since ADR-112 itself already stated this rule in full but the day-to-day coding standard contributors actually consult during review did not carry its own line for it (previously only an incidental parenthetical on the virtualization rule). Updated CS-10's Why/Example prose and the standards-summary line to match. No behavioral change; no ledger entry needed (this task was never gated).
 **Description.** Cursor-token paging (one-shot admin queries) and grow-window resubscribe (realtime notifications) sit on genuinely different data channels and each documents its channel-specific rationale in code. Codify them as **the** two and close the door on a third.
 **Acceptance criteria**
 

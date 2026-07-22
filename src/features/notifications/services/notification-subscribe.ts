@@ -42,6 +42,15 @@ function mapNotificationDoc(d: QueryDocumentSnapshot): AppNotification {
  * live window's oldest item out, that item falls into a gap that's neither
  * live-covered nor part of any already-fetched page. Re-querying with a bigger
  * limit keeps everything under one always-live source of truth instead.
+ *
+ * This is a deliberate correctness-over-reads tradeoff, not unmanaged debt:
+ * each `loadMore()` re-reads the whole grown window (O(N·page) cumulative
+ * document reads), not just the newly-revealed page. It is the sanctioned
+ * "grow-window resubscribe" mechanism (ADR-112) for realtime-feed pagination
+ * — one of exactly two mechanisms this codebase permits, the other being
+ * cursor-token paging over one-shot queries (`useCursorPagination`). No third
+ * mechanism (offset pagination, `useInfiniteQuery`) may be introduced; a new
+ * paged surface picks whichever of the two its data channel dictates.
  */
 export function subscribeNotifications(
     userId: string,
