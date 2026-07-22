@@ -679,7 +679,8 @@ Each is scheduled into a wave but is **NOT READY** until its question answers. E
 
 #### T-114d — `analytics_daily` + `metadata/counters`: remove read paths or define a writer
 
-**Size** M · **Wave** 3 · **Status** **Gated Q-9**
+**Size** M · **Wave** 3 · **Status** ⏸️ **RECORDED — still Gated Q-9** (Sprint 9) — _was: Gated Q-9_
+**Delivered** The two in-repo-actionable AC items are done: (1) re-verified by grep that zero read paths outside `user.service.ts`/`analytics.service.ts`/`admin.actions.ts` (all fixed by T-114b/c) reference either collection, and confirmed (again) that no writer exists anywhere in `app`, `functions`, or `scripts`; (2) the disposition is recorded against `Q-9` in `docs/migrations-ledger.md`'s `LDG-07` row, updated to reflect the post-T-114b/c state. The delete-vs-complete branch itself remains genuinely open — Q-9 (does an out-of-repo pipeline populate these collections?) cannot be answered from the repository. The task's own "Fallback if Q-9 is unanswered" (delete the dead reads) was deliberately **not self-invoked**: severing a possibly-live external contract is a hard-to-reverse, real-infrastructure decision for the owner to make explicitly, not one an agent should take autonomously just because a fallback clause permits it. Awaiting the owner's answer to Q-9 (or explicit instruction to invoke the standing-default deletion) to close this row.
 **Traces to** ADR-114 (AD-14) · RC-5, TD-8, OP-16, W-11 · cluster **C6** · `assess/03`, `/04`, `/07`, `/11`
 **Description.** Both collections are read but written by **no** code in the app, functions, or scripts — and the repo had no server compute for months after the readers were built, so no in-repo producer ever existed. Whether an out-of-repo pipeline populates them is Q-9, and it is the delete-vs-complete branch.
 **Acceptance criteria**
