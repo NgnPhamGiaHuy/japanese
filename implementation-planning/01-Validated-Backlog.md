@@ -819,7 +819,8 @@ Each is scheduled into a wave but is **NOT READY** until its question answers. E
 
 #### T-115c — Align the 3 divergent admin-authority predicates
 
-**Size** M · **Wave** 4 · **Status** **Gated Q-10**
+**Size** M · **Wave** 4 · **Status** ⏸️ **RECORDED — still Gated Q-10** (Sprint 14) — _was: Gated Q-10_
+**Delivered** Re-verified and precisely recorded the three predicates' exact observable differences against `LDG-15` in the migrations ledger: `resolveCallerContext` (app) grants on custom claim **or** the Firestore role field's value; `isSystemAdmin()` (rules) grants on the same claims **or** mere existence of the `admins/{uid}` doc, never reading its role field; `isAdmin()` (functions) reads only the Firestore role field, never checking claims at all — three genuinely different disagreement shapes, not one. Confirmed (again) that `setCustomUserClaims` is called nowhere in production code. Per the task's own fallback, **no predicate was touched** — aligning to the wrong source risks locking out all admins or over-granting, so this stays the one gate where inaction is correct until Q-10 answers.
 **Traces to** ADR-115 (AD-15) · OP-7, RC-10, R-8 · cluster **C11** · `assess/09`, `/04`, `/11`
 **Description.** Three admin-authority predicates already diverge semantically, and no `setCustomUserClaims` call exists anywhere — so how admin authority is actually provisioned in production (custom claims vs `admins/{uid}`) is unknown. ADR-115 converges them **only after** the live source is known.
 **Acceptance criteria**
