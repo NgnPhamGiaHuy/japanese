@@ -8,6 +8,7 @@ import { z } from "zod";
 import { APP_ID } from "@/lib/app-id";
 import { verifySessionCookie } from "@/lib/auth-session";
 import { adminAuth, adminDb } from "@/lib/firebase-admin";
+import { verifiedActionClient } from "@/lib/safe-action";
 import { COOKIE_NAME } from "@/shared/utils/cookie";
 import { hasPermission, normalizeAdminRole } from "../utils/rbac";
 
@@ -83,11 +84,12 @@ export async function assertAdminAction(action: PermissionAction): Promise<Calle
 }
 
 /**
- * Admin-scoped safe-action client: each action declares its
- * required permission via `.metadata({permission})`; this middleware runs
- * the existing `assertAdminAction` once and exposes the resolved
- * `{uid, role}` as `ctx`. Folds the cookie-session + role/permission check
- * that every admin action previously hand-rolled into one place.
+ * Pre-unification admin-scoped client, retained only for its 19 remaining
+ * callers (T-106b migrates them onto `verifiedAdminActionClient` below,
+ * after which this is deleted — T-106d). Each action declares its required
+ * permission via `.metadata({permission})`; this middleware runs the
+ * existing `assertAdminAction` once and exposes the resolved `{uid, role}`
+ * as `ctx`.
  */
 export const adminActionClient = createSafeActionClient({
     defineMetadataSchema: () =>
@@ -108,5 +110,27 @@ export const adminActionClient = createSafeActionClient({
     },
 }).use(async ({ next, metadata }) => {
     const caller = await assertAdminAction(metadata.permission);
+    return next({ ctx: caller });
+});
+
+/**
+ * The unified admin surface (ADR-106, T-106a): extends the SHARED
+ * `verifiedActionClient` base (`lib/safe-action.ts`) — imported here, not
+ * re-implemented, since ADR-103 forbids the reverse (`lib/` importing this
+ * feature) — with the same cookie-session identity + permission check as
+ * the pre-unification client above.
+ *
+ * `verifiedActionClient`'s metadata schema is a generic `z.string().min(1)`,
+ * fixed once at the shared client's creation — next-safe-action has no way
+ * to narrow a metadata schema per-surface after the fact, which is the one
+ * real trade-off of unifying on a single client: `.metadata({permission})`
+ * call sites lose the exact `PermissionAction` enum's compile-time typo
+ * protection. `assertAdminAction`'s runtime `hasPermission` check is the
+ * backstop that already existed regardless of the zod schema, so this
+ * narrows a DX nicety, not a security property — a mistyped permission
+ * still fails closed (FORBIDDEN), just at runtime instead of compile time.
+ */
+export const verifiedAdminActionClient = verifiedActionClient.use(async ({ next, metadata }) => {
+    const caller = await assertAdminAction(metadata.permission as PermissionAction);
     return next({ ctx: caller });
 });
