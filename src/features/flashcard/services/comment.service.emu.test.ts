@@ -1,7 +1,7 @@
 /**
  * @file comment.service.emu.test.ts
  * Emulator-backed tests for comment.service.ts's CRUD orchestration (T-117c):
- * add/reply/resolve/get/update/delete, plus the self-notification skip.
+ * add/reply/resolve/update/delete, plus the self-notification skip.
  *
  * GATED: requires the Firestore + Auth emulator. Skips itself when the
  * emulator env is absent so a stray invocation is a no-op rather than a hang.
@@ -22,7 +22,6 @@ import { CommentError, CommentErrorCode } from "./comment-errors";
 import {
     addComment,
     deleteComment,
-    getComments,
     replyToComment,
     resolveComment,
     updateComment,
@@ -117,14 +116,6 @@ d("comment.service", () => {
 
         await resolveComment(OWNER, LESSON_ID, CARD_ID, id, OWNER);
         expect((await adminDb.doc(`${commentsPath()}/${id}`).get()).data()?.resolved).toBe(false);
-    });
-
-    it("getComments returns every comment for the card", async () => {
-        await addComment(OWNER, LESSON_ID, CARD_ID, "first", OWNER, "Owner");
-        await addComment(OWNER, LESSON_ID, CARD_ID, "second", OWNER, "Owner");
-
-        const comments = await getComments(OWNER, LESSON_ID, CARD_ID);
-        expect(comments.map((c) => c.content).sort()).toEqual(["first", "second"]);
     });
 
     it("updateComment replaces content and stamps updatedAt", async () => {

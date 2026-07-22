@@ -1,7 +1,7 @@
 /**
  * @file comment.service
  * Social orchestration layer for threaded flashcard feedback — the CRUD
- * operations (add/reply/resolve/get/subscribe/update/delete). Split from a
+ * operations (add/reply/resolve/subscribe/update/delete). Split from a
  * single 489-line file (E11-T3): errors → comment-errors.ts, path helpers →
  * comment-paths.ts, validation/sanitization → comment-validation.ts. This
  * file re-exports all of them, so every existing import path
@@ -16,15 +16,7 @@
  * 3. **Sanitization**: Manual entity escaping to prevent XSS while maintaining Markdown compatibility.
  */
 
-import {
-    addDoc,
-    deleteDoc,
-    getDoc,
-    getDocs,
-    onSnapshot,
-    Timestamp,
-    updateDoc,
-} from "firebase/firestore";
+import { addDoc, deleteDoc, getDoc, onSnapshot, Timestamp, updateDoc } from "firebase/firestore";
 
 import { emitNotification } from "@/features/notifications";
 import { CommentError, CommentErrorCode, mapFirestoreCommentError } from "./comment-errors";
@@ -189,26 +181,6 @@ export async function resolveComment(
             error,
             "You don't have permission to resolve comments",
             "Failed to resolve comment. Please try again.",
-        );
-    }
-}
-
-/**
- * Fetches all comments for a specific card (one-time read).
- */
-export async function getComments(
-    ownerId: string,
-    lessonId: string,
-    cardId: string,
-): Promise<Comment[]> {
-    try {
-        const snapshot = await getDocs(commentsCol(ownerId, lessonId, cardId));
-        return snapshot.docs.map((d) => ({ ...d.data(), id: d.id })) as Comment[];
-    } catch (error: unknown) {
-        mapFirestoreCommentError(
-            error,
-            "You don't have permission to view comments",
-            "Failed to fetch comments. Please try again.",
         );
     }
 }

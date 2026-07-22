@@ -149,7 +149,7 @@ export interface Lesson {
         }
     >;
 
-    /** Legacy or computed public status flag */
+    /** Whether the deck is publicly discoverable — feeds the Discover-tab query and RBAC's public-access check */
     isPublic?: boolean;
     /** URL-safe token representing the {ownerId}:{lessonId} pair */
     shareId?: string;

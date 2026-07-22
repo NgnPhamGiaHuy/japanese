@@ -34,9 +34,8 @@ export default defineConfig({
     // module subtree that Vite's dep optimizer doesn't discover before the
     // single-shot `vitest run` test import happens, producing a duplicate
     // React module instance ("Invalid hook call" / useContext returning
-    // null) — same class of cold-optimizer issue as vitest.config.ts's
-    // storybook project. Forcing it into optimizeDeps pre-bundles its whole
-    // subtree with one React copy.
+    // null). Forcing it into optimizeDeps pre-bundles its whole subtree with
+    // one React copy.
     optimizeDeps: {
         include: [
             "@base-ui/react/select",

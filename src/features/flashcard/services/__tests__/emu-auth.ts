@@ -1,4 +1,4 @@
-import { signInWithCustomToken, signOut } from "firebase/auth";
+import { signInWithCustomToken } from "firebase/auth";
 
 import { auth } from "@/lib/firebase";
 import { adminAuth, adminDb } from "@/lib/firebase-admin";
@@ -67,19 +67,10 @@ export async function signInAs(uid: string, email?: string, displayName?: string
     return credential.user;
 }
 
-export async function signOutUser(): Promise<void> {
-    await signOut(auth);
-}
-
 /** Deletes every doc under the given Admin-SDK collection paths (test cleanup). */
 export async function wipeCollections(...paths: string[]): Promise<void> {
     for (const path of paths) {
         const snap = await adminDb.collection(path).get();
         await Promise.all(snap.docs.map((d) => d.ref.delete()));
     }
-}
-
-/** Deletes a single doc by path via the Admin SDK (bypasses rules). */
-export async function wipeDoc(path: string): Promise<void> {
-    await adminDb.doc(path).delete();
 }

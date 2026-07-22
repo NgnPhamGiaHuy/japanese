@@ -17,4 +17,4 @@ export { useAIImageDeck } from "./hooks/useAIImageDeck";
 // Consumed by the match game to build plausible wrong answers.
 export { generateMatchDistractors } from "./services/gemini.service";
 
-export type { AIGenerateMode, JLPTLevel } from "./types";
+export type { JLPTLevel } from "./types";
