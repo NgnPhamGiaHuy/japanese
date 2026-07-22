@@ -17,7 +17,6 @@ export {
     AdminGuard,
     AdminOverviewPage,
     AdminReportsPageContent,
-    AdminSettingsPageContent,
     AdminSidebar,
     AdminUsersPageContent,
 } from "./components";

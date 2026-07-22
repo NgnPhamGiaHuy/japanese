@@ -45,9 +45,7 @@
         "adminAnalyticsTitle": "Analytics | Admin",
         "adminAnalyticsDescription": "Platform usage statistics, user engagement, and system performance.",
         "adminReportsTitle": "Reports | Admin",
-        "adminReportsDescription": "System logs, user reports, and audit trails.",
-        "adminSettingsTitle": "Settings | Admin",
-        "adminSettingsDescription": "Global administrative configuration."
+        "adminReportsDescription": "System logs, user reports, and audit trails."
     },
     "ErrorScreens": {
         "errorTitle": "Something Went Wrong",
@@ -654,7 +652,6 @@
         "content": "Content",
         "analytics": "Analytics",
         "reports": "Reports",
-        "settings": "Settings",
         "openNavigation": "Open navigation",
         "closeNavigation": "Close navigation",
         "navigation": "Navigation",
@@ -700,10 +697,6 @@
         "systemHealth": "System Health",
         "errorRate": "Error Rate",
         "activeTeam": "Active Team",
-        "quickActions": "Quick Actions",
-        "globalSettings": "Global Settings",
-        "contentAudit": "Content Audit",
-        "securityReview": "Security Review",
         "noDataSource": "No data",
         "noChartData": "No data yet",
         "userAcquisitionGrowth": "User Acquisition Growth",
@@ -902,11 +895,5 @@
             "SYSTEM": "System",
             "ERROR": "Error"
         }
-    },
-    "AdminSettings": {
-        "title": "Settings",
-        "description": "Global platform configuration.",
-        "notAvailableYet": "Not available yet",
-        "notAvailableMessage": "Platform configuration isn't connected to a backend yet, so changes can't be saved from here. This section will be enabled in a future release."
     }
 }

@@ -8,7 +8,6 @@ export interface PermissionSet {
     canDeleteUsers: boolean;
     canPromoteUsers: boolean;
     canManageContent: boolean;
-    canChangeSettings: boolean;
 }
 
 const ROLE_PERMISSIONS: Record<AdminRole, PermissionSet> = {
@@ -20,7 +19,6 @@ const ROLE_PERMISSIONS: Record<AdminRole, PermissionSet> = {
         canDeleteUsers: true,
         canPromoteUsers: true,
         canManageContent: true,
-        canChangeSettings: true,
     },
     admin: {
         canViewDashboard: true,
@@ -30,7 +28,6 @@ const ROLE_PERMISSIONS: Record<AdminRole, PermissionSet> = {
         canDeleteUsers: false,
         canPromoteUsers: false,
         canManageContent: true,
-        canChangeSettings: false,
     },
 };
 

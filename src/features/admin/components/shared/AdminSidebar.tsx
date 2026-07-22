@@ -5,16 +5,7 @@ import { useState } from "react";
 
 import { Dialog } from "@base-ui/react/dialog";
 import { clsx } from "clsx";
-import {
-    BarChart3,
-    Database,
-    FileText,
-    LayoutDashboard,
-    Menu,
-    Settings,
-    Users,
-    X,
-} from "lucide-react";
+import { BarChart3, Database, FileText, LayoutDashboard, Menu, Users, X } from "lucide-react";
 import { m } from "motion/react";
 
 import { Link, usePathname } from "@/i18n/navigation";
@@ -26,7 +17,6 @@ const navItems = [
     { id: "content", href: "/admin/content", icon: Database },
     { id: "analytics", href: "/admin/analytics", icon: BarChart3 },
     { id: "reports", href: "/admin/reports", icon: FileText },
-    { id: "settings", href: "/admin/settings", icon: Settings },
 ];
 
 const Logo = () => {

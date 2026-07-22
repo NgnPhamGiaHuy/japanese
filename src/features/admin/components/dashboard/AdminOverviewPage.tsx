@@ -6,7 +6,6 @@ import { Activity, BookOpen, Database, Users, Zap } from "lucide-react";
 
 import { Link } from "@/i18n/navigation";
 import { Button, EmptyState, LoadingSpinner } from "@/shared/components/ui";
-import QuickActionsCard from "./QuickActionsCard";
 import SystemHealthCard from "./SystemHealthCard";
 import { LogRow } from "../reports";
 import {
@@ -131,7 +130,6 @@ const AdminOverviewPage = () => {
                         activeAdmins={stats.activeAdmins}
                         activeSuperAdmins={stats.activeSuperAdmins}
                     />
-                    <QuickActionsCard />
                 </div>
             </div>
         </AdminPageLayout>

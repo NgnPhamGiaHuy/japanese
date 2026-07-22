@@ -45,9 +45,7 @@
         "adminAnalyticsTitle": "分析 | 管理",
         "adminAnalyticsDescription": "利用統計、ユーザーエンゲージメント、システムパフォーマンス。",
         "adminReportsTitle": "レポート | 管理",
-        "adminReportsDescription": "システムログ、ユーザーレポート、監査証跡。",
-        "adminSettingsTitle": "設定 | 管理",
-        "adminSettingsDescription": "プラットフォーム全体の管理設定。"
+        "adminReportsDescription": "システムログ、ユーザーレポート、監査証跡。"
     },
     "ErrorScreens": {
         "errorTitle": "問題が発生しました",
@@ -675,7 +673,6 @@
         "content": "コンテンツ",
         "analytics": "分析",
         "reports": "レポート",
-        "settings": "設定",
         "openNavigation": "ナビゲーションを開く",
         "closeNavigation": "ナビゲーションを閉じる",
         "navigation": "ナビゲーション",
@@ -721,10 +718,6 @@
         "systemHealth": "システムの状態",
         "errorRate": "エラー率",
         "activeTeam": "アクティブなチーム",
-        "quickActions": "クイックアクション",
-        "globalSettings": "グローバル設定",
-        "contentAudit": "コンテンツ監査",
-        "securityReview": "セキュリティレビュー",
         "noDataSource": "データなし",
         "noChartData": "まだデータがありません",
         "userAcquisitionGrowth": "ユーザー獲得の推移",
@@ -923,11 +916,5 @@
             "SYSTEM": "システム",
             "ERROR": "エラー"
         }
-    },
-    "AdminSettings": {
-        "title": "設定",
-        "description": "プラットフォームのグローバル設定。",
-        "notAvailableYet": "まだ利用できません",
-        "notAvailableMessage": "プラットフォーム設定はまだバックエンドに接続されていないため、ここでの変更は保存できません。この機能は今後のリリースで有効になります。"
     }
 }

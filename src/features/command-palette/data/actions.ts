@@ -41,5 +41,4 @@ export const ADMIN_ACTIONS: CommandAction[] = [
     { id: "admin-content", href: "/admin/content", icon: Database },
     { id: "admin-analytics", href: "/admin/analytics", icon: BarChart3 },
     { id: "admin-reports", href: "/admin/reports", icon: FileText },
-    { id: "admin-settings", href: "/admin/settings", icon: Settings },
 ];
