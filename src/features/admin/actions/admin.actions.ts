@@ -9,11 +9,11 @@ import { ActivityAction } from "@/lib/logging/actions.enum";
 import { toActionResult } from "@/lib/safe-action";
 import { COOKIE_NAME } from "@/shared/utils/cookie";
 import {
-    adminActionClient,
     adminDb,
     APP_ID,
     assertAdminAction,
     assertPermissionFromToken,
+    verifiedAdminActionClient,
 } from "../services/admin.service";
 import {
     getAdminAnalytics,
@@ -40,7 +40,7 @@ import { USERS_PAGE_SIZE } from "../utils/queryKeys";
 /**
  * @file Admin Server Actions — migrated to next-safe-action.
  *
- * Every action runs through `adminActionClient` (features/admin/services/
+ * Every action runs through `verifiedAdminActionClient` (features/admin/services/
  * admin.service.ts): its middleware resolves the caller from the `auth-token`
  * session cookie and enforces the permission declared via `.metadata()`
  * BEFORE the action body ever runs — no action here calls `verifyIdToken` or
@@ -57,7 +57,7 @@ async function getAuthToken(): Promise<string> {
 }
 
 export async function fetchUsersAction(pageToken?: string, pageSize = USERS_PAGE_SIZE) {
-    const result = await adminActionClient
+    const result = await verifiedAdminActionClient
         .metadata({ permission: "canManageUsers" })
         .inputSchema(
             z.object({ pageToken: z.string().optional(), pageSize: z.number().int().positive() }),
@@ -69,14 +69,14 @@ export async function fetchUsersAction(pageToken?: string, pageSize = USERS_PAGE
 }
 
 export async function fetchAdminStatsAction() {
-    const result = await adminActionClient
+    const result = await verifiedAdminActionClient
         .metadata({ permission: "canViewDashboard" })
         .action(async () => getAdminStats())();
     return toActionResult(result);
 }
 
 export async function setAdminRoleAction(targetUid: string, grant: boolean) {
-    const result = await adminActionClient
+    const result = await verifiedAdminActionClient
         .metadata({ permission: "canPromoteUsers" })
         .inputSchema(z.object({ targetUid: z.string().min(1), grant: z.boolean() }))
         .action(async ({ parsedInput, ctx }) => {
@@ -97,7 +97,7 @@ export async function setAdminRoleAction(targetUid: string, grant: boolean) {
 }
 
 export async function deleteUserAction(targetUid: string) {
-    const result = await adminActionClient
+    const result = await verifiedAdminActionClient
         .metadata({ permission: "canDeleteUsers" })
         .inputSchema(z.object({ targetUid: z.string().min(1) }))
         .action(async ({ parsedInput, ctx }) => {
@@ -113,7 +113,7 @@ export async function deleteUserAction(targetUid: string) {
 }
 
 export async function fetchAnalyticsAction() {
-    const result = await adminActionClient
+    const result = await verifiedAdminActionClient
         .metadata({ permission: "canViewAnalytics" })
         .action(async () => getAdminAnalytics())();
     return toActionResult(result);
@@ -123,7 +123,7 @@ export async function fetchLogsAction(
     filters: Parameters<typeof getLogs>[0],
     startAfterDocId?: string | null,
 ) {
-    const result = await adminActionClient
+    const result = await verifiedAdminActionClient
         .metadata({ permission: "canViewReports" })
         .inputSchema(
             z.object({
@@ -138,7 +138,7 @@ export async function fetchLogsAction(
 }
 
 export async function createTestLogAction() {
-    const result = await adminActionClient
+    const result = await verifiedAdminActionClient
         .metadata({ permission: "canViewReports" })
         .action(async ({ ctx }) => {
             const token = await getAuthToken();
@@ -152,14 +152,14 @@ export async function createTestLogAction() {
 }
 
 export async function fetchDashboardOverviewAction() {
-    const result = await adminActionClient
+    const result = await verifiedAdminActionClient
         .metadata({ permission: "canViewDashboard" })
         .action(async () => getDashboardOverview())();
     return toActionResult(result);
 }
 
 export async function fetchDeckCardsAction(path: string) {
-    const result = await adminActionClient
+    const result = await verifiedAdminActionClient
         .metadata({ permission: "canManageContent" })
         .inputSchema(z.object({ path: z.string().min(1) }))
         .action(async ({ parsedInput }) => getDeckCards(parsedInput.path))({ path });
@@ -167,7 +167,7 @@ export async function fetchDeckCardsAction(path: string) {
 }
 
 export async function fetchGlobalContentAction(limit = 50) {
-    const result = await adminActionClient
+    const result = await verifiedAdminActionClient
         .metadata({ permission: "canManageContent" })
         .inputSchema(z.object({ limit: z.number().int().positive() }))
         .action(async ({ parsedInput }) => getGlobalContentPaginated(parsedInput.limit))({ limit });
@@ -175,7 +175,7 @@ export async function fetchGlobalContentAction(limit = 50) {
 }
 
 export async function deleteGlobalFlashcardAction(path: string) {
-    const result = await adminActionClient
+    const result = await verifiedAdminActionClient
         .metadata({ permission: "canManageContent" })
         .inputSchema(z.object({ path: z.string().min(1) }))
         .action(async ({ parsedInput, ctx }) => {
@@ -207,7 +207,7 @@ export async function deleteGlobalFlashcardAction(path: string) {
  * Only action with a caller-choice auth path: an explicit token (checked at
  * app boot, before an `auth-token` cookie necessarily exists yet) or the
  * cookie session. Left on `assertPermissionFromToken`/`assertAdminAction`
- * directly rather than `adminActionClient` — its whole point is running
+ * directly rather than `verifiedAdminActionClient` — its whole point is running
  * *before* the cookie-based path is guaranteed available.
  */
 export async function fetchAdminRoleAction(idToken?: string) {
@@ -223,7 +223,7 @@ export async function fetchAdminRoleAction(idToken?: string) {
 }
 
 export async function fetchDrilldownUsersAction(filter: { date?: string; role?: string }) {
-    const result = await adminActionClient
+    const result = await verifiedAdminActionClient
         .metadata({ permission: "canViewAnalytics" })
         .inputSchema(z.object({ date: z.string().optional(), role: z.string().optional() }))
         .action(async ({ parsedInput }) => {
@@ -235,7 +235,7 @@ export async function fetchDrilldownUsersAction(filter: { date?: string; role?: 
 }
 
 export async function fetchDrilldownFeatureAction(feature: string) {
-    const result = await adminActionClient
+    const result = await verifiedAdminActionClient
         .metadata({ permission: "canViewAnalytics" })
         .inputSchema(z.object({ feature: z.string().min(1) }))
         .action(async ({ parsedInput }) => getFeatureUsageDetails(parsedInput.feature))({
@@ -245,7 +245,7 @@ export async function fetchDrilldownFeatureAction(feature: string) {
 }
 
 export async function fetchDrilldownContentAction(category: string) {
-    const result = await adminActionClient
+    const result = await verifiedAdminActionClient
         .metadata({ permission: "canViewAnalytics" })
         .inputSchema(z.object({ category: z.string().min(1) }))
         .action(async ({ parsedInput }) => getContentBreakdown(parsedInput.category))({ category });
@@ -257,7 +257,7 @@ export async function fetchDrilldownLogsAction(filter: {
     level?: string;
     action?: string;
 }) {
-    const result = await adminActionClient
+    const result = await verifiedAdminActionClient
         .metadata({ permission: "canViewReports" })
         .inputSchema(
             z.object({
@@ -271,7 +271,7 @@ export async function fetchDrilldownLogsAction(filter: {
 }
 
 export async function exportAnalyticsAction() {
-    const result = await adminActionClient
+    const result = await verifiedAdminActionClient
         .metadata({ permission: "canViewAnalytics" })
         .action(async () => {
             const snapshots = await adminDb
@@ -311,7 +311,7 @@ export async function exportAnalyticsAction() {
 }
 
 export async function exportUsersDatasetAction() {
-    const result = await adminActionClient
+    const result = await verifiedAdminActionClient
         .metadata({ permission: "canViewAnalytics" })
         .action(async () => {
             const snap = await adminDb
@@ -336,7 +336,7 @@ export async function exportUsersDatasetAction() {
 }
 
 export async function exportContentDatasetAction() {
-    const result = await adminActionClient
+    const result = await verifiedAdminActionClient
         .metadata({ permission: "canViewAnalytics" })
         .action(async () => {
             const snap = await adminDb.collectionGroup("lessons").limit(1000).get();
@@ -360,7 +360,7 @@ export async function exportContentDatasetAction() {
 }
 
 export async function exportLogsDatasetAction() {
-    const result = await adminActionClient
+    const result = await verifiedAdminActionClient
         .metadata({ permission: "canViewAnalytics" })
         .action(async () => {
             const snap = await adminDb

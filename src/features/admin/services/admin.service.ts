@@ -84,12 +84,10 @@ export async function assertAdminAction(action: PermissionAction): Promise<Calle
 }
 
 /**
- * Pre-unification admin-scoped client, retained only for its 19 remaining
- * callers (T-106b migrates them onto `verifiedAdminActionClient` below,
- * after which this is deleted — T-106d). Each action declares its required
- * permission via `.metadata({permission})`; this middleware runs the
- * existing `assertAdminAction` once and exposes the resolved `{uid, role}`
- * as `ctx`.
+ * Pre-unification client. T-106b migrated its last caller
+ * (features/admin/actions/admin.actions.ts) onto `verifiedAdminActionClient`
+ * below; this has zero remaining callers and is kept only until T-106d
+ * deletes it alongside `lib/safe-action.ts`'s equivalent `actionClient`.
  */
 export const adminActionClient = createSafeActionClient({
     defineMetadataSchema: () =>

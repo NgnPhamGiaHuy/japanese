@@ -857,8 +857,9 @@ Each is scheduled into a wave but is **NOT READY** until its question answers. E
 
 #### T-106b — Migrate `adminActionClient` call sites
 
-**Size** L · **Wave** 4 · **Status** Ready
+**Size** L · **Wave** 4 · **Status** ✅ **DONE**
 **Traces to** ADR-106 (AD-06) · PC-5, RC-11, W-12, S-4 · cluster **C10** · `assess/06`, `/05`, `/09`
+**Delivered** All 19 `adminActionClient` call sites in `admin.actions.ts` (of its 20 exported actions — `fetchAdminRoleAction` is the one deliberate exception, calling `assertPermissionFromToken`/`assertAdminAction` directly since it runs before a session cookie is guaranteed to exist) now run on `verifiedAdminActionClient` (T-106a's unified base), each retaining its exact `.metadata({permission})` declaration unchanged — a pure client swap, no permission remapped. The file's own docblock and import list were updated to match; import order re-sorted (the renamed identifier sorts last, case-insensitively). `admin.service.ts`'s `adminActionClient` export now has zero remaining callers anywhere in the repo (confirmed by grep) and is kept only until T-106d deletes it alongside `lib/safe-action.ts`'s `actionClient` — its docblock updated to say so rather than left pointing at a stale "19 remaining callers." No file split needed: the migration is a rename, not a restructuring, and line count is unchanged (389, was 390) — CS-2's "if the migration makes it two" condition never triggers. Verified: `next build` (full-tree typecheck) clean, lint 0 errors, 368 unit + 76 browser + 126 emu (3 skipped) all green — the emu suite exercises exactly the admin-action authorization paths this task touches (T-117d's `admins` rules tests, `admin.service.emu.test.ts`'s `assertAdminAction` coverage), so the "same caller permitted/denied as before" acceptance criterion is proven against real tokens, not just typechecked.
 **Description.** Move the cookie-session admin actions onto the unified client, preserving each action's declared permission. `admin.actions.ts` alone is 380 lines and 20 actions — the RBAC enforcement seam.
 **Acceptance criteria**
 
