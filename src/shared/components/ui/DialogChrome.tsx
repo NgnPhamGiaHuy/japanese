@@ -5,7 +5,7 @@ import { X } from "lucide-react";
 
 import Button from "./Button";
 
-/** Shared backdrop classNames for every Base UI Dialog-based overlay (Modal, ConfirmModal, Drawer). */
+/** Shared backdrop classNames for every Base UI Dialog-based overlay (Modal, ConfirmModal). */
 export const DIALOG_BACKDROP_CLASSNAME =
     "fixed inset-0 z-50 bg-black/40 backdrop-blur-sm transition-opacity duration-200 data-[ending-style]:opacity-0 data-[starting-style]:opacity-0";
 

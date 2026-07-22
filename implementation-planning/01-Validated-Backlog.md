@@ -1170,8 +1170,9 @@ Each is scheduled into a wave but is **NOT READY** until its question answers. E
 
 #### T-110b — `Drawer`: delete, or adopt with the two bespoke panels converging on it
 
-**Size** M · **Wave** 6 · **Status** **Gated NQ-3** _(veto window — default = delete; see §5.3)_
+**Size** M · **Wave** 6 · **Status** ✅ **DONE** (Q-N fallback applied — NQ-3 default = delete)
 **Traces to** ADR-110 (AD-10) · OP-12, TD-11, W-21(c), PC-3, CX-7 · cluster **C12** · `assess/06`, `/09`, `/11`
+**Delivered** Re-verified the zero-render-site claim at removal time rather than trusting the corpus count (per this task's own regression-scope note): grepped the whole repo for `<Drawer` — the only two matches were inside `Drawer.tsx` itself (a type reference and its own `@example` doc comment), confirmed via `AdminSidebar.tsx`/`DeckDetailsPanel.tsx` that neither bespoke panel had adopted it either. Deleted `shared/components/ui/Drawer.tsx` and its barrel export (`shared/components/ui/index.ts`); removed the "Drawer" mention from `DialogChrome.tsx`'s own doc comment (T-110a separately adds its real remaining consumers back to that same line). `docs/migrations-ledger.md`'s `LDG-06` closed; `project-discovery/04-Component-Inventory.md`'s shared-UI inventory entry replaced with a removal note so it no longer advertises an unused-but-canonical-looking primitive.
 **Description.** The finished, themed, barrel-exported `Drawer` primitive has **zero** render sites while the two surfaces that _are_ drawers hand-compose Base UI `Dialog` directly — CS-1's named counter-example of a shared extraction with zero uses. It is delete-unless-claimed; the only legitimate claim is adoption by those two existing panels.
 **Acceptance criteria**
 

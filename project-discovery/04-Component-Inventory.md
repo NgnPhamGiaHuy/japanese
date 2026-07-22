@@ -72,12 +72,8 @@ Two subdirectories exist: `ui/` (21 exported components + 1 internal module + ba
 - **Depends on**: `@base-ui/react/dialog`, lucide `X`, sibling `Button`.
 - **Used by (3)**: `Modal.tsx`, `Drawer.tsx`, `ConfirmModal.tsx` (all sibling files).
 
-#### Drawer — `shared/components/ui/Drawer.tsx` ⬥client
-- **Purpose** (docblock, lines 27–38): "Slide-in drawer, positioned on the same Base UI Dialog primitive as Modal.tsx … reuses Dialog rather than Base UI's separate gesture-driven Drawer primitive."
-- **Props** (lines 8–19): `isOpen, onClose, title?, children, side? ("left"|"right"|"bottom")`.
-- **Depends on**: `@base-ui/react/dialog`, `./DialogChrome`.
-- **Used by (0)**: no file imports `Drawer` (observed via import grep; it is exported from the barrel at `ui/index.ts:8`). `features/admin/components/shared/AdminSidebar.tsx` builds its own mobile drawer directly on `Dialog.Root` (AdminSidebar.tsx:140) rather than using this component.
-- **Responsibilities**: per-side positioning/transition classes (lines 21–25); header with title + close button (lines 49–56).
+#### ~~Drawer~~ — removed (T-110b)
+- Formerly `shared/components/ui/Drawer.tsx` — a zero-render-site primitive (CS-1's named counter-example: built ahead of any consumer). NQ-3 resolved to its default, delete; deleted along with its barrel export. See `docs/migrations-ledger.md` `LDG-06` (closed).
 
 #### EmptyState — `shared/components/ui/EmptyState.tsx` ⬦no-directive
 - **Purpose** (docblock, lines 1–14): "Reusable empty state component for displaying missing content."
