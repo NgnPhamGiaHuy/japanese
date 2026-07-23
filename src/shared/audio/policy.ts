@@ -22,7 +22,7 @@ import type { AudioStage, SpeakTrigger } from "./types";
 /** Question types whose prompt *is* the audio. */
 const LISTENING_QUESTION_TYPES = new Set(["listen"]);
 
-export interface SpeechPolicyInput {
+interface SpeechPolicyInput {
     stage: AudioStage;
     trigger: SpeakTrigger;
     questionType?: string;

@@ -23,7 +23,7 @@ export interface SpeakOptions {
     questionType?: string;
 }
 
-export type PlaybackStatus =
+type PlaybackStatus =
     /** Audio played to its end. */
     | "completed"
     /** Superseded by a newer request, or stopped by navigation/unload. */

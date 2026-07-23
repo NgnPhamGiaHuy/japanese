@@ -9,7 +9,7 @@ import { Search } from "lucide-react";
 
 import { useAdminRole } from "@/features/admin";
 import { useRouter } from "@/i18n/navigation";
-import { DIALOG_BACKDROP_CLASSNAME } from "@/shared/components/ui/DialogChrome";
+import { DIALOG_BACKDROP_CLASSNAME } from "@/shared/components/ui";
 import { ADMIN_ACTIONS, MAIN_ACTIONS } from "../data/actions";
 
 import type { CommandAction } from "../data/actions";

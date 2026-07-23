@@ -14,17 +14,7 @@ export { default as KanaHub } from "./hub";
 export { KanaLearn } from "./learn";
 export { KanaPractice } from "./practice";
 export { KanaQuiz } from "./quiz";
-export {
-    KanaSurvival,
-    TIME_ATTACK_MAX_STREAK_BONUS_SEC,
-    TIME_ATTACK_WRONG_PENALTY_SEC,
-} from "./survival";
-
-// Shared across modes.
-export { AnswerFeedback, KanaMCOptionsGrid } from "./components";
-export { useKanaDataset } from "./hooks";
+export { KanaSurvival } from "./survival";
 
 // The character datasets themselves.
 export { HIRAGANA_DATA, KATAKANA_DATA } from "./data";
-
-export type { AlphabetMode } from "./types";

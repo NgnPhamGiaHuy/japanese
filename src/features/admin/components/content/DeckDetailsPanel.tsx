@@ -5,8 +5,7 @@ import { useTranslations } from "next-intl";
 import { Dialog } from "@base-ui/react/dialog";
 import { Book, X } from "lucide-react";
 
-import { Button, LoadingSpinner } from "@/shared/components/ui";
-import { DIALOG_BACKDROP_CLASSNAME } from "@/shared/components/ui/DialogChrome";
+import { Button, DIALOG_BACKDROP_CLASSNAME, LoadingSpinner } from "@/shared/components/ui";
 import { DeckCardItem } from "./DeckCardItem";
 
 import type { FlashCard } from "@/features/flashcard";

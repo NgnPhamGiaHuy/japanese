@@ -13,13 +13,14 @@ import Confetti from "react-confetti";
 
 import { m } from "motion/react";
 
-import { Button } from "@/shared/components/ui";
+import { GameResultsActions } from "./GameResultsActions";
 import Leaderboard from "./Leaderboard";
 import { StatGrid } from "./StatGrid";
 import { usePrefersReducedMotion } from "../hooks";
 
 import type { LucideIcon } from "lucide-react";
 import type { TierInfo } from "@/features/game/domain";
+import type { GameResultsScreenAction } from "./GameResultsActions";
 import type { StatItem } from "./StatGrid";
 
 export interface GameResultsScreenProps {
@@ -35,10 +36,10 @@ export interface GameResultsScreenProps {
     score: number;
     /** Previous best score */
     bestScore: number;
-    /** Tier information */
-    tierInfo: TierInfo;
-    /** Statistics to display in grid */
-    stats: StatItem[];
+    /** Tier information — omit for modes with no tier system (skips the tier badge) */
+    tierInfo?: TierInfo;
+    /** Statistics to display in grid — omit for modes with no stat breakdown (skips the grid) */
+    stats?: StatItem[];
     /** Game mode identifier for leaderboard */
     gameMode: string;
     /** Current user ID for leaderboard highlighting */
@@ -50,7 +51,12 @@ export interface GameResultsScreenProps {
     /** XP earned (calculated from score) */
     xpEarned?: number;
     onPlayAgain: () => void;
-    onCollectXP: () => void;
+    /** Omit for modes with no explicit XP-collection step — Play Again renders full-width instead */
+    onCollectXP?: () => void;
+    /** Extra outline-style action rendered below the primary row (e.g. "Change Mode") */
+    secondaryAction?: GameResultsScreenAction;
+    /** Extra ghost-style action rendered below secondaryAction (e.g. "Back") */
+    tertiaryAction?: GameResultsScreenAction;
 }
 
 export function GameResultsScreen({
@@ -69,6 +75,8 @@ export function GameResultsScreen({
     xpEarned,
     onPlayAgain,
     onCollectXP,
+    secondaryAction,
+    tertiaryAction,
 }: GameResultsScreenProps) {
     const t = useTranslations("Game");
     const prefersReducedMotion = usePrefersReducedMotion();
@@ -117,47 +125,41 @@ export function GameResultsScreen({
 
                 <div className="mt-4 mb-6 flex flex-col items-center gap-2">
                     <div className="text-text text-6xl font-black">{score}</div>
-                    <div
-                        className="flex items-center gap-2 rounded-2xl border-2 px-4 py-1.5"
-                        style={{
-                            borderColor: tierInfo.border,
-                            backgroundColor: tierInfo.bg,
-                        }}
-                    >
-                        <span className="text-base">{tierInfo.emoji}</span>
-                        <span className="text-sm font-black" style={{ color: tierInfo.color }}>
-                            {t(`tier.${tierInfo.id}`)}
-                        </span>
-                        {tierInfo.nextThreshold && (
-                            <span className="text-muted text-xs font-bold">
-                                {t("toNext", { remaining: tierInfo.nextThreshold - score })}
+                    {tierInfo && (
+                        <div
+                            className="flex items-center gap-2 rounded-2xl border-2 px-4 py-1.5"
+                            style={{
+                                borderColor: tierInfo.border,
+                                backgroundColor: tierInfo.bg,
+                            }}
+                        >
+                            <span className="text-base">{tierInfo.emoji}</span>
+                            <span className="text-sm font-black" style={{ color: tierInfo.color }}>
+                                {t(`tier.${tierInfo.id}`)}
                             </span>
-                        )}
+                            {tierInfo.nextThreshold && (
+                                <span className="text-muted text-xs font-bold">
+                                    {t("toNext", { remaining: tierInfo.nextThreshold - score })}
+                                </span>
+                            )}
+                        </div>
+                    )}
+                </div>
+
+                {stats && (
+                    <div className="mb-8 w-full">
+                        <StatGrid stats={stats} />
                     </div>
-                </div>
+                )}
 
-                <div className="mb-8 w-full">
-                    <StatGrid stats={stats} />
-                </div>
-
-                <div className="mb-8 flex w-full gap-3">
-                    <Button
-                        variant="secondary"
-                        color={primaryColor}
-                        onClick={onPlayAgain}
-                        className="flex-1 py-4"
-                    >
-                        {t("playAgain")}
-                    </Button>
-                    <Button
-                        variant="primary"
-                        color={primaryColor}
-                        onClick={onCollectXP}
-                        className="flex-1 py-4"
-                    >
-                        {t("xpEarned", { xp: calculatedXP })}
-                    </Button>
-                </div>
+                <GameResultsActions
+                    onPlayAgain={onPlayAgain}
+                    primaryColor={primaryColor}
+                    xpEarned={calculatedXP}
+                    onCollectXP={onCollectXP}
+                    secondaryAction={secondaryAction}
+                    tertiaryAction={tertiaryAction}
+                />
 
                 <Leaderboard
                     gameMode={gameMode}

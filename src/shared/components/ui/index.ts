@@ -4,6 +4,7 @@ export { default as Button } from "./Button";
 export { default as Input } from "./Input";
 export { default as Textarea } from "./Textarea";
 export { default as ConfirmModal } from "./ConfirmModal";
+export { DIALOG_BACKDROP_CLASSNAME } from "./DialogChrome";
 export { default as Select } from "./Select";
 export { default as StatCard } from "./StatCard";
 export { default as UserAvatar } from "./UserAvatar";

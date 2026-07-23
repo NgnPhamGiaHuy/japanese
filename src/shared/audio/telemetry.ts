@@ -42,7 +42,7 @@ export type AudioEvent =
     | { type: "failure"; reason: string };
 
 /** A sink receives every event. It must not throw; the bus guards anyway. */
-export type AudioEventSink = (event: AudioEvent) => void;
+type AudioEventSink = (event: AudioEvent) => void;
 
 const subscribers = new Set<AudioEventSink>();
 let counters: Record<string, number> = {};

@@ -105,7 +105,6 @@ export function useShareModal({ lesson, onShareLink, onUpdateRoles }: UseShareMo
     const isPublicMode = privacyMode === "public";
 
     // ── UI state ──────────────────────────────────────────────────────
-    const [openPrivacyMenu, setOpenPrivacyMenu] = useState(false);
     const { copied, copy: copyLink } = useCopyToClipboard();
     const [saving, setSaving] = useState(false);
 
@@ -238,8 +237,6 @@ export function useShareModal({ lesson, onShareLink, onUpdateRoles }: UseShareMo
         privacyMode,
         publicRole,
         roles,
-        openPrivacyMenu,
-        setOpenPrivacyMenu,
         copied,
         saving,
         registerInvite,

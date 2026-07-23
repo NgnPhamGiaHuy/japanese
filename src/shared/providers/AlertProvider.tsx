@@ -10,7 +10,7 @@ import { Alert, AlertType } from "@/shared/components/ui";
 import type { AlertAction } from "@/shared/components/ui";
 
 /** Optional extras for an alert (inline action, custom duration). */
-export interface AlertOptions {
+interface AlertOptions {
     action?: AlertAction;
     durationMs?: number;
 }

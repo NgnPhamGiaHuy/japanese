@@ -29,9 +29,9 @@
  * - `asset` — served without the React shell (crawler files, file-convention
  *   image routes). Only the edge ever sees these.
  */
-export type PublicRouteKind = "page" | "asset";
+type PublicRouteKind = "page" | "asset";
 
-export interface PublicRoute {
+interface PublicRoute {
     /** Stable identifier, used in tests and in the ledger. */
     readonly id: string;
     readonly kind: PublicRouteKind;

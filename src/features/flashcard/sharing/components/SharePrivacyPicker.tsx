@@ -2,6 +2,7 @@
 
 import { useTranslations } from "next-intl";
 
+import { Menu } from "@base-ui/react/menu";
 import { Check, ChevronDown } from "lucide-react";
 
 import { ROLE_CONFIG } from "@/features/flashcard/utils/rbac";
@@ -21,27 +22,29 @@ import type { PrivacyMode } from "../hooks/useShareModal";
  */
 const PUBLIC_ROLES: readonly ("viewer" | "commenter")[] = ["viewer", "commenter"] as const;
 
+const PRIVACY_MODES: readonly PrivacyMode[] = ["restricted", "link", "public"] as const;
+
+function levelForMode(mode: PrivacyMode): VisibilityLevel {
+    if (mode === "public") return VisibilityLevel.PUBLIC;
+    if (mode === "link") return VisibilityLevel.SHARED;
+    return VisibilityLevel.PRIVATE;
+}
+
 interface SharePrivacyPickerProps {
     privacyMode: PrivacyMode;
     publicRole: "viewer" | "commenter";
     saving: boolean;
     themeHex: string;
-    openPrivacyMenu: boolean;
-    onTogglePrivacyMenu: () => void;
-    onClosePrivacyMenu: () => void;
     onChangePrivacyMode: (mode: PrivacyMode) => void;
     onChangePublicRole: (role: "viewer" | "commenter") => void;
 }
 
-/** "General access" section of ShareModal — privacy mode dropdown + default public role. */
+/** "General access" section of ShareModal — privacy mode menu + default public role. */
 const SharePrivacyPicker = ({
     privacyMode,
     publicRole,
     saving,
     themeHex,
-    openPrivacyMenu,
-    onTogglePrivacyMenu,
-    onClosePrivacyMenu,
     onChangePrivacyMode,
     onChangePublicRole,
 }: SharePrivacyPickerProps) => {
@@ -55,13 +58,7 @@ const SharePrivacyPicker = ({
         color: ROLE_CONFIG[role].color,
     }));
 
-    const currentLevel =
-        privacyMode === "public"
-            ? VisibilityLevel.PUBLIC
-            : privacyMode === "link"
-              ? VisibilityLevel.SHARED
-              : VisibilityLevel.PRIVATE;
-    const currentVisibility = VISIBILITY_MAPPINGS[currentLevel];
+    const currentVisibility = VISIBILITY_MAPPINGS[levelForMode(privacyMode)];
 
     return (
         <>
@@ -87,77 +84,86 @@ const SharePrivacyPicker = ({
 
                     <div className="relative flex-1">
                         {/* Privacy picker */}
-                        <Button
-                            variant="ghost"
-                            className="text-text flex w-fit items-center gap-2 !py-1 !pr-2 !text-lg !font-black hover:bg-gray-100"
-                            onClick={onTogglePrivacyMenu}
-                            disabled={saving}
-                        >
-                            {t(`visibility.${currentVisibility.level}.label`)}
-                            <ChevronDown
-                                size={20}
-                                className={`text-gray-400 transition-transform ${openPrivacyMenu ? "rotate-180" : ""}`}
-                            />
-                        </Button>
+                        <Menu.Root>
+                            <Menu.Trigger
+                                disabled={saving}
+                                render={
+                                    <Button
+                                        variant="ghost"
+                                        className="text-text group flex w-fit items-center gap-2 !py-1 !pr-2 !text-lg !font-black hover:bg-gray-100"
+                                    />
+                                }
+                            >
+                                {t(`visibility.${currentVisibility.level}.label`)}
+                                <ChevronDown
+                                    size={20}
+                                    className="text-gray-400 transition-transform group-data-[popup-open]:rotate-180"
+                                />
+                            </Menu.Trigger>
 
-                        {openPrivacyMenu && (
-                            <>
-                                <div className="fixed inset-0 z-40" onClick={onClosePrivacyMenu} />
-                                <div className="animate-in fade-in zoom-in-95 absolute top-10 left-0 z-50 w-72 overflow-hidden rounded-2xl border-2 border-gray-100 bg-white shadow-lg">
-                                    {(["restricted", "link", "public"] as const).map((mode) => {
-                                        const level =
-                                            mode === "public"
-                                                ? VisibilityLevel.PUBLIC
-                                                : mode === "link"
-                                                  ? VisibilityLevel.SHARED
-                                                  : VisibilityLevel.PRIVATE;
-                                        const v = VISIBILITY_MAPPINGS[level];
-                                        const Icon = v.icon;
-                                        const isSelected = privacyMode === mode;
+                            <Menu.Portal>
+                                <Menu.Positioner
+                                    side="bottom"
+                                    align="start"
+                                    sideOffset={4}
+                                    className="z-50"
+                                >
+                                    <Menu.Popup className="fade-in zoom-in-95 data-[ending-style]:fade-out data-[ending-style]:zoom-out-95 w-72 overflow-hidden rounded-2xl border-2 border-gray-100 bg-white shadow-lg transition-[opacity,transform] duration-150 outline-none data-[ending-style]:opacity-0 data-[starting-style]:opacity-0">
+                                        <Menu.RadioGroup
+                                            value={privacyMode}
+                                            onValueChange={(mode) =>
+                                                onChangePrivacyMode(mode as PrivacyMode)
+                                            }
+                                        >
+                                            {PRIVACY_MODES.map((mode) => {
+                                                const v = VISIBILITY_MAPPINGS[levelForMode(mode)];
+                                                const Icon = v.icon;
 
-                                        return (
-                                            <Button
-                                                key={mode}
-                                                variant="ghost"
-                                                className="flex w-full items-center !justify-start gap-3 !rounded-none border-b-2 border-gray-50 !p-4 !text-left shadow-none hover:bg-gray-50 hover:shadow-none"
-                                                onClick={() => {
-                                                    onChangePrivacyMode(mode);
-                                                    onClosePrivacyMenu();
-                                                }}
-                                            >
-                                                <Icon
-                                                    className="shrink-0"
-                                                    style={{
-                                                        color: resolveVisibilityColor(v, themeHex),
-                                                    }}
-                                                    size={20}
-                                                />
-                                                <div className="flex-1 text-left">
-                                                    <div className="text-text font-black">
-                                                        {t(`visibility.${v.level}.label`)}
-                                                    </div>
-                                                    <div className="text-xs font-bold text-gray-400">
-                                                        {t(`visibility.${v.level}.description`)}
-                                                    </div>
-                                                </div>
-                                                {isSelected && (
-                                                    <Check
-                                                        style={{
-                                                            color: resolveVisibilityColor(
-                                                                v,
-                                                                themeHex,
-                                                            ),
-                                                        }}
-                                                        size={20}
-                                                        className="shrink-0"
-                                                    />
-                                                )}
-                                            </Button>
-                                        );
-                                    })}
-                                </div>
-                            </>
-                        )}
+                                                return (
+                                                    <Menu.RadioItem
+                                                        key={mode}
+                                                        value={mode}
+                                                        className="flex w-full cursor-pointer items-center gap-3 border-b-2 border-gray-50 p-4 text-left outline-none select-none last:border-b-0 hover:bg-gray-50 data-[highlighted]:bg-gray-50"
+                                                    >
+                                                        <Icon
+                                                            className="shrink-0"
+                                                            style={{
+                                                                color: resolveVisibilityColor(
+                                                                    v,
+                                                                    themeHex,
+                                                                ),
+                                                            }}
+                                                            size={20}
+                                                        />
+                                                        <div className="flex-1 text-left">
+                                                            <div className="text-text font-black">
+                                                                {t(`visibility.${v.level}.label`)}
+                                                            </div>
+                                                            <div className="text-xs font-bold text-gray-400">
+                                                                {t(
+                                                                    `visibility.${v.level}.description`,
+                                                                )}
+                                                            </div>
+                                                        </div>
+                                                        <Menu.RadioItemIndicator className="shrink-0">
+                                                            <Check
+                                                                style={{
+                                                                    color: resolveVisibilityColor(
+                                                                        v,
+                                                                        themeHex,
+                                                                    ),
+                                                                }}
+                                                                size={20}
+                                                            />
+                                                        </Menu.RadioItemIndicator>
+                                                    </Menu.RadioItem>
+                                                );
+                                            })}
+                                        </Menu.RadioGroup>
+                                    </Menu.Popup>
+                                </Menu.Positioner>
+                            </Menu.Portal>
+                        </Menu.Root>
 
                         <p className="text-muted mt-1 text-sm font-bold">
                             {t(`visibility.${currentVisibility.level}.description`)}

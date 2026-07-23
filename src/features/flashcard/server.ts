@@ -27,11 +27,10 @@ export {
     getPublicSharedLessonPreview,
     listPublicSharedLessonUrls,
 } from "./services/shared-preview.service";
-export type { PublicSharedLessonPreview } from "./services/shared-preview.service";
 
 // ─── Isomorphic values, re-exported so server code has one import site ───────
 // These are plain data and carry no client dependency; they are also available
 // from the client barrel. Duplicating the export (not the declaration) is what
 // lets a Server Component avoid the client barrel entirely.
 export { DEFAULT_DECK_THEME_COLOR } from "./types";
-export type { FlashCard, Lesson } from "./types";
+export type { FlashCard } from "./types";

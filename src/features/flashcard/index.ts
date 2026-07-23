@@ -59,7 +59,6 @@ export { useFlashcardLoader } from "./loaders";
 
 // ─── Sharing ─────────────────────────────────────────────────────────────────
 export { buildShareId, duplicateLesson } from "./services";
-export { declineInviteAction } from "./actions/access.actions";
 export { logDeckCreated } from "./actions/activity-log.actions";
 
 // Called once by the composition root to register this feature's handlers on

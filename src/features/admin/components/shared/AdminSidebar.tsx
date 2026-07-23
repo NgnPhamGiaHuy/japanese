@@ -9,8 +9,7 @@ import { BarChart3, Database, FileText, LayoutDashboard, Menu, Users, X } from "
 import { m } from "motion/react";
 
 import { Link, usePathname } from "@/i18n/navigation";
-import { Button } from "@/shared/components/ui";
-import { DIALOG_BACKDROP_CLASSNAME } from "@/shared/components/ui/DialogChrome";
+import { Button, DIALOG_BACKDROP_CLASSNAME } from "@/shared/components/ui";
 
 const navItems = [
     { id: "dashboard", href: "/admin", icon: LayoutDashboard },

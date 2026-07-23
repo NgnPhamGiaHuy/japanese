@@ -22,8 +22,8 @@ const DEFAULT_FLAGS = {
     locale_switch_enabled: false,
 } as const;
 
-export type FlagKey = keyof typeof DEFAULT_FLAGS;
-export type Flags = { [K in FlagKey]: (typeof DEFAULT_FLAGS)[K] extends boolean ? boolean : never };
+type FlagKey = keyof typeof DEFAULT_FLAGS;
+type Flags = { [K in FlagKey]: (typeof DEFAULT_FLAGS)[K] extends boolean ? boolean : never };
 
 // Remote Config server templates don't push updates — the SDK only sees a
 // flip once you call load() again. A short TTL keeps "without a redeploy"

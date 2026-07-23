@@ -10,7 +10,7 @@ import Button from "./Button";
 import { DIALOG_BACKDROP_CLASSNAME, DialogCloseButton } from "./DialogChrome";
 
 /** Supported visual variants for the confirmation modal. */
-export type ConfirmVariant = "danger" | "warning" | "info";
+type ConfirmVariant = "danger" | "warning" | "info";
 
 /** Attributes for rendering a ConfirmModal. */
 interface ConfirmModalProps {

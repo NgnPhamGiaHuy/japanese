@@ -34,7 +34,7 @@ const SPEECH_RATE = 0.82;
 const SILENT_AUDIO_SRC =
     "data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEAESsAACJWAAACABAAZGF0YQQAAAAAAA==";
 
-export interface VoicePlaybackOptions {
+interface VoicePlaybackOptions {
     /** 0–1. Applied to both the media element and the speech utterance. */
     volume?: number;
     /** Telemetry origin tag. */

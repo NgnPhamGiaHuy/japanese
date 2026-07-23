@@ -99,5 +99,3 @@ export const cardContentSchema = z.object({
         .optional(),
     cardType: z.enum(["standard", "cloze"]).optional(),
 });
-
-export type CardContent = z.infer<typeof cardContentSchema>;

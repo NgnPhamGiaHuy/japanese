@@ -1,6 +1,6 @@
 import type { ThemeColor } from "@/shared/components/ui/Button";
 
-export type SemanticStatus = "danger" | "warning" | "success" | "info";
+type SemanticStatus = "danger" | "warning" | "success" | "info";
 
 /**
  * One canonical hue per semantic role, sourced from the app's actual design

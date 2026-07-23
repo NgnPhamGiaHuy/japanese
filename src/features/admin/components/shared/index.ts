@@ -1,8 +1,6 @@
-export { default as AdminGuard } from "./AdminGuard";
 export { default as AdminErrorState } from "./AdminErrorState";
 export { default as AdminPageHeader } from "./AdminPageHeader";
 export { default as AdminPageLayout } from "./AdminPageLayout";
-export { default as AdminSidebar } from "./AdminSidebar";
 export { default as AdminStatCard } from "./AdminStatCard";
 export { default as AdminSearchInput } from "./AdminSearchInput";
 export { default as AdminBulkActionsBar } from "./AdminBulkActionsBar";

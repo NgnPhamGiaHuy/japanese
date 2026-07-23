@@ -7,8 +7,7 @@ import { Check, Copy, ShieldAlert, X } from "lucide-react";
 
 import { DEFAULT_DECK_THEME_COLOR } from "@/features/flashcard/types";
 import { hexToThemeColor } from "@/features/flashcard/utils";
-import { Button } from "@/shared/components/ui";
-import { DIALOG_BACKDROP_CLASSNAME } from "@/shared/components/ui/DialogChrome";
+import { Button, DIALOG_BACKDROP_CLASSNAME } from "@/shared/components/ui";
 import ShareCollaboratorsPanel from "./ShareCollaboratorsPanel";
 import SharePrivacyPicker from "./SharePrivacyPicker";
 import { useShareModal } from "../hooks/useShareModal";
@@ -63,8 +62,6 @@ const ShareModal = ({ lesson, onShareLink, onUpdateRoles, onClose }: ShareModalP
         privacyMode,
         publicRole,
         roles,
-        openPrivacyMenu,
-        setOpenPrivacyMenu,
         copied,
         saving,
         registerInvite,
@@ -87,13 +84,13 @@ const ShareModal = ({ lesson, onShareLink, onUpdateRoles, onClose }: ShareModalP
             open
             disablePointerDismissal
             onOpenChange={(open) => {
-                if (open) return;
-                // Escape closes the privacy dropdown first if it's open, otherwise the
-                // whole modal — this component has no isOpen prop, it's only ever
-                // mounted while it should be open (`open` above stays a constant `true`;
-                // the parent unmounts this component entirely to actually close it).
-                if (openPrivacyMenu) setOpenPrivacyMenu(false);
-                else onClose();
+                // This component has no isOpen prop, it's only ever mounted while it
+                // should be open (`open` above stays a constant `true`) — the parent
+                // unmounts this component entirely to actually close it. The privacy
+                // picker's own Menu.Root handles its Escape/outside-click independently
+                // (nested Base UI popups don't bubble dismissal to their ancestors), so
+                // this no longer needs to special-case it.
+                if (!open) onClose();
             }}
         >
             <Dialog.Portal>
@@ -145,9 +142,6 @@ const ShareModal = ({ lesson, onShareLink, onUpdateRoles, onClose }: ShareModalP
                                         publicRole={publicRole}
                                         saving={saving}
                                         themeHex={themeHex}
-                                        openPrivacyMenu={openPrivacyMenu}
-                                        onTogglePrivacyMenu={() => setOpenPrivacyMenu((v) => !v)}
-                                        onClosePrivacyMenu={() => setOpenPrivacyMenu(false)}
                                         onChangePrivacyMode={(mode) =>
                                             void handleSavePrivacyMode(mode)
                                         }

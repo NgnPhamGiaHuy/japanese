@@ -35,7 +35,7 @@ const TAIL_OVERLAP_MS = 150;
 /** Beyond this, queued cues are stale — the learner has moved on. */
 const DEFAULT_QUEUE_DEPTH = 2;
 
-export type SequenceStep =
+type SequenceStep =
     /** Fire a UI cue. Never queues, never blocks. */
     | { sfx: SfxCue }
     /** Wait out the named cue's envelope (minus a small overlap) before continuing. */
@@ -45,7 +45,7 @@ export type SequenceStep =
     | { speak: { text: string; options: SpeakOptions } }
     | { call: () => void };
 
-export type SequencePolicy =
+type SequencePolicy =
     /** Cancel whatever is running on this key and start immediately. */
     | "replace"
     /** Run after the current sequence finishes, up to `queueDepth` deep. */
@@ -53,12 +53,12 @@ export type SequencePolicy =
     /** Do nothing if this key is already busy. */
     | "ignore-if-busy";
 
-export interface SequenceOptions {
+interface SequenceOptions {
     policy?: SequencePolicy;
     queueDepth?: number;
 }
 
-export type SequenceStatus = "completed" | "cancelled" | "ignored";
+type SequenceStatus = "completed" | "cancelled" | "ignored";
 
 interface RunningSequence {
     cancelled: boolean;

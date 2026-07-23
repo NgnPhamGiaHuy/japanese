@@ -16,8 +16,7 @@
 export { NotificationsProvider, useNotifications } from "./context/NotificationsContext";
 
 // Inbox rendering.
-export { NotificationRow, NotificationsInbox, NotificationsVirtualList } from "./components";
-export { flattenNotificationGroups } from "./domain/format";
+export { NotificationsInbox } from "./components";
 
 // Act-side seam. Producing features register their own handlers here at the
 // composition root; the inbox renders whatever is registered and never imports
