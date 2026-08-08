@@ -1,5 +1,30 @@
 # Architecture Assessment — Index
 
+> ## ⚠ HISTORICAL — sealed snapshot, do not read as current state
+>
+> **Assessed at `a0bbbc4` (2026-07-19). HEAD is now 82+ commits later.** The 63-task
+> modernization program this assessment produced has since **executed**, followed by a
+> structural cleanup program that moved or deleted many of the files cited here.
+>
+> **Roughly half the W / TD / OP findings are now closed.** Verified closed: the
+> `flashcard ↔ notifications` cycle (W-1), the `lib`→`features` type inversion (W-2), the
+> barrel/boundary gap (W-3 — all 9 features now have barrels, `import/no-restricted-paths`
+> is at `error`), kana-survival's split placement (W-5), the dead `Drawer` and Storybook
+> (W-21), the admin Quick Actions / Settings stubs (W-10), the notification type-vocabulary
+> drift (W-7), the unbounded public-lesson listener (R-2), and the missing `.env.example`.
+> **Still true and still unaddressed:** W-6 (bus factor), W-11 (`analytics_daily` has no
+> writer), W-13, W-14, W-15 (edge gate is presence-only), W-19 (uncontracted external
+> endpoints), R-3 / R-18 (world-readable leaderboard PII and card images), TD-3, TD-8, TD-14.
+>
+> **Do not navigate by the file paths in this corpus** — a large fraction point at moved or
+> deleted files. For current state read **[`project-memory/00-INDEX.md`](../project-memory/00-INDEX.md)**;
+> for live migration state read **[`docs/migrations-ledger.md`](../docs/migrations-ledger.md)**.
+>
+> Kept unedited because the ADR-101…120 series is only legible against the findings that
+> produced it. Its most durable files are **02** (strengths — still the best onboarding
+> read), **04** (root-cause chains, true even where symptoms are fixed), and **10 §5**
+> (14 adjudicated defects in this corpus's own numbers — read before quoting any figure).
+
 Assessment of the repository at HEAD `a0bbbc4` (branch `main`, 2026-07-19), built on the `project-discovery/` corpus with every load-bearing claim re-verified against the repository (the repository always wins on conflict; ten discovery-level count discrepancies were corrected here). The assessment evaluates and explains only — no libraries, implementations, refactors, or tasks are proposed anywhere in it. Every finding carries Observation / Evidence / Interpretation / Confidence and a stable ID.
 
 **Finding families:** S (strengths) · W (weaknesses) · RC (root causes) · CX (complexity sources) · PC (pattern consistency) · TD (technical debt) · R (risks) · OP (opportunities) — 144 findings total, cross-mapped in file 11 and classified for decision-readiness in file 10.

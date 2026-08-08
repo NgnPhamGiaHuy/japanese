@@ -1,5 +1,33 @@
 # Execution Readiness — Index
 
+> ## ⚠ HISTORICAL — this gate has been passed and spent
+>
+> **The program it gated has since executed** (61 of 63 tasks). Sprint 0 ran and closed;
+> see [`08-Sprint-0-Completion.md`](08-Sprint-0-Completion.md).
+>
+> **Condition status (2026-08-04):**
+>
+> | | Condition | Status |
+> |---|---|---|
+> | **C-1** | Run Sprint 0 | ✅ Discharged |
+> | **C-2** | Restate Sprint 1's acceptance evidence | ✅ Closed |
+> | **C-3** | Hold T-118b out of Wave 1 | ✅ Closed — still BLOCKED (`LDG-09`) |
+> | **C-4** | Correct the "T-117d is droppable float" claim | ✅ **Closed 2026-08-04** |
+> | **C-5** | Flip CI lint to blocking | ✅ Closed (`4fd206c`) |
+> | **C-6** | Feature-flag posture + DR position | ⚠ Rule recorded, implementation deferred |
+> | **C-7** | Adjudicate the ADR-106 / ADR-115 permission-vocabulary collision | ❌ **STILL OPEN** |
+>
+> ⚠ **Two different `C-1…C-7` sets exist in this directory.** The table above is
+> [`07-Go-NoGo-Decision.md`](07-Go-NoGo-Decision.md)'s. [`04-Sprint-1-Approval.md`](04-Sprint-1-Approval.md)
+> uses the same labels for entirely different conditions, and only 07's set was ever tracked
+> to closure. When someone says "C-3 is closed," ask which set.
+>
+> **The one thing here that is still live: C-7.** Also still unclosed —
+> [`05-Risk-Register.md`](05-Risk-Register.md) rated feature-flags, disaster-recovery and
+> monitoring **ABSENT or THIN**, and nothing since has closed them.
+>
+> For current state read **[`project-memory/00-INDEX.md`](../project-memory/00-INDEX.md)**.
+
 Readiness review of the implementation plan. **Verdict: GO WITH CONDITIONS** — Sprint 0 (a working session) then Sprint 1 are approved; seven conditions attach, three of them due before later waves rather than before Sprint 1.
 
 This is a verification phase, not a planning phase. No architecture, tasks, or plans were created here. The only new artifacts are findings, statuses, and the verdict.
@@ -23,7 +51,9 @@ Four independent reviewers were briefed **adversarially**: every document under 
 
 ## The two findings that changed the verdict
 
-1. **CI lint does not block.** It runs `continue-on-error: true`, and no task among the 63 flips it — yet from Sprint 4 the program converts import-boundary rules to `error` and treats that as enforcement for its first principle. Wave 1 would have shipped the *appearance* of enforcement. No prior phase caught this; the corpus cites the non-blocking lint approvingly.
+1. ~~**CI lint does not block.** It runs `continue-on-error: true`, and no task among the 63 flips it~~ — yet from Sprint 4 the program converts import-boundary rules to `error` and treats that as enforcement for its first principle. Wave 1 would have shipped the *appearance* of enforcement. No prior phase caught this; the corpus cites the non-blocking lint approvingly.
+
+   > **RESOLVED 2026-08-04.** This finding did its job: Sprint 0 flipped CI lint to blocking (`4fd206c`, removing `continue-on-error`) under Go/No-Go condition **C-5**. `.github/workflows/ci.yml:41-53` now runs lint as a hard gate, and `import/no-restricted-paths` is at `error` in `src/eslint.config.mjs`. The enforcement is real, not apparent. This correction also applies to `02-Open-Questions.md` §290, `04-Sprint-1-Approval.md` F-4, and `06-Implementation-Contract.md` PROH-20 / gap G-1, all of which rest on the same premise.
 2. **Sprint 1's acceptance evidence does not exist.** Three documents name an E2E route-matrix pass that only materializes in Sprint 11 — itself downstream of Sprint 1's own work.
 
 ## What is approved

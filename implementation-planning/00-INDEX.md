@@ -1,5 +1,31 @@
 # Implementation Planning — Index
 
+> ## ⚠ HISTORICAL — this plan has been EXECUTED
+>
+> **Status as of 2026-08-04: 61 of 63 tasks complete.** Only two remain, both deliberately:
+> **T-118b** (BLOCKED — unifying `APP_ID` is a tenant repartition; ledger `LDG-09`) and
+> **T-118d** (OPEN — hosting is a decision, not a task; ledger `LDG-08`).
+>
+> **The 29-sprint / 58-week schedule never ran as written.** The program executed in
+> **5 days / 82 commits** (`a0bbbc4` → `f4dd766`). Every sprint boundary, capacity figure,
+> merge-lock window and parallel-opportunity note in **02**, **03**, **04** describes a
+> process that did not occur. The 16 gated tasks discharged two different ways: **5 executed
+> their delete default** (T-110b, T-119a/b/c/e) and **11 landed as recorded dispositions with
+> code untouched** (T-108b/c/d, T-109b/c/d, T-114d, T-115c, T-116b/c, T-119d).
+>
+> ⚠ **[`09-Progress-Tracking.md`](09-Progress-Tracking.md) still reports `Done: 0` for all
+> 63 tasks. It is wrong** — it was pre-filled and never updated. See its own banner.
+>
+> **Still-binding reference material, worth keeping (not schedules):**
+> - **[`04-PR-Plan.md`](04-PR-Plan.md) §1.2** — 7 PR-sizing rules. The most reusable block in the corpus.
+> - **[`08-Implementation-Readiness.md`](08-Implementation-Readiness.md) §7** — the 17-point standing definition of done.
+> - **[`10-Release-Plan.md`](10-Release-Plan.md) §3.3** — what does NOT revert cleanly. Item (6) is the reasoning behind T-118b's standing BLOCK.
+> - **[`10-Release-Plan.md`](10-Release-Plan.md) §5.2** — two-package deploy topology ("the tolerant side deploys first").
+> - **[`02-Execution-Waves.md`](02-Execution-Waves.md) §576** — the six areas the program deliberately did *not* address.
+>
+> For current state read **[`project-memory/00-INDEX.md`](../project-memory/00-INDEX.md)**;
+> for live state read **[`docs/migrations-ledger.md`](../docs/migrations-ledger.md)**.
+
 Execution-ready plan for the "Kana & Nihongo Master" modernization program: **63 tasks · 6 waves · 29 sprints · 93 PRs · 10 release units**, every task traceable to an Architecture Decision Record.
 
 ## Provenance and honest labelling

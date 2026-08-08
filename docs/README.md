@@ -41,4 +41,14 @@ ledger row saying which stage the code is actually in.
 ## Runbooks
 
 - [Notification testing & migration runbook](testing-notifications.md) — the two test tiers
-  (unit vs. emulator), the pending index/rules deploy, and the one-time data backfill.
+  (unit vs. emulator), the index/rules deploy state (indexes deployed per `LDG-19`; rules
+  still unverified), and the one-time data backfill.
+
+## Current-state memory (`../project-memory/`)
+
+Start here before changing code. The planning corpora at the repo root
+(`architecture-assessment/`, `project-discovery/`, `architecture-decision/`,
+`implementation-planning/`, `execution-readiness/`) are **historical records of a
+completed program** — reliable on rationale, unreliable on completion state and file
+paths. [`project-memory/00-INDEX.md`](../project-memory/00-INDEX.md) reconciles them
+against the code as it actually is.

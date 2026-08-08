@@ -139,7 +139,7 @@ Float is the amount a task can slip without moving the program's end date. **At 
 |---|---|---:|---|---|
 | **All of Wave 6** | T-105a/b, T-104a/b, T-110a/b, T-111a, T-112a | **25.0** | **Largest in the plan** | Its only HARD predecessors are T-101a and T-101c, both complete by day 11.5. Its placement in Wave 6 is a **merge-conflict policy**, not a dependency. Nothing in the plan waits on any of it. |
 | **ADR-119 dead-surface branch** | T-119a–e | 15.0 | High (gate-bound only) | Five mutually independent tasks. Only T-119b has a predecessor (T-103a, done by day 11.5). Each ships the moment its own question answers, in any order. |
-| **Off-path coverage** | T-117d, T-117e | 13.0 | High | Zero downstream dependents anywhere in the plan. The rules suite and the four zero-coverage features block nothing. |
+| **Off-path coverage** | T-117d, T-117e | 13.0 | High | ~~Zero downstream dependents anywhere in the plan. The rules suite and the four zero-coverage features block nothing.~~ **Correction (Go/No-Go C-4, 2026-08-04): T-117d is NOT dependency-free — it is a named prerequisite/oracle for seven other tasks (see `05-Dependency-Map.md` §D.3). Only T-117e (the four zero-coverage features) genuinely blocks nothing.** |
 | **ADR-113 + ADR-114 branch** | T-113a/b, T-114a/b/c/d | 19.5 | Moderate | No spine task depends on any of it. Bound only by the SOFT coverage edge and by Q-9 for T-114d. Co-critical with the auth chain under a 2-dev split. |
 | **ADR-115 branch** | T-115a, T-115b, T-115c | 12.5 | **Low — deceptively** | T-115a needs T-117b (HARD) and carries the **CS-2 `ShareModal.tsx` split** rider, which is what makes the 400-line hard-error rule adoptable. **T-115b is a HARD predecessor of T-108a**, so despite looking like a leaf it is one step off the spine — deferring it stalls Wave 5, even with the report-only staging. |
 | **Config + ledger branch** | T-118a/b/c, T-120b/c | 11.0 | High | Day-1 startable, nothing on the spine depends on them. |
@@ -180,7 +180,7 @@ Q-1 (production project identity) blocks no task's *execution* and verification-
 
 ### Risk 4 — Wave 2 is 34 days with no user-visible deliverable
 
-At team size 1 that is roughly 3.5 sprints of test-writing and error-plumbing before anything ships that a user or stakeholder can see. It is the most likely wave to be truncated under delivery pressure — and truncating it invalidates the premise on which Waves 3, 4, and 5 are sequenced. Three of its five ADR-117 tasks are directly on the critical path (T-117a/b/c, 12.5 d), so partial truncation does not even buy the schedule much: cutting T-117d/e saves 13 d of *off-path* work while leaving the path unchanged.
+At team size 1 that is roughly 3.5 sprints of test-writing and error-plumbing before anything ships that a user or stakeholder can see. It is the most likely wave to be truncated under delivery pressure — and truncating it invalidates the premise on which Waves 3, 4, and 5 are sequenced. Three of its five ADR-117 tasks are directly on the critical path (T-117a/b/c, 12.5 d), so partial truncation does not even buy the schedule much: cutting T-117d/e saves 13 d of *off-path* work while leaving the path unchanged. **Correction (Go/No-Go C-4, 2026-08-04): "cutting" is not actually safe for T-117d — dropping it removes the rules-side verification oracle for seven other tasks (T-114a, T-115a, T-115c, T-106b, T-108b, T-119c, T-109d). The critical-path-length claim above still holds; the implied safety of cutting T-117d does not. See `05-Dependency-Map.md` §D.3.**
 
 ### Risk 5 — T-117c is the hardest test target in the plan, and it is on the path
 
@@ -221,7 +221,7 @@ The path is 73 d and the program is 197 d, so **the path is not the binding cons
 | Wave | Give dev 2 | Days | Why this branch |
 |---|---|---:|---|
 | 1 | **T-118a + T-118b + T-118c**, then **T-120b + T-120c** | 13.0 | Configuration and ledger share no files with the barrel/seam spine. T-118a is also the wave's only live-defect fix, so it makes the first increment valuable. |
-| 2 | **T-117d + T-117e**, then **T-116b + T-116c** | 15.0 | The rules suite and the four zero-coverage features have **zero downstream dependents anywhere** — the safest 13 d to hand off in the plan. |
+| 2 | **T-117d + T-117e**, then **T-116b + T-116c** | 15.0 | ~~The rules suite and the four zero-coverage features have **zero downstream dependents anywhere** — the safest 13 d to hand off in the plan.~~ **Correction (Go/No-Go C-4, 2026-08-04): T-117d has seven downstream dependents (see `05-Dependency-Map.md` §D.3). Handing it to dev 2 is still fine — but it is not "safest to drop," and it must land before Waves 3-5's T-114a/T-115a/T-115c/T-106b/T-108b/T-119c/T-109d.** |
 | 3 | **T-113a + T-113b + T-114a/b/c** | 16.5 | The listener and guardrail branches share no files with the auth chain. Note this branch is exactly co-critical with dev 1's — it has no float. |
 | 4 | **T-115a + T-115b**, then **T-109b/c/d + T-109e** | 20.5 | Predicates and CI checks live in different layers from the action-client transport. **Sequence T-115b early in the branch** — Wave 5's T-108a depends on it. |
 | 5 | **The entire ADR-119 branch (T-119a–e)** | 15.0 | Five mutually independent gated tasks; each ships when its own question answers. Cleanest handoff in the plan. |

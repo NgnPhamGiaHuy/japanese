@@ -200,7 +200,7 @@ Marked in **two** places so it cannot be picked up by accident: `01-Validated-Ba
 |---|---|---|---|
 | **S0-4 / S0-5** — name owners; register Q-4 | ✅ **Closed** | — (T-120b unblocked) | Closed at execution |
 | C-2 (already applied) | ✅ Closed by §3 | — | — |
-| C-4 — correct the "T-117d is droppable float" claim | Open | Sprint 5 planning | Team; due before Wave 2 exit |
+| C-4 — correct the "T-117d is droppable float" claim | ✅ **Closed 2026-08-04** | — | Corrected in `05-Dependency-Map.md` §D.2/§D.3 and `06-Critical-Path.md` (3 sites) — T-117d removed from every droppable/off-path/zero-dependent characterization, with its seven dependents cited at each site |
 | C-6 — implement IM-1…IM-5 | Rule recorded | Wave 3 | Attaches to T-107a, T-108c/d |
 | C-7 — ADR-106/115 permission-vocabulary collision | Open | Wave 4 | Architecture decision |
 | PF-1/2/3/7/8 | Open by design | Later waves | Dispatch in parallel with Sprint 1 |

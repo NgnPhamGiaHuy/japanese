@@ -1,5 +1,33 @@
 # Project Discovery — Index
 
+> ## ⚠ HISTORICAL — sealed inventory, do not navigate by its paths
+>
+> **Discovered at `a0bbbc4` (2026-07-18). HEAD is now 82+ commits later.** These are
+> point-in-time **inventories**, and inventories decay fastest. A structural cleanup program
+> has since moved most of `features/flashcard/components/`, `admin/components/shared/`,
+> `shared/components/ui/`, and every `app/**/_components/` directory.
+>
+> **Measured path accuracy, by file (sampled 2026-08-04):**
+>
+> | Doc | Accuracy | Read it for |
+> |---|---|---|
+> | 06-Service-Inventory | ~100% | **Still reliable.** Firestore path map, execution-context legend, the two server-action auth families |
+> | 09-Data-Flow | ~100% | **Still reliable** — but its "centralized listener = notifications only" claim is now false (`UserProgressContext` and `LessonsContext` do it too) |
+> | 02-Architecture-Discovery | high | Auth chain, both RBAC systems, env-var table — rationale intact, counts stale |
+> | 07-Provider-Inventory | high | Now **5** contexts, not 3 |
+> | 08-Dependency-Graph | ~75% | The two cycles + the layering invariant; every edge *count* is stale |
+> | 05-Hook-Inventory | ~73% | Per-hook semantics reusable; path column rotted |
+> | 04-Component-Inventory | ~56% | **Flashcard section is 0/24 — every path moved** |
+> | 11-Code-Metrics | ~45% | The *commands* are re-runnable; the numbers are a 2026-07-18 baseline |
+> | 14-Evidence-Appendix | 0% | Faithful transcript of `a0bbbc4`; archival only |
+>
+> **Current counts (2026-08-04):** 9 features (unchanged) · 493 files under `features/` ·
+> 12 `onSnapshot` call sites in 8 files, all in `services/` · 0 Storybook files.
+>
+> For current state read **[`project-memory/00-INDEX.md`](../project-memory/00-INDEX.md)**.
+> Docs **12** and **13** (known-unknowns / questions) largely still stand — those questions
+> are out-of-repo by nature — except U-8, U-9, U-23, Q-13 and Q-17, all answered by deletion.
+
 Evidence-based Discovery Phase for the repository at HEAD `a0bbbc4` (branch `main`). Every document observes and cites; none evaluates or recommends. Claims are grounded in file:line references verified at time of writing; "Observed" and "Inferred" are separated throughout, and uncertainty is marked explicitly. The prior-analysis artifacts formerly at the repo root were not used as evidence (they were absent from disk at discovery time); `docs/` (ADRs, testing notes) was cited only where code comments reference it.
 
 | # | Document | Contents |

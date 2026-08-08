@@ -1,5 +1,37 @@
 # Architecture Decision — Index
 
+> ## ✅ STILL IN FORCE — this is the authoritative decision record
+>
+> Unlike its sibling corpora (`architecture-assessment/`, `project-discovery/`,
+> `implementation-planning/`, `execution-readiness/`), which are sealed historical
+> snapshots, **all 20 ADRs (ADR-101…ADR-120) remain Accepted. None is superseded**
+> (re-verified 2026-08-04). Together with `docs/adr/001-003` — also all still in force —
+> this is the standing answer to *"why is it built this way?"*.
+>
+> **Verified holding in code (2026-08-04):** ADR-101 (9/9 feature barrels; **0** external
+> deep-imports into `flashcard/types`; `import/no-restricted-paths` at `error`) ·
+> ADR-102 (`features/notifications/` imports **0** other features) · ADR-103 (`lib/` reaches
+> into features only from `lib/providers.tsx`) · ADR-113 (**all 12** `onSnapshot` call sites
+> live in `services/`) · ADR-107 (httpOnly server-verified session) · ADR-120 (the ledger is
+> live and maintained).
+>
+> **Two things to know before quoting this file:**
+> 1. **ADR-101 carries Amendment 1** (a feature has *two* entry points — `@/features/<f>` and
+>    `@/features/<f>/server` — plus the hard constraint that T-102a/b must land before T-101b).
+>    Both `features/flashcard/server.ts` and `features/notifications/server.ts` exist. The
+>    master-table row is marked, but no `execution-readiness/` document predates it.
+> 2. **`03-Architecture-Decisions.md` is now 579 lines, not the 555 the readiness reviews
+>    cite.** Amendment 1 shifted everything after it by ~24 lines, so their line citations
+>    into this file are off by that much.
+>
+> **One decision is still unadjudicated:** the **ADR-106 / ADR-115 permission-vocabulary
+> collision** (Go/No-Go **C-7**) — neither ADR names the other, and no criterion says which
+> vocabulary a deck-sharing server action declares.
+>
+> Gate/answer status for the open questions in `07-Open-Questions.md` is tracked live in
+> **[`docs/migrations-ledger.md`](../docs/migrations-ledger.md)**, which is more current than
+> this corpus.
+
 The **decision phase** for the "Kana & Nihongo Master" codebase: one coherent architectural direction consolidated from the two preceding corpora. Fixes **12 principles**, **20 Architecture Decision Records (ADR-101–120)**, and **14 coding standards**. Every decision traces to assessment findings, which trace to discovery citations, which trace to the repository.
 
 **Method note.** This phase consolidated existing documentation and did not rescan the repository; where the corpus was silent, an open question was recorded rather than an answer invented. Statuses are **Accepted** (decidable now) or **Accepted-conditional** (default stands, gated on a named question). Priorities are P1/P2/P3.

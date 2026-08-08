@@ -98,3 +98,27 @@ bespoke `onSnapshot` hooks are the realtime layer; nothing wraps or replaces the
   `useMutation` around the composite function, same as today.
 - The realtime idiom is unchanged and remains the app's only source of truth for live state —
   this ADR adds a narrow option alongside it, not a replacement for any part of it.
+
+---
+
+## Addendum — pointer corrections (2026-08-04)
+
+**The decision above is unchanged and still in force.** This addendum corrects only *where the
+code lives*, so a reader is not sent to paths that no longer exist. Per `docs/README.md`, an ADR
+records a decision at the moment it was made and is never rewritten; this is an appended
+correction, not an edit.
+
+| Stated above | Where it actually is now |
+| --- | --- |
+| Reference implementation: `app/(main)/flashcard/[id]/edit/page.tsx` | The bridge hooks were extracted into `src/features/flashcard/hooks/useEditableLesson.ts` (`useDocumentQuery` / `useCollectionQuery`, both `enabled`-gated exactly as specified). The route file is now `src/app/[locale]/(main)/flashcard/[id]/edit/page.tsx` and contains no query code. |
+| `game.service` (in the realtime-hooks list) | Split into `src/features/game/services/leaderboard.service.ts` and `stats.service.ts`. |
+| `lesson.service`'s listeners | Moved to `src/features/flashcard/services/lesson-subscriptions.ts`. |
+| `notification.service`'s listeners | Moved to `src/features/notifications/services/notification-subscribe.ts`. |
+| Dead-code candidate `comment.service.ts`'s `getComments()` | Removed. Zero references repo-wide; only `subscribeToComments` remains. |
+
+**Verified still true (2026-08-04):** the bridge is installed and used
+(`@tanstack-query-firebase/react` in `src/package.json`); no binding library (`reactfire` /
+`react-firebase-hooks`) is present; there is still exactly one `QueryClientProvider`
+(`src/lib/providers.tsx`) with `staleTime: 30_000`; `useFlashcardLoader.ts` and the admin
+dashboard hooks remain on plain `useQuery`. Every realtime `onSnapshot` call site now lives in a
+`services/` file — 12 call sites across 8 files — which ADR-113 later made a hard rule.

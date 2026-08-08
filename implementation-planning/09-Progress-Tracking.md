@@ -1,5 +1,27 @@
 # 09 — Progress Tracking
 
+> ## 🛑 SUPERSEDED — the status tables in this file are WRONG
+>
+> **Every task row below is blank and §3's roll-up reads `Done: 0` for all six waves.
+> That is not the state of the repository.** The tables were pre-filled to be "usable on
+> day one" and were never updated during execution.
+>
+> **Actual status (verified 2026-08-04): 61 of 63 tasks complete.** 61 task IDs appear in
+> commit messages (`git log --oneline | grep -oE "T-[0-9]{3}[a-e]?" | sort -u`). The only
+> two that are not are **T-118b** (BLOCKED — ledger `LDG-09`) and **T-118d** (OPEN — ledger
+> `LDG-08`), both correctly so.
+>
+> **Do not use this file to decide what to work on.** It would have you re-plan 63 finished
+> tasks. The tables are left in place rather than retro-filled because the ledger already
+> carries the durable state and back-writing 63 rows from memory is exactly the failure
+> ADR-120 exists to prevent.
+>
+> **Read instead:** [`docs/migrations-ledger.md`](../docs/migrations-ledger.md) (live state)
+> and [`project-memory/00-INDEX.md`](../project-memory/00-INDEX.md) (current state).
+>
+> What *is* still valuable here: **§2.3's ledger-row model** and **§5's open-question
+> register**, both of which the ledger now implements.
+
 **Phase 11 — Implementation Planning.** How this plan's execution is tracked, day to day, by a one-person team.
 
 > **Honest labeling.** This plan is **derived from the 20 ADRs** in `architecture-decision/`, not a validation of a pre-existing backlog. `engineering-tasks/` and `requirements-consolidation/` do not exist. No requirement-ID or recommendation-ID is cited anywhere in this document, because those documents are absent and their IDs are unrecoverable. Traceability runs **task → ADR → driving findings → corpus file**.

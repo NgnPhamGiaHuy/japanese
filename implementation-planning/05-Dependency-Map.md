@@ -142,7 +142,7 @@ graph TD
 | T-117a/b/c ⇢ T-116a | SOFT (kernel-binding) | Report-then-handle rewrites 17 catch sites including **SRS counters** — logic T-117a has just covered. **Inversion cost:** the swallow-site rewrite proceeds without a net over the exact state-mutating paths it touches. This is the kernel's critical-path edge and ADR-117's cost-of-delay argument in miniature. |
 | Q-4 ⇒ T-116b, T-116c | GATE | Credentials, project ownership, and intended analytics scope. See gate table. |
 
-**Wave 2 tasks with NO task dependency (gate-bound or wave-bound only):** T-117d, T-117e (no downstream dependent anywhere in the plan), T-116b, T-116c (gate-bound only).
+**Wave 2 tasks with NO task dependency (gate-bound or wave-bound only):** T-117e (no downstream dependent anywhere in the plan), T-116b, T-116c (gate-bound only). T-117d has no HARD *predecessor* but is **not** dependency-free downstream — see the correction in §D.3.
 
 ---
 
@@ -505,7 +505,7 @@ These have no technical predecessor; their placement is a sequencing decision (c
 
 | Task | Size | Wave | What actually holds it |
 |---|:--:|:--:|---|
-| T-117d Rules-suite coverage | L | 2 | Wave 1's import surface (HARD for test imports); nothing downstream depends on it. |
+| T-117d Rules-suite coverage | L | 2 | Wave 1's import surface (HARD for test imports). **Correction (Go/No-Go C-4, 2026-08-04): the original claim that nothing downstream depends on it was wrong — see §D.3.** |
 | T-117e Four zero-coverage features | L | 2 | Same. **Zero downstream dependents anywhere in the plan.** |
 | T-116b / T-116c Sentry / PostHog | S / S | 2 | Q-4 only. |
 | T-114b Absent-data dashboards | M | 3 | Nothing. A true parallel start within Wave 3. |
@@ -525,6 +525,8 @@ These have no technical predecessor; their placement is a sequencing decision (c
 
 Nothing in the plan waits on these. They can slip to the end of their wave, or out of the program, without blocking anything:
 
-**T-120c, T-118c, T-117d, T-117e, T-116b, T-116c, T-107d, T-113b, T-114c, T-114d, T-109b, T-109c, T-109d, T-109e, T-115c, T-106d, T-108e, T-119a, T-119c, T-119d, T-119e, T-105b, T-104b, T-110b, T-112a** — 25 of 62 tasks.
+**T-120c, T-118c, T-117e, T-116b, T-116c, T-107d, T-113b, T-114c, T-114d, T-109b, T-109c, T-109d, T-109e, T-115c, T-106d, T-108e, T-119a, T-119c, T-119d, T-119e, T-105b, T-104b, T-110b, T-112a** — 24 of 62 tasks.
 
-This is a healthy shape: **40% of the plan is leaf work.** It means the plan is broad rather than deep, and that added capacity converts to schedule compression efficiently — up to the 22.5 d serial chain identified in Part B, which no capacity can compress.
+> **Correction (Go/No-Go C-4, 2026-08-04):** T-117d was originally listed here and is removed. It is a named prerequisite or verification oracle for **seven** other tasks — T-114a, T-115a, T-115c, T-106b, T-108b, T-119c, T-109d (`01-Validated-Backlog.md` lines 526, 624, 653, 656, 680, 711, 770) — documented in full at `execution-readiness/01-Readiness-Review.md` §C4-a. Treating it as droppable float risks silently removing the rules-side verification oracle for an access-control convergence, an admin-authority alignment, and an admin-mutation migration. (Historical note: T-117d had already landed by the time this was corrected, so the hazard never materialized in execution — see `docs/migrations-ledger.md` and `project-memory/CURRENT_PROJECT_MEMORY.md` — but the record was wrong until now.)
+
+This is a healthy shape: **39% of the plan is leaf work.** It means the plan is broad rather than deep, and that added capacity converts to schedule compression efficiently — up to the 22.5 d serial chain identified in Part B, which no capacity can compress.

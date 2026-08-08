@@ -13,7 +13,7 @@
 
 | ADR | Kernel | Title | Status | Priority | Gate(s) | Evidence clusters |
 |---|---|---|---|---|---|---|
-| ADR-101 | AD-01 | Feature public APIs are enforced, not conventional | Accepted | P1 | — | C3 (enabler: W-3) |
+| ADR-101 | AD-01 | Feature public APIs are enforced, not conventional (+ Amendment 1) | Accepted | P1 | — | C3 (enabler: W-3) |
 | ADR-102 | AD-02 | Dependency direction: flashcard → notifications, never back | Accepted | P1 | — | C3 |
 | ADR-103 | AD-03 | `lib` never imports `features` | Accepted | P2 | — | C3 |
 | ADR-104 | AD-04 | Flashcard remains one feature, with enforced internal sub-module boundaries | Accepted | P2 | — | C15 |

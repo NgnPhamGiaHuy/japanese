@@ -1,7 +1,12 @@
 # Notification testing & migration runbook
 
-Covers how to run the two test tiers, the pending index/rules deploy, and the
+Covers how to run the two test tiers, the index/rules deploy state, and the
 one-time data backfill. All commands run from the project root (`src/`).
+
+**Last reconciled against the code: 2026-08-04.** Live migration state for the
+notification schema is tracked as row `LDG-01` in
+[migrations-ledger.md](migrations-ledger.md) — where this runbook and the ledger
+disagree, the ledger is authoritative.
 
 ## Test tiers
 
@@ -27,9 +32,22 @@ npm run test:emu
 `npm run emulators:start` boots the emulator standalone (UI at :4000) for
 interactive work.
 
-## Pending index & rules deploy (NOT yet deployed)
+## Index & rules deploy — indexes DEPLOYED, rules UNVERIFIED
 
-Phase 1 PREPARES these but does not deploy them. Deploy only when ready:
+> **Status corrected 2026-08-04.** This section formerly read "NOT yet
+> deployed" for both halves. That is no longer accurate:
+>
+> - **Indexes: deployed.** All three notification composite indexes
+>   (`status+isDeleted`, `read+isDeleted`, `isDeleted+createdAt`) are live on
+>   `ngnphamgiahuy-devfolio`, confirmed via `firebase firestore:indexes`. They
+>   went out as a side effect of the T-114a index deploy — see the **closed**
+>   row `LDG-19` in [migrations-ledger.md](migrations-ledger.md).
+> - **Rules: still unverified.** `firebase deploy --only firestore:rules` has
+>   not been confirmed run against any project. Treat the rules command below
+>   as still pending.
+
+The commands below remain correct; run only the rules half unless you have
+confirmed the index state yourself:
 
 ```
 # Composite indexes for markAllNotificationsRead's dual query (status/isDeleted,
@@ -107,12 +125,14 @@ gcloud firestore fields ttls update expiresAt \
 
 ## Not yet wired
 
-Registry kinds declared but without a producer yet (see
-`features/notifications/domain/registry.ts`, `active: false`): `invite_declined`,
-`deck_updated`, `deck_deleted`, `privacy_changed`, `overtaken`,
-`leaderboard_top3`, `achievement`. The achievement/leaderboard kinds need hooks
-into the XP/streak/game code; the rest are lower priority.
+Updated 2026-08-04. The seven producer-less kinds this section used to list
+(`invite_declined`, `deck_updated`, `deck_deleted`, `privacy_changed`,
+`overtaken`, `leaderboard_top3`, `achievement`) were **deleted**, not wired —
+commit `01db60e` (T-119a) applied the Q-8 standing fallback. There is no
+`active: false` entry left in `features/notifications/domain/registry.ts`
+(verified: 0 matches); the registry now holds 9 kinds and every one is active.
+`NotificationKind` is the closed set in `features/notifications/domain/events.ts`.
 
-Also outstanding: seen/read badge split + `count()` unread, history pagination,
+Still outstanding: seen/read badge split + `count()` unread, history pagination,
 per-type/per-deck preferences (Phase 3 remainder); FCM push + email digests
 (Phase 4).

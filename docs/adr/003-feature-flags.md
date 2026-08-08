@@ -94,3 +94,26 @@ Reasons:
   server template published at all (the actual current state of this project), the app renders
   normally end-to-end, logging one `console.warn` per cache-TTL window rather than failing the
   request.
+
+---
+
+## Addendum — pointer corrections (2026-08-04)
+
+**The decision above is unchanged and still in force.** This addendum corrects only *where the
+code lives* and records that the mechanism has since been reused as predicted. Per
+`docs/README.md`, an ADR is never rewritten; this is an appended correction.
+
+| Stated above | Where it actually is now |
+| --- | --- |
+| "The root layout (`app/layout.tsx`) calls `getFlags()`" | i18n routing moved it: `src/app/[locale]/layout.tsx` now calls `await getFlags()` and renders `<MaintenanceScreen />`. There is no `src/app/layout.tsx`. |
+| "`AdminSettingsPageContent`'s placeholder is … untouched" | That component and the whole `features/admin/components/settings/` directory were deleted by `772a7e1` (T-119c, Q-13 fallback). The decision it illustrated — no in-app flag admin UI — still holds; only the example is gone. |
+
+**One flag became two, exactly as this ADR anticipated.** `locale_switch_enabled` was added
+alongside `maintenance_mode` (`src/lib/flags.ts`), consumed by
+`src/app/[locale]/(main)/settings/page.tsx` which resolves it server-side and passes it as a prop.
+That is consistent with — not a departure from — the "no client-side flag evaluation" rule.
+
+**Verified still true (2026-08-04):** `adminRemoteConfig` via `lazyProxy`
+(`src/lib/firebase-admin.ts`); `DEFAULT_FLAGS`, `TEMPLATE_TTL_MS = 60_000`, the `NOT_FOUND` warn
+path and the fallback to defaults all present in `src/lib/flags.ts`. All three items under "What
+was explicitly not done" remain not done.
