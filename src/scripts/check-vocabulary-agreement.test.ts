@@ -4,13 +4,19 @@
  * check-vocabulary-agreement.mjs (T-115b) — synthetic source strings, no
  * filesystem access, so these run in the plain unit suite.
  */
+import { existsSync } from "node:fs";
+import path from "node:path";
+
 import { describe, expect, it } from "vitest";
 
 import {
+    collectConfiguredPaths,
     diffSubset,
     parseRulesLiterals,
     parseTsLiterals,
     parseWriterLiterals,
+    SRC_ROOT,
+    VOCABULARIES,
 } from "./check-vocabulary-agreement.mjs";
 
 describe("parseTsLiterals", () => {
@@ -81,5 +87,33 @@ describe("diffSubset", () => {
         );
         expect(problems).toHaveLength(1);
         expect(problems[0]).toContain("editor");
+    });
+});
+
+describe("collectConfiguredPaths", () => {
+    it("lists every ts.file, rules.file, and writers.files entry across all vocabularies", () => {
+        const refs = collectConfiguredPaths([
+            {
+                name: "Foo",
+                ts: { file: "a.ts" },
+                rules: { file: "b.rules" },
+                writers: { files: ["c.ts", "d.ts"] },
+            },
+            { name: "Bar", ts: { file: "e.ts" }, rules: null, writers: null },
+        ]);
+        expect(refs.map((r) => r.path)).toEqual(["a.ts", "b.rules", "c.ts", "d.ts", "e.ts"]);
+    });
+});
+
+describe("VOCABULARIES configured source paths", () => {
+    // A file referenced here once moved out from under the config with
+    // nothing catching it until the blocking `check:vocab` CI step crashed
+    // with a raw ENOENT. This test is the regression guard: it fails fast,
+    // in the plain unit suite, and names exactly which path broke.
+    it("every path VOCABULARIES references resolves on disk", () => {
+        const missing = collectConfiguredPaths(VOCABULARIES).filter(
+            (ref) => !existsSync(path.join(SRC_ROOT, ref.path)),
+        );
+        expect(missing).toEqual([]);
     });
 });

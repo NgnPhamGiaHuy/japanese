@@ -50,11 +50,11 @@
  *
  * Exits non-zero (and CI fails) only on an `"enforce"`-mode mismatch.
  */
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
-const SRC_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
+export const SRC_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 
 export function readSrc(relPath) {
     return readFileSync(path.join(SRC_ROOT, relPath), "utf8");
@@ -115,7 +115,7 @@ function extractWriterLiterals({ files, pattern }) {
 
 // ─── Vocabulary configs ─────────────────────────────────────────────────────
 
-const VOCABULARIES = [
+export const VOCABULARIES = [
     {
         name: "LogSource",
         mode: "enforce",
@@ -175,7 +175,7 @@ const VOCABULARIES = [
         },
         writers: {
             files: [
-                "features/notifications/schema.ts",
+                "features/notifications/domain/schema.ts",
                 "features/admin/actions/admin.actions.ts",
                 "features/flashcard/services/access.service.ts",
                 "features/notifications/services/notification-pending.ts",
@@ -194,6 +194,49 @@ const VOCABULARIES = [
         },
     },
 ];
+
+/**
+ * Every file path VOCABULARIES references, tagged with which vocabulary and
+ * field named it. This is the resolution surface the whole check depends on
+ * staying accurate — a moved/renamed file silently breaks every vocabulary
+ * that names it. Pure — no file I/O — so it's directly unit-testable against
+ * the real disk from the test file without duplicating this traversal.
+ */
+export function collectConfiguredPaths(vocabularies) {
+    const refs = [];
+    for (const v of vocabularies) {
+        refs.push({ vocabulary: v.name, field: "ts.file", path: v.ts.file });
+        if (v.rules) refs.push({ vocabulary: v.name, field: "rules.file", path: v.rules.file });
+        if (v.writers) {
+            for (const file of v.writers.files) {
+                refs.push({ vocabulary: v.name, field: "writers.files", path: file });
+            }
+        }
+    }
+    return refs;
+}
+
+/**
+ * Fails loudly, before any comparison runs, if a configured path no longer
+ * resolves — the exact failure mode that previously crashed this script with
+ * a raw ENOENT stack trace when a source file moved out from under it.
+ */
+function validateConfiguredPaths() {
+    const missing = collectConfiguredPaths(VOCABULARIES).filter(
+        (ref) => !existsSync(path.join(SRC_ROOT, ref.path)),
+    );
+    if (missing.length === 0) return;
+
+    console.error("Vocabulary agreement check cannot run — configured source path(s) missing:\n");
+    for (const ref of missing) {
+        console.error(`  [${ref.vocabulary}] ${ref.field}: "${ref.path}" does not exist`);
+    }
+    console.error(
+        "\nThe file was likely moved or renamed. Update its path in the VOCABULARIES config " +
+            "(scripts/check-vocabulary-agreement.mjs).",
+    );
+    process.exit(1);
+}
 
 // ─── Comparison engine ──────────────────────────────────────────────────────
 
@@ -241,6 +284,8 @@ function checkVocabulary(config) {
 }
 
 function main() {
+    validateConfiguredPaths();
+
     const results = VOCABULARIES.map(checkVocabulary);
     let hasEnforceFailure = false;
 
