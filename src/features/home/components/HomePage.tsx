@@ -223,8 +223,8 @@ const HomePage = () => {
                                     isPublic,
                                 );
                             }}
-                            onUpdateRoles={async (roles, collabs) => {
-                                await updateLessonRoles(liveLesson.id, roles, collabs);
+                            onUpdateRoles={async (roles) => {
+                                await updateLessonRoles(liveLesson.id, roles);
                             }}
                             onClose={() => setSharingLesson(null)}
                         />

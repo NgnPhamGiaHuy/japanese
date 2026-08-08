@@ -52,12 +52,7 @@ const DeckCard = ({
         user && lesson.lastSharedBy === user.uid ? t("youShared") : tCommon("sharedBy");
 
     const resolvedShareId =
-        lesson.shareId ||
-        (lesson.ownerId
-            ? buildShareId(lesson.ownerId, lesson.id)
-            : lesson.userId
-              ? buildShareId(lesson.userId, lesson.id)
-              : "");
+        lesson.shareId || (lesson.ownerId ? buildShareId(lesson.ownerId, lesson.id) : "");
 
     const viewPath = isShared ? `/flashcard/shared/${resolvedShareId}` : `/flashcard/${lesson.id}`;
     const speedPath = isShared
@@ -67,7 +62,7 @@ const DeckCard = ({
         ? `/flashcard/shared/${resolvedShareId}/match`
         : `/flashcard/${lesson.id}/match`;
     const editPath = isShared
-        ? `/flashcard/${lesson.id}/edit?ownerId=${lesson.ownerId ?? lesson.userId}`
+        ? `/flashcard/${lesson.id}/edit?ownerId=${lesson.ownerId}`
         : `/flashcard/${lesson.id}/edit`;
 
     const roleInfo = ROLE_CONFIG[resolvedRole];

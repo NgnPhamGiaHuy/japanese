@@ -52,11 +52,7 @@ export function useEditableLesson(id: string, ownerId: string | null) {
     const sharedLessonSnap = sharedLessonQuery.data;
     const sharedLesson =
         sharedLessonSnap && sharedLessonSnap.exists()
-            ? normalizeLesson({
-                  ...sharedLessonSnap.data(),
-                  id: sharedLessonSnap.id,
-                  __ownerIdFallback: ownerId,
-              })
+            ? normalizeLesson({ ...sharedLessonSnap.data(), id: sharedLessonSnap.id })
             : null;
     const sharedCards = sortByOrder(
         (sharedCardsQuery.data?.docs ?? []).map((d) => ({ ...d.data(), id: d.id }) as FlashCard),

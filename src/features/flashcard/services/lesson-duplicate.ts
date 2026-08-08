@@ -38,7 +38,6 @@ export async function duplicateLesson({
     const newLesson: Lesson = {
         ...sourceLesson,
         id: "",
-        userId: newOwner.uid,
         ownerId: newOwner.uid,
         ownerName: newOwner.displayName,
         ownerAvatar: newOwner.photoURL,
@@ -46,7 +45,6 @@ export async function duplicateLesson({
         allowLinkAccess: false,
         isPublic: false,
         roles: { [newOwner.uid]: "owner" },
-        collaborators: [newOwner.uid],
         createdAt: Date.now(),
         sourceLessonId,
         sourceUserId,

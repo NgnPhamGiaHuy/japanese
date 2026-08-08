@@ -90,21 +90,19 @@ export async function shareLessonSettings(
 }
 
 /**
- * Updates the explicitly invited collaborators and their roles.
+ * Updates the explicitly invited collaborators' roles.
  * Uses updateDoc (not setDoc+merge) so removed keys are actually deleted from Firestore.
  */
 export async function updateLessonRoles(
     userId: string,
     lessonId: string,
     roles: Record<string, DeckAccessRole>,
-    collaborators: string[],
     sharedById: string,
     sharedByName?: string | null,
     sharedByAvatar?: string | null,
 ): Promise<void> {
     await updateDoc(lessonDoc(userId, lessonId), {
         roles,
-        collaborators,
         lastSharedBy: sharedById,
         lastSharedByName: sharedByName ?? null,
         lastSharedByAvatar: sharedByAvatar ?? null,

@@ -72,8 +72,7 @@ export default function FlashcardEditPage({ params }: { params: Promise<{ id: st
         <LessonBuilder
             editingLesson={{
                 ...lesson,
-                ownerId: ownerId ?? lesson.ownerId ?? lesson.userId,
-                userId: ownerId ?? lesson.userId,
+                ownerId: ownerId ?? lesson.ownerId,
             }}
             initialCards={cards}
             onSave={async (updatedLesson, updatedCards, isNew) => {

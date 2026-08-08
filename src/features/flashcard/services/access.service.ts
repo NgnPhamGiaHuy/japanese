@@ -55,8 +55,6 @@ export async function syncInviteToCollaborator(
         [user.uid]: roleToGrant,
     };
 
-    const updatedCollaborators = Array.from(new Set([...(lesson.collaborators ?? []), user.uid]));
-
     const updatedInvitedEmails = { ...(lesson.invitedEmails ?? {}) };
     delete updatedInvitedEmails[normalizedEmail];
 
@@ -64,7 +62,6 @@ export async function syncInviteToCollaborator(
         lessonDoc(ownerId, lessonId),
         {
             roles: updatedRoles,
-            collaborators: updatedCollaborators,
             invitedEmails: updatedInvitedEmails,
             lastSharedBy: user.uid,
             lastSharedByName: user.displayName ?? null,

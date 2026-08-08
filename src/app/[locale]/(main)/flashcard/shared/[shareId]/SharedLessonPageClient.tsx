@@ -242,8 +242,8 @@ export default function SharedLessonPageClient({
                     onShareLink={async (isPub, pRole, isPublic) => {
                         await shareLesson(meta.sourceLessonId, isPub, pRole, isPublic);
                     }}
-                    onUpdateRoles={async (roles, collabs) => {
-                        await updateLessonRoles(meta.sourceLessonId, roles, collabs);
+                    onUpdateRoles={async (roles) => {
+                        await updateLessonRoles(meta.sourceLessonId, roles);
                     }}
                     onClose={() => setSharingLesson(false)}
                 />

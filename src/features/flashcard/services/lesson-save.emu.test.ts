@@ -94,9 +94,9 @@ d("saveLessonWithCards", () => {
         const { data } = await getOnlyLesson();
         expect(data.title).toBe("My New Deck");
         expect(data.ownerId).toBe(OWNER);
-        expect(data.userId).toBe(OWNER);
+        expect(data.userId).toBeUndefined();
         expect(data.roles).toEqual({ [OWNER]: "owner" });
-        expect(data.collaborators).toEqual([OWNER]);
+        expect(data.collaborators).toBeUndefined();
         expect(data.allowLinkAccess).toBe(false);
         expect(data.cardCount).toBe(2);
     });

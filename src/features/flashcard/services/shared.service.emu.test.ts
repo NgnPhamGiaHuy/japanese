@@ -48,9 +48,7 @@ async function seedLesson(overrides: Record<string, unknown> = {}) {
         createdAt: 0,
         cardCount: 1,
         ownerId: OWNER,
-        userId: OWNER,
         roles: { [OWNER]: "owner" },
-        collaborators: [OWNER],
         ...overrides,
     });
 }

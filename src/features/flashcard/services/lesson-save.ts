@@ -92,13 +92,11 @@ export async function saveLessonWithCards(
         batch.set(newRef, {
             ...omitUndefined({ ...lesson }),
             id: targetLessonId,
-            userId,
             ownerId: userId,
             ownerName: lesson.ownerName ?? null,
             ownerAvatar: lesson.ownerAvatar ?? null,
             cardCount: cards.length,
             roles: { [userId]: "owner" },
-            collaborators: [userId],
             allowLinkAccess: false,
         });
     } else {

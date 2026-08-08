@@ -117,12 +117,10 @@ d("duplicateLesson", () => {
         });
 
         const { data } = await findDuplicatedLesson(NEW_OWNER);
-        expect(data.userId).toBe(NEW_OWNER);
         expect(data.ownerId).toBe(NEW_OWNER);
         expect(data.ownerName).toBe("New Owner");
         expect(data.ownerAvatar).toBe("https://example.com/p.jpg");
         expect(data.roles).toEqual({ [NEW_OWNER]: "owner" });
-        expect(data.collaborators).toEqual([NEW_OWNER]);
         expect(data.isPublic).toBe(false);
         expect(data.allowLinkAccess).toBe(false);
         expect(data.shareId).toBeUndefined();

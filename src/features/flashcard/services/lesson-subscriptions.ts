@@ -26,9 +26,7 @@ export function subscribeLessons(
         lessonsCol(userId),
         (snap) => {
             const lessons = sortByOrder(
-                snap.docs.map((d) =>
-                    normalizeLesson({ ...d.data(), id: d.id, __ownerIdFallback: userId }),
-                ),
+                snap.docs.map((d) => normalizeLesson({ ...d.data(), id: d.id })),
                 newestFirst,
             );
             onUpdate(lessons);
@@ -40,24 +38,21 @@ export function subscribeLessons(
 /**
  * Subscribes to lessons where the user is a collaborator but NOT the owner.
  * Uses a collection group query on 'lessons' — requires a Firestore index.
+ *
+ * LDG-22 (2026-08-04): the legacy `collaborators`-array fallback query was
+ * removed — every write path has always kept `roles` and `collaborators` in
+ * lockstep, so the roles query alone was already a strict superset; the
+ * matching `firestore.rules` collection-group branch was updated in the same
+ * change.
  */
 export function subscribeSharedLessons(
     userId: string,
     onUpdate: (lessons: Lesson[]) => void,
     onError: (err: Error) => void,
 ): Unsubscribe {
-    const extractOwnerIdFromPath = (docPath: string): string | undefined => {
-        // Expected: .../users/{ownerId}/lessons/{lessonId}
-        const parts = docPath.split("/");
-        const usersIdx = parts.indexOf("users");
-        if (usersIdx === -1) return undefined;
-        return parts[usersIdx + 1];
-    };
-
     type SnapshotLike = {
         docs: Array<{
             id: string;
-            ref: { path: string };
             data: () => unknown;
         }>;
     };
@@ -65,54 +60,20 @@ export function subscribeSharedLessons(
     const mapLessonsFromSnapshot = (snap: SnapshotLike) => {
         const lessons: Lesson[] = sortByOrder(
             snap.docs
-                .map((d) => {
-                    const raw = d.data() as Record<string, unknown>;
-                    return normalizeLesson({
-                        ...raw,
-                        id: d.id,
-                        __ownerIdFallback: extractOwnerIdFromPath(d.ref.path),
-                    });
-                })
-                // Exclude the viewer's own lessons — checked directly against
-                // ownerId ?? userId (ADR-115's owner semantics) rather than
-                // roles[userId], which normalizeLesson above already heals to
-                // include the owner anyway; this avoids depending on that
-                // healing behavior for correctness.
-                .filter((l) => (l.ownerId ?? l.userId) !== userId),
+                .map((d) => normalizeLesson({ ...(d.data() as Record<string, unknown>), id: d.id }))
+                // Exclude the viewer's own lessons.
+                .filter((l) => l.ownerId !== userId),
             newestFirst,
         );
         onUpdate(lessons);
     };
 
-    // Legacy fallback (works with existing docs that still have `collaborators`)
-    const qCollaborators = query(
-        collectionGroup(db, "lessons"),
-        where("collaborators", "array-contains", userId),
-    );
-
-    // Preferred query: roles map is the source-of-truth
     const qRoles = query(
         collectionGroup(db, "lessons"),
         where(`roles.${userId}`, "in", ["owner", "editor", "commenter", "viewer"]),
     );
 
-    let currentUnsub: Unsubscribe = () => {};
-
-    const startCollaborators = () => {
-        currentUnsub = onSnapshot(qCollaborators, mapLessonsFromSnapshot, onError);
-    };
-
-    const startRoles = () => {
-        currentUnsub = onSnapshot(qRoles, mapLessonsFromSnapshot, (err) => {
-            console.warn("[subscribeSharedLessons] roles query failed, falling back:", err);
-            // Tear down roles listener and retry with the legacy collaborators query.
-            currentUnsub();
-            startCollaborators();
-        });
-    };
-
-    startRoles();
-    return () => currentUnsub();
+    return onSnapshot(qRoles, mapLessonsFromSnapshot, onError);
 }
 
 /**
@@ -136,13 +97,6 @@ export function subscribePublicLessons(
     onError: (err: Error) => void,
     pageSize: number,
 ): Unsubscribe {
-    const extractOwnerIdFromPath = (docPath: string): string | undefined => {
-        const parts = docPath.split("/");
-        const usersIdx = parts.indexOf("users");
-        if (usersIdx === -1) return undefined;
-        return parts[usersIdx + 1];
-    };
-
     const q = query(
         collectionGroup(db, "lessons"),
         where("isPublic", "==", true),
@@ -154,10 +108,7 @@ export function subscribePublicLessons(
         q,
         (snap) => {
             const lessons: Lesson[] = snap.docs
-                .map((d) => {
-                    const ownerId = extractOwnerIdFromPath(d.ref.path);
-                    return normalizeLesson({ ...d.data(), id: d.id, __ownerIdFallback: ownerId });
-                })
+                .map((d) => normalizeLesson({ ...d.data(), id: d.id }))
                 // Exclude the viewer's own decks — they already appear in "My Decks".
                 .filter((l) => !currentUserId || l.ownerId !== currentUserId)
                 .sort(newestFirst);

@@ -219,13 +219,16 @@ service cloud.firestore {
 
     // Enables discovery of shared decks across the global users collection.
     // Public decks are readable without authentication; role-based access requires auth.
+    //
+    // LDG-22 (2026-08-04): the legacy `collaborators.hasAny(...)` branch was
+    // removed — every write path (lesson-save.ts, lesson.service.ts,
+    // access.service.ts) has always kept `roles` and `collaborators` in
+    // lockstep, so this mirrors the direct-path lesson rule above, which was
+    // already roles-only.
     match /{path=**}/lessons/{lessonId} {
       allow read: if resource.data.isPublic == true
                   || resource.data.allowLinkAccess == true
-                  || (isSignedIn() && (
-                       resource.data.roles[request.auth.uid] != null ||
-                       resource.data.collaborators.hasAny([request.auth.uid])
-                     ));
+                  || (isSignedIn() && resource.data.roles[request.auth.uid] != null);
     }
   }
 }

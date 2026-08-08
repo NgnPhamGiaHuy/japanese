@@ -42,7 +42,7 @@ export function useShareInvites({ lesson, setSaving }: UseShareInvitesParams) {
 
         setSaving(true);
         try {
-            const ownerId = lesson.ownerId ?? lesson.userId;
+            const ownerId = lesson.ownerId;
             if (!ownerId) return;
             await inviteByEmail(
                 ownerId,
@@ -65,7 +65,7 @@ export function useShareInvites({ lesson, setSaving }: UseShareInvitesParams) {
     });
 
     const handleRevokeEmailInvite = async (email: string) => {
-        const ownerId = lesson.ownerId ?? lesson.userId;
+        const ownerId = lesson.ownerId;
         if (!ownerId) return;
         setSaving(true);
         try {

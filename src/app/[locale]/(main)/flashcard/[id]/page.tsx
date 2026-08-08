@@ -108,8 +108,8 @@ export default function FlashcardDetailPage({ params }: { params: Promise<{ id: 
                     onShareLink={async (allowLinkAccess, publicRole, isPublic) => {
                         await shareLesson(id, allowLinkAccess, publicRole, isPublic);
                     }}
-                    onUpdateRoles={async (roles, collabs) => {
-                        await updateLessonRoles(id, roles, collabs);
+                    onUpdateRoles={async (roles) => {
+                        await updateLessonRoles(id, roles);
                     }}
                     onClose={() => setSharingLesson(false)}
                 />

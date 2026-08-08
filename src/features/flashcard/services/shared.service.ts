@@ -155,11 +155,7 @@ export async function getSharedLesson(
         const lessonSnap = await getDoc(lessonRef);
         if (!lessonSnap.exists()) return null;
 
-        let lesson = normalizeLesson({
-            ...lessonSnap.data(),
-            id: lessonSnap.id,
-            __ownerIdFallback: ownerId,
-        });
+        let lesson = normalizeLesson({ ...lessonSnap.data(), id: lessonSnap.id });
 
         // Auto-convert pending email invite → collaborator before the access gate
         if (currentUser?.email) {
@@ -168,11 +164,7 @@ export async function getSharedLesson(
                 await syncInviteToCollaborator(currentUser, lesson, ownerId, lessonId);
                 const refreshed = await getDoc(lessonRef);
                 if (refreshed.exists()) {
-                    lesson = normalizeLesson({
-                        ...refreshed.data(),
-                        id: refreshed.id,
-                        __ownerIdFallback: ownerId,
-                    });
+                    lesson = normalizeLesson({ ...refreshed.data(), id: refreshed.id });
                 }
             }
         }

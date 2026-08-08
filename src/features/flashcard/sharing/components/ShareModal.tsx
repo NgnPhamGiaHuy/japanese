@@ -46,7 +46,7 @@ interface ShareModalProps {
         isPublic?: boolean,
     ) => Promise<void>;
     /** Callback for specific user role management */
-    onUpdateRoles: (newRoles: Record<string, Role>, newCollaborators: string[]) => Promise<void>;
+    onUpdateRoles: (newRoles: Record<string, Role>) => Promise<void>;
     /** Close logic */
     onClose: () => void;
 }

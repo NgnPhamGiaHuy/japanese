@@ -6,10 +6,10 @@
  * `resolveRole` is the single source of truth for every permission decision
  * in the sharing feature (per rbac.ts's own docblock). These tests assert
  * against resolveRole's actual documented semantics — the 5-step priority
- * order and the `ownerId ?? userId` owner check in particular — not against
- * shared.service.ts's separately-drifted inline copy of this same
- * access-check concept (OP-5). A test suite built against the wrong copy
- * would certify the divergent behavior instead of catching it.
+ * order in particular — not against shared.service.ts's separately-drifted
+ * inline copy of this same access-check concept (OP-5). A test suite built
+ * against the wrong copy would certify the divergent behavior instead of
+ * catching it.
  */
 import { describe, expect, it } from "vitest";
 
@@ -20,17 +20,9 @@ describe("resolveRole — owner resolution (step 1)", () => {
         expect(resolveRole({ lesson: { ownerId: "u1" }, userId: "u1" })).toBe("owner");
     });
 
-    it("legacy fallback: resolves owner via the legacy userId field when ownerId is absent", () => {
-        expect(resolveRole({ lesson: { userId: "u1" }, userId: "u1" })).toBe("owner");
-    });
-
-    it("ownerId takes priority over legacy userId — once ownerId is set, a differing userId field is not consulted at all", () => {
-        // The OP-5 divergence point: `lesson.ownerId ?? lesson.userId` means
-        // legacy userId is ONLY a fallback for a missing ownerId, never an
-        // alternate match once ownerId exists.
-        const lesson = { ownerId: "owner-uid", userId: "stale-uid" };
-        expect(resolveRole({ lesson, userId: "owner-uid" })).toBe("owner");
-        expect(resolveRole({ lesson, userId: "stale-uid" })).toBe("none");
+    it("does not resolve owner via the legacy userId field — ownerId is the only source of truth (LDG-22, 2026-08-04)", () => {
+        const lesson = { userId: "u1" };
+        expect(resolveRole({ lesson, userId: "u1" })).toBe("none");
     });
 
     it("does not resolve owner for an anonymous caller (no userId)", () => {

@@ -88,7 +88,7 @@ export const DEFAULT_DECK_THEME_COLOR = "#1cb0f6";
 export interface Lesson {
     /** Unique document ID for the deck */
     id: string;
-    /** UID of the primary deck owner */
+    /** @deprecated Use `ownerId` instead. Kept only for pre-2026-08-04 documents. */
     userId?: string;
     /** Standardized owner UID (source of truth for ownership identity) */
     ownerId?: string;
@@ -114,7 +114,7 @@ export interface Lesson {
      * Key: User UID, Value: Semantic permission level.
      */
     roles?: Record<string, DeckAccessRole>;
-    /** List of explicit UIDs with access to this deck */
+    /** @deprecated Use `roles` instead. Kept only for pre-2026-08-04 documents. */
     collaborators?: string[];
     /** Flag allowing anyone with the shareId to view/comment based on global policy */
     allowLinkAccess?: boolean;

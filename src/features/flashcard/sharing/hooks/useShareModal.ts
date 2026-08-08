@@ -26,7 +26,7 @@ interface UseShareModalParams {
         publicRole: Lesson["publicRole"],
         isPublic?: boolean,
     ) => Promise<void>;
-    onUpdateRoles: (newRoles: Record<string, Role>, newCollaborators: string[]) => Promise<void>;
+    onUpdateRoles: (newRoles: Record<string, Role>) => Promise<void>;
 }
 
 /**
@@ -69,11 +69,11 @@ export function useShareModal({ lesson, onShareLink, onUpdateRoles }: UseShareMo
     const canManageRoles = isOwner;
 
     const shareLink = useMemo(() => {
-        const ownerId = lesson.ownerId ?? lesson.userId;
+        const ownerId = lesson.ownerId;
         if (typeof window === "undefined" || !ownerId) return "";
         const id = buildShareId(ownerId, lesson.id);
         return `${window.location.origin}/flashcard/shared/${id}`;
-    }, [lesson.ownerId, lesson.userId, lesson.id]);
+    }, [lesson.ownerId, lesson.id]);
 
     // ── Local edit state ──────────────────────────────────────────────────
     const derivePrivacyMode = (): PrivacyMode => {
@@ -169,18 +169,14 @@ export function useShareModal({ lesson, onShareLink, onUpdateRoles }: UseShareMo
 
     // ── Role Management ───────────────────────────────────────────────
 
-    /**
-     * Orchestrator for persisting role changes.
-     * Computes the new collaborators list (keys of roles object) and calls parent handler.
-     */
+    /** Orchestrator for persisting role changes. */
     const commitRolesUpdate = async (newRoles: Record<string, Role>): Promise<boolean> => {
         setRoles(newRoles);
-        const newCollaborators = Object.keys(newRoles);
         setSaving(true);
         try {
-            await onUpdateRoles(newRoles, newCollaborators);
+            await onUpdateRoles(newRoles);
             auditClient(ActivityAction.SHARE_ROLES_UPDATED, {
-                collaboratorCount: newCollaborators.length,
+                collaboratorCount: Object.keys(newRoles).length,
             });
             showAlert("success", t("permissionsUpdated"));
             return true;
@@ -196,7 +192,7 @@ export function useShareModal({ lesson, onShareLink, onUpdateRoles }: UseShareMo
 
     // The owner manages sharing on their own deck, so lesson.ownerId (or the
     // current user) is the authoritative owner the server writer expects.
-    const deckOwnerId = lesson.ownerId ?? lesson.userId ?? user?.uid;
+    const deckOwnerId = lesson.ownerId ?? user?.uid;
 
     const handleUpdateUserRole = async (targetId: string, newRole: Role) => {
         if (roles[targetId] === "owner" || targetId === user?.uid) return;

@@ -45,9 +45,7 @@ async function seedLesson(overrides: Record<string, unknown> = {}) {
         createdAt: 0,
         cardCount: 0,
         ownerId: OWNER,
-        userId: OWNER,
         roles: { [OWNER]: "owner" },
-        collaborators: [OWNER],
         ...overrides,
     });
 }
@@ -122,7 +120,6 @@ d("access.service", () => {
         expect(granted).toBe("commenter");
         const snap = await adminDb.doc(lessonPath()).get();
         expect(snap.data()?.roles[INVITEE]).toBe("commenter");
-        expect(snap.data()?.collaborators).toContain(INVITEE);
         expect(snap.data()?.invitedEmails[INVITEE_EMAIL]).toBeUndefined();
         expect(snap.data()?.collaboratorMeta[INVITEE].displayName).toBe("Invitee Name");
     });

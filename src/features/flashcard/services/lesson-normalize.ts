@@ -10,36 +10,20 @@ import type { Lesson } from "../types";
  *  dashboard, not fall to wherever its id happens to sort. */
 export const newestFirst = (a: Lesson, b: Lesson) => b.createdAt - a.createdAt;
 
-type NormalizeLessonInput = Lesson & {
-    /**
-     * Internal, non-persisted hint.
-     * Used when the snapshot doesn't include an owner field (legacy docs).
-     */
-    __ownerIdFallback?: string;
-    /**
-     * Legacy share fields (not referenced by the app code directly anymore).
-     * We keep mapping for backward compatibility.
-     */
-    sharedBy?: string;
-    sharedByName?: string | null;
-    sharedAt?: number;
-};
-
 /**
  * Normalizes a Lesson snapshot so that:
- * - `ownerId` and legacy `userId` are both present (compat)
  * - `roles` always includes the owner role (roles are source-of-truth)
  * - `ownerName` has a best-effort fallback (zero-join)
- * - legacy share fields are mapped into `lastSharedBy*`
  *
- * Never deletes legacy fields immediately.
+ * LDG-22 (2026-08-04): the legacy `__ownerIdFallback`/`userId` owner fallback
+ * and the `sharedBy`/`sharedByName`/`sharedAt` → `lastSharedBy*` mapping were
+ * removed — empirically confirmed zero remaining documents needed them
+ * (every lesson doc already carries `ownerId`, `roles`, and `lastSharedBy*`).
  */
 export function normalizeLesson(raw: unknown): Lesson {
-    const input = raw as NormalizeLessonInput;
-    const { __ownerIdFallback, sharedBy, sharedByName, sharedAt, ...doc } =
-        input ?? ({} as NormalizeLessonInput);
+    const doc = (raw ?? ({} as Lesson)) as Lesson;
 
-    const ownerId = (doc.ownerId ?? doc.userId ?? __ownerIdFallback) as string | undefined;
+    const ownerId = doc.ownerId;
 
     const rolesFromDoc = doc.roles as NonNullable<Lesson["roles"]> | undefined;
     const normalizedRoles: NonNullable<Lesson["roles"]> | undefined = ownerId
@@ -49,13 +33,9 @@ export function normalizeLesson(raw: unknown): Lesson {
           }
         : rolesFromDoc;
 
-    const collaborators =
-        doc.collaborators ?? (normalizedRoles ? Object.keys(normalizedRoles) : undefined);
-
-    const lastSharedBy = (doc.lastSharedBy ?? sharedBy) as string | undefined;
+    const lastSharedBy = doc.lastSharedBy;
     const lastSharedByName =
         doc.lastSharedByName ??
-        sharedByName ??
         (lastSharedBy ? (doc.collaboratorMeta?.[lastSharedBy]?.displayName ?? null) : null);
 
     const createdAt = typeof doc.createdAt === "number" ? doc.createdAt : Date.now();
@@ -91,7 +71,7 @@ export function normalizeLesson(raw: unknown): Lesson {
 
     return {
         // Preserve anything else for forward compatibility first.
-        ...(doc as Record<string, unknown>),
+        ...(doc as unknown as Record<string, unknown>),
 
         // Identity + required fields
         id: String(doc.id ?? ""),
@@ -100,15 +80,13 @@ export function normalizeLesson(raw: unknown): Lesson {
         createdAt,
         cardCount,
 
-        // Core identity + legacy compatibility
+        // Core identity
         ownerId,
         ownerName,
         ownerAvatar,
-        userId: (doc.userId ?? ownerId) as string | undefined,
 
         // Access control (roles is source of truth)
         roles: normalizedRoles,
-        collaborators,
 
         // Existing flags + metadata
         allowLinkAccess: doc.allowLinkAccess,
@@ -123,6 +101,6 @@ export function normalizeLesson(raw: unknown): Lesson {
         lastSharedBy,
         lastSharedByName: lastSharedByNameFinal,
         lastSharedByAvatar,
-        lastSharedAt: doc.lastSharedAt ?? sharedAt,
+        lastSharedAt: doc.lastSharedAt,
     } as Lesson;
 }

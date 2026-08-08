@@ -111,8 +111,10 @@ interface ResolveRoleParams {
 export function resolveRole(params: ResolveRoleParams): DeckAccessRole {
     const { lesson, userId, userEmail } = params;
 
-    // 1. Owner — ownerId is the source of truth; userId is the legacy fallback.
-    const ownerId = lesson.ownerId ?? lesson.userId;
+    // 1. Owner — ownerId is the source of truth (LDG-22: the legacy userId
+    // fallback was removed 2026-08-04; every lesson doc has had ownerId
+    // populated since the normalize-on-read migration completed).
+    const ownerId = lesson.ownerId;
     if (userId && ownerId && userId === ownerId) {
         return "owner";
     }
