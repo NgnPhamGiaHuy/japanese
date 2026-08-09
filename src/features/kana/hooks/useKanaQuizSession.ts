@@ -62,7 +62,12 @@ interface UseKanaQuizSessionParams {
  * - startSession / endSession wired to Firestore via useGameSession
  *
  * Session lifecycle:
- *   setup → playing (score reaches TARGET_SCORE) → done
+ *   setup → playing (TARGET_SCORE questions answered) → done
+ *
+ * Two distinct counters, deliberately not merged:
+ * - `score`        combo-weighted points. Ranks the leaderboard. Unbounded.
+ * - `correctCount` answers correct, out of `answered` questions asked. Drives
+ *                  the quiz's progress bar, its end condition and "perfect".
  */
 export function useKanaQuizSession({
     dataset,
@@ -80,10 +85,13 @@ export function useKanaQuizSession({
     const [status, setStatus] = useState<KanaAnswerStatus>("idle");
     const [score, setScore] = useState(0);
     const [streak, setStreak] = useState(0);
+    const [answered, setAnswered] = useState(0);
+    const [correctCount, setCorrectCount] = useState(0);
 
     const deckRef = useRef<KanaChar[]>([]);
     const streakRef = useRef(0);
     const savedRef = useRef(false);
+    const scoreRef = useRef(0);
     const onCorrectComboRef = useRef(onCorrectCombo);
 
     useLayoutEffect(() => {
@@ -175,6 +183,9 @@ export function useKanaQuizSession({
 
             if (question) recordCharStat(question.char, isCorrect);
 
+            setAnswered((n) => n + 1);
+            if (isCorrect) setCorrectCount((n) => n + 1);
+
             if (isCorrect) {
                 const nextStreak = streakRef.current + 1;
                 streakRef.current = nextStreak;
@@ -183,6 +194,7 @@ export function useKanaQuizSession({
                 const pts = comboMultiplier(nextStreak);
                 setScore((s) => {
                     const next = s + pts;
+                    scoreRef.current = next;
                     syncScoreRef.current(next);
                     return next;
                 });
@@ -237,23 +249,32 @@ export function useKanaQuizSession({
     const startQuiz = useCallback(() => {
         streakRef.current = 0;
         savedRef.current = false;
+        scoreRef.current = 0;
         setScore(0);
         setStreak(0);
+        setAnswered(0);
+        setCorrectCount(0);
         setStatus("idle");
         deckRef.current = [];
         void startSession();
     }, [startSession]);
 
     /**
-     * Persists the final score when the quiz completes.
+     * Persists the final combo-weighted score when the quiz completes.
      *
      * @remarks
+     * Takes no score argument: the caller runs inside the advance timeout and
+     * cannot see the points awarded for the answer that ended the run, so the
+     * engine reads its own `scoreRef` instead. That also keeps the persisted
+     * total identical to the last value `syncScore` streamed and to the number
+     * the results screen shows.
+     *
      * Guard prevents double-firing if called multiple times.
      */
-    const finishQuiz = useCallback((finalScore: number) => {
+    const finishQuiz = useCallback(() => {
         if (savedRef.current) return;
         savedRef.current = true;
-        void endSessionRef.current(finalScore);
+        void endSessionRef.current(scoreRef.current);
     }, []);
 
     /**
@@ -262,8 +283,11 @@ export function useKanaQuizSession({
     const resetEngine = useCallback(() => {
         streakRef.current = 0;
         savedRef.current = false;
+        scoreRef.current = 0;
         setScore(0);
         setStreak(0);
+        setAnswered(0);
+        setCorrectCount(0);
         setStatus("idle");
         deckRef.current = [];
     }, []);
@@ -275,6 +299,8 @@ export function useKanaQuizSession({
         status,
         score,
         streak,
+        answered,
+        correctCount,
         targetScore: TARGET_SCORE,
         generateQuestion,
         buildSmartDeck,

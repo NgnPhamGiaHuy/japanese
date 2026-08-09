@@ -50,7 +50,7 @@ export function KanaQuiz() {
     if (phase === "done") {
         return (
             <QuizResults
-                score={session.score}
+                score={session.correctCount}
                 targetScore={session.targetScore}
                 alphabet={alphabet}
                 themeColor={themeColor}
@@ -67,7 +67,8 @@ export function KanaQuiz() {
             questionType={session.questionType}
             options={session.options}
             status={session.status}
-            score={session.score}
+            score={session.correctCount}
+            answered={session.answered}
             targetScore={session.targetScore}
             streak={session.streak}
             themeColor={themeColor}

@@ -29,6 +29,7 @@ interface QuizPlayingProps {
     options: KanaChar[];
     status: "idle" | "correct" | "wrong";
     score: number;
+    answered: number;
     targetScore: number;
     streak: number;
     themeColor: {
@@ -49,6 +50,7 @@ export function QuizPlaying({
     options,
     status,
     score,
+    answered,
     targetScore,
     streak,
     themeColor,
@@ -80,7 +82,7 @@ export function QuizPlaying({
                     <div
                         className={`h-full rounded-full transition-all duration-500 ease-out ${themeColor.bg}`}
                         style={{
-                            width: `${Math.min((score / targetScore) * 100, 100)}%`,
+                            width: `${Math.min((answered / targetScore) * 100, 100)}%`,
                         }}
                     />
                 </div>

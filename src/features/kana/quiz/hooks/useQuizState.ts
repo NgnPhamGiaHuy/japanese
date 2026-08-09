@@ -12,6 +12,7 @@ import { auth } from "@/lib/firebase";
 import { logKanaQuizCompleted } from "../../actions";
 import { checkTypedAnswer } from "../../utils";
 
+import type { useKanaQuizSession } from "@/features/kana/hooks";
 import type { KanaChar } from "@/features/kana/types";
 import type { QuizMode, QuizPhase } from "../types";
 
@@ -20,7 +21,7 @@ interface UseQuizStateProps {
     alphabet: "hiragana" | "katakana" | "both";
     userId?: string;
     displayName?: string;
-    session: any; // KanaQuizSession type
+    session: ReturnType<typeof useKanaQuizSession>;
 }
 
 export function useQuizState({ session, userId, alphabet }: UseQuizStateProps) {
@@ -36,54 +37,49 @@ export function useQuizState({ session, userId, alphabet }: UseQuizStateProps) {
         setPhase("playing");
     };
 
-    const handleMCAnswer = (option: { romaji: string }) => {
-        if (session.status !== "idle" || !session.question) return;
-        const isCorrect = option.romaji === session.question.romaji;
-        const nextScore = session.score + (isCorrect ? 1 : 0);
+    /**
+     * Shared end-of-answer step for both input modes.
+     *
+     * A quiz run is `targetScore` QUESTIONS long, so the end condition counts
+     * questions answered — not points. `finishQuiz` persists the engine's own
+     * combo-weighted score (what `syncScore` streamed during play and what the
+     * leaderboard ranks on); the activity log records the question tally, so
+     * its `score / total` stays a meaningful accuracy figure.
+     */
+    const advanceAfterAnswer = (isCorrect: boolean, forcedType: "type" | "read") => {
+        const questionsAnswered = session.answered + 1;
+        const correct = session.correctCount + (isCorrect ? 1 : 0);
 
         session.processAnswer(isCorrect, () => {
             setTypedInput("");
-            if (nextScore >= session.targetScore) {
-                session.finishQuiz(nextScore);
+            if (questionsAnswered >= session.targetScore) {
+                session.finishQuiz();
                 setPhase("done");
                 if (userId) {
                     void auth.currentUser?.getIdToken().then((token) =>
                         logKanaQuizCompleted(token, userId, alphabet ?? "hiragana", {
-                            score: nextScore,
+                            score: correct,
                             total: session.targetScore,
                             mode: quizMode,
                         }),
                     );
                 }
             } else {
-                session.generateQuestion(quizMode === "type" ? "type" : "read");
+                session.generateQuestion(forcedType);
             }
         });
+    };
+
+    const handleMCAnswer = (option: { romaji: string }) => {
+        if (session.status !== "idle" || !session.question) return;
+        const isCorrect = option.romaji === session.question.romaji;
+        advanceAfterAnswer(isCorrect, quizMode === "type" ? "type" : "read");
     };
 
     const handleTypeAnswer = () => {
         if (session.status !== "idle" || !session.question) return;
         const isCorrect = checkTypedAnswer(typedInput, session.question.romaji);
-        const nextScore = session.score + (isCorrect ? 1 : 0);
-
-        session.processAnswer(isCorrect, () => {
-            setTypedInput("");
-            if (nextScore >= session.targetScore) {
-                session.finishQuiz(nextScore);
-                setPhase("done");
-                if (userId) {
-                    void auth.currentUser?.getIdToken().then((token) =>
-                        logKanaQuizCompleted(token, userId, alphabet ?? "hiragana", {
-                            score: nextScore,
-                            total: session.targetScore,
-                            mode: quizMode,
-                        }),
-                    );
-                }
-            } else {
-                session.generateQuestion("type");
-            }
-        });
+        advanceAfterAnswer(isCorrect, "type");
     };
 
     return {
