@@ -3,6 +3,18 @@
  * Logic layer for public deck sharing and external session resolution.
  */
 
+/**
+ * @file shared.service
+ * Logic layer for public deck sharing and external session resolution.
+ */
+/**
+ * @file shared.service
+ * Logic layer for public deck sharing and external session resolution.
+ */
+/**
+ * @file shared.service
+ * Logic layer for public deck sharing and external session resolution.
+ */
 import { doc, getDoc, getDocs, limit, query, startAfter, where } from "firebase/firestore";
 
 import { APP_ID, db } from "@/lib/firebase";
@@ -157,27 +169,19 @@ export async function getSharedLesson(
 
         let lesson = normalizeLesson({ ...lessonSnap.data(), id: lessonSnap.id });
 
-        // Auto-convert pending email invite → collaborator before the access gate
         if (currentUser?.email) {
             const normalizedEmail = currentUser.email.trim().toLowerCase();
             if (lesson.invitedEmails?.[normalizedEmail]) {
-                await syncInviteToCollaborator(currentUser, lesson, ownerId, lessonId);
-                const refreshed = await getDoc(lessonRef);
-                if (refreshed.exists()) {
-                    lesson = normalizeLesson({ ...refreshed.data(), id: refreshed.id });
-                }
+                try {
+                    await syncInviteToCollaborator(currentUser, lesson, ownerId, lessonId);
+                    const refreshed = await getDoc(lessonRef);
+                    if (refreshed.exists()) {
+                        lesson = normalizeLesson({ ...refreshed.data(), id: refreshed.id });
+                    }
+                } catch {}
             }
         }
 
-        // RBAC gate — resolved once via the canonical engine (ADR-115) and
-        // reused below as viewerRole, rather than a separately re-derived
-        // isOwner/hasExplicitRole/hasPendingInvite/linkAccess check. That
-        // duplicate's isOwner read `roles[uid] === "owner"` directly, which
-        // in principle disagrees with the engine's `ownerId ?? userId` — in
-        // practice `lesson` here is always normalizeLesson's output, which
-        // already back-fills the owner's roles entry, so the two checks
-        // happened to agree at this call site. Converging on one predicate
-        // removes that incidental (and easily broken) coupling.
         const viewerRole = resolveRole({
             lesson,
             userId: currentUserId,

@@ -15,7 +15,7 @@
  * another entry here — never an edit inside notifications.
  */
 import { registerNotificationActions } from "@/features/notifications";
-import { declineInviteAction } from "./actions/access.actions";
+import { acceptInviteAction, declineInviteAction } from "./actions/access.actions";
 
 let registered = false;
 
@@ -31,6 +31,17 @@ export function registerFlashcardNotificationActions(): void {
     registered = true;
 
     registerNotificationActions("invite", {
+        onAccept: async ({ idToken, notification }) => {
+            const ownerId = notification.data?.inviterId;
+            const lessonId = notification.data?.lessonId;
+
+            if (!ownerId || !lessonId) return;
+            const result = await acceptInviteAction(idToken, ownerId, lessonId);
+            if (!result.ok) {
+                console.error("[flashcard] accepting invite failed:", result.error);
+            }
+        },
+
         onDecline: async ({ idToken, notification }) => {
             const ownerId = notification.data?.inviterId;
             const lessonId = notification.data?.lessonId;

@@ -40,6 +40,18 @@ export interface NotificationActionContext {
  */
 export interface NotificationActionHandlers {
     /**
+     * Feature-specific work when the user accepts — e.g. converting a pending
+     * email invite into a real role grant.
+     *
+     * Unlike {@link onDecline} this is **awaited before the inbox navigates**,
+     * because the destination usually depends on the grant having landed.
+     * A rejection is reported and navigation still proceeds — the destination
+     * renders its own access-denied state, which is more honest than trapping
+     * the user in the inbox.
+     */
+    onAccept?: (ctx: NotificationActionContext) => void | Promise<void>;
+
+    /**
      * Feature-specific work when the user declines — e.g. revoking a pending
      * invite so it cannot silently re-convert to access later.
      *

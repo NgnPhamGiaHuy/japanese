@@ -30,15 +30,21 @@ const InviteActions = ({
     const handleAccept = () => {
         startTransition(async () => {
             await markNotificationRead(userId, notification.id);
-            void withFreshToken((token) =>
-                logNotificationRead(
+            await withFreshToken(async (token) => {
+                void logNotificationRead(
                     token,
                     userId,
                     notification.id,
                     notification.type,
                     notification.title,
-                ),
-            );
+                );
+                if (notification.type === "invite") {
+                    const handlers = resolveNotificationActions(notification.type, (message) => {
+                        console.error(`[notifications] ${message}`);
+                    });
+                    await handlers?.onAccept?.({ idToken: token, notification, userId });
+                }
+            });
             router.push(link);
         });
     };
