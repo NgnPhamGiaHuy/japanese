@@ -47,13 +47,18 @@ function validateCardIds(cards: Omit<FlashCard, "lessonId">[]): void {
  *   • Cards with temp IDs (prefix "c_") → new documents are created.
  *
  * A Firestore WriteBatch is used so all mutations succeed or fail together.
+ *
+ * @returns The lesson's id — freshly minted for a new lesson, unchanged for an
+ * existing one. Callers need this: on create the id is generated *here*, so a
+ * caller that logged the id it passed in was logging `undefined` (that is
+ * exactly how every `deck.created` audit entry came to carry `entityId: null`).
  */
 export async function saveLessonWithCards(
     userId: string,
     lesson: Lesson,
     cards: Omit<FlashCard, "lessonId">[],
     isNew: boolean,
-): Promise<void> {
+): Promise<string> {
     const titleCheck = lessonMetadataSchema.shape.title.safeParse(lesson.title);
     if (!titleCheck.success) {
         throw new Error(titleCheck.error.issues[0]?.message ?? "Lesson title is required");
@@ -187,4 +192,6 @@ export async function saveLessonWithCards(
     }
 
     await batch.commit();
+
+    return targetLessonId;
 }

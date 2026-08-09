@@ -85,14 +85,19 @@ export function useLessons() {
                           : {}),
                   };
 
-            await LessonService.saveLessonWithCards(ownerId, lessonToSave, cards, isNew);
+            const savedLessonId = await LessonService.saveLessonWithCards(
+                ownerId,
+                lessonToSave,
+                cards,
+                isNew,
+            );
 
             try {
                 const token = await user.getIdToken();
                 if (isNew) {
-                    void logDeckCreated(token, user.uid, lesson.id, lesson.title);
+                    void logDeckCreated(token, user.uid, savedLessonId, lesson.title);
                 } else {
-                    void logDeckUpdated(token, user.uid, lesson.id, lesson.title);
+                    void logDeckUpdated(token, user.uid, savedLessonId, lesson.title);
                 }
             } catch {
                 // Non-blocking

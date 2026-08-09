@@ -20,7 +20,6 @@ import {
 } from "@dnd-kit/sortable";
 import { Plus } from "lucide-react";
 import { m } from "motion/react";
-import { v4 as uuidv4 } from "uuid";
 
 import { Button } from "@/shared/components/ui";
 import DraggableCard from "./DraggableCard";
@@ -82,7 +81,7 @@ const LessonBuilderCardList: React.FC<LessonBuilderCardListProps> = ({
                     icon={Plus}
                     onClick={() => {
                         const newCard: EditorCard = {
-                            id: `c_${uuidv4()}`,
+                            id: `c_${crypto.randomUUID()}`,
                             primary: "",
                             alternatives: [],
                             meaning: "",
@@ -136,7 +135,7 @@ const LessonBuilderCardList: React.FC<LessonBuilderCardListProps> = ({
                 <button
                     onClick={() => {
                         const newCard: EditorCard = {
-                            id: `c_${uuidv4()}`,
+                            id: `c_${crypto.randomUUID()}`,
                             primary: "",
                             alternatives: [],
                             meaning: "",

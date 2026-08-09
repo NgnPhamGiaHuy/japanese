@@ -420,6 +420,7 @@
         "deleteDeckConfirm": "このデッキを削除してもよろしいですか？",
         "removeCard": "カードを削除",
         "primaryLabel": "見出し語 ✱",
+        "primaryPlaceholder": "食べる",
         "autoFillWithAI": "AIで自動入力",
         "typeWordFirst": "先に単語を入力してください",
         "filling": "入力中…",

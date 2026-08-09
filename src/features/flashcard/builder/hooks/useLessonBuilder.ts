@@ -3,7 +3,6 @@ import { useMemo, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { v4 as uuidv4 } from "uuid";
 
 import { useAICard } from "@/features/ai";
 import { DEFAULT_DECK_THEME_COLOR, lessonMetadataSchema } from "@/features/flashcard/types";
@@ -21,7 +20,7 @@ import type { ImportRow } from "../components/ImportPreview";
 import type { EditorCard, FlashCard, Lesson } from "../../types";
 
 export const makeCard = (order = 0): EditorCard => ({
-    id: `c_${uuidv4()}`,
+    id: `c_${crypto.randomUUID()}`,
     primary: "",
     alternatives: [],
     meaning: "",

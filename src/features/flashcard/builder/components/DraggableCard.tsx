@@ -117,7 +117,7 @@ const DraggableCard = ({
                     <Input
                         variant="underline"
                         className={`border-gray-100 pb-1 text-xl sm:pb-2 sm:text-3xl ${aiLoading ? "opacity-60" : ""}`}
-                        placeholder="食べる / たべる"
+                        placeholder={t("primaryPlaceholder")}
                         value={card.primary || ""}
                         onChange={(e) => onUpdate(card.id, "primary", e.target.value)}
                         disabled={saving || aiLoading}

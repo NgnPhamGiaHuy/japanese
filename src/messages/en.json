@@ -420,6 +420,7 @@
         "deleteDeckConfirm": "Are you sure you want to delete this deck?",
         "removeCard": "Remove Card",
         "primaryLabel": "Primary ✱",
+        "primaryPlaceholder": "食べる",
         "autoFillWithAI": "Auto-fill with AI",
         "typeWordFirst": "Type a word first",
         "filling": "Filling…",
