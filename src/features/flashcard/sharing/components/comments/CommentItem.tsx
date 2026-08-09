@@ -12,6 +12,7 @@ import { useState } from "react";
 import { CheckCircle, Circle, Edit2, MessageSquare, Trash2 } from "lucide-react";
 
 import { Button } from "@/shared/components/ui";
+import { useRelativeTimeLabels } from "@/shared/hooks";
 import { formatRelativeTime } from "@/shared/utils";
 import CommentInput from "./CommentInput";
 
@@ -83,6 +84,7 @@ const CommentItem = ({
     onDelete,
 }: CommentItemProps) => {
     const t = useTranslations("FlashcardComments");
+    const relativeLabels = useRelativeTimeLabels();
     const tCommon = useTranslations("Common");
     const [isEditing, setIsEditing] = useState(false);
     const [isReplying, setIsReplying] = useState(false);
@@ -140,7 +142,7 @@ const CommentItem = ({
                             </span>
                         )}
                         <span className="text-xs text-gray-400">
-                            {formatRelativeTime(comment.createdAt, now)}
+                            {formatRelativeTime(comment.createdAt, now, relativeLabels)}
                         </span>
                         {isEdited && (
                             <span className="text-xs text-gray-400 italic">{t("edited")}</span>

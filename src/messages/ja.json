@@ -47,6 +47,12 @@
         "adminReportsTitle": "レポート | 管理",
         "adminReportsDescription": "システムログ、ユーザーレポート、監査証跡。"
     },
+    "RelativeTime": {
+        "justNow": "たった今",
+        "minutes": "{count}分前",
+        "hours": "{count}時間前",
+        "days": "{count}日前"
+    },
     "ErrorScreens": {
         "errorTitle": "問題が発生しました",
         "errorMessage": "{scope}の読み込み中に予期しないエラーが発生しました。もう一度お試しいただくか、ホームに戻ってください。",

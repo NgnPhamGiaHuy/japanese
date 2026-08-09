@@ -7,6 +7,7 @@ import { Trash2 } from "lucide-react";
 
 import { useRouter } from "@/i18n/navigation";
 import { Button } from "@/shared/components/ui";
+import { useRelativeTimeLabels } from "@/shared/hooks";
 import { useAlert } from "@/shared/providers";
 import { formatRelativeTime } from "@/shared/utils";
 import InviteActions from "./InviteActions";
@@ -72,6 +73,7 @@ export function NotificationRow({
     now: number;
 }) {
     const t = useTranslations("NotificationsPage");
+    const relativeLabels = useRelativeTimeLabels();
     const tCommon = useTranslations("Common");
     const router = useRouter();
     const { showAlert } = useAlert();
@@ -156,7 +158,7 @@ export function NotificationRow({
                             {notification.title}
                         </p>
                         <span className="shrink-0 text-xs text-gray-400">
-                            {formatRelativeTime(notification.createdAt, now)}
+                            {formatRelativeTime(notification.createdAt, now, relativeLabels)}
                         </span>
                     </div>
                     <p className="mt-0.5 text-[13px] leading-snug text-gray-500">

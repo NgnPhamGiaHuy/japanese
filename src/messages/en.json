@@ -47,6 +47,12 @@
         "adminReportsTitle": "Reports | Admin",
         "adminReportsDescription": "System logs, user reports, and audit trails."
     },
+    "RelativeTime": {
+        "justNow": "just now",
+        "minutes": "{count}m ago",
+        "hours": "{count}h ago",
+        "days": "{count}d ago"
+    },
     "ErrorScreens": {
         "errorTitle": "Something Went Wrong",
         "errorMessage": "An unexpected error occurred while loading {scope}. You can try again, or head back home.",

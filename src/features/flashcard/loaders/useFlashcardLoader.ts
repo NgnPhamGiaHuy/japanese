@@ -119,8 +119,16 @@ export function useFlashcardLoader(source: FlashcardSource): FlashcardLoaderStat
         };
     }
 
-    // Personal deck
-    const isLoading = lessonsLoading || cardsLoading || !personalData;
+    // Personal deck — settle the loading flags FIRST, then treat absent data as
+    // not-found, exactly as the shared branch above does.
+    //
+    // `!personalData` used to be folded into this expression, which made "the
+    // lesson does not exist" indistinguishable from "the lesson has not loaded
+    // yet". personalData is null precisely when the id is absent from the
+    // user's lessons, so it stayed null forever, isLoading stayed true forever,
+    // and the not-found branch below was unreachable: a deleted deck or a stale
+    // bookmark rendered a spinner that never resolved.
+    const isLoading = lessonsLoading || cardsLoading;
     if (isLoading) {
         return { data: null, isLoading: true, isReady: false, isNotFound: false, error: null };
     }
