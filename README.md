@@ -87,8 +87,23 @@ Two RBAC engines exist deliberately and are not merged: deck-sharing roles
 (`owner > editor > commenter > viewer > none`, resolved only through `resolveRole()`) and admin
 authority. Public link access is capped at `commenter`.
 
+## Invariants worth knowing before you change things
+
+- **Audio.** Everything that makes noise goes through `shared/audio`. Feature code never
+  touches `AudioContext`, `HTMLAudioElement` or `speechSynthesis` directly — see
+  [its README](src/shared/audio/README.md).
+- **Reads.** Realtime data comes from a `subscribeX()` in a service, mounted once by a
+  Context; one-shot reads go through the TanStack-Query bridge. Mounting a hook N times must
+  not open N listeners.
+- **Writes.** Client writes go service → `writeBatch`/`setDoc`. Anything privileged or
+  cross-user goes through a `"use server"` action that derives the actor from a verified ID
+  token.
+- **Queries are bounded.** Every list query carries a `limit()`, and the UI renders absent
+  data as absent — never as a fabricated zero.
+- **Feature flags** come from Firebase Remote Config, read server-side, degrading to defaults.
+- **Config is single-sourced.** [`src/.env.example`](src/.env.example) is the environment
+  contract: every variable the code reads, and what silently stops working when it is unset.
+
 ## Documentation
 
-- [docs/](docs/README.md) — architecture decision records and testing
-- [src/shared/audio/README.md](src/shared/audio/README.md) — the audio layer
-- [src/.env.example](src/.env.example) — the environment contract
+- [docs/testing.md](docs/testing.md) — the five test tiers and how to run them

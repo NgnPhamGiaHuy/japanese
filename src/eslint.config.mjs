@@ -22,7 +22,6 @@ const eslintConfig = defineConfig([
         // All sound goes through `shared/audio`. Reaching for a browser audio API directly is how
         // the previous system ended up with two competing singletons, a user setting that only
         // half the app honoured, and failures nothing could observe.
-        // See docs/adr/001-audio-architecture.md.
         files: ["features/**/*.{ts,tsx}", "app/**/*.{ts,tsx}", "lib/**/*.{ts,tsx}"],
         rules: {
             "no-restricted-globals": [
@@ -102,8 +101,7 @@ const eslintConfig = defineConfig([
         const PUBLIC_ENTRY_POINTS = FEATURES.flatMap((f) => [`${f}/index.ts`, `${f}/server.ts`]);
         const MESSAGE =
             "Import the owning feature's public API instead — `@/features/<feature>` " +
-            "or, for server-only code, `@/features/<feature>/server`. See ADR-101 " +
-            "(docs/adr/1xx-refactor-decisions.md) and its Amendment 1.";
+            "or, for server-only code, `@/features/<feature>/server`.";
         const TEST_AND_STORY_FILES = [
             "**/*.test.{ts,tsx}",
             "**/*.browser.test.{ts,tsx}",
@@ -155,7 +153,7 @@ const eslintConfig = defineConfig([
         const FLASHCARD_MESSAGE =
             "Import the owning sub-module's public API instead — " +
             "`@/features/flashcard/<sub-module>` (e.g. `sharing`, `builder`, " +
-            "`games/study`). See ADR-104 (docs/adr/1xx-refactor-decisions.md).";
+            "`games/study`).";
         // Directories only (not the root's loose files) — each gets its own zone
         // below so shared-root code (e.g. loaders/, which unifies personal/shared
         // data across all 3 game modes) can reach another shared-root dir or any
@@ -229,8 +227,7 @@ const eslintConfig = defineConfig([
                                         "feature, not even its public barrel — notifications " +
                                         "is feature-agnostic by contract. Producing features " +
                                         "register their own handlers on its act-side seam " +
-                                        "instead (domain/action-registry.ts). See ADR-102 " +
-                                        "(docs/adr/1xx-refactor-decisions.md).",
+                                        "instead (domain/action-registry.ts).",
                                 },
                             ],
                         },
@@ -280,8 +277,7 @@ const eslintConfig = defineConfig([
                                     from: "./features",
                                     message:
                                         "lib/ may not import from features/ — only the composition " +
-                                        "root (lib/providers.tsx) may. See ADR-103 " +
-                                        "(docs/adr/1xx-refactor-decisions.md).",
+                                        "root (lib/providers.tsx) may.",
                                 },
                             ],
                         },
