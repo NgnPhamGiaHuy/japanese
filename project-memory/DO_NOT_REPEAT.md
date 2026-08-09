@@ -2,7 +2,7 @@
 
 Work already completed, or decisions already made, that must **not** be re-proposed or re-implemented without new evidence.
 
-**Verified:** 2026-08-04 at commit `f4dd766`. Every entry carries code evidence or a commit SHA.
+**Verified:** 2026-08-09 at commit `e629c25`. Every entry carries code evidence or a commit SHA.
 
 > **How to use this.** Before proposing a refactor, search this file for the area you are touching. If it appears here, the work is done or the decision is settled — read the "Do not reimplement unless" clause and honor it.
 
@@ -105,7 +105,7 @@ Work already completed, or decisions already made, that must **not** be re-propo
 
 ### The 200-line ceiling is deferred **on purpose** (TD-3)
 - **Decision:** `max-lines` stays at `warn`. 52 files currently exceed it.
-- **Evidence:** `architecture-decision/06-Decision-Matrix.md:62` — "a **deliberate deferral, not an oversight**"; `implementation-planning/02-Execution-Waves.md:519` — "recorded here so its absence is auditable, not mistaken for coverage."
+- **Evidence:** the refactor program recorded this as "a **deliberate deferral, not an oversight**", noted "so its absence is auditable, not mistaken for coverage." The rule is `warn` in `eslint.config.mjs` and has never been flipped to `error`.
 - **Do not report this as newly-discovered debt.**
 
 ### Every fallback in the codebase is load-bearing or gated
@@ -144,4 +144,4 @@ Work already completed, or decisions already made, that must **not** be re-propo
 
 ### Rules do not auto-load
 - **There is no `CLAUDE.md` and no root `AGENTS.md`.** `[HIGH]` Nothing loads `.rules/` automatically; the 14 `ai-rules/*.rule.md` files are persona prompts written for manual paste, yet read as ambient policy.
-- **Consequence:** an agent that ingests `.rules/` wholesale will absorb a SvelteKit pack, a styled-components pack, and a barrel-ban that all contradict this codebase. See `REFACTORING_READINESS_REPORT.md` §6.
+- **Consequence:** an agent that ingests `.rules/` wholesale will absorb a SvelteKit pack, a styled-components pack, and a barrel-ban that all contradict this codebase. Treat `.rules/` as third-party rule packs, not as this project's conventions.

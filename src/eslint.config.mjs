@@ -103,7 +103,7 @@ const eslintConfig = defineConfig([
         const MESSAGE =
             "Import the owning feature's public API instead — `@/features/<feature>` " +
             "or, for server-only code, `@/features/<feature>/server`. See ADR-101 " +
-            "(architecture-decision/03-Architecture-Decisions.md) and its Amendment 1.";
+            "(docs/adr/1xx-refactor-decisions.md) and its Amendment 1.";
         const TEST_AND_STORY_FILES = [
             "**/*.test.{ts,tsx}",
             "**/*.browser.test.{ts,tsx}",
@@ -155,7 +155,7 @@ const eslintConfig = defineConfig([
         const FLASHCARD_MESSAGE =
             "Import the owning sub-module's public API instead — " +
             "`@/features/flashcard/<sub-module>` (e.g. `sharing`, `builder`, " +
-            "`games/study`). See ADR-104 (architecture-decision/03-Architecture-Decisions.md).";
+            "`games/study`). See ADR-104 (docs/adr/1xx-refactor-decisions.md).";
         // Directories only (not the root's loose files) — each gets its own zone
         // below so shared-root code (e.g. loaders/, which unifies personal/shared
         // data across all 3 game modes) can reach another shared-root dir or any
@@ -230,7 +230,7 @@ const eslintConfig = defineConfig([
                                         "is feature-agnostic by contract. Producing features " +
                                         "register their own handlers on its act-side seam " +
                                         "instead (domain/action-registry.ts). See ADR-102 " +
-                                        "(architecture-decision/03-Architecture-Decisions.md).",
+                                        "(docs/adr/1xx-refactor-decisions.md).",
                                 },
                             ],
                         },
@@ -281,7 +281,7 @@ const eslintConfig = defineConfig([
                                     message:
                                         "lib/ may not import from features/ — only the composition " +
                                         "root (lib/providers.tsx) may. See ADR-103 " +
-                                        "(architecture-decision/03-Architecture-Decisions.md).",
+                                        "(docs/adr/1xx-refactor-decisions.md).",
                                 },
                             ],
                         },
@@ -302,7 +302,7 @@ const eslintConfig = defineConfig([
     // error-level rule anywhere else — including the audio boundary above and the
     // import-boundary rules arriving with T-101c — now fails CI. That property is
     // what ADR-101/102/103 enforcement depends on and did not have before
-    // (execution-readiness/06 §G-1).
+    // (ADR-117 — coverage follows risk).
     //
     // Removing a file from these lists is part of "done" for the task that fixes
     // it: T-116a owns the react-hooks entries, T-109a the no-explicit-any ones.

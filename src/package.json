@@ -7,6 +7,7 @@
         "build": "next build",
         "test": "vitest run",
         "test:browser": "vitest run --config vitest.browser.config.ts",
+        "test:e2e": "playwright test --project=chromium",
         "test:emu": "firebase emulators:exec --only firestore,auth \"vitest run --config vitest.emu.config.ts\"",
         "test:functions": "npm --prefix functions run test:emu",
         "emulators:start": "firebase emulators:start --only firestore,auth",

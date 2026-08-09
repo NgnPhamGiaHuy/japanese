@@ -1,15 +1,15 @@
 # Current Project Memory
 
-**The single starting point before modifying this codebase.** Describes the codebase **as it is at `f4dd766`**, not as any plan intended it.
+**The single starting point before modifying this codebase.** Describes the codebase **as it is at `e629c25`**, not as any plan intended it.
 
-**Verified:** 2026-08-04, against working tree at commit `f4dd766`, by direct code inspection + full suite execution.
+**Verified:** 2026-08-09, against working tree at commit `e629c25`, by direct code inspection + full execution of all five test suites.
 **Confidence key:** `[HIGH]` directly verified in code this session · `[MED]` multiple documents + partial code evidence · `[LOW]` inferred, needs validation.
 
 > **Authority order when sources disagree** (this is new; nothing previously stated one):
 > 1. **The code** — what actually runs.
 > 2. **`docs/migrations-ledger.md`** — the live, in-repo record of staged-change state (ADR-120). It is *current*; the planning corpus is *historical intent*.
-> 3. **`docs/adr/`** + `architecture-decision/03-Architecture-Decisions.md` — why it is built this way.
-> 4. **`implementation-planning/` · `execution-readiness/` · `architecture-assessment/` · `project-discovery/`** — historical intent. **Substantially stale on completion state.** See `REFACTORING_READINESS_REPORT.md` §6.
+> 3. **`docs/adr/`** — why it is built this way. Two series, both in force: `001`–`003` and `1xx-refactor-decisions.md` (ADR-101…120).
+> 4. **This directory** — the reconciliation between the three above.
 
 ---
 
@@ -143,9 +143,9 @@ Full detail: `DO_NOT_REPEAT.md`.
 | D-3 | APP_ID split-brain: app reads `NEXT_PUBLIC_APP_ID`, functions read `NOTIFICATIONS_APP_ID` | `lib/app-id.ts:1` vs `functions/src/digest.ts:151`, `fanout.ts:126` | High risk, **correctly blocked** (LDG-09) |
 | D-4 | 102 ESLint warnings standing (0 errors) | `npx eslint .` | Low — behind a shrink-only ratchet |
 | D-5 | ~~Flashcard legacy-doc compat cluster: 6 read-time mechanisms~~ — **narrowed 2026-08-04**: the 4 lesson-level mechanisms (owner/collaborator fallbacks) were removed after an empirical check found 0/9 lessons needed them. The 2 card-level mechanisms remain and are **confirmed still needed**: 192/817 cards (23.5%) missing `alternatives`, 621/817 (76%) on legacy numeric order | LDG-22 | Medium — gated on a cards-only backfill decision |
-| D-6 | 2 privacy risks with **no task and no owner**: world-readable leaderboard (NQ-7), world-readable card images (NQ-8) | `execution-readiness/05-Risk-Register.md` | **Highest unowned risk** |
+| D-6 | 2 privacy risks with **no task and no owner**. **NQ-7:** `firestore.rules:187` allows unauthenticated read of any `leaderboard_*` collection — confirmed empirically over REST; display names and scores are world-readable. **NQ-8:** card images in Storage are likewise world-readable | `firestore.rules:187`, `storage.rules` | **Highest unowned risk** |
 
-**TD-3 (the 200-line ceiling) is a documented deliberate deferral, not an oversight** — `architecture-decision/06-Decision-Matrix.md:62`, `implementation-planning/02-Execution-Waves.md:519`. Do not "discover" it as new debt.
+**TD-3 (the 200-line ceiling) is a deliberate deferral, not an oversight** — the rule is deliberately `warn`, and the refactor program recorded the deferral so its absence would be auditable rather than mistaken for coverage. Do not "discover" it as new debt.
 
 ---
 
@@ -174,7 +174,7 @@ See `DO_NOT_REPEAT.md`. The short version: **do not** re-propose barrel adoption
 
 ## 10. Current refactoring priorities
 
-See `REFACTORING_READINESS_REPORT.md` §9. Top three:
+Top three:
 1. **R-1** Make the vocabulary checker resilient to file moves (it silently broke CI once already).
 2. **R-2** Get NQ-7/NQ-8 owned — a decision, not code.
 3. **R-3** Reconcile the stale planning corpus so it stops contradicting the code (this document set is step one).

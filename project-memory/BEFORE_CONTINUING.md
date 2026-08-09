@@ -11,10 +11,10 @@ Run this checklist before implementing any feature, bug fix, or refactor in this
 - [ ] Read `project-memory/CURRENT_PROJECT_MEMORY.md`
 - [ ] Read `project-memory/DO_NOT_REPEAT.md` — check whether your area is already settled
 - [ ] Read `docs/migrations-ledger.md` — **the live state of record**, more current than any plan
-- [ ] Check `docs/adr/` (3 files, `00X` series) **and** `architecture-decision/03-Architecture-Decisions.md` (ADR-101…120)
-- [ ] Check `project-memory/REFACTORING_READINESS_REPORT.md` §9 for current priorities
+- [ ] Check `docs/adr/` — the `00X` series **and** `1xx-refactor-decisions.md` (ADR-101…120)
+- [ ] Check `docs/migrations-ledger.md` for open rows and still-open questions
 
-⚠ **Do not treat `implementation-planning/09-Progress-Tracking.md` as current.** Its roll-up reads `Done: 0` for all 63 tasks; ~61 are in fact complete.
+⚠ **The 2026 refactor program is finished.** Its planning corpus was deleted on 2026-08-09; only the decisions survive, in `docs/adr/1xx-refactor-decisions.md`. `T-1xx` task IDs in code comments are provenance markers, not links.
 
 ## Existing implementation
 
@@ -75,7 +75,7 @@ npm run test:emu       # 133 tests / 18 files — needs JDK 21:
 - [ ] **If you created staged work** (a `@deprecated` marker, a "later step", a conditional path), add a ledger row **now**, not later
 - [ ] Update `project-memory/CURRENT_PROJECT_MEMORY.md` if architecture or patterns changed
 - [ ] Add to `project-memory/DO_NOT_REPEAT.md` if you settled a decision or rejected an approach
-- [ ] Record new architecture decisions as an ADR — `docs/adr/` for the `00X` series, or amend `architecture-decision/03-Architecture-Decisions.md` for the `1xx` series
+- [ ] Record new architecture decisions as an ADR in `docs/adr/` — a new `00X` file, or an amendment inside `1xx-refactor-decisions.md`
 
 ---
 

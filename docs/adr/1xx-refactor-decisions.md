@@ -1,11 +1,37 @@
-# 03 — Architecture Decisions
+# ADR-101 … ADR-120 — Refactor-program decisions
 
-**Architecture Decision phase — Phase 4.** One Architecture Decision Record per kernel decision: **ADR-101 … ADR-120**, mapping 1:1 onto decisions AD-01 … AD-20 of the decision kernel. Each ADR states Problem / Context / Decision / Alternatives Considered / Trade-offs / Consequences / Success Criteria / Status / Priority. Statuses (Accepted / Accepted-conditional + gate) and priorities (P1/P2/P3) are fixed by the kernel; this file elaborates and evidences them from the corpus.
+**Status: in force.** Twenty kernel decisions taken for the 2026 refactor program.
+Nothing here is superseded; the code cites these numbers in 76 places, and
+`eslint.config.mjs` quotes several of them in the error messages it shows
+developers when a boundary rule trips.
 
-- **Numbering.** The repository already carries an in-repo ADR series: `docs/adr/001-audio-architecture.md`, `002-data-layer-pattern.md`, `003-feature-flags.md` (verified by the corpus — S-13/S-14/S-15, S-20; the docs index omits 003, W-21(d)/TD-13). Those ADRs remain in force — ADR-113 explicitly affirms ADR-002, and nothing here supersedes 001 or 003. The **1xx namespace** is chosen so this decision set can coexist with (and, if adopted in-repo, land alongside) the existing 001–003 series without collision.
-- **Evidence keys.** S/W/RC/CX/PC/TD/R/OP-n are findings from `architecture-assessment/02–09`; C-n are the shared-fact clusters from `11-Evidence-Matrix.md` §2; Q-n are `project-discovery/13-Questions-Before-Refactoring.md`; NQ-n are `architecture-assessment/12-Questions-Requiring-Validation.md`. P-n are the principles derived in file 01.
-- **Input-state note.** Only `project-discovery/` and `architecture-assessment/` exist on disk as inputs; the phase's other two named input directories (`architecture-audit/`, `requirements-consolidation/`) were absent (removed before discovery). No repository rescan was performed for this file; the corpus is the sole evidence source.
-- **"Resolved-by-decision."** Several open intent questions (NQ-2, NQ-4, NQ-5, NQ-9) are closed *by decision* here rather than by discovered fact: the decision stands as the default and the question's answer, if it ever arrives and disagrees, is handled as an owner veto (noted per ADR).
+## Why the 1xx namespace
+
+The repository already carried an ADR series — [001 Audio architecture](001-audio-architecture.md),
+[002 Data-layer pattern](002-data-layer-pattern.md), [003 Feature flags](003-feature-flags.md).
+The 1xx range was chosen so this set could sit alongside that series without
+colliding with it. Both series remain in force: ADR-113 explicitly affirms
+ADR-002, and nothing here supersedes 001 or 003.
+
+## Provenance, and how to read the evidence keys
+
+These decisions were produced by a multi-phase assessment program whose working
+corpus (`architecture-assessment/`, `project-discovery/`, `architecture-decision/`,
+`implementation-planning/`, `execution-readiness/` — ~19,000 lines) was **retired
+in 2026-08-09** once its file paths had drifted far enough from the code to
+mislead. This file is the part worth keeping: the decisions themselves.
+
+The bodies below are preserved verbatim, so they still carry that corpus's
+shorthand — `S/W/RC/CX/PC/TD/R/OP-n` (assessment findings), `C-n` (evidence
+clusters), `Q-n`/`NQ-n` (open questions), `P-n` (principles). Those keys no
+longer resolve to a file in this repository. Read them as provenance markers,
+not as links; the retired corpus is recoverable from git history at
+`e629c25~1`. Where a question is still genuinely open, it is tracked as a row in
+[the migrations ledger](../migrations-ledger.md), which is the live record.
+
+Task IDs (`T-1xx`) that appear in code comments came from the same program's
+backlog and are likewise historical — every one of them reached a terminal
+state; see the ledger for anything still staged.
 
 ---
 

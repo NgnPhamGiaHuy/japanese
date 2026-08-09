@@ -32,7 +32,7 @@
  * the notification-type target runs report-only until T-108a (Wave 5)
  * widens that union to the values already written; wiring it as enforcing
  * now would fail CI on a divergence that is already scheduled to be fixed
- * (see implementation-planning/01-Validated-Backlog.md §5.4).
+ * (see ADR-108 in docs/adr/1xx-refactor-decisions.md).
  *
  * The `rules` comparison is a SUBSET check (every rules-mentioned literal
  * must be a real TS union member), not full-set equality — rules
