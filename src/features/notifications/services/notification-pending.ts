@@ -115,9 +115,9 @@ export async function notifyInvite({
         senderName,
         data,
         // Legacy field — kept so existing UI code that reads `link` still works.
-        // `deckId`/`deckTitle` are NOT written here: they have zero readers
-        // (docs/migrations-ledger.md LDG-01) and `data.lessonId`/the message
-        // string above already carry what they used to provide.
+        // `deckId`/`deckTitle` are NOT written here: they have zero readers,
+        // and `data.lessonId`/the message string above already carry what they
+        // used to provide.
         link: shareLink,
     });
 }

@@ -6,11 +6,9 @@
  * array is plain useState, not wired to a resolver; no server action or
  * write-boundary function imports it; AI/import output validates through
  * the separate `generatedCardSchema` in ai-output.schema.ts instead). Its
- * disposition — wire it into a real write path, or delete it — is
- * gated on Q-12 (author intent: was adoption planned but unfinished, or is
- * this an overtaken artifact?), tracked as `LDG-03` in
- * docs/migrations-ledger.md. Do not treat this file as already the
- * enforced source of truth until that gate resolves.
+ * disposition — wire it into a real write path, or delete it — awaits an
+ * owner decision. Do not treat this file as already the enforced source of
+ * truth until then.
  */
 import { z } from "zod";
 

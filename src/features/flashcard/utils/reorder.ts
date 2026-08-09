@@ -7,8 +7,10 @@
  * midpoint-averaging scheme (repeated insertions at the same slot could
  * eventually exhaust a double's precision).
  *
- * Legacy numeric `order`/`sortOrder` values from before this migration are
- * still supported for reading/display (`sortByOrder`), but a reorder or save
+ * Numeric `order`/`sortOrder` values are still supported for reading/display
+ * (`sortByOrder`). This is NOT dead compatibility code: the majority of stored
+ * cards still carry a numeric order, so removing the numeric branch would
+ * scramble their display order. A reorder or save
  * always renormalizes the whole touched set to fresh string keys — there's
  * no ongoing support for computing a new fractional position relative to a
  * legacy numeric neighbor, since fractional-indexing's own key format isn't

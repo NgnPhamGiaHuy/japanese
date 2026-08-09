@@ -23,7 +23,7 @@ This is about new/changed code. It is not a mandate to go rewrite unrelated file
 
 ## Relationship to this project's other rules
 
-`.rules/ai-rules/*.rule.md` in this repo already covers code *organization* — feature-based structure, layer responsibilities (components UI-only, hooks logic-only, services own all API/Firebase calls, utils pure-only), naming, file-size limits, comment density, and mandatory cleanup + `npm run build` validation after any change. That's a separate, complementary concern from this skill: those rules govern how code is structured, this one governs what visual values and primitives get used. Follow both at once — this skill doesn't override them (e.g. a new `Input` primitive still belongs in `src/shared/components/ui`, stays UI-only, and the change still needs a passing build before it's done), and they don't cover colors/typography/spacing/component reuse.
+This skill governs visual values and primitives only. Code *organization* — feature structure, layer responsibilities, naming, file-size limits — is enforced by ESLint and described in the root README; follow both at once. A new `Input` primitive still belongs in `src/shared/components/ui`, stays UI-only, and still needs a passing build.
 
 ## Quick reference
 

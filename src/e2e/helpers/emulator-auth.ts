@@ -6,8 +6,7 @@
  *
  * SAFETY: this file must never run against real Firebase. `initE2EAdmin()`
  * refuses to initialize unless `FIREBASE_AUTH_EMULATOR_HOST` is set — no
- * service-account credentials are read or required, matching the same
- * emulator-only pattern as `scripts/backfill-notifications.mjs`.
+ * service-account credentials are read or required.
  */
 import { getApps, initializeApp } from "firebase-admin/app";
 import { getAuth } from "firebase-admin/auth";

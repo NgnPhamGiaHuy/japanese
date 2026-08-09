@@ -85,7 +85,9 @@ function assertCardSchema(userId: string, card: FlashCard): FlashCard {
         throw new Error(`[card.service] Invalid card ${card.id}: primary is required`);
     }
     if (card.alternatives === undefined) {
-        // Legacy docs may not have alternatives yet; normalize and heal once.
+        // Not dead compatibility code: a substantial share of stored cards
+        // predate `alternatives` and still arrive without it. Normalize for
+        // this read and heal the document once.
         card.alternatives = [];
         void updateDoc(cardDoc(userId, card.id), { alternatives: [] }).catch((err) => {
             console.error("[card.service] alternatives schema-heal failed:", err);

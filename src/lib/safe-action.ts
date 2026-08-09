@@ -101,9 +101,8 @@ export async function verifyIdToken(
  * their own external contract unchanged for the hooks/components that
  * consume them — that consumer need is orthogonal to which safe-action
  * client backs an action, so it outlives the client-unification migration
- * itself. See `docs/migrations-ledger.md`'s `LDG-21` for the concrete
- * finding: M-2's original plan assumed this shim's last caller would
- * disappear once T-106b/c/d landed; it does not.
+ * itself. Treat it as a permanent envelope adapter, not a shim awaiting
+ * removal.
  */
 export function toActionResult<T>(result: {
     data?: T;

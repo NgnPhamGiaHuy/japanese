@@ -13,25 +13,12 @@ The 1xx range was chosen so this set could sit alongside that series without
 colliding with it. Both series remain in force: ADR-113 explicitly affirms
 ADR-002, and nothing here supersedes 001 or 003.
 
-## Provenance, and how to read the evidence keys
+## Reading the shorthand
 
-These decisions were produced by a multi-phase assessment program whose working
-corpus (`architecture-assessment/`, `project-discovery/`, `architecture-decision/`,
-`implementation-planning/`, `execution-readiness/` — ~19,000 lines) was **retired
-in 2026-08-09** once its file paths had drifted far enough from the code to
-mislead. This file is the part worth keeping: the decisions themselves.
-
-The bodies below are preserved verbatim, so they still carry that corpus's
-shorthand — `S/W/RC/CX/PC/TD/R/OP-n` (assessment findings), `C-n` (evidence
-clusters), `Q-n`/`NQ-n` (open questions), `P-n` (principles). Those keys no
-longer resolve to a file in this repository. Read them as provenance markers,
-not as links; the retired corpus is recoverable from git history at
-`e629c25~1`. Where a question is still genuinely open, it is tracked as a row in
-[the migrations ledger](../migrations-ledger.md), which is the live record.
-
-Task IDs (`T-1xx`) that appear in code comments came from the same program's
-backlog and are likewise historical — every one of them reached a terminal
-state; see the ledger for anything still staged.
+The bodies below carry short evidence keys from the assessment that produced them —
+`S/W/RC/CX/PC/TD/R/OP-n`, `C-n`, `Q-n`/`NQ-n`, `P-n` — and `T-1xx` task IDs appear in code
+comments for the same reason. Those working documents are not part of this repository. Read the
+keys as labels, not as links; the decision text stands on its own.
 
 ---
 

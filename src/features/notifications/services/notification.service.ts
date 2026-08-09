@@ -58,9 +58,8 @@ export async function markNotificationRead(userId: string, notificationId: strin
 export async function markAllNotificationsRead(userId: string): Promise<void> {
     // TRANSITIONAL: query both legacy (read==false) and current (status=="unread")
     // unread docs so docs written before the status migration aren't missed.
-    // Once scripts/backfill-notifications.mjs has run in prod (stamping `status`
-    // on every doc), drop the `read` query + its (read,isDeleted) index and the
-    // legacy `read` dual-write below. See docs/testing-notifications.md.
+    // Once every stored doc carries `status`, drop the `read` query, its
+    // (read,isDeleted) index, and the legacy `read` dual-write below.
     const [oldSnap, newSnap] = await Promise.all([
         getDocs(
             query(

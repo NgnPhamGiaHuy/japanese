@@ -17,7 +17,7 @@ export const DELIVERY_CHUNK = 200;
 // ─── Retention (TTL) ──────────────────────────────────────────────────────────
 // Read/soft-deleted docs get an `expiresAt` so a Firestore TTL policy on the
 // `expiresAt` field can reap them (unread docs never expire). The TTL policy
-// itself is configured in GCP, not here — see docs/testing-notifications.md.
+// itself is configured in GCP, not here.
 const DAY_MS = 86_400_000;
 export const READ_TTL_MS = 180 * DAY_MS;
 export const DELETED_TTL_MS = 30 * DAY_MS;
