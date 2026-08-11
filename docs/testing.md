@@ -45,8 +45,4 @@ Sign-in in the emulator tiers goes through `window.__e2eSignIn`, a test-only bri
 `lib/firebase.ts` behind a double gate (an explicit env var **and** a non-production
 `NODE_ENV`). The real login screen offers Google OAuth only, which automation cannot drive.
 
-## CI
-
-`.github/workflows/ci.yml` runs five jobs: `build-lint-test`, `emulator-rules-tests`,
-`functions-tests`, `e2e-tests`, and a Cloud Functions deploy that is gated behind repository
-variables and skips cleanly when they are unset. **Lint is blocking.**
+There is no CI pipeline — all five tiers run locally, on demand.

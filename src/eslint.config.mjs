@@ -289,16 +289,16 @@ const eslintConfig = defineConfig([
 
     // ─── Lint ratchet baseline (Sprint 0) ──────────────────────────────────────
     //
-    // CI lint is BLOCKING (.github/workflows/ci.yml). It could not be flipped
-    // while these files carried error-level violations that predate the gate, so
-    // each is pinned to "warn" below — still reported on every run, no longer
-    // able to fail the build for a pre-existing reason.
+    // `npm run lint` exits non-zero on any error-level violation. It could not
+    // be made to while these files carried error-level violations that predate
+    // the gate, so each is pinned to "warn" below — still reported on every
+    // run, no longer able to fail the lint step for a pre-existing reason.
     //
     // This list is a RATCHET: it may only shrink, never grow. A violation of any
     // error-level rule anywhere else — including the audio boundary above and the
-    // import-boundary rules arriving with T-101c — now fails CI. That property is
-    // what ADR-101/102/103 enforcement depends on and did not have before
-    // (ADR-117 — coverage follows risk).
+    // import-boundary rules arriving with T-101c — now fails lint. That property
+    // is what the ADR-101/102/103 boundary rules depend on and did not have
+    // before.
     //
     // Removing a file from these lists is part of "done" for the task that fixes
     // it: T-116a owns the react-hooks entries, T-109a the no-explicit-any ones.
